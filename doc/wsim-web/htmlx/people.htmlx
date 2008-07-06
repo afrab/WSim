@@ -1,0 +1,22 @@
+<!-- -*-html-*- -->
+<!-- HEADER -->
+#include "header.html"
+<!-- /HEADER  -->
+
+<div id="main-body">
+
+  <h2 id="intro">People</h2>
+
+  <p>
+    The WSim developpers are:
+  </p>
+  <ul style="margin-top: 0pt;">
+    <li><a href="http://perso.citi.insa-lyon.fr/afraboul/" target="_new">Antoine Fraboulet</a>, Associate professor, (antoine DOT fraboulet AT insa-lyon.fr)</li>
+    <li><a href="http://citi.insa-lyon.fr/~gchelius/" target="_new">Guillaume Chelius</a>, INRIA Research Scientist, (guillaume DOT chelius AT inria.fr)</li>
+  </ul>
+  
+</div>
+
+<!-- FOOTER -->
+#include "footer.html"
+<!-- FOOTER -->

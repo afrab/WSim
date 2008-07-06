@@ -1,0 +1,75 @@
+% -*-outline-*-
+
+* Communications
+* ==============
+  WSim  UDP in input/output
+  WSNet listening unicast UDP port
+        multicast UDP to talk to nodes
+
+* Information to have in mind
+* ===========================
+
+the server keeps a global sequence number
+each client has its own seq number
+
+- worldsens variables
+   - csync           : temps du dernier point de synchro
+   - csyncseq        : numéro de séquence des synchros
+   - nsync           : teps absolu du prochain point de synchro
+   - nsyncseq        : numéro du prochain point de synchro
+   - wsens_synched   : number of currently synchronized nodes (blocked)
+   - wsens_connected : total number of wsim nodes
+
+* Protocole
+* =========
+
+** 1 
+  CONNECT (node_id) 
+  SYNCHRO (ns avant synchro = nsync - csync, nsyncseq, numéro de seq. serveur)
+
+** 2 
+  DISCONNECT ()
+  no acknoledge
+
+** 3
+  SYNCHED(node_id, nsyncseq)
+  - RELEASE( csyncseq, nsyncseq, nsync(relative) )
+  - SYNCHRO( nsyncseq, nsync(relative) ) <-- backtrack
+  - 0 or more Rx, followed by a release
+  - 0 or more MEASURE, followed by a release
+
+** 4
+  TX >> (node_id, \delta since csync, duration, data ....)
+     received set to  (\delta + durée)
+  SYNCHRO << Force l'nvoi d'un SYNCHRO peut provoquer un backtrack local
+  ** Le noeud qui a fait le TX se bloque en attente du synchro avec
+     nsync =< csync + \delta + durée
+
+** 5
+  RX << (data ... durée)
+    on doit être dans un état SYNCHED
+
+** 6
+  READ >> ( ..., \delta depuis csync) 
+  SYNCHRO << eventuellement backtrack sinon le noeud qui a généré le READ
+             bloque sur (csync + \delta)
+  SYNCHED doit être dans la même fonction
+
+     tx()
+       send(TX)
+       while () {
+           nsync <= csync + \delta + duration
+           select
+           parse
+       }
+       return
+
+
+    read()
+      send(READ)
+      while (nsync <= csync + \delta)
+      {
+         select
+	 parse
+      }
+      if (SYNCHED)

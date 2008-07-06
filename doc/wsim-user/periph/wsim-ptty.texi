@@ -1,0 +1,67 @@
+@node Pseudo Serial I/O
+@section Pseudo Serial Port Emulation
+
+The Ptty (Pseudo TTY) peripheral model is a special peripheral that 
+can be used to connect a platform to a RS232 serial port. The model 
+has the capability to open a full duplex communication stream with
+the operating system in order to connect the simulator to external 
+tools such as the console interface provided in the Worldsens 
+environment.
+
+The @t{ptty} device adds a command line option to the WSim simulator.
+This option is used to give the name of the peripheral fifo that 
+will be used for communication with the outside operating system world.
+When the option is not present on the command line the @t{ptty} device
+is not activated and the output sent from the micro-controller to 
+its serial port is lost. 
+
+Naming conventions for operating system bi-directional fifos is 
+operating system dependant.
+
+@table @option
+@item --serial=[name]
+      @table @option
+      @item stdout
+        The special @t{stdout} name can be used as an option to the 
+        serial I/O device output. Input is disabled while running in
+        this mode.
+      @end table
+@end table 
+
+If more than one @t{ptty} device are present on a platform, the WSim options are extended and are names @t{--serial0}, @t{--serial1}, ...
+
+@subsection Worldsens serial console
+
+The WorldSens serial console (WConsole) is a standalone application
+that can be used to drive the communication with the pseudo tty
+model. Its main use is to provide a full duplex interface that can
+output the octet stream from the simulator and use the host keyboard
+to communicate with the simulated application. The source code of the
+serial console can also be used to derive and test applications that
+will communicate through the serial port of the node in production use
+such as base station monitoring applications.
+
+@c @image{fig/wsim_serial,15cm,,WSim Serial I/O application}   
+
+The screenshot of the WSim serial console presents a simple application 
+that produces an echo for every character sent to its serial port 1.
+The platform used in this test has two serial ports and the WSim serial 
+console is attached to serial port 1. As the option for serial 
+port 0 is not present it is disabled during simulation.
+
+@example
+$./serial 
+Local fifo is /dev/ptmx
+Remote fifo is /dev/pts/7
+@end example
+
+@example 
+$./wsim --ui --serial1=/dev/pts/7 uart.elf
+PTTY0: ptty not activated
+PTTY1: local fifo is [/dev/pts/7]
+PTTY1: remote fifo is [unknown]
+@end example
+
+Top half of the user interface window presents the simulation output
+with grayed letters and bottom half is the local keyboard echo for 
+the host machine.

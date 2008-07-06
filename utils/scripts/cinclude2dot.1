@@ -1,0 +1,75 @@
+.TH CINCLUDE2DOT 1
+.SH NAME
+cinclude2dot \- generate graphs of #include dependencies
+.SH SYNOPSIS
+.B cinclude2dot
+.SH DESCRIPTION
+.I cinclude2dot
+writes a
+.IR graphviz (dot)
+graph of the
+.B #include
+relationships of the
+.BR .c ,
+.BR .cc ,
+.BR .cpp ,
+.BR .cxx ,
+.BR .h ,
+.BR .hpp " and"
+.BR .hxx
+files of the current directory to standard output.
+.SH OPTIONS
+.TP
+.B \--debug
+Write various debugging information.
+.TP
+.B \--exclude
+Specify a regular expression of filenames to be ignored - for example, your test harnesses.
+.TP
+.BI \--merge " arg"
+Specify the granularity of the diagram -
+.IR arg " ="
+.B file
+is the default, which treats each file as being separate;
+.IR arg " ="
+.B module
+merges .c/.cc/.cpp/.cxx and .h/.hpp/.hxx pairs;
+.IR arg " ="
+.B directory
+merges directories into one node.
+.TP
+.B \--groups
+Cluster files or modules into directory groups.
+.TP
+.B \--help
+Write a usage message for this command.
+.TP
+.BI \--include " pathlist"
+Set the directory search path to be the supplied comma-separated list of directories.
+.TP
+.B \--paths
+Leaves relative paths in displayed filenames.
+.TP
+.BI \--quotetypes " arg"
+.IR arg " ="
+.B both
+is the default, parse all headers;
+.IR arg " = "
+.B angle
+includes only system headers quoted with angle brackets;
+.IR arg " = "
+.B quote
+includes only user headers included with double quotes.
+.SH EXAMPLES
+.nf
+$ ls
+hello.c
+$ cinclude2dot -i /usr/include hello.c
+$ ls
+hello.c hello.dot
+$
+.fi
+.SH SEE ALSO
+.IR dot (1),
+.IR dotty (1),
+.IR neato (1).

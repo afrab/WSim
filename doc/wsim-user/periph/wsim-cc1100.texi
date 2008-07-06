@@ -1,0 +1,11 @@
+@node Chipcon CC1100
+@section Chipcon CC1100 Packet Radio Interface
+
+The Chipcon CC1100 peripheral is a radio interface. As for
+the pseudo tty interface used for serial communications, this kind 
+of peripherals is able to communicate with external
+tools. The primary purpose of this model is to be connected to the
+WSNet radio simulator included in the Worldsens environment. 
+
+A more detailed description of the Worldsens environment and its use with
+both WSim and WSNet is detailed in next section.

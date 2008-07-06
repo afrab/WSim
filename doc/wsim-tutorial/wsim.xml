@@ -1,0 +1,599 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
+    "/usr/share/sgml/docbook/dtd/4.5/docbookx.dtd">
+
+<book lang="en">
+	<bookinfo>
+		<title>WSim Hardware Platform Simulator</title>
+		<copyright><year>2005</year><year>2006</year><year>2007</year><holder>Worldsens</holder></copyright>
+		<subtitle>Tutorial</subtitle>
+		<authorgroup>
+			<author>
+				<firstname>Antoine</firstname>
+				<surname>Fraboulet</surname>
+			</author>
+			<author>
+				<firstname>Andreea</firstname>
+				<surname>Picu</surname>
+				<affiliation>
+					<orgname>INRIA Rhône Alpes</orgname>
+					<orgdiv>ARES Project</orgdiv>
+					<address>CITI Laboratory
+					Domaine Scientifique de la Doua, INSA Lyon
+					Bâtiment Leonard de Vinci
+					21, avenue Jean Capelle
+					69621 Villeurbanne Cedex
+					France</address>
+				</affiliation>
+			</author>
+		</authorgroup>
+		<revhistory>
+			<revision>
+				<revnumber>1.0</revnumber><date>2007-11-07</date>
+				<revremark>First Draft</revremark>
+			</revision>
+		</revhistory>
+		<abstract>
+			<para>First try of a tutorial for WSim that covers the basics through some 
+			simple examples.</para>
+		</abstract>
+	</bookinfo>
+	<chapter id="introduction">
+		<title>Introduction</title>
+		<para>This tutorial is intended to get you started with WSim. It shows you the basics 
+		of compiling, executing, debugging and interpreting results of applications written for 
+		supported target microcontrollers. They introduce the basic WSim features listed above.</para>
+		<para>After a brief presentation of the tools, four simple examples will be discussed: an
+		example involving LEDs, another example on timers and LPMs, an example demonstrating 
+		serial port communication and finally an example involving the whole Worldsens framework
+		(including WSNet).</para>
+	</chapter>
+	<chapter id="tools">
+		<title>Brief Presentation of the Tools</title>
+		<para>Following is a list of tools needed to carry out this tutorial:
+			<itemizedlist mark="bullet" spacing="normal">
+				<listitem><simpara><userinput>mspgcc</userinput>: The GCC toolchain for the Texas Instruments MSP430 MCUs.</simpara></listitem>
+				<listitem><simpara><userinput>gdb</userinput> and <userinput>insight</userinput>: The GNU Project Debugger and its GUI.</simpara></listitem>
+				<listitem><simpara><userinput>wsim</userinput>: The Worldsens hardware platform simulator.</simpara></listitem>
+				<listitem><simpara><userinput>wconsole</userinput>: The Worldsens serial console.</simpara></listitem>
+				<listitem><simpara><userinput>wtracer</userinput>: The Worlsens trace reading tool.</simpara></listitem>
+				<listitem><simpara><userinput>wsnet</userinput>: The Worldsens wireless network simulator.</simpara></listitem>
+			</itemizedlist>
+		Before starting the tutorial, make sure you are using the Worldsens Live CD or that you have 
+		installed all the necessary tools listed above. The Worldsens suite will be described in the following. 
+		For information on the first couple of tools, please refer to their respective manuals. Please find below 
+		some useful links.
+			<itemizedlist mark="bullet" spacing="normal">
+				<listitem><simpara><ulink url="http://mspgcc.sourceforge.net/manual/">The official <userinput>mspgcc</userinput> manual</ulink></simpara></listitem>
+				<listitem><simpara><ulink url="http://cnx.org/lenses/TexasInstruments/MSP430">Courses and material on MSP430 programming</ulink></simpara></listitem>
+				<listitem><simpara><ulink url="http://www.gnu.org/software/gdb/documentation/">The GDB documentation</ulink></simpara></listitem>
+				<listitem><simpara><ulink url="http://sources.redhat.com/insight/faq.php">The GDB GUI FAQ</ulink></simpara></listitem>
+			</itemizedlist>
+		</para>
+		<sect1>
+			<title>WSim: the Worldsens hardware platform simulator</title>
+			<para>WSim is part of the Worldsens development environment. WSim is a 
+			full platform simulator that can run the target platform object code 
+			without modification. The primary goals of WSim are debugging, profiling 
+			and performance evaluation for deeply embedded wireless sensor 
+			node/network (WSN) distributed applications.</para>
+			<figure id="compile">
+				<title>The place of WSim in the development process</title>
+				<mediaobject>
+					<imageobject>
+						<imagedata align="center" fileref="figures/compile.png"/>
+					</imageobject>
+				</mediaobject>
+			</figure>
+			<para>Writing distributed WSN applications using the Worldsens toolkit is 
+			far easier than using prototype boards due to the fast compile/debug/estimate 
+			development cycle. This performance estimation is made possible using a full 
+			platform simulation at a cycle accurate level. Peripherals that deal with real time 
+			constraints (timers, interrupts, serial ports, radio interface, etc.) are included 
+			in the WSim platform model. Time is given in a cycle accurate manner using 
+			application instruction timing.</para>
+			<para>WSim provides a simulation environment in which you can get:
+				<itemizedlist mark="bullet" spacing="normal">
+					<listitem><simpara>Full instruction set support for the target microcontroller</simpara></listitem>
+					<listitem><simpara>Cycle-accurate simulation</simpara></listitem>
+					<listitem><simpara>Simulation of peripherals such as timers</simpara></listitem>
+					<listitem><simpara>Interrupts</simpara></listitem>
+					<listitem><simpara>Cycle-accurate simulation of other peripherals (e.g. UART)</simpara></listitem>
+					<listitem><simpara>External peripherals (radio modules, LCD display, ...)</simpara></listitem>
+					<listitem><simpara>A full system debug and performance analysis framework</simpara></listitem>
+				</itemizedlist>
+			</para>
+			<para>WSim should compile and run on any Un*x-like platform. It has been tested 
+			on Linux/x86, Linux/x86_64, Linux/ppc32, Linux/Alpha, Solaris9/Sparc, Solaris10/Sparc, 
+			MacOSX/ppc32, MacOSX/x86 and Windows XP (using cygwin).</para>
+		</sect1>
+		<sect1>
+			<title>WConsole: the Worldsens serial console</title>
+			<para>The WorldSens serial console (WConsole) is a standalone application that can 
+			be used to drive the communication with the pseudo tty model. Its main use is to provide 
+			a full duplex interface that can output the octet stream from the simulator and use the 
+			host keyboard to communicate with the simulated application. The source code of the 
+			serial console can also be used to derive and test applications that will communicate 
+			through the serial port of the node in production use such as base station monitoring 
+			applications.</para>
+			<figure id="wconsole">
+				<title>WConsole example</title>
+				<mediaobject>
+					<imageobject>
+						<imagedata align="center" fileref="figures/serial.png"/>
+					</imageobject>
+				</mediaobject>
+			</figure>
+			<para>The screenshot of the WSim serial console shown in <xref linkend="wconsole"/> 
+			presents a simple application that produces an echo for every character sent to its serial 
+			port. The top half of the user interface window presents the simulation output with 
+			grayed letters and bottom half is the local keyboard input for the host machine.</para>
+		</sect1>
+		<sect1>
+			<title>WTracer: the Worldsens trace reading tool</title>
+			<para>WSim traces are output in binary format. The WTracer tool transforms the traces
+			in the Gnuplot format.</para>
+		</sect1>
+		<sect1>
+			<title>WSNet: the Worldsens wireless network simulator</title>
+			<para>WSNet is part of the Worldsens development environment. WSNet is a modular 
+			event-driven wireless network simulator. Its architecture consists in diﬀerent blocks that 
+			implement functionnalities of the nodes and the radio medium. As an example, separate 
+			blocks are deﬁned for the radio propagation, the interference computation or the radio 
+			modulation. Similarly, a node is itself composed by several blocks: one for the mobility, 
+			one for the application, one for the system queue, one for the mac layer, one for the 
+			radio and one for the antenna.</para>
+			<para>During one simulation, the behaviour of a block is speciﬁed using a model. A 
+			model is one particular implementation of the block functionnalities. If we consider the 
+			radio propagation block, one model implements the free space propagation model; another 
+			one implements a radio range model, etc. Considering the radio modulation block, one 
+			model implements the BPSK modulation, another one the FSK modulation, etc.</para>
+			<para>Models are either provided with the simulator or developped by users. A user can 
+			develop models for any of the blocks and use it for its own simulations. A model must 
+			implement a given API as well as characteristics that are deﬁned by its associated block. 
+			WSNet should be able to compile on any Unix-like platform and has been tested on 
+			Linux/x86, Linux/x86 64, Linux/ppc32, Linux/Alpha, Solaris9/sparc, Solaris10/sparc, 
+			MacOSX/ppc32, Windows XP (using cygwin).</para>
+		</sect1>
+		<sect1>
+			<title>Worldsens: the development framework</title>
+			<para>WSim can be attached to the WSNet simulator through radio interfaces such as 
+			the Chipcon CC1100 model. This allows to build a complete simulation framework that 
+			is able to debug and analyse a complete wireless sensor network. Thus WSim and WSNet 
+			allow to design and reﬁne a full distributed application from the top level speciﬁcations to 
+			the ﬁnal application binary within the same framework and application description: the 
+			real application code.</para>
+			<figure id="dist-simul">
+				<title>Distributed simulation</title>
+				<mediaobject>
+					<imageobject>
+						<imagedata align="center" fileref="figures/dist_simul.png" />
+					</imageobject>
+				</mediaobject>
+			</figure>
+			<para>Communication between the simulators is done using IPv4 unicast and multicast 
+			in order to allow the distribution of the simulation load across a network of workstations. 
+			A typical middle range workstation can handle several dozens of concurrent WSN node 
+			simulators so that a small set of workstations can scale to hundreds of nodes. This allows 
+			the Worldsens environment to provide a performance analysis of real world applications 
+			using cycle accurate simulation tools.</para>
+			<para>These features will be demonstrated in <xref linkend="token"/>.</para>
+		</sect1>
+	</chapter>
+	<chapter id="leds">
+		<title>LEDs Example</title>
+		<sect1>
+			<title>Introduction</title>
+			<para>This chapter presents the LEDs (Light Emitting Diodes) example. It is a very 
+			simple application written for the WSN430 hardware platform, in which LEDs are 
+			turned on and off at variable time intervals. The purpose of this example is to show 
+			you how to <emphasis>execute</emphasis> a program using WSim, how to 
+			<emphasis>convert the traces</emphasis> generated by the simulator into a human 
+			readable format and how to <emphasis>debug</emphasis> your program using 
+			Insight/GDB.</para>
+		</sect1>
+		<sect1>
+			<title>Compiling and executing the example</title>
+			<para>If you are using the Worldsens Live CD, go to <userinput>/opt/worldsens/examples/wsn430-leds</userinput>.
+			If not, go to <userinput>$WSIM_FOLDER/examples/wsn430-leds</userinput> and type:</para>
+				<programlisting>
+<prompt>[wsn430-leds]$</prompt> <userinput>make</userinput></programlisting>
+			<para>You should see:</para>
+				<programlisting>
+<computeroutput>msp430-gcc -mmcu=msp430x1611 -O2 -Wall -g   -c -o main.o main.c
+msp430-gcc -mmcu=msp430x1611 -o wsn430-leds.elf main.o
+msp430-objcopy -O ihex wsn430-leds.elf wsn430-leds.a43
+msp430-objdump -dSt wsn430-leds.elf &gt;wsn430-leds.lst</computeroutput></programlisting>
+			<para>If you are not using the Worldsens Live CD and you see an error, make 
+			sure all the tools are in your <userinput>$PATH</userinput>.</para>
+			<para>Once the example is compiled, you can execute it using WSim with the
+			following options:
+				<itemizedlist mark="bullet" spacing="normal">
+					<listitem><simpara><userinput>ui</userinput>: to show the user interface (i.e. the LEDs blinking).</simpara></listitem>
+					<listitem><simpara><userinput>trace</userinput>: write simulator traces in a file (<userinput>wsim.trc</userinput>).</simpara></listitem>
+					<listitem><simpara><userinput>mode</userinput>: WSim mode (<userinput>time</userinput>, <userinput>steps</userinput> 
+						or <userinput>gdb</userinput>); if this is not specified, WSim will run forever.</simpara></listitem>
+					<listitem><simpara><userinput>modearg</userinput>: if mode is <userinput>time</userinput> or <userinput>steps</userinput>,
+						then this option will specify the simulation time in nanoseconds or number of steps.</simpara></listitem>
+				</itemizedlist>
+			The command to type is therefore the following (expected output is included below):</para>
+				<programlisting>
+<prompt>[wsn430-leds]$</prompt> <userinput>wsim-wsn430 --ui --trace --mode=time --modearg=100000000000 wsn430-leds.elf</userinput>
+<computeroutput>WSim 0.82cvs, copyright 2005, 2006, 2007 Worldsens
+wsim:pid:20530
+wsim:log:wsim.log</computeroutput></programlisting>
+			<note><title>The <userinput>mode</userinput> option</title>
+				<para>As explained above, when the <userinput>mode</userinput> option is not
+				used, simulation time is unlimited. It is important to note that, in this case, trace data 
+				are kept in a buffer of relatively large size (approx. 4 MB). Therefore, should the user 
+				interrupt the simulation (<userinput>killall -USR1 wsim-wsn430</userinput>), they 
+				should expect the trace files to be empty.</para>
+			</note>
+			<figure id="leds-exec">
+				<title>Snapshot of the execution of the LEDs example</title>
+				<mediaobject>
+					<imageobject>
+						<imagedata align="center" fileref="figures/wsn430-leds.png"/>
+					</imageobject>
+				</mediaobject>
+			</figure>
+		</sect1>
+		<sect1>
+			<title>Converting and interpreting the traces</title>
+			<para>Simulation traces are written in a file called <userinput>wsim.trc</userinput>, 
+			if the <userinput>trace</userinput> option was used. The trace file records interruptions,
+			blinking frequency for each of the three LEDs, clock frequencies, power mode changes, 
+			serial port information etc. However, this information is not readily available, since it is
+			recorded in binary format. This is why it first needs to be converted to a human readable
+			form. To do so, we will use a tool called WTracer, which is part of the Worldsens tool suite. 
+			After having executed the LEDs example, type the following:</para>
+				<programlisting>
+<prompt>[wsn430-leds]$</prompt> <userinput>wtracer --in=wsim.trc --out=wsim.gp --format=gplot</userinput></programlisting>
+			<para>You should now have a new file, <userinput>wsim.gp</userinput> in Gnuplot 
+			format. The <ulink url="http://www.gnuplot.info/">Gnuplot</ulink> utility will use this file
+			to generate nice plots of the recorded information (one EPS file per type of data). To do so,
+			type the command:</para>
+			<programlisting>
+<prompt>[wsn430-leds]$</prompt> <userinput>cat wsim.gp | gnuplot</userinput></programlisting>
+			<para>The files resulting from this procedure are: <userinput>wsim.gp.CC1100_state.eps</userinput>, 
+			<userinput>wsim.gp.ds2411.eps</userinput>, <userinput>wsim.gp.Interrupt.eps</userinput>, 
+			<userinput>wsim.gp.led1.eps</userinput>, <userinput>wsim.gp.led2.eps</userinput>, 
+			<userinput>wsim.gp.led3.eps</userinput>, <userinput>wsim.gp.m25p80.eps</userinput>, 
+			<userinput>wsim.gp.msp430_aclk.eps</userinput>, <userinput>wsim.gp.msp430_mclk.eps</userinput>, 
+			<userinput>wsim.gp.msp430_smclk.eps</userinput>, <userinput>wsim.gp.Power_mode.eps</userinput>,
+			<userinput>wsim.gp.Usart0.eps</userinput>, <userinput>wsim.gp.Usart1.eps</userinput>.
+			However, since this simple example only makes use of LEDs, the LED files are the only ones relevant.
+			They show the LED blinking frequency during the entire simultation time. The file for LED 1 is 
+			included below, in <xref linkend="led1-trace"/>.</para>
+			<figure id="led1-trace">
+				<title>Trace of LED 1</title>
+				<mediaobject>
+					<imageobject>
+						<imagedata align="center" fileref="figures/wsn430-led1.png"/>
+					</imageobject>
+				</mediaobject>
+			</figure>
+		</sect1>
+		<sect1>
+			<title>Debugging using WSim and Insight/GDB</title>
+			<para>WSim understands the GDB remote protocol to drive the simulation engine. The 
+			simulator can be started using the <userinput>--mode=gdb</userinput> parameter to 
+			use this functionality. The following steps  should be followed in order to debug an application
+			using WSim and Insight/GDB:</para>
+			<procedure>
+				<step><para>Start a simulation in debug mode. WSim will stop right after machine creation and
+				will wait on the default port (TCP 2159) until a connexion is made from a remote debugger 
+				that implements the same target architecture (GDB must be compiled as a cross-debugger 
+				for the target architecture):</para>
+					<programlisting>
+<prompt>[wsn430-leds]$</prompt> <userinput>wsim-wsn430 --ui --trace --mode=gdb wsn430-leds.elf</userinput></programlisting>
+				</step>
+				<step><para>Launch Insight/GDB and load the ELF file as shown below (File menu --> Open):</para>
+					<figure id="leds-dbg-1">
+						<title>First debugging snapshot</title>
+						<mediaobject>
+							<imageobject>
+								<imagedata align="center" fileref="figures/wsn430-leds-insight-1.png"/>
+							</imageobject>
+						</mediaobject>
+					</figure>
+				</step>
+				<step><para>Connect to the WSim simulation as shown below (Run menu --> Connect to target):</para>
+					<figure id="leds-dbg-2">
+						<title>Second debugging snapshot</title>
+						<mediaobject>
+							<imageobject>
+								<imagedata align="center" fileref="figures/wsn430-leds-insight-2.png"/>
+							</imageobject>
+						</mediaobject>
+					</figure>
+					<para>Once you click OK, you should see the following:</para>
+					<figure id="leds-dbg-3">
+						<title>Third debugging snapshot</title>
+						<mediaobject>
+							<imageobject>
+								<imagedata align="center" fileref="figures/wsn430-leds-insight-3.png"/>
+							</imageobject>
+						</mediaobject>
+					</figure>
+				</step>
+				<step><para>Start the execution by pressing the « Run » button (upper left corner). Don't worry
+				about breakpoints, two of them are automatically set for you: one in the beginning of the main
+				function and a second one at the end of the function. You should see this:</para>
+					<figure id="leds-dbg-4">
+						<title>Fourth debugging snapshot</title>
+						<mediaobject>
+							<imageobject>
+								<imagedata align="center" fileref="figures/wsn430-leds-insight-4.png"/>
+							</imageobject>
+						</mediaobject>
+					</figure>
+				</step>
+				<step><para>Now you can start setting your breakpoints and debugging!</para>
+					<figure id="leds-dbg-5">
+						<title>Fifth debugging snapshot</title>
+						<mediaobject>
+							<imageobject>
+								<imagedata align="center" fileref="figures/wsn430-leds-insight-all.png"/>
+							</imageobject>
+						</mediaobject>
+					</figure>
+				</step>
+				<step><para>Stop debugging and close the file: File menu --> Close.</para></step>
+			</procedure>
+		</sect1>
+	</chapter>
+	<chapter id="timers">
+		<title>Timer Example</title>
+		<sect1>
+			<title>Introduction</title>
+			<para>This chapter presents the timers example. This application written for the 
+			WSN430 hardware platform aims at demonstrating WSim's capability to simulate interrupts.
+			We will also discuss setting breakpoints in an application using LPMs (Low Power Modes).</para>
+		</sect1>
+		<sect1>
+			<title>Compiling and executing the example</title>
+			<para>If you are using the Worldsens Live CD, go to <userinput>/opt/worldsens/examples/wsn430-timer</userinput>.
+			If not, go to <userinput>$WSIM_FOLDER/examples/wsn430-timer and type</userinput>:</para>
+				<programlisting>
+<prompt>[wsn430-timer]$</prompt> <userinput>make</userinput></programlisting>
+			<para>You should see:</para>
+				<programlisting>
+<computeroutput>msp430-gcc -mmcu=msp430x1611 -O2 -Wall -I../wsn430-leds -I../wsn430-clock -I../wsn430-serial -g   -c -o main.o main.c
+msp430-gcc -c -mmcu=msp430x1611 -O2 -Wall -I../wsn430-leds -I../wsn430-clock -I../wsn430-serial -g ../wsn430-clock/clock.c
+msp430-gcc -c -mmcu=msp430x1611 -O2 -Wall -I../wsn430-leds -I../wsn430-clock -I../wsn430-serial -g ../wsn430-serial/uart1.c
+msp430-gcc -mmcu=msp430x1611 -O2 -Wall -I../wsn430-leds -I../wsn430-clock -I../wsn430-serial -g   -c -o timer.o timer.c
+msp430-gcc -mmcu=msp430x1611 -o wsn430-timer.elf main.o clock.o uart1.o timer.o
+msp430-objcopy -O ihex wsn430-timer.elf wsn430-timer.a43
+msp430-objdump -dSt wsn430-timer.elf >wsn430-timer.lst</computeroutput></programlisting>
+			<para>If you are not using the Worldsens Live CD and you see an error, make 
+			sure all the tools are in your <userinput>$PATH</userinput>.</para>
+			<para>Once the example is compiled, you can execute it using WSim with the
+			same options presented in the previous example, i.e.:
+				<itemizedlist mark="bullet" spacing="normal">
+					<listitem><simpara><userinput>ui</userinput>: to show the user interface (i.e. the LEDs blinking).</simpara></listitem>
+					<listitem><simpara><userinput>trace</userinput>: write simulator traces in a file (<userinput>wsim.trc</userinput>).</simpara></listitem>
+					<listitem><simpara><userinput>mode</userinput>: WSim mode (<userinput>time</userinput>, <userinput>steps</userinput> 
+						or <userinput>gdb</userinput>); if this is not specified, WSim will run forever.</simpara></listitem>
+					<listitem><simpara><userinput>modearg</userinput>: if mode is <userinput>time</userinput> or <userinput>steps</userinput>,
+						then this option will specify the simulation time in nanoseconds or number of steps.</simpara></listitem>
+				</itemizedlist>
+			The command to type is therefore the following (expected output is included below):</para>
+				<programlisting>
+<prompt>[wsn430-timer]$</prompt> <userinput>wsim-wsn430 --ui --trace --mode=time --modearg=100000000000 wsn430-timer.elf</userinput>
+<computeroutput>WSim 0.82cvs, copyright 2005, 2006, 2007 Worldsens
+wsim:pid:22830
+wsim:log:wsim.log</computeroutput></programlisting>
+			<note>
+				<title>The <userinput>mode</userinput> option</title>
+				<para>As explained above, when the <userinput>mode</userinput> option is not
+				used, simulation time is unlimited. It is important to note that, in this case, trace data 
+				are kept in a buffer of relatively large size (approx. 4 MB). Therefore, should the user 
+				interrupt the simulation (<userinput>killall -USR1 wsim-wsn430</userinput>), they 
+				should expect the trace files to be empty.</para>
+			</note>
+			<figure id="timer-exec">
+				<title>Snapshot of the execution of the timer example</title>
+				<mediaobject>
+					<imageobject>
+						<imagedata align="center" fileref="figures/wsn430-timer.png"/>
+					</imageobject>
+				</mediaobject>
+			</figure>
+		</sect1>
+		<sect1>
+			<title>Converting and interpreting the traces</title>
+			<para>After having converted the trace file as explained in the <link linkend="leds">previous example</link>,
+			you will again obtain EPS files for each type of data: <userinput>wsim.gp.CC1100_state.eps</userinput>, 
+			<userinput>wsim.gp.ds2411.eps</userinput>, <userinput>wsim.gp.Interrupt.eps</userinput>, 
+			<userinput>wsim.gp.led1.eps</userinput>, <userinput>wsim.gp.led2.eps</userinput>, 
+			<userinput>wsim.gp.led3.eps</userinput>, <userinput>wsim.gp.m25p80.eps</userinput>, 
+			<userinput>wsim.gp.msp430_aclk.eps</userinput>, <userinput>wsim.gp.msp430_mclk.eps</userinput>, 
+			<userinput>wsim.gp.msp430_smclk.eps</userinput>, <userinput>wsim.gp.Power_mode.eps</userinput>,
+			<userinput>wsim.gp.Usart0.eps</userinput>, <userinput>wsim.gp.Usart1.eps</userinput>.
+			However, this time, besides from LED files, another interesting file to analyse is the interrupt file,
+			<userinput>wsim.gp.Interrupt.eps</userinput>, which presents harware interrupts issued during
+			the execution of the program by the simulator. This file is included below, as well as LED trace files:</para>
+			<figure id="timer-int-trace">
+				<title>Interruptions for the timer example</title>
+				<mediaobject>
+					<imageobject>
+						<imagedata align="center" fileref="figures/wsn430-timer-Interrupt.png"/>
+					</imageobject>
+				</mediaobject>
+			</figure>
+			<para>
+				<inlinemediaobject>
+					<imageobject>
+						<imagedata align="center" fileref="figures/wsn430-timer-led1.png"/>
+					</imageobject>
+				</inlinemediaobject>
+				<inlinemediaobject>
+					<imageobject>
+						<imagedata align="center" fileref="figures/wsn430-timer-led3.png"/>
+					</imageobject>
+				</inlinemediaobject>
+			</para>
+		</sect1>
+	</chapter>
+	<chapter id="serial">
+		<title>Serial Port Example</title>
+		<sect1>
+			<title>Introduction</title>
+			<para>This chapter presents the serial port example. Like the previous examples, this one is 
+			also written for the WSN430 hardware platform and it demonstrates communication through the
+			serial port in WSim. It is a simple application that produces an echo for every character sent 
+			to its serial port 1.</para>
+		</sect1>
+		<sect1>
+			<title>Compiling and executing the example</title>
+			<para>To compile the example, follow the same instructions as before. For users of the Worldsens 
+			Live CD, the folder containing this example is <userinput>/opt/worldsens/examples/wsn430-serial</userinput>.
+			For other, go to <userinput>$WSIM_FOLDER/examples/wsn430-serial</userinput>.</para>
+			<para>To execute the example users will have to follow the procedure below:</para>
+			<procedure>
+				<step><para>Launch an instance of the Worldsens WConsole application, as follows:</para>
+					<programlisting>
+<prompt>[wsn430-serial]$</prompt> <userinput>wconsole</userinput></programlisting>
+					<para>You should see this:</para>
+					<figure id="serial-wconsole">
+						<title>Snapshot of the launching of the serial console</title>
+						<mediaobject>
+							<imageobject>
+								<imagedata align="center" fileref="figures/wsn430-serial-wconsole.png"/>
+							</imageobject>
+						</mediaobject>
+					</figure>
+				</step>
+				<step><para>Launch the simulator and connect it to the previously launched WConsole instance,
+				using the following command (expected output is included):</para>
+					<programlisting>
+<prompt>[wsn430-timer]$</prompt> <userinput>wsim-wsn430 --serial=/dev/pts/3 wsn430-serial.elf</userinput>
+<computeroutput>WSim 0.82cvs, copyright 2005, 2006, 2007 Worldsens
+wsim:pid:4343
+wsim:log:wsim.log</computeroutput></programlisting>
+					<para>Once you attach the serial console to the simulated platform's serial port 1, the 
+					application will let you switch between its two modes by typing « Z ». The two available modes 
+					are:
+						<itemizedlist mark="bullet" spacing="normal">
+							<listitem><simpara>IRQ+LPM0: in this mode the program starts by checking if
+							a character is available on the serial port; if no character is available, it goes into
+							a Low Power Mode (see the <ulink url="http://www.ti.com/litv/pdf/slau049f">TI 
+							MSP430 User Guide</ulink>), LPM0 to be precise; all subsequent characters are 
+							processed in interrupt routines.</simpara></listitem>
+							<listitem><simpara>polling: in this mode, the program is constantly checking if
+							the user has entered any new character on the serial port.</simpara></listitem>
+						</itemizedlist>
+					The top half of the user interface window presents the simulation output with grayed letters and 
+					bottom half is the local keyboard echo for the host machine. In both modes, all the text you type 
+					will be echoed by the application in the upper part of the serial console.</para>
+					<figure id="serial-exec">
+						<title>Snapshot of the execution of the serial example</title>
+						<mediaobject>
+							<imageobject>
+								<imagedata align="center" fileref="figures/wsn430-serial-2.png"/>
+							</imageobject>
+						</mediaobject>
+					</figure>
+				</step>
+			</procedure>
+		</sect1>
+		<sect1>
+			<title>Debugging and LPMs</title>
+			<para>As explained above, the IRQ+LPM0 mode consists of a sequence of LPM0 periods and 
+			executions of interrupt routines. For this reason, bla bla bla.</para>
+		</sect1>
+	</chapter>
+	<chapter id="token">
+		<title>Token Passing Example</title>
+		<sect1>
+			<title>Introduction</title> 
+                        <!--<para>This example is Supercalifragilisticexpialidocious!!!</para>-->
+			<para>This example shows how to start a mixed simulation using WSim for node 
+			simulation and WSNet for radio propagation and interferences. It consists of three sensor
+			nodes (again, simulating the WSN430 hardware platform). The nodes are communicating
+			with one another by passing a token around the network.</para>
+		</sect1>
+		<sect1>
+			<title>Example description and execution</title>
+			<para>Nodes are numbered from 1 to 3 and can identify themselves through the 
+			DS2411 unique Id number chip. Node Id are given at simulation startup using the
+			<userinput>--ds2411=0a:00:00:00:00:00:01:01</userinput>. Node Ids must be 
+			given with the right CRC value (a valid CRC is calculated at simulation startup). 
+			The <userinput>--node-id</userinput> parameter is used by WSim for packet exchanges
+			with WSNet. This node Id cannot be used by the embedded software running on the 
+			node hardware.
+			The demo application is a single token passing application. Each node listens the
+			radio medium and waits for a packet that contains its node-Id. Once a packet is 
+			received with the correct id number, the corresponding node <emphasis>bla bla bla</emphasis>.</para>
+			<para>To compile this example, simply run the <userinput>make</userinput> command. 
+			To execute it, the following procedure must be followed:</para>
+			<procedure>
+				<step><para>Launch three WConsole instances (each node will print its feedback 
+				in these serial consoles) in separate shells.</para></step>
+				<step><para>Launch WSNet the network simulator. You must either launch it
+				from the directory containing the example or provide the path of this directory to it
+				as an option (see WSNet Tutorial for more details). This is needed for the configuration
+				of the network simulator (environment, physical layer, MAC layer etc).</para></step>
+				<step><para>Launch the three WSim nodes. To do so, use the script provided with 
+				the example: <userinput>demo.sh</userinput>. For regular execution (time mode, 
+				10 seconds), use the script with the following arguments:</para>
+				<programlisting>
+<prompt>[wsn430-token]$</prompt> <userinput>./demo.sh p3 /dev/pts/7 /dev/pts/8 /dev/pts/9</userinput></programlisting></step>
+			</procedure>
+			<para><xref linkend="token-petit"/> shows the console output of the 3 nodes. Console 
+			duplicated messages are one of the effects of the distributed simulation mechanims. WSNet 
+			keeps track of global simulation time but does not impose a tight synchronisation with WSim 
+			instances. Time synchronisation is done among nodes using an optimistic behaviour that 
+			lets processes work at full speed, only requiring time synchronisation when uncoherent 
+			events are detected. Correct distributed events ordering is ensured by backtracking nodes 
+			that are in advance compared to others. Only WSim processes are backtracked but WConsoles 
+			do not go back in time, hence the duplicated messages on consoles output.</para>
+			<figure id="token-petit">
+				<title>Snapshot of the execution of the token passing example</title>
+				<mediaobject>
+					<imageobject>
+						<imagedata align="center" fileref="figures/wsn430-token-petit.png" />
+					</imageobject>
+				</mediaobject>
+			</figure>
+		</sect1>
+		<sect1>
+			<title>Debugging a distributed application</title>
+			<para>WSim allows debugging even for distributed applications. It is possible to place one 
+			node from the network in debug mode and the entire application (including other nodes and 
+			WSNet) will follow the node being debugged.</para>
+			<para>To launch this example in debug mode, follow the same steps as above, with a slight 
+			modification at the third step:
+				<itemizedlist mark="bullet" spacing="normal">
+					<listitem><para>To place Node 1 in debug mode and the other two in regular 
+					execution, execute the script with the following arguments:
+					<programlisting>
+<prompt>[wsn430-token]$</prompt> <userinput>./demo.sh d31 /dev/pts/7 /dev/pts/8 /dev/pts/9</userinput></programlisting>
+					</para></listitem>
+					<listitem><para>To place Node 2 in debug mode and the other two in regular 
+					execution, execute the script with the following arguments:
+					<programlisting>
+<prompt>[wsn430-token]$</prompt> <userinput>./demo.sh d32 /dev/pts/7 /dev/pts/8 /dev/pts/9</userinput></programlisting></para></listitem>
+				</itemizedlist>
+			</para>
+			<para>Once the simulators are launched, you can connect GDB/Insight to the node placed 
+			in debug mode in the same way as presented in <xref linkend="leds"/>.</para>
+			<figure id="token-debug">
+				<title>Snapshot of the debugging of the token passing example</title>
+				<mediaobject>
+					<imageobject>
+						<imagedata align="center" fileref="figures/wsn430-token-debug.png" />
+					</imageobject>
+				</mediaobject>
+			</figure>
+			<para><xref linkend="token-debug"/> gives an idea of how the debugging of this example 
+			should look like.</para>
+		</sect1>
+	</chapter>
+	<chapter id="credits">
+		<title>Credits</title>
+		<para>Credit for the icons goes to the <ulink url="http://tango.freedesktop.org/">Tango Desktop Project</ulink>.</para>
+		<para>The style is inspired from <ulink url="http://blogs.gnome.org/shaunm/">Shaun's Blog</ulink>.</para>
+	</chapter>
+</book>

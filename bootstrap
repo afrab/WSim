@@ -1,0 +1,11 @@
+#!/bin/sh
+
+bootstrap_wsim()
+{
+    aclocal 
+    autoheader
+    automake --add-missing --foreign --copy
+    autoconf
+}
+
+bootstrap_wsim

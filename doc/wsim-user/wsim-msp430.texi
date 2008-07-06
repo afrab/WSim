@@ -1,0 +1,109 @@
+@c ====================================================
+@c ====================================================
+
+@node MSP430
+@section Ti MSP430 micro-controllers
+
+@c ====================================================
+@c ====================================================
+
+@menu
+* Ti MSP430 Model:: MSP430 Model Introduction 
+* MSP430 Current State:: MSP430 Current State
+* MSP430 Options:: Simulation Options
+@c * msp430_links:: External Resources
+@end menu
+
+@c ====================================================
+@c ====================================================
+
+@node Ti MSP430 Model
+@subsection Introduction
+
+The MSP430 micro-controller is an integrated circuit that implements its
+own instruction set architecture and that has many on-chip mixed
+analog and digital peripherals.
+
+@c @image{fig/msp430_arch,8cm,,MSP430 architecture description}
+
+Although the models implemented in Wsim cover the full MSP430
+instruction set and memory mapping they do not cover the full range of
+available msp430 models from Texas Instruments. The following sections
+presents the peripherals that can be used within the
+simulation. Peripherals that are not fully implemented are replaced by
+stub devices that only report reads and writes to them.
+
+@c ====================================================
+@c ====================================================
+
+@node MSP430 Current State
+@subsection MSP430 Model Current State
+
+The following list of internal peripherals are included in the current 
+version of the Wsim software. This list will be
+modified and updated has new peripheral implementation are included
+in the MSP430 model.
+
+@itemize 
+@item 8bit blocks
+  @itemize
+    @item SFR registers 
+    @item FLL+ Clock
+    @item Basic Clock Module
+    @item USART with UART and SPI mode
+  @end itemize
+@item 16bits blocks
+  @itemize
+    @item Watchdog
+    @item Hardware multiplier
+    @item Timer A3
+    @item Timer B3
+    @item Timer B7
+    @c @item Internal Flash Controller
+  @end itemize
+@end itemize
+
+All other peripherals are present (a read or a write access to their
+control registers does not produce an error during the simulation)
+but they only act as stubs that produce warnings during execution.
+
+The available list of integrated peripherals can be combined to
+implement the digital part of the following MSP430 models:
+
+@itemize
+@item MSP430f135
+@item MSP430f449 
+@item MSP430f1611 
+@end itemize
+
+Although the missing peripherals models can be easily implemented in
+the Wsim msp430 library, they will not be done until a request
+is made to the authors through the WorldSens website.
+
+@c ====================================================
+@c ====================================================
+
+@node MSP430 Options
+@subsection Simulation Options
+
+The MSP430 model adds two options to the set of available
+Wsim command line options. These options are 
+
+@table @option
+@item --xt1=arg
+     @t{XT1} crystal frequency (Hz). 
+@item --xt2=arg
+     @t{XT2} crystal frequency (Hz)
+@end table
+
+The default values for these options are fixed in platform
+configurations.
+
+@c ====================================================
+@c ====================================================
+
+@c @node msp430_links
+@c @subsection External Resources
+
+@c ====================================================
+@c ====================================================

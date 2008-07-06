@@ -1,0 +1,6562 @@
+%!PS-Adobe-2.0 EPSF-2.0
+%%Title: trace1.Interrupt.eps
+%%Creator: gnuplot 4.1 patchlevel 0
+%%CreationDate: Wed May 17 14:33:43 2006
+%%DocumentFonts: (atend)
+%%BoundingBox: 50 50 410 302
+%%EndComments
+/gnudict 256 dict def
+gnudict begin
+%
+% The following 6 true/false flags may be edited by hand if required
+% The unit line width may also be changed
+%
+/Color false def
+/Blacktext false def
+/Solid false def
+/Dashlength 1 def
+/Landscape false def
+/Level1 false def
+/Rounded false def
+/gnulinewidth 5.000 def
+/userlinewidth gnulinewidth def
+%
+/vshift -46 def
+/dl1 {
+  10.0 Dashlength mul mul
+  Rounded { currentlinewidth 0.75 mul sub dup 0 le { pop 0.01 } if } if
+} def
+/dl2 {
+  10.0 Dashlength mul mul
+  Rounded { currentlinewidth 0.75 mul add } if
+} def
+/hpt_ 31.5 def
+/vpt_ 31.5 def
+/hpt hpt_ def
+/vpt vpt_ def
+Level1 {} {
+/SDict 10 dict def
+systemdict /pdfmark known not {
+  userdict /pdfmark systemdict /cleartomark get put
+} if
+SDict begin [
+  /Title (trace1.Interrupt.eps)
+  /Subject (gnuplot plot)
+  /Creator (gnuplot 4.1 patchlevel 0)
+  /Author (Antoine Fraboulet,,,)
+%  /Producer (gnuplot)
+%  /Keywords ()
+  /CreationDate (Wed May 17 14:33:43 2006)
+  /DOCINFO pdfmark
+end
+} ifelse
+/reencodeISO {
+dup dup findfont dup length dict begin
+{ 1 index /FID ne { def }{ pop pop } ifelse } forall
+currentdict /CharStrings known {
+	CharStrings /Idieresis known {
+		/Encoding ISOLatin1Encoding def } if
+} if
+currentdict end definefont
+} def
+/ISOLatin1Encoding [
+/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef
+/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef
+/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef
+/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef
+/space/exclam/quotedbl/numbersign/dollar/percent/ampersand/quoteright
+/parenleft/parenright/asterisk/plus/comma/minus/period/slash
+/zero/one/two/three/four/five/six/seven/eight/nine/colon/semicolon
+/less/equal/greater/question/at/A/B/C/D/E/F/G/H/I/J/K/L/M/N
+/O/P/Q/R/S/T/U/V/W/X/Y/Z/bracketleft/backslash/bracketright
+/asciicircum/underscore/quoteleft/a/b/c/d/e/f/g/h/i/j/k/l/m
+/n/o/p/q/r/s/t/u/v/w/x/y/z/braceleft/bar/braceright/asciitilde
+/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef
+/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef
+/.notdef/dotlessi/grave/acute/circumflex/tilde/macron/breve
+/dotaccent/dieresis/.notdef/ring/cedilla/.notdef/hungarumlaut
+/ogonek/caron/space/exclamdown/cent/sterling/currency/yen/brokenbar
+/section/dieresis/copyright/ordfeminine/guillemotleft/logicalnot
+/hyphen/registered/macron/degree/plusminus/twosuperior/threesuperior
+/acute/mu/paragraph/periodcentered/cedilla/onesuperior/ordmasculine
+/guillemotright/onequarter/onehalf/threequarters/questiondown
+/Agrave/Aacute/Acircumflex/Atilde/Adieresis/Aring/AE/Ccedilla
+/Egrave/Eacute/Ecircumflex/Edieresis/Igrave/Iacute/Icircumflex
+/Idieresis/Eth/Ntilde/Ograve/Oacute/Ocircumflex/Otilde/Odieresis
+/multiply/Oslash/Ugrave/Uacute/Ucircumflex/Udieresis/Yacute
+/Thorn/germandbls/agrave/aacute/acircumflex/atilde/adieresis
+/aring/ae/ccedilla/egrave/eacute/ecircumflex/edieresis/igrave
+/iacute/icircumflex/idieresis/eth/ntilde/ograve/oacute/ocircumflex
+/otilde/odieresis/divide/oslash/ugrave/uacute/ucircumflex/udieresis
+/yacute/thorn/ydieresis
+] def
+/M {moveto} bind def
+/L {lineto} bind def
+/R {rmoveto} bind def
+/V {rlineto} bind def
+/N {newpath moveto} bind def
+/C {setrgbcolor} bind def
+/f {rlineto fill} bind def
+/vpt2 vpt 2 mul def
+/hpt2 hpt 2 mul def
+/Lshow { currentpoint stroke M
+  0 vshift R show } def
+/Rshow { currentpoint stroke M
+  dup stringwidth pop neg vshift R show } def
+/Cshow { currentpoint stroke M
+  dup stringwidth pop -2 div vshift R show } def
+/UP { dup vpt_ mul /vpt exch def hpt_ mul /hpt exch def
+  /hpt2 hpt 2 mul def /vpt2 vpt 2 mul def } def
+/DL { Color {setrgbcolor Solid {pop []} if 0 setdash }
+ {pop pop pop 0 setgray Solid {pop []} if 0 setdash} ifelse } def
+/BL { stroke userlinewidth 2 mul setlinewidth
+      Rounded { 1 setlinejoin 1 setlinecap } if } def
+/AL { stroke userlinewidth 2 div setlinewidth
+      Rounded { 1 setlinejoin 1 setlinecap } if } def
+/UL { dup gnulinewidth mul /userlinewidth exch def
+      dup 1 lt {pop 1} if 10 mul /udl exch def } def
+/PL { stroke userlinewidth setlinewidth
+      Rounded { 1 setlinejoin 1 setlinecap } if } def
+% Default Line colors
+/LCw { 1 1 1 } def
+/LCb { 0 0 0 } def
+/LCa { 0 0 0 } def
+/LC0 { 1 0 0 } def
+/LC1 { 0 1 0 } def
+/LC2 { 0 0 1 } def
+/LC3 { 1 0 1 } def
+/LC4 { 0 1 1 } def
+/LC5 { 1 1 0 } def
+/LC6 { 0 0 0 } def
+/LC7 { 1 0.3 0 } def
+/LC8 { 0.5 0.5 0.5 } def
+% Default Line Types
+/LTw { PL [] 1 setgray } def
+/LTb { BL [] LCb DL } def
+/LTa { AL [1 udl mul 2 udl mul] 0 setdash LCa setrgbcolor } def
+/LT0 { PL [] LC0 DL } def
+/LT1 { PL [4 dl1 2 dl2] LC1 DL } def
+/LT2 { PL [2 dl1 3 dl2] LC2 DL } def
+/LT3 { PL [1 dl1 1.5 dl2] LC3 DL } def
+/LT4 { PL [6 dl1 2 dl2 1 dl1 2 dl2] LC4 DL } def
+/LT5 { PL [3 dl1 3 dl2 1 dl1 3 dl2] LC5 DL } def
+/LT6 { PL [2 dl1 2 dl2 2 dl1 6 dl2] LC6 DL } def
+/LT7 { PL [1 dl1 2 dl2 6 dl1 2 dl2 1 dl1 2 dl2] LC7 DL } def
+/LT8 { PL [2 dl1 2 dl2 2 dl1 2 dl2 2 dl1 2 dl2 2 dl1 4 dl2] LC8 DL } def
+/Pnt { stroke [] 0 setdash
+   gsave 1 setlinecap M 0 0 V stroke grestore } def
+/Dia { stroke [] 0 setdash 2 copy vpt add M
+  hpt neg vpt neg V hpt vpt neg V
+  hpt vpt V hpt neg vpt V closepath stroke
+  Pnt } def
+/Pls { stroke [] 0 setdash vpt sub M 0 vpt2 V
+  currentpoint stroke M
+  hpt neg vpt neg R hpt2 0 V stroke
+  } def
+/Box { stroke [] 0 setdash 2 copy exch hpt sub exch vpt add M
+  0 vpt2 neg V hpt2 0 V 0 vpt2 V
+  hpt2 neg 0 V closepath stroke
+  Pnt } def
+/Crs { stroke [] 0 setdash exch hpt sub exch vpt add M
+  hpt2 vpt2 neg V currentpoint stroke M
+  hpt2 neg 0 R hpt2 vpt2 V stroke } def
+/TriU { stroke [] 0 setdash 2 copy vpt 1.12 mul add M
+  hpt neg vpt -1.62 mul V
+  hpt 2 mul 0 V
+  hpt neg vpt 1.62 mul V closepath stroke
+  Pnt  } def
+/Star { 2 copy Pls Crs } def
+/BoxF { stroke [] 0 setdash exch hpt sub exch vpt add M
+  0 vpt2 neg V  hpt2 0 V  0 vpt2 V
+  hpt2 neg 0 V  closepath fill } def
+/TriUF { stroke [] 0 setdash vpt 1.12 mul add M
+  hpt neg vpt -1.62 mul V
+  hpt 2 mul 0 V
+  hpt neg vpt 1.62 mul V closepath fill } def
+/TriD { stroke [] 0 setdash 2 copy vpt 1.12 mul sub M
+  hpt neg vpt 1.62 mul V
+  hpt 2 mul 0 V
+  hpt neg vpt -1.62 mul V closepath stroke
+  Pnt  } def
+/TriDF { stroke [] 0 setdash vpt 1.12 mul sub M
+  hpt neg vpt 1.62 mul V
+  hpt 2 mul 0 V
+  hpt neg vpt -1.62 mul V closepath fill} def
+/DiaF { stroke [] 0 setdash vpt add M
+  hpt neg vpt neg V hpt vpt neg V
+  hpt vpt V hpt neg vpt V closepath fill } def
+/Pent { stroke [] 0 setdash 2 copy gsave
+  translate 0 hpt M 4 {72 rotate 0 hpt L} repeat
+  closepath stroke grestore Pnt } def
+/PentF { stroke [] 0 setdash gsave
+  translate 0 hpt M 4 {72 rotate 0 hpt L} repeat
+  closepath fill grestore } def
+/Circle { stroke [] 0 setdash 2 copy
+  hpt 0 360 arc stroke Pnt } def
+/CircleF { stroke [] 0 setdash hpt 0 360 arc fill } def
+/C0 { BL [] 0 setdash 2 copy moveto vpt 90 450  arc } bind def
+/C1 { BL [] 0 setdash 2 copy        moveto
+       2 copy  vpt 0 90 arc closepath fill
+               vpt 0 360 arc closepath } bind def
+/C2 { BL [] 0 setdash 2 copy moveto
+       2 copy  vpt 90 180 arc closepath fill
+               vpt 0 360 arc closepath } bind def
+/C3 { BL [] 0 setdash 2 copy moveto
+       2 copy  vpt 0 180 arc closepath fill
+               vpt 0 360 arc closepath } bind def
+/C4 { BL [] 0 setdash 2 copy moveto
+       2 copy  vpt 180 270 arc closepath fill
+               vpt 0 360 arc closepath } bind def
+/C5 { BL [] 0 setdash 2 copy moveto
+       2 copy  vpt 0 90 arc
+       2 copy moveto
+       2 copy  vpt 180 270 arc closepath fill
+               vpt 0 360 arc } bind def
+/C6 { BL [] 0 setdash 2 copy moveto
+      2 copy  vpt 90 270 arc closepath fill
+              vpt 0 360 arc closepath } bind def
+/C7 { BL [] 0 setdash 2 copy moveto
+      2 copy  vpt 0 270 arc closepath fill
+              vpt 0 360 arc closepath } bind def
+/C8 { BL [] 0 setdash 2 copy moveto
+      2 copy vpt 270 360 arc closepath fill
+              vpt 0 360 arc closepath } bind def
+/C9 { BL [] 0 setdash 2 copy moveto
+      2 copy  vpt 270 450 arc closepath fill
+              vpt 0 360 arc closepath } bind def
+/C10 { BL [] 0 setdash 2 copy 2 copy moveto vpt 270 360 arc closepath fill
+       2 copy moveto
+       2 copy vpt 90 180 arc closepath fill
+               vpt 0 360 arc closepath } bind def
+/C11 { BL [] 0 setdash 2 copy moveto
+       2 copy  vpt 0 180 arc closepath fill
+       2 copy moveto
+       2 copy  vpt 270 360 arc closepath fill
+               vpt 0 360 arc closepath } bind def
+/C12 { BL [] 0 setdash 2 copy moveto
+       2 copy  vpt 180 360 arc closepath fill
+               vpt 0 360 arc closepath } bind def
+/C13 { BL [] 0 setdash  2 copy moveto
+       2 copy  vpt 0 90 arc closepath fill
+       2 copy moveto
+       2 copy  vpt 180 360 arc closepath fill
+               vpt 0 360 arc closepath } bind def
+/C14 { BL [] 0 setdash 2 copy moveto
+       2 copy  vpt 90 360 arc closepath fill
+               vpt 0 360 arc } bind def
+/C15 { BL [] 0 setdash 2 copy vpt 0 360 arc closepath fill
+               vpt 0 360 arc closepath } bind def
+/Rec   { newpath 4 2 roll moveto 1 index 0 rlineto 0 exch rlineto
+       neg 0 rlineto closepath } bind def
+/Square { dup Rec } bind def
+/Bsquare { vpt sub exch vpt sub exch vpt2 Square } bind def
+/S0 { BL [] 0 setdash 2 copy moveto 0 vpt rlineto BL Bsquare } bind def
+/S1 { BL [] 0 setdash 2 copy vpt Square fill Bsquare } bind def
+/S2 { BL [] 0 setdash 2 copy exch vpt sub exch vpt Square fill Bsquare } bind def
+/S3 { BL [] 0 setdash 2 copy exch vpt sub exch vpt2 vpt Rec fill Bsquare } bind def
+/S4 { BL [] 0 setdash 2 copy exch vpt sub exch vpt sub vpt Square fill Bsquare } bind def
+/S5 { BL [] 0 setdash 2 copy 2 copy vpt Square fill
+       exch vpt sub exch vpt sub vpt Square fill Bsquare } bind def
+/S6 { BL [] 0 setdash 2 copy exch vpt sub exch vpt sub vpt vpt2 Rec fill Bsquare } bind def
+/S7 { BL [] 0 setdash 2 copy exch vpt sub exch vpt sub vpt vpt2 Rec fill
+       2 copy vpt Square fill
+       Bsquare } bind def
+/S8 { BL [] 0 setdash 2 copy vpt sub vpt Square fill Bsquare } bind def
+/S9 { BL [] 0 setdash 2 copy vpt sub vpt vpt2 Rec fill Bsquare } bind def
+/S10 { BL [] 0 setdash 2 copy vpt sub vpt Square fill 2 copy exch vpt sub exch vpt Square fill
+       Bsquare } bind def
+/S11 { BL [] 0 setdash 2 copy vpt sub vpt Square fill 2 copy exch vpt sub exch vpt2 vpt Rec fill
+       Bsquare } bind def
+/S12 { BL [] 0 setdash 2 copy exch vpt sub exch vpt sub vpt2 vpt Rec fill Bsquare } bind def
+/S13 { BL [] 0 setdash 2 copy exch vpt sub exch vpt sub vpt2 vpt Rec fill
+       2 copy vpt Square fill Bsquare } bind def
+/S14 { BL [] 0 setdash 2 copy exch vpt sub exch vpt sub vpt2 vpt Rec fill
+       2 copy exch vpt sub exch vpt Square fill Bsquare } bind def
+/S15 { BL [] 0 setdash 2 copy Bsquare fill Bsquare } bind def
+/D0 { gsave translate 45 rotate 0 0 S0 stroke grestore } bind def
+/D1 { gsave translate 45 rotate 0 0 S1 stroke grestore } bind def
+/D2 { gsave translate 45 rotate 0 0 S2 stroke grestore } bind def
+/D3 { gsave translate 45 rotate 0 0 S3 stroke grestore } bind def
+/D4 { gsave translate 45 rotate 0 0 S4 stroke grestore } bind def
+/D5 { gsave translate 45 rotate 0 0 S5 stroke grestore } bind def
+/D6 { gsave translate 45 rotate 0 0 S6 stroke grestore } bind def
+/D7 { gsave translate 45 rotate 0 0 S7 stroke grestore } bind def
+/D8 { gsave translate 45 rotate 0 0 S8 stroke grestore } bind def
+/D9 { gsave translate 45 rotate 0 0 S9 stroke grestore } bind def
+/D10 { gsave translate 45 rotate 0 0 S10 stroke grestore } bind def
+/D11 { gsave translate 45 rotate 0 0 S11 stroke grestore } bind def
+/D12 { gsave translate 45 rotate 0 0 S12 stroke grestore } bind def
+/D13 { gsave translate 45 rotate 0 0 S13 stroke grestore } bind def
+/D14 { gsave translate 45 rotate 0 0 S14 stroke grestore } bind def
+/D15 { gsave translate 45 rotate 0 0 S15 stroke grestore } bind def
+/DiaE { stroke [] 0 setdash vpt add M
+  hpt neg vpt neg V hpt vpt neg V
+  hpt vpt V hpt neg vpt V closepath stroke } def
+/BoxE { stroke [] 0 setdash exch hpt sub exch vpt add M
+  0 vpt2 neg V hpt2 0 V 0 vpt2 V
+  hpt2 neg 0 V closepath stroke } def
+/TriUE { stroke [] 0 setdash vpt 1.12 mul add M
+  hpt neg vpt -1.62 mul V
+  hpt 2 mul 0 V
+  hpt neg vpt 1.62 mul V closepath stroke } def
+/TriDE { stroke [] 0 setdash vpt 1.12 mul sub M
+  hpt neg vpt 1.62 mul V
+  hpt 2 mul 0 V
+  hpt neg vpt -1.62 mul V closepath stroke } def
+/PentE { stroke [] 0 setdash gsave
+  translate 0 hpt M 4 {72 rotate 0 hpt L} repeat
+  closepath stroke grestore } def
+/CircE { stroke [] 0 setdash 
+  hpt 0 360 arc stroke } def
+/Opaque { gsave closepath 1 setgray fill grestore 0 setgray closepath } def
+/DiaW { stroke [] 0 setdash vpt add M
+  hpt neg vpt neg V hpt vpt neg V
+  hpt vpt V hpt neg vpt V Opaque stroke } def
+/BoxW { stroke [] 0 setdash exch hpt sub exch vpt add M
+  0 vpt2 neg V hpt2 0 V 0 vpt2 V
+  hpt2 neg 0 V Opaque stroke } def
+/TriUW { stroke [] 0 setdash vpt 1.12 mul add M
+  hpt neg vpt -1.62 mul V
+  hpt 2 mul 0 V
+  hpt neg vpt 1.62 mul V Opaque stroke } def
+/TriDW { stroke [] 0 setdash vpt 1.12 mul sub M
+  hpt neg vpt 1.62 mul V
+  hpt 2 mul 0 V
+  hpt neg vpt -1.62 mul V Opaque stroke } def
+/PentW { stroke [] 0 setdash gsave
+  translate 0 hpt M 4 {72 rotate 0 hpt L} repeat
+  Opaque stroke grestore } def
+/CircW { stroke [] 0 setdash 
+  hpt 0 360 arc Opaque stroke } def
+/BoxFill { gsave Rec 1 setgray fill grestore } def
+/Density {
+  /Fillden exch def
+  currentrgbcolor
+  /ColB exch def /ColG exch def /ColR exch def
+  /ColR ColR Fillden mul Fillden sub 1 add def
+  /ColG ColG Fillden mul Fillden sub 1 add def
+  /ColB ColB Fillden mul Fillden sub 1 add def
+  ColR ColG ColB setrgbcolor } def
+/BoxColFill { gsave Rec PolyFill } def
+/PolyFill {gsave Density  fill grestore grestore} def
+/h {rlineto rlineto rlineto gsave fill grestore} bind def
+%
+% PostScript Level 1 Pattern Fill routine for rectangles
+% Usage: x y w h s a XX PatternFill
+%	x,y = lower left corner of box to be filled
+%	w,h = width and height of box
+%	  a = angle in degrees between lines and x-axis
+%	 XX = 0/1 for no/yes cross-hatch
+%
+/PatternFill { gsave /PFa [ 9 2 roll ] def
+    PFa 0 get PFa 2 get 2 div add PFa 1 get PFa 3 get 2 div add translate
+    PFa 2 get -2 div PFa 3 get -2 div PFa 2 get PFa 3 get Rec
+    gsave 1 setgray fill grestore clip
+    currentlinewidth 0.5 mul setlinewidth
+    /PFs PFa 2 get dup mul PFa 3 get dup mul add sqrt def
+    0 0 M PFa 5 get rotate PFs -2 div dup translate
+	0 1 PFs PFa 4 get div 1 add floor cvi
+	{ PFa 4 get mul 0 M 0 PFs V } for
+    0 PFa 6 get ne {
+	0 1 PFs PFa 4 get div 1 add floor cvi
+	{ PFa 4 get mul 0 2 1 roll M PFs 0 V } for
+    } if
+    stroke grestore } def
+%
+/languagelevel where
+   {pop languagelevel} {1} ifelse
+   2 lt
+      {/InterpretLevel1 true def}
+      {/InterpretLevel1 Level1 def}
+   ifelse
+%
+% PostScript level 2 pattern fill definitions
+% Ethan A Merritt April 2004
+%
+/Level2PatternFill {
+/Tile8x8 {/PaintType 2 /PatternType 1 /TilingType 1 /BBox [0 0 8 8] /XStep 8 /YStep 8}
+          bind def
+/KeepColor {currentrgbcolor [/Pattern /DeviceRGB] setcolorspace} bind def
+<< Tile8x8
+ /PaintProc { 0.5 setlinewidth  pop 0 0 M 8 8 L 0 8 M 8 0 L stroke } 
+>> matrix makepattern
+/Pat1 exch def
+<< Tile8x8
+ /PaintProc { 0.5 setlinewidth  pop 0 0 M 8 8 L 0 8 M 8 0 L stroke
+              0 4 M 4 8 L 8 4 L 4 0 L 0 4 L stroke }
+>> matrix makepattern
+/Pat2 exch def
+<< Tile8x8
+ /PaintProc { 0.5 setlinewidth  pop 0 0 M 0 8 L
+              8 8 L 8 0 L 0 0 L fill }
+>> matrix makepattern
+/Pat3 exch def
+<< Tile8x8
+ /PaintProc { 0.5 setlinewidth  pop -4 8 M 8 -4 L
+              0 12 M 12 0 L stroke }
+>> matrix makepattern
+/Pat4 exch def
+<< Tile8x8
+ /PaintProc { 0.5 setlinewidth  pop -4 0 M 8 12 L
+              0 -4 M 12 8 L stroke }
+>> matrix makepattern
+/Pat5 exch def
+<< Tile8x8
+ /PaintProc { 0.5 setlinewidth  pop -2 8 M 4 -4 L
+              0 12 M 8 -4 L 4 12 M 10 0 L stroke }
+>> matrix makepattern
+/Pat6 exch def
+<< Tile8x8
+ /PaintProc { 0.5 setlinewidth  pop -2 0 M 4 12 L
+              0 -4 M 8 12 L 4 -4 M 10 8 L stroke }
+>> matrix makepattern
+/Pat7 exch def
+<< Tile8x8
+ /PaintProc { 0.5 setlinewidth  pop 8 -2 M -4 4 L
+              12 0 M -4 8 L 12 4 M 0 10 L stroke }
+>> matrix makepattern
+/Pat8 exch def
+<< Tile8x8
+ /PaintProc { 0.5 setlinewidth  pop 0 -2 M 12 4 L
+              -4 0 M 12 8 L -4 4 M 8 10 L stroke }
+>> matrix makepattern
+/Pat9 exch def
+/Pattern1 {KeepColor Pat1 setpattern} bind def
+/Pattern2 {KeepColor Pat2 setpattern} bind def
+/Pattern3 {KeepColor Pat3 setpattern} bind def
+/Pattern4 {KeepColor Landscape { Pat5 } { Pat4 } ifelse setpattern} bind def
+/Pattern5 {KeepColor Landscape { Pat4 } { Pat5 } ifelse setpattern} bind def
+/Pattern6 {KeepColor Landscape { Pat9 } { Pat6 } ifelse setpattern} bind def
+/Pattern7 {KeepColor Landscape { Pat8 } { Pat7 } ifelse setpattern} bind def
+} def
+%
+%
+%End of PostScript Level 2 code
+%
+%
+% Substitute for Level 2 pattern fill codes with
+% grayscale if Level 2 support is not selected.
+%
+/Level1PatternFill {
+/Pattern1 {0.250 Density} bind def
+/Pattern2 {0.500 Density} bind def
+/Pattern3 {0.750 Density} bind def
+/Pattern4 {0.125 Density} bind def
+/Pattern5 {0.375 Density} bind def
+/Pattern6 {0.625 Density} bind def
+/Pattern7 {0.875 Density} bind def
+} def
+%
+% Now test for support of Level 2 code
+%
+Level1 {Level1PatternFill} {Level2PatternFill} ifelse
+%
+/Symbol-Oblique /Symbol findfont [1 0 .167 1 0 0] makefont
+dup length dict begin {1 index /FID eq {pop pop} {def} ifelse} forall
+currentdict end definefont pop
+/Helvetica reencodeISO def
+end
+%%EndProlog
+gnudict begin
+gsave
+50 50 translate
+0.050 0.050 scale
+0 setgray
+newpath
+(Helvetica) findfont 140 scalefont setfont
+1.000 UL
+LTb
+1.000 UL
+LTa
+546 1042 M
+6416 0 V
+stroke
+LTb
+546 1042 M
+63 0 V
+6353 0 R
+-63 0 V
+-6437 0 R
+Blacktext { gsave 0 setgray } if
+( 0) Rshow
+Blacktext { grestore } if
+1.000 UL
+LTb
+1.000 UL
+LTa
+546 1500 M
+6416 0 V
+stroke
+LTb
+546 1500 M
+63 0 V
+6353 0 R
+-63 0 V
+-6437 0 R
+Blacktext { gsave 0 setgray } if
+( 1) Rshow
+Blacktext { grestore } if
+1.000 UL
+LTb
+1.000 UL
+LTa
+546 1959 M
+6416 0 V
+stroke
+LTb
+546 1959 M
+63 0 V
+6353 0 R
+-63 0 V
+-6437 0 R
+Blacktext { gsave 0 setgray } if
+( 2) Rshow
+Blacktext { grestore } if
+1.000 UL
+LTb
+1.000 UL
+LTa
+546 2417 M
+6416 0 V
+stroke
+LTb
+546 2417 M
+63 0 V
+6353 0 R
+-63 0 V
+-6437 0 R
+Blacktext { gsave 0 setgray } if
+( 3) Rshow
+Blacktext { grestore } if
+1.000 UL
+LTb
+1.000 UL
+LTa
+546 2875 M
+6416 0 V
+stroke
+LTb
+546 2875 M
+63 0 V
+6353 0 R
+-63 0 V
+-6437 0 R
+Blacktext { gsave 0 setgray } if
+( 4) Rshow
+Blacktext { grestore } if
+1.000 UL
+LTb
+1.000 UL
+LTa
+546 3333 M
+6416 0 V
+stroke
+LTb
+546 3333 M
+63 0 V
+6353 0 R
+-63 0 V
+-6437 0 R
+Blacktext { gsave 0 setgray } if
+( 5) Rshow
+Blacktext { grestore } if
+1.000 UL
+LTb
+1.000 UL
+LTa
+546 3792 M
+6416 0 V
+stroke
+LTb
+546 3792 M
+63 0 V
+6353 0 R
+-63 0 V
+-6437 0 R
+Blacktext { gsave 0 setgray } if
+( 6) Rshow
+Blacktext { grestore } if
+1.000 UL
+LTb
+1.000 UL
+LTa
+546 4250 M
+6416 0 V
+stroke
+LTb
+546 4250 M
+63 0 V
+6353 0 R
+-63 0 V
+-6437 0 R
+Blacktext { gsave 0 setgray } if
+( 7) Rshow
+Blacktext { grestore } if
+1.000 UL
+LTb
+1.000 UL
+LTa
+546 1042 M
+0 3208 V
+stroke
+LTb
+546 1042 M
+0 63 V
+0 3145 R
+0 -63 V
+546 902 M
+Blacktext { gsave 0 setgray } if
+( 0) Cshow
+Blacktext { grestore } if
+1.000 UL
+LTb
+1.000 UL
+LTa
+1450 1042 M
+0 3208 V
+stroke
+LTb
+1450 1042 M
+0 63 V
+0 3145 R
+0 -63 V
+0 -3285 R
+Blacktext { gsave 0 setgray } if
+( 10000) Cshow
+Blacktext { grestore } if
+1.000 UL
+LTb
+1.000 UL
+LTa
+2354 1042 M
+0 3208 V
+stroke
+LTb
+2354 1042 M
+0 63 V
+0 3145 R
+0 -63 V
+0 -3285 R
+Blacktext { gsave 0 setgray } if
+( 20000) Cshow
+Blacktext { grestore } if
+1.000 UL
+LTb
+1.000 UL
+LTa
+3257 1042 M
+0 3208 V
+stroke
+LTb
+3257 1042 M
+0 63 V
+0 3145 R
+0 -63 V
+0 -3285 R
+Blacktext { gsave 0 setgray } if
+( 30000) Cshow
+Blacktext { grestore } if
+1.000 UL
+LTb
+1.000 UL
+LTa
+4161 1042 M
+0 3208 V
+stroke
+LTb
+4161 1042 M
+0 63 V
+0 3145 R
+0 -63 V
+0 -3285 R
+Blacktext { gsave 0 setgray } if
+( 40000) Cshow
+Blacktext { grestore } if
+1.000 UL
+LTb
+1.000 UL
+LTa
+5065 1042 M
+0 3208 V
+stroke
+LTb
+5065 1042 M
+0 63 V
+0 3145 R
+0 -63 V
+0 -3285 R
+Blacktext { gsave 0 setgray } if
+( 50000) Cshow
+Blacktext { grestore } if
+1.000 UL
+LTb
+1.000 UL
+LTa
+5969 1042 M
+0 3208 V
+stroke
+LTb
+5969 1042 M
+0 63 V
+0 3145 R
+0 -63 V
+0 -3285 R
+Blacktext { gsave 0 setgray } if
+( 60000) Cshow
+Blacktext { grestore } if
+1.000 UL
+LTb
+1.000 UL
+LTa
+6872 1042 M
+0 3145 V
+0 63 V
+stroke
+LTb
+6872 1042 M
+0 63 V
+0 3145 R
+0 -63 V
+0 -3285 R
+Blacktext { gsave 0 setgray } if
+( 70000) Cshow
+Blacktext { grestore } if
+1.000 UL
+LTb
+1.000 UL
+LTb
+546 1042 M
+6416 0 V
+0 3208 V
+-6416 0 V
+0 -3208 V
+stroke
+LCb setrgbcolor
+140 2646 M
+Blacktext { gsave 0 setgray } if
+currentpoint gsave translate 90 rotate 0 0 M
+(Interrupt) Cshow
+grestore
+Blacktext { grestore } if
+LTb
+LCb setrgbcolor
+3754 692 M
+Blacktext { gsave 0 setgray } if
+(time \(ms\)) Cshow
+Blacktext { grestore } if
+LTb
+1.000 UP
+1.000 UL
+LTb
+0.000 UP
+10.000 UL
+LT0
+546 1042 M
+546 1042 Pnt
+546 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+546 1042 M
+546 1042 Pnt
+546 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+546 2875 M
+546 2875 Pnt
+546 2875 Pnt
+0.000 UP
+10.000 UL
+LT0
+546 1042 M
+18 0 V
+546 1042 Pnt
+564 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+564 3792 M
+564 3792 Pnt
+564 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+564 1042 M
+18 0 V
+564 1042 Pnt
+582 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+582 3792 M
+582 3792 Pnt
+582 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+582 1042 M
+18 0 V
+582 1042 Pnt
+600 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+600 3792 M
+600 3792 Pnt
+600 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+600 1042 M
+18 0 V
+600 1042 Pnt
+618 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+618 3792 M
+618 3792 Pnt
+618 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+618 1042 M
+18 0 V
+618 1042 Pnt
+636 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+636 3792 M
+636 3792 Pnt
+636 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+636 1042 M
+18 0 V
+636 1042 Pnt
+654 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+654 3792 M
+654 3792 Pnt
+654 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+654 1042 M
+19 0 V
+654 1042 Pnt
+673 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+673 3792 M
+673 3792 Pnt
+673 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+673 1042 M
+18 0 V
+673 1042 Pnt
+691 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+691 3792 M
+691 3792 Pnt
+691 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+691 1042 M
+18 0 V
+691 1042 Pnt
+709 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+709 3792 M
+709 3792 Pnt
+709 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+709 1042 M
+14 0 V
+709 1042 Pnt
+723 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+723 2875 M
+723 2875 Pnt
+723 2875 Pnt
+0.000 UP
+10.000 UL
+LT0
+723 1042 M
+723 1042 Pnt
+723 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+723 2875 M
+723 2875 Pnt
+723 2875 Pnt
+0.000 UP
+10.000 UL
+LT0
+723 1042 M
+4 0 V
+723 1042 Pnt
+727 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+727 3792 M
+727 3792 Pnt
+727 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+727 1042 M
+18 0 V
+727 1042 Pnt
+745 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+745 3792 M
+745 3792 Pnt
+745 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+745 1042 M
+18 0 V
+745 1042 Pnt
+763 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+763 3792 M
+763 3792 Pnt
+763 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+763 1042 M
+18 0 V
+763 1042 Pnt
+781 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+781 3792 M
+781 3792 Pnt
+781 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+781 1042 M
+18 0 V
+781 1042 Pnt
+799 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+799 3792 M
+799 3792 Pnt
+799 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+799 1042 M
+15 0 V
+799 1042 Pnt
+814 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+814 2875 M
+814 2875 Pnt
+814 2875 Pnt
+0.000 UP
+10.000 UL
+LT0
+814 1042 M
+3 0 V
+814 1042 Pnt
+817 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+817 3792 M
+817 3792 Pnt
+817 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+817 1042 M
+18 0 V
+817 1042 Pnt
+835 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+835 3792 M
+835 3792 Pnt
+835 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+835 1042 M
+18 0 V
+835 1042 Pnt
+853 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+853 3792 M
+853 3792 Pnt
+853 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+853 1042 M
+18 0 V
+853 1042 Pnt
+871 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+871 3792 M
+871 3792 Pnt
+871 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+871 1042 M
+18 0 V
+871 1042 Pnt
+889 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+889 3792 M
+889 3792 Pnt
+889 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+889 1042 M
+15 0 V
+889 1042 Pnt
+904 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+904 2875 M
+904 2875 Pnt
+904 2875 Pnt
+0.000 UP
+10.000 UL
+LT0
+904 1042 M
+3 0 V
+904 1042 Pnt
+907 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+907 3792 M
+907 3792 Pnt
+907 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+907 1042 M
+18 0 V
+907 1042 Pnt
+925 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+925 3792 M
+925 3792 Pnt
+925 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+925 1042 M
+19 0 V
+925 1042 Pnt
+944 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+944 3792 M
+944 3792 Pnt
+944 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+944 1042 M
+18 0 V
+944 1042 Pnt
+962 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+962 3792 M
+962 3792 Pnt
+962 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+962 1042 M
+18 0 V
+962 1042 Pnt
+980 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+980 3792 M
+980 3792 Pnt
+980 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+980 1042 M
+18 0 V
+980 1042 Pnt
+998 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+998 3792 M
+998 3792 Pnt
+998 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+998 1042 M
+18 0 V
+998 1042 Pnt
+1016 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1016 3792 M
+1016 3792 Pnt
+1016 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+1016 1042 M
+18 0 V
+1016 1042 Pnt
+1034 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1034 3792 M
+1034 3792 Pnt
+1034 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+1034 1042 M
+2 0 V
+1034 1042 Pnt
+1036 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1036 2875 M
+1036 2875 Pnt
+1036 2875 Pnt
+0.000 UP
+10.000 UL
+LT0
+1036 1042 M
+16 0 V
+1036 1042 Pnt
+1052 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1052 3792 M
+1052 3792 Pnt
+1052 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+1052 1042 M
+18 0 V
+1052 1042 Pnt
+1070 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1070 3792 M
+1070 3792 Pnt
+1070 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+1070 1042 M
+18 0 V
+1070 1042 Pnt
+1088 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1088 3792 M
+1088 3792 Pnt
+1088 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+1088 1042 M
+18 0 V
+1088 1042 Pnt
+1106 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1106 3792 M
+1106 3792 Pnt
+1106 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+1106 1042 M
+18 0 V
+1106 1042 Pnt
+1124 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1124 3792 M
+1124 3792 Pnt
+1124 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+1124 1042 M
+3 0 V
+1124 1042 Pnt
+1127 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1127 2875 M
+1127 2875 Pnt
+1127 2875 Pnt
+0.000 UP
+10.000 UL
+LT0
+1127 1042 M
+15 0 V
+1127 1042 Pnt
+1142 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1142 3792 M
+1142 3792 Pnt
+1142 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+1142 1042 M
+3 0 V
+1142 1042 Pnt
+1145 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1145 2875 M
+1145 2875 Pnt
+1145 2875 Pnt
+0.000 UP
+10.000 UL
+LT0
+1145 1042 M
+1 0 V
+1145 1042 Pnt
+1146 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1146 2875 M
+1146 2875 Pnt
+1146 2875 Pnt
+0.000 UP
+10.000 UL
+LT0
+1146 1042 M
+1146 1042 Pnt
+1146 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1146 2875 M
+1146 2875 Pnt
+1146 2875 Pnt
+0.000 UP
+10.000 UL
+LT0
+1146 1042 M
+6 0 V
+1146 1042 Pnt
+1152 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1152 2875 M
+1152 2875 Pnt
+1152 2875 Pnt
+0.000 UP
+10.000 UL
+LT0
+1152 1042 M
+8 0 V
+1152 1042 Pnt
+1160 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1160 3792 M
+1160 3792 Pnt
+1160 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+1160 1042 M
+19 0 V
+1160 1042 Pnt
+1179 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1179 3792 M
+1179 3792 Pnt
+1179 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+1179 1042 M
+18 0 V
+1179 1042 Pnt
+1197 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1197 3792 M
+1197 3792 Pnt
+1197 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+1197 1042 M
+18 0 V
+1197 1042 Pnt
+1215 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1215 3792 M
+1215 3792 Pnt
+1215 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+1215 1042 M
+18 0 V
+1215 1042 Pnt
+1233 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1233 3792 M
+1233 3792 Pnt
+1233 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+1233 1042 M
+2 0 V
+1233 1042 Pnt
+1235 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1235 2417 M
+1235 2417 Pnt
+1235 2417 Pnt
+0.000 UP
+10.000 UL
+LT0
+1235 1042 M
+1235 1042 Pnt
+1235 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1235 2417 M
+1235 2417 Pnt
+1235 2417 Pnt
+0.000 UP
+10.000 UL
+LT0
+1235 1042 M
+1235 1042 Pnt
+1235 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1235 2417 M
+1235 2417 Pnt
+1235 2417 Pnt
+0.000 UP
+10.000 UL
+LT0
+1235 1042 M
+1235 1042 Pnt
+1235 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1235 2417 M
+1235 2417 Pnt
+1235 2417 Pnt
+0.000 UP
+10.000 UL
+LT0
+1235 1042 M
+1235 1042 Pnt
+1235 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1235 2417 M
+1235 2417 Pnt
+1235 2417 Pnt
+0.000 UP
+10.000 UL
+LT0
+1235 1042 M
+16 0 V
+1235 1042 Pnt
+1251 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1251 3792 M
+1251 3792 Pnt
+1251 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+1251 1042 M
+10 0 V
+1251 1042 Pnt
+1261 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1261 2417 M
+1261 2417 Pnt
+1261 2417 Pnt
+0.000 UP
+10.000 UL
+LT0
+1261 1042 M
+8 0 V
+1261 1042 Pnt
+1269 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1269 3792 M
+1269 3792 Pnt
+1269 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+1269 1042 M
+10 0 V
+1269 1042 Pnt
+1279 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1279 2417 M
+1279 2417 Pnt
+1279 2417 Pnt
+0.000 UP
+10.000 UL
+LT0
+1279 1042 M
+1 0 V
+1279 1042 Pnt
+1280 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1280 2417 M
+1280 2417 Pnt
+1280 2417 Pnt
+0.000 UP
+10.000 UL
+LT0
+1280 1042 M
+3 0 V
+1280 1042 Pnt
+1283 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1283 2417 M
+1283 2417 Pnt
+1283 2417 Pnt
+0.000 UP
+10.000 UL
+LT0
+1283 1042 M
+1283 1042 Pnt
+1283 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1283 2417 M
+1283 2417 Pnt
+1283 2417 Pnt
+0.000 UP
+10.000 UL
+LT0
+1283 1042 M
+1283 1042 Pnt
+1283 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1283 2417 M
+1283 2417 Pnt
+1283 2417 Pnt
+0.000 UP
+10.000 UL
+LT0
+1283 1042 M
+4 0 V
+1283 1042 Pnt
+1287 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1287 3792 M
+1287 3792 Pnt
+1287 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+1287 1042 M
+18 0 V
+1287 1042 Pnt
+1305 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1305 3792 M
+1305 3792 Pnt
+1305 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+1305 1042 M
+3 0 V
+1305 1042 Pnt
+1308 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1308 2417 M
+1308 2417 Pnt
+1308 2417 Pnt
+0.000 UP
+10.000 UL
+LT0
+1308 1042 M
+1308 1042 Pnt
+1308 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1308 2417 M
+1308 2417 Pnt
+1308 2417 Pnt
+0.000 UP
+10.000 UL
+LT0
+1308 1042 M
+1308 1042 Pnt
+1308 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1308 2417 M
+1308 2417 Pnt
+1308 2417 Pnt
+0.000 UP
+10.000 UL
+LT0
+1308 1042 M
+11 0 V
+1308 1042 Pnt
+1319 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1319 2417 M
+1319 2417 Pnt
+1319 2417 Pnt
+0.000 UP
+10.000 UL
+LT0
+1319 1042 M
+1319 1042 Pnt
+1319 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1319 2417 M
+1319 2417 Pnt
+1319 2417 Pnt
+0.000 UP
+10.000 UL
+LT0
+1319 1042 M
+1319 1042 Pnt
+1319 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1319 2417 M
+1319 2417 Pnt
+1319 2417 Pnt
+0.000 UP
+10.000 UL
+LT0
+1319 1042 M
+1319 1042 Pnt
+1319 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1319 2417 M
+1 0 V
+1319 2417 Pnt
+1320 2417 Pnt
+0.000 UP
+10.000 UL
+LT0
+1320 1042 M
+1320 1042 Pnt
+1320 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1320 2417 M
+1320 2417 Pnt
+1320 2417 Pnt
+0.000 UP
+10.000 UL
+LT0
+1320 1042 M
+1320 1042 Pnt
+1320 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1320 2417 M
+1320 2417 Pnt
+1320 2417 Pnt
+0.000 UP
+10.000 UL
+LT0
+1320 1042 M
+1320 1042 Pnt
+1320 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1320 2417 M
+1320 2417 Pnt
+1320 2417 Pnt
+0.000 UP
+10.000 UL
+LT0
+1320 1042 M
+1320 1042 Pnt
+1320 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1320 2417 M
+1320 2417 Pnt
+1320 2417 Pnt
+0.000 UP
+10.000 UL
+LT0
+1320 1042 M
+1320 1042 Pnt
+1320 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1320 2417 M
+1 0 V
+1320 2417 Pnt
+1321 2417 Pnt
+0.000 UP
+10.000 UL
+LT0
+1321 1042 M
+1321 1042 Pnt
+1321 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1321 2417 M
+1321 2417 Pnt
+1321 2417 Pnt
+0.000 UP
+10.000 UL
+LT0
+1321 1042 M
+2 0 V
+1321 1042 Pnt
+1323 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1323 3792 M
+1323 3792 Pnt
+1323 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+1323 1042 M
+18 0 V
+1323 1042 Pnt
+1341 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1341 3792 M
+1341 3792 Pnt
+1341 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+1341 1042 M
+18 0 V
+1341 1042 Pnt
+1359 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1359 3792 M
+1359 3792 Pnt
+1359 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+1359 1042 M
+18 0 V
+1359 1042 Pnt
+1377 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1377 3792 M
+1377 3792 Pnt
+1377 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+1377 1042 M
+18 0 V
+1377 1042 Pnt
+1395 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1395 3792 M
+1395 3792 Pnt
+1395 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+1395 1042 M
+19 0 V
+1395 1042 Pnt
+1414 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1414 3792 M
+1414 3792 Pnt
+1414 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+1414 1042 M
+18 0 V
+1414 1042 Pnt
+1432 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1432 3792 M
+1432 3792 Pnt
+1432 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+1432 1042 M
+18 0 V
+1432 1042 Pnt
+1450 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1450 3792 M
+1450 3792 Pnt
+1450 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+1450 1042 M
+18 0 V
+1450 1042 Pnt
+1468 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1468 3792 M
+1468 3792 Pnt
+1468 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+1468 1042 M
+18 0 V
+1468 1042 Pnt
+1486 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1486 3792 M
+1486 3792 Pnt
+1486 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+1486 1042 M
+18 0 V
+1486 1042 Pnt
+1504 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1504 3792 M
+1504 3792 Pnt
+1504 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+1504 1042 M
+18 0 V
+1504 1042 Pnt
+1522 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1522 3792 M
+1522 3792 Pnt
+1522 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+1522 1042 M
+18 0 V
+1522 1042 Pnt
+1540 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1540 3792 M
+1540 3792 Pnt
+1540 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+1540 1042 M
+18 0 V
+1540 1042 Pnt
+1558 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1558 3792 M
+1558 3792 Pnt
+1558 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+1558 1042 M
+18 0 V
+1558 1042 Pnt
+1576 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1576 3792 M
+1576 3792 Pnt
+1576 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+1576 1042 M
+18 0 V
+1576 1042 Pnt
+1594 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1594 3792 M
+1594 3792 Pnt
+1594 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+1594 1042 M
+18 0 V
+1594 1042 Pnt
+1612 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1612 3792 M
+1612 3792 Pnt
+1612 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+1612 1042 M
+18 0 V
+1612 1042 Pnt
+1630 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1630 3792 M
+1630 3792 Pnt
+1630 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+1630 1042 M
+19 0 V
+1630 1042 Pnt
+1649 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1649 3792 M
+1649 3792 Pnt
+1649 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+1649 1042 M
+17 0 V
+1649 1042 Pnt
+1666 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1666 3792 M
+1 0 V
+1666 3792 Pnt
+1667 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+1667 1042 M
+1 0 V
+1667 1042 Pnt
+1668 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1668 2417 M
+1668 2417 Pnt
+1668 2417 Pnt
+0.000 UP
+10.000 UL
+LT0
+1668 1042 M
+1668 1042 Pnt
+1668 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1668 2417 M
+1668 2417 Pnt
+1668 2417 Pnt
+0.000 UP
+10.000 UL
+LT0
+1668 1042 M
+1668 1042 Pnt
+1668 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1668 2417 M
+1668 2417 Pnt
+1668 2417 Pnt
+0.000 UP
+10.000 UL
+LT0
+1668 1042 M
+1668 1042 Pnt
+1668 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1668 2417 M
+1 0 V
+1668 2417 Pnt
+1669 2417 Pnt
+0.000 UP
+10.000 UL
+LT0
+1669 1042 M
+16 0 V
+1669 1042 Pnt
+1685 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1685 3792 M
+1685 3792 Pnt
+1685 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+1685 1042 M
+18 0 V
+1685 1042 Pnt
+1703 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1703 3792 M
+1703 3792 Pnt
+1703 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+1703 1042 M
+18 0 V
+1703 1042 Pnt
+1721 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1721 3792 M
+1721 3792 Pnt
+1721 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+1721 1042 M
+18 0 V
+1721 1042 Pnt
+1739 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1739 3792 M
+1739 3792 Pnt
+1739 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+1739 1042 M
+18 0 V
+1739 1042 Pnt
+1757 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1757 3792 M
+1757 3792 Pnt
+1757 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+1757 1042 M
+18 0 V
+1757 1042 Pnt
+1775 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1775 3792 M
+1775 3792 Pnt
+1775 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+1775 1042 M
+18 0 V
+1775 1042 Pnt
+1793 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1793 3792 M
+1793 3792 Pnt
+1793 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+1793 1042 M
+13 0 V
+1793 1042 Pnt
+1806 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1806 2875 M
+1806 2875 Pnt
+1806 2875 Pnt
+0.000 UP
+10.000 UL
+LT0
+1806 1042 M
+1806 1042 Pnt
+1806 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1806 2875 M
+1806 2875 Pnt
+1806 2875 Pnt
+0.000 UP
+10.000 UL
+LT0
+1806 1042 M
+1806 1042 Pnt
+1806 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1806 2875 M
+1806 2875 Pnt
+1806 2875 Pnt
+0.000 UP
+10.000 UL
+LT0
+1806 1042 M
+1806 1042 Pnt
+1806 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1806 2875 M
+1806 2875 Pnt
+1806 2875 Pnt
+0.000 UP
+10.000 UL
+LT0
+1806 1042 M
+1806 1042 Pnt
+1806 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1806 2875 M
+1806 2875 Pnt
+1806 2875 Pnt
+0.000 UP
+10.000 UL
+LT0
+1806 1042 M
+1806 1042 Pnt
+1806 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1806 2875 M
+1806 2875 Pnt
+1806 2875 Pnt
+0.000 UP
+10.000 UL
+LT0
+1806 1042 M
+5 0 V
+1806 1042 Pnt
+1811 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1811 3792 M
+1811 3792 Pnt
+1811 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+1811 1042 M
+18 0 V
+1811 1042 Pnt
+1829 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1829 3792 M
+1829 3792 Pnt
+1829 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+1829 1042 M
+1829 1042 Pnt
+1829 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1829 2875 M
+1829 2875 Pnt
+1829 2875 Pnt
+0.000 UP
+10.000 UL
+LT0
+1829 1042 M
+1829 1042 Pnt
+1829 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1829 2875 M
+1829 2875 Pnt
+1829 2875 Pnt
+0.000 UP
+10.000 UL
+LT0
+1829 1042 M
+4 0 V
+1829 1042 Pnt
+1833 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1833 2875 M
+1833 2875 Pnt
+1833 2875 Pnt
+0.000 UP
+10.000 UL
+LT0
+1833 1042 M
+14 0 V
+1833 1042 Pnt
+1847 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1847 3792 M
+1847 3792 Pnt
+1847 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+1847 1042 M
+8 0 V
+1847 1042 Pnt
+1855 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1855 2875 M
+1855 2875 Pnt
+1855 2875 Pnt
+0.000 UP
+10.000 UL
+LT0
+1855 1042 M
+1855 1042 Pnt
+1855 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1855 2875 M
+1855 2875 Pnt
+1855 2875 Pnt
+0.000 UP
+10.000 UL
+LT0
+1855 1042 M
+10 0 V
+1855 1042 Pnt
+1865 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1865 3792 M
+1865 3792 Pnt
+1865 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+1865 1042 M
+3 0 V
+1865 1042 Pnt
+1868 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1868 2875 M
+1868 2875 Pnt
+1868 2875 Pnt
+0.000 UP
+10.000 UL
+LT0
+1868 1042 M
+1868 1042 Pnt
+1868 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1868 2875 M
+1868 2875 Pnt
+1868 2875 Pnt
+0.000 UP
+10.000 UL
+LT0
+1868 1042 M
+3 0 V
+1868 1042 Pnt
+1871 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1871 2875 M
+1871 2875 Pnt
+1871 2875 Pnt
+0.000 UP
+10.000 UL
+LT0
+1871 1042 M
+5 0 V
+1871 1042 Pnt
+1876 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1876 2875 M
+1876 2875 Pnt
+1876 2875 Pnt
+0.000 UP
+10.000 UL
+LT0
+1876 1042 M
+7 0 V
+1876 1042 Pnt
+1883 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1883 3792 M
+1883 3792 Pnt
+1883 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+1883 1042 M
+9 0 V
+1883 1042 Pnt
+1892 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1892 2875 M
+1892 2875 Pnt
+1892 2875 Pnt
+0.000 UP
+10.000 UL
+LT0
+1892 1042 M
+2 0 V
+1892 1042 Pnt
+1894 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1894 2875 M
+1894 2875 Pnt
+1894 2875 Pnt
+0.000 UP
+10.000 UL
+LT0
+1894 1042 M
+7 0 V
+1894 1042 Pnt
+1901 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1901 3792 M
+1901 3792 Pnt
+1901 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+1901 1042 M
+19 0 V
+1901 1042 Pnt
+1920 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1920 3792 M
+1920 3792 Pnt
+1920 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+1920 1042 M
+15 0 V
+1920 1042 Pnt
+1935 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1935 2875 M
+1935 2875 Pnt
+1935 2875 Pnt
+0.000 UP
+10.000 UL
+LT0
+1935 1042 M
+1935 1042 Pnt
+1935 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1935 2875 M
+1935 2875 Pnt
+1935 2875 Pnt
+0.000 UP
+10.000 UL
+LT0
+1935 1042 M
+1935 1042 Pnt
+1935 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1935 2875 M
+1935 2875 Pnt
+1935 2875 Pnt
+0.000 UP
+10.000 UL
+LT0
+1935 1042 M
+3 0 V
+1935 1042 Pnt
+1938 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1938 3792 M
+1938 3792 Pnt
+1938 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+1938 1042 M
+4 0 V
+1938 1042 Pnt
+1942 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1942 2875 M
+1942 2875 Pnt
+1942 2875 Pnt
+0.000 UP
+10.000 UL
+LT0
+1942 1042 M
+14 0 V
+1942 1042 Pnt
+1956 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1956 3792 M
+1956 3792 Pnt
+1956 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+1956 1042 M
+18 0 V
+1956 1042 Pnt
+1974 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1974 3792 M
+1974 3792 Pnt
+1974 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+1974 1042 M
+18 0 V
+1974 1042 Pnt
+1992 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+1992 3792 M
+1992 3792 Pnt
+1992 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+1992 1042 M
+18 0 V
+1992 1042 Pnt
+2010 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+2010 3792 M
+2010 3792 Pnt
+2010 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+2010 1042 M
+18 0 V
+2010 1042 Pnt
+2028 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+2028 3792 M
+2028 3792 Pnt
+2028 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+2028 1042 M
+18 0 V
+2028 1042 Pnt
+2046 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+2046 3792 M
+2046 3792 Pnt
+2046 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+2046 1042 M
+18 0 V
+2046 1042 Pnt
+2064 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+2064 3792 M
+2064 3792 Pnt
+2064 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+2064 1042 M
+18 0 V
+2064 1042 Pnt
+2082 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+2082 3792 M
+2082 3792 Pnt
+2082 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+2082 1042 M
+18 0 V
+2082 1042 Pnt
+2100 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+2100 3792 M
+2100 3792 Pnt
+2100 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+2100 1042 M
+15 0 V
+2100 1042 Pnt
+2115 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+2115 2875 M
+2115 2875 Pnt
+2115 2875 Pnt
+0.000 UP
+10.000 UL
+LT0
+2115 1042 M
+2115 1042 Pnt
+2115 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+2115 2875 M
+1 0 V
+2115 2875 Pnt
+2116 2875 Pnt
+0.000 UP
+10.000 UL
+LT0
+2116 1042 M
+2 0 V
+2116 1042 Pnt
+2118 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+2118 3792 M
+2118 3792 Pnt
+2118 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+2118 1042 M
+3 0 V
+2118 1042 Pnt
+2121 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+2121 2875 M
+2121 2875 Pnt
+2121 2875 Pnt
+0.000 UP
+10.000 UL
+LT0
+2121 1042 M
+8 0 V
+2121 1042 Pnt
+2129 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+2129 2875 M
+2129 2875 Pnt
+2129 2875 Pnt
+0.000 UP
+10.000 UL
+LT0
+2129 1042 M
+7 0 V
+2129 1042 Pnt
+2136 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+2136 3792 M
+2136 3792 Pnt
+2136 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+2136 1042 M
+1 0 V
+2136 1042 Pnt
+2137 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+2137 2875 M
+2137 2875 Pnt
+2137 2875 Pnt
+0.000 UP
+10.000 UL
+LT0
+2137 1042 M
+14 0 V
+2137 1042 Pnt
+2151 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+2151 2875 M
+2151 2875 Pnt
+2151 2875 Pnt
+0.000 UP
+10.000 UL
+LT0
+2151 1042 M
+3 0 V
+2151 1042 Pnt
+2154 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+2154 2875 M
+2154 2875 Pnt
+2154 2875 Pnt
+0.000 UP
+10.000 UL
+LT0
+2154 1042 M
+1 0 V
+2154 1042 Pnt
+2155 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+2155 3792 M
+2155 3792 Pnt
+2155 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+2155 1042 M
+2155 1042 Pnt
+2155 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+2155 2875 M
+2155 2875 Pnt
+2155 2875 Pnt
+0.000 UP
+10.000 UL
+LT0
+2155 1042 M
+8 0 V
+2155 1042 Pnt
+2163 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+2163 2875 M
+2163 2875 Pnt
+2163 2875 Pnt
+0.000 UP
+10.000 UL
+LT0
+2163 1042 M
+3 0 V
+2163 1042 Pnt
+2166 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+2166 2875 M
+2166 2875 Pnt
+2166 2875 Pnt
+0.000 UP
+10.000 UL
+LT0
+2166 1042 M
+7 0 V
+2166 1042 Pnt
+2173 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+2173 3792 M
+2173 3792 Pnt
+2173 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+2173 1042 M
+2173 1042 Pnt
+2173 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+2173 2875 M
+2173 2875 Pnt
+2173 2875 Pnt
+0.000 UP
+10.000 UL
+LT0
+2173 1042 M
+2173 1042 Pnt
+2173 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+2173 2875 M
+2173 2875 Pnt
+2173 2875 Pnt
+0.000 UP
+10.000 UL
+LT0
+2173 1042 M
+5 0 V
+2173 1042 Pnt
+2178 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+2178 2875 M
+2178 2875 Pnt
+2178 2875 Pnt
+0.000 UP
+10.000 UL
+LT0
+2178 1042 M
+5 0 V
+2178 1042 Pnt
+2183 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+2183 2875 M
+2183 2875 Pnt
+2183 2875 Pnt
+0.000 UP
+10.000 UL
+LT0
+2183 1042 M
+8 0 V
+2183 1042 Pnt
+2191 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+2191 3792 M
+2191 3792 Pnt
+2191 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+2191 1042 M
+1 0 V
+2191 1042 Pnt
+2192 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+2192 2875 M
+2192 2875 Pnt
+2192 2875 Pnt
+0.000 UP
+10.000 UL
+LT0
+2192 1042 M
+2192 1042 Pnt
+2192 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+2192 2875 M
+2192 2875 Pnt
+2192 2875 Pnt
+0.000 UP
+10.000 UL
+LT0
+2192 1042 M
+6 0 V
+2192 1042 Pnt
+2198 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+2198 2875 M
+2198 2875 Pnt
+2198 2875 Pnt
+0.000 UP
+10.000 UL
+LT0
+2198 1042 M
+5 0 V
+2198 1042 Pnt
+2203 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+2203 2875 M
+2203 2875 Pnt
+2203 2875 Pnt
+0.000 UP
+10.000 UL
+LT0
+2203 1042 M
+6 0 V
+2203 1042 Pnt
+2209 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+2209 3792 M
+2209 3792 Pnt
+2209 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+2209 1042 M
+2209 1042 Pnt
+2209 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+2209 2875 M
+2209 2875 Pnt
+2209 2875 Pnt
+0.000 UP
+10.000 UL
+LT0
+2209 1042 M
+5 0 V
+2209 1042 Pnt
+2214 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+2214 2875 M
+2214 2875 Pnt
+2214 2875 Pnt
+0.000 UP
+10.000 UL
+LT0
+2214 1042 M
+2 0 V
+2214 1042 Pnt
+2216 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+2216 2875 M
+2216 2875 Pnt
+2216 2875 Pnt
+0.000 UP
+10.000 UL
+LT0
+2216 1042 M
+9 0 V
+2216 1042 Pnt
+2225 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+2225 2875 M
+2225 2875 Pnt
+2225 2875 Pnt
+0.000 UP
+10.000 UL
+LT0
+2225 1042 M
+2 0 V
+2225 1042 Pnt
+2227 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+2227 3792 M
+2227 3792 Pnt
+2227 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+2227 1042 M
+1 0 V
+2227 1042 Pnt
+2228 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+2228 2875 M
+2228 2875 Pnt
+2228 2875 Pnt
+0.000 UP
+10.000 UL
+LT0
+2228 1042 M
+2228 1042 Pnt
+2228 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+2228 2875 M
+2228 2875 Pnt
+2228 2875 Pnt
+0.000 UP
+10.000 UL
+LT0
+2228 1042 M
+5 0 V
+2228 1042 Pnt
+2233 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+2233 2875 M
+2233 2875 Pnt
+2233 2875 Pnt
+0.000 UP
+10.000 UL
+LT0
+2233 1042 M
+5 0 V
+2233 1042 Pnt
+2238 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+2238 2875 M
+2238 2875 Pnt
+2238 2875 Pnt
+0.000 UP
+10.000 UL
+LT0
+2238 1042 M
+7 0 V
+2238 1042 Pnt
+2245 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+2245 3792 M
+2245 3792 Pnt
+2245 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+2245 1042 M
+18 0 V
+2245 1042 Pnt
+2263 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+2263 3792 M
+2263 3792 Pnt
+2263 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+2263 1042 M
+18 0 V
+2263 1042 Pnt
+2281 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+2281 3792 M
+2281 3792 Pnt
+2281 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+2281 1042 M
+18 0 V
+2281 1042 Pnt
+2299 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+2299 3792 M
+2299 3792 Pnt
+2299 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+2299 1042 M
+18 0 V
+2299 1042 Pnt
+2317 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+2317 3792 M
+2317 3792 Pnt
+2317 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+2317 1042 M
+18 0 V
+2317 1042 Pnt
+2335 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+2335 3792 M
+2335 3792 Pnt
+2335 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+2335 1042 M
+18 0 V
+2335 1042 Pnt
+2353 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+2353 3792 M
+2353 3792 Pnt
+2353 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+2353 1042 M
+18 0 V
+2353 1042 Pnt
+2371 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+2371 3792 M
+2371 3792 Pnt
+2371 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+2371 1042 M
+18 0 V
+2371 1042 Pnt
+2389 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+2389 3792 M
+2389 3792 Pnt
+2389 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+2389 1042 M
+19 0 V
+2389 1042 Pnt
+2408 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+2408 3792 M
+2408 3792 Pnt
+2408 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+2408 1042 M
+11 0 V
+2408 1042 Pnt
+2419 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+2419 2875 M
+1 0 V
+2419 2875 Pnt
+2420 2875 Pnt
+0.000 UP
+10.000 UL
+LT0
+2420 1042 M
+6 0 V
+2420 1042 Pnt
+2426 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+2426 3792 M
+2426 3792 Pnt
+2426 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+2426 1042 M
+18 0 V
+2426 1042 Pnt
+2444 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+2444 3792 M
+2444 3792 Pnt
+2444 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+2444 1042 M
+18 0 V
+2444 1042 Pnt
+2462 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+2462 3792 M
+2462 3792 Pnt
+2462 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+2462 1042 M
+18 0 V
+2462 1042 Pnt
+2480 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+2480 3792 M
+2480 3792 Pnt
+2480 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+2480 1042 M
+18 0 V
+2480 1042 Pnt
+2498 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+2498 3792 M
+2498 3792 Pnt
+2498 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+2498 1042 M
+18 0 V
+2498 1042 Pnt
+2516 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+2516 3792 M
+2516 3792 Pnt
+2516 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+2516 1042 M
+18 0 V
+2516 1042 Pnt
+2534 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+2534 3792 M
+2534 3792 Pnt
+2534 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+2534 1042 M
+18 0 V
+2534 1042 Pnt
+2552 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+2552 3792 M
+2552 3792 Pnt
+2552 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+2552 1042 M
+18 0 V
+2552 1042 Pnt
+2570 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+2570 3792 M
+2570 3792 Pnt
+2570 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+2570 1042 M
+18 0 V
+2570 1042 Pnt
+2588 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+2588 3792 M
+2588 3792 Pnt
+2588 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+2588 1042 M
+18 0 V
+2588 1042 Pnt
+2606 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+2606 3792 M
+2606 3792 Pnt
+2606 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+2606 1042 M
+18 0 V
+2606 1042 Pnt
+2624 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+2624 3792 M
+2624 3792 Pnt
+2624 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+2624 1042 M
+18 0 V
+2624 1042 Pnt
+2642 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+2642 3792 M
+2642 3792 Pnt
+2642 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+2642 1042 M
+19 0 V
+2642 1042 Pnt
+2661 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+2661 3792 M
+2661 3792 Pnt
+2661 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+2661 1042 M
+18 0 V
+2661 1042 Pnt
+2679 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+2679 3792 M
+2679 3792 Pnt
+2679 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+2679 1042 M
+18 0 V
+2679 1042 Pnt
+2697 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+2697 3792 M
+2697 3792 Pnt
+2697 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+2697 1042 M
+8 0 V
+2697 1042 Pnt
+2705 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+2705 2875 M
+2705 2875 Pnt
+2705 2875 Pnt
+0.000 UP
+10.000 UL
+LT0
+2705 1042 M
+2705 1042 Pnt
+2705 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+2705 2875 M
+2705 2875 Pnt
+2705 2875 Pnt
+0.000 UP
+10.000 UL
+LT0
+2705 1042 M
+3 0 V
+2705 1042 Pnt
+2708 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+2708 2875 M
+2708 2875 Pnt
+2708 2875 Pnt
+0.000 UP
+10.000 UL
+LT0
+2708 1042 M
+2708 1042 Pnt
+2708 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+2708 2875 M
+2708 2875 Pnt
+2708 2875 Pnt
+0.000 UP
+10.000 UL
+LT0
+2708 1042 M
+1 0 V
+2708 1042 Pnt
+2709 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+2709 2875 M
+2709 2875 Pnt
+2709 2875 Pnt
+0.000 UP
+10.000 UL
+LT0
+2709 1042 M
+6 0 V
+2709 1042 Pnt
+2715 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+2715 3792 M
+2715 3792 Pnt
+2715 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+2715 1042 M
+18 0 V
+2715 1042 Pnt
+2733 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+2733 3792 M
+2733 3792 Pnt
+2733 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+2733 1042 M
+18 0 V
+2733 1042 Pnt
+2751 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+2751 3792 M
+2751 3792 Pnt
+2751 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+2751 1042 M
+18 0 V
+2751 1042 Pnt
+2769 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+2769 3792 M
+2769 3792 Pnt
+2769 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+2769 1042 M
+18 0 V
+2769 1042 Pnt
+2787 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+2787 3792 M
+2787 3792 Pnt
+2787 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+2787 1042 M
+18 0 V
+2787 1042 Pnt
+2805 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+2805 3792 M
+2805 3792 Pnt
+2805 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+2805 1042 M
+18 0 V
+2805 1042 Pnt
+2823 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+2823 3792 M
+2823 3792 Pnt
+2823 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+2823 1042 M
+18 0 V
+2823 1042 Pnt
+2841 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+2841 3792 M
+2841 3792 Pnt
+2841 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+2841 1042 M
+18 0 V
+2841 1042 Pnt
+2859 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+2859 3792 M
+2859 3792 Pnt
+2859 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+2859 1042 M
+18 0 V
+2859 1042 Pnt
+2877 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+2877 3792 M
+2877 3792 Pnt
+2877 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+2877 1042 M
+19 0 V
+2877 1042 Pnt
+2896 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+2896 3792 M
+2896 3792 Pnt
+2896 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+2896 1042 M
+18 0 V
+2896 1042 Pnt
+2914 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+2914 3792 M
+2914 3792 Pnt
+2914 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+2914 1042 M
+18 0 V
+2914 1042 Pnt
+2932 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+2932 3792 M
+2932 3792 Pnt
+2932 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+2932 1042 M
+18 0 V
+2932 1042 Pnt
+2950 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+2950 3792 M
+2950 3792 Pnt
+2950 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+2950 1042 M
+18 0 V
+2950 1042 Pnt
+2968 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+2968 3792 M
+2968 3792 Pnt
+2968 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+2968 1042 M
+12 0 V
+2968 1042 Pnt
+2980 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+2980 2875 M
+2980 2875 Pnt
+2980 2875 Pnt
+0.000 UP
+10.000 UL
+LT0
+2980 1042 M
+6 0 V
+2980 1042 Pnt
+2986 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+2986 3792 M
+2986 3792 Pnt
+2986 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+2986 1042 M
+18 0 V
+2986 1042 Pnt
+3004 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+3004 3792 M
+3004 3792 Pnt
+3004 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+3004 1042 M
+18 0 V
+3004 1042 Pnt
+3022 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+3022 3792 M
+3022 3792 Pnt
+3022 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+3022 1042 M
+18 0 V
+3022 1042 Pnt
+3040 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+3040 3792 M
+3040 3792 Pnt
+3040 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+3040 1042 M
+18 0 V
+3040 1042 Pnt
+3058 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+3058 3792 M
+3058 3792 Pnt
+3058 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+3058 1042 M
+18 0 V
+3058 1042 Pnt
+3076 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+3076 3792 M
+3076 3792 Pnt
+3076 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+3076 1042 M
+18 0 V
+3076 1042 Pnt
+3094 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+3094 3792 M
+3094 3792 Pnt
+3094 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+3094 1042 M
+18 0 V
+3094 1042 Pnt
+3112 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+3112 3792 M
+3112 3792 Pnt
+3112 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+3112 1042 M
+18 0 V
+3112 1042 Pnt
+3130 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+3130 3792 M
+3130 3792 Pnt
+3130 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+3130 1042 M
+19 0 V
+3130 1042 Pnt
+3149 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+3149 3792 M
+3149 3792 Pnt
+3149 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+3149 1042 M
+18 0 V
+3149 1042 Pnt
+3167 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+3167 3792 M
+3167 3792 Pnt
+3167 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+3167 1042 M
+18 0 V
+3167 1042 Pnt
+3185 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+3185 3792 M
+3185 3792 Pnt
+3185 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+3185 1042 M
+18 0 V
+3185 1042 Pnt
+3203 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+3203 3792 M
+3203 3792 Pnt
+3203 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+3203 1042 M
+18 0 V
+3203 1042 Pnt
+3221 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+3221 3792 M
+3221 3792 Pnt
+3221 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+3221 1042 M
+18 0 V
+3221 1042 Pnt
+3239 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+3239 3792 M
+3239 3792 Pnt
+3239 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+3239 1042 M
+18 0 V
+3239 1042 Pnt
+3257 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+3257 3792 M
+3257 3792 Pnt
+3257 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+3257 1042 M
+18 0 V
+3257 1042 Pnt
+3275 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+3275 3792 M
+3275 3792 Pnt
+3275 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+3275 1042 M
+18 0 V
+3275 1042 Pnt
+3293 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+3293 3792 M
+3293 3792 Pnt
+3293 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+3293 1042 M
+18 0 V
+3293 1042 Pnt
+3311 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+3311 3792 M
+3311 3792 Pnt
+3311 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+3311 1042 M
+18 0 V
+3311 1042 Pnt
+3329 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+3329 3792 M
+3329 3792 Pnt
+3329 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+3329 1042 M
+18 0 V
+3329 1042 Pnt
+3347 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+3347 3792 M
+3347 3792 Pnt
+3347 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+3347 1042 M
+18 0 V
+3347 1042 Pnt
+3365 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+3365 3792 M
+3365 3792 Pnt
+3365 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+3365 1042 M
+18 0 V
+3365 1042 Pnt
+3383 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+3383 3792 M
+3383 3792 Pnt
+3383 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+3383 1042 M
+19 0 V
+3383 1042 Pnt
+3402 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+3402 3792 M
+3402 3792 Pnt
+3402 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+3402 1042 M
+18 0 V
+3402 1042 Pnt
+3420 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+3420 3792 M
+3420 3792 Pnt
+3420 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+3420 1042 M
+18 0 V
+3420 1042 Pnt
+3438 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+3438 3792 M
+3438 3792 Pnt
+3438 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+3438 1042 M
+18 0 V
+3438 1042 Pnt
+3456 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+3456 3792 M
+3456 3792 Pnt
+3456 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+3456 1042 M
+18 0 V
+3456 1042 Pnt
+3474 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+3474 3792 M
+3474 3792 Pnt
+3474 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+3474 1042 M
+18 0 V
+3474 1042 Pnt
+3492 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+3492 3792 M
+3492 3792 Pnt
+3492 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+3492 1042 M
+18 0 V
+3492 1042 Pnt
+3510 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+3510 3792 M
+3510 3792 Pnt
+3510 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+3510 1042 M
+18 0 V
+3510 1042 Pnt
+3528 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+3528 3792 M
+3528 3792 Pnt
+3528 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+3528 1042 M
+18 0 V
+3528 1042 Pnt
+3546 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+3546 3792 M
+3546 3792 Pnt
+3546 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+3546 1042 M
+18 0 V
+3546 1042 Pnt
+3564 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+3564 3792 M
+3564 3792 Pnt
+3564 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+3564 1042 M
+18 0 V
+3564 1042 Pnt
+3582 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+3582 3792 M
+3582 3792 Pnt
+3582 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+3582 1042 M
+18 0 V
+3582 1042 Pnt
+3600 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+3600 3792 M
+3600 3792 Pnt
+3600 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+3600 1042 M
+18 0 V
+3600 1042 Pnt
+3618 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+3618 3792 M
+3618 3792 Pnt
+3618 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+3618 1042 M
+19 0 V
+3618 1042 Pnt
+3637 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+3637 3792 M
+3637 3792 Pnt
+3637 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+3637 1042 M
+18 0 V
+3637 1042 Pnt
+3655 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+3655 3792 M
+3655 3792 Pnt
+3655 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+3655 1042 M
+18 0 V
+3655 1042 Pnt
+3673 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+3673 3792 M
+3673 3792 Pnt
+3673 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+3673 1042 M
+18 0 V
+3673 1042 Pnt
+3691 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+3691 3792 M
+3691 3792 Pnt
+3691 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+3691 1042 M
+18 0 V
+3691 1042 Pnt
+3709 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+3709 3792 M
+3709 3792 Pnt
+3709 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+3709 1042 M
+18 0 V
+3709 1042 Pnt
+3727 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+3727 3792 M
+3727 3792 Pnt
+3727 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+3727 1042 M
+18 0 V
+3727 1042 Pnt
+3745 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+3745 3792 M
+3745 3792 Pnt
+3745 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+3745 1042 M
+18 0 V
+3745 1042 Pnt
+3763 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+3763 3792 M
+3763 3792 Pnt
+3763 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+3763 1042 M
+18 0 V
+3763 1042 Pnt
+3781 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+3781 3792 M
+3781 3792 Pnt
+3781 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+3781 1042 M
+18 0 V
+3781 1042 Pnt
+3799 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+3799 3792 M
+3799 3792 Pnt
+3799 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+3799 1042 M
+18 0 V
+3799 1042 Pnt
+3817 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+3817 3792 M
+3817 3792 Pnt
+3817 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+3817 1042 M
+18 0 V
+3817 1042 Pnt
+3835 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+3835 3792 M
+3835 3792 Pnt
+3835 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+3835 1042 M
+18 0 V
+3835 1042 Pnt
+3853 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+3853 3792 M
+3853 3792 Pnt
+3853 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+3853 1042 M
+18 0 V
+3853 1042 Pnt
+3871 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+3871 3792 M
+3871 3792 Pnt
+3871 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+3871 1042 M
+19 0 V
+3871 1042 Pnt
+3890 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+3890 3792 M
+3890 3792 Pnt
+3890 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+3890 1042 M
+18 0 V
+3890 1042 Pnt
+3908 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+3908 3792 M
+3908 3792 Pnt
+3908 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+3908 1042 M
+18 0 V
+3908 1042 Pnt
+3926 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+3926 3792 M
+3926 3792 Pnt
+3926 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+3926 1042 M
+18 0 V
+3926 1042 Pnt
+3944 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+3944 3792 M
+3944 3792 Pnt
+3944 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+3944 1042 M
+18 0 V
+3944 1042 Pnt
+3962 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+3962 3792 M
+3962 3792 Pnt
+3962 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+3962 1042 M
+18 0 V
+3962 1042 Pnt
+3980 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+3980 3792 M
+3980 3792 Pnt
+3980 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+3980 1042 M
+18 0 V
+3980 1042 Pnt
+3998 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+3998 3792 M
+3998 3792 Pnt
+3998 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+3998 1042 M
+18 0 V
+3998 1042 Pnt
+4016 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+4016 3792 M
+4016 3792 Pnt
+4016 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+4016 1042 M
+18 0 V
+4016 1042 Pnt
+4034 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+4034 3792 M
+4034 3792 Pnt
+4034 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+4034 1042 M
+18 0 V
+4034 1042 Pnt
+4052 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+4052 3792 M
+4052 3792 Pnt
+4052 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+4052 1042 M
+18 0 V
+4052 1042 Pnt
+4070 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+4070 3792 M
+4070 3792 Pnt
+4070 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+4070 1042 M
+18 0 V
+4070 1042 Pnt
+4088 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+4088 3792 M
+4088 3792 Pnt
+4088 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+4088 1042 M
+18 0 V
+4088 1042 Pnt
+4106 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+4106 3792 M
+4106 3792 Pnt
+4106 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+4106 1042 M
+18 0 V
+4106 1042 Pnt
+4124 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+4124 3792 M
+1 0 V
+4124 3792 Pnt
+4125 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+4125 1042 M
+18 0 V
+4125 1042 Pnt
+4143 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+4143 3792 M
+4143 3792 Pnt
+4143 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+4143 1042 M
+18 0 V
+4143 1042 Pnt
+4161 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+4161 3792 M
+4161 3792 Pnt
+4161 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+4161 1042 M
+18 0 V
+4161 1042 Pnt
+4179 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+4179 3792 M
+4179 3792 Pnt
+4179 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+4179 1042 M
+18 0 V
+4179 1042 Pnt
+4197 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+4197 3792 M
+4197 3792 Pnt
+4197 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+4197 1042 M
+18 0 V
+4197 1042 Pnt
+4215 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+4215 3792 M
+4215 3792 Pnt
+4215 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+4215 1042 M
+18 0 V
+4215 1042 Pnt
+4233 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+4233 3792 M
+4233 3792 Pnt
+4233 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+4233 1042 M
+18 0 V
+4233 1042 Pnt
+4251 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+4251 3792 M
+4251 3792 Pnt
+4251 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+4251 1042 M
+18 0 V
+4251 1042 Pnt
+4269 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+4269 3792 M
+4269 3792 Pnt
+4269 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+4269 1042 M
+18 0 V
+4269 1042 Pnt
+4287 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+4287 3792 M
+4287 3792 Pnt
+4287 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+4287 1042 M
+18 0 V
+4287 1042 Pnt
+4305 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+4305 3792 M
+4305 3792 Pnt
+4305 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+4305 1042 M
+18 0 V
+4305 1042 Pnt
+4323 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+4323 3792 M
+4323 3792 Pnt
+4323 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+4323 1042 M
+18 0 V
+4323 1042 Pnt
+4341 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+4341 3792 M
+4341 3792 Pnt
+4341 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+4341 1042 M
+18 0 V
+4341 1042 Pnt
+4359 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+4359 3792 M
+4359 3792 Pnt
+4359 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+4359 1042 M
+19 0 V
+4359 1042 Pnt
+4378 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+4378 3792 M
+4378 3792 Pnt
+4378 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+4378 1042 M
+18 0 V
+4378 1042 Pnt
+4396 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+4396 3792 M
+4396 3792 Pnt
+4396 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+4396 1042 M
+18 0 V
+4396 1042 Pnt
+4414 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+4414 3792 M
+4414 3792 Pnt
+4414 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+4414 1042 M
+18 0 V
+4414 1042 Pnt
+4432 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+4432 3792 M
+4432 3792 Pnt
+4432 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+4432 1042 M
+18 0 V
+4432 1042 Pnt
+4450 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+4450 3792 M
+4450 3792 Pnt
+4450 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+4450 1042 M
+18 0 V
+4450 1042 Pnt
+4468 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+4468 3792 M
+4468 3792 Pnt
+4468 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+4468 1042 M
+18 0 V
+4468 1042 Pnt
+4486 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+4486 3792 M
+4486 3792 Pnt
+4486 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+4486 1042 M
+18 0 V
+4486 1042 Pnt
+4504 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+4504 3792 M
+4504 3792 Pnt
+4504 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+4504 1042 M
+18 0 V
+4504 1042 Pnt
+4522 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+4522 3792 M
+4522 3792 Pnt
+4522 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+4522 1042 M
+18 0 V
+4522 1042 Pnt
+4540 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+4540 3792 M
+4540 3792 Pnt
+4540 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+4540 1042 M
+18 0 V
+4540 1042 Pnt
+4558 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+4558 3792 M
+4558 3792 Pnt
+4558 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+4558 1042 M
+18 0 V
+4558 1042 Pnt
+4576 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+4576 3792 M
+4576 3792 Pnt
+4576 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+4576 1042 M
+18 0 V
+4576 1042 Pnt
+4594 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+4594 3792 M
+4594 3792 Pnt
+4594 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+4594 1042 M
+18 0 V
+4594 1042 Pnt
+4612 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+4612 3792 M
+4612 3792 Pnt
+4612 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+4612 1042 M
+19 0 V
+4612 1042 Pnt
+4631 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+4631 3792 M
+4631 3792 Pnt
+4631 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+4631 1042 M
+18 0 V
+4631 1042 Pnt
+4649 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+4649 3792 M
+4649 3792 Pnt
+4649 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+4649 1042 M
+18 0 V
+4649 1042 Pnt
+4667 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+4667 3792 M
+4667 3792 Pnt
+4667 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+4667 1042 M
+18 0 V
+4667 1042 Pnt
+4685 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+4685 3792 M
+4685 3792 Pnt
+4685 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+4685 1042 M
+18 0 V
+4685 1042 Pnt
+4703 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+4703 3792 M
+4703 3792 Pnt
+4703 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+4703 1042 M
+18 0 V
+4703 1042 Pnt
+4721 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+4721 3792 M
+4721 3792 Pnt
+4721 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+4721 1042 M
+18 0 V
+4721 1042 Pnt
+4739 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+4739 3792 M
+4739 3792 Pnt
+4739 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+4739 1042 M
+18 0 V
+4739 1042 Pnt
+4757 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+4757 3792 M
+4757 3792 Pnt
+4757 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+4757 1042 M
+18 0 V
+4757 1042 Pnt
+4775 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+4775 3792 M
+4775 3792 Pnt
+4775 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+4775 1042 M
+18 0 V
+4775 1042 Pnt
+4793 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+4793 3792 M
+4793 3792 Pnt
+4793 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+4793 1042 M
+18 0 V
+4793 1042 Pnt
+4811 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+4811 3792 M
+4811 3792 Pnt
+4811 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+4811 1042 M
+18 0 V
+4811 1042 Pnt
+4829 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+4829 3792 M
+4829 3792 Pnt
+4829 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+4829 1042 M
+18 0 V
+4829 1042 Pnt
+4847 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+4847 3792 M
+4847 3792 Pnt
+4847 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+4847 1042 M
+19 0 V
+4847 1042 Pnt
+4866 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+4866 3792 M
+4866 3792 Pnt
+4866 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+4866 1042 M
+18 0 V
+4866 1042 Pnt
+4884 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+4884 3792 M
+4884 3792 Pnt
+4884 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+4884 1042 M
+18 0 V
+4884 1042 Pnt
+4902 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+4902 3792 M
+4902 3792 Pnt
+4902 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+4902 1042 M
+18 0 V
+4902 1042 Pnt
+4920 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+4920 3792 M
+4920 3792 Pnt
+4920 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+4920 1042 M
+18 0 V
+4920 1042 Pnt
+4938 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+4938 3792 M
+4938 3792 Pnt
+4938 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+4938 1042 M
+18 0 V
+4938 1042 Pnt
+4956 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+4956 3792 M
+4956 3792 Pnt
+4956 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+4956 1042 M
+18 0 V
+4956 1042 Pnt
+4974 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+4974 3792 M
+4974 3792 Pnt
+4974 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+4974 1042 M
+18 0 V
+4974 1042 Pnt
+4992 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+4992 3792 M
+4992 3792 Pnt
+4992 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+4992 1042 M
+18 0 V
+4992 1042 Pnt
+5010 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+5010 3792 M
+5010 3792 Pnt
+5010 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+5010 1042 M
+18 0 V
+5010 1042 Pnt
+5028 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+5028 3792 M
+5028 3792 Pnt
+5028 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+5028 1042 M
+18 0 V
+5028 1042 Pnt
+5046 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+5046 3792 M
+5046 3792 Pnt
+5046 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+5046 1042 M
+18 0 V
+5046 1042 Pnt
+5064 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+5064 3792 M
+5064 3792 Pnt
+5064 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+5064 1042 M
+18 0 V
+5064 1042 Pnt
+5082 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+5082 3792 M
+5082 3792 Pnt
+5082 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+5082 1042 M
+18 0 V
+5082 1042 Pnt
+5100 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+5100 3792 M
+5100 3792 Pnt
+5100 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+5100 1042 M
+19 0 V
+5100 1042 Pnt
+5119 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+5119 3792 M
+5119 3792 Pnt
+5119 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+5119 1042 M
+18 0 V
+5119 1042 Pnt
+5137 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+5137 3792 M
+5137 3792 Pnt
+5137 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+5137 1042 M
+18 0 V
+5137 1042 Pnt
+5155 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+5155 3792 M
+5155 3792 Pnt
+5155 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+5155 1042 M
+18 0 V
+5155 1042 Pnt
+5173 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+5173 3792 M
+5173 3792 Pnt
+5173 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+5173 1042 M
+18 0 V
+5173 1042 Pnt
+5191 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+5191 3792 M
+5191 3792 Pnt
+5191 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+5191 1042 M
+18 0 V
+5191 1042 Pnt
+5209 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+5209 3792 M
+5209 3792 Pnt
+5209 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+5209 1042 M
+18 0 V
+5209 1042 Pnt
+5227 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+5227 3792 M
+5227 3792 Pnt
+5227 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+5227 1042 M
+18 0 V
+5227 1042 Pnt
+5245 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+5245 3792 M
+5245 3792 Pnt
+5245 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+5245 1042 M
+18 0 V
+5245 1042 Pnt
+5263 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+5263 3792 M
+5263 3792 Pnt
+5263 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+5263 1042 M
+18 0 V
+5263 1042 Pnt
+5281 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+5281 3792 M
+5281 3792 Pnt
+5281 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+5281 1042 M
+18 0 V
+5281 1042 Pnt
+5299 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+5299 3792 M
+5299 3792 Pnt
+5299 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+5299 1042 M
+18 0 V
+5299 1042 Pnt
+5317 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+5317 3792 M
+5317 3792 Pnt
+5317 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+5317 1042 M
+18 0 V
+5317 1042 Pnt
+5335 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+5335 3792 M
+5335 3792 Pnt
+5335 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+5335 1042 M
+18 0 V
+5335 1042 Pnt
+5353 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+5353 3792 M
+5353 3792 Pnt
+5353 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+5353 1042 M
+19 0 V
+5353 1042 Pnt
+5372 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+5372 3792 M
+5372 3792 Pnt
+5372 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+5372 1042 M
+18 0 V
+5372 1042 Pnt
+5390 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+5390 3792 M
+5390 3792 Pnt
+5390 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+5390 1042 M
+18 0 V
+5390 1042 Pnt
+5408 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+5408 3792 M
+5408 3792 Pnt
+5408 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+5408 1042 M
+18 0 V
+5408 1042 Pnt
+5426 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+5426 3792 M
+5426 3792 Pnt
+5426 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+5426 1042 M
+18 0 V
+5426 1042 Pnt
+5444 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+5444 3792 M
+5444 3792 Pnt
+5444 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+5444 1042 M
+18 0 V
+5444 1042 Pnt
+5462 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+5462 3792 M
+5462 3792 Pnt
+5462 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+5462 1042 M
+18 0 V
+5462 1042 Pnt
+5480 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+5480 3792 M
+5480 3792 Pnt
+5480 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+5480 1042 M
+18 0 V
+5480 1042 Pnt
+5498 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+5498 3792 M
+5498 3792 Pnt
+5498 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+5498 1042 M
+18 0 V
+5498 1042 Pnt
+5516 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+5516 3792 M
+5516 3792 Pnt
+5516 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+5516 1042 M
+18 0 V
+5516 1042 Pnt
+5534 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+5534 3792 M
+5534 3792 Pnt
+5534 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+5534 1042 M
+18 0 V
+5534 1042 Pnt
+5552 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+5552 3792 M
+5552 3792 Pnt
+5552 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+5552 1042 M
+18 0 V
+5552 1042 Pnt
+5570 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+5570 3792 M
+5570 3792 Pnt
+5570 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+5570 1042 M
+18 0 V
+5570 1042 Pnt
+5588 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+5588 3792 M
+5588 3792 Pnt
+5588 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+5588 1042 M
+19 0 V
+5588 1042 Pnt
+5607 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+5607 3792 M
+5607 3792 Pnt
+5607 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+5607 1042 M
+18 0 V
+5607 1042 Pnt
+5625 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+5625 3792 M
+5625 3792 Pnt
+5625 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+5625 1042 M
+18 0 V
+5625 1042 Pnt
+5643 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+5643 3792 M
+5643 3792 Pnt
+5643 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+5643 1042 M
+18 0 V
+5643 1042 Pnt
+5661 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+5661 3792 M
+5661 3792 Pnt
+5661 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+5661 1042 M
+18 0 V
+5661 1042 Pnt
+5679 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+5679 3792 M
+5679 3792 Pnt
+5679 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+5679 1042 M
+18 0 V
+5679 1042 Pnt
+5697 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+5697 3792 M
+5697 3792 Pnt
+5697 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+5697 1042 M
+18 0 V
+5697 1042 Pnt
+5715 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+5715 3792 M
+5715 3792 Pnt
+5715 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+5715 1042 M
+18 0 V
+5715 1042 Pnt
+5733 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+5733 3792 M
+5733 3792 Pnt
+5733 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+5733 1042 M
+18 0 V
+5733 1042 Pnt
+5751 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+5751 3792 M
+5751 3792 Pnt
+5751 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+5751 1042 M
+18 0 V
+5751 1042 Pnt
+5769 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+5769 3792 M
+5769 3792 Pnt
+5769 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+5769 1042 M
+18 0 V
+5769 1042 Pnt
+5787 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+5787 3792 M
+5787 3792 Pnt
+5787 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+5787 1042 M
+18 0 V
+5787 1042 Pnt
+5805 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+5805 3792 M
+5805 3792 Pnt
+5805 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+5805 1042 M
+18 0 V
+5805 1042 Pnt
+5823 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+5823 3792 M
+5823 3792 Pnt
+5823 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+5823 1042 M
+18 0 V
+5823 1042 Pnt
+5841 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+5841 3792 M
+5841 3792 Pnt
+5841 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+5841 1042 M
+18 0 V
+5841 1042 Pnt
+5859 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+5859 3792 M
+5859 3792 Pnt
+5859 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+5859 1042 M
+19 0 V
+5859 1042 Pnt
+5878 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+5878 3792 M
+5878 3792 Pnt
+5878 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+5878 1042 M
+18 0 V
+5878 1042 Pnt
+5896 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+5896 3792 M
+5896 3792 Pnt
+5896 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+5896 1042 M
+18 0 V
+5896 1042 Pnt
+5914 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+5914 3792 M
+5914 3792 Pnt
+5914 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+5914 1042 M
+18 0 V
+5914 1042 Pnt
+5932 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+5932 3792 M
+5932 3792 Pnt
+5932 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+5932 1042 M
+18 0 V
+5932 1042 Pnt
+5950 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+5950 3792 M
+5950 3792 Pnt
+5950 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+5950 1042 M
+18 0 V
+5950 1042 Pnt
+5968 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+5968 3792 M
+5968 3792 Pnt
+5968 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+5968 1042 M
+18 0 V
+5968 1042 Pnt
+5986 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+5986 3792 M
+5986 3792 Pnt
+5986 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+5986 1042 M
+18 0 V
+5986 1042 Pnt
+6004 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+6004 3792 M
+6004 3792 Pnt
+6004 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+6004 1042 M
+18 0 V
+6004 1042 Pnt
+6022 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+6022 3792 M
+6022 3792 Pnt
+6022 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+6022 1042 M
+18 0 V
+6022 1042 Pnt
+6040 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+6040 3792 M
+6040 3792 Pnt
+6040 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+6040 1042 M
+18 0 V
+6040 1042 Pnt
+6058 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+6058 3792 M
+6058 3792 Pnt
+6058 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+6058 1042 M
+18 0 V
+6058 1042 Pnt
+6076 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+6076 3792 M
+6076 3792 Pnt
+6076 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+6076 1042 M
+18 0 V
+6076 1042 Pnt
+6094 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+6094 3792 M
+6094 3792 Pnt
+6094 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+6094 1042 M
+19 0 V
+6094 1042 Pnt
+6113 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+6113 3792 M
+6113 3792 Pnt
+6113 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+6113 1042 M
+18 0 V
+6113 1042 Pnt
+6131 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+6131 3792 M
+6131 3792 Pnt
+6131 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+6131 1042 M
+18 0 V
+6131 1042 Pnt
+6149 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+6149 3792 M
+6149 3792 Pnt
+6149 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+6149 1042 M
+18 0 V
+6149 1042 Pnt
+6167 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+6167 3792 M
+6167 3792 Pnt
+6167 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+6167 1042 M
+18 0 V
+6167 1042 Pnt
+6185 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+6185 3792 M
+6185 3792 Pnt
+6185 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+6185 1042 M
+18 0 V
+6185 1042 Pnt
+6203 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+6203 3792 M
+6203 3792 Pnt
+6203 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+6203 1042 M
+18 0 V
+6203 1042 Pnt
+6221 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+6221 3792 M
+6221 3792 Pnt
+6221 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+6221 1042 M
+18 0 V
+6221 1042 Pnt
+6239 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+6239 3792 M
+6239 3792 Pnt
+6239 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+6239 1042 M
+18 0 V
+6239 1042 Pnt
+6257 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+6257 3792 M
+6257 3792 Pnt
+6257 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+6257 1042 M
+18 0 V
+6257 1042 Pnt
+6275 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+6275 3792 M
+6275 3792 Pnt
+6275 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+6275 1042 M
+18 0 V
+6275 1042 Pnt
+6293 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+6293 3792 M
+6293 3792 Pnt
+6293 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+6293 1042 M
+18 0 V
+6293 1042 Pnt
+6311 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+6311 3792 M
+6311 3792 Pnt
+6311 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+6311 1042 M
+18 0 V
+6311 1042 Pnt
+6329 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+6329 3792 M
+6329 3792 Pnt
+6329 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+6329 1042 M
+19 0 V
+6329 1042 Pnt
+6348 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+6348 3792 M
+6348 3792 Pnt
+6348 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+6348 1042 M
+18 0 V
+6348 1042 Pnt
+6366 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+6366 3792 M
+6366 3792 Pnt
+6366 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+6366 1042 M
+18 0 V
+6366 1042 Pnt
+6384 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+6384 3792 M
+6384 3792 Pnt
+6384 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+6384 1042 M
+18 0 V
+6384 1042 Pnt
+6402 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+6402 3792 M
+6402 3792 Pnt
+6402 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+6402 1042 M
+18 0 V
+6402 1042 Pnt
+6420 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+6420 3792 M
+6420 3792 Pnt
+6420 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+6420 1042 M
+18 0 V
+6420 1042 Pnt
+6438 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+6438 3792 M
+6438 3792 Pnt
+6438 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+6438 1042 M
+18 0 V
+6438 1042 Pnt
+6456 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+6456 3792 M
+6456 3792 Pnt
+6456 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+6456 1042 M
+18 0 V
+6456 1042 Pnt
+6474 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+6474 3792 M
+6474 3792 Pnt
+6474 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+6474 1042 M
+18 0 V
+6474 1042 Pnt
+6492 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+6492 3792 M
+6492 3792 Pnt
+6492 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+6492 1042 M
+18 0 V
+6492 1042 Pnt
+6510 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+6510 3792 M
+6510 3792 Pnt
+6510 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+6510 1042 M
+18 0 V
+6510 1042 Pnt
+6528 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+6528 3792 M
+6528 3792 Pnt
+6528 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+6528 1042 M
+18 0 V
+6528 1042 Pnt
+6546 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+6546 3792 M
+6546 3792 Pnt
+6546 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+6546 1042 M
+18 0 V
+6546 1042 Pnt
+6564 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+6564 3792 M
+6564 3792 Pnt
+6564 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+6564 1042 M
+18 0 V
+6564 1042 Pnt
+6582 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+6582 3792 M
+1 0 V
+6582 3792 Pnt
+6583 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+6583 1042 M
+17 0 V
+6583 1042 Pnt
+6600 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+6600 3792 M
+1 0 V
+6600 3792 Pnt
+6601 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+6601 1042 M
+18 0 V
+6601 1042 Pnt
+6619 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+6619 3792 M
+6619 3792 Pnt
+6619 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+6619 1042 M
+18 0 V
+6619 1042 Pnt
+6637 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+6637 3792 M
+6637 3792 Pnt
+6637 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+6637 1042 M
+18 0 V
+6637 1042 Pnt
+6655 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+6655 3792 M
+6655 3792 Pnt
+6655 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+6655 1042 M
+18 0 V
+6655 1042 Pnt
+6673 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+6673 3792 M
+6673 3792 Pnt
+6673 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+6673 1042 M
+18 0 V
+6673 1042 Pnt
+6691 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+6691 3792 M
+6691 3792 Pnt
+6691 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+6691 1042 M
+18 0 V
+6691 1042 Pnt
+6709 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+6709 3792 M
+6709 3792 Pnt
+6709 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+6709 1042 M
+18 0 V
+6709 1042 Pnt
+6727 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+6727 3792 M
+6727 3792 Pnt
+6727 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+6727 1042 M
+18 0 V
+6727 1042 Pnt
+6745 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+6745 3792 M
+6745 3792 Pnt
+6745 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+6745 1042 M
+18 0 V
+6745 1042 Pnt
+6763 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+6763 3792 M
+6763 3792 Pnt
+6763 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+6763 1042 M
+18 0 V
+6763 1042 Pnt
+6781 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+6781 3792 M
+6781 3792 Pnt
+6781 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+6781 1042 M
+18 0 V
+6781 1042 Pnt
+6799 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+6799 3792 M
+6799 3792 Pnt
+6799 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+6799 1042 M
+18 0 V
+6799 1042 Pnt
+6817 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+6817 3792 M
+6817 3792 Pnt
+6817 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+6817 1042 M
+18 0 V
+6817 1042 Pnt
+6835 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+6835 3792 M
+6835 3792 Pnt
+6835 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+6835 1042 M
+19 0 V
+6835 1042 Pnt
+6854 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+6854 3792 M
+6854 3792 Pnt
+6854 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+6854 1042 M
+18 0 V
+6854 1042 Pnt
+6872 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+6872 3792 M
+6872 3792 Pnt
+6872 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+6872 1042 M
+18 0 V
+6872 1042 Pnt
+6890 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+6890 3792 M
+6890 3792 Pnt
+6890 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+6890 1042 M
+18 0 V
+6890 1042 Pnt
+6908 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+6908 3792 M
+6908 3792 Pnt
+6908 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+6908 1042 M
+18 0 V
+6908 1042 Pnt
+6926 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+6926 3792 M
+6926 3792 Pnt
+6926 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+6926 1042 M
+18 0 V
+6926 1042 Pnt
+6944 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+6944 3792 M
+6944 3792 Pnt
+6944 3792 Pnt
+0.000 UP
+10.000 UL
+LT0
+6944 1042 M
+18 0 V
+6944 1042 Pnt
+6962 1042 Pnt
+0.000 UP
+10.000 UL
+LT0
+6962 3792 M
+6962 3792 Pnt
+6962 3792 Pnt
+1.000 UL
+LTb
+546 1042 M
+6416 0 V
+0 3208 V
+-6416 0 V
+0 -3208 V
+1.000 UP
+stroke
+LTb
+stroke
+grestore
+end
+showpage
+%%Trailer
+%%DocumentFonts: Helvetica

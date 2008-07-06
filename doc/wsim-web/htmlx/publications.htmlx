@@ -1,0 +1,24 @@
+<!-- -*-html-*- -->
+<!-- HEADER -->
+#include "header.html"
+<!-- /HEADER  -->
+
+<div id="main-body">
+
+  <h2 id="intro">WSim publications</h2>
+
+  <h3><U>Research about WSim and Worldsens</U></h3>
+
+  <ul style="margin-top: 0pt;">
+    <li>Guillaume Chelius, Antoine Fraboulet, Eric Fleury, <b>Worldsens: development and prototyping tools for application specific wireless sensors networks</b>, In International Conference on Information Processing in Sensor Networks (IPSN) (Boston, USA), ACM, April 2007.</li>
+    <li>Guillaume Chelius, Antoine Fraboulet, Eric Fleury, <b>Worldsens: a fast and accurate development framework for sensor network applications</b>, In proceedings of the 22nd Annual ACM Symposium on Applied Computing (SAC 2007) (Seoul, South Corea), ACM, March 2007.</li>
+    <li>Guillaume Chelius, Antoine Fraboulet, Eric Fleury, <b>Worldsens: system tools for embedded sensor networks</b>, In Real-Time Systems Symposium (RTSS 2006) (Work in Progress) (Rio de Janeiro, Brasil), IEEE, December 2006.</li>
+    <li>Guillaume Chelius, Antoine Fraboulet, Eric Fleury. <b>Demonstration of Worldsens: A Fast Prototyping and Performance Evaluation tool for Wireless Sensor Network Applications & Protocols</b>. In Second International Workshop on Multi-hop Ad Hoc Networks: from Theory to Reality (REALMAN), Firenze, Italia, May 2006. ACM.</li> 
+  </ul>
+  
+  
+</div>
+
+<!-- FOOTER -->
+#include "footer.html"
+<!-- FOOTER -->

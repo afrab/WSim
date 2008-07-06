@@ -1,0 +1,34 @@
+<!-- -*-html-*- -->
+<!-- HEADER -->
+#include "header.html"
+<!-- /HEADER  -->
+
+<div id="main-body">
+
+<p> WSim is a platform simulator. It relies on cycle accurate full
+platform simulation using microprocessor instruction driven
+timings. The simulator is able to perform a full simulation of
+hardware events that occur in the platform and to give back to the
+developer a precise timing analysis of the simulated software.</p>
+ 
+<p> The native software of the node can be used in the simulator
+without the need to reconfigure or recompile the software. We use a
+classical GCC cross-compiler toolchain and the simulation is not
+attached to any particular language nor operating system. We are thus
+able to debug and evaluate performances of the full system at the
+assembly level. A precise estimation of timings, memory consumption
+and power can be obtained during simulation. FreeRTOS, Contiki and
+TinyOS operating systems have been successfully tested on simulation
+platforms.</p>
+ 
+<p>The simulator can be used in standalone mode for debuging purposes
+when no radio device is used in the design (or when the radio
+simulation is not needed). But one of the main WSim feature is its
+interface with the WSNet simulator to perform the simulation of a
+complete sensor network. </p>
+
+</div>
+
+<!-- FOOTER -->
+#include "footer.html"
+<!-- FOOTER -->

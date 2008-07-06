@@ -1,0 +1,9 @@
+# -*-makefile-*-
+IMG=ledimg.h
+
+led.bitmap: led.fig
+	fig2dev -L xpm < $< | sed 's/noname/ledimg/' | sed 's/static//g' > $@
+	@echo "Please check color definition on top of led.bitmap and led_img.c"
+
+clean:
+	-rm -f *.o $(BIN) $(OBJ)

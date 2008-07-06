@@ -1,0 +1,90 @@
+
+WSim dependencies and platform requirements are minimal.
+Building the GUI requires libSDL-1.2 installed.
+
+You can choose to install WSim using le GNU libbfd or the native
+library included in WSim.
+
+
+Linux (Un*x)
+------------
+* From the CVS archive : 
+
+  ./bootstrap
+  ./configure --prefix=/your/preferred/path --enable-platform-XXX
+  make
+  make install
+
+* From the tar archive :
+
+  ./configure --prefix=/your/preferred/path --enable-platform-XXX
+  make
+  make install
+
+WSim tools (tracer, console, ...) are located in the utils/ directory.
+Eauch of the tools can be compiled and installed used autoconf scripts (./configure && make)
+
+
+Installation for Windows
+------------------------
+
+There are two ways to compile this software for windows
+* Native compile for Windows using the Cygwin tools suite (http://www.cygwin.com/).
+* Using the Mingw32 Win32 cross compiler from GNU/Linux
+
+
+
+* Install the development framework, either native or the cross compiler one.
+
+* Building Wsim 
+
+    - Cygwin :
+            CC="gcc -mno-cygwin" CXX="g++ -mno-cygwin" \
+            ./configure 
+
+	    make
+            make install
+
+    - Mingw32 cross compiler : 
+            CC=i586-mingw32msvc-gcc CXX=i586-mingw32msvc-g++ \
+            ./configure --host=i586-mingw32msvc --build=i386-linux 
+
+	    make
+	    make install
+
+
+Solaris install
+---------------
+
+the solaris install using GNU libbfd needs the libiberty to compile wsim. This
+library is available as part of the binutils distribution and 
+must be compiled and installed using the same options as the libbfd. 
+
+
+
+MSPGCC cross compiling toolchain
+================================
+
+the GCC cross compiler for MSP430 is available at http://mspgcc.sf.net/
+You need to checkout the complete CVS tree to build all the
+necessary tools to compile msp430 binaries.
+
+cvs -d:pserver:anonymous@cvs.sourceforge.net:/cvsroot/mspgcc login
+
+hit [enter] when prompted for a password
+
+cvs -z3 -d:pserver:anonymous@cvs.sourceforge.net:/cvsroot/mspgcc co -P . 
+
+A building script is avalable in packaging/makefile
+We are currently using binutils-2.16.1, gcc-core-3.2.3 and gdb-6.0 for
+our development environment.
+
+This script will install 
+  binutils targeted for msp430
+  msp430-gcc 
+  msp430-libc
+  msp430-gdb
+
+msp430-insight is supported on some platforms (Linux, Solaris)
+
+

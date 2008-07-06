@@ -1,0 +1,9 @@
+@node GDM1602a
+@section GDM1602a LCD display
+
+The GDM1602a  is an external LCD display that uses the 
+KS0066u LCD controller. The controller uses only the 8 bits
+addressing mode (4bit is not implemented in the WSim device).
+The gdl1602a does not have any option.
+
+@c @image{fig/wsim_ui}

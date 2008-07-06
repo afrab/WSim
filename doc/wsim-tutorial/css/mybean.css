@@ -1,0 +1,237 @@
+h1 { font-size: 1.728em; margin: 0em; }
+
+h2 { font-size: 1.44em; color: #404040; }
+h2[class~="title"] { margin-top: 1.728em; margin-bottom: 0em; }
+h2[class~="title"] + * { margin-top: 0.83em; }
+
+h3 { font-size: 1.2em; }
+h3[class~="title"] { margin-top: 1.44em; margin-bottom: 0em; }
+h3[class~="title"] + * { margin-top: 0.83em; }
+
+h4 { font-size: 1em; }
+h4[class~="title"] { margin-top: 1.2em; }
+h4[class~="title"] + * { margin-top: 0.83em; }
+
+h5 { font-size: 1em; margin-top: 1em; }
+h6 { font-size: 1em; margin-top: 1em; }
+h7 { font-size: 1em; margin-top: 1em; }
+
+div[class~="title"] { font-weight: bold; color: #404040; }
+div[class~="title"] + * { margin-top: 0.83em; }
+
+/*-------------- BODY -------------*/
+body {
+  margin: 0.5em; 
+  width: 80%;
+  margin-left: auto;
+  margin-right: auto;
+  background: #000000 url(bg-html.png);
+}
+
+/*-------------- CHAPTER -------------*/
+div[class ~= "chapter"] {
+  margin-top: 0em;
+  margin-bottom: 0em;
+  padding: 1.5em;
+  background-color: white;
+}
+
+/*-------------- BOOK (first page) -------------*/
+div[class ~= "book"] {
+  margin-top: 0em;
+  margin-bottom: 0em;
+  padding: 1.5em;
+  background-color: white;
+}
+
+div {
+  margin-top: 0em;  margin-bottom: 0em;
+  padding-top: 0em; padding-bottom: 0em;
+}
+p {
+  font-family: liberation-serif, times;
+  margin-top: 0em;  margin-bottom: 0em;
+  padding-top: 0em; padding-bottom: 0em;
+  padding-left: 1em; padding-right: 1em;
+}
+div + * { margin-top: 1.2em; }
+p   + * { margin-top: 1.2em; }
+p &gt; div { margin-top: 1.2em; }
+p { text-align: justify; }
+
+/*-------------- REVHISTORY -------------*/
+.revhistory table {
+	border-collapse: collapse;
+	margin-bottom: 2em;
+}
+
+.revhistory th {
+	text-align: left;
+	padding: 0.5em 0.5em 0.5em 0.5em;
+	background: #33649f;
+	color: #fefefe;
+	font-weight: bold;
+}
+
+.revhistory tr {
+	border: 1px solid #22437f;
+}
+
+.revhistory td {
+	padding: 0.5em 0.5em 0.5em 0.5em;
+}
+
+/*-------------- ADMONITIONS -------------*/
+div[class~="note"] {
+  padding: 0.8em;
+  border: solid 2px #F79537;
+  background: #FFFBF7;
+  border-radius: 12px;
+  -moz-border-radius: 12px;
+}
+div[class~="warning"] {
+  padding: 0.8em;
+  border: solid 2px #F79537;
+  background: #FFFBF7;
+  border-radius: 12px;
+  -moz-border-radius: 12px;
+}
+div[class~="important"] {
+  padding: 0.8em;
+  border: solid 2px #F79537;
+  background: #FFFBF7;
+  border-radius: 12px;
+  -moz-border-radius: 12px;
+}
+div[class~="caution"] {
+  padding: 0.8em;
+  border: solid 2px #F79537;
+  background: #FFFBF7;
+  border-radius: 12px;
+  -moz-border-radius: 12px;
+}
+div[class~="tip"] {
+  padding: 0.8em;
+  border: solid 2px #F79537;
+  background: #FFFBF7;
+  border-radius: 12px;
+  -moz-border-radius: 12px;
+}
+
+/*-------------- CODE -------------*/
+pre[class~="programlisting"] {
+  background: #EEE9E9 url(programlisting.png) no-repeat top right;
+  border: solid 2px #F0F0F0;
+  border-radius: 4px;
+  -moz-border-radius: 4px;
+  padding: 0.8em;
+  margin-left: 2em;
+  margin-right: 2em;
+}
+div[class~="blockquote"] {
+  background: url(yelp-watermark-blockquote-201C.png) no-repeat;
+  padding-left: 32px;
+  max-width: 80%;
+  min-height: 64px;
+}
+div[class~="attribution"] {
+  margin-left: 1.44em;
+}
+
+/*-------------- TABLE OF CONTENTS -------------*/
+div[class~="toc"] {
+  margin: 0em;
+  padding: 0em;
+}
+ul[class~="toc"] {
+  margin-left: 1.2em;
+  padding: 0em;
+}
+ul[class~="toc"] li {
+  margin: 0em;
+  padding: 0em;
+  list-style-type: none;
+}
+ul[class~="toc"] a {
+  text-decoration: none;
+}
+
+div[class~="list-of-figures"] {
+  margin-bottom: 2em;
+  padding: 0em;
+}
+
+/*-------------- HEADER -------------*/
+div[class~="navheader"] {
+  background: #104E8B url(bg-header.png) repeat-x;
+  color: #FFFFFF;
+  text-align: center;
+  font-weight: bold;
+  margin: 0;
+  padding: 0.7em;
+  border-radius: 8px;
+  -moz-border-radius: 8px;
+}
+div[class~="navheader"] a {
+  color: #FFFFFF;
+  text-decoration: none;
+}
+div[class~="navheader"] a:hover {
+  border-bottom: solid 0em;
+}
+div[class~="navheader"] a img {
+  border: none;
+  vertical-align: middle;
+}
+
+div[class~="navheader"] table tr th {
+  font-size: 1.728em;
+  margin: 0em;
+}
+
+/*-------------- FOOTER -------------*/
+div[class~="navfooter"] {
+  background: #104E8B url(bg-footer.png) bottom repeat-x;
+  color: #FFFFFF;
+  text-align: center;
+  font-weight: bold;
+  margin: 0;
+  padding: 0.8em;
+  border-radius: 8px;
+  -moz-border-radius: 8px;
+}
+div[class~="navfooter"] a {
+  color: #FFFFFF;
+  text-decoration: none;
+}
+ div[class~="navfooter"] a:hover {
+  border-bottom: solid 0em;
+}
+div[class~="navfooter"] a img {
+  border: none;
+  vertical-align: middle;
+}
+
+/*-------------- NAVBAR -------------*/
+div[class ~= "-navbar"] {
+  margin: 0;
+}
+div[class ~= "-navbar-prev"] {
+  padding: 0em;
+  float: left;
+}
+div[class ~= "-navbar-prev-sans-next"] {
+  float: none;
+}
+div[class ~= "-navbar-next"] {
+  margin: 0em;
+  padding: 0em;
+  text-align: right;
+}
+a[class~="-navbar-prev"] img {
+  padding-right: 0.667em;
+}
+a[class~="-navbar-next"] img {
+  padding-left: 0.667em;
+}
+

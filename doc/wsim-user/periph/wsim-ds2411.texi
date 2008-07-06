@@ -1,0 +1,22 @@
+@node Maxim DS2411
+@section Maxim DS2411 Silicon Serial Number
+
+The Maxim @uref{http://www.maxim-ic.com/quick_view2.cfm/qv_pk/3711,
+DS2411} uses the 1-wire protocol to communicate with the micro-controller
+using only one external digital I/O pin.
+
+The model proposed with the WSim simulator can be parameterized at run time
+with the following options:
+
+@table @option
+@item --ds2411=xx:s1:s2:s3:s4:s5:s6:id
+      
+      The serial number is composed of 8 bytes in hexadecimal notation.
+      xx is the serial number crc, s1 to s6 are the 6 bytes serial ID and
+      id is the chip family (fixed to 01). s1 is the most significant byte (MSB) and
+      s6 is the least significant byte (LSB) of the serial number.
+
+@end table 
+
+The default serial number is fixed to 0f:07:06:05:04:03:02:01 in the simulator.
+

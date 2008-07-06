@@ -1,0 +1,9 @@
+# -*-makefile-*-
+IMG=ledimg.h
+
+7segimg.bitmap: 7segimg.fig
+	fig2dev -L xpm < $< | sed 's/noname/seg7img/' | sed 's/static//g' > $@
+	@echo "Please check color definition on top of 7segimg.bitmap and 7seg_img.c"
+
+clean:
+	-rm -f *.o $(BIN) $(OBJ)

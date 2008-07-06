@@ -1,0 +1,8 @@
+@node Led
+@section Led
+
+The led device in WSim is a very simple one that can be connected directly to a 
+general MCU IO port. The led device does not have any option. Its colour can only
+be set at compile time. The display is activated using the @t{--ui} option.
+
+@c @image{fig/wsim_led}

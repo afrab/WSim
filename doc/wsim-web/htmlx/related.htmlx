@@ -1,0 +1,21 @@
+<!-- -*-html-*- -->
+<!-- HEADER -->
+#include "header.html"
+<!-- /HEADER  -->
+
+  <div id="main-body">
+    
+    <h2 id="intro">Related</h2>
+    
+  
+    <h3>Associated tools</h3>
+    <ul style="margin-top: 0pt;">
+      <li><a href="http://wsnet.gforge.inria.fr/" target="_new" title="WSNet website">WSNet</a> </li>
+    </ul>
+
+  </div>
+
+
+<!-- FOOTER -->
+#include "footer.html"
+<!-- FOOTER -->

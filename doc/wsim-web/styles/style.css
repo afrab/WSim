@@ -1,0 +1,637 @@
+/* 
+
+    GSB common CSS <http://gsb.sf.net>
+    Chip Cuccio <chipster@norlug.org>
+    $Id: style.css,v 1.1 2008-06-21 14:35:03 afraboul Exp $
+
+*/
+
+/* #### common styles #### */
+
+body {
+    color: #000;
+    background-color: #fff;
+    font-family: "Lucida Grande", "Trebuchet MS", "Bitstream Vera Sans", Verdana, Helvetica, Arial, sans-serif;
+    margin: 0;
+    padding: 1em 0.4em;
+    text-align: center;
+}
+
+#wrapper {
+    color: inherit;
+    background: #fff;
+    border: 1px solid #fff;
+    padding: 0;
+    margin: auto;
+    text-align: left;
+    width: 80%; /* 970px */
+    position: relative;
+}
+
+#subfoot {
+    color: white;
+    background: inherit;
+    padding-top: 1em;
+    font-size: smaller;
+    font-weight: bold;
+}
+
+#subfoot a {
+    color: #9FEAFF;
+    background: inherit;
+}
+
+#subfoot a:hover {
+    background: #9FEAFF;
+    color: #333;
+    text-decoration: none;
+}
+
+hr {
+    color: white;
+    background-color: black;
+    height: 1px;
+    border: 0px;
+}
+
+.stremph {
+    font-style: italic;
+    font-weight: bold;
+}
+
+.emph {
+    font-style: italic;
+}
+
+.hilite { 
+    background-color: #ffc; 
+    color: inherit;
+}
+
+.hilite-code { 
+    background-color: #D3D3D3; 
+    color: inherit;
+    font-weight: bold;
+}
+
+pre {
+    background-color: #ddd;
+    color: inherit;
+    padding: 1.2ex;
+    border: 1px solid #999;
+}
+
+.introthumb {
+    margin: 15px 0px 6px 6px;
+    padding: 8px;
+    border-bottom: 1px solid #999;
+    border-right: 1px solid #999;
+    color: inherit;
+    background: #eee;
+    float: right;
+    font-size: x-small;
+    text-align: center;
+}
+
+a .introthumb:hover {
+    background: #ccc;
+    color: inherit;
+}
+
+.version {
+    font-weight: bold;
+    color: #cc0000;
+    background: inherit;
+}
+
+.faqhead {
+    font-style: italic;
+    font-weight: bold;
+}
+
+.faqentry {
+    margin: 0 0 0 2.8em;
+}
+
+img.screenthumb {
+    vertical-align: middle;
+    background-color: #eee;
+    color: inherit;
+    border-bottom: 1px solid #a9a9a9;
+    border-right: 1px solid #a9a9a9;
+    padding: 8px;
+    margin: 25px 25px 0 0;
+}
+
+a img.screenthumb:hover {
+    background: #ccc;
+    color: inherit;
+}
+
+.center {
+    text-align: center;
+}
+
+.left {
+    text-align: left;
+} 
+
+.boilerplate {
+    position: relative;
+    margin-top: auto;
+    float: right;
+    text-align: right;
+    margin-right: 1ex;
+    font-size: smaller;
+    font-style: italic;
+    padding-top: 0em;
+}
+
+.news_entry {
+    margin: 0 0 0 2em;
+}
+
+.newsheader {
+    font-size: small;
+    font-style: italic;
+    font-weight: normal;
+}
+
+#side-bar {
+    background: white;
+    color: inherit;
+}
+
+pre,code,tt {
+    font-size: 0.9em;
+    line-height:1em;
+}
+
+input, select, option {
+    font-size: 12px;
+}
+
+img {
+    border: 0 none;
+}
+
+.indent, .italic {
+    font-style: italic;
+    margin: 0.5em 0 0 1.2em;
+    padding: 0.5em 0 0 0;
+    border: 0px;
+}
+
+hr.print {
+    border: 0px;
+    height: 0px;
+}
+
+acronym, .titleTip {
+    border-bottom: 1px dotted rgb(153,153,153);
+    cursor: help;
+    margin: 0;
+    padding: 0 0 0.4px 0;
+}
+
+.doNotDisplay {
+    display: none;
+}
+
+
+/* ##### Header ##### */
+
+.bannerTitle {
+    font-style: italic;
+    font-weight: bold;
+}
+
+.headerTitle {
+    font-weight: bold;
+    font-style: italic;
+    margin: 0 0 0 0;
+    padding: 0.25ex 0;
+}
+
+.subHeader {
+    color: white;
+    background-color: #5651a1; /* INRIA color */
+    margin: 0;
+    padding: 0.2ex 1ex 0.2ex 1.5mm;
+             /*    background-image:url(/images/GSB_Logo-3.png); */
+    background-repeat:no-repeat;
+    background-position: center left;
+    height: 111px; /*TODO 141*/
+}
+
+.subHeader a {
+    color: white;
+    background-color: inherit;
+}  
+
+.subHeader a:hover {
+    text-decoration: none;
+}
+
+.superHeader .highlight, .subHeader .highlight {
+    color: rgb(253,160,91);
+    background-color: inherit; 
+}
+
+.subHeader h1 a {
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 140px;
+    width: 440px;
+    text-indent: -9999em;
+    text-decoration: none;
+}
+
+/* ##### Side Bar 1 ##### */
+
+#side-bar {
+    width: 11em;
+    color: #000;
+    background: #eeeeee;
+    float: left;
+    clear: left;
+    border-right: 1px solid rgb(153,153,153);
+}
+
+#side-bar div {
+    border-bottom: 1px solid rgb(153,153,153);
+}
+
+#side-bar div.sep {
+    border-bottom: 1px solid rgb(153,153,153);
+}
+
+.sideBarTitle {
+    font-size: medium;
+    font-weight: bold;
+    margin: 0 0 0.5em 2.5mm;
+    padding: 0.5em 0.8em 0 0;
+    text-align: left;
+}
+
+#side-bar ul {
+    list-style-type: none;
+    list-style-position: outside;
+    margin: 0;
+    padding: 0 0 0.5em 0;
+    text-align: left;
+}
+
+#side-bar li {
+    margin: 0;
+    padding: 0;
+    border-bottom: 0px solid #fff;
+    font-size: 1.6ex;
+}
+
+#side-bar a {
+    color: #147;
+    background-color: inherit;
+    text-decoration: none;
+    margin: 0;
+    padding: 0 1em 0 5mm;
+    display: block;
+    font-weight: bold;
+    border-top: 1px solid #eeeeee;
+    border-bottom: 1px solid #eeeeee;
+}
+
+#side-bar a:hover {
+    color: #06c;
+    text-decoration: none;
+    background: rgb(255,255,255);
+    border-top: 1px solid rgb(153,153,153);
+    border-bottom: 1px solid rgb(153,153,153);
+}
+
+#side-bar .thisPage {
+    text-decoration: none;
+    color: #555;
+    background-color: #ddd;
+    border-top: 1px solid rgb(153,153,153);
+    border-bottom: 1px solid rgb(153,153,153);
+}
+
+#side-bar .thisPage:hover {
+    text-decoration: none;
+    color: #555;
+    background-color: #ddd;
+    border-top: 1px solid rgb(153,153,153);
+    border-bottom: 1px solid rgb(153,153,153);
+}
+
+.sideBarText {
+    line-height: 1.5em;
+    margin: 0 0 1em 0;
+    padding: 0 1.5ex 0 2.5mm;
+    display: block;
+}
+
+#side-bar .sideBarText a {
+    text-decoration: underline;
+    margin: 0;
+    padding: 0;
+    display: inline;
+}
+
+#side-bar .sideBarText a:hover {
+    color: rgb(0,102,204);
+    background-color: inherit;
+    text-decoration: none;
+}
+
+.lighterBackground {
+  color: inherit;
+  background-color: white;
+}
+
+/* ##### Side Bar 2 ##### */
+
+#side-bar2 {
+    width: 11em;
+    color: #000;
+    background: #eeeeee;
+    float: left;
+    clear: left;
+    border-right: 1px solid rgb(153,153,153);
+    background-color: #B0C4DE; /*couleur carré*/
+}
+
+#side-bar2 div {
+    border-bottom: 1px solid rgb(153,153,153);
+}
+
+#side-bar2 div.sep {
+    border-bottom: 1px solid rgb(153,153,153);
+}
+
+.sideBarTitle2 {
+    font-size: medium;
+    font-weight: bold;
+    margin: 0 0 0.5em 2.5mm;
+    padding: 0.5em 0.8em 0 0;
+    text-align: left;
+	 color: #8B0000;
+}
+
+#side-bar2 ul {
+    list-style-type: none;
+    list-style-position: outside;
+    margin: 0;
+    padding: 0 0 0.5em 0;
+    text-align: left;
+}
+
+#side-bar2 li {
+    margin: 0;
+    padding: 0;
+    border-bottom: 0px solid #fff;
+    font-size: 1.6ex;
+}
+
+#side-bar2 a {
+    color: #147;
+    background-color: inherit;
+    text-decoration: none;
+    margin: 0;
+    padding: 0 1em 0 5mm;
+    display: block;
+    font-weight: bold;
+    border-top: 1px solid #eeeeee;
+    border-bottom: 1px solid #eeeeee;
+}
+
+#side-bar2 a:hover {
+    color: #06c;
+    text-decoration: none;
+    background: rgb(255,255,255); /*couleur hover*/
+    border-top: 1px solid rgb(153,153,153);
+    border-bottom: 1px solid rgb(153,153,153);
+}
+
+#side-bar2 .thisPage {
+    text-decoration: none;
+    color: #555;
+    background-color: #ddd;
+    border-top: 1px solid rgb(153,153,153);
+    border-bottom: 1px solid rgb(153,153,153);
+}
+
+#side-bar2 .thisPage:hover {
+    text-decoration: none;
+    color: #555;
+    background-color: #ddd;
+    border-top: 1px solid rgb(153,153,153);
+    border-bottom: 1px solid rgb(153,153,153);
+}
+
+.sideBarText2 {
+    line-height: 1.5em;
+    margin: 0 0 1em 0;
+    padding: 0 1.5ex 0 2.5mm;
+    display: block;
+}
+
+#side-bar2 .sideBarText2 a {
+    text-decoration: underline;
+    margin: 0;
+    padding: 0;
+    display: inline;
+}
+
+#side-bar2 .sideBarText2 a:hover {
+    color: rgb(0,102,204);
+    background-color: inherit;
+    text-decoration: none;
+}
+
+.lighterBackground2 {
+  color: inherit;
+  background-color: white;
+}
+
+
+/* ##### Main body ##### */
+
+#main-body {
+    color: #000;
+    background-color: white;
+    line-height: 1.5em;
+    margin: 0 0 0 11.1em;
+    padding: 0.5mm 5mm 5mm 5mm;
+    border-bottom: 1px solid white;
+}
+
+#main-body p {
+    margin: 1em 1ex 1em 0;
+    padding: 0;
+}
+
+#main-body a {
+    color: #147;
+    background-color: inherit;
+    text-decoration: underline;
+}
+
+#main-body a:hover {
+    text-decoration: none;
+    color: #06c;
+    background-color: inherit;
+}
+
+#main-body h1 {
+    border-bottom: 1px solid black;
+    margin: 1em 0 0 0;
+    padding: 0.5ex 0 1.0ex 0;
+    line-height: 1.4em;
+}
+
+#main-body h2 {
+    border-bottom: 1px solid black;
+    margin: 1em 0 0 0;
+    padding: 0.5ex 0 1.0ex 0;
+    line-height: 1.4em;
+}
+
+#main-body h3 {
+    margin: 1em 0 0 0;
+    padding: 0.5ex 0 1.0ex 0;
+    line-height: 1.4em;
+
+}
+
+#main-body .topOfPage {
+    color: rgb(35,90,157);
+    background-color: inherit;
+    text-decoration: none;
+    float: right;
+    padding: 2.1em 0 0 0;
+}
+
+dl {
+    margin: 1em 1ex 2em 1ex;
+    padding: 0;
+}
+
+dt {
+    margin: 0 0 0 0;
+    padding: 0;
+    font-weight: bold;
+}
+
+dd {
+    margin: 0 0 1em 2em;
+    padding: 0;
+}
+
+
+/* ##### Footer ##### */
+
+.footLinkTop {
+    padding: 3px 0 3px 0;
+}
+
+.footLink {
+    border-width: 0;
+}
+
+#footer {
+    color: black;
+    background: #eeeeee;
+    margin: 0;
+    padding: 1em 2.5mm 2.5ex 2.5mm;
+    clear: both;
+    font-size: small;
+    border-top: 1px solid rgb(153,153,153);
+}
+
+#footer .left {
+    line-height: 1.45em;
+    float: left;
+    clear: left;
+}
+
+#footer .right {
+    text-align: right;
+    line-height: 1.45em;
+}
+
+#footer a {
+    color: #147;
+    background-color: inherit;
+    text-decoration: underline;
+}
+
+#footer a:hover {
+    text-decoration: none;
+}
+
+/* ### other crap ### */
+
+a {
+    outline: none;
+}
+
+a:active {
+    outline: none;
+}
+
+.bookmark {
+    color: inherit; 
+    background: #147;
+    font-style: normal;
+    font-weight: normal;
+    font-size: smaller;
+    padding: 8px;
+    border: 1px solid #333;
+    margin-right: 0;
+} 
+
+.bookmark a {
+    color: #9FEAFF;
+    background: inherit;
+    font-weight: bold;
+    text-decoration: none;
+    line-height: 16px !important;
+    padding: 2px 5px 2px 20px;
+    margin: 0 5px 0 0;
+}
+
+.bookmark a.delicious {
+    background:url(/images/icons/delicious.gif) no-repeat 0 50%;
+}
+
+.bookmark a.digg {
+    background:url(/images/icons/digg.gif) no-repeat 0 50%;
+}
+
+.bookmark a.blink {
+    background:url(/images/icons/blink.gif) no-repeat 0 50%;
+}
+
+.bookmark a:hover {
+    border-bottom: 1px dotted #eee;
+}
+.changelog {
+    line-height: 1.0em;
+}
+
+/* Style for source code */
+
+pre {
+	overflow:	auto;
+	background:	rgb(230,230,230);
+	text-align: left;
+	margin: 0;
+}
+
+pre.terminal { background: #999999; color: white; padding: 0.3em; font-size: 90% ; font-family: courier; text-align: left;}
+pre.terminal span.prompt { font-weight: bold; color: #111; text-align: left;}
+pre.terminal span.input { font-weight: bold; color: #222; text-align: left;}
+

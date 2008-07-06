@@ -1,0 +1,18 @@
+@node STMicro M25P80
+@section STMicro ST25P80 1MB Flash Memory Module
+
+The STMicroelectronic
+@uref{http://www.st.com/stonline/products/@/literature/@/ds/8495.htm, M25P80} 
+Flash memory device is an 8Mb module driven by SPI serial
+communications. Standard memory operations are supported including low
+power modes. 
+
+@table @option
+@item    --flash_init=arg       
+         Flash init image (binary file)
+@item    --flash_dump=arg       
+         Flash dump image (binary file)
+@end table
+
+The default behavior is to start the simulation with a factiry default Flash
+for which all bits are set to 1.

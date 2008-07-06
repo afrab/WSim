@@ -1,0 +1,15 @@
+Authors of WSim.
+
+  Copyright (C) 2005, 2006, 2007, 2008 Antoine Fraboulet
+
+  Copying and distribution of this file, with or without modification,
+  are permitted in any medium without royalty provided the copyright
+  notice and this notice are preserved.
+
+  Antoine Fraboulet : antoine.fraboulet@insa-lyon.fr
+
+
+Contributors:
+- Guillaume Chelius   WSNet v1 and cc1100 device
+- Nicolas Boulicault  cc2420 device
+- Eric Fleury         ds2411 and mcp73861 devices

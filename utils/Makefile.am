@@ -1,0 +1,2 @@
+SUBDIRS = archinfo 	\
+	crctools	\

@@ -1,0 +1,9 @@
+# -*-makefile-*-
+IMG=bargraph
+
+bargraph.bitmap: bargraph.fig
+	fig2dev -L xpm < $< | sed 's/noname/bargraph/' | sed 's/static//g' > $@
+	@echo "Please check color definition on top of bargraph.bitmap and bargraph_img.c"
+
+clean:
+	-rm -f *.o $(BIN) $(OBJ)

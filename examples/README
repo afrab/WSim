@@ -1,0 +1,9 @@
+This file lists the example for the wsn430 platform.
+Order is important, examples are build as a progression.
+
+1- wsn430-leds   
+2- wsn430-clock   
+3- wsn430-serial  
+4- wsn430-timer   
+5- wsn430-ds2411  
+6- wsn430-m25p80  

@@ -1,0 +1,16 @@
+<!-- -*-html-*- -->
+<!-- HEADER -->
+#include "header.html"
+<!-- /HEADER  -->
+
+  <div id="main-body">
+    <h2 id="intro">Tools / Utilities</h2>
+    <br /><br /><br /><br />
+    <div align="center"><img src="./figures/travaux.gif" alt="" height="134" width="150" /></div>
+  </div>
+
+<!-- FOOTER -->
+#include "footer.html"
+<!-- FOOTER -->
+
+

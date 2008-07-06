@@ -1,0 +1,35 @@
+<!-- -*-html-*- -->
+<!-- HEADER -->
+#include "header.html"
+<!-- /HEADER  -->
+
+  <div id="main-body">
+    <br />
+      <!--      <div align="center"><img src="./figures/wsim-logo.jpg" alt="" width="660" height="159" /></div> -->
+      
+      <b><i>Features:</i></b>
+      <ul>
+	<li>support for full system and environment simulation</li>
+	<li>support for energy consumption simulation</li>
+	<li>support for nodes advanced debuging modes</li>
+	<li>support for high level performance estimations</li>
+      </ul>
+
+      <p>Writing distributed WSN applications using the Worldsens
+	toolkit is far easier than using prototype boards due to the fast
+	compile/debug/estimate development cycle. This performance estimation
+	is made possible using a full platform simulation at a cycle accurate
+	level. Peripherals that deal with real time constraints (timers,
+	interrupts, serial ports, radio interface, etc.) are included in the
+	WSim platform model. Time is given in a cycle accurate manner using
+	application instruction timing.
+      </p>
+
+      <p>WSim should compile and run on any Unix-like platform and Windows using cygwin or mingw32.</p>
+
+  </div>
+      
+
+<!-- FOOTER -->
+#include "footer.html"
+<!-- FOOTER -->

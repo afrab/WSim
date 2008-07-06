@@ -1,0 +1,16 @@
+<!-- -*-html-*- -->
+<!-- HEADER -->
+#include "header.html"
+<!-- /HEADER  -->
+
+<div id="main-body">
+
+  <h2 id="intro">Contact</h2>
+  	<p>For questions please contact us <a href="mailto:antoine.fraboulet@insa-lyon.fr?subject=About%20WSim">here</a>.</p>
+
+</div>
+
+<!-- FOOTER -->
+#include "footer.html"
+<!-- FOOTER -->
+

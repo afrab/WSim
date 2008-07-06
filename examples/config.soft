@@ -1,0 +1,234 @@
+# -*-shell-script-*-
+
+WORLDSENS=${HOME}/projets/worldsens
+
+WSNET=${WORLDSENS}/wsnet1/worldsens_wsnet
+
+WSIMNET=${WORLDSENS}/build/wsim/platforms/wsn430/worldsens-wsn430
+WSIMNETD=${WORLDSENS}/build/wsim-debug/platforms/wsn430/worldsens-wsn430
+#WSIMNETD=${WORLDSENS}/build/0-test-cvs/linux32/worldsens-debug/platforms/wsn430/worldsens-wsn430
+WSIMNETE=${WORLDSENS}/build/wsim-esimu/platforms/wsn430/worldsens-wsn430
+
+WSIM=${WORLDSENS}/build/wsim/platforms/wsn430/wsim-wsn430
+WSIMD=${WORLDSENS}/build/wsim-debug/platforms/wsn430/wsim-wsn430
+WSIME=${WORLDSENS}/build/wsim-esimu/platforms/wsn430/wsim-wsn430
+
+WCNS=${WORLDSENS}/build/wconsole/src/wconsole
+WTRC=${WORLDSENS}/build/wtracer/src/wtracer
+ESIMU=${HOME}/projets/os_basse_conso/tools/skyeye/eSimu/src/esimu
+
+FACTOR=1000000000
+
+DS1=0a:00:00:00:00:00:01:01
+DS2=53:00:00:00:00:00:02:01
+DS3=64:00:00:00:00:00:03:01
+DS4=e1:00:00:00:00:00:04:01
+DS5=d6:00:00:00:00:00:05:01
+DS6=8f:00:00:00:00:00:06:01
+DS7=b8:00:00:00:00:00:07:01
+DS8=9c:00:00:00:00:00:08:01
+DS9=ab:00:00:00:00:00:09:01
+DS10=f2:00:00:00:00:00:0a:01
+
+# ##################################################
+# ##################################################
+
+sleep_time()
+{
+    case "$HOSTNAME" in
+	"rollins")
+	    sleep 1.5
+	    ;;
+	"pistols")
+	    sleep 1
+	    ;;
+	*)
+	    sleep 1
+	    ;;
+    esac
+}
+
+# ##################################################
+# ##################################################
+
+dump_trace()
+{
+    $WTRC --in=$1.trc --out=$1.gp --format=gplot
+}
+
+# ##################################################
+# ##################################################
+# $1 id
+# $2 format
+# $3 output
+# $4 elf file
+
+dump_esimu_trace()
+{
+    $ESIMU $2 -b $1.est -o $1.prof -e $3
+}
+
+# ##################################################
+# ##################################################
+
+kill_demo()
+{
+    killall -SIGUSR1 worldsens-wsn430 > /dev/null 2>&1
+    killall -SIGQUIT worldsens_wsnet  > /dev/null 2>&1
+    killall -SIGQUIT wconsole         > /dev/null 2>&1
+}
+
+# ##################################################
+# ##################################################
+
+run_console()
+{
+    TMP=`mktemp`
+    ##echo "tmp=${TMP}"
+    ${WCNS} $* > ${TMP} 2>&1 &
+    sleep_time
+    REMOTE=`grep Remote ${TMP} | cut -f 4 -d ' '`
+    rm ${TMP}
+    echo "${REMOTE}"
+}
+
+# ##################################################
+# ##################################################
+
+run_wsnet()
+{
+    ${WSNET} -F config -l wsnet.log
+}
+
+# ##################################################
+# ##################################################
+# $1 id 
+# $2 ds2411
+# $3 elf file
+# $4 time
+# $5 serial
+
+run_wsimnet()
+{
+    ARGS=""
+    if [ "$5" != "" ] ; then 
+	ARGS="${ARGS} --serial=$5"
+    fi
+    if [ "x$SETUI" != "x" ] ; then 
+	ARGS="${ARGS} --ui"
+    fi
+    ARGS="${ARGS} --node-id=$1 --trace=n$1.trc --logfile=n$1.log"
+    ARGS="${ARGS} --verbose=4 --ds2411=$2 --mode=time --modearg=$4"
+    echo "${WSIMNET} ${ARGS} $3"
+}
+
+# ################################################################################
+# ################################################################################
+# #### Worldsens #################################################################
+# ################################################################################
+# ################################################################################
+
+# $1 id 
+# $2 ds2411
+# $3 elf file
+# $4 time
+# $5 serial
+
+run_wsimnetd()
+{
+    ARGS=""
+    PROG=${WSIMNETD}
+    if [ "$5" != "" ] ; then 
+	ARGS="${ARGS} --serial=$5"
+    fi
+    if [ "x$SETUI" != "x" ] ; then 
+	ARGS="${ARGS} --ui"
+    fi
+    if [ "x$SETESIMU" != "x" ] ; then
+	PROG=${WSIMNETE}
+	ARGS="${ARGS} --esimu=n$1.est --esimu-start"
+    fi
+    ARGS="${ARGS} --node-id=$1 --trace=n$1.trc --logfile=n$1.log"
+    ARGS="${ARGS} --verbose=5 --ds2411=$2 --mode=time --modearg=$4"
+    echo "${PROG} ${ARGS} $3"
+}
+
+# ##################################################
+# ##################################################
+# $1 id 
+# $2 ds2411
+# $3 elf file
+# $4 unused
+# $5 serial
+
+run_wsimnetd_gdb()
+{
+    if [ "$5" != "" ] ; then 
+	SERIAL=--serial=$5
+    fi
+    if [ "x$SETUI" != "x" ] ; then 
+	ARGS="--ui"
+    fi
+    ARGS="${ARGS} --node-id=$1 --trace=n$1.trc --logfile=n$1.log"
+    ARGS="${ARGS} --verbose=4 --ds2411=$2 --mode=gdb $SERIAL"
+    echo "${WSIMNETD} ${ARGS} $3"
+}
+
+# ################################################################################
+# ################################################################################
+# #### Wsim ######################################################################
+# ################################################################################
+# ################################################################################
+
+# $1 ds2411
+# $2 elf file
+# $3 time
+# $4 serial
+
+run_wsimd()
+{
+    ARGS=""
+    PROG=${WSIMD}
+    if [ "$4" != "" ] ; then 
+	SERIAL=--serial=$4
+    fi
+    if [ "x$SETUI" != "x" ] ; then 
+	ARGS="--ui"
+    fi
+    if [ "x$SETESIMU" != "x" ] ; then
+	PROG=${WSIME}
+	ARGS="${ARGS} --esimu=wsim.est --esimu-start"
+    fi
+    ARGS="${ARGS} --trace=wsim.trc --logfile=wsim.log"
+    ARGS="${ARGS} --verbose=4 --ds2411=$1 --mode=time --modearg=$3 $SERIAL"
+    echo "${PROG} ${ARGS} $2"
+}
+
+# ##################################################
+# ##################################################
+# $1 ds2411
+# $2 elf file
+# $3 unused
+# $4 serial
+
+run_wsimd_gdb()
+{
+    ARGS=""
+    PROG=${WSIMD}
+    if [ "$4" != "" ] ; then 
+	SERIAL=--serial=$4
+    fi
+    if [ "x$SETUI" != "x" ] ; then 
+	ARGS="--ui"
+    fi
+    ARGS="${ARGS} --trace=wsim.trc --logfile=wsim.log"
+    ARGS="${ARGS} --verbose=4 --ds2411=$1 --mode=gdb $SERIAL"
+    echo "${PROG} ${ARGS} $2"
+}
+
+# ################################################################################
+# ################################################################################
+# ################################################################################
+# ################################################################################
+# ################################################################################
+

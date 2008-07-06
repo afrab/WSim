@@ -1,0 +1,88 @@
+<!-- -*-html-*- -->
+<!-- HEADER -->
+#include "header.html"
+<!-- /HEADER  -->
+
+  <div id="main-body">
+    
+    <h2 id="intro">FAQ</h2>
+
+    <ul>
+      <li><b>About WSim</b></a><br>
+	  <ol>
+	    <li><a href="#1-1">What is WSim ?</a></li>
+	    <li><a href="#1-2">How much does it cost ?</a></li>
+            <li><a href="#1-3">Who to contact ?</a></li>
+	  </ol>
+      </li>
+
+      <li><b>For users</b></a><br>
+	  <ol>
+	    <li><a href="#2-3"> ?</a></li>
+	  </ol>
+      </li>
+
+      <li><b>Tools</b></a><br>
+	  <ol>
+	    <li><a href="#3-1"> ?</a></li>
+	  </ol>
+      </li>
+    </ul>
+
+</ br>
+
+<!-- ANSWERS -->
+
+    <h2 id="intro">About WSim</h2>
+    <ol>
+      <li><a name="1-1"></a><b>What is WSim ?</b></ br></li>
+      <p>
+	WSim is wireless network event-driven simulator. It is largely  
+	similar to other event-driven simulators such as ns2, JiST, GloMoSim,  
+	GTNetS, omnet++ though it differentiates itself with various  
+	functionalities, a precise radio medium simulation and the simulated  
+	node internals.
+      </p>
+
+      <li><a name="1-2"></a><b>How much does it cost ?</b></ br></li>
+      <p>
+	Nothing. WSim is under the Cecill free software license agreement.
+      </p> 
+
+      <li><a name="1-4"></a><b>Who/Why to contact ?</b></ br></li>
+      <p>
+	If you have any remark, question or contribution to this simulator,  
+	do not hesitate to contact one of the developpers. Inputs and  
+	feedbacks are more than welcome.
+	In particular, do not hesitate to ask for additions in this faq or in  
+	the tutorials.
+      </p>      
+    </ol>
+      
+    [ <a href="#top"><b>Back to Top</b></a> ]
+      
+    <h2 id="intro">For users</h2>
+      <ol>
+      <li><a name="2-1"></a><b> ?</b></br>
+      </li>
+      <p>
+      </p>
+      </ol>
+      
+    [ <a href="#top"><b>Back to Top</b></a> ]
+      
+    <h2 id="intro">Tools</h2>
+    <ol>
+      <li><a name="3-1"></a><b> ?</b></ br></li>
+      <p>
+      </p>
+    </ol>
+      
+    [ <a href="#top"><b>Back to Top</b></a> ]
+      
+</div>
+
+
+<!-- FOOTER -->
+#include "footer.html"
+<!-- FOOTER -->

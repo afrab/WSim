@@ -1,0 +1,189 @@
+\input texinfo @c -*- texinfo -*-
+@c %**start of header
+@setfilename wconsole.info
+@settitle WConsole: Worldsens Virtual Serial TTY
+@afourpaper
+@c %**end of header
+
+@c ======================================================================
+@c ======================================================================
+@c ======================================================================
+
+@set EDITION      0.2  @c manual edition
+@set VERSION      0.8cvs  @c wsim version
+@set UPDATED 06 May 2007
+@set UPDATE-MONTH May 2007
+
+@c     Send bug reports to @email{antoine.fraboulet@insa-lyon.fr},
+@c     suggestions to the @email{antoine.fraboulet@insa-lyon.fr, same address}.
+
+@c ======================================================================
+@c ======================================================================
+@c ======================================================================
+
+@copying
+This manual is for WConsole, the virtuel serial console for WSim, version @value{VERSION}.
+
+Copyright @copyright{} 2006, 2007 Antoine Fraboulet.
+
+@quotation
+Permission is granted to make and distribute verbatim copies
+of this entire document without royalty provided the
+copyright notice and this permission notice are preserved.
+@end quotation
+@end copying
+
+@c ======================================================================
+@c == Title Page ========================================================
+@c ======================================================================
+
+@titlepage
+@title WConsole: Worldsens Virtual Serial TTY
+@subtitle User Documentation
+@subtitle @value{UPDATE-MONTH}
+@author Antoine Fraboulet
+
+@page
+@vskip 0pt plus 1filll
+@insertcopying
+
+@c Published by ...
+@end titlepage
+
+@c ======================================================================
+@c == Contents ==========================================================
+@c ======================================================================
+
+@contents
+
+@ifnottex
+@node Top, Introduction, (dir), (dir)
+@top WConsole: Worldsens Virtual Serial TTY
+
+@insertcopying
+@end ifnottex
+
+@menu
+* Introduction:: Introduction
+* Options:: WConsole Command Line Options
+* Examples:: WConsole Example of Use
+@end menu
+
+
+@c ==================================================
+@c ==================================================
+@node Introduction, Options, Top, Top
+@chapter Introduction
+@c ==================================================
+@c ==================================================
+
+
+WConsole is a pseudo serial input/output tool that can be used as a
+basic console tool for WSim simulation. Its primary purpose is to
+simulate a RS232 like serial communication port linked to the WSim
+simulator. The fifo communication scheme is implemented using Unix
+pseudo-terminal master and slave interface (@t{ptmx} port
+multiplexer). WConsole is known to work on most unices (Linux, MacOSX,
+Solaris, ...)
+
+@image{fig/wsens_simul,16cm,,WConsole is a virtual console for WSim simulations}
+
+@c ==================================================
+@c ==================================================
+@node Options, Examples, Introduction, Top
+@chapter WConsole Command Line Options
+@c ==================================================
+@c ==================================================
+
+
+@c @cartouche
+@example
+@c man begin SYNOPSIS
+usage: wconsole [options]
+@c man end
+@end example
+@c @end cartouche
+
+
+@table @option
+@item  --help
+       -h : WConsole help
+@item  --output    
+       -o : output mode only      
+@item  --fifo=name 
+       -f : open an existing fifo 
+@item  --reopen    
+       -r : reopen on exit        
+@item  --log=name  
+       -l : logfile name          
+@item  --width=n   
+       -W : window character width 
+@item  --height=n  
+       -H : window character height         
+@end table
+
+
+
+
+@c ==================================================
+@c ==================================================
+@node Examples,  , Options, Top
+@chapter WConsole Examples
+@c ==================================================
+@c ==================================================
+
+
+The following example illustrate two WConsole linked together through 
+a pseudo-terminal fifo provded by the operating system (Linux in that
+case). The first WConsole opens the master port @t{/dev/ptmx} and 
+creates a slave port @t{/dev/pts/10} that can be used to connect 
+another WConsole or a WSim node. This very basic example works as a 
+full duplex fifo between two consoles.
+
+@verbatim
+   $wconsole 
+     ==== Wsim serial console ====
+     Local fifo is /dev/ptmx
+     Remote fifo is /dev/pts/2
+   $wconsole --fifo=/dev/pts/2
+@end verbatim
+
+
+The following figure is a screenshot of WConsole running the @t{wsn430-serial}
+provided in the WSim package. This example can be run with WSim by starting a
+WConsole on a master port and then opening the corresponding slave port 
+in the WSim simulation. The slave port name is given on the @t{stdout} terminal
+output that has been used to start WConsole and is also available as the window
+title.
+
+@image{fig/wconsole,12cm,,WConsole screenshot in input/output mode.}
+
+@verbatim
+  $ wconsole --reopen --output &
+  ==== Wsim serial console ====
+  Local fifo is /dev/ptmx
+  Remote fifo is /dev/pts/10
+  $ wsim --serial=/dev/pts/10 ...
+@end verbatim
+
+@c ==================================================
+@c ==================================================
+@c @node Resources and Links
+@c @chapter Resources and Links
+@c ==================================================
+@c ==================================================
+
+@c ======================================================================
+@c ======================================================================
+@c ======================================================================
+@c @node Index
+@c @unnumbered Index
+@c @printindex vr
+
+@c ======================================================================
+@c ======================================================================
+@c ======================================================================
+@bye
+@c ======================================================================
+@c ======================================================================
+@c ======================================================================

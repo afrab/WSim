@@ -1,0 +1,8 @@
+@node 7 Segments Display
+@section 7 Segments Display
+
+The 7 segmenst model is an 8 bits display that can be connected to 
+general IO ports. The 7 segments display device does not have 
+any option. The display is activated using the @t{--ui} option.
+
+@c @image{fig/wsim_7seg}

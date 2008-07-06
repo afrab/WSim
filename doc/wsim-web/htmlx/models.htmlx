@@ -1,0 +1,69 @@
+<!-- -*-html-*- -->
+<!-- HEADER -->
+#include "header.html"
+<!-- /HEADER  -->
+
+<div id="main-body">
+
+  <h2 id="intro">Models / API</h2>
+
+	<br>
+
+	The models included in the WSim distribution are the following:	<br><br>
+	
+	<TABLE BORDER="0" width="90%" align="center" cellpadding="2" cellspacing="1" bgcolor="#aebfd1">
+  		<TR align="middle" bgcolor="#7192be">
+			<TH WIDTH="20%"> Models </TH>
+			<TH WIDTH="70%"> Included in WSim distribution </TH>
+  		</TR>
+  		<TR align="middle" bgcolor="#ffffff">
+			<TD> <b>Micro controllers </b> </TD>
+			<TD> Ti MSP430, Atmel ATMega128 (ongoing work) </TD>
+  		</TR>
+  		<TR align="middle" bgcolor="#ffffff">
+			<TD> <b>Flash Memories</b> </TD>
+			<TD> ST m25p80, m25p10. Atmel atd45xx </TD>
+  		</TR>
+  		<TR align="middle" bgcolor="#ffffff">
+			<TD> <b>Wireless Chipset</b> </TD>
+			<TD> Chipcon CC1100, CC1101, CC2420</TD>
+  		</TR>
+  		<TR align="middle" bgcolor="#ffffff">
+			<TD> <b>Others</b> </TD>
+			<TD> Maxim serial ID DS2411, Leds, Bargraphs, 7 segments modules, LCD display (hd44780, gdm1602)</TD>
+  		</TR>
+
+<!-- SEPARATOR -->
+  		<TR align="middle" bgcolor="#7192be"> <TD>  </TD> <TD>  </TD> </TR>
+<!-- SEPARATOR -->
+
+  		<TR align="middle" bgcolor="#ffffff">
+			<TD> <b>MSP based Platforms</b> </TD>
+			<TD> INRIA WSN430v1, Berkeley Telosb, CSEM Wisenodes, ICL BSN nodes, Ti eZ430 usb key </TD>
+  		</TR>
+  		<TR align="middle" bgcolor="#ffffff">
+			<TD> <b>ATMega based platforms</b> </TD>
+			<TD> Berkeley MicaZ, Berkelay Mica2 </TD>
+  		</TR>
+
+<!-- SEPARATOR -->
+  		<TR align="middle" bgcolor="#7192be"> <TD>  </TD> <TD>  </TD> </TR>
+<!-- SEPARATOR -->
+
+  		<TR align="middle" bgcolor="#ffffff">
+			<TD> <b>Environment</b> </TD>
+			<TD> WSNet simulation interface </TD>
+  		</TR>
+
+<!-- SEPARATOR -->
+  		<TR align="middle" bgcolor="#7192be"> <TD>  </TD> <TD>  </TD> </TR>
+<!-- SEPARATOR -->
+
+  	</TABLE> 
+  	<br>
+  	
+</div>
+
+<!-- FOOTER -->
+#include "footer.html"
+<!-- FOOTER -->

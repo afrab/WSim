@@ -1,0 +1,52 @@
+<!-- -*-html-*- -->
+<!-- HEADER -->
+#include "header.html"
+<!-- /HEADER  -->
+  
+  <div id="main-body">
+    
+    <h2 id="intro">Installation</h2>
+    
+    <h3>System requirements</h3>
+	
+    <p>Before compiling WSim make sure the following software packages are installed on your system:</p>
+    
+    <ul style="margin-top: 0pt;">
+      <li><span >gcc</span>,  and <span>make</span></li>    		
+      <li><span >libsdl1.2</span></li>
+      <li><span >automake</span> (>= 1.10), <span>autoconf</span> (>= 2.61)</li>
+    </ul>
+    
+    
+    <h3>Downloading WSim source code</h3>
+    
+    <p> Check out the very latest WSim source code from the SVN repository by typing the following command:</p>
+    <pre class="terminal"><span class="prompt">$ </span> <span class="input">svn checkout svn://scm.gforge.inria.fr/svn/wsim</span></pre>
+    
+    
+    <h3>Compiling WSim</h3>
+	 
+    <p> After checking out the SVN repository, move to the <span class="hilite">./wsim/</span> directory and type the following commands: </p>
+
+    <pre class="terminal"><span class="prompt">$ </span> <span class="input">./bootstrap</span></pre>
+    <pre class="terminal"><span class="prompt">$ </span> <span class="input">./configure</span></pre>
+
+	
+    <p>The main configure options are (type <span class="hilite-code"> ./configure --help </span> for a more complete list): </p>
+    <ul style="margin-top: 0pt;">
+      <li><span class="hilite">--prefix=PREFIX</span>: to specify an install directory other than /usr/local/wsim/</li> 
+      <li><span class="hilite">--enable-debug</span>: enable debugging symbols</li>
+      <li><span class="hilite">--enable-platform-xxx</span>: compiles only platform xxx</li>
+    </ul>
+		
+    <p>To compile the WSim source code, type the following command: </p>
+
+    <pre class="terminal"><span class="prompt">$ </span> <span class="input">make</span></pre>
+    
+    <p>Platform specific simulators are compiled in their own platform/xxx directory </p>
+
+</div>
+
+<!-- FOOTER -->
+#include "footer.html"
+<!-- FOOTER -->

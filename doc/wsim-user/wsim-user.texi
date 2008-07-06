@@ -1,0 +1,576 @@
+\input texinfo @c -*- texinfo -*-
+@c %**start of header
+@setfilename wsim-user.info
+@settitle WSim : Worldsens Platform Simulator
+@afourpaper
+@c %**end of header
+
+@c ======================================================================
+@c ======================================================================
+@c ======================================================================
+@set EDITION      0.2  @c manual edition
+@set VERSION      0.8cvs  @c wsim version
+@set UPDATED 06 May 2007
+@set UPDATE-MONTH May 2007
+
+@c     Send bug reports to @email{antoine.fraboulet@insa-lyon.fr},
+@c     suggestions to the @email{antoine.fraboulet@insa-lyon.fr, same address}.
+
+@c ======================================================================
+@c ======================================================================
+@c ======================================================================
+
+@copying
+This manual is for WSim, version @value{VERSION}.
+
+Copyright @copyright{} 2006 Antoine Fraboulet, Guillaume Chelius, Eric Fleury.
+
+@quotation
+Permission is granted to make and distribute verbatim copies
+of this entire document without royalty provided the
+copyright notice and this permission notice are preserved.
+@end quotation
+@end copying
+
+@c ======================================================================
+@c == Title Page ========================================================
+@c ======================================================================
+
+@titlepage
+@title WSim: Worldsens Platform Simulator 
+@subtitle User Documentation
+@subtitle @value{UPDATE-MONTH}
+@author Antoine Fraboulet
+
+@page
+@vskip 0pt plus 1filll
+@insertcopying
+
+@c Published by ...
+@end titlepage
+
+@c ======================================================================
+@c == Contents ==========================================================
+@c ======================================================================
+
+@contents
+
+@ifnottex
+@node Top, Introduction , (dir), (dir)
+@top WSim: Worldsens Platform Simulator
+
+@insertcopying
+@end ifnottex
+
+@menu
+* Introduction:: Introduction
+* Options:: WSim Command Line Options
+* Description:: Description of Use
+* Platforms:: WSim Platform Support
+* Processors:: WSim processor units models
+* Peripherals:: External Peripherals
+* WSNet:: Using WSim with WSNet Radio Simulator
+* Links:: External Resources
+@c * Index:: Index
+@end menu
+
+@c ======================================================================
+@c == Introduction ======================================================
+@c ======================================================================
+
+@node Introduction , Options, Top, Top
+@chapter Introduction
+
+WSim is part of the Worldsens development environment. WSim is a full
+platform simulator that can run the target platform object code without
+modification. The primary goals of WSim are debugging, profiling and
+performance evaluation for deeply embedded wireless sensor node/network (WSN)
+distributed applications. 
+
+@image{fig/compile,15cm,,Compile - Simulate - Dowload application design loop}
+
+Writing distributed WSN applications using the worldsens toolkit is far
+more easier than using prototype boards due to the fast compile/debug/estimate
+development cycle. 
+@c Debugging and performance estimation if far more easier using
+@c software simulator than real hardware. 
+This performance estimation is made possible using a full platform
+simulation at a cycle precise level. Peripherals that deal with real time constraints (timers, interrupts,
+serial ports, radio interface, etc.) are included in the WSim platform
+model. Time is given in a cycle accurate manner using application
+instruction timing.
+
+WSim provides a simulation environment in which you can get
+
+@itemize
+@item Full instruction set support for the target micro-controller
+@item Cycle-accurate simulation 
+@item Simulation of peripherals such as timers
+@item Interrupts
+@item Cycle-accurate simulation of other peripherals (e.g. UART)
+@item External peripherals (radio modules, LCD display, ...)
+@item A @b{full system} debug and performance analysis framework
+@end itemize
+
+This manual describes the user interface of the WSim simulator. The
+internals of the simulator, including how to write the description of
+a new platform (a new simulation target) and some information about
+how to write hardware component models, are documented in a separate
+manual.
+
+WSim should compile and run on any Un*x-like platform. It has been
+tested on Linux/x86, Linux/x86_64, Linux/ppc32, Linux/Alpha,
+Solaris9/Sparc, Solaris10/Sparc, MacOSX/ppc32, MacOSX/x86 and Windows
+XP (using cygwin). Please refer to the internal documentation for more
+information about supported platforms and porting to new operating systems.
+
+@c ======================================================================
+@c ======================================================================
+@c ======================================================================
+
+@node Options, Description, Introduction , Top
+@chapter WSim Command Line Options
+
+WSim uses both general options to control the simulation behaviour as
+well as platform specific options. These options are enabled only when
+the associated peripherals are included in the simulation platform.
+Platform specific options are listed and explained in their
+appropriate sections.
+ 
+This section presents the general options that are common to all
+platforms.
+
+@example
+@c man begin SYNOPSIS
+usage: wsim [options] [binary_file]
+@c man end
+@end example
+
+@table @option
+@item --help
+      Print command line help.
+
+@item --version
+      Print WSim and exit.
+
+@item --ui 
+      Enables a user interface that includes target dependent 
+      output peripherals (leds, 7 segments, LCD display, buttons, ...)
+
+@item --mode
+      Starts WSim in gdb mode waiting on default port 2159/TCP
+
+@item --modearg=int
+      Starts WSim in gdb mode waiting on the specified TCP port
+
+@item --verbose=value
+      Set the level of debug and warning messages.
+
+@item --logfile=filename
+      Set an output file name for WSim log system. Default is set to @t{stdout}
+
+@item --trace[=tracefile]
+      Enables trace output. The tracer module records numbered events during the simulation.
+      By default, WSim currently records interrupts and power modes. These traces
+      can be extended in the platform configuration in order to record any event during
+      the simulation. Traces can be read using the WTracer tool provided in the Worldsens
+      toolsuite. 
+      
+@end table
+
+@c ======================================================================
+@c ======================================================================
+@c ======================================================================
+
+@node Description, Platforms, Options, Top
+@chapter Description of Use
+
+@menu
+* Running:: Running WSim
+* Errors:: Reported Errors
+* Debugging:: Debugging
+@end menu
+
+WSim is a cycle accurate platform simulator that takes an ELF
+(Executable and Linkable Format) file compiled for the target
+processor architecture  as input. The executable file should be an executable
+statically linked object file that is a standalone application.
+
+WSim uses an instruction based timing model. The main processing unit
+is thus responsible for simulation timing according to its frequency
+and instruction set performance numbers. When the micro-controller is
+in a low power state which inhibits the instruction fetch - decode -
+execute loop, an arbitrary delay loop is introduced to drive the
+simulation. The micro-controller unit model is fully responsible for
+time keeping within the simulation. For more information, see the WSim
+internal documentation.
+
+The current version of WSim as only been tested using GCC generated
+ELF files produced using the GNU binutils tools. WSim should be
+compliant with other compilers and tools as long as they produce
+standard ELF files.
+
+@c ==========
+@node Running, Errors, Description, Description
+@section Running a program using WSim
+@c ==========
+
+WSim takes as arguments several command line options that are used
+to drive the simulation and an ELF program targeted for the simulated 
+platform.
+
+
+@example
+  wsim --ui --trace=wsim.trc --mode=time --modearg=4000000000 program.elf
+@end example
+
+This command line starts a simulation with a user interface for
+peripherals display such as leds and LCD screen. The simulation will
+last for 4 seconds (time is expressed in nano seconds on the command
+line). The simulation will output trace files that can be read by
+the @t{wtracer} tool.
+
+Simulation time is unlimited unless otherwise specified using
+@t{--mode=steps} or @t{--mode=time}. 
+
+The @t{--verbose} output can display various runtime information about
+program execution. An example of simulation output is presented below
+
+@verbatim
+== MSP430 creation
+  model: msp430f1611
+==
+PTTY1: local fifo is [/dev/pts/6]
+PTTY1: remote fifo is [unknown]
+== Machine description
+mcu   : msp430 
+model : msp430f1611 
+device list:
+  dev 00 : m25p80 flash memory
+  dev 01 : Led display
+  dev 02 : Led display
+  dev 03 : Led display
+  dev 04 : ds2411 silicon serial number
+  dev 05 : ptty serial I/O
+  dev 06 : 7 segments display
+  dev 07 : 7 segments display
+==
+
+== 
+== simulation time :  2.1 seconds
+== simulated time  :    6 seconds
+== speedup    : 2.9
+== backtracks : 0
+== 
+@end verbatim
+
+The simulation time is given using the ``wall clock'' processor time
+used by the simulation process (this may vary on some systems).  The
+speedup time is the ratio between the simulation time and the
+simulated time. The speedup depends on the simulated activity (serial
+port communication, ui widget drawing, ...)
+
+@node Errors, Debugging, Running, Description
+@section Error reporting and Warnings
+@c =====================================
+
+WSim reports dynamic common errors and warnings that occur during the
+simulation. Examples of common errors and warnings are missed
+interrupts, writing to flash memory, serial port buffer overrun, etc.
+
+The errors and warning messages begin with a prefix that can be used
+to filter the output. This prefix is made of the component's name and
+its subsystem name separated by semi-columns.
+
+The following example is a missed interrupt that has occured while GIE
+(General Interrupt Enable) was equal to zero. The current PC
+information can be used to determine where this interrupt has occurred
+in the program. In this particular example, this address is in a
+non-reentrant interrupt handler.
+
+@example
+msp430:intr: Interrupt 6 received but GIE = 0 (current PC = 0x40f6)
+@end example
+
+
+@node Debugging,  , Errors, Description
+@section Debugging using WSim
+@c =====================================
+
+WSim understands the GDB remote protocol to drive the simulation
+engine.  The simulator can be started using the @t{--mode=gdb}
+parameter to use this functionality. The following example starts a
+simulation in debug mode and waits on the default port (TCP 2159)
+until a connexion is made from a remote debugger that implements the
+same target architecture (@t{GDB} must be compiled as a cross-debugger
+for the target architecture).
+
+@example
+wsim --ui --verbose=1 --mode=gdb prog.elf
+@end example
+
+@c @image{fig/wsim_gdb,15cm,,Simulation and debugger on the host machine}
+@image{fig/wsim_gdb_ui,15cm,,WSim used with GNU Insight debugger}
+
+While WSim is used in gdb mode, the simulation is stopped just after
+machine creation. The program (ELF file) can be preloaded using
+the command line or loaded through the GDB interface using standard
+@t{load} commands. 
+
+@c @example
+@c target remote localhost:2159
+@c @end example
+
+@c ============
+@c @node Profiling
+@c @section Performance Profiling using WSim
+@c ============
+@c Performance profiling is done using selective execution traces. 
+
+@c ======================================================================
+@c ======================================================================
+@c ======================================================================
+
+@node Platforms, Processors, Description, Top
+@chapter WSim Platform Support
+
+WSim is composed of a set of libraries that have to be configured and
+linked together to build a simulator dedicated to a specific
+platform.  This ``compile time'' configuration creates an
+efficient simulation engine tailored to a specific node mode. The main
+drawback to this strategy is that there is no single ``WSim
+executable'' that can be used for all platforms.
+
+A specific platform configuration has the global options explained
+above and adds a set of options from the components included in the
+design. These options are specific to the components and can be set
+in the command line when running WSim. The available WSim components
+are listed in the following sections and are presented with their
+corresponding options.
+
+@section Wsn430 platform example
+
+As an example of platform description, we present @t{wsn430} platform
+ that can be simulated using WSim. This platform owns the following main components
+
+@c @image{wsm430,,,wsm430 platform model}
+
+@itemize
+@item Ti MSP430f1611 micro controller 
+@item 1MB Flash memory STMicroelectronics STM25P80
+@item Chipcon CC1100 radio interface
+@item Silicon serial number DS2411
+@item External access to the MCU serial port 
+@item External crystals with specific frequencies
+@end itemize
+
+This example illustrates the type of platforms that can implemented
+within the simulator. One of the main restriction in the platform design
+is the assumption that a node owns only one micro-controller.
+This restriction comes from the timing model used within the
+simulation process.
+
+@image{fig/wsn430_arch,12cm,,WSN430 architecture simulated in WSim}
+
+@section Ti ez430 USB key
+
+The Ti USB ez430 is very simple device that is made to test and 
+develop very small application on an MSP430f2013 micro-controller. The
+only peripheral included on the platform is a led connected to port 1, bit 0 (P1.0)
+
+@c ======================================================================
+@c ======================================================================
+@c ======================================================================
+
+@node Processors, Peripherals, Platforms, Top
+@chapter WSim Processing Units
+
+WSim currently support the Ti MSP430 micro-controller family. Other 
+micro-controllers will be available in a short timeframe to extand the
+capabilities of the simulator. 
+
+@menu
+* MSP430:: Ti MSP430 micro-controllers
+@end menu
+
+@c ====
+@include wsim-msp430.texi
+
+@c ======================================================================
+@c ======================================================================
+@c ======================================================================
+@node Peripherals, WSNet, Processors, Top
+@chapter Available External Peripherals
+
+WSim includes several external peripherals that can be used to design
+platforms. These devices are modeled using finite state machines and
+use the simulator interface and timing model to preserve their precise
+behavior during the simulation. The presented models include drivers for
+several embedded protocols (1-wire, UART in both asynchronous and SPI
+modes) that can be reused for other devices.
+
+@menu
+* Led:: Led
+* 7 Segments Display:: 7 Segment Display
+* GDM1602a:: GDM1602a LCD display
+* Maxim DS2411:: Maxim DS2411 Silicon Serial Number
+* STMicro M25P80:: STMicroelectronic ST25P80 1MB Flash Memory Module
+* Pseudo Serial I/O:: Serial Port Emulation
+* Chipcon CC1100:: Chipcon CC1100 packet radio device
+@end menu
+
+@include periph/wsim-led.texi
+@include periph/wsim-7seg.texi
+@include periph/wsim-gdm1602a.texi
+@include periph/wsim-ds2411.texi
+@include periph/wsim-m25p80.texi
+@include periph/wsim-ptty.texi
+@include periph/wsim-cc1100.texi
+
+@c ======================================================================
+@c ======================================================================
+@c ======================================================================
+@node WSNet, Links, Peripherals, Top
+@chapter Using WSim with WSNet Radio Simulator
+
+WSim can be attached to the WSNet simulator through radio interfaces such as the
+Chipcon CC1100 model. This allows to build a complete simulation framework that
+is able to debug and analyze a complete wireless sensor network. Thus WSim and WSNet 
+allows to @b{design and refine} a full distributed application from the top
+level specifications to the final application binary within the same framework and
+application description: the @b{real application code}.
+
+@image{fig/dist_simul,16cm,,Complete system using WSim and WSNet network simulators}
+@c @image{fig/dist_simul,16cm,,WSim and WSNet combined for mixed simulation}
+
+Communication between the simulators are done using IPv4 unicast and multicast 
+in order to allow the distribution of the simulation load across a network of workstations.
+A typical middle range workstation can handle several dozens of concurrent WSN node
+simulators so that a small set of workstations can scale to hundreds of nodes. This
+allows the Worldsens environment to provide a performance
+analysis of real world applications using cycle accurate simulation tools.
+
+WSim, when run in the Worldsens environment has the following list of options added
+to its basic option list:
+
+@table @option
+@item --node-id=[id]
+      @t{id} is the configuration node id in the WSNet configuration file. 
+      Default node id is set to @t{1}.
+@item --server-ip=[ip]
+      Specify the WSNet server port IP address. This corresponds to the 
+      WSNet control channel. Default IP address is @t{127.0.0.1}.
+@item --server-port=[port]
+      WSNet Control channel port. Default port value is set to @t{9998}
+@item --broadcast-ip=[ip]
+      WSNet multicast IP address. Default address is set to @t{224.0.0.1}
+@item --broadcast-port=[port]
+      WSNet multicast port. Default port is set to @t{9999}.
+@end table
+
+
+@c ======================================================================
+@c ======================================================================
+@c ======================================================================
+@node Links,  , WSNet, Top
+@chapter External Resources
+
+@itemize
+
+@item Compilers and Tools
+      @itemize @bullet
+      @item Worldsens web page
+
+            @uref{http://worldsens.citi.insa-lyon.fr/}
+
+      @item GCC port for Ti MSP430 
+
+            @uref{http://mspgcc.sourceforge.net/}
+
+@c      @item GCC port for Atmel AVR
+@c
+@c            @uref{http://a.b.c/}
+
+      @item GDB, the GNU Project Debugger 
+
+            @uref{http://www.gnu.org/software/gdb/}
+
+      @item DDD, Data Display Debugger 
+
+            @uref{http://www.gnu.org/software/ddd/}
+
+      @end itemize
+
+@item Profiling and Visualization Tools
+
+      WSim performance evaluation output files can be used with the following tools:
+
+      @itemize @bullet
+      @item Gnuplot 
+      
+            @uref{http://www.gnuplot.info/}
+
+      @item KCachegrind - Profiling Visualization 
+      
+            @uref{http://kcachegrind.sourceforge.net/cgi-bin/show.cgi}
+
+      @item GTKWave - Electronic Waveform Viewer 
+
+            @uref{http://www.cs.manchester.ac.uk/apt/projects/tools/gtkwave/}
+
+      @end itemize
+
+@item Operating Systems links
+
+      The following operating systems are known to work on the Worldsens environment:
+
+      @itemize @bullet
+      @item The TinyOS Project 
+
+            @uref{http://www.tinyos.net/}
+
+      @item The Contiki OS 
+            
+            @uref{http://www.sics.se/~adam/contiki/}
+
+      @item FreeRTOS OS
+
+            @uref{http://www.freertos.org/}
+
+      @end itemize
+
+@item WSens Hardware Components
+      @itemize @bullet
+      @item Texas Instrument MSP430 microcontroller 
+ 
+            @uref{http://www.ti.com/msp430}
+
+      @item Chipcon radio chipsets 
+
+            @uref{http://www.chipcon.com/}
+
+      @item Maxim DS2411 onewire serial number 
+
+            @uref{http://www.maxim-ic.com/DS2411}
+
+      @item STM 8Mb Flash Memory 
+
+            @uref{http://www.st.com/stonline/products/literature/ds/8495.htm}
+      @end itemize
+
+@end itemize
+
+@c ======================================================================
+@c ======================================================================
+@c ======================================================================
+@c @node Index
+@c @unnumbered Index
+@c @printindex vr
+
+@c ======================================================================
+@c ======================================================================
+@c ======================================================================
+@bye
+@c ======================================================================
+@c ======================================================================
+@c ======================================================================

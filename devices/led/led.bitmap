@@ -1,0 +1,38 @@
+/* XPM */
+ char *ledimg[] = {
+/* width height ncolors chars_per_pixel */
+"27 27 4 1",
+/* colors */
+"  c #000000",
+". c #FF0000",
+"X c #FFFFFF",
+"o c None",
+/* pixels */
+"                           ",
+" XXXXXXXXXXXXXXXXXXXXXXXXX ",
+" XXXXXXXXXXXXXXXXXXXXXXXXX ",
+" XXXXXXXXXXXXXXXXXXXXXXXXX ",
+" XXXXXXXXXXXXXXXXXXXXXXXXX ",
+" XXXXXXXXXXXXXXXXXXXXXXXXX ",
+" XXXXXXXXXX     XXXXXXXXXX ",
+" XXXXXXXX  .....  XXXXXXXX ",
+" XXXXXXX ......... XXXXXXX ",
+" XXXXXX ........... XXXXXX ",
+" XXXXX  ........... XXXXXX ",
+" XXXXX ............. XXXXX ",
+" XXXXX ............. XXXXX ",
+" XXXXX ............. XXXXX ",
+" XXXXX ............. XXXXX ",
+" XXXXX ............. XXXXX ",
+" XXXXX  ........... XXXXXX ",
+" XXXXXX ........... XXXXXX ",
+" XXXXXXX ......... XXXXXXX ",
+" XXXXXXXX  .....  XXXXXXXX ",
+" XXXXXXXXX       XXXXXXXXX ",
+" XXXXXXXXXXXXXXXXXXXXXXXXX ",
+" XXXXXXXXXXXXXXXXXXXXXXXXX ",
+" XXXXXXXXXXXXXXXXXXXXXXXXX ",
+" XXXXXXXXXXXXXXXXXXXXXXXXX ",
+" XXXXXXXXXXXXXXXXXXXXXXXXX ",
+"                           "
+};

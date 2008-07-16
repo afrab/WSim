@@ -12,6 +12,7 @@
 
 #include "arch/common/hardware.h"
 #include "devices/m25p80/m25p80_dev.h"
+#include "src/options.h"
 
 /***************************************************/
 /***************************************************/
@@ -29,8 +30,8 @@
 /***************************************************/
 /***************************************************/
  
-#ifdef __DEBUG
-#define MSG_DEVICES       6
+#ifdef DEBUG
+#define MSG_DEVICES       2
 #define DEBUG_ME_HARDER
 #define HW_DMSG_M25(x...) VERBOSE(MSG_DEVICES,x)
 #else
@@ -287,6 +288,40 @@ void m25p_ui_get_pos  (int dev, int *x, int *y);
 /***************************************************/
 /***************************************************/
 
+#define MAXNAME 1024
+
+static struct moption_t flash_init_opt = {
+  .longname    = "flash_init",
+  .type        = required_argument,
+  .helpstring  = "Flash init image",
+  .value       = NULL
+};
+
+static struct moption_t flash_dump_opt = {
+  .longname    = "flash_dump",
+  .type        = required_argument,
+  .helpstring  = "Flash dump image",
+  .value       = NULL
+};
+
+
+int m25p_add_options(int UNUSED dev_num, int dev_id, const char UNUSED *dev_name)
+{
+  if (dev_id >= 1)
+    {
+      ERROR("m25p: too much devices, please rewrite option handling\n");
+      return -1;
+    }
+
+  options_add( &flash_init_opt  );
+  options_add( &flash_dump_opt  );
+  return 0;
+}
+
+/***************************************************/
+/***************************************************/
+/***************************************************/
+
 int m25p_device_size()
 {
   return sizeof(struct m25p_t);
@@ -352,7 +387,7 @@ int m25p_flash_dump(int dev, const char *name)
 /***************************************************/
 /***************************************************/
 
-int m25p_device_create(int dev, const char* init, const char *dump)
+int m25p_device_create(int dev, int UNUSED id)
 {
   machine.device[dev].reset         = m25p_reset;
   machine.device[dev].delete        = m25p_delete;
@@ -370,8 +405,8 @@ int m25p_device_create(int dev, const char* init, const char *dump)
   machine.device[dev].state_size    = m25p_device_size();
   machine.device[dev].name          = M25PNAME " flash memory";
 
-  M25P_INIT = (init == NULL) ? NULL : strdup(init);
-  M25P_DUMP = (dump == NULL) ? NULL : strdup(dump);
+  M25P_INIT = flash_init_opt.value;
+  M25P_DUMP = flash_dump_opt.value;
 
 #if defined(DEBUG_ME_HARDER)
   HW_DMSG_M25(M25PNAME ": =================================== \n");
@@ -384,7 +419,7 @@ int m25p_device_create(int dev, const char* init, const char *dump)
   HW_DMSG_M25(M25PNAME ": =================================== \n");
 #endif
 
-  if (init == NULL || m25p_flash_load(dev, init))
+  if (M25P_INIT == NULL || m25p_flash_load(dev, M25P_INIT))
     {
       HW_DMSG_M25(M25PNAME ": flash memory init to 0xff\n");
       memset(M25P_MEMRAW,0xff,M25P_FLASH_SIZE);

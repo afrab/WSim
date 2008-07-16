@@ -15,7 +15,8 @@
 
 #define PTTY_D 0xffu
 
+int  ptty_add_options   (int dev_num, int dev_id, const char* dev_name);
 int  ptty_device_size   ();
-int  ptty_device_create (int dev_num, int id, const char *filename);
+int  ptty_device_create (int dev_num, int dev_id);
 
 #endif

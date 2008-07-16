@@ -35,8 +35,10 @@
 /* ************************************************** */
 /* ************************************************** */
 
-#undef DEBUG
-#ifdef DEBUG
+/* liblogger cannot be used during option parse */
+
+#define __DEBUG_OPTIONS
+#ifdef DEBUG_OPTIONS
 #  define OPT_DMSG(x...)  fprintf(stderr,x)
 #else
 #  define OPT_DMSG(x...)  do { } while(0)

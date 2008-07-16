@@ -43,13 +43,6 @@
 /* ************************************************** */
 /* ************************************************** */
 
-static struct moption_t ptty_opt = {
-  .longname    = "serial",
-  .type        = required_argument,
-  .helpstring  = "serial fifo",
-  .value       = NULL
-};
-
 static struct moption_t xt1_opt = {
   .longname    = "xin",
   .type        = required_argument,
@@ -71,20 +64,6 @@ static struct moption_t xosc_opt = {
   .value       = NULL
 };
 
-static struct moption_t flash_init_opt = {
-  .longname    = "flash_init",
-  .type        = required_argument,
-  .helpstring  = "Flash init image",
-  .value       = NULL
-};
-
-static struct moption_t flash_dump_opt = {
-  .longname    = "flash_dump",
-  .type        = required_argument,
-  .helpstring  = "Flash dump image",
-  .value       = NULL
-};
-
 /* ************************************************** */
 /* ************************************************** */
 /* ************************************************** */
@@ -94,9 +73,8 @@ int devices_options_add(void)
   options_add(& xt1_opt            );
   options_add(& xt2_opt            );
   options_add(& xosc_opt           );
-  options_add(& flash_init_opt     );
-  options_add(& flash_dump_opt     );
-  options_add(& ptty_opt           );
+  m25p_add_options(FLASH,  0, "flash"  );
+  ptty_add_options(SERIAL, 1, "serial1");
 
   return 0;
 }
@@ -198,13 +176,13 @@ int devices_create(void)
   /*********************************/
 
   res += system_create          (SYSTEM);
-  res += m25p_device_create     (FLASH, flash_init_opt.value, flash_dump_opt.value);
+  res += m25p_device_create     (FLASH, 0);
   res += led_device_create      (LED1,0xee,0x00,0x00);
   res += led_device_create      (LED2,0x00,0xee,0x00);
   res += led_device_create      (LED3,0x00,0x00,0xee);
   res += led_device_create      (LED4,0x00,0xee,0xee);
   res += cc1100_device_create   (RADIO, xosc_freq / 1000000);
-  res += ptty_device_create     (SERIAL,1,ptty_opt.value);
+  res += ptty_device_create     (SERIAL,1);
 
   /*********************************/
   /* place peripherals Gui         */

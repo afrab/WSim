@@ -12,6 +12,7 @@
 
 #include "arch/common/hardware.h"
 #include "devices/at45db/at45db_dev.h"
+#include "src/options.h"
 
 #define DEBUG_ME_HARDER
 
@@ -196,6 +197,40 @@ void at45db_ui_get_pos  (int dev, int *x, int *y);
 /***************************************************/
 /***************************************************/
 
+#define MAXNAME 1024
+
+static struct moption_t flash_init_opt = {
+  .longname    = "flash_init",
+  .type        = required_argument,
+  .helpstring  = "Flash init image",
+  .value       = NULL
+};
+
+static struct moption_t flash_dump_opt = {
+  .longname    = "flash_dump",
+  .type        = required_argument,
+  .helpstring  = "Flash dump image",
+  .value       = NULL
+};
+
+
+int at45db_add_options(int UNUSED dev_num, int dev_id, const char UNUSED *dev_name)
+{
+  if (dev_id >= 1)
+    {
+      ERROR("at45db: too much devices, please rewrite option handling\n");
+      return -1;
+    }
+
+  options_add( &flash_init_opt  );
+  options_add( &flash_dump_opt  );
+  return 0;
+}
+
+/***************************************************/
+/***************************************************/
+/***************************************************/
+
 int at45db_device_size()
 {
   return sizeof(struct at45db_t);
@@ -261,7 +296,7 @@ int at45db_flash_dump(int dev, const char *name)
 /***************************************************/
 /***************************************************/
 
-int at45db_device_create(int dev, const char* init, const char *dump)
+int at45db_device_create(int dev, int UNUSED id)
 {
   machine.device[dev].reset         = at45db_reset;
   machine.device[dev].delete        = at45db_delete;
@@ -279,10 +314,10 @@ int at45db_device_create(int dev, const char* init, const char *dump)
   machine.device[dev].state_size    = at45db_device_size();
   machine.device[dev].name          = "at45db flash memory";
 
-  AT45_INIT = (init == NULL) ? NULL : strdup(init);
-  AT45_DUMP = (dump == NULL) ? NULL : strdup(dump);
+  AT45_INIT = flash_init_opt.value;
+  AT45_DUMP = flash_dump_opt.value;
 
-  if (init == NULL || at45db_flash_load(dev, init))
+  if (AT45_INIT == NULL || at45db_flash_load(dev, AT45_INIT))
     {
       HW_DMSG_AT45("at45db: flash memory init to 0xff\n");
       memset(AT45_MEMRAW,0xff,AT45_FLASH_SIZE);

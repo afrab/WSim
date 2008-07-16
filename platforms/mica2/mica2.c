@@ -60,18 +60,11 @@ static struct moption_t xosc_opt = {
   .value       = NULL
 };
 
-static struct moption_t ptty_opt = {
-  .longname    = "serial",
-  .type        = required_argument,
-  .helpstring  = "serial fifo",
-  .value       = NULL
-};
-
 int devices_options_add(void)
 {
   options_add(&xtal_opt            );
   options_add(&xosc_opt            );
-  options_add(&ptty_opt            );
+  ptty_add_options(SERIAL, 1, "serial1");
   return 0;
 }
 
@@ -129,7 +122,7 @@ int devices_create(void)
   res += led_device_create      (LED1,0xee0000,0,0);
   res += led_device_create      (LED2,0x00ee00,0,0);
   res += led_device_create      (LED3,0xee0000,0,0);
-  res += ptty_device_create     (SERIAL,1,ptty_opt.value);
+  res += ptty_device_create     (SERIAL,1);
 
   /*********************************/
   /* place peripherals Gui         */

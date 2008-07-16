@@ -21,13 +21,14 @@
 
 #include "arch/common/hardware.h"
 #include "libselect/libselect.h"
+#include "src/options.h"
 #include "ptty_dev.h"
 
 /***************************************************/
 /***************************************************/
 /***************************************************/
 
-// #define DEBUG_PTTY
+#define DEBUG_PTTY
 
 #ifdef DEBUG_PTTY
 #    define HW_DMSG_PTTY(x...) HW_DMSG(x)
@@ -47,10 +48,13 @@ struct ptty_t {
 
   int   fd_in;
   int   fd_out;
-  int   need_close;
+  int   need_close_in;
+  int   need_close_out;
 
-  char  fifo_local[MAX_FILENAME];
-  char  fifo_remote[MAX_FILENAME];
+  char  fifo_in_local  [MAX_FILENAME];
+  char  fifo_in_remote [MAX_FILENAME];
+  char  fifo_out_local [MAX_FILENAME];
+  char  fifo_out_remote[MAX_FILENAME];
 };
 
 #define PTTY_DATA     ((struct ptty_t*)(machine.device[dev].data))
@@ -77,6 +81,63 @@ int  ptty_ui_draw     (int dev);
 void ptty_ui_get_size (int dev, int *w, int *h);
 void ptty_ui_set_pos  (int dev, int  x, int  y);
 void ptty_ui_get_pos  (int dev, int *x, int *y);
+
+/***************************************************/
+/***************************************************/
+/***************************************************/
+
+#define MAXNAME 40
+
+struct ptty_opt_t {
+  int  dev_num;
+  int  dev_id;
+  char dev_name[MAXNAME];
+  struct moption_t io;
+  struct moption_t in; 
+  struct moption_t out;
+};
+
+static struct ptty_opt_t opt_array[2];
+
+char* str_build(const char* str, const char* name)
+{
+  char buff[MAXNAME];
+  snprintf(buff,MAXNAME,str,name);
+  return strdup(buff);
+}
+
+int ptty_add_options(int dev_num, int dev_id, const char *dev_name)
+{
+  if (dev_id >= 2)
+    {
+      ERROR("ptty: too much devices, please rewrite option handling\n");
+      return -1;
+    }
+
+  opt_array[dev_id].dev_num = dev_num;
+  opt_array[dev_id].dev_id  = dev_id;
+  strncpy(opt_array[dev_id].dev_name, dev_name, MAXNAME);
+
+  opt_array[dev_id].io.longname    = str_build("%s_io", dev_name);
+  opt_array[dev_id].io.type        = required_argument;
+  opt_array[dev_id].io.helpstring  = str_build("%s fifo in/out", dev_name);
+  opt_array[dev_id].io.value       = NULL;
+
+  opt_array[dev_id].in.longname    = str_build("%s_in", dev_name);
+  opt_array[dev_id].in.type        = required_argument;
+  opt_array[dev_id].in.helpstring  = str_build("%s fifo in", dev_name);
+  opt_array[dev_id].in.value       = NULL;
+
+  opt_array[dev_id].out.longname   = str_build("%s_out", dev_name);
+  opt_array[dev_id].out.type       = required_argument;
+  opt_array[dev_id].out.helpstring = str_build("%s fifo out", dev_name);
+  opt_array[dev_id].out.value      = NULL;
+
+  options_add( & opt_array[dev_id].io);
+  options_add( & opt_array[dev_id].in);
+  options_add( & opt_array[dev_id].out);
+  return 0;
+}
 
 /***************************************************/
 /***************************************************/
@@ -164,74 +225,176 @@ ptty_get_system_fifo(char local_name[MAX_FILENAME], char remote_name[MAX_FILENAM
 /***************************************************/
 /***************************************************/
 
-int ptty_device_create(int dev, int id, const char *filename)
+int ptty_device_create(int dev, int id)
 {
+  char* file_in;
+  char* file_out;
 
-  PTTY_FD_IN            = -1;
-  PTTY_FD_OUT           = -1;
-  PTTY_DATA->need_close =  0;
+  PTTY_FD_IN                 = -1;
+  PTTY_FD_OUT                = -1;
+  PTTY_DATA->need_close_in   =  0;
+  PTTY_DATA->need_close_out  =  0;
+  machine.device[dev].read   =  ptty_dummy_read;
+  machine.device[dev].write  =  ptty_dummy_write;
 
-  if (filename == NULL)
+  REAL_STDOUT("ptty:options: %s %s %s\n",
+	      opt_array[id].io.value,
+	      opt_array[id].in.value,
+	      opt_array[id].out.value);
+
+  if (opt_array[id].io.value && (opt_array[id].in.value || opt_array[id].out.value))
     {
-      OUTPUT("PTTY%d: ptty not activated\n",id);
-      machine.device[dev].read          = ptty_dummy_read;
-      machine.device[dev].write         = ptty_dummy_write;
+      ERROR("ptty:options: must define unique io or or separated in/out devices\n");
+      return 1;
     }
-  else if (strcmp(filename,"stdout") == 0)
+
+  if (opt_array[id].io.value != NULL)
     {
-      PTTY_FD_OUT                       = 1;
-      machine.device[dev].read          = ptty_dummy_read;
-      machine.device[dev].write         = ptty_write;
-    }
-  else if (strcmp(filename,"stdin") == 0)
-    {
-      PTTY_FD_IN                        = 0;
-      machine.device[dev].read          = ptty_read;
-      machine.device[dev].write         = ptty_dummy_write;
-    }
-  else if (strcmp(filename,"stdio") == 0)
-    {
-      PTTY_FD_IN                        = 0;
-      PTTY_FD_OUT                       = 1;
-      machine.device[dev].read          = ptty_read;
-      machine.device[dev].write         = ptty_write;
-    }
-  else if (strcmp(filename,"create") == 0)
-    {
-      int fd;
-      if ((fd = ptty_get_system_fifo(PTTY_DATA->fifo_local,PTTY_DATA->fifo_remote)) == -1)
+      file_in  = opt_array[id].io.value;
+      file_out = opt_array[id].io.value;
+      
+      if      (strcmp(file_in,"stdio") == 0)
 	{
-	  ERROR("PTTY%d: Cannot create system fifo\n",id);
-	  OUTPUT("PTTY%d: ptty not activated\n",id);
-	  machine.device[dev].read          = ptty_dummy_read;
-	  machine.device[dev].write         = ptty_dummy_write;
+	  PTTY_FD_IN                        = 0;
+	  PTTY_FD_OUT                       = 1;
+	  machine.device[dev].read          = ptty_read;
+	  machine.device[dev].write         = ptty_write;
 	}
-      else
+      else if (strcmp(file_in,"stdout") == 0)
 	{
-	  REAL_STDOUT("PTTY%d: local  system fifo %s\n",id,PTTY_DATA->fifo_local);
-	  REAL_STDOUT("PTTY%d: remote system fifo %s\n",id,PTTY_DATA->fifo_remote);
+	  PTTY_FD_OUT                       = 1;
+	  machine.device[dev].write         = ptty_write;
+	}
+      else if (strcmp(file_in,"stdin") == 0)
+	{
+	  PTTY_FD_OUT                       = 0;
+	  machine.device[dev].read          = ptty_read;
+	}
+      else if (strcmp(file_in,"create") == 0)
+	{
+	  int fd;
+	  if ((fd = ptty_get_system_fifo(PTTY_DATA->fifo_in_local,PTTY_DATA->fifo_in_remote)) == -1)
+	    {
+	      ERROR("PTTY%d: Cannot create system fifo\n",id);
+	      OUTPUT("PTTY%d: ptty not activated\n",id);
+	    }
+	  else
+	    {
+	      REAL_STDOUT("PTTY%d: local  system fifo %s\n",id,PTTY_DATA->fifo_in_local);
+	      REAL_STDOUT("PTTY%d: remote system fifo %s\n",id,PTTY_DATA->fifo_in_remote);
+	      PTTY_FD_IN                        = fd;
+	      PTTY_FD_OUT                       = fd;
+	      PTTY_DATA->need_close_in          = 1;
+	      machine.device[dev].read          = ptty_read;
+	      machine.device[dev].write         = ptty_write;
+	    }
+	}
+      else /* fifo name */
+	{
+	  int fd;
+	  if ((fd = open(file_in,O_RDWR)) == -1)
+	    {
+	      ERROR("PTTY%d: Cannot open file %s\n",id,file_in);
+	      return 1;
+	    }
 	  PTTY_FD_IN                        = fd;
 	  PTTY_FD_OUT                       = fd;
-	  PTTY_DATA->need_close             = 1;
+	  PTTY_DATA->need_close_out         = 1;
+	  strncpy(PTTY_DATA->fifo_in_local,file_in,MAX_FILENAME);
 	  machine.device[dev].read          = ptty_read;
 	  machine.device[dev].write         = ptty_write;
 	}
     }
-  else
+  else /* separate input/output devices */
     {
-      int fd;
-      if ((fd = open(filename,O_RDWR)) == -1)
-	{
-	  ERROR("PTTY%d: Cannot open file %s\n",id,filename);
-	  return 1;
-	}
-      PTTY_FD_IN                        = fd;
-      PTTY_FD_OUT                       = fd;
-      PTTY_DATA->need_close             = 1;
-      machine.device[dev].read          = ptty_read;
-      machine.device[dev].write         = ptty_write;
-    }
+      file_in  = opt_array[id].in.value;
+      file_out = opt_array[id].out.value;
 
+      /* output */
+      if (file_out == NULL )
+	{
+	  OUTPUT("PTTY%d: ptty OUT not activated\n",id);
+	}
+      else if (strcmp(file_out,"stdout") == 0)
+	{
+	  PTTY_FD_OUT                       = 1;
+	  machine.device[dev].write         = ptty_write;
+	}
+      else if (strcmp(file_out,"create") == 0)
+	{
+	  int fd;
+	  if ((fd = ptty_get_system_fifo(PTTY_DATA->fifo_out_local,PTTY_DATA->fifo_out_remote)) == -1)
+	    {
+	      ERROR("PTTY%d: Cannot create system fifo for output\n",id);
+	    }
+	  else
+	    {
+	      REAL_STDOUT("PTTY%d: remote system fifo %s output\n",id,PTTY_DATA->fifo_out_remote);
+	      PTTY_FD_OUT                       = fd;
+	      PTTY_DATA->need_close_out         = 1;
+	      machine.device[dev].write         = ptty_write;
+	    }
+	}
+      else
+	{
+	  int fd;
+	  if ((fd = open(file_out,O_WRONLY)) == -1)
+	    {
+	      ERROR("PTTY%d:output: Cannot open file %s\n",id,file_out);
+	      return 1;
+	    }
+	  REAL_STDOUT("PTTY%d:open:output %15s = %d\n",id,file_out,fd);
+	  PTTY_FD_OUT                       = fd;
+	  PTTY_DATA->need_close_out         = 1;
+	  strncpy(PTTY_DATA->fifo_out_local,file_out,MAX_FILENAME);
+	  machine.device[dev].write         = ptty_write;
+	}
+
+      /* input */
+      if (file_in == NULL )
+	{
+	  OUTPUT("PTTY%d: ptty IN not activated\n",id);
+	}
+      else if (strcmp(file_in,"stdin") == 0)
+	{
+	  PTTY_FD_IN                        = 0;
+	  machine.device[dev].read          = ptty_read;
+	}
+      else if (strcmp(file_in,"create") == 0)
+	{
+	  int fd;
+	  if ((fd = ptty_get_system_fifo(PTTY_DATA->fifo_in_local,PTTY_DATA->fifo_in_remote)) == -1)
+	    {
+	      ERROR("PTTY%d: Cannot create system fifo for input\n",id);
+	    }
+	  else
+	    {
+	      REAL_STDOUT("PTTY%d: remote system fifo %s input\n",id,PTTY_DATA->fifo_in_remote);
+	      PTTY_FD_IN                        = fd;
+	      PTTY_DATA->need_close_in          = 1;
+	      machine.device[dev].read          = ptty_read;
+	    }
+	}
+      else
+	{
+	  int fd;
+	  if ((fd = open(file_in,O_RDONLY)) == -1)
+	    {
+	      ERROR("PTTY%d:input: Cannot open file %s\n",id,file_in);
+	      return 1;
+	    }
+	  REAL_STDOUT("PTTY%d:open:input  %15s = %d\n",id,file_in,fd);
+	  PTTY_FD_IN                        = fd;
+	  PTTY_DATA->need_close_in          = 1;
+	  strncpy(PTTY_DATA->fifo_in_local,file_in,MAX_FILENAME);
+	  machine.device[dev].read          = ptty_read;
+	}
+
+      
+    }
+  
+
+  /* ******* */
 
   if (machine.device[dev].read != ptty_dummy_read)
     {
@@ -242,6 +405,8 @@ int ptty_device_create(int dev, int id, const char *filename)
 	}
       libselect_add_callback(PTTY_FD_IN, ptty_libselect_callback, machine.device[dev].data);
     }
+
+  /* ******* */
 
   PTTY_ID    = id;
   PTTY_DEVID = dev;
@@ -283,10 +448,16 @@ int ptty_delete(int dev)
     {
       libselect_unregister(PTTY_FD_IN);
     }
-  if (PTTY_DATA->need_close)
+  if ((PTTY_FD_IN != -1) && (PTTY_DATA->need_close_in))
+    {
+      close(PTTY_FD_IN);
+    }
+  if ((PTTY_FD_OUT != -1) && (PTTY_DATA->need_close_out))
     {
       close(PTTY_FD_OUT);
     }
+
+  /* add: free memory used for options */
   return 0;
 }
 
@@ -347,10 +518,15 @@ void ptty_read(int dev, uint32_t *addr, uint32_t *val)
       *addr = PTTY_D;
       *val  = c & 0xffu;
 #if defined(DEBUG_PTTY)      
-      if (isprint(*val))
-	HW_DMSG_PTTY("PTTY%d <- read data 0x%02x [%c]\n",PTTY_ID,*val,*val);
-      else
-	HW_DMSG_PTTY("PTTY%d <- read data 0x%02x\n",PTTY_ID,*val);
+      {
+	char buff[1024];
+	if (isprint(*val))
+	  snprintf(buff,1024,"PTTY%d <- MCU read  data 0x%02x [%c] from OUTSIDE\n",PTTY_ID,*val,*val);
+	else
+	  snprintf(buff,1024,"PTTY%d <- MCU read  data 0x%02x      from OUTSIDE\n",PTTY_ID,*val);
+	HW_DMSG_PTTY(buff);
+	REAL_STDOUT(buff);
+      }
 #endif
     }
 }
@@ -371,10 +547,15 @@ void ptty_write(int dev, uint32_t addr, uint32_t val)
     {
       v = val & PTTY_D;
 #if defined(DEBUG_PTTY)      
-      if (isprint(v))
-	HW_DMSG_PTTY("PTTY%d -> write data 0x%02x [%c]\n",PTTY_ID,v,v);
-      else
-	HW_DMSG_PTTY("PTTY%d -> write data 0x%02x\n",PTTY_ID,v);
+      {
+	char buff[1024];
+	if (isprint(v))
+	  snprintf(buff,1024,"PTTY%d -> MCU write data 0x%02x [%c]  to  OUTSIDE\n",PTTY_ID,v,v);
+	else
+	  snprintf(buff,1024,"PTTY%d -> MCU write data 0x%02x       to  OUTSIDE\n",PTTY_ID,v);
+	HW_DMSG_PTTY(buff);
+	REAL_STDOUT(buff);
+      }
 #endif
       write(PTTY_FD_OUT,&v,1);
     }
@@ -384,7 +565,10 @@ void ptty_write(int dev, uint32_t addr, uint32_t val)
 /***************************************************/
 /***************************************************/
 
-int  ptty_update      (int UNUSED dev)      { return 0;       }
+int  ptty_update      (int UNUSED dev)      
+{ 
+  return 0;       
+}
 
 /***************************************************/
 /***************************************************/

@@ -324,8 +324,8 @@ do {                                                                          \
                  {                                                            \
                     msp430_interrupt_set(INTR_USART##NUM##_TX);               \
                  }                                                            \
-               HW_DMSG_USART("msp430:usart%d: UART tx buf -> shifter (%d)\n", \
-			      NUM,MCU.USART.uxtx_shift_delay);                \
+               HW_DMSG_USART("msp430:usart%d: UART tx buf -> shifter (delay %d, val %d)\n", \
+			     NUM,MCU.USART.uxtx_shift_delay, MCU.USART.uxtxbuf);            \
 	       VERBOSE(VUART,"msp430:usart%d: UART send (0x%x,%c)\n",NUM,     \
                   MCU.USART.uxtxbuf, isgraph(MCU.USART.uxtxbuf) ?             \
                   MCU.USART.uxtxbuf : '.');                                   \
@@ -461,7 +461,7 @@ do {                                                                          \
       break;                                                                  \
     case U##NUM##TCTL       :                                                 \
       res = MCU.USART.uxtctl.s;                                               \
-      HW_DMSG_USART("msp430:usart%d: read uxtctl = 0x%02x\n",NUM,res & 0xff); \
+      HW_DMSG_USART("msp430:usart%d: read uxtctl = 0x%02x [PC=0x%04x]\n",NUM,res & 0xff, mcu_get_pc()); \
       break;                                                                  \
     case U##NUM##RCTL       :                                                 \
       res = MCU.USART.uxrctl.s;                                               \

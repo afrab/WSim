@@ -70,16 +70,9 @@
 /* ************************************************** */
 /* ************************************************** */
 
-static struct moption_t ptty_opt = {
-  .longname    = "serial",
-  .type        = required_argument,
-  .helpstring  = "serial port",
-  .value       = NULL
-};
-
 int devices_options_add()
 {
-  options_add(&ptty_opt);
+  ptty_add_options(SERIAL,0,"serial0");
   VERBOSE(2,"ot2007: boutton 1 = 'a'\n");
   VERBOSE(2,"ot2007: boutton 2 = 'z'\n");
   VERBOSE(2,"ot2007: boutton 3 = 'e'\n");
@@ -187,7 +180,7 @@ int devices_create()
   res += system_create          (SYSTEM);
   res += led_device_create      (LEDstatus, 0xee0000, OFF, BKG);
   res += hd44_device_create     (LCD,       0xaaaaaa, OFF, BKG);
-  res += ptty_device_create     (SERIAL,    0, ptty_opt.value);
+  res += ptty_device_create     (SERIAL,    0);
   res += bargraph_device_create (BAGR,      0xee1010, OFF, BKG);
   res += led_device_create      (BLED9,     0x00ee00, OFF, BKG);
   /* res += led_device_create      (BLED10,    0x001e00, OFF, BKG); */

@@ -63,7 +63,7 @@ struct ptty_t {
 #define PTTY_FD_IN    PTTY_DATA->fd_in
 #define PTTY_FD_OUT   PTTY_DATA->fd_out
 
-#define PTTY_IN_FIFO   10
+#define PTTY_IN_FIFO_SIZE 512
 
 int  ptty_reset       (int dev);
 int  ptty_delete      (int dev);
@@ -398,7 +398,7 @@ int ptty_device_create(int dev, int id)
 
   if (machine.device[dev].read != ptty_dummy_read)
     {
-      if (libselect_register_fifo(PTTY_FD_IN, PTTY_IN_FIFO))
+      if (libselect_register_fifo(PTTY_FD_IN, PTTY_IN_FIFO_SIZE))
 	{
 	  ERROR("PTTY%d: cannot register input handler %d in libselect\n",PTTY_FD_IN);
 	  return 1;

@@ -291,9 +291,9 @@ int devices_create(void)
   /* end of platform specific part */
   /*********************************/
 
-  tracer_event_add_id(TRACER_LED1,  "led1"  ,  1);
-  tracer_event_add_id(TRACER_LED2,  "led2"  ,  1);
-  tracer_event_add_id(TRACER_LED3,  "led3"  ,  1);
+  tracer_event_add_id(TRACER_LED1, 1, "led1",  "");
+  tracer_event_add_id(TRACER_LED2, 1, "led2",  "");
+  tracer_event_add_id(TRACER_LED3, 1, "led3",  "");
 
   return res;
 }

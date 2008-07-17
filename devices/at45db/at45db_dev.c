@@ -323,7 +323,8 @@ int at45db_device_create(int dev, int UNUSED id)
       memset(AT45_MEMRAW,0xff,AT45_FLASH_SIZE);
     }
 
-  tracer_event_add_id(TRACER_AT45DB, "at45db" , 64);
+  tracer_event_add_id(TRACER_AT45DB_STATE, 8, "at45db_state" , "");
+  //  tracer_event_add_id(TRACER_AT45DB_FUNC,  8, "at45db_state" , "");
 
   return 0;
 }
@@ -340,7 +341,7 @@ int at45db_reset(int dev)
   AT45_DATA->status_register.s        = 0;
   AT45_DATA->power_mode               = AT45_POWER_STANDBY;
 
-  tracer_event_record(TRACER_AT45DB, AT45_POWER_STANDBY);
+  tracer_event_record(TRACER_AT45DB_STATE, AT45_POWER_STANDBY);
   etracer_slot_event(ETRACER_PER_ID_AT45DB,
 		     ETRACER_PER_EVT_MODE_CHANGED,
 		     ETRACER_AT45DB_POWER_STANDBY, 0);
@@ -1017,7 +1018,7 @@ void at45db_write_spidata(int dev, uint32_t mask, uint32_t value)
 	    {
 	      AT45_DATA->data_buffer_ok = 0;
 	      AT45_DATA->power_mode = AT45_POWER_ACTIVE;
-	      tracer_event_record(TRACER_AT45DB, AT45_POWER_ACTIVE);
+	      tracer_event_record(TRACER_AT45DB_STATE, AT45_POWER_ACTIVE);
 	      etracer_slot_event(ETRACER_PER_ID_AT45DB,
 				 ETRACER_PER_EVT_MODE_CHANGED,
 				 ETRACER_AT45DB_POWER_ACTIVE, 0);
@@ -1103,24 +1104,24 @@ void at45db_write(int dev, uint32_t mask, uint32_t value)
    * Chip Select
    ***************************/
 
-#define END_COMMAND()                                                           \
-do {                                                                            \
-  HW_DMSG_AT45("at45db:    End command 0x%02x (%s)\n",                           \
-	      AT45_DATA->command, str_cmd(AT45_DATA->command));                   \
-  AT45_DATA->command_need_to_complete = 0;                                       \
-  AT45_DATA->command = AT45_OP_NOP;                                               \
+#define END_COMMAND()							\
+  do {									\
+  HW_DMSG_AT45("at45db:    End command 0x%02x (%s)\n",			\
+	       AT45_DATA->command, str_cmd(AT45_DATA->command));	\
+  AT45_DATA->command_need_to_complete = 0;				\
+  AT45_DATA->command = AT45_OP_NOP;					\
   HW_DMSG_AT45("at45db:    chip select : Active -> Standby (end of command)\n"); \
-} while (0) 
+  } while (0) 
 
-#define END_COMMAND_GO_STANDBY()                                                \
-do {                                                                            \
-  END_COMMAND();                                                                \
-  AT45_DATA->power_mode = AT45_POWER_STANDBY;                                     \
-  tracer_event_record(TRACER_AT45DB, AT45_POWER_STANDBY);                        \
-  etracer_slot_event(ETRACER_PER_ID_AT45DB,                                     \
-		     ETRACER_PER_EVT_MODE_CHANGED,                              \
-		     ETRACER_AT45DB_POWER_STANDBY, 0);                          \
-} while (0)
+#define END_COMMAND_GO_STANDBY()					\
+  do {									\
+  END_COMMAND();							\
+  AT45_DATA->power_mode = AT45_POWER_STANDBY;				\
+  tracer_event_record(TRACER_AT45DB_STATE, AT45_POWER_STANDBY);		\
+  etracer_slot_event(ETRACER_PER_ID_AT45DB,				\
+		     ETRACER_PER_EVT_MODE_CHANGED,			\
+		     ETRACER_AT45DB_POWER_STANDBY, 0);			\
+  } while (0)
 
   if (mask & AT45DB_S) /* chip select negated */
     {
@@ -1195,7 +1196,7 @@ do {                                                                            
 	      END_COMMAND();
 	      HW_DMSG_AT45("at45db:    Power mode changed to DEEP POWER DOWN\n");	
 	      AT45_DATA->power_mode = AT45_POWER_DEEP_DOWN;
-	      tracer_event_record(TRACER_AT45DB, AT45_POWER_DEEP_DOWN);
+	      tracer_event_record(TRACER_AT45DB_STATE, AT45_POWER_DEEP_DOWN);
 	      etracer_slot_event(ETRACER_PER_ID_AT45DB,
 				 ETRACER_PER_EVT_MODE_CHANGED,
 				 ETRACER_AT45DB_POWER_DEEP_DOWN, 0);
@@ -1206,7 +1207,7 @@ do {                                                                            
 	      END_COMMAND();
 	      HW_DMSG_AT45("at45db:    Power mode changed to ACTIVE\n");
 	      AT45_DATA->power_mode = AT45_POWER_ACTIVE;
-	      tracer_event_record(TRACER_AT45DB, AT45_POWER_ACTIVE);
+	      tracer_event_record(TRACER_AT45DB_STATE, AT45_POWER_ACTIVE);
 	      etracer_slot_event(ETRACER_PER_ID_AT45DB,
 				 ETRACER_PER_EVT_MODE_CHANGED,
 				 ETRACER_AT45DB_POWER_ACTIVE, 0);
@@ -1223,7 +1224,7 @@ do {                                                                            
 	  AT45_DATA->select_bit = bit_cs;
 	  HW_DMSG_AT45("at45db:    flash write CS = 1 : Standby -> Active\n");
 	  AT45_DATA->power_mode = AT45_POWER_ACTIVE;
-	  tracer_event_record(TRACER_AT45DB, AT45_POWER_ACTIVE);
+	  tracer_event_record(TRACER_AT45DB_STATE, AT45_POWER_ACTIVE);
 	  etracer_slot_event(ETRACER_PER_ID_AT45DB,
 			     ETRACER_PER_EVT_MODE_CHANGED,
 			     ETRACER_AT45DB_POWER_ACTIVE, 0);
@@ -1291,7 +1292,7 @@ int at45db_update(int dev)
 	    {
 	      /* going from active to standby */
 	      HW_DMSG_AT45("at45db: update: end of command wip=0: Active -> Standby\n");
-	      tracer_event_record(TRACER_AT45DB, AT45_POWER_STANDBY);
+	      tracer_event_record(TRACER_AT45DB_STATE, AT45_POWER_STANDBY);
 	      etracer_slot_event(ETRACER_PER_ID_AT45DB,
 				 ETRACER_PER_EVT_MODE_CHANGED,
 				 ETRACER_AT45DB_POWER_STANDBY, 0);

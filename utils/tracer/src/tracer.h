@@ -27,7 +27,7 @@ typedef uint8_t               tracer_width_t;  /* width        */
 /****************************************
  * struct _sample_t is the sample type
  * that is recorded. Its size should be 
- * 12 bytes  (96 bits)
+ * 20 bytes  (160 bits)
  ****************************************/
 
 #define PACKED __attribute__((packed))
@@ -51,8 +51,10 @@ typedef struct tracer_sample_struct_t tracer_sample_t;
       use unpacked struct
       magic_size == 27
    version 1:
-      packed struct
+      packed struct for 32/64 data exchange
       magic_size == 26
+   version 2:
+      ..
 */
 #define TRACER_VERSION           2
 
@@ -142,9 +144,9 @@ typedef int (*tracer_drv_function_t)(tracer_t*);
 
 struct tracer_driver_struct_t {
   char                  *name; 
-  tracer_drv_function_t  init;     /* init process, called once     */
-  tracer_drv_function_t  process;  /* process, called for each file */
-  tracer_drv_function_t  finalize; /* finalize process, called once */
+  tracer_drv_function_t  init;     /* init process, called once per run     */
+  tracer_drv_function_t  process;  /* process, called for each file         */
+  tracer_drv_function_t  finalize; /* finalize process, called once per run */
 };
 
 typedef struct tracer_driver_struct_t tracer_driver_t;

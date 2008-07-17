@@ -111,6 +111,10 @@ int drv_vcd_process(tracer_t *t)
   fprintf(t->out_fd,"$scope module WSim $end\n");
   fprintf(t->out_fd,"\n");
 
+
+
+
+#if defined(NO_SUBMODULE)
   for(id=0; id < TRACER_MAX_ID; id ++)
     {
       sprintf(id_var[id],"%c%c%c",(id / 100) + 'a', ((id / 10) % 10) + 'a', (id % 10) + 'a');
@@ -119,6 +123,72 @@ int drv_vcd_process(tracer_t *t)
 	  fprintf(t->out_fd,"$var integer %d %s %s $end\n", t->hdr.id_width[id], id_var[id], t->hdr.id_name[id]);
 	}
     }
+#else
+  {
+    int  mod;
+    int  modmax = 0;
+    char id_module [TRACER_MAX_ID][TRACER_MAX_NAME_LENGTH];
+    for(id=0; id < TRACER_MAX_ID; id++)
+      {
+	if (t->hdr.id_name[id][0] != '\0')
+	  {
+	    char *ptr;
+	    char name[TRACER_MAX_NAME_LENGTH];
+	    strncpy(name,t->hdr.id_name[id],TRACER_MAX_NAME_LENGTH);
+	    ptr = strtok(name,"_.");
+	    DMSG(t,"vcd: looking for module %s in %s\n",ptr,t->hdr.id_name[id]);
+	    if ((ptr != NULL) && (strcmp(ptr,t->hdr.id_name[id]) != 0))
+	      {
+		int mod;
+		int found = 0;
+		for(mod=0; mod<modmax; mod++)
+		  {
+		    if (strcmp(ptr,id_module[mod]) == 0)
+		      {
+			found = 1;
+		      }
+		  }
+		if (found == 0)
+		  {
+		    DMSG(t,"vcd: find module %s\n",ptr);
+		    strcpy(id_module[modmax++], ptr);
+		  }
+	      }
+	  }
+      }
+
+    for(mod=0; mod<modmax; mod++)
+      {
+	fprintf(t->out_fd,"$scope module %s $end\n",id_module[mod]);
+	for(id=0; id < TRACER_MAX_ID; id ++)
+	  {
+	    if (t->hdr.id_name[id][0] != '\0')
+	      {
+		char *ptr;
+		char name[TRACER_MAX_NAME_LENGTH];
+		strncpy(name,t->hdr.id_name[id],TRACER_MAX_NAME_LENGTH);
+		ptr = strtok(name,"_.");
+		if (strcmp(ptr,id_module[mod]) == 0)
+		  {
+		    sprintf(id_var[id],"%c%c%c", mod + 'a', ((id / 10) % 10) + 'a', (id % 10) + 'a');
+		    fprintf(t->out_fd,"    $var integer %d %s %s $end\n", t->hdr.id_width[id], id_var[id], t->hdr.id_name[id]);
+		  }
+	      }
+	  }
+	fprintf(t->out_fd,"$upscope $end\n\n");
+      }
+
+    for(id=0; id < TRACER_MAX_ID; id ++)
+      {
+	if ((t->hdr.id_name[id][0] != '\0') && (id_var[id][0] == '\0'))
+	  {
+	    sprintf(id_var[id],"%c%c%c", mod + 'a', ((id / 10) % 10) + 'a', (id % 10) + 'a');
+	    fprintf(t->out_fd,"$var integer %d %s %s $end\n", t->hdr.id_width[id], id_var[id], t->hdr.id_name[id]);
+	  }
+      }
+  }
+
+#endif
 
   fprintf(t->out_fd,"\n");
   fprintf(t->out_fd,"$upscope $end\n");

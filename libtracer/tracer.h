@@ -42,9 +42,12 @@
 #define TRACER_DS2411         20 /* ds2411 */
 #define TRACER_CC1100         21
 #define TRACER_CC2420         22 /* not used at the same time as CC1100 ? */
-#define TRACER_M25P10         23 /* flash m25p10 */
-#define TRACER_M25P80         24 /* flash m25p80 */
-#define TRACER_AT45DB         24 /* flash at45db */
+#define TRACER_M25P10_STATE   24 /* flash m25p10 */
+#define TRACER_M25P10_FUNC    25
+#define TRACER_M25P80_STATE   24 /* flash m25p80 */
+#define TRACER_M25P80_FUNC    25
+#define TRACER_AT45DB_STATE   24 /* flash at45db */
+#define TRACER_AT45DB_FUNC    25
 
 /* ************************************************** */
 /* ************************************************** */
@@ -78,7 +81,7 @@ typedef uint64_t (*get_nanotime_function_t)();
  * to a static tracer_t variable
  */
 void  tracer_init            (char *filename, get_nanotime_function_t f);
-void  tracer_event_add_id    (tracer_id_t id, char* label, int width);
+void  tracer_event_add_id    (tracer_id_t id, int width, char* label, char* module);
 void  tracer_close           (void);
 
 /*
@@ -113,17 +116,17 @@ void  tracer_state_restore   (void);
 #if 0
 #define NOOP  do { } while (0)
 
-#define tracer_close()              NOOP
-#define tracer_init(f1,f2)          NOOP
-#define tracer_start()              NOOP
-#define tracer_stop()               NOOP
-#define tracer_event_add_id(i,l,w)  NOOP
-#define tracer_event_record(i,v)    NOOP
-#define tracer_state_save()         NOOP
-#define tracer_state_restore()      NOOP
-#define tracer_dump_set_format(f)   1
-#define tracer_dump_file(n)         NOOP
-#define tracer_set_node_id(i)       NOOP
+#define tracer_close()                NOOP
+#define tracer_init(f1,f2)            NOOP
+#define tracer_start()                NOOP
+#define tracer_stop()                 NOOP
+#define tracer_event_add_id(i,j,k,l)  NOOP
+#define tracer_event_record(i,v)      NOOP
+#define tracer_state_save()           NOOP
+#define tracer_state_restore()        NOOP
+#define tracer_dump_set_format(f)     1
+#define tracer_dump_file(n)           NOOP
+#define tracer_set_node_id(i)         NOOP
 #endif
 /* ************************************************** */
 /* ************************************************** */

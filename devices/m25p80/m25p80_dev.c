@@ -19,10 +19,12 @@
 
 #if defined(BUILD_M25P80)
 #  define M25PNAME      "m25p80"
-#  define TRACER_M25P   TRACER_M25P80
+#  define TRACER_M25P_STATE   TRACER_M25P80_STATE
+#  define TRACER_M25P_FUNC    TRACER_M25P80_FUNC
 #elif defined(BUILD_M25P10)
 #  define M25PNAME      "m25p10"
-#  define TRACER_M25P   TRACER_M25P10
+#  define TRACER_M25P_STATE   TRACER_M25P10_STATE
+#  define TRACER_M25P_FUNC    TRACER_M25P10_FUNC
 #else
 #  error "you must define a specific M25P model"
 #endif
@@ -425,7 +427,8 @@ int m25p_device_create(int dev, int UNUSED id)
       memset(M25P_MEMRAW,0xff,M25P_FLASH_SIZE);
     }
 
-  tracer_event_add_id(TRACER_M25P, M25PNAME, 64);
+  tracer_event_add_id(TRACER_M25P_STATE, 8, M25PNAME"_state"    , "");
+  tracer_event_add_id(TRACER_M25P_FUNC,  8, M25PNAME"_function" , "");
 
   return 0;
 }
@@ -442,7 +445,7 @@ int m25p_reset(int dev)
   M25P_DATA->status_register.s        = 0;
   M25P_DATA->power_mode               = M25P_POWER_STANDBY;
 
-  tracer_event_record(TRACER_M25P, M25P_POWER_STANDBY);
+  tracer_event_record(TRACER_M25P_STATE, M25P_POWER_STANDBY);
   etracer_slot_event(ETRACER_PER_ID_M25P,
 		     ETRACER_PER_EVT_MODE_CHANGED,
 		     ETRACER_M25P_POWER_STANDBY, 0);
@@ -1089,7 +1092,7 @@ void m25p_write_spidata(int dev, uint32_t UNUSED mask, uint32_t value)
 	    {
 	      M25P_DATA->data_buffer_ok = 0;
 	      M25P_DATA->power_mode = M25P_POWER_ACTIVE;
-	      tracer_event_record(TRACER_M25P, M25P_POWER_ACTIVE);
+	      tracer_event_record(TRACER_M25P_STATE, M25P_POWER_ACTIVE);
 	      etracer_slot_event(ETRACER_PER_ID_M25P,
 				 ETRACER_PER_EVT_MODE_CHANGED,
 				 ETRACER_M25P_POWER_ACTIVE, 0);
@@ -1206,24 +1209,24 @@ void m25p_write(int dev, uint32_t mask, uint32_t value)
    * Chip Select
    ***************************/
 
-#define END_COMMAND()                                                           \
-do {                                                                            \
-  HW_DMSG_M25(M25PNAME ":    End command 0x%02x (%s)\n",                           \
-	      M25P_DATA->command, str_cmd(M25P_DATA->command));                   \
-  M25P_DATA->command_need_to_complete = 0;                                       \
-  M25P_DATA->command = M25P_OP_NOP;                                               \
-  HW_DMSG_M25(M25PNAME ":    chip select : Active -> Standby (end of command)\n"); \
-} while (0) 
+#define END_COMMAND()							\
+  do {									\
+    HW_DMSG_M25(M25PNAME ":    End command 0x%02x (%s)\n",		\
+		M25P_DATA->command, str_cmd(M25P_DATA->command));	\
+    M25P_DATA->command_need_to_complete = 0;				\
+    M25P_DATA->command = M25P_OP_NOP;					\
+    HW_DMSG_M25(M25PNAME ":    chip select : Active -> Standby (end of command)\n"); \
+  } while (0) 
 
-#define END_COMMAND_GO_STANDBY()                                                \
-do {                                                                            \
-  END_COMMAND();                                                                \
-  M25P_DATA->power_mode = M25P_POWER_STANDBY;                                     \
-  tracer_event_record(TRACER_M25P, M25P_POWER_STANDBY);                        \
-  etracer_slot_event(ETRACER_PER_ID_M25P,                                     \
-		     ETRACER_PER_EVT_MODE_CHANGED,                              \
-		     ETRACER_M25P_POWER_STANDBY, 0);                          \
-} while (0)
+#define END_COMMAND_GO_STANDBY()					\
+  do {									\
+    END_COMMAND();							\
+    M25P_DATA->power_mode = M25P_POWER_STANDBY;				\
+    tracer_event_record(TRACER_M25P_STATE, M25P_POWER_STANDBY);		\
+    etracer_slot_event(ETRACER_PER_ID_M25P,				\
+		       ETRACER_PER_EVT_MODE_CHANGED,			\
+		       ETRACER_M25P_POWER_STANDBY, 0);			\
+  } while (0)
 
   if (mask & M25P_S) /* chip select negated */
     {
@@ -1300,7 +1303,7 @@ do {                                                                            
 		  END_COMMAND();
 		  HW_DMSG_M25(M25PNAME ":    Power mode changed to DEEP POWER DOWN\n");	
 		  M25P_DATA->power_mode = M25P_POWER_DEEP_DOWN;
-		  tracer_event_record(TRACER_M25P, M25P_POWER_DEEP_DOWN);
+		  tracer_event_record(TRACER_M25P_STATE, M25P_POWER_DEEP_DOWN);
 		  etracer_slot_event(ETRACER_PER_ID_M25P,
 				     ETRACER_PER_EVT_MODE_CHANGED,
 				     ETRACER_M25P_POWER_DEEP_DOWN, 0);
@@ -1311,7 +1314,7 @@ do {                                                                            
 		  END_COMMAND();
 		  HW_DMSG_M25(M25PNAME ":    Power mode changed to ACTIVE\n");
 		  M25P_DATA->power_mode = M25P_POWER_ACTIVE;
-		  tracer_event_record(TRACER_M25P, M25P_POWER_ACTIVE);
+		  tracer_event_record(TRACER_M25P_STATE, M25P_POWER_ACTIVE);
 		  etracer_slot_event(ETRACER_PER_ID_M25P,
 				     ETRACER_PER_EVT_MODE_CHANGED,
 				     ETRACER_M25P_POWER_ACTIVE, 0);
@@ -1335,7 +1338,7 @@ do {                                                                            
 	    {
 	      HW_DMSG_M25(M25PNAME ":    flash write CS = 1 : Standby -> Active\n");
 	      M25P_DATA->power_mode = M25P_POWER_ACTIVE;
-	      tracer_event_record(TRACER_M25P, M25P_POWER_ACTIVE);
+	      tracer_event_record(TRACER_M25P_STATE, M25P_POWER_ACTIVE);
 	      etracer_slot_event(ETRACER_PER_ID_M25P,
 				 ETRACER_PER_EVT_MODE_CHANGED,
 				 ETRACER_M25P_POWER_ACTIVE, 0);
@@ -1410,7 +1413,7 @@ int m25p_update(int dev)
 	    {
 	      /* going from active to standby */
 	      HW_DMSG_M25(M25PNAME ":    UPDATE end of command wip=0: Active -> Standby\n");
-	      tracer_event_record(TRACER_M25P, M25P_POWER_STANDBY);
+	      tracer_event_record(TRACER_M25P_STATE, M25P_POWER_STANDBY);
 	      etracer_slot_event(ETRACER_PER_ID_M25P,
 				 ETRACER_PER_EVT_MODE_CHANGED,
 				 ETRACER_M25P_POWER_STANDBY, 0);

@@ -191,7 +191,7 @@ int cc1100_device_create (int dev_num, int fxosc_mhz)
 
   worldsens_c_rx_register((void*)cc1100, cc1100_callback_rx);
 
-  tracer_event_add_id(TRACER_CC1100, "cc1100_state", 32);	
+  tracer_event_add_id(TRACER_CC1100, 32, "cc1100_state", "");
   
   return 0;
 }

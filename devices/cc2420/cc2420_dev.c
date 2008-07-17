@@ -100,7 +100,7 @@ int cc2420_device_create (int dev_num, int fxosc_mhz)
 
   cc2420->fsm_state = CC2420_STATE_POWER_DOWN;
 
-  tracer_event_add_id(TRACER_CC2420, "CC2420", 32);
+  tracer_event_add_id(TRACER_CC2420, 32, "CC2420", "");
 
   return 0;
 }

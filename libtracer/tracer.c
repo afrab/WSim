@@ -141,13 +141,14 @@ static int32_t                 tracer_node_id      = 0xFFFF;
 static unsigned char           tracer_max_id       = TRACER_MAX_ID;
 static char                   *tracer_filename     = NULL;
 static char                    tracer_id_name        [TRACER_MAX_ID][TRACER_MAX_NAME_LENGTH];
+static char                    tracer_id_module      [TRACER_MAX_ID][TRACER_MAX_NAME_LENGTH];
 static uint8_t                 tracer_width          [TRACER_MAX_ID];
 static get_nanotime_function_t tracer_get_nanotime = NULL;
 static int                     tracer_init_done    = 0;
 static FILE*                   tracer_datafile     = NULL;
 static tracer_sample_t         tracer_buffer[TRACER_BLOCK_EV];
 
-/* blobk access macro */
+/* block access macro */
 #define tracer_end_of_block(e)   ((e & TRACER_BLOCK_EV) == TRACER_BLOCK_EV)
 
 /* ************************************************** */
@@ -291,7 +292,8 @@ tracer_init(char *filename, get_nanotime_function_t f)
   tracer_filename     = strdup(filename);
   for(id=0; id < TRACER_MAX_ID; id++)
     {
-      tracer_id_name[id][0]       = '\0';
+      tracer_id_name   [id][0]    = '\0';
+      tracer_id_module [id][0]    = '\0';
       EVENT_TRACER.id_count[id]   = 0;
       EVENT_TRACER.id_val_min[id] = 0;
       EVENT_TRACER.id_val_max[id] = 0;
@@ -364,7 +366,7 @@ void tracer_stop(void)
 /* ************************************************** */
 
 void
-tracer_event_add_id(tracer_id_t id, char* label, int width)
+tracer_event_add_id(tracer_id_t id, int width, char* label, char* module)
 {
   if (id >= (TRACER_MAX_ID - 1))
     {
@@ -388,12 +390,12 @@ tracer_event_add_id(tracer_id_t id, char* label, int width)
       ERROR("tracer: event id %d for %s is already used by event %s\n",id,label,tracer_id_name[id]);
       exit(1);
     }
-
   
-  strncpy(tracer_id_name[id],label,TRACER_MAX_NAME_LENGTH);
+  strncpy(tracer_id_name   [id], label,  TRACER_MAX_NAME_LENGTH);
+  strncpy(tracer_id_module [id], module, TRACER_MAX_NAME_LENGTH);
   tracer_width[id] = width;
 
-  DMSG_TRACER("tracer:add:id: %s=%d\n",label,id);
+  DMSG_TRACER("tracer:add:id: %s=%d module=%s\n",label,id,module);
   tracer_event_record_time_nocheck(id,0,0);
 }
 

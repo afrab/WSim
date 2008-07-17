@@ -1093,7 +1093,7 @@ ds2411_device_create(int dev, char *serial)
 
   DS2411_ID = ds2411_str_to_id(serial);
 
-  tracer_event_add_id(TRACER_DS2411,"ds2411", 32);
+  tracer_event_add_id(TRACER_DS2411, 8, "ds2411", "");
 
   return 0;
 }

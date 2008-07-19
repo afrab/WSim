@@ -40,14 +40,21 @@
 #define TRACER_LED4           19
 
 #define TRACER_DS2411         20 /* ds2411 */
-#define TRACER_CC1100         21
-#define TRACER_CC2420         22 /* not used at the same time as CC1100 ? */
-#define TRACER_M25P10_STATE   24 /* flash m25p10 */
-#define TRACER_M25P10_FUNC    25
-#define TRACER_M25P80_STATE   24 /* flash m25p80 */
-#define TRACER_M25P80_FUNC    25
-#define TRACER_AT45DB_STATE   24 /* flash at45db */
-#define TRACER_AT45DB_FUNC    25
+
+/* radio */
+#define TRACER_CC1100_STATE   21 /* cc1100 */
+#define TRACER_CC1100_STROBE  22 /* cc1100 */
+#define TRACER_CC1100_CS      23 /* cc1100 */
+
+#define TRACER_CC2420_STATE   21 /* cc2420 */
+
+/* flash memories */
+#define TRACER_M25P10_STATE   26 /* flash m25p10 */
+#define TRACER_M25P10_STROBE  27
+#define TRACER_M25P80_STATE   26 /* flash m25p80 */
+#define TRACER_M25P80_STROBE  27
+#define TRACER_AT45DB_STATE   26 /* flash at45db */
+#define TRACER_AT45DB_STROBE  27
 
 /* ************************************************** */
 /* ************************************************** */

@@ -98,16 +98,38 @@ void cc1100_write(int dev_num, uint32_t  mask, uint32_t  value)
   
   if ((mask & CC1100_CSn_MASK) != 0)
     {
+      tracer_event_record(TRACER_CC1100_CS, (value & CC1100_CSn_MASK) ? 0 : 1);
+
       if ((value & CC1100_CSn_MASK) != 0)
 	{
+	  if (cc1100->CSn_pin == 0)
+	    {
+	      CC1100_DBG_PINS ("cc1100:pins: from mcu CSn = 1\n");
+	      CC1100_DBG_STATE("cc1100:state: chip deselected\n");
+	      /* deactivated */
+	      /* will need to change state and go to SLEEP or XOFF */
+	      if ((cc1100->fsm_state   == CC1100_STATE_IDLE) && 
+		  (cc1100->fsm_pending == CC1100_STATE_SLEEP))
+		{
+		  CC1100_DBG_STATE("cc1100:state: going from IDLE to SLEEP state\n");
+		  CC1100_SLEEP_REALLY_ENTER(cc1100);
+		}
+	      else if ((cc1100->fsm_state   == CC1100_STATE_IDLE) && 
+		       (cc1100->fsm_pending == CC1100_STATE_XOFF))
+		{
+		  CC1100_DBG_STATE("cc1100:state: going from IDLE to XOFF state\n");
+		  CC1100_XOFF_REALLY_ENTER(cc1100);
+		}
+	    }
 	  cc1100->CSn_pin = 0xFF;
-	  CC1100_DBG_PINS("cc1100:pins: from mcu CSn = 1\n");
 	} 
       else 
 	{
-	  if (cc1100->CSn_pin)
+	  if (cc1100->CSn_pin != 0)
 	    {
-	      CC1100_DBG_PINS("cc1100:pins: from mcu CSn = 0\n");
+	      CC1100_DBG_PINS ("cc1100:pins: from mcu CSn = 0\n");
+	      CC1100_DBG_STATE("cc1100:state: chip selected\n");
+	      /* activated */
 	    }
 	  cc1100->CSn_pin = 0x00;
 	}
@@ -191,7 +213,9 @@ int cc1100_device_create (int dev_num, int fxosc_mhz)
 
   worldsens_c_rx_register((void*)cc1100, cc1100_callback_rx);
 
-  tracer_event_add_id(TRACER_CC1100, 32, "cc1100_state", "");
+  tracer_event_add_id(TRACER_CC1100_STATE,  8, "cc1100_state",  "");
+  tracer_event_add_id(TRACER_CC1100_STROBE, 8, "cc1100_strobe", "");
+  tracer_event_add_id(TRACER_CC1100_CS,     1, "cc1100_cs",     "");
   
   return 0;
 }
@@ -266,7 +290,7 @@ void cc1100_reset_internal (struct _cc1100_t *cc1100)
   
   cc1100_reset_registers(cc1100);
   
-  tracer_event_record(TRACER_CC1100, CC1100_STATE_IDLE);
+  tracer_event_record(TRACER_CC1100_STATE, CC1100_STATE_IDLE);
   etracer_slot_event(ETRACER_PER_ID_CC1100,ETRACER_PER_EVT_MODE_CHANGED,ETRACER_CC1100_IDLE,0);
   CC1100_DBG_STATE("cc1100:state: IDLE (internal reset)\n");
   
@@ -607,16 +631,13 @@ void cc1100_write_status(struct _cc1100_t *cc1100)
 
   switch (cc1100->fsm_state) 
     {
-      /*
-	case CC1100_STATE_SLEEP:
-	status = (CC1100) & 0xF0;
-	break;
-      */
-      /*
-	case CC1100_STATE_XOFF:
-	status = (CC1100) & 0xF0;
-	break;
-      */
+    case CC1100_STATE_SLEEP:   /* don't care, STATUS not available in SLEEP mode        */
+      status = (CC1100_STATUS_IDLE                << 4) & 0xF0; /* ? */
+      break;
+
+    case CC1100_STATE_XOFF:    /* don't really care since XOFF is set when CSn goes low */
+      status = (CC1100_STATUS_IDLE                << 4) & 0xF0; /* ? */
+      break;
 
     case CC1100_STATE_IDLE:
       status = (CC1100_STATUS_IDLE                << 4) & 0xF0;

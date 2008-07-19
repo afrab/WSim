@@ -245,7 +245,7 @@ do { \
   do {									\
     CC1100_DBG_STATE("cc1100:tx:state: TX (enter)\n");			\
     cc1100->fsm_state = CC1100_STATE_TX;				\
-    tracer_event_record(TRACER_CC1100, CC1100_STATE_TX);		\
+    tracer_event_record(TRACER_CC1100_STATE, CC1100_STATE_TX);		\
     etracer_slot_event(ETRACER_PER_ID_CC1100,				\
 		       ETRACER_PER_EVT_MODE_CHANGED,			\
 		       ETRACER_CC1100_TX,0);				\
@@ -343,7 +343,7 @@ do { \
     CC1100_SET_CRC_TRUE(cc1100);					\
     cc1100->fsm_state   = CC1100_STATE_RX;				\
     cc1100->fsm_pending = CC1100_STATE_IDLE;				\
-    tracer_event_record(TRACER_CC1100, CC1100_STATE_RX);		\
+    tracer_event_record(TRACER_CC1100_STATE, CC1100_STATE_RX);		\
     etracer_slot_event(ETRACER_PER_ID_CC1100,				\
 		       ETRACER_PER_EVT_MODE_CHANGED,			\
 		       ETRACER_CC1100_RX,0);				\
@@ -360,7 +360,7 @@ do { \
   do {									\
     CC1100_DBG_STATE("cc1100:state: CALIBRATE (enter)\n");		\
     cc1100->fsm_state = CC1100_STATE_CALIBRATE;				\
-    tracer_event_record(TRACER_CC1100, CC1100_STATE_CALIBRATE);		\
+    tracer_event_record(TRACER_CC1100_STATE, CC1100_STATE_CALIBRATE);	\
     etracer_slot_event(ETRACER_PER_ID_CC1100,				\
 		       ETRACER_PER_EVT_MODE_CHANGED,			\
 		       ETRACER_CC1100_STARTUP,0);			\
@@ -376,7 +376,7 @@ do { \
   do {									\
     CC1100_DBG_STATE("cc1100:state: FS_CALIBRATE (enter)\n");		\
     cc1100->fsm_state = CC1100_STATE_FS_CALIBRATE;			\
-    tracer_event_record(TRACER_CC1100, CC1100_STATE_FS_CALIBRATE);	\
+    tracer_event_record(TRACER_CC1100_STATE, CC1100_STATE_FS_CALIBRATE); \
     etracer_slot_event(ETRACER_PER_ID_CC1100,				\
 		       ETRACER_PER_EVT_MODE_CHANGED,			\
 		       ETRACER_CC1100_STARTUP,0);			\
@@ -392,7 +392,7 @@ do { \
   do {									\
     CC1100_DBG_STATE("cc1100:state: MANCAL (enter)\n");			\
     cc1100->fsm_state = CC1100_STATE_MANCAL;				\
-    tracer_event_record(TRACER_CC1100, CC1100_STATE_MANCAL);		\
+    tracer_event_record(TRACER_CC1100_STATE, CC1100_STATE_MANCAL);	\
     etracer_slot_event(ETRACER_PER_ID_CC1100,				\
 		       ETRACER_PER_EVT_MODE_CHANGED,			\
 		       ETRACER_CC1100_STARTUP,0);			\
@@ -408,7 +408,7 @@ do { \
   do {									\
     CC1100_DBG_STATE("cc1100:state: FSTXON (enter)\n");			\
     cc1100->fsm_state = CC1100_STATE_FSTXON;				\
-    tracer_event_record(TRACER_CC1100, CC1100_STATE_FSTXON);		\
+    tracer_event_record(TRACER_CC1100_STATE, CC1100_STATE_FSTXON);	\
     etracer_slot_event(ETRACER_PER_ID_CC1100,				\
 		       ETRACER_PER_EVT_MODE_CHANGED,			\
 		       ETRACER_CC1100_STARTUP,0);			\
@@ -422,7 +422,7 @@ do { \
   do {									\
     CC1100_DBG_STATE("cc1100:state: SETTLING (enter)\n");		\
     cc1100->fsm_state = CC1100_STATE_SETTLING;				\
-    tracer_event_record(TRACER_CC1100, CC1100_STATE_SETTLING);		\
+    tracer_event_record(TRACER_CC1100_STATE, CC1100_STATE_SETTLING);	\
     etracer_slot_event(ETRACER_PER_ID_CC1100,				\
 		       ETRACER_PER_EVT_MODE_CHANGED,			\
 		       ETRACER_CC1100_STARTUP,0);			\
@@ -436,9 +436,10 @@ do { \
 
 #define CC1100_IDLE_ENTER(cc1100)					\
   do {									\
-    CC1100_DBG_STATE("cc1100:state: IDLE (enter)\n");			\
+    CC1100_DBG_STATE("cc1100:state: IDLE (enter) at %"PRId64"\n",	\
+		     MACHINE_TIME_GET_NANO());				\
     cc1100->fsm_state = CC1100_STATE_IDLE;				\
-    tracer_event_record(TRACER_CC1100, CC1100_STATE_IDLE);		\
+    tracer_event_record(TRACER_CC1100_STATE, CC1100_STATE_IDLE);	\
     etracer_slot_event(ETRACER_PER_ID_CC1100,				\
 		       ETRACER_PER_EVT_MODE_CHANGED,			\
 		       ETRACER_CC1100_IDLE,0);				\
@@ -450,10 +451,17 @@ do { \
 
 #define CC1100_SLEEP_ENTER(cc1100)					\
   do {									\
-    CC1100_DBG_STATE("cc1100:state: SLEEP (enter)\n");			\
+    cc1100->fsm_pending = CC1100_STATE_SLEEP;				\
+  } while (0)
+
+#define CC1100_SLEEP_REALLY_ENTER(cc1100)				\
+  do {									\
+    CC1100_DBG_STATE("cc1100:state: SLEEP (enter) at %"PRId64"\n",	\
+		     MACHINE_TIME_GET_NANO());				\
     CC1100_UNCALIBRATE(cc1100);						\
     cc1100->fsm_state = CC1100_STATE_SLEEP;				\
-    tracer_event_record(TRACER_CC1100, CC1100_STATE_SLEEP);		\
+    cc1100->fsm_pending = CC1100_STATE_IDLE;				\
+    tracer_event_record(TRACER_CC1100_STATE, CC1100_STATE_SLEEP);	\
     etracer_slot_event(ETRACER_PER_ID_CC1100,				\
 		       ETRACER_PER_EVT_MODE_CHANGED,			\
 		       ETRACER_CC1100_SLEEP,0);				\
@@ -477,14 +485,23 @@ do { \
 /***************************************************/
 /***************************************************/
 /***************************************************/
-#define CC1100_XOFF_ENTER(cc1100) \
-do { \
-	CC1100_UNCALIBRATE(cc1100); \
-	cc1100->fsm_state = CC1100_STATE_XOFF; \
-	tracer_event_record(TRACER_CC1100, CC1100_STATE_XOFF); \
-	etracer_slot_event(ETRACER_PER_ID_CC1100,ETRACER_PER_EVT_MODE_CHANGED,ETRACER_CC1100_XOFF,0); \
-	CC1100_DBG_STATE("cc1100:state: XOFF (enter)\n"); \
-} while (0)
+
+#define CC1100_XOFF_ENTER(cc1100)					\
+  do {									\
+    cc1100->fsm_pending = CC1100_STATE_XOFF;				\
+  } while (0) 
+
+#define CC1100_XOFF_REALLY_ENTER(cc1100)				\
+  do {									\
+    CC1100_UNCALIBRATE(cc1100);						\
+    cc1100->fsm_state = CC1100_STATE_XOFF;				\
+    cc1100->fsm_pending = CC1100_STATE_IDLE;				\
+    tracer_event_record(TRACER_CC1100_STATE, CC1100_STATE_XOFF);	\
+    etracer_slot_event(ETRACER_PER_ID_CC1100,				\
+		       ETRACER_PER_EVT_MODE_CHANGED,			\
+		       ETRACER_CC1100_XOFF,0);				\
+    CC1100_DBG_STATE("cc1100:state: XOFF (enter)\n");			\
+  } while (0)
 
 /***************************************************/
 /***************************************************/
@@ -494,7 +511,7 @@ do { \
   do {									\
     CC1100_DBG_STATE("cc1100:state: FS_WAKEUP (enter)\n");		\
     cc1100->fsm_state = CC1100_STATE_FS_WAKEUP;				\
-    tracer_event_record(TRACER_CC1100, CC1100_STATE_FS_WAKEUP);		\
+    tracer_event_record(TRACER_CC1100_STATE, CC1100_STATE_FS_WAKEUP);	\
     etracer_slot_event(ETRACER_PER_ID_CC1100,				\
 		       ETRACER_PER_EVT_MODE_CHANGED,			\
 		       ETRACER_CC1100_STARTUP,0);			\
@@ -506,28 +523,32 @@ do { \
 /***************************************************/
 /***************************************************/
 
-#define CC1100_RXTX_SETTLING_ENTER(cc1100) \
-do { \
-	CC1100_DBG_STATE("cc1100:state: RXTX_SETTLING (enter)\n"); \
-	cc1100->fsm_state = CC1100_STATE_RXTX_SETTLING; \
-	tracer_event_record(TRACER_CC1100, CC1100_STATE_RXTX_SETTLING); \
-	etracer_slot_event(ETRACER_PER_ID_CC1100,ETRACER_PER_EVT_MODE_CHANGED,ETRACER_CC1100_STARTUP,0); \
-	cc1100->fsm_timer =  MACHINE_TIME_GET_NANO() \
-	  + CC1100_RX_TX_DELAY_NS; \
-} while (0)
+#define CC1100_RXTX_SETTLING_ENTER(cc1100)				\
+  do {									\
+    CC1100_DBG_STATE("cc1100:state: RXTX_SETTLING (enter)\n");		\
+    cc1100->fsm_state = CC1100_STATE_RXTX_SETTLING;			\
+    tracer_event_record(TRACER_CC1100_STATE,CC1100_STATE_RXTX_SETTLING);\
+    etracer_slot_event(ETRACER_PER_ID_CC1100,				\
+		       ETRACER_PER_EVT_MODE_CHANGED,			\
+		       ETRACER_CC1100_STARTUP,0);			\
+    cc1100->fsm_timer = MACHINE_TIME_GET_NANO()				\
+      + CC1100_RX_TX_DELAY_NS;						\
+  } while (0)
 
 /***************************************************/
 /***************************************************/
 /***************************************************/
 
-#define CC1100_TXRX_SETTLING_ENTER(cc1100) \
-do { \
-	CC1100_DBG_STATE("cc1100:state: TXRX_SETTLING (enter)\n"); \
-	cc1100->fsm_state = CC1100_STATE_TXRX_SETTLING; \
-	tracer_event_record(TRACER_CC1100, CC1100_STATE_TXRX_SETTLING); \
-	etracer_slot_event(ETRACER_PER_ID_CC1100,ETRACER_PER_EVT_MODE_CHANGED,ETRACER_CC1100_STARTUP,0); \
-	cc1100->fsm_timer =  MACHINE_TIME_GET_NANO() \
-	  + CC1100_TX_RX_DELAY_NS; \
+#define CC1100_TXRX_SETTLING_ENTER(cc1100)				\
+  do {									\
+    CC1100_DBG_STATE("cc1100:state: TXRX_SETTLING (enter)\n");		\
+    cc1100->fsm_state = CC1100_STATE_TXRX_SETTLING;			\
+    tracer_event_record(TRACER_CC1100_STATE,CC1100_STATE_TXRX_SETTLING);\
+    etracer_slot_event(ETRACER_PER_ID_CC1100,				\
+		       ETRACER_PER_EVT_MODE_CHANGED,			\
+		       ETRACER_CC1100_STARTUP,0);			\
+    cc1100->fsm_timer = MACHINE_TIME_GET_NANO()				\
+      + CC1100_TX_RX_DELAY_NS;						\
 } while (0)
 
 /***************************************************/

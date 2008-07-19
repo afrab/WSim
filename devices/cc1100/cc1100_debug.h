@@ -25,7 +25,7 @@
 
 #define CC1100_IMPLEMENTATION_DEBUG
 #define CC1100_EXCEPTION_DEBUG
-#define CC1100_STATE_DEBUG
+#define _CC1100_STATE_DEBUG
 #define _CC1100_STATUS_DEBUG
 #define _CC1100_STROBE_DEBUG
 #define _CC1100_GDO_DEBUG
@@ -39,7 +39,7 @@
 #define _CC1100_PACKET_DEBUG
 
 #ifdef CC1100_STATE_DEBUG
-#    define CC1100_DBG_STATE(x...) VERBOSE(7,x)
+#    define CC1100_DBG_STATE(x...) VERBOSE(4,x)
 #else
 #    define CC1100_DBG_STATE(x...) do { } while (0)
 #endif
@@ -126,7 +126,9 @@
 /***************************************************/
 /***************************************************/
 
-char* cc1100_strobe_to_str(int strb);
+char* cc1100_status_to_str (int status);
+char* cc1100_state_to_str  (int state);
+char* cc1100_strobe_to_str (int strb);
 
 /***************************************************/
 /***************************************************/

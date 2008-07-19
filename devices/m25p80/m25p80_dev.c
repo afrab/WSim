@@ -19,12 +19,12 @@
 
 #if defined(BUILD_M25P80)
 #  define M25PNAME      "m25p80"
-#  define TRACER_M25P_STATE   TRACER_M25P80_STATE
-#  define TRACER_M25P_FUNC    TRACER_M25P80_FUNC
+#  define TRACER_M25P_STATE     TRACER_M25P80_STATE
+#  define TRACER_M25P_STROBE    TRACER_M25P80_STROBE
 #elif defined(BUILD_M25P10)
 #  define M25PNAME      "m25p10"
-#  define TRACER_M25P_STATE   TRACER_M25P10_STATE
-#  define TRACER_M25P_FUNC    TRACER_M25P10_FUNC
+#  define TRACER_M25P_STATE     TRACER_M25P10_STATE
+#  define TRACER_M25P_STROBE    TRACER_M25P10_STROBE
 #else
 #  error "you must define a specific M25P model"
 #endif
@@ -92,6 +92,7 @@ struct __attribute__ ((packed)) m25p_status_t {
 };
 #endif
 
+
 #if defined(DEBUG)
 const char* str_cmd(int n)
 {
@@ -113,6 +114,7 @@ const char* str_cmd(int n)
   return "UNKNOWN";
 }
 #endif
+
 
 /***************************************************/
 /** Flash internal data ****************************/
@@ -427,8 +429,8 @@ int m25p_device_create(int dev, int UNUSED id)
       memset(M25P_MEMRAW,0xff,M25P_FLASH_SIZE);
     }
 
-  tracer_event_add_id(TRACER_M25P_STATE, 8, M25PNAME"_state"    , "");
-  tracer_event_add_id(TRACER_M25P_FUNC,  8, M25PNAME"_function" , "");
+  tracer_event_add_id(TRACER_M25P_STATE,   8, M25PNAME"_state"    , "");
+  tracer_event_add_id(TRACER_M25P_STROBE,  8, M25PNAME"_function" , "");
 
   return 0;
 }
@@ -525,7 +527,7 @@ static void m25p_set_write_time(int dev, uint64_t nano)
 {
   M25P_DATA->status_register.b.wip = 1;
   M25P_DATA->end_of_busy_time      = MACHINE_TIME_GET_NANO() + nano;
-  HW_DMSG_M25(M25PNAME ": flash busyflag delays %"PRIu64" cycles\n",M25P_DATA->end_of_busy_time);
+  HW_DMSG_M25(M25PNAME ": flash busyflag for %"PRIu64"ns, end at %"PRIu64"ns\n", nano, M25P_DATA->end_of_busy_time);
 }
 
 /***************************************************/

@@ -431,7 +431,7 @@ void cc1100_tx (struct _cc1100_t *cc1100)
 	  cc1100_assert_gdo(cc1100, 0x05, CC1100_PIN_ASSERT);
 	  cc1100_assert_gdo(cc1100, 0x06, CC1100_PIN_DEASSERT);
 	  CC1100_DBG_STATE("cc1100:state: TX_UNDERFLOW\n");
-	  tracer_event_record(TRACER_CC1100, CC1100_STATE_TX_UNDERFLOW);
+	  tracer_event_record(TRACER_CC1100_STATE, CC1100_STATE_TX_UNDERFLOW);
 	  etracer_slot_event(ETRACER_PER_ID_CC1100,ETRACER_PER_EVT_MODE_CHANGED,ETRACER_CC1100_STARTUP,0);
 	  return;
 	}

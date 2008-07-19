@@ -90,10 +90,16 @@ int cc1100_update_state_calibrate (struct _cc1100_t *cc1100)
 int cc1100_update_state_sleep (struct _cc1100_t *cc1100) 
 {
   /* Check if we are waking up through CSn pin */
+  /* CSn will go low at end of the strobe      */
   if (cc1100_read_pin(cc1100, CC1100_INTERNAL_CSn_PIN) == 0x00) 
     {
-      CC1100_DBG_PINS("cc1100: (pins DEBUG): CSn down\n");
+      CC1100_DBG_PINS("cc1100:pins: CSn down, going from SLEEP to Idle at %"PRId64"\n",
+		      MACHINE_TIME_GET_NANO());
       CC1100_IDLE_ENTER(cc1100);
+    }
+  else
+    {
+      //
     }
   return 0;
 }
@@ -103,8 +109,13 @@ int cc1100_update_state_xoff (struct _cc1100_t *cc1100)
   /* Check if we are waking up through CSn pin */
   if (cc1100_read_pin(cc1100, CC1100_INTERNAL_CSn_PIN) == 0x00) 
     {
-      CC1100_DBG_PINS("cc1100: (pins DEBUG): CSn down\n");
+      CC1100_DBG_PINS("cc1100:pins: CSn down, going from XOFF to Idle at %"PRId64"\n",
+		      MACHINE_TIME_GET_NANO());
       CC1100_IDLE_ENTER(cc1100);
+    }
+  else
+    {
+      //
     }
   return 0;
 }

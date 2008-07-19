@@ -385,6 +385,8 @@ void cc1100_strobe_state_tx(struct _cc1100_t *cc1100) {
 /***************************************************/
 
 void cc1100_strobe_command(struct _cc1100_t *cc1100) {
+  tracer_event_record(TRACER_CC1100_STROBE, cc1100->addr);
+
 	switch (cc1100->fsm_state) {
 		case CC1100_STATE_IDLE:
 			cc1100_strobe_state_idle(cc1100);

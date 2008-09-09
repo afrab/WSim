@@ -131,7 +131,7 @@ void msp430_print_registers()
   int i;
   for(i=0; i < 16; i++)
     {
-      HW_DMSG_FD(" %3s : 0x%04x\n",mcu_regname_str(i),MCU_REGS[i] & 0xffffu);
+      VERBOSE(2," %3s : 0x%04x\n",mcu_regname_str(i),MCU_REGS[i] & 0xffffu);
     }
 }
 

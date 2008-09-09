@@ -48,6 +48,7 @@ static void    msp430_write16_sigbus (uint16_t addr, int16_t val);
 
 #define SIGBUS_EXIT()                        \
   do {                                       \
+    msp430_print_registers();		     \
     mcu_signal_add(SIG_MCU | SIG_MCU_BUS);   \
     exit(0);                                 \
   } while (0)

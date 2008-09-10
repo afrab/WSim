@@ -28,7 +28,7 @@
 /***************************************************/
 /***************************************************/
 
-#define DEBUG_PTTY
+#define DEBUG_PTTY__NO
 
 #ifdef DEBUG_PTTY
 #    define HW_DMSG_PTTY(x...) HW_DMSG(x)

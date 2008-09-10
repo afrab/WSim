@@ -80,17 +80,20 @@
 
 
 /* C1100 Strobe commands (cf [1] p41) */
-#define CC1100_STROBE_SRES                      0x30
-#define CC1100_STROBE_SFSTXON                   0x31
-#define CC1100_STROBE_SXOFF                     0x32
-#define CC1100_STROBE_SCAL                      0x33
-#define CC1100_STROBE_SRX                       0x34
-#define CC1100_STROBE_STX                       0x35
-#define CC1100_STROBE_SIDLE                     0x36
-#define CC1100_STROBE_SPWD                      0x39
-#define CC1100_STROBE_SFRX                      0x3A
-#define CC1100_STROBE_SFTX                      0x3B
-#define CC1100_STROBE_SNOP                      0x3D
+#define CC1100_STROBE_SRES                      0x30 /* reset                  */
+#define CC1100_STROBE_SFSTXON                   0x31 /* enable and calibrate   */
+#define CC1100_STROBE_SXOFF                     0x32 /* crystall off           */
+#define CC1100_STROBE_SCAL                      0x33 /* calibrate              */
+#define CC1100_STROBE_SRX                       0x34 /* enable rx              */
+#define CC1100_STROBE_STX                       0x35 /* enable tx              */
+#define CC1100_STROBE_SIDLE                     0x36 /* go idle                */
+#define CC1100_STROBE_SAFC                      0x37 /* AFC adjustment         */
+#define CC1100_STROBE_SWOR                      0x38 /* wake on radio          */
+#define CC1100_STROBE_SPWD                      0x39 /* power down             */
+#define CC1100_STROBE_SFRX                      0x3A /* flush Rx fifo          */
+#define CC1100_STROBE_SFTX                      0x3B /* flush Tx fifo          */
+#define CC1100_STROBE_SWORRST                   0x3C /* Reset real time clock. */
+#define CC1100_STROBE_SNOP                      0x3D /* no operation           */
 
 
 /* C1100 Registers (cf [1] p42) */

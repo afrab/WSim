@@ -39,7 +39,7 @@
 //#define DEBUG_SERIAL
 
 #ifdef DEBUG
-#define HW_DMSG_DS2411(x...) fprintf(stderr, x)
+#define HW_DMSG_DS2411(x...) VERBOSE(2, x)
 #else
 #define HW_DMSG_DS2411(x...) do {} while(0)
 #endif
@@ -593,12 +593,12 @@ static void update_onewire_reset_state(int dev, uint64_t current_time, uint64_t 
 	  if (time_in_state < ONEWIRE_RSTL_MIN)
 	    {
 	      GO_WAIT_RESET(dev);
-	      HW_DMSG_DS2411("ds2411:    reset_pulse canceled, up too early [+%"PRId64"]\n",time_in_state);
+	      HW_DMSG_DS2411("ds2411:    reset_pulse canceled, up too early [+%"PRId64" < %"PRId64"]\n",time_in_state, ONEWIRE_RSTL_MIN);
 	    }
 	  else if (time_in_state > ONEWIRE_RSTL_MAX)
 	    {
 	      GO_WAIT_RESET(dev);
-	      HW_DMSG_DS2411("ds2411:    reset_pulse canceled, up too late [+%"PRId64"]\n",time_in_state);
+	      HW_DMSG_DS2411("ds2411:    reset_pulse canceled, up too late [+%"PRId64" > %"PRId64"]\n",time_in_state, ONEWIRE_RSTL_MAX);
 	    }
 	  else
 	    {
@@ -946,6 +946,7 @@ static void update_ds2411_state_readrom(int dev, uint64_t current_time, uint64_t
 	    {
 	      DS2411_READROM_BYTENUM  = 0;
 	      HW_DMSG_DSTATE("ds2411: READ ROM finished\n");
+	      VERBOSE(4,"ds2411: READ ROM finished\n");
 	      GO_WAIT_RESET(dev);
 	    }
 	}

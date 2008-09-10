@@ -76,12 +76,14 @@ char* cc1100_strobe_to_str(int strb)
     case CC1100_STROBE_SRX     : return "SRX";     // 0x34
     case CC1100_STROBE_STX     : return "STX";     // 0x35
     case CC1100_STROBE_SIDLE   : return "SIDLE";   // 0x36
+    case CC1100_STROBE_SAFC    : return "SAFC";    // 0x37 
+    case CC1100_STROBE_SWOR    : return "SWOR";    // 0x38 
     case CC1100_STROBE_SPWD    : return "SPWD";    // 0x39
     case CC1100_STROBE_SFRX    : return "SFRX";    // 0x3A
     case CC1100_STROBE_SFTX    : return "SFTX";    // 0x3B
     case CC1100_STROBE_SNOP    : return "SNOP";    // 0x3D
     }
-  return "";
+  return "unknown";
 }
 
 /***************************************************/

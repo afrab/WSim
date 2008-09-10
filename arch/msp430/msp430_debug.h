@@ -16,7 +16,7 @@
 char* msp430_debug_opcode(unsigned short opcode, int b);
 char* msp430_debug_regname(unsigned short r);
 char* msp430_debug_portname(uint16_t addr);
-void  msp430_print_registers();
+void  msp430_print_registers(int columns);
 
 extern char* msp430_lpm_names[];
 

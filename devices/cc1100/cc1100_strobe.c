@@ -165,7 +165,8 @@ void cc1100_strobe_state_idle(struct _cc1100_t *cc1100)
       CC1100_FS_WAKEUP_ENTER(cc1100);
       return;
     default:
-      CC1100_DBG_IMPL("cc1100:strobe:idle: strobe (0x%x) invalid or not implemented yet\n", cc1100->addr);
+      CC1100_DBG_IMPL("cc1100:strobe:idle: strobe (0x%x,%s) invalid or not implemented yet\n", cc1100->addr, 
+		      cc1100_strobe_to_str(cc1100->addr));
       return;
     }
 }
@@ -359,7 +360,7 @@ void cc1100_strobe_state_rx(struct _cc1100_t *cc1100)
       break;
 
     default:
-      CC1100_DBG_IMPL("cc1100:strobe:rx: strobe command %s not implemented in rx state (0x%x)\n", 
+      CC1100_DBG_IMPL("cc1100:strobe:rx: strobe command \"%s\" not implemented in rx state (0x%x)\n", 
 		      cc1100_strobe_to_str(cc1100->addr), cc1100->addr);
       break;
     }

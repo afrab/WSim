@@ -677,7 +677,8 @@ do {                                                                          \
       ERROR("msp430:usart%d: writing to read only register RXBUFF\n",NUM);    \
       break;                                                                  \
     case U##NUM##TXBUF      :                                                 \
-      HW_DMSG_USART("msp430:usart%d: write uxtxbuf  = 0x%02x\n",NUM,val & 0xff); \
+      HW_DMSG_USART("msp430:usart%d: write uxtxbuf  = 0x%02x [PC=0x%04x]\n",NUM,val & 0xff, \
+		    mcu_get_pc());					\
       if (MCU.USART.uxtxbuf_full == 1)                                        \
         {                                                                     \
           ERROR("msp430:usart%d:    overwriting tx buffer with [0x%02x]\n",   \

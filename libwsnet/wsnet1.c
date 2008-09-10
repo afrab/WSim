@@ -866,12 +866,10 @@ static int64_t worldsens_packet_parse_data(char *msg, int UNUSED pkt_seq, int UN
       if (ntohl(data->node) == (unsigned)WSENS_MYADDR) 
 	{
 	  struct wsnet_rx_info info;
-	  WSNET_RX("WSNET (%"PRIu64", %d): <-- RX%d[%d] (data: 0x%02x, freq: %dHz, mod: %d, rx: %lf, SiNR: %lf)\n",
-		   MACHINE_TIME_GET_NANO(), 
-		   pkt_seq, 
-		   line,
-		   c_node,
-		   data->data & 0xff, 
+	  WSNET_RX("WSNET (%"PRIu64", %d): <-- RX src=%d[%d] (data: [0x%02x,%c], freq: %dHz, mod: %d, rx: %lfdBm, SiNR: %lf)\n",
+		   MACHINE_TIME_GET_NANO(), pkt_seq, 
+		   /* RX_line[c_node] */ line, c_node,
+		   data->data & 0xff, isprint(data->data & 0xff ) ? data->data & 0xff : '.',
 		   ntohl(pkt->frequency), 
 		   ntohl(pkt->modulation), 
 		   ntohdbl(data->rx_dBm), 

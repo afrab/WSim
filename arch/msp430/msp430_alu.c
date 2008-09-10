@@ -1590,7 +1590,7 @@ static void msp430_mcu_run_insn()
       MCU_ALU.regs[PC_REG_IDX] = MCU_ALU.next_pc;
 
 #if defined(DEBUG) && defined(DEBUG_REGISTERS)
-      msp430_print_registers();
+      msp430_print_registers(1);
 #endif
       HW_DMSG_FD("msp430: -- Fetch end --------------------------------------------\n");
 

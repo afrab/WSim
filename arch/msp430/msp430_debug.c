@@ -126,12 +126,14 @@ char* mcu_regname_str(unsigned r)
 /* ************************************************** */
 /* ************************************************** */
 
-void msp430_print_registers()
+void msp430_print_registers(int columns)
 {
   int i;
   for(i=0; i < 16; i++)
     {
-      VERBOSE(2," %3s : 0x%04x\n",mcu_regname_str(i),MCU_REGS[i] & 0xffffu);
+      VERBOSE(2," %3s:0x%04x",mcu_regname_str(i),MCU_REGS[i] & 0xffffu);
+      if (((i+1) % columns) == 0)
+	VERBOSE(2,"\n");
     }
 }
 

@@ -190,7 +190,17 @@ int machine_get_node_id(void)
 /* ************************************************** */
 /* ************************************************** */
 
-inline void machine_run_free(void)
+void machine_exit(int arg)
+{
+  REAL_STDERR("wsim: error, exit\n");
+  exit(arg);
+}
+
+/* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
+
+static inline uint32_t machine_run(void)
 {
   uint32_t sig;
   /*
@@ -208,15 +218,24 @@ inline void machine_run_free(void)
 	WARNING("wsim: ========================================\n");
 	mcu_signal_remove(MAC_TO_SIG(MAC_MUST_WRITE_FIRST));
 	sig = mcu_signal_get();
-	return;
+	return sig;
       }
 
   } while (sig == 0);
+  return sig;
+}
 
-  /*
-   * HW_DMSG_MACH("machine: stop at 0x%04x with signal %s\n",mcu_get_pc(),mcu_signal_str());
-   */
+/* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
 
+
+inline void machine_run_free(void)
+{
+  uint32_t sig;
+  sig = machine_run();
+  
+  HW_DMSG_MACH("machine:run: stopped at 0x%04x with signal %s\n",mcu_get_pc(),mcu_signal_str());
   /*
    * Allowed outside tools signals
    *    SIG_GDB | SIG_CONSOLE | SIG_WORLDSENS_IO 
@@ -246,7 +265,7 @@ uint64_t machine_run_insn(uint64_t insn)
   for(i=0; i < insn; i++)
     {
       mcu_signal_add(SIG_RUN_INSN);
-      machine_run_free();
+      (void)machine_run();
       mcu_signal_remove(SIG_RUN_INSN);
 
       if (mcu_signal_get())
@@ -272,7 +291,7 @@ uint64_t machine_run_time(uint64_t nanotime)
   while (MACHINE_TIME_GET_NANO() < nanotime)
     {
       mcu_signal_add(SIG_RUN_TIME);
-      machine_run_free();
+      (void)machine_run();
       mcu_signal_remove(SIG_RUN_TIME);
 
       if (mcu_signal_get())

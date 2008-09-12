@@ -1232,20 +1232,20 @@ void atmega128_alu_reset(void)
 /* ************************************************** */
 /* ************************************************** */
 
-#define UNKNOWN_OPCODE(insn)                                                \
-do {                                                                        \
-  ERROR("atmega:error: unknown opcode 0x%04x at 0x%04x\n",insn,mcu_get_pc()); \
-  mcu_signal_add(SIG_MCU_ILL);                                              \
-} while (0)
+#define UNKNOWN_OPCODE(insn)						\
+  do {									\
+    ERROR("atmega:error: unknown opcode 0x%04x at 0x%04x\n",insn,mcu_get_pc()); \
+    mcu_signal_add(SIG_MCU | SIG_MCU_ILL);				\
+  } while (0)
 
 /* ************************************************** */
 /* ************************************************** */
 /* ************************************************** */
 
 #define RETURN(opcode,insn)                                  \
-do {                                                         \
-  return OPCODES[opcode].fun(opcode,insn);                   \
-} while (0)
+  do {							     \
+    return OPCODES[opcode].fun(opcode,insn);		     \
+  } while (0)
 
 /* ************************************************** */
 /* ************************************************** */

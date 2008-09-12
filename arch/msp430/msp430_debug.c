@@ -141,6 +141,26 @@ void msp430_print_registers(int columns)
 /* ************************************************** */
 /* ************************************************** */
 
+void msp430_print_stack(int lines)
+{
+  int i;
+  uint16_t sp = MCU_REGS[1];
+  VERBOSE(2," stack dump: sp = 0x%04x\n",sp);
+
+  for(i = 0; i < lines; i++)
+    {
+      uint16_t adr  = sp + 2*(lines-1) - 2*i; 
+      uint16_t data = mcu_jtag_read_word(adr); 
+      VERBOSE(2,"   0x%04x: 0x%04x - %c%c\n", adr, data,
+	      isprint((data >> 8) & 0xff) ? (data >> 8) & 0xff : '.',
+	      isprint((data     ) & 0xff) ? (data     ) & 0xff : '.');
+    }
+}
+
+/* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
+
 char* msp430_debug_portname(uint16_t addr)
 {
   switch (addr)

@@ -1581,7 +1581,7 @@ static void msp430_mcu_run_insn()
         default:
           ERROR("msp430:alu: Unknown opcode 0x%04x at 0x%04x\n", insn, MCU_ALU.curr_pc);
 	  SET_CYCLES(0);
-	  mcu_signal_add(SIG_MCU_ILL);
+	  mcu_signal_add(SIG_MCU | SIG_MCU_ILL);
 	  return;
 
         } /* case OP_*/

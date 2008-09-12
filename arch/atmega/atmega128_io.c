@@ -35,7 +35,7 @@ typedef void    (*peripheral_write16_t) (uint16_t addr, int16_t val);
 
 static int8_t atmega128_read8_sigbus(uint16_t addr)
 {
-  mcu_signal_add(SIG_MCU_BUS);
+  mcu_signal_add(SIG_MCU | SIG_MCU_BUS);
   ERROR("atmega128:io: read byte at address 0x%04x at pc 0x%04x\n",addr,mcu_get_pc());
   ERROR("atmega128:io:     -- target unknown or block not implemented\n");
   return 0;
@@ -43,7 +43,7 @@ static int8_t atmega128_read8_sigbus(uint16_t addr)
 
 static void atmega128_write8_sigbus(uint16_t addr, int8_t val)
 {
-  mcu_signal_add(SIG_MCU_BUS);
+  mcu_signal_add(SIG_MCU | SIG_MCU_BUS);
   ERROR("atmega128:io: write byte [0x%04x] = 0x%02x at pc 0x%04x\n",addr,(uint8_t)val,mcu_get_pc());
   ERROR("atmega128:io:     -- target unknown or block not implemented\n");
 }

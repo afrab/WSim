@@ -73,6 +73,8 @@ extern struct machine_t machine;
 /* ************************************************** */
 /* ************************************************** */
 
+void     machine_exit      (int arg);
+
 #define MACHINE_TIME_GET_NANO()  machine.nanotime
 #define MACHINE_TIME_GET_INCR()  machine.nanotime_incr
 #define MACHINE_TIME_SET_INCR(n)                                \

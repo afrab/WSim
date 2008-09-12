@@ -371,13 +371,13 @@ tracer_event_add_id(tracer_id_t id, int width, char* label, char* module)
   if (id >= (TRACER_MAX_ID - 1))
     {
       ERROR("tracer: max event recording reached, could not register [%s] = %d\n",label,id);
-      exit(1);
+      machine_exit(1);
     }
 
   if ((label == NULL) || (strlen(label) == 0))
     {
       ERROR("tracer: event id %d must have a valid name (non null)\n",id);
-      exit(1);
+      machine_exit(1);
     }
 
   if ((width < 1) || (width > 64))
@@ -388,7 +388,7 @@ tracer_event_add_id(tracer_id_t id, int width, char* label, char* module)
   if (tracer_id_name[id][0] != 0)
     {
       ERROR("tracer: event id %d for %s is already used by event %s\n",id,label,tracer_id_name[id]);
-      exit(1);
+      machine_exit(1);
     }
   
   strncpy(tracer_id_name   [id], label,  TRACER_MAX_NAME_LENGTH);

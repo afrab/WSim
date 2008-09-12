@@ -46,17 +46,20 @@ static void    msp430_write16_sigbus (uint16_t addr, int16_t val);
 /* ** SIGBUS **************************************** */
 /* ************************************************** */
 
-#define SIGBUS_EXIT()                        \
-  do {                                       \
-    msp430_print_registers(4);		     \
-    mcu_signal_add(SIG_MCU | SIG_MCU_BUS);   \
-    exit(0);                                 \
-  } while (0)
+#define STACK_DUMP_LINES 32
+
+static void SIGBUS_EXIT(void)
+{
+  ERROR("msp430: SIGBUS\n");
+  msp430_print_registers(4);
+  msp430_print_stack(STACK_DUMP_LINES);
+  mcu_signal_add(SIG_MCU | SIG_MCU_BUS);
+}
 
 
 static void msp430_write8_sigbus(uint16_t addr, int8_t val)
 {
-  mcu_signal_add(SIG_MCU_BUS);
+  ERROR("msp430: =======================\n");
   ERROR("msp430:io: write byte [0x%04x] = 0x%02x at pc 0x%04x\n",addr,(uint8_t)val,mcu_get_pc());
   ERROR("msp430:io:     -- target unknown or block not implemented\n");
   if (((addr & 1) == 0) && (pread16[addr] != msp430_read16_sigbus))
@@ -66,31 +69,35 @@ static void msp430_write8_sigbus(uint16_t addr, int8_t val)
       ERROR("msp430:io:     -- for WSim correction\n");
     }
   SIGBUS_EXIT();
+  ERROR("msp430: =======================\n");
 }
 
 static void msp430_write16_sigbus(uint16_t addr, int16_t val)
 {
-  mcu_signal_add(SIG_MCU_BUS);
+  ERROR("msp430: =======================\n");
   ERROR("msp430:io: write short [0x%04x] = 0x%04x at pc 0x%04x\n",addr,(uint16_t)val,mcu_get_pc());
   ERROR("msp430:io:     -- target unknown or block not implemented\n");
   SIGBUS_EXIT();
+  ERROR("msp430: =======================\n");
 }
 
 static int8_t msp430_read8_sigbus(uint16_t addr)
 {
-  mcu_signal_add(SIG_MCU_BUS);
+  ERROR("msp430: =======================\n");
   ERROR("msp430:io: read byte at address 0x%04x at pc 0x%04x\n",addr,mcu_get_pc());
   ERROR("msp430:io:     -- target unknown or block not implemented\n");
   SIGBUS_EXIT();
+  ERROR("msp430: =======================\n");
   return 0;
 }
 
 static int16_t msp430_read16_sigbus(uint16_t addr)
 {
-  mcu_signal_add(SIG_MCU_BUS);
+  ERROR("msp430: =======================\n");
   ERROR("msp430:io: read short at address 0x%04x at pc 0x%04x\n",addr,mcu_get_pc());
   ERROR("msp430:io:     -- target unknown or block not implemented\n");
   SIGBUS_EXIT();
+  ERROR("msp430: =======================\n");
   return 0;
 }
 
@@ -192,7 +199,7 @@ static void msp430_set_readptr8(addr_map_read8_t f, uint16_t addr)
   else
     {
       ERROR("msp430:io: MCU create errror, IO read8 0x%04x function not unique\n",addr);
-      exit(0);
+      machine_exit(0);
     }
 }
 
@@ -205,7 +212,7 @@ static void msp430_set_readptr16(addr_map_read16_t f, uint16_t addr)
   else
     {
       ERROR("msp430:io: MCU create errror, IO read16 0x%04x function not unique\n",addr);
-      exit(0);
+      machine_exit(0);
     }
 }
 
@@ -218,7 +225,7 @@ static void msp430_set_writeptr8(addr_map_write8_t f, uint16_t addr)
   else
     {
       ERROR("msp430:io: MCU create errror, IO write8 0x%04x function not unique\n",addr);
-      exit(0);
+      machine_exit(0);
     }
 
 }
@@ -232,7 +239,7 @@ static void msp430_set_writeptr16(addr_map_write16_t f, uint16_t addr)
   else
     {
       ERROR("msp430:io: MCU create errror, IO write16 0x%04x function not unique\n",addr);
-      exit(0);
+      machine_exit(0);
     }
 }
 

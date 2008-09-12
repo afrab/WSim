@@ -169,10 +169,10 @@ do {                                                                          \
                  {                                                            \
                     msp430_interrupt_set(INTR_USART##NUM##_TX);               \
                  }                                                            \
-               HW_DMSG_USART("msp430:usart%d: SPI tx buf -> shifter (%d)\n",  \
-                              NUM,MCU.USART.uxtx_shift_delay);                \
-	       VERBOSE(VUART,"msp430:usart%d: SPI send (0x%x,%c) at 0x%04x\n",NUM,      \
-                  MCU.USART.uxtxbuf, isgraph(MCU.USART.uxtxbuf) ?             \
+               HW_DMSG_USART("msp430:usart%d: SPI tx buf -> shifter (%d)\n", \
+			     NUM,MCU.USART.uxtx_shift_delay);		\
+	       VERBOSE(VUART,"msp430:usart%d: SPI send (0x%x,%c) at 0x%04x\n",NUM, \
+		       MCU.USART.uxtxbuf, isprint(MCU.USART.uxtxbuf) ?	\
 		       MCU.USART.uxtxbuf : '.', mcu_get_pc());		\
             }                                                                 \
          } /* uxtfubuf_full */                                                \

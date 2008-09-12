@@ -64,9 +64,10 @@ uint64_t machine_get_nanotime(void);
 /**
  * machine_run
  **/
-void     machine_run_free(void);
-uint64_t machine_run_insn(uint64_t insn);
-uint64_t machine_run_time(uint64_t nanotime);
+void     machine_exit      (int arg);
+void     machine_run_free  (void);
+uint64_t machine_run_insn  (uint64_t insn);
+uint64_t machine_run_time  (uint64_t nanotime);
 
 /**
  * save machine state in a backup place

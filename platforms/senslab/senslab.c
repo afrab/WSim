@@ -1,9 +1,9 @@
 
 /**
- *  \file   wsn430.c
- *  \brief  Platform devices handling functions, WSN430 / Capnet platform
+ *  \file   senslab.c
+ *  \brief  Platform devices handling functions, WSN430 / Senslab platforms
  *  \author Antoine Fraboulet
- *  \date   2005
+ *  \date   2008
  **/
 
 #include <stdio.h>
@@ -21,7 +21,23 @@
 #include "devices/led/led_dev.h"
 #include "devices/m25p80/m25p80_dev.h"
 #include "devices/ds2411/ds2411_dev.h"
+
+#if defined(SLABV13B)
 #include "devices/cc1100/cc1100_dev.h"
+#define RADIO_CSn_MASK  CC1100_CSn_MASK
+#define RADIO_CSn_SHIFT CC1100_CSn_SHIFT
+#define RADIO_DATA_MASK CC1100_DATA_MASK
+#define RADIO_GDO0_MASK CC1100_GDO0_MASK   /* GDO0 -> P1.3 */
+#define RADIO_GDO2_MASK CC1100_GDO2_MASK   /* GDO2 -> P1.4 */
+#elif defined(SLABV14)
+#include "devices/cc2420/cc2420_dev.h"
+#define RADIO_CSn_MASK  CC2420_CSn_MASK
+#define RADIO_CSn_SHIFT CC2420_BIT_CSn
+#define RADIO_DATA_MASK CC2420_DATA_MASK
+#define RADIO_GDO0_MASK CC2420_GDO0_MASK   /* GDO0 -> P1. */
+#define RADIO_GDO2_MASK CC2420_GDO2_MASK   /* GDO2 -> P1. */
+#endif
+
 #include "devices/ptty/ptty_dev.h"
 #include "devices/uigfx/uigfx_dev.h"
 #include "src/options.h"
@@ -31,7 +47,7 @@
 /* ************************************************** */
 
 /* ****************************************
- * platform description for WSN430 devices
+ * platform description for Senslab devices
  *
  * Port 1
  * ======
@@ -186,21 +202,26 @@ int devices_create(void)
 
   xin_freq  =    32768; /* 32 kHz */
   xt2_freq  =  8000000; /*  8 MHz */
+
+#if defined(SLABV13B)
   xosc_freq = 27000000; /* 27 MHz */
+#elif defined(SLABV14)
+  xosc_freq = 16000000; /* 16 MHz */
+#endif
 
   if (xt1_opt.value) {
     xin_freq = atoi(xt1_opt.value);
-    VERBOSE(1,"wsn430: xt1 external crystal set to %d Hz\n",xin_freq);
+    VERBOSE(1,"senslab: xt1 external crystal set to %d Hz\n",xin_freq);
   }
 
   if (xt2_opt.value) {
     xt2_freq = atoi(xt2_opt.value);
-    VERBOSE(1,"wsn430: xt2 external crystal set to %d Hz\n",xt2_freq);
+    VERBOSE(1,"senslab: xt2 external crystal set to %d Hz\n",xt2_freq);
   }
 
   if (xosc_opt.value) {
     xosc_freq = atoi(xosc_opt.value);
-    VERBOSE(1,"wsn430: xosc external crystal set to %d Hz\n",xosc_freq);
+    VERBOSE(1,"senslab: xosc external crystal set to %d Hz\n",xosc_freq);
   }
 
   /*********************************/
@@ -220,8 +241,14 @@ int devices_create(void)
   machine.device_size[LED2]   = led_device_size();    // Led2
   machine.device_size[LED3]   = led_device_size();    // Led3
   machine.device_size[DS24]   = ds2411_device_size(); // dallas ds2411
-  machine.device_size[RADIO]  = cc1100_device_size(); // cc1100 radio
   machine.device_size[SERIAL] = ptty_device_size();
+
+#if defined(SLABV13B)
+  machine.device_size[RADIO]  = cc1100_device_size(); // cc1100 radio
+#elif defined(SLABV14)
+  machine.device_size[RADIO]  = cc2420_device_size(); // cc1100 radio
+#endif
+
 #if defined(LOGO1)
   machine.device_size[LOGO1]  = uigfx_device_size();
 #endif
@@ -252,7 +279,11 @@ int devices_create(void)
   res += led_device_create      (LED3,    0x0000ee,OFF,BKG);
   res += m25p_device_create     (FLASH,   0);
   res += ds2411_device_create   (DS24,    ds2411_opt.value);
+#if defined(SLABV13B)
   res += cc1100_device_create   (RADIO,   xosc_freq / 1000000);
+#elif defined(SLABV14)
+  res += cc2420_device_create   (RADIO,   xosc_freq / 1000000);
+#endif
   res += ptty_device_create     (SERIAL,  1);
 #if defined(LOGO1)
   res += uigfx_device_create    (LOGO1,   wsim);
@@ -323,7 +354,7 @@ int devices_update(void)
 #if defined(GUI)
   int refresh = 0;
 #endif
-  int CC1100_CSn = 0;
+  int RADIO_CSn = 0;
   uint8_t  val8;
 
   /* *************************************************************************** */
@@ -401,8 +432,8 @@ int devices_update(void)
       /* waiting for flash update */
       etracer_slot_access(0x0, 1, ETRACER_ACCESS_WRITE, ETRACER_ACCESS_BIT, ETRACER_ACCESS_LVL_GPIO, 0);
 
-      CC1100_CSn = BIT(val8,2);
-      machine.device[RADIO].write(RADIO, CC1100_CSn_MASK, CC1100_CSn << CC1100_CSn_SHIFT);
+      RADIO_CSn = BIT(val8,2);
+      machine.device[RADIO].write(RADIO, RADIO_CSn_MASK, RADIO_CSn << RADIO_CSn_SHIFT);
       etracer_slot_access(0x0, 1, ETRACER_ACCESS_WRITE, ETRACER_ACCESS_BIT, ETRACER_ACCESS_LVL_GPIO, 0);
     }
 
@@ -463,7 +494,7 @@ int devices_update(void)
     case USART_MODE_SPI:
       if (msp430_usart0_dev_read_spi(&val8))
 	{
-	  machine.device[RADIO].write(RADIO, CC1100_DATA_MASK, val8);
+	  machine.device[RADIO].write(RADIO, RADIO_DATA_MASK, val8);
 	  etracer_slot_access(0x0, 1, ETRACER_ACCESS_WRITE, ETRACER_ACCESS_BYTE, ETRACER_ACCESS_LVL_SPI0, 0);
 	}      
       break; 
@@ -519,26 +550,26 @@ int devices_update(void)
     uint32_t mask  = 0;
     uint32_t value = 0;
     machine.device[ RADIO ].read( RADIO ,&mask,&value);
-    if (mask & CC1100_DATA_MASK)
+    if (mask & RADIO_DATA_MASK)
       {
 	if (MCU.usart0.mode != USART_MODE_SPI)
 	  {
 #if defined(DEBUG_ME_HARDER)
-	    ERROR("wsn430:devices: read data on radio while not in SPI mode ?\n");
+	    ERROR("senslab:devices: read data on radio while not in SPI mode ?\n");
 #endif
 	  }
-	msp430_usart0_dev_write_spi(value & CC1100_DATA_MASK);
+	msp430_usart0_dev_write_spi(value & RADIO_DATA_MASK);
 	etracer_slot_access(0x0, 1, ETRACER_ACCESS_READ, ETRACER_ACCESS_BYTE, ETRACER_ACCESS_LVL_SPI0, 0);
       }
 
-    if (mask & CC1100_GDO2_MASK) // GDO2 -> P1.4
+    if (mask & RADIO_GDO2_MASK) // GDO2 -> P1.4
       { 
-	msp430_digiIO_dev_write(PORT1, (CC1100_GDO2_MASK & value) ? 0x10 : 0x00, 0x10);
+	msp430_digiIO_dev_write(PORT1, (RADIO_GDO2_MASK & value) ? 0x10 : 0x00, 0x10);
 	etracer_slot_access(0x0, 1, ETRACER_ACCESS_READ, ETRACER_ACCESS_BIT, ETRACER_ACCESS_LVL_GPIO, 0);
       }
-    if (mask & CC1100_GDO0_MASK) // GDO0 -> P1.3
+    if (mask & RADIO_GDO0_MASK) // GDO0 -> P1.3
       { 
-	msp430_digiIO_dev_write(PORT1, (CC1100_GDO0_MASK & value) ? 0x08 : 0x00, 0x08);
+	msp430_digiIO_dev_write(PORT1, (RADIO_GDO0_MASK & value) ? 0x08 : 0x00, 0x08);
 	etracer_slot_access(0x0, 1, ETRACER_ACCESS_READ, ETRACER_ACCESS_BIT, ETRACER_ACCESS_LVL_GPIO, 0);
       }
   }
@@ -553,7 +584,7 @@ int devices_update(void)
       {
 	if (MCU.usart1.mode != USART_MODE_SPI)
 	  {
-	    ERROR("wsn430:devices: read data on flash while not in SPI mode ?\n");
+	    ERROR("senslab:devices: read data on flash while not in SPI mode ?\n");
 	  }
 	msp430_usart1_dev_write_spi(value & 0x00FF);
 	etracer_slot_access(0x0, 1, ETRACER_ACCESS_READ, ETRACER_ACCESS_BYTE, ETRACER_ACCESS_LVL_SPI1, 0);
@@ -586,14 +617,14 @@ int devices_update(void)
 	switch ((ev = ui_getevent()))
 	  {
 	  case UI_EVENT_QUIT:
-	    HW_DMSG_UI("wsn430:devices: UI event QUIT\n");
+	    HW_DMSG_UI("senslab:devices: UI event QUIT\n");
 	    MCU_SIGNAL = MCU_SIGINT;
 	    break;
 	  case UI_EVENT_CMD:
 	  case UI_EVENT_NONE:
 	    break;
 	  default:
-	    ERROR("wsn430:devices: unknown ui event\n");
+	    ERROR("senslab:devices: unknown ui event\n");
 	    break;
 	  }
       }

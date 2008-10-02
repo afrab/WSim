@@ -50,8 +50,8 @@
 #define CC2420_BIT_SFD      12
 #define CC2420_BIT_RESET    13
 #define CC2420_BIT_VREG_EN  14
-#define CC2420_BIT_GIO0     15
-#define CC2420_BIT_GIO1     16
+#define CC2420_BIT_GDO0     15
+#define CC2420_BIT_GDO2     16
 #define CC2420_BIT_PKT_INT  17
 
 #define CC2420_DATA_MASK    0x000000ff
@@ -62,8 +62,8 @@
 #define CC2420_SFD_MASK     (1 << CC2420_BIT_SFD)
 #define CC2420_RESET_MASK   (1 << CC2420_BIT_RESET)
 #define CC2420_VREG_EN_MASK (1 << CC2420_BIT_VREG_EN)
-#define CC2420_GIO0_MASK    (1 << CC2420_BIT_GIO0)
-#define CC2420_GIO1_MASK    (1 << CC2420_BIT_GIO1)
+#define CC2420_GDO0_MASK    (1 << CC2420_BIT_GDO0)
+#define CC2420_GDO2_MASK    (1 << CC2420_BIT_GDO2)
 #define CC2420_PKT_INT_MASK (1 << CC2420_BIT_PKT_INT)
 
 /***************************************************/

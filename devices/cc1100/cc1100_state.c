@@ -277,7 +277,7 @@ int cc1100_update_state_tx (struct _cc1100_t *cc1100) {
 
 int cc1100_update_state_rx (struct _cc1100_t *cc1100) 
 {
-  CC1100_COMPUTE_CCA(cc1100);
+  cc1100_compute_cca(cc1100);
 
   if (cc1100->fsm_pending != CC1100_STATE_IDLE) 
     {

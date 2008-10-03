@@ -632,11 +632,11 @@ void cc1100_write_status(struct _cc1100_t *cc1100)
   switch (cc1100->fsm_state) 
     {
     case CC1100_STATE_SLEEP:   /* don't care, STATUS not available in SLEEP mode        */
-      status = (CC1100_STATUS_IDLE                << 4) & 0xF0; /* ? */
+      status = 0; /* (CC1100_STATUS_IDLE                << 4) & 0xF0;  */
       break;
 
     case CC1100_STATE_XOFF:    /* don't really care since XOFF is set when CSn goes low */
-      status = (CC1100_STATUS_IDLE                << 4) & 0xF0; /* ? */
+      status = 0; /* (CC1100_STATUS_IDLE                << 4) & 0xF0;  */
       break;
 
     case CC1100_STATE_IDLE:

@@ -218,6 +218,54 @@ void cc1100_rx_sfd(struct _cc1100_t *cc1100, uint8_t rx) {
 /***************************************************/
 /***************************************************/
 
+void cc1100_compute_cca(struct _cc1100_t *cc1100)
+{
+  if (cc1100->fsm_state != CC1100_STATE_RX)
+    {
+      cc1100->registers[CC1100_REG_PKTSTATUS] &= ~(0x10);
+    }
+  switch ((cc1100->registers[CC1100_REG_MCSM1] >> 4) && 0x03)
+    {
+    case 0:
+      cc1100->registers[CC1100_REG_PKTSTATUS] |= (0x10);
+      break;
+    case 1:
+      /* ToCheck: valeur de 0 */
+      if (((int8_t) cc1100->registers[CC1100_REG_RSSI]) == 0) 
+	{
+	  cc1100->registers[CC1100_REG_PKTSTATUS] |= (0x10);
+	} 
+      else 
+	{
+	  cc1100->registers[CC1100_REG_PKTSTATUS] &= ~(0x10);
+	}
+      break;
+    case 2:
+      if (cc1100->fsm_ustate == 1) 
+	{
+	  cc1100->registers[CC1100_REG_PKTSTATUS] |= (0x10);
+	} 
+      else 
+	{
+	  cc1100->registers[CC1100_REG_PKTSTATUS] &= ~(0x10);
+	}
+      break;
+    case 3:
+      /* ToCheck: valeur de 0 */
+      if ((cc1100->fsm_ustate == 1) && (((int8_t) cc1100->registers[CC1100_REG_RSSI]) == 0))
+	{
+	  cc1100->registers[CC1100_REG_PKTSTATUS] |= (0x10);
+	} else {
+	cc1100->registers[CC1100_REG_PKTSTATUS] &= ~(0x10);
+      }
+      break;
+    }
+} 
+
+/***************************************************/
+/***************************************************/
+/***************************************************/
+
 void cc1100_rx_state(struct _cc1100_t *cc1100) 
 {
   /* cc1100 data sheet rev 1.1, page 68

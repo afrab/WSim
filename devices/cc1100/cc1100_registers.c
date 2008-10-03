@@ -21,14 +21,16 @@
 /***************************************************/
 /***************************************************/
 /***************************************************/
-uint8_t cc1100_read_ro_register				(struct _cc1100_t *cc1100, uint8_t addr);
-uint8_t cc1100_compute_pktstatus_register	(struct _cc1100_t *cc1100);
 
+uint8_t cc1100_read_ro_register                 (struct _cc1100_t *cc1100, uint8_t addr);
+uint8_t cc1100_compute_pktstatus_register       (struct _cc1100_t *cc1100);
 
 /***************************************************/
 /***************************************************/
 /***************************************************/
-void cc1100_reset_registers(struct _cc1100_t *cc1100) {
+
+void cc1100_reset_registers(struct _cc1100_t *cc1100) 
+{
 	
 	cc1100->registers[CC1100_REG_IOCFG2] = CC1100_REG_IOCFG2_DEFAULT;
 	cc1100->registers[CC1100_REG_IOCFG1] = CC1100_REG_IOCFG1_DEFAULT;
@@ -108,135 +110,159 @@ void cc1100_reset_registers(struct _cc1100_t *cc1100) {
 	return;
 }	
 
+/***************************************************/
+/***************************************************/
+/***************************************************/
 
-/***************************************************/
-/***************************************************/
-/***************************************************/
-void cc1100_write_register(struct _cc1100_t *cc1100, uint8_t addr, uint8_t val) {
-	uint8_t old_val;
-	
-	if (addr >= 0x30)
-		return;
-	
-	old_val = cc1100->registers[addr];
-	cc1100->registers[addr] = val;
-	
-	if ((addr >= CC1100_REG_FREQ2) && (addr <= CC1100_REG_FREQ0) && (val != old_val)) {
-		/* Need to calibrate if the frequency registers are modified */
-		CC1100_UNCALIBRATE(cc1100);
-	} else if ((addr <= CC1100_REG_IOCFG0) && (val != old_val)) {
-		/* Need to update pins if modified */
-		cc1100_update_gdo(cc1100, val);
-	}		
-	
-	CC1100_DBG_REG("cc1100: (register DEBUG): register 0x%x written with 0x%x\n", addr, val);		
-	return;
-}
-
-
-/***************************************************/
-/***************************************************/
-/***************************************************/
-uint8_t cc1100_read_register(struct _cc1100_t *cc1100, uint8_t addr) {
-
-	if (addr >= 0x30) {
-		return cc1100_read_ro_register(cc1100, addr);
-	} else {
-		CC1100_DBG_REG("cc1100: (register DEBUG): register 0x%x read 0x%x\n", addr, cc1100->registers[addr]);		
-		return cc1100->registers[addr];
-	}
+void cc1100_write_register(struct _cc1100_t *cc1100, uint8_t addr, uint8_t val) 
+{
+  uint8_t old_val;
+  
+  if (addr >= 0x30)
+    return;
+  
+  old_val = cc1100->registers[addr];
+  cc1100->registers[addr] = val;
+  
+  if ((addr >= CC1100_REG_FREQ2) && (addr <= CC1100_REG_FREQ0) && (val != old_val)) 
+    {
+      /* Need to calibrate if the frequency registers are modified */
+      CC1100_UNCALIBRATE(cc1100);
+    } 
+  else if ((addr <= CC1100_REG_IOCFG0) && (val != old_val)) 
+    {
+      /* Need to update pins if modified */
+      cc1100_update_gdo(cc1100, val);
+    }		
+  
+  CC1100_DBG_REG("cc1100:register:write %s [0x%x] written with 0x%x\n", 
+		 cc1100_register_to_str(addr), addr, val);		
 }
 
 /***************************************************/
 /***************************************************/
 /***************************************************/
-uint8_t cc1100_read_ro_register(struct _cc1100_t *cc1100, uint8_t addr) {
-	uint8_t val;
-	
-	switch (addr) {
-		case CC1100_REG_PARTNUM:
-			val = cc1100->registers[addr];
-			break;
-		case CC1100_REG_VERSION:
-			val = cc1100->registers[addr];
-			break;
-		case CC1100_REG_FREQEST:
-			CC1100_DBG_IMPL("cc1100: (register IMPLEMENTATION): read-only register 0x%x not implemented yet\n", addr);		
-			val = cc1100->registers[addr];
-			break;
-		case CC1100_REG_LQI:
-			val = cc1100->registers[addr];
-			break;
-		case CC1100_REG_RSSI:
-			val = cc1100->registers[addr];
-			break;
-		case CC1100_REG_MARCSTATE:
-			val = cc1100->fsm_state;
-			break;
-		case CC1100_REG_WORTIME1:
-			CC1100_DBG_IMPL("cc1100: (register IMPLEMENTATION): read-only register 0x%x not implemented yet\n", addr);		
-			val = cc1100->registers[addr];
-			break;
-		case CC1100_REG_WORTIME0:
-			CC1100_DBG_IMPL("cc1100: (register IMPLEMENTATION): read-only register 0x%x not implemented yet\n", addr);		
-			val = cc1100->registers[addr];
-			break;
-		case CC1100_REG_PKTSTATUS:
-			val = cc1100_compute_pktstatus_register(cc1100);
-			break;
-		case CC1100_REG_VCO_VC_DAC:
-			val = cc1100->registers[addr];
-			break;
-		case CC1100_REG_TXBYTES:
-			if (cc1100->txUnderflow)
-				val = 0x80;
-			else
-				val = cc1100->txBytes;
-			break;
-		case CC1100_REG_RXBYTES:
-			if (cc1100->rxOverflow)
-				val = 0x80;
-			else
-				val = cc1100->rxBytes;
-			break;
-		default: 
-			CC1100_DBG_EXC("cc1100: (register EXCEPTION): unknown register address 0x%x \n", addr);		
-			val = 0x00;
-			break;
-	}	
 
-	CC1100_DBG_REG("cc1100: (register DEBUG): register 0x%x read 0x%x\n", addr, cc1100->registers[addr]);		
-	return val;
+uint8_t cc1100_read_register(struct _cc1100_t *cc1100, uint8_t addr) 
+{
+  uint8_t val; 
+
+  if (addr >= 0x30) 
+    {
+      return cc1100_read_ro_register(cc1100, addr);
+    } 
+
+  val = cc1100->registers[addr];
+  CC1100_DBG_REG("cc1100:register:read  %s [0x%x] read 0x%x\n", 
+		 cc1100_register_to_str(addr), addr, val);
+  return val;
 }
 
+/***************************************************/
+/***************************************************/
+/***************************************************/
 
-/***************************************************/
-/***************************************************/
-/***************************************************/
-uint8_t cc1100_compute_pktstatus_register(struct _cc1100_t *cc1100) {
-
-	/* CRC value */
-	cc1100->registers[CC1100_REG_PKTSTATUS] = cc1100->registers[CC1100_REG_LQI] & 0x80;
-	
-	/* CS */
-	if (CC1100_GET_CS(cc1100)) {
-		cc1100->registers[CC1100_REG_PKTSTATUS] |= 0x40;
-	}
-	
-	/* PQT */
-	if (CC1100_GET_PQT(cc1100)) {
-		cc1100->registers[CC1100_REG_PKTSTATUS] |= 0x20;
-	}
-	
-	/* CCA */
-	CC1100_COMPUTE_CCA(cc1100);
-	
-	/* Sync word found */
-	if ((cc1100->fsm_state == CC1100_STATE_RX) 
-		&& ((cc1100->fsm_ustate == 3) || (cc1100->fsm_ustate == 4))) {
-		cc1100->registers[CC1100_REG_PKTSTATUS] |= 0x08;
-	}
-	
-	return cc1100->registers[CC1100_REG_PKTSTATUS];
+uint8_t cc1100_read_ro_register(struct _cc1100_t *cc1100, uint8_t addr) 
+{
+  uint8_t val;
+  
+  switch (addr) 
+    {
+    case CC1100_REG_PARTNUM:
+      val = cc1100->registers[addr];
+      break;
+    case CC1100_REG_VERSION:
+      val = cc1100->registers[addr];
+      break;
+    case CC1100_REG_FREQEST:
+      CC1100_DBG_IMPL("cc1100:register:IMPLEMENTATION: read-only register 0x%x not implemented yet\n", 
+		      cc1100_register_to_str(addr), addr);
+      val = cc1100->registers[addr];
+      break;
+    case CC1100_REG_LQI:
+      val = cc1100->registers[addr];
+      break;
+    case CC1100_REG_RSSI:
+      val = cc1100->registers[addr];
+      break;
+    case CC1100_REG_MARCSTATE:
+      val = cc1100->fsm_state;
+      break;
+    case CC1100_REG_WORTIME1:
+      CC1100_DBG_IMPL("cc1100:register:IMPLEMENTATION: read-only register 0x%x not implemented yet\n", 
+		      cc1100_register_to_str(addr), addr);
+      val = cc1100->registers[addr];
+      break;
+    case CC1100_REG_WORTIME0:
+      CC1100_DBG_IMPL("cc1100:register:IMPLEMENTATION: read-only register 0x%x not implemented yet\n", 
+		      cc1100_register_to_str(addr), addr);
+      val = cc1100->registers[addr];
+      break;
+    case CC1100_REG_PKTSTATUS:
+      val = cc1100_compute_pktstatus_register(cc1100);
+      CC1100_DBG_REG("cc1100:register:read RO %s 0x%x read 0x%x\n",
+		     cc1100_register_to_str(addr), addr, val);
+      break;
+    case CC1100_REG_VCO_VC_DAC:
+      val = cc1100->registers[addr];
+      break;
+    case CC1100_REG_TXBYTES:
+      if (cc1100->txUnderflow)
+	val = 0x80;
+      else
+	val = cc1100->txBytes;
+      break;
+    case CC1100_REG_RXBYTES:
+      if (cc1100->rxOverflow)
+	val = 0x80;
+      else
+	val = cc1100->rxBytes;
+      break;
+    default: 
+      CC1100_DBG_EXC("cc1100:register:EXCEPTION: unknown register address 0x%x \n", addr);		
+      val = 0x00;
+      break;
+    }	
+  
+  CC1100_DBG_REG("cc1100:register:read RO %s 0x%x read 0x%x\n",
+		 cc1100_register_to_str(addr), addr, val);
+  return val;
 }
 
+/***************************************************/
+/***************************************************/
+/***************************************************/
+
+uint8_t cc1100_compute_pktstatus_register(struct _cc1100_t *cc1100) 
+{
+  /* CRC value */
+  cc1100->registers[CC1100_REG_PKTSTATUS] = cc1100->registers[CC1100_REG_LQI] & 0x80;
+  
+  /* CS */
+  if (CC1100_GET_CS(cc1100)) 
+    {
+      cc1100->registers[CC1100_REG_PKTSTATUS] |= 0x40;
+    }
+  
+  /* PQT */
+  if (CC1100_GET_PQT(cc1100)) 
+    {
+      cc1100->registers[CC1100_REG_PKTSTATUS] |= 0x20;
+    }
+  
+  /* CCA */
+  cc1100_compute_cca(cc1100);
+  
+  /* Sync word found */
+  if ((cc1100->fsm_state == CC1100_STATE_RX) && 
+      ((cc1100->fsm_ustate == 3) || (cc1100->fsm_ustate == 4))) 
+    {
+      cc1100->registers[CC1100_REG_PKTSTATUS] |= 0x08;
+    }
+  
+  return cc1100->registers[CC1100_REG_PKTSTATUS];
+}
+
+/***************************************************/
+/***************************************************/
+/***************************************************/

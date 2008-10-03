@@ -202,7 +202,7 @@ void	 cc1100_tx                      (struct _cc1100_t *cc1100);
 ***************************************/
 
 uint64_t cc1100_callback_rx		(void *, struct wsnet_rx_info*);
-int	 cc1100_compute_cca		(struct _cc1100_t *cc1100);
+void	 cc1100_compute_cca		(struct _cc1100_t *cc1100);
 void	 cc1100_rx_state		(struct _cc1100_t *cc1100);
 
 

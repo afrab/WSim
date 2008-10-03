@@ -337,7 +337,7 @@ void cc1100_strobe_state_rx(struct _cc1100_t *cc1100)
 
     case CC1100_STROBE_STX:
       CC1100_DBG_STROBE("cc1100:strobe:rx: STX\n");
-      CC1100_COMPUTE_CCA(cc1100);
+      cc1100_compute_cca(cc1100);
       cc1100->fsm_pending = CC1100_STATE_TX;
       if (cc1100->registers[CC1100_REG_PKTSTATUS] & 0x10) 
 	{
@@ -347,7 +347,7 @@ void cc1100_strobe_state_rx(struct _cc1100_t *cc1100)
 
     case CC1100_STROBE_SFSTXON:
       CC1100_DBG_STROBE("cc1100:strobe:rx: SFSTXON\n");
-      CC1100_COMPUTE_CCA(cc1100);
+      cc1100_compute_cca(cc1100);
       cc1100->fsm_pending = CC1100_STATE_FSTXON;
       if (cc1100->registers[CC1100_REG_PKTSTATUS] & 0x10) 
 	{

@@ -21,21 +21,21 @@
 /***************************************************/
 /***************************************************/
 /***************************************************/
-#define CC1100_INIT_PQT(cc1100) \
-do { \
-	cc1100->pqt = 0; \
-} while (0) // TODO
+#define CC1100_INIT_PQT(cc1100)			\
+  do {						\
+    cc1100->pqt = 0;				\
+  } while (0) // TODO
 
 #define CC1100_GET_PQT(cc1100) 	(cc1100->pqt >= ((cc1100->registers[CC1100_REG_PKTCTRL1] >> 5) & 0x07))
 
-#define CC1100_UPDATE_PQT(cc1100, rx) \
-do { \
-	cc1100->pqt += 8; \
-	if (cc1100->pqt > 31) \
-		cc1100->pqt = 31; \
-	if (cc1100->pqt < 0) \
-		cc1100->pqt = 0; \
-} while (0) // TODO
+#define CC1100_UPDATE_PQT(cc1100, rx)		\
+  do {						\
+    cc1100->pqt += 8;				\
+    if (cc1100->pqt > 31)			\
+      cc1100->pqt = 31;				\
+    if (cc1100->pqt < 0)			\
+      cc1100->pqt = 0;				\
+  } while (0) // TODO
 
 
 #define CC1100_INIT_CS(cc1100)			               \
@@ -59,92 +59,56 @@ do { \
   } while (0)
 
 
-#define CC1100_RECORD_RSSI(cc1100, dBm) \
-do { \
-	if ((cc1100->fsm_state == 1) && (cc1100->fsm_ustate == 1)) {\
-		/* ToCheck: 0 -> -110dBm */ \
-		if (dBm < -110) {\
-			cc1100->registers[CC1100_REG_RSSI] = 0; \
-		} else {\
-			cc1100->registers[CC1100_REG_RSSI] = dBm + 110; \
-		} \
-		CC1100_SET_CS(cc1100, dBm); \
-	} \
-} while (0)
+#define CC1100_RECORD_RSSI(cc1100, dBm)					\
+  do {									\
+    if ((cc1100->fsm_state == 1) && (cc1100->fsm_ustate == 1)) {	\
+      /* ToCheck: 0 -> -110dBm */					\
+      if (dBm < -110) {							\
+	cc1100->registers[CC1100_REG_RSSI] = 0;				\
+      } else {								\
+	cc1100->registers[CC1100_REG_RSSI] = dBm + 110;			\
+      }									\
+      CC1100_SET_CS(cc1100, dBm);					\
+    }									\
+  } while (0)
 
 
-#define CC1100_INIT_LQI(cc1100) \
-do { \
-	/* ToCheck: 0 -> -110dBm */ \
-	/* (int8_t) */ cc1100->registers[CC1100_REG_RSSI] = 0; \
-} while (0)
+#define CC1100_INIT_LQI(cc1100)					\
+  do {								\
+    /* ToCheck: 0 -> -110dBm */					\
+    /* (int8_t) */ cc1100->registers[CC1100_REG_RSSI] = 0;	\
+  } while (0)
 
-#define CC1100_RECORD_LQI(cc1100, lqi) \
-do { \
-	cc1100->registers[CC1100_REG_LQI] = \
-	  (cc1100->registers[CC1100_REG_LQI] & 0x80) | (lqi & 0x7F); \
-} while (0)
+#define CC1100_RECORD_LQI(cc1100, lqi)				     \
+  do {								     \
+    cc1100->registers[CC1100_REG_LQI] =				     \
+      (cc1100->registers[CC1100_REG_LQI] & 0x80) | (lqi & 0x7F);     \
+  } while (0)
 
-#define CC1100_COMPUTE_LQI(cc1100,snr) \
-do { \
-	if (cc1100->lqi_cnt >= 8) { \
-		break; \
-	} \
-	cc1100->lqi_cnt++; \
-	if (snr > 127) \
-		cc1100->lqi += 127; \
-	else \
-		cc1100->lqi += snr; \
-	if (cc1100->lqi_cnt == 8) { \
-		uint8_t val; \
-		cc1100->lqi /= 8; \
-		val = (uint8_t) cc1100->lqi; \
-		CC1100_RECORD_LQI(cc1100, val); \
-	} \
-} while (0)
-
-#define CC1100_COMPUTE_CCA(cc1100) \
-do { \
-	if (cc1100->fsm_state != CC1100_STATE_RX) { \
-		cc1100->registers[CC1100_REG_PKTSTATUS] &= ~(0x10); \
-	} \
-	switch ((cc1100->registers[CC1100_REG_MCSM1] >> 4) && 0x03) { \
-		case 0: \
-			cc1100->registers[CC1100_REG_PKTSTATUS] |= (0x10); \
-			break; \
-		case 1: \
-			/* ToCheck: valeur de 0 */ \
-			if (((int8_t) cc1100->registers[CC1100_REG_RSSI]) == 0) { \
-				cc1100->registers[CC1100_REG_PKTSTATUS] |= (0x10); \
-			} else { \
-				cc1100->registers[CC1100_REG_PKTSTATUS] &= ~(0x10); \
-			} \
-			break; \
-		case 2: \
-			if (cc1100->fsm_ustate == 1) { \
-				cc1100->registers[CC1100_REG_PKTSTATUS] |= (0x10); \
-			} else { \
-				cc1100->registers[CC1100_REG_PKTSTATUS] &= ~(0x10); \
-			} \
-			break; \
-		case 3: \
-			/* ToCheck: valeur de 0 */ \
-			if ((cc1100->fsm_ustate == 1) && (((int8_t) cc1100->registers[CC1100_REG_RSSI]) == 0)) { \
-				cc1100->registers[CC1100_REG_PKTSTATUS] |= (0x10); \
-			} else { \
-				cc1100->registers[CC1100_REG_PKTSTATUS] &= ~(0x10); \
-			} \
-			break; \
-	} \
-} while (0)
-
+#define CC1100_COMPUTE_LQI(cc1100,snr)		\
+  do {						\
+    if (cc1100->lqi_cnt >= 8) {			\
+      break;					\
+    }						\
+    cc1100->lqi_cnt++;				\
+    if (snr > 127)				\
+      cc1100->lqi += 127;			\
+    else					\
+      cc1100->lqi += snr;			\
+    if (cc1100->lqi_cnt == 8) {			\
+      uint8_t val;				\
+      cc1100->lqi /= 8;				\
+      val = (uint8_t) cc1100->lqi;		\
+      CC1100_RECORD_LQI(cc1100, val);		\
+    }						\
+  } while (0)
 
 
 /***************************************************/
 /***************************************************/
 /***************************************************/
-#define CC1100_COMPUTE_CRC(cc1100)		(cc1100->registers[CC1100_REG_PKTCTRL0] & 0x04)
-#define CC1100_APPEND_CRC(cc1100)		(cc1100->registers[CC1100_REG_PKTCTRL1] & 0x04)
+#define CC1100_COMPUTE_CRC(cc1100)      (cc1100->registers[CC1100_REG_PKTCTRL0] & 0x04)
+#define CC1100_APPEND_CRC(cc1100)       (cc1100->registers[CC1100_REG_PKTCTRL1] & 0x04)
 
 /***************************************************/
 /***************************************************/
@@ -159,8 +123,7 @@ do { \
 /***************************************************/
 /***************************************************/
 
-
-#define CC1100_IS_CALIBRATED(cc1100)	   (cc1100->fs_cal)
+#define CC1100_IS_CALIBRATED(cc1100)	(cc1100->fs_cal)
 
 #define CC1100_UNCALIBRATE(cc1100)				        \
   do {									\
@@ -182,16 +145,16 @@ do { \
 /***************************************************/
 
 
-#define CC1100_SET_CRC_TRUE(cc1100) \
-do { \
-	cc1100_assert_gdo(cc1100, 0x07, CC1100_PIN_ASSERT); \
-	cc1100->registers[CC1100_REG_LQI] |= 0x80; \
-} while (0)
+#define CC1100_SET_CRC_TRUE(cc1100)			    \
+  do {							    \
+    cc1100_assert_gdo(cc1100, 0x07, CC1100_PIN_ASSERT);	    \
+    cc1100->registers[CC1100_REG_LQI] |= 0x80;		    \
+  } while (0)
 
-#define CC1100_SET_CRC_FALSE(cc1100) \
-do { \
-	cc1100->registers[CC1100_REG_LQI] &= 0x7F; \
-} while (0)
+#define CC1100_SET_CRC_FALSE(cc1100)		   \
+  do {						   \
+    cc1100->registers[CC1100_REG_LQI] &= 0x7F;	   \
+  } while (0)
 
 
 /***************************************************/

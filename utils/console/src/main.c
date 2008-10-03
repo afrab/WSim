@@ -70,7 +70,7 @@ void usage(char* name)
   fprintf(stdout,"usage: %s            \n\
   --help      -h : this message          \n\
   --output    -o : output mode only      \n\
-  --fifo=name -f : open an existing fifo \n\
+  --fifo=name -f : open an existing fifo \n\
   --reopen    -r : reopen on exit        \n\
   --log=name  -l : logfile name          \n\
   --width=n   -W : window width          \n\

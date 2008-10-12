@@ -8,6 +8,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <ctype.h>
 
 #include "arch/common/hardware.h"
 #include "msp430.h"

@@ -61,7 +61,7 @@
 
 #define CC1100_RECORD_RSSI(cc1100, dBm)					\
   do {									\
-    if ((cc1100->fsm_state == 1) && (cc1100->fsm_ustate == 1)) {	\
+    if ((cc1100->fsm_state == CC1100_STATE_RX)) {			\
       /* ToCheck: 0 -> -110dBm */					\
       if (dBm < -110) {							\
 	cc1100->registers[CC1100_REG_RSSI] = 0;				\

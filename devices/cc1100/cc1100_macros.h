@@ -257,6 +257,7 @@
     CC1100_DBG_PKT("cc1100:rx:packet: RX END\n");			\
     CC1100_DBG_STATE("cc1100:rx:state: RX END [%s():%d]\n",		\
 		     __FUNCTION__, __LINE__);				\
+    CC1100_INIT_RSSI(cc1100); /* GUILLAUME_:_A_VERIFIER */		\
     cc1100_rx_state(cc1100);						\
   } while (0)
 

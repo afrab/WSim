@@ -302,7 +302,7 @@ tracer_init(char *filename, get_nanotime_function_t f)
   EVENT_TRACER.ev_count_total = 0;;
   tracer_stop();
 
-  if ((tracer_datafile = fopen(filename,"w")) == NULL)
+  if ((tracer_datafile = fopen(filename,"wb")) == NULL)
     {
       ERROR("tracer: ***********************************\n");
       ERROR("tracer: %s\n",strerror(errno));

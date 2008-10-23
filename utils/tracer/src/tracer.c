@@ -128,7 +128,7 @@ int tracer_dirmode_close(tracer_t *t)
 
 int tracer_file_open(tracer_t *t)
 {
-  if ((t->in_fd = fopen(t->in_filename,"r")) == NULL)
+  if ((t->in_fd = fopen(t->in_filename,"rb")) == NULL)
     {
       ERROR("tracer:file: open error on input %s\n",t->in_filename);
       return 1;
@@ -454,7 +454,7 @@ int tracer_file_out_open(tracer_t *t, const char* suffix)
       strncat(t->out_filename,suffix,FILENAME_MAX - strlen(t->out_filename));
     }
 
-  if ((t->out_fd = fopen(t->out_filename,"w")) == NULL)
+  if ((t->out_fd = fopen(t->out_filename,"wb")) == NULL)
     {
       return 1;
     }

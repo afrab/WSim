@@ -167,7 +167,7 @@ int machine_dump(const char *filename)
   FILE *file;
 
   HW_DMSG_MACH("machine: dump state to file %s\n",filename);
-  if ((file = fopen(filename, "w")) == NULL)
+  if ((file = fopen(filename, "wb")) == NULL)
     {
       ERROR("machine: cannot dump state to file %s\n",filename);
       return 1;

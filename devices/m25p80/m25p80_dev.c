@@ -340,7 +340,7 @@ int m25p_flash_load(int dev, const char *name)
 {
   FILE *f;
 
-  if ((f = fopen(name, "r")) == NULL)
+  if ((f = fopen(name, "rb")) == NULL)
     {
       return 1;
     }
@@ -368,7 +368,7 @@ int m25p_flash_dump(int dev, const char *name)
 {
   FILE *f;
 
-  if ((f = fopen(name, "w")) == NULL)
+  if ((f = fopen(name, "wb")) == NULL)
     {
       return 1;
     }

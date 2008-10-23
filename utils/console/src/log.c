@@ -23,7 +23,7 @@
 FILE* log_open(char* filename)
 {
   FILE* f;
-  f = fopen(filename,"w");
+  f = fopen(filename,"wb");
   return f;
 }
 

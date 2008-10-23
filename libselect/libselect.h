@@ -17,14 +17,14 @@
 typedef void (*libselect_callback)(int fd, uint64_t flags, void *ptr);
 
 /**
- * libselect_init is called from main just after option parsing 
+ * libselect_init is called from main() just after option parsing 
  * and before machine_create() so that devices can register
  * their own handlers
  */
 int libselect_init(void);
 
 /**
- * libselect_close is called from main after machine_delete and before 
+ * libselect_close is called from main() after machine_delete() and before 
  * logger_close()
  */
 int libselect_close(void);

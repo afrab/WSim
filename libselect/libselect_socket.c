@@ -1,6 +1,6 @@
 /**
- *  \file   gdbremote_socket.c
- *  \brief  GDB Remote functions, socket API
+ *  \file   libselect_socket.c
+ *  \brief  libselect socket API, socket API
  *  \author Antoine Fraboulet
  *  \date   2005
  **/
@@ -25,17 +25,18 @@
 #endif
 
 #include "config.h"
-#include "gdbremote.h"
-#include "gdbremote_socket.h"
+#include "libselect.h"
+#include "libselect_socket.h"
 #include "liblogger/logger.h"
 
 #define LISTENQ 2 // socket listen fifo size (backlog)
 
+#define DMSG_LIBSELECT_SOCKET(x...) VERBOSE(5,x)
 /* ************************************************** */
 /* ************************************************** */
 
 static int 
-gdbremote_create_socket(int type, unsigned int addr, unsigned short port)
+libselect_create_socket(int type, unsigned int addr, unsigned short port)
 {
   int yes;
   int desc; 
@@ -80,7 +81,7 @@ gdbremote_create_socket(int type, unsigned int addr, unsigned short port)
 /* ************************************************** */
 
 static void
-gdbremote_log_connection(struct sockaddr_in *cli)
+libselect_log_connection(struct sockaddr_in *cli)
 {
 #ifdef INET_NTOP
   char buf_svr[120];
@@ -89,7 +90,7 @@ gdbremote_log_connection(struct sockaddr_in *cli)
 
   if (1)
     {
-      OUTPUT("wsim:gdb: connexion opened ");
+      OUTPUT("wsim:libselect_socket: connexion opened ");
 #ifdef INET_NTOP
       OUTPUT("from %s:%d\n",
 	       inet_ntop(cli->sin_family,(void*)&cli->sin_addr,
@@ -107,13 +108,13 @@ gdbremote_log_connection(struct sockaddr_in *cli)
 /* ************************************************** */
 
 int 
-gdbremote_init(struct gdbremote_t *gdb, unsigned short port)
+libselect_skt_init(struct libselect_socket_t *skt, unsigned short port)
 {
-  gdb->socket_listen = -1;
-  gdb->socket        = -1;
-  gdb->port          = port;
+  skt->socket_listen = -1;
+  skt->socket        = -1;
+  skt->port          = port;
 
-  if ((gdb->socket_listen = gdbremote_create_socket(SOCK_STREAM, INADDR_ANY, gdb->port)) < 0)
+  if ((skt->socket_listen = libselect_create_socket(SOCK_STREAM, INADDR_ANY, skt->port)) < 0)
     return 1;
   
   return 0;
@@ -123,7 +124,7 @@ gdbremote_init(struct gdbremote_t *gdb, unsigned short port)
 /* ************************************************** */
 
 int 
-gdbremote_accept(struct gdbremote_t *gdb)
+libselect_skt_accept(struct libselect_socket_t *skt)
 {
   int yes;
   socklen_t length;
@@ -131,16 +132,16 @@ gdbremote_accept(struct gdbremote_t *gdb)
 
   length = sizeof(s);
   memset(&s,0,length);
-  OUTPUT("wsim:gdb: waiting for a gdb connection on port %d\n",gdb->port);
-  if ((gdb->socket = accept(gdb->socket_listen,(struct sockaddr*)&s,&length)) == -1)
+  OUTPUT("wsim:libselect_socket: waiting for a libselect_socket connection on port %d\n", skt->port);
+  if ((skt->socket = accept(skt->socket_listen,(struct sockaddr*)&s,&length)) == -1)
     {
-      DMSG_GDB("gdbremote: %s", strerror(errno));
+      DMSG_LIBSELECT_SOCKET("libselect:accept %s", strerror(errno));
       return 1;
     }
 
   /* TCP keep alive */
   yes = 1;
-  setsockopt (gdb->socket,SOL_SOCKET,SO_KEEPALIVE,(void*)&yes,sizeof(yes));
+  setsockopt (skt->socket,SOL_SOCKET,SO_KEEPALIVE,(void*)&yes,sizeof(yes));
 
   /* TCP no delay */
 #if !defined(PROTO_TCP)
@@ -148,13 +149,13 @@ gdbremote_accept(struct gdbremote_t *gdb)
 #endif
 
   yes = 1;
-  setsockopt (gdb->socket,PROTO_TCP,TCP_NODELAY,(void*)&yes,sizeof(yes));
+  setsockopt (skt->socket,PROTO_TCP,TCP_NODELAY,(void*)&yes,sizeof(yes));
 
 #if defined(SIGPIPE)
   signal (SIGPIPE, SIG_IGN);
 #endif
 
-  gdbremote_log_connection(&s);
+  libselect_log_connection(&s);
   return 0;
 }
 
@@ -162,12 +163,12 @@ gdbremote_accept(struct gdbremote_t *gdb)
 /* ************************************************** */
 
 int
-gdbremote_close_client(struct gdbremote_t *gdb)
+libselect_skt_close_client(struct libselect_socket_t *skt)
 {
-  if (gdb->socket != -1)
+  if (skt->socket != -1)
     {
-      close(gdb->socket);
-      gdb->socket = -1;
+      close(skt->socket);
+      skt->socket = -1;
     }
 
   return 0;
@@ -177,14 +178,14 @@ gdbremote_close_client(struct gdbremote_t *gdb)
 /* ************************************************** */
 
 int 
-gdbremote_close(struct gdbremote_t *gdb)
+libselect_skt_close(struct libselect_socket_t *skt)
 {
-  gdbremote_close_client(gdb);
+  libselect_skt_close_client(skt);
 
-  if (gdb->socket_listen != -1)
+  if (skt->socket_listen != -1)
     {
-      close(gdb->socket_listen);
-      gdb->socket_listen = -1;
+      close(skt->socket_listen);
+      skt->socket_listen = -1;
     }
 
   return 0;
@@ -194,19 +195,19 @@ gdbremote_close(struct gdbremote_t *gdb)
 /* ************************************************** */
 
 char
-gdbremote_getchar(struct gdbremote_t *gdb)
+libselect_skt_getchar(struct libselect_socket_t *skt)
 {
   unsigned char c;
 
-  if (gdb->socket == -1)
+  if (skt->socket == -1)
     {
-      ERROR("wsim:gdb:getchar: read on closed socket\n");
+      ERROR("wsim:libselect_socket:getchar: read on closed socket\n");
       return 0;
     }
 
-  if (read(gdb->socket,&c,1) == -1)
+  if (read(skt->socket,&c,1) == -1)
     {
-      ERROR("wsim:gdb:getchar: read failed - %s\n",strerror(errno));
+      ERROR("wsim:libselect_socket:getchar: read failed - %s\n",strerror(errno));
       return 0;
     }
 
@@ -217,23 +218,23 @@ gdbremote_getchar(struct gdbremote_t *gdb)
 /* ************************************************** */
 
 int
-gdbremote_putchar(struct gdbremote_t *gdb, unsigned char c)
+libselect_skt_putchar(struct libselect_socket_t *skt, unsigned char c)
 {
-  if (gdb->socket == -1)
+  if (skt->socket == -1)
     {
-      ERROR("wsim:gdb:putchar: write on closed socket\n");
-      return GDBREMOTE_PUTCHAR_ERROR;
+      ERROR("wsim:libselect_socket:putchar: write on closed socket\n");
+      return LIBSELECT_SOCKET_PUTCHAR_ERROR;
     }
 
-  if (write(gdb->socket,&c,1) < 1)
+  if (write(skt->socket,&c,1) < 1)
     {
-      ERROR("wsim:gdb:putchar: write failed - %s\n",strerror(errno));
-      close(gdb->socket);
-      gdb->socket = -1;
-      return GDBREMOTE_PUTCHAR_ERROR;
+      ERROR("wsim:libselect_socket:putchar: write failed - %s\n",strerror(errno));
+      close(skt->socket);
+      skt->socket = -1;
+      return LIBSELECT_SOCKET_PUTCHAR_ERROR;
     }
 
-  return GDBREMOTE_PUTCHAR_OK;
+  return LIBSELECT_SOCKET_PUTCHAR_OK;
 }
 
 /* ************************************************** */

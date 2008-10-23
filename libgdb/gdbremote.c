@@ -15,9 +15,9 @@
 
 #include "arch/common/hardware.h"
 #include "machine/machine.h"
+#include "libselect/libselect_socket.h"
 
 #include "gdbremote.h"
-#include "gdbremote_socket.h"
 #include "gdbremote_utils.h"
 
 /* ************************************************** */
@@ -38,6 +38,29 @@
 #define GDB_PKT_CHECKSUM_ERROR     2
 #define GDB_PKT_WRITE_ERROR        3
 #define GDB_PKT_READ_ERROR         4
+
+/* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
+
+static int
+gdbremote_getchar(struct gdbremote_t *gdb)
+{
+  return libselect_skt_getchar(& gdb->skt);
+}
+
+static int
+gdbremote_putchar(struct gdbremote_t *gdb, unsigned char c)
+{
+  return libselect_skt_putchar(& gdb->skt, c);
+}
+
+#define GDBREMOTE_PUTCHAR_OK    LIBSELECT_SOCKET_PUTCHAR_OK
+#define GDBREMOTE_PUTCHAR_ERROR LIBSELECT_SOCKET_PUTCHAR_ERROR
+
+/* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
 
 static int
 gdbremote_getpacket (struct gdbremote_t *gdb, char* buffer, int size)
@@ -694,13 +717,13 @@ gdbremote_continue(struct gdbremote_t *gdb, char UNUSED *buffer, int UNUSED size
 
 #define GDB_STOP_BITMASK ~(SIG_WORLDSENS_IO)
 
-  assert(libselect_register_signal(gdb->socket, SIG_GDB_IO) == 0);   
+  assert(libselect_register_signal(gdb->skt.socket, SIG_GDB_IO) == 0);   
   do 
     {
       machine_run_free();
     }
   while ((mcu_signal_get() & GDB_STOP_BITMASK) == 0);  /* we stop on anything but WORLDSENS_IO */ 
-  assert(libselect_unregister(gdb->socket) == 0);
+  assert(libselect_unregister(gdb->skt.socket) == 0);
 
   DMSG_GDB("gdbremote: exit continue at 0x%04x with signal = 0x%x (%s)\n",
 	   mcu_get_pc(),mcu_signal_get(),mcu_signal_str());
@@ -843,13 +866,13 @@ gdbremote_getcmd(struct gdbremote_t *gdb)
   char buffer[GDB_CMD_BUFFER_SIZE];
 
   buffer[0] = 0;
-  if (gdb->socket == -1)
+  if (gdb->skt.socket == -1)
     return GDB_CMD_ERROR;
 
   if ((err = gdbremote_getpacket(gdb,buffer,size)) != GDB_PKT_OK)
     {
       ERROR("packet received with error %d. Closing Connection\n",err);
-      gdbremote_close_client(gdb);
+      libselect_skt_close_client(& gdb->skt);
       return GDB_CMD_DETACH;
     }
 
@@ -909,7 +932,7 @@ gdbremote_getcmd(struct gdbremote_t *gdb)
 
     case 'D': /* detach gdb from the remote target */
       DMSG_GDB_CMD("  detach gdb from remote target");
-      gdbremote_close_client(gdb);
+      libselect_skt_close_client(& gdb->skt);
       gdbremote_putpacket(gdb,"OK");
       return GDB_CMD_DETACH;
       break;
@@ -969,7 +992,7 @@ gdbremote_getcmd(struct gdbremote_t *gdb)
 
     case 'k': /* kill request */
       DMSG_GDB_CMD("GDB:     kill gdb from remote target");
-      gdbremote_close_client(gdb);
+      libselect_skt_close_client(& gdb->skt);
       return GDB_CMD_KILL;
 
     case 'p': /* read register */

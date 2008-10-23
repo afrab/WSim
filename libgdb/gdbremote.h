@@ -13,13 +13,10 @@
 /* ************************************************** */
 
 struct gdbremote_t {
-  char           initialized;
-  char           extended_mode;
-  int            socket_listen;
-  int            socket;
-  unsigned short port;
-
-  uint32_t       last_signal;
+  char                      initialized;
+  char                      extended_mode;
+  uint32_t                  last_signal;
+  struct libselect_socket_t skt;
 };
 
 #define GDB_CMD_OK      0

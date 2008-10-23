@@ -7,9 +7,9 @@
 
 #include "arch/common/hardware.h"
 #include "machine/machine.h"
+#include "libselect/libselect_socket.h"
 
 #include "gdbremote.h"
-#include "gdbremote_socket.h"
 #include "gdbremote_utils.h"
 #include "libgdb.h"
 
@@ -22,7 +22,7 @@ int libgdb_target_mode_main(unsigned short port)
   struct gdbremote_t gdb;
 
 
-  if (gdbremote_init(&gdb,port))
+  if (libselect_skt_init(& gdb.skt, port))
     {
       return GDB_INIT_ERROR;
     }
@@ -31,13 +31,13 @@ int libgdb_target_mode_main(unsigned short port)
 
   do 
     {
-      if (gdbremote_accept(&gdb))
+      if (libselect_skt_accept(& gdb.skt))
 	{
 	  ERROR("** GDB accept error\n");
 	  break;
 	}
 
-      while ((retcode = gdbremote_getcmd(&gdb)) == GDB_CMD_OK) ;
+      while ((retcode = gdbremote_getcmd(& gdb)) == GDB_CMD_OK) ;
 
     }
   while (retcode != GDB_CMD_ERROR && retcode != GDB_CMD_KILL); // DETACH left
@@ -52,7 +52,7 @@ int libgdb_target_mode_main(unsigned short port)
       break;
     }
 
-  if (gdbremote_close(&gdb))
+  if (libselect_skt_close(& gdb.skt))
     {
       return GDB_CLOSE_ERROR;
     }

@@ -86,7 +86,8 @@ void ptty_ui_get_pos  (int dev, int *x, int *y);
 /***************************************************/
 /***************************************************/
 
-#define MAXNAME 40
+#define WSIM_MAX_PTTYS 4
+#define MAXNAME        40
 
 struct ptty_opt_t {
   int  dev_num;
@@ -97,7 +98,7 @@ struct ptty_opt_t {
   struct moption_t out;
 };
 
-static struct ptty_opt_t opt_array[2];
+static struct ptty_opt_t opt_array[WSIM_MAX_PTTYS];
 
 char* str_build(const char* str, const char* name)
 {
@@ -108,7 +109,7 @@ char* str_build(const char* str, const char* name)
 
 int ptty_add_options(int dev_num, int dev_id, const char *dev_name)
 {
-  if (dev_id >= 2)
+  if (dev_id >= WSIM_MAX_PTTYS)
     {
       ERROR("ptty: too much devices, please rewrite option handling\n");
       return -1;
@@ -120,17 +121,17 @@ int ptty_add_options(int dev_num, int dev_id, const char *dev_name)
 
   opt_array[dev_id].io.longname    = str_build("%s_io", dev_name);
   opt_array[dev_id].io.type        = required_argument;
-  opt_array[dev_id].io.helpstring  = str_build("%s fifo in/out", dev_name);
+  opt_array[dev_id].io.helpstring  = str_build("%s in/out", dev_name);
   opt_array[dev_id].io.value       = NULL;
 
   opt_array[dev_id].in.longname    = str_build("%s_in", dev_name);
   opt_array[dev_id].in.type        = required_argument;
-  opt_array[dev_id].in.helpstring  = str_build("%s fifo in", dev_name);
+  opt_array[dev_id].in.helpstring  = str_build("%s in", dev_name);
   opt_array[dev_id].in.value       = NULL;
 
   opt_array[dev_id].out.longname   = str_build("%s_out", dev_name);
   opt_array[dev_id].out.type       = required_argument;
-  opt_array[dev_id].out.helpstring = str_build("%s fifo out", dev_name);
+  opt_array[dev_id].out.helpstring = str_build("%s out", dev_name);
   opt_array[dev_id].out.value      = NULL;
 
   options_add( & opt_array[dev_id].io);
@@ -289,6 +290,13 @@ int ptty_device_create(int dev, int id)
 	      machine.device[dev].write         = ptty_write;
 	    }
 	}
+      /*
+      else if (strstr(file_in,"tcp:") == file_in)
+	{
+	  if fd;
+	  
+	}
+      */
       else /* fifo name */
 	{
 	  int fd;

@@ -12,6 +12,8 @@
 #include <string.h>
 #include <errno.h>
 #include <signal.h>
+#include <stdlib.h>
+#include <ctype.h>
 
 #if defined(__MINGW32__)
   #include <winsock2.h>
@@ -31,7 +33,8 @@
 
 #define LISTENQ 2 // socket listen fifo size (backlog)
 
-#define DMSG_LIBSELECT_SOCKET(x...) VERBOSE(5,x)
+#define DMSG_SKT(x...) VERBOSE(4,x)
+
 /* ************************************************** */
 /* ************************************************** */
 
@@ -58,6 +61,7 @@ libselect_create_socket(int type, unsigned int addr, unsigned short port)
   memset(&address,0,length);
   address.sin_family = AF_INET;
   address.sin_addr.s_addr = htonl(addr);
+
   address.sin_port = htons(port);
   if (bind(desc,(struct sockaddr*)&address,length) == -1)
     {
@@ -65,15 +69,20 @@ libselect_create_socket(int type, unsigned int addr, unsigned short port)
       close(desc);
       return -3;
     }
-  if (type == SOCK_STREAM)
+
+  if (port != 0)
     {
-      if (listen(desc,LISTENQ) == -1)
+      if (type == SOCK_STREAM)
 	{
-	  perror("could not listen to socket");
-	  close(desc);
-	  return -4;
+	  if (listen(desc,LISTENQ) == -1)
+	    {
+	      perror("could not listen to socket");
+	      close(desc);
+	      return -4;
+	    }
 	}
     }
+
   return desc; 
 }
 
@@ -90,14 +99,14 @@ libselect_log_connection(struct sockaddr_in *cli)
 
   if (1)
     {
-      OUTPUT("wsim:libselect_socket: connexion opened ");
+      VERBOSE(2,"wsim:libselect_socket: connexion opened ");
 #ifdef INET_NTOP
-      OUTPUT("from %s:%d\n",
+      VERBOSE(2,"from %s:%d\n",
 	       inet_ntop(cli->sin_family,(void*)&cli->sin_addr,
 			 buf_cli,sizeof(buf_cli)),
 	       ntohs(cli->sin_port));
 #else
-      OUTPUT("from %s:%d\n",
+      VERBOSE(2,"from %s:%d\n",
 	       inet_ntoa(cli->sin_addr),
 	       ntohs(cli->sin_port));
 #endif 
@@ -106,16 +115,102 @@ libselect_log_connection(struct sockaddr_in *cli)
 
 /* ************************************************** */
 /* ************************************************** */
+#define MAX_URL      200
+#define MAX_HOSTNAME 50
+#define MAX_PORT     10
 
 int 
-libselect_skt_init(struct libselect_socket_t *skt, unsigned short port)
+libselect_skt_init(struct libselect_socket_t *skt, char *name_org)
 {
+  char *tok;
+  char delim[] = ":";
+  char name[MAX_URL];
+
+  strncpy(name,name_org,MAX_URL);
   skt->socket_listen = -1;
   skt->socket        = -1;
-  skt->port          = port;
+  skt->port          =  0;
 
-  if ((skt->socket_listen = libselect_create_socket(SOCK_STREAM, INADDR_ANY, skt->port)) < 0)
-    return 1;
+  DMSG_SKT("wsim:libselect_socket:init: %s\n",name);
+
+  /* tcp:s:machine:port */
+  /* tcp:c:machine:port */
+
+  tok = strtok(name,delim);
+  if (strcmp(tok,"tcp") == 0)
+    {
+      tok = strtok(NULL,delim);
+      switch (tok[0])
+	{
+	case 's':
+	  {
+	    char hostname[MAX_HOSTNAME];
+	    char port[MAX_PORT];
+	    strncpy(hostname, strtok(NULL,delim), MAX_HOSTNAME);
+	    strncpy(port    , strtok(NULL,delim), MAX_PORT);
+	    skt->port = atoi(port);
+
+	    DMSG_SKT("wsim:libselect_socket:init: tcp server creation for %s:%d\n",hostname,atoi(port));
+	    if ((skt->socket_listen = libselect_create_socket(SOCK_STREAM, INADDR_ANY, skt->port)) < 0)
+	      {
+		ERROR("wsim:libselect_socket:init create TCP srv not possible\n");
+		return -1;
+	      }
+	  }
+	  break;
+	case 'c':
+	  {
+	    struct sockaddr_in addr; 
+	    int lg=sizeof(addr);
+	    struct hostent *hp;
+
+	    char hostname[MAX_HOSTNAME];
+	    char port[MAX_PORT];
+	    strncpy(hostname, strtok(NULL,delim), MAX_HOSTNAME);
+	    strncpy(port    , strtok(NULL,delim), MAX_PORT);
+	    skt->port = atoi(port);
+
+	    if ((skt->socket = libselect_create_socket(SOCK_STREAM, INADDR_ANY, 0)) < 0)
+	      {
+		ERROR("wsim:libselect_socket:init create TCP clt not possible\n");
+		return -1;
+	      }
+
+	    if ((hp = gethostbyname((hostname))) == NULL)
+	      {
+		ERROR("wsim:libselect_socket:init unknown machine %s\n",hostname); 
+		return -1;
+	      }
+
+	    addr.sin_family=AF_INET; 
+	    addr.sin_port=htons(skt->port);
+	    memcpy(&(addr.sin_addr.s_addr),hp->h_addr,hp->h_length); 
+	    if (connect(skt->socket,(struct sockaddr*) &addr, lg) == -1)
+	      {
+		ERROR("wsim:libselect_socket:connect error on %s:%d\n",hostname,skt->port);
+		return -1;
+	      } 
+	  }
+	  break;
+	default:
+	  DMSG_SKT("wsim:libselect_socket:init syntax error on tcp socket %s\n",name);
+	  return 1;
+	}
+    }
+
+  /* udp:machine:port */
+  else if (strcmp(tok,"udp") == 0)
+    {
+      /* udp:s:machine:port */
+      /* udp:c:machine:port */
+      return -1;
+    }
+  else
+    {
+      return -1;
+    }
+
+  DMSG_SKT("wsim:libselect_socket:init: done\n");
   
   return 0;
 }
@@ -132,10 +227,11 @@ libselect_skt_accept(struct libselect_socket_t *skt)
 
   length = sizeof(s);
   memset(&s,0,length);
-  OUTPUT("wsim:libselect_socket: waiting for a libselect_socket connection on port %d\n", skt->port);
+
+  DMSG_SKT("wsim:libselect_socket:accept: waiting for a libselect_socket connection on port %d\n", skt->port);
   if ((skt->socket = accept(skt->socket_listen,(struct sockaddr*)&s,&length)) == -1)
     {
-      DMSG_LIBSELECT_SOCKET("libselect:accept %s", strerror(errno));
+      DMSG_SKT("wsim:libselect_socket:accept: %s", strerror(errno));
       return 1;
     }
 
@@ -155,6 +251,7 @@ libselect_skt_accept(struct libselect_socket_t *skt)
   signal (SIGPIPE, SIG_IGN);
 #endif
 
+  DMSG_SKT("wsim:libselect_socket:accept:done fd=%d -> fd=%d\n", skt->socket_listen, skt->socket);
   libselect_log_connection(&s);
   return 0;
 }
@@ -194,24 +291,29 @@ libselect_skt_close(struct libselect_socket_t *skt)
 /* ************************************************** */
 /* ************************************************** */
 
-char
-libselect_skt_getchar(struct libselect_socket_t *skt)
+int
+libselect_skt_getchar(struct libselect_socket_t *skt, unsigned char *c)
 {
-  unsigned char c;
+  *c = 0x55;
 
   if (skt->socket == -1)
     {
       ERROR("wsim:libselect_socket:getchar: read on closed socket\n");
-      return 0;
+      return LIBSELECT_SOCKET_GETCHAR_ERROR;
     }
 
-  if (read(skt->socket,&c,1) == -1)
+  if (read(skt->socket, c, 1) == -1)
     {
       ERROR("wsim:libselect_socket:getchar: read failed - %s\n",strerror(errno));
-      return 0;
+      close(skt->socket);
+      skt->socket = -1;
+      return LIBSELECT_SOCKET_GETCHAR_ERROR;
     }
 
-  return c;
+  DMSG_SKT("wsim:libselect_socket:getchar: 0x%02x %c\n", 
+	      *c, isprint(*c) ? *c : '.');
+
+  return LIBSELECT_SOCKET_GETCHAR_OK;
 }
 
 /* ************************************************** */
@@ -226,13 +328,16 @@ libselect_skt_putchar(struct libselect_socket_t *skt, unsigned char c)
       return LIBSELECT_SOCKET_PUTCHAR_ERROR;
     }
 
-  if (write(skt->socket,&c,1) < 1)
+  if (write(skt->socket, &c, 1) < 1)
     {
       ERROR("wsim:libselect_socket:putchar: write failed - %s\n",strerror(errno));
       close(skt->socket);
       skt->socket = -1;
       return LIBSELECT_SOCKET_PUTCHAR_ERROR;
     }
+
+  DMSG_SKT("wsim:libselect_socket:getchar: 0x%02x %c\n", 
+	      c, isprint(c) ? c : '.');
 
   return LIBSELECT_SOCKET_PUTCHAR_OK;
 }

@@ -16,13 +16,16 @@
 /* ************************************************** */
 /* ************************************************** */
 
+#define MAXPORT 200
+
 int libgdb_target_mode_main(unsigned short port)
 {
+  char tcpsocket[MAXPORT];
   int retcode = GDB_CMD_DETACH;
   struct gdbremote_t gdb;
 
-
-  if (libselect_skt_init(& gdb.skt, port))
+  snprintf(tcpsocket, MAXPORT, "tcp:s:localhost:%d", port);
+  if (libselect_skt_init(& gdb.skt, tcpsocket))
     {
       return GDB_INIT_ERROR;
     }

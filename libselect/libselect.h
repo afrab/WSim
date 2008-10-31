@@ -9,12 +9,23 @@
 #ifndef LIBSELECT_H
 #define LIBSELECT_H
 
-#define LIBSELECT_READ   0x01
-#define LIBSELECT_WRITE  0x02
-#define LIBSELECT_EXCEPT 0x04
-#define LIBSELECT_CLOSE  0x08
+/***************************************************/
+/***************************************************/
+/***************************************************/
 
-typedef void (*libselect_callback)(int fd, uint64_t flags, void *ptr);
+/*
+libselect
+  ptty        // io using fifo mems
+  
+signal:
+  GDB         // tcp/ip gdb serial link
+  Console     // tcp/ip console link 
+  Worldsens   // multicast IP
+*/
+
+/***************************************************/
+/***************************************************/
+/***************************************************/
 
 /**
  * libselect_init is called from main() just after option parsing 
@@ -29,34 +40,6 @@ int libselect_init(void);
  */
 int libselect_close(void);
 
-/**
- * libselect_register_fifo is called from devices
- * returns : 0=ok else error
- */
-int libselect_register_fifo(int fd, unsigned int fifo_size);
-
-/**
- * libselect_register_signal
- * returns : 0=ok else error
- */
-int libselect_register_signal(int fd, unsigned int signal);
-
-/**
- * libselect_add_callback
- * returns : 0=ok else error
- */
-int libselect_add_callback(int fd, libselect_callback callback, void *ptr);
-
-/**
- * libselect_del_callback
- * returns : 0=ok else error
- */
-int libselect_del_callback(int fd);
-
-/**
- * libselect_unregister is called from devices
- */
-int libselect_unregister(int fd);
 
 /**
  * libselect_update is called from main event loop, pointer is set to 
@@ -70,16 +53,60 @@ do {                                          \
     libselect_update_ptr();                   \
 } while (0)
 
+
+/***************************************************/
+/***************************************************/
+/***************************************************/
+
+#define LIBSELECT_EVT_NONE  0
+#define LIBSELECT_EVT_CLOSE 1
+
+typedef int  libselect_id_t;
+typedef void (*libselect_callback)(libselect_id_t, uint64_t flags, void *ptr);
+
+libselect_id_t libselect_id_create   (char *name, int flags);
+int            libselect_id_is_valid (libselect_id_t id);
+int            libselect_id_close    (libselect_id_t id);
+
+/**
+ * libselect_register_fd is called from devices
+ * returns : 0=ok else error
+ */
+int libselect_id_register(libselect_id_t id);
+
+/**
+ * libselect_unregister is called from devices
+ */
+int libselect_id_unregister(libselect_id_t id);
+
+/**
+ * libselect_add_callback
+ * callback function is used on data errors (ie. close())
+ * returns : 0=ok else error
+ */
+int libselect_id_add_callback(libselect_id_t fd, libselect_callback callback, void *ptr);
+
 /**
  * libselect_read is called from devices as a non blocking read,
  * this function only returns value according to select() results
+ * returns : size if ok, -1 on error
  */
-uint32_t libselect_read(int fd, uint8_t *data, uint32_t size);
+uint32_t libselect_id_read(libselect_id_t id, uint8_t *data, uint32_t size);
+uint32_t libselect_id_write(libselect_id_t id, uint8_t *data, uint32_t size);
 
-/**
- * libselect_read_flush
- * returns : number of bytes read
- */
-uint32_t libselect_read_flush(int fd);
+/***************************************************/
+/***************************************************/
+/***************************************************/
+
+int libselect_fd_register    (int fd, unsigned int signal);
+int libselect_fd_unregister  (int fd);
+
+/***************************************************/
+/***************************************************/
+/***************************************************/
 
 #endif
+
+/***************************************************/
+/***************************************************/
+/***************************************************/

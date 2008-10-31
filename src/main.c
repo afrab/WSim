@@ -67,8 +67,12 @@ static void main_dump_stats()
   OUTPUT("-----------\n");
   if (unanotime > 0)
     {
-      OUTPUT("  simulation user time          : %d.%03d s (%"PRId64" ns)\n", unanotime / NANO, unanotime / 1000000, unanotime);
-      /* OUTPUT("  system simulation time        : %d.%03d s\n", ru.ru_stime.tv_sec, ru.ru_stime.tv_usec / 1000); */
+      OUTPUT("  simulation user time          : %d.%03d s (%"PRId64" ns)\n", 
+	     unanotime / NANO, unanotime / 1000000, unanotime);
+      /* 
+       * OUTPUT("  system simulation time        : %d.%03d s\n", 
+       *	 ru.ru_stime.tv_sec, ru.ru_stime.tv_usec / 1000); 
+       */
     }
   OUTPUT("  simulation backtracks         : %d\n",machine.backtrack); 
 

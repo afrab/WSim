@@ -1,13 +1,13 @@
 
 /**
- *  \file   libselect_fifo.h
- *  \brief  Fifo for wsim select() wrapper
+ *  \file   libselect_fifomem.h
+ *  \brief  Fifo buffer mems for wsim select() wrapper
  *  \author Antoine Fraboulet
  *  \date   2006
  **/
 
-#ifndef LIBSELECT_FIFO_H
-#define LIBSELECT_FIFO_H
+#ifndef LIBSELECT_FIFOMEM_H
+#define LIBSELECT_FIFOMEM_H
 
 typedef struct libselect_fifo_struct_t *libselect_fifo_t;
 

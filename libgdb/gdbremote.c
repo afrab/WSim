@@ -43,10 +43,16 @@
 /* ************************************************** */
 /* ************************************************** */
 
+#define GDBREMOTE_PUTCHAR_OK    LIBSELECT_SOCKET_PUTCHAR_OK
+#define GDBREMOTE_PUTCHAR_ERROR LIBSELECT_SOCKET_PUTCHAR_ERROR
+
+#define GDBREMOTE_GETCHAR_OK    LIBSELECT_SOCKET_GETCHAR_OK
+#define GDBREMOTE_GETCHAR_ERROR LIBSELECT_SOCKET_GETCHAR_ERROR
+
 static int
-gdbremote_getchar(struct gdbremote_t *gdb)
+gdbremote_getchar(struct gdbremote_t *gdb, unsigned char *c)
 {
-  return libselect_skt_getchar(& gdb->skt);
+  return libselect_skt_getchar(& gdb->skt, c);
 }
 
 static int
@@ -55,9 +61,6 @@ gdbremote_putchar(struct gdbremote_t *gdb, unsigned char c)
   return libselect_skt_putchar(& gdb->skt, c);
 }
 
-#define GDBREMOTE_PUTCHAR_OK    LIBSELECT_SOCKET_PUTCHAR_OK
-#define GDBREMOTE_PUTCHAR_ERROR LIBSELECT_SOCKET_PUTCHAR_ERROR
-
 /* ************************************************** */
 /* ************************************************** */
 /* ************************************************** */
@@ -65,16 +68,17 @@ gdbremote_putchar(struct gdbremote_t *gdb, unsigned char c)
 static int
 gdbremote_getpacket (struct gdbremote_t *gdb, char* buffer, int size)
 {
-  char          ch;
+  unsigned char ch;
+  int           ret;
   int           count    = 0;
   unsigned char checksum = 0;
 
   /* wait around for the start character, ignore all other characters */
   do {
-    ch = gdbremote_getchar (gdb);
-    switch (ch)
+    ret = gdbremote_getchar (gdb, &ch);
+    switch (ret)
       {
-      case 0:
+      case GDBREMOTE_GETCHAR_ERROR:
 	return GDB_PKT_READ_ERROR;
       default:
 	break;
@@ -84,7 +88,7 @@ gdbremote_getpacket (struct gdbremote_t *gdb, char* buffer, int size)
 
   /* now, read until a # or end of buffer is found */
   do {
-    ch = gdbremote_getchar (gdb);
+    ret = gdbremote_getchar (gdb, &ch);
     switch (ch)
       {
       case 0:
@@ -117,10 +121,10 @@ gdbremote_getpacket (struct gdbremote_t *gdb, char* buffer, int size)
   /* packet checksum validation */
   if (ch == '#')
     {
-      int ch1, ch2;
+      unsigned char ch1, ch2;
       unsigned char sum = 0;
-      ch1 = gdbremote_getchar (gdb);
-      ch2 = gdbremote_getchar (gdb);
+      gdbremote_getchar (gdb, &ch1);
+      gdbremote_getchar (gdb, &ch2);
 
       sum = (gdbremote_hexchar2int(ch1) << 4) | gdbremote_hexchar2int(ch2);
 
@@ -160,7 +164,9 @@ gdbremote_getpacket (struct gdbremote_t *gdb, char* buffer, int size)
 static void
 gdbremote_putpacket (struct gdbremote_t *gdb, char *buffer)
 {
+  int ret;
   int retry = -1;
+  unsigned char cret;
   /*  $<packet info>#<checksum>. */
   DMSG_GDB_CMD("GDB:snd: reply -%s-\n",buffer);
   do
@@ -184,8 +190,10 @@ gdbremote_putpacket (struct gdbremote_t *gdb, char *buffer)
       GDB_WRITE('#');
       GDB_WRITE(gdbremote_hexchars[checksum >>  4]);
       GDB_WRITE(gdbremote_hexchars[checksum & 0xf]);
+
+      ret = gdbremote_getchar(gdb, &cret);
     }
-  while (gdbremote_getchar(gdb) != '+');
+  while (cret != '+');
 }
 
 #undef GDB_WRITE
@@ -717,13 +725,13 @@ gdbremote_continue(struct gdbremote_t *gdb, char UNUSED *buffer, int UNUSED size
 
 #define GDB_STOP_BITMASK ~(SIG_WORLDSENS_IO)
 
-  assert(libselect_register_signal(gdb->skt.socket, SIG_GDB_IO) == 0);   
+  assert(libselect_fd_register(gdb->skt.socket, SIG_GDB_IO) != -1);
   do 
     {
       machine_run_free();
     }
   while ((mcu_signal_get() & GDB_STOP_BITMASK) == 0);  /* we stop on anything but WORLDSENS_IO */ 
-  assert(libselect_unregister(gdb->skt.socket) == 0);
+  assert(libselect_fd_unregister(gdb->skt.socket) != -1);
 
   DMSG_GDB("gdbremote: exit continue at 0x%04x with signal = 0x%x (%s)\n",
 	   mcu_get_pc(),mcu_signal_get(),mcu_signal_str());

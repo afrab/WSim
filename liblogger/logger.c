@@ -119,10 +119,19 @@ mylog(char* fmt, va_list ap)
 
 void ERROR(char* fmt, ...)
 {
+  int length;
   va_list ap;
+  char buf[MAX_VNSPRINTF_BUF_LENGTH + 1];
+
   va_start(ap, fmt);
-  mylog(fmt,ap);
+  length = vsnprintf(buf,MAX_VNSPRINTF_BUF_LENGTH,fmt,ap);
   va_end(ap);
+
+  fprintf(logger_logfile,buf);
+  if ((logger_logfile != stdout) && (logger_logfile != stderr))
+    {
+      fprintf(stderr        ,buf);
+    }
 }
 
 /* ************************************************** */

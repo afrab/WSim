@@ -403,7 +403,7 @@ int worldsens_c_initialize(void)
   if (ret_connect == 0)
     {
       WSNET_DBG("WSNet:connect:ok, registering fd %d\n",WSENS_MULTICAST);
-      libselect_register_signal(WSENS_MULTICAST, SIG_WORLDSENS_IO);
+      assert(libselect_fd_register(WSENS_MULTICAST, SIG_WORLDSENS_IO) != -1);
     }
   return ret_connect;
 }
@@ -791,7 +791,7 @@ static int worldsens_disconnect()
       WSNET_DBG("WSNet:disconnect:%"PRIu64": --> DISCONNECT (addr: %d) \n", 
 		MACHINE_TIME_GET_NANO(), WSENS_MYADDR);
     }
-  libselect_unregister(WSENS_MULTICAST);
+  assert(libselect_fd_unregister(WSENS_MULTICAST) != -1);
   return ret;
 }
 

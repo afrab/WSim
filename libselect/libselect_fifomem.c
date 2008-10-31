@@ -1,7 +1,7 @@
 
 /**
- *  \file   libselect_fifo.c
- *  \brief  Fifo for wsim select() wrapper
+ *  \file   libselect_fifomem.c
+ *  \brief  Fifo buffer mems for wsim select() wrapper
  *  \author Antoine Fraboulet
  *  \date   2006
  **/
@@ -14,7 +14,7 @@
 
 #include "config.h"
 #include "liblogger/logger.h"
-#include "libselect_fifo.h"
+#include "libselect_fifomem.h"
 
 /****************************************
  * DEBUG
@@ -22,9 +22,9 @@
  * DMSG is used for general tracer messages
  * while debugging select code
  ****************************************/
-#undef DEBUG
+#define DEBUG_FIFO
 
-#if defined(DEBUG)
+#if defined(DEBUG_FIFO)
 #define DMSG(x...) fprintf(stderr,x)
 #else
 #define DMSG(x...) do {} while(0)
@@ -119,13 +119,13 @@ int libselect_fifo_putchar(libselect_fifo_t fifo, unsigned char c)
 {
   if (fifo->state == fifo->size)
     {
-      return LIBSELECT_FIFO_ERROR;
+      return 0;
     }
 
   fifo->val[fifo->write_ptr] = c;
   fifo->state     =  fifo->state     + 1;
   fifo->write_ptr = (fifo->write_ptr + 1) % fifo->size;
-  return LIBSELECT_FIFO_OK;
+  return 1;
 }
 
 /* ************************************************** */     
@@ -139,7 +139,7 @@ int libselect_fifo_putblock(libselect_fifo_t fifo, unsigned char *data, unsigned
     {
       DMSG("libselect_fifo:     fifo size %d, rdptr %d, wrptr %d\n",
 	    fifo->size, fifo->read_ptr, fifo->write_ptr);
-      return LIBSELECT_FIFO_ERROR;
+      return size - (fifo->size - fifo->state);
     }
 
   /*
@@ -171,7 +171,7 @@ int libselect_fifo_putblock(libselect_fifo_t fifo, unsigned char *data, unsigned
   DMSG("libselect_fifo:      read %3d write %3d state=%3d/%3d\n",
        fifo->read_ptr,fifo->write_ptr,fifo->state,fifo->size);
   
-  return LIBSELECT_FIFO_OK;
+  return size;
 }
 
 /* ************************************************** */     
@@ -183,7 +183,7 @@ int libselect_fifo_getchar(libselect_fifo_t fifo, unsigned char *c)
   if (fifo->size == 0)
     {
       *c = 0;
-      return LIBSELECT_FIFO_ERROR;
+      return 0;
     }
 
   DMSG("libselect_fifo: getchar\n");
@@ -194,7 +194,7 @@ int libselect_fifo_getchar(libselect_fifo_t fifo, unsigned char *c)
   fifo->read_ptr = (fifo->read_ptr + 1) % fifo->size;
   DMSG("libselect_fifo:      read %3d write %3d state=%3d/%3d\n",
        fifo->read_ptr,fifo->write_ptr,fifo->state,fifo->size);
-  return LIBSELECT_FIFO_OK;
+  return 1;
 }
 
 /* ************************************************** */     
@@ -206,7 +206,7 @@ int libselect_fifo_getblock(libselect_fifo_t fifo, unsigned char *data, unsigned
   int part1, part2;  
   if (size > fifo->state)
     {
-      return LIBSELECT_FIFO_ERROR;
+      return fifo->state;
     }
 
   /*
@@ -237,7 +237,7 @@ int libselect_fifo_getblock(libselect_fifo_t fifo, unsigned char *data, unsigned
 
   DMSG("libselect_fifo:      read %3d write %3d state=%3d/%3d\n",
        fifo->read_ptr,fifo->write_ptr,fifo->state,fifo->size);
-  return LIBSELECT_FIFO_OK;
+  return size;
 }
 
 /* ************************************************** */     

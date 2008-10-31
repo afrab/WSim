@@ -237,6 +237,8 @@ int libselect_update_registered()
 	      break;
 	      
 	    case ENTRY_FILE:
+	    case ENTRY_UDP:
+	    case ENTRY_TCP:
 	      if ((n = read(fd_in,buffer,BUFFER_MAX)) > 0)
 		{
 		  DMSG("wsim:libselect:update: something to read on id %d = %d bytes\n",id,n);
@@ -254,8 +256,6 @@ int libselect_update_registered()
 		      libselect.entry[id].callback(id,LIBSELECT_EVT_CLOSE,libselect.entry[id].cb_ptr);
 		    }
 		}
-	      break;
-	    case ENTRY_TCP:
 	      break;
 	    case ENTRY_TCP_SRV:
 	      if (fd_in == libselect.entry[id].skt.socket_listen)
@@ -296,9 +296,6 @@ int libselect_update_registered()
 			}
 		    }
 		}
-	      break;
-	    case ENTRY_UDP:
-	      ERROR("wsim:libselect:update: UDP socket not implemented\n");
 	      break;
 	    case ENTRY_FD_ONLY:
 	      mcu_signal_add(libselect.entry[id].signal);

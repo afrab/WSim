@@ -17,12 +17,6 @@
 /* ************************************************** */
 /* ************************************************** */
 
-#define xxWARN_UNALIGNED_ACCESS
-
-/* ************************************************** */
-/* ************************************************** */
-/* ************************************************** */
-
 typedef int8_t  (*addr_map_read8_t  ) (uint16_t addr);
 typedef void    (*addr_map_write8_t ) (uint16_t addr, int8_t val);
 
@@ -426,18 +420,13 @@ void msp430_io_init(void)
 /* ************************************************** */
 /* ************************************************** */
 
-#if defined(WARN_UNALIGNED_ACCESS)
-#  define CHECK_ALIGNMENT(loc,str)					\
-  do {									\
-    if ((loc & 1) == 1)							\
-      {									\
-	ERROR("msp430:io: %s unaligned at 0x%04x (PC=0x%04x)\n",        \
-              str,loc,mcu_get_pc());				        \
-      }									\
-  } while (0)
-#else
-#  define CHECK_ALIGNMENT(x,y) do { } while (0)
-#endif
+static inline void CHECK_ALIGNMENT(uint16_t loc,char *str)
+{
+  if ((loc & 1) == 1)
+    {
+      ERROR("msp430:io: unaligned %s at 0x%04x [PC=0x%04x]\n",str,loc,mcu_get_pc());
+    }
+}
 
 /* ************************************************** */
 /* ************************************************** */

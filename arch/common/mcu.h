@@ -58,7 +58,7 @@
 /* mcu internal signal id */
 #define SIG_MCU_HUP        0x00000001
 #define SIG_MCU_INT        0x00000002
-#define SIG_MCU_QUIT       0x00000004
+#define SIG_MCU_QUIT       0x00000004 /* used */
 #define SIG_MCU_ILL        0x00000008 /* used */
 #define SIG_MCU_TRAP       0x00000010 /* used */
 #define SIG_MCU_ABRT       0x00000020
@@ -66,6 +66,8 @@
 #define SIG_MCU_TSTP       0x00000080
 #define SIG_MCU_LPM_CHANGE 0x00000100
 #define SIG_MCU_ALL        0x000001ff
+
+#define SIG_HOST_SIGNAL    0x000000ff
 
 /* signal source identifier */
 #define SIG_MCU            0x00010000 /* mcu internal signal     */

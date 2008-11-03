@@ -242,7 +242,7 @@ int libselect_update_registered()
 	      if ((n = read(fd_in,buffer,BUFFER_MAX)) > 0)
 		{
 		  DMSG("wsim:libselect:update: something to read on id %d = %d bytes\n",id,n);
-		  if (libselect_fifo_putblock(libselect.entry[id].fifo_input,buffer,n))
+		  if (libselect_fifo_putblock(libselect.entry[id].fifo_input,buffer,n) < n)
 		    {
 		      ERROR("wsim:libselect:update: fifo overrun on descriptor %d\n",id);
 		    }
@@ -278,7 +278,7 @@ int libselect_update_registered()
 		  if ((n = read(fd_in,buffer,BUFFER_MAX)) > 0)
 		    {
 		      DMSG("wsim:libselect:update: something to read on id %d = %d bytes\n",id,n);
-		      if (libselect_fifo_putblock(libselect.entry[id].fifo_input,buffer,n))
+		      if (libselect_fifo_putblock(libselect.entry[id].fifo_input,buffer,n) < n)
 			{
 			  ERROR("wsim:libselect:update: fifo overrun on descriptor %d\n",id);
 			}

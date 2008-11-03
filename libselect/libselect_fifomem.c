@@ -22,12 +22,20 @@
  * DMSG is used for general tracer messages
  * while debugging select code
  ****************************************/
+
 #define DEBUG_FIFO
+/* #define DEBUG_INFO2 */
 
 #if defined(DEBUG_FIFO)
-#define DMSG(x...) fprintf(stderr,x)
+#define DMSG(x...)  REAL_STDERR(x)
 #else
 #define DMSG(x...) do {} while(0)
+#endif
+
+#if defined(DEBUG_FIFO2)
+#define DMSG2(x...) REAL_STDERR(x)
+#else
+#define DMSG2(x...) do {} while(0)
 #endif
 
 /* ************************************************** */     
@@ -122,6 +130,7 @@ int libselect_fifo_putchar(libselect_fifo_t fifo, unsigned char c)
       return 0;
     }
 
+  DMSG("libselect_fifo: putchar\n");
   fifo->val[fifo->write_ptr] = c;
   fifo->state     =  fifo->state     + 1;
   fifo->write_ptr = (fifo->write_ptr + 1) % fifo->size;
@@ -149,9 +158,7 @@ int libselect_fifo_putblock(libselect_fifo_t fifo, unsigned char *data, unsigned
    */
 
   DMSG("libselect_fifo: write block %d bytes\n",size);
-  DMSG("libselect_fifo:      read %3d write %3d state=%3d/%3d\n",
-       fifo->read_ptr,fifo->write_ptr,fifo->state,fifo->size);
-
+  DMSG2("libselect_fifo:      read %3d write %3d state=%3d/%3d\n", fifo->read_ptr,fifo->write_ptr,fifo->state,fifo->size);
   part1 = fifo->size - fifo->write_ptr; 
   part2 = size       - part1;
 
@@ -167,9 +174,7 @@ int libselect_fifo_putblock(libselect_fifo_t fifo, unsigned char *data, unsigned
 
   fifo->state     =  fifo->state     + size;
   fifo->write_ptr = (fifo->write_ptr + size) % fifo->size;
-
-  DMSG("libselect_fifo:      read %3d write %3d state=%3d/%3d\n",
-       fifo->read_ptr,fifo->write_ptr,fifo->state,fifo->size);
+  DMSG2("libselect_fifo:      read %3d write %3d state=%3d/%3d\n", fifo->read_ptr,fifo->write_ptr,fifo->state,fifo->size);
   
   return size;
 }
@@ -187,13 +192,11 @@ int libselect_fifo_getchar(libselect_fifo_t fifo, unsigned char *c)
     }
 
   DMSG("libselect_fifo: getchar\n");
-  DMSG("libselect_fifo:      read %3d write %3d state=%3d/%3d\n",
-       fifo->read_ptr,fifo->write_ptr,fifo->state,fifo->size);
+  DMSG2("libselect_fifo:      read %3d write %3d state=%3d/%3d\n", fifo->read_ptr,fifo->write_ptr,fifo->state,fifo->size);
   *c = fifo->val[fifo->read_ptr];
   fifo->state    =  fifo->state    - 1;
   fifo->read_ptr = (fifo->read_ptr + 1) % fifo->size;
-  DMSG("libselect_fifo:      read %3d write %3d state=%3d/%3d\n",
-       fifo->read_ptr,fifo->write_ptr,fifo->state,fifo->size);
+  DMSG2("libselect_fifo:      read %3d write %3d state=%3d/%3d\n", fifo->read_ptr,fifo->write_ptr,fifo->state,fifo->size);
   return 1;
 }
 
@@ -215,9 +218,8 @@ int libselect_fifo_getblock(libselect_fifo_t fifo, unsigned char *data, unsigned
    *
    */
 
-  DMSG("libselect_fifo: read block %d bytes\n",size);
-  DMSG("libselect_fifo:      read %3d write %3d state=%3d/%3d\n",
-       fifo->read_ptr,fifo->write_ptr,fifo->state,fifo->size);
+  DMSG("libselect_fifo: read  block %d bytes\n",size);
+  DMSG2("libselect_fifo:      read %3d write %3d state=%3d/%3d\n", fifo->read_ptr,fifo->write_ptr,fifo->state,fifo->size);
 
   part1 = fifo->size - fifo->read_ptr;
   part2 = size       - part1;
@@ -235,8 +237,7 @@ int libselect_fifo_getblock(libselect_fifo_t fifo, unsigned char *data, unsigned
   fifo->state    =  fifo->state    - size;
   fifo->read_ptr = (fifo->read_ptr + size) % fifo->size;
 
-  DMSG("libselect_fifo:      read %3d write %3d state=%3d/%3d\n",
-       fifo->read_ptr,fifo->write_ptr,fifo->state,fifo->size);
+  DMSG2("libselect_fifo:      read %3d write %3d state=%3d/%3d\n", fifo->read_ptr,fifo->write_ptr,fifo->state,fifo->size);
   return size;
 }
 

@@ -104,8 +104,7 @@ void cc1100_write(int dev_num, uint32_t  mask, uint32_t  value)
 	{
 	  if (cc1100->CSn_pin == 0)
 	    {
-	      CC1100_DBG_PINS ("cc1100:pins: from mcu CSn = 1\n");
-	      CC1100_DBG_STATE("cc1100:state: chip deselected\n");
+	      CC1100_DBG_PINS ("cc1100:pins: from mcu CSn = 1 **  chip deselected\n");
 	      /* deactivated */
 	      /* will need to change state and go to SLEEP or XOFF */
 	      if ((cc1100->fsm_state   == CC1100_STATE_IDLE) && 
@@ -127,8 +126,7 @@ void cc1100_write(int dev_num, uint32_t  mask, uint32_t  value)
 	{
 	  if (cc1100->CSn_pin != 0)
 	    {
-	      CC1100_DBG_PINS ("cc1100:pins: from mcu CSn = 0\n");
-	      CC1100_DBG_STATE("cc1100:state: chip selected\n");
+	      CC1100_DBG_PINS ("cc1100:pins: from mcu CSn = 0 ** chip selected\n");
 	      /* activated */
 	    }
 	  cc1100->CSn_pin = 0x00;

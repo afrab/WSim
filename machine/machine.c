@@ -246,21 +246,26 @@ inline void machine_run_free(void)
 /* ************************************************** */
 /* ************************************************** */
 
+#define TEST_SIGNAL_EXIT(sig)						\
+  ((sig & SIG_CON_IO)                           )  ||			\
+  ((sig & SIG_MCU)    && (sig & SIG_MCU_ILL)    )  ||			\
+  ((sig & SIG_HOST)   && (sig & SIG_HOST_SIGNAL))
 
-#define TEST_SIGNAL_EXIT(sig)			\
-  (sig & SIG_CON_IO)   ||			\
-  (sig & SIG_MCU_ILL)  ||			\
-  ((sig & SIG_HOST) && (sig & SIG_HOST_SIGNAL))
+void TEST_SIGNAL_PRINT(char *name)
+{
+  OUTPUT("wsim:run:%s: exit at 0x%04x with signal 0x%x (%s)\n", 
+	 name,mcu_get_pc(), mcu_signal_get(), mcu_signal_str());
+  REAL_STDOUT("wsim:run:%s: exit at 0x%04x with signal 0x%x (%s)\n", 
+	 name,mcu_get_pc(), mcu_signal_get(), mcu_signal_str());
+}
 
-#define TEST_SIGNAL_PRINT(name)						       \
-  do {									       \
-    HW_DMSG("wsim:machine:run:"name": exit at 0x%04x with signal 0x%x (%s)\n", \
-            mcu_get_pc(), mcu_signal_get(), mcu_signal_str());                 \
-} while (0)
-
+/* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
 
 uint64_t machine_run_insn(uint64_t insn)
 {
+  uint32_t sig;
   uint64_t i;
   HW_DMSG_MACH("machine: will run for %" PRIu64 " instructions\n",insn);
   for(i=0; i < insn; i++)
@@ -269,9 +274,9 @@ uint64_t machine_run_insn(uint64_t insn)
       (void)machine_run();
       mcu_signal_remove(SIG_RUN_INSN);
 
-      if (mcu_signal_get())
+      sig = mcu_signal_get();
+      if (sig)
 	{
-	  uint32_t sig = mcu_signal_get();
 	  if (TEST_SIGNAL_EXIT(sig))
 	    {
 	      TEST_SIGNAL_PRINT("insn");
@@ -288,6 +293,7 @@ uint64_t machine_run_insn(uint64_t insn)
 
 uint64_t machine_run_time(uint64_t nanotime)
 {
+  uint32_t sig;
   HW_DMSG_MACH("machine: will run for %" PRIu64 " nano seconds\n",nanotime);
   while (MACHINE_TIME_GET_NANO() < nanotime)
     {
@@ -295,10 +301,9 @@ uint64_t machine_run_time(uint64_t nanotime)
       (void)machine_run();
       mcu_signal_remove(SIG_RUN_TIME);
 
-      if (mcu_signal_get())
+      sig = mcu_signal_get();
+      if (sig)
 	{
-	  // SIG_WORLDSENS_IO must loop
-	  uint32_t sig = mcu_signal_get();
 	  if (TEST_SIGNAL_EXIT(sig))
 	    {
 	      TEST_SIGNAL_PRINT("time");

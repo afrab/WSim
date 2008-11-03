@@ -70,6 +70,13 @@ static struct moption_t gui_opt = {
   .value       = NULL
 };
 
+static struct moption_t title_opt = {
+  .longname    = "title",
+  .type        = required_argument,
+  .helpstring  = "GUI window title",
+  .value       = NULL
+};
+
 #define NB_BUTTONS 8
 static const int butkey [NB_BUTTONS] = {
   SDLK_a,
@@ -99,7 +106,8 @@ static const int butcode[NB_BUTTONS] = {
 
 int ui_options_add(void)
 {
-  options_add(& gui_opt );
+  options_add(& gui_opt            );
+  options_add(& title_opt          );
   return 0;
 }
 
@@ -160,8 +168,16 @@ int ui_create(int w, int h, int id)
 
   if (id != -1)
     {
-      char name[20];
-      sprintf(name,"WSim %d",id);
+      #define MAX_TITLE_SIZE 20
+      char name[MAX_TITLE_SIZE];
+      if (title_opt.isset && (title_opt.value != NULL))
+	{
+	  strncpy(name, title_opt.value, MAX_TITLE_SIZE);
+	}
+      else
+	{
+	  snprintf(name,MAX_TITLE_SIZE,"WSim %d",id);
+	}
       SDL_WM_SetCaption(name,name);
     }
   else

@@ -517,6 +517,12 @@ int libselect_id_register(int id)
       return 1;
     }
 
+  if (libselect.entry[id].fd_in == -1)
+    {
+      WARNING("wsim:libselect: trying to register closed IN descriptor %d\n",id);
+      return 1;
+    }
+
   DMSG("wsim:libselect:register: id=%d, fd_in=%d\n",id,libselect.entry[id].fd_in);
   libselect.entry[id].registered = 1;
   libselect.state               += 1;

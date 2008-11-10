@@ -80,20 +80,20 @@
 
 
 /* C1100 Strobe commands (cf [1] p41) */
-#define CC1100_STROBE_SRES                      0x30 /* reset                  */
-#define CC1100_STROBE_SFSTXON                   0x31 /* enable and calibrate   */
-#define CC1100_STROBE_SXOFF                     0x32 /* crystall off           */
-#define CC1100_STROBE_SCAL                      0x33 /* calibrate              */
-#define CC1100_STROBE_SRX                       0x34 /* enable rx              */
-#define CC1100_STROBE_STX                       0x35 /* enable tx              */
-#define CC1100_STROBE_SIDLE                     0x36 /* go idle                */
-#define CC1100_STROBE_SAFC                      0x37 /* AFC adjustment         */
-#define CC1100_STROBE_SWOR                      0x38 /* wake on radio          */
-#define CC1100_STROBE_SPWD                      0x39 /* power down             */
-#define CC1100_STROBE_SFRX                      0x3A /* flush Rx fifo          */
-#define CC1100_STROBE_SFTX                      0x3B /* flush Tx fifo          */
-#define CC1100_STROBE_SWORRST                   0x3C /* Reset real time clock. */
-#define CC1100_STROBE_SNOP                      0x3D /* no operation           */
+#define CC1100_STROBE_SRES                      0x30 /* reset                                       */
+#define CC1100_STROBE_SFSTXON                   0x31 /* enable and calibrate                        */
+#define CC1100_STROBE_SXOFF                     0x32 /* crystall off                                */
+#define CC1100_STROBE_SCAL                      0x33 /* calibrate                                   */
+#define CC1100_STROBE_SRX                       0x34 /* enable rx                                   */
+#define CC1100_STROBE_STX                       0x35 /* enable tx                                   */
+#define CC1100_STROBE_SIDLE                     0x36 /* go idle                                     */
+/* #define CC1100_STROBE_SAFC                      0x37*/ /* AFC adjustment, remove Datasheet 1.1   */
+#define CC1100_STROBE_SWOR                      0x38 /* wake on radio                               */
+#define CC1100_STROBE_SPWD                      0x39 /* power down                                  */
+#define CC1100_STROBE_SFRX                      0x3A /* flush Rx fifo                               */
+#define CC1100_STROBE_SFTX                      0x3B /* flush Tx fifo                               */
+#define CC1100_STROBE_SWORRST                   0x3C /* Reset real time clock to Event1 value.      */
+#define CC1100_STROBE_SNOP                      0x3D /* no operation                                */
 
 
 /* C1100 Registers (cf [1] p42) */
@@ -164,7 +164,7 @@
 #define CC1100_REG_WORCTRL                      0x20
 #define CC1100_REG_WORCTRL_DEFAULT              0xF8
 #define CC1100_REG_FREND1                       0x21
-#define CC1100_REG_FREND1_DEFAULT               0xA6
+#define CC1100_REG_FREND1_DEFAULT               0x56 /* A6 in datasheet 1.0 */
 #define CC1100_REG_FREND0                       0x22
 #define CC1100_REG_FREND0_DEFAULT               0x10
 #define CC1100_REG_FSCAL3                       0x23
@@ -183,16 +183,16 @@
 
 /* Configuration registers  (cf [1] p60) */
 #define CC1100_REG_FSTEST                       0x29
-#define CC1100_REG_FSTEST_DEFAULT               0x57
+#define CC1100_REG_FSTEST_DEFAULT               0x59 /* 57 in datasheet 1.0 */
 #define CC1100_REG_PTEST                        0x2A
 #define CC1100_REG_PTEST_DEFAULT                0x7F
 #define CC1100_REG_AGCTEST                      0x2B
 #define CC1100_REG_AGCTEST_DEFAULT              0x3F
-#define CC1100_REG_TEST2                        0x2B
+#define CC1100_REG_TEST2                        0x2C
 #define CC1100_REG_TEST2_DEFAULT                0x88
-#define CC1100_REG_TEST1                        0x2C
+#define CC1100_REG_TEST1                        0x2D
 #define CC1100_REG_TEST1_DEFAULT                0x31
-#define CC1100_REG_TEST0                        0x2D
+#define CC1100_REG_TEST0                        0x2E
 #define CC1100_REG_TEST0_DEFAULT                0x0B
 
 

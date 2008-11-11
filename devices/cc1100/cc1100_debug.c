@@ -81,6 +81,7 @@ char* cc1100_strobe_to_str(int strb)
     case CC1100_STROBE_SPWD    : return "SPWD";    // 0x39
     case CC1100_STROBE_SFRX    : return "SFRX";    // 0x3A
     case CC1100_STROBE_SFTX    : return "SFTX";    // 0x3B
+    case CC1100_STROBE_SWORRST : return "SWORRST"; // 0x3C
     case CC1100_STROBE_SNOP    : return "SNOP";    // 0x3D
     }
   return "unknown";

@@ -87,7 +87,7 @@
 #define CC1100_STROBE_SRX                       0x34 /* enable rx                                   */
 #define CC1100_STROBE_STX                       0x35 /* enable tx                                   */
 #define CC1100_STROBE_SIDLE                     0x36 /* go idle                                     */
-/* #define CC1100_STROBE_SAFC                      0x37*/ /* AFC adjustment, remove Datasheet 1.1   */
+#define CC1100_STROBE_SAFC                      0x37 /* AFC adjustment, removed in datasheet 1.1    */
 #define CC1100_STROBE_SWOR                      0x38 /* wake on radio                               */
 #define CC1100_STROBE_SPWD                      0x39 /* power down                                  */
 #define CC1100_STROBE_SFRX                      0x3A /* flush Rx fifo                               */

@@ -28,6 +28,30 @@
 #include <sys/resource.h>
 #endif
 
+/* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
+
+enum wsim_end_mode_t {
+  WSIM_END_NORMAL,
+  WSIM_END_SIGNAL,
+  WSIM_END_ERROR
+};
+
+char* wsim_end_mode_str(enum wsim_end_mode_t mode)
+{
+  switch (mode)
+    {
+    case WSIM_END_NORMAL: return "normal";
+    case WSIM_END_SIGNAL: return "signal";
+    case WSIM_END_ERROR:  return "error";
+    default: return "unknown";
+    }
+  return "unknown";
+}
+
+static struct options_t o;
+static void main_end(enum wsim_end_mode_t mode);
 
 /* ************************************************** */
 /* ************************************************** */
@@ -36,7 +60,9 @@
 void signal_quit(int signum)
 {
   ERROR("wsim: received Unix signal %d (%s)\n",signum,host_signal_str(signum));
+  
   mcu_signal_add(SIG_HOST | signum);
+  main_end(WSIM_END_SIGNAL);
 }
 
 /* ************************************************** */
@@ -130,12 +156,45 @@ static void  main_run_mode(struct options_t* o)
 /* ************************************************** */
 /* ************************************************** */
 
+static void main_end(enum wsim_end_mode_t mode)
+{
+  VERBOSE(1,"wsim:end mode %s (%d)\n", wsim_end_mode_str(mode), mode);
+  /* simulation done */
+  if (o.do_dump)
+    {
+      VERBOSE(2,"wsim:dumper: dump machine state in [%s]\n",o.dumpfile);
+      machine_dump(o.dumpfile);
+    }
+
+  /* finishing traces */
+  if (o.do_trace)
+    {
+      VERBOSE(2,"wsim:tracer: finalize trace in [%s]\n",o.tracefile);
+      tracer_close();
+    }
+
+  if (o.do_etrace)
+    {
+      VERBOSE(2,"wsim:tracer: finalize eTrace in [%s]\n",o.etracefile);
+      etracer_close();
+    }
+
+  ui_delete();
+  machine_delete();
+  worldsens_c_close();
+  libselect_close();
+  logger_close();
+}
+
+/* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
+
 /**
  * main : program entry point
  **/
 int main(int argc, char* argv[])
 {
-  struct options_t o;
 
   /* options */
   options_start();
@@ -242,32 +301,7 @@ int main(int argc, char* argv[])
   /* go */
   main_run_mode(&o);
 
-  /* simulation done */
-  if (o.do_dump)
-    {
-      VERBOSE(2,"dumper: dump machine state in [%s]\n",o.dumpfile);
-      machine_dump(o.dumpfile);
-    }
-
-  /* finishing traces */
-  if (o.do_trace)
-    {
-      VERBOSE(2,"tracer: finalize trace in [%s]\n",o.tracefile);
-      tracer_close();
-    }
-
-  if (o.do_etrace)
-    {
-      VERBOSE(2,"tracer: finalize eTrace in [%s]\n",o.etracefile);
-      etracer_close();
-    }
-
-  ui_delete();
-  machine_delete();
-  /* close worldsens */
-  worldsens_c_close();
-  libselect_close();
-  logger_close();
+  main_end(WSIM_END_NORMAL);
   return 0;
 }
 

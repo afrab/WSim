@@ -34,16 +34,6 @@ dnl Checks for compilation flags
 dnl --------------------------------------------------------------
 
 CFLAGS_save="${CFLAGS}"
-AC_CACHE_CHECK([if \$CC accepts -Wextra],
-   [ac_cv_c_Wextra],
-   [CFLAGS="-Wextra ${CFLAGS_save}"
-    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[]], [[]])],[ac_cv_c_Wextra=yes],[ac_cv_c_Wextra=no])])
-CFLAGS="${CFLAGS_save}"
-if test "${ac_cv_c_Wextra}" != "no"; then
-   CFLAGS="-Wextra ${CFLAGS}"
-fi
-
-CFLAGS_save="${CFLAGS}"
 AC_CACHE_CHECK([if \$CC accepts -Wall],
     [ac_cv_c_Wall],
     [CFLAGS="-Wall ${CFLAGS_save}"
@@ -53,16 +43,19 @@ if test "${ac_cv_c_Wall}" != "no"; then
     CFLAGS="-Wall ${CFLAGS}"
 fi
 
+dnl Wextra && Werror
+dnl ================
 CFLAGS_save="${CFLAGS}"
-AC_CACHE_CHECK([if \$CC accepts -Werror],
-    [ac_cv_c_Werror],
-    [CFLAGS="-Werror ${CFLAGS_save}"
-     AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[]], [[]])],[ac_cv_c_Werror=yes],[ac_cv_c_Werror=no])])
-CFLAGS="${CFLAGS_save}"
-dnl if test "${ac_cv_c_Werror}" != "no"; then
-dnl    CFLAGS="-Werror ${CFLAGS}"
-dnl fi
+AC_ARG_ENABLE([waou],AC_HELP_STRING([--enable-waou],[Wextra Werror mode (default disabled)]))
+if test "${enable_waou}" = "yes"; then
+    CFLAGS="$CFLAGS -Wextra -Werror"
+    waou_sum="yes"
+else
+    waou_sum="no"
+fi
 
+dnl -pipe
+dnl =====
 CFLAGS_save="${CFLAGS}"
 AC_CACHE_CHECK([if \$CC accepts -pipe],
     [ac_cv_c_pipe],

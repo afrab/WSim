@@ -22,17 +22,18 @@ int drv_gplot_finalize(tracer_t *t);
 tracer_driver_t tracer_driver_gplot = 
   { 
     .name     = "gplot",
+    .ext      = ".gp",
     .init     = drv_gplot_init,
     .process  = drv_gplot_process,
     .finalize = drv_gplot_finalize
   };
 
-tracer_time_t inline min(tracer_time_t t1, tracer_time_t t2)
+inline tracer_time_t min(tracer_time_t t1, tracer_time_t t2)
 {
   return t1 < t2 ? t1 : t2;
 }
 
-tracer_time_t inline max(tracer_time_t t1, tracer_time_t t2)
+inline tracer_time_t max(tracer_time_t t1, tracer_time_t t2)
 {
   return t1 < t2 ? t2 : t1;
 }
@@ -45,9 +46,9 @@ tracer_time_t inline max(tracer_time_t t1, tracer_time_t t2)
 */
 
 static void
-tracer_dump_gplot_id(tracer_t *t, int id)
+tracer_dump_gplot_id(tracer_t *t, tracer_id_t id)
 {
-  int nplot = 0;
+  tracer_ev_t       nplot = 0;
 
   tracer_time_t     t1;
   tracer_time_t     t2;
@@ -154,6 +155,11 @@ tracer_dump_gplot_id(tracer_t *t, int id)
 int drv_gplot_init(tracer_t *t)
 {
   DMSG(t,"tracer:drv:gplot: init\n");
+  if (t->merge)
+    {
+      ERROR("tracer:drv:raw: merge mode is not supported\n");
+      return 1;
+    }
   return 0;
 }
 
@@ -164,25 +170,16 @@ int drv_gplot_init(tracer_t *t)
 int drv_gplot_process(tracer_t *t)
 {
   tracer_id_t   id;
-  DMSG(t,"tracer:drv:gplot: process %s\n",t->in_filename);
-  if (tracer_file_out_open(t,".gp") != 0)
-    {
-      DMSG(t,"tracer:drv:gplot: open out error\n");
-      return 1;
-    }
-
   for(id=0; id < TRACER_MAX_ID; id++)
     {
       if (t->hdr.id_name[id][0] != '\0' && 
 	  ((strcmp(t->out_signal_name,"all") == 0) || 
 	   (strcmp(t->out_signal_name,t->hdr.id_name[id]) == 0)))
 	{
-	  tracer_file_rewind(t);
+	  tracer_file_in_rewind(t);
 	  tracer_dump_gplot_id(t,id);
 	}
     }
-
-  tracer_file_out_close(t);
   return 0;
 }
 

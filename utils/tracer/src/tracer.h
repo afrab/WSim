@@ -16,13 +16,15 @@
 /******************************************************************************************/
 /******************************************************************************************/
 
+#define UNUSED __attribute__((unused))  
+
 #define DEFAULT_STOP_TIME 0xffffffffffffffffull /* 64 */
 
-typedef uint32_t              tracer_ev_t;     /* event number */
-typedef uint32_t              tracer_id_t;     /* signal id    */
-typedef uint64_t              tracer_time_t;   /* time         */
-typedef uint64_t              tracer_val_t;    /* value        */
-typedef uint8_t               tracer_width_t;  /* width        */
+typedef uint32_t              tracer_ev_t;      /* event number */
+typedef uint32_t              tracer_id_t;      /* signal id    */
+typedef uint64_t              tracer_time_t;    /* time         */
+typedef uint64_t              tracer_val_t;     /* value        */
+typedef uint8_t               tracer_width_t;   /* width        */
 
 /****************************************
  * struct _sample_t is the sample type
@@ -90,49 +92,63 @@ typedef struct _tracer_header_t tracer_header_t;
 /******************************************************************************************/
 /******************************************************************************************/
 
+enum tracer_mode_t {
+  TRC_NONE,
+  TRC_FILE,
+  TRC_DIR,
+  TRC_MULTI
+};
+
 struct tracer_struct_t {
-  tracer_header_t  hdr;
-  int              debug;
-  int              merge;
+  tracer_header_t    hdr;
+  int                debug;
+  enum tracer_mode_t mode;
+  int                merge;
 
-  char             in_filename[FILENAME_MAX];
-  char             out_filename[FILENAME_MAX];
+  char               in_filename[FILENAME_MAX];
+  char               out_filename[FILENAME_MAX];
   
-  FILE            *in_fd;
-  FILE            *out_fd;
-  int              file_mode;
+  FILE              *in_fd;
+  FILE              *out_fd;
 
-  char             in_Dir[FILENAME_MAX];
-  DIR             *dir;
-  char             dir_pattern[FILENAME_MAX];
-  int              dir_mode;
+  char               in_Dir[FILENAME_MAX];
+  DIR               *dir;
+  char               dir_pattern[FILENAME_MAX];
 
-  char            *out_format_name;
-  char            *out_signal_name;
+  char              *out_format_name;
+  char              *out_signal_name;
 
-  tracer_time_t    start_time;
-  tracer_time_t    stop_time;
+  tracer_time_t      start_time;
+  tracer_time_t      stop_time;
+
+
+  /* VCD format */
+  int             modmax;
+  char            id_module [TRACER_MAX_ID][TRACER_MAX_NAME_LENGTH]; /* module names  */
+  char            id_var    [TRACER_MAX_ID][6];                      /* var in module */
 };
 typedef struct tracer_struct_t tracer_t;
 
 
 tracer_t*       tracer_create          ();
 void            tracer_delete          (tracer_t *t);
+int             tracer_dup             (tracer_t *dst,tracer_t *src);
+void            tracer_dump_header     (tracer_t *t);
 
-int             tracer_file_open       (tracer_t *t);
-int             tracer_file_close      (tracer_t *t);
-int             tracer_file_rewind     (tracer_t *t);
-void            tracer_file_dump_header(tracer_t *t);
+int             tracer_file_in_open    (tracer_t *t);
+int             tracer_file_in_close   (tracer_t *t);
+int             tracer_file_in_rewind  (tracer_t *t);
 
-int             tracer_file_out_open   (tracer_t *t, const char* suffix);
+int             tracer_file_out_name   (tracer_t *t, char *ext, int n);
+int             tracer_file_out_open   (tracer_t *t);
 int             tracer_file_out_close  (tracer_t *t);
 
 int             tracer_dirmode_init    (tracer_t *t, const char* patterm);
 int             tracer_dirmode_next    (tracer_t *t);
 int             tracer_dirmode_close   (tracer_t *t);
 
-tracer_id_t     tracer_find_id_by_name (tracer_t *t, char* name);
 int             tracer_read_sample     (tracer_t *t, tracer_sample_t *s);
+tracer_id_t     tracer_find_id_by_name (tracer_t *t, char* name);
 
 /******************************************************************************************/
 /******************************************************************************************/
@@ -144,6 +160,7 @@ typedef int (*tracer_drv_function_t)(tracer_t*);
 
 struct tracer_driver_struct_t {
   char                  *name; 
+  char                  *ext;
   tracer_drv_function_t  init;     /* init process, called once per run     */
   tracer_drv_function_t  process;  /* process, called for each file         */
   tracer_drv_function_t  finalize; /* finalize process, called once per run */

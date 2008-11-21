@@ -34,13 +34,13 @@ tracer_t* tracer_create()
 /* ************************************************** */
 
 #define TERROR(test,msg)                      \
-do {                                          \
-  if (test)                                   \
-    {                                         \
-       ERROR(msg);                            \
-       return 1;                              \
-    }                                         \
-} while (0)
+  do {					      \
+    if (test)				      \
+      {					      \
+	ERROR(msg);			      \
+	return 1;			      \
+      }					      \
+  } while (0)
 
 /* ************************************************** */
 /* ************************************************** */
@@ -126,19 +126,14 @@ int tracer_dirmode_close(tracer_t *t)
 /* ************************************************** */
 /* ************************************************** */
 
-int tracer_file_open(tracer_t *t)
+int tracer_file_in_open(tracer_t *t)
 {
   if ((t->in_fd = fopen(t->in_filename,"rb")) == NULL)
     {
       ERROR("tracer:file: open error on input %s\n",t->in_filename);
       return 1;
     }
-  
-  if (tracer_load(t))
-    {
-      ERROR("tracer:file: file %s header load error\n",t->in_filename);
-    }
-
+  tracer_load(t);
   return 0;
 }
 
@@ -146,7 +141,7 @@ int tracer_file_open(tracer_t *t)
 /* ************************************************** */
 /* ************************************************** */
 
-int tracer_file_close(tracer_t *t)
+int tracer_file_in_close(tracer_t *t)
 {
   if (t)
     {
@@ -156,6 +151,10 @@ int tracer_file_close(tracer_t *t)
 	  t->in_fd = NULL;
 	}
     }
+  else
+    {
+      ERROR("tracer:file: close error on input %s\n",t->in_filename);
+    }
   return 0;
 }
 
@@ -163,7 +162,7 @@ int tracer_file_close(tracer_t *t)
 /* ************************************************** */
 /* ************************************************** */
 
-int tracer_file_rewind(tracer_t *t)
+int tracer_file_in_rewind(tracer_t *t)
 {
   TERROR(t->in_fd == NULL,"tracer:file: rewind error\n");
   fseek(t->in_fd,t->hdr.header_length,SEEK_SET);
@@ -184,8 +183,9 @@ static int tracer_load(tracer_t *t)
   TERROR(t == NULL, "tracer:file:load tracer is NULL\n");
   TERROR(t->in_fd == NULL, "tracer:file:load file is NULL\n");
 
-  r = fread(buff,1,sizeof(TRACER_MAGIC),t->in_fd);
-  if ((r < sizeof(TRACER_MAGIC)) || (strncmp(buff,TRACER_MAGIC,sizeof(TRACER_MAGIC)) != 0))
+  r = fread(buff,1,TRACER_MAGIC_SIZE,t->in_fd);
+  if ((r < TRACER_MAGIC_SIZE) || 
+      (strncmp(buff,TRACER_MAGIC,TRACER_MAGIC_SIZE) != 0))
     {
       ERROR("tracer: read file magic value error\n");
       return 1;
@@ -276,7 +276,7 @@ static int tracer_load(tracer_t *t)
   
   /*
     if (t->debug)
-    tracer_file_dump_header(t);
+    tracer_dump_header(t);
   */
   return 0;
 }
@@ -319,7 +319,25 @@ static void tracer_swap_header(tracer_t *t)
 /* ************************************************** */
 /* ************************************************** */
 
-void tracer_file_dump_header(tracer_t *t)
+int tracer_dup(tracer_t *dest,tracer_t *source)
+{
+  long pos;
+  memcpy(dest,source,sizeof(struct tracer_struct_t));
+  pos = ftell(source->in_fd);
+
+  dest->in_fd     = fdopen(dup(fileno(source->in_fd)),"rb");
+  dest->out_fd    = NULL;
+  dest->dir       = NULL;
+
+  fseek(dest->in_fd, pos, SEEK_SET);
+  return 0;
+}
+
+/* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
+
+void tracer_dump_header(tracer_t *t)
 {
   int i;
   OUTPUT("tracer:hdr: node id %d\n",t->hdr.node_id);
@@ -372,7 +390,7 @@ tracer_id_t tracer_find_id_by_name (tracer_t *t, char* name)
 
 int tracer_read_sample(tracer_t *t, tracer_sample_t *s)
 {
-  int size = sizeof(tracer_sample_t);
+  size_t size = sizeof(tracer_sample_t);
   if (fread(s, 1, size, t->in_fd) != size)
     {
       DMSG(t,"tracer:sample: read error\n");
@@ -404,16 +422,16 @@ static tracer_registered_drivers_t tracer_registered_drivers =
  { 
    0,
    {
-    { NULL, NULL, NULL, NULL },
-    { NULL, NULL, NULL, NULL },
-    { NULL, NULL, NULL, NULL },
-    { NULL, NULL, NULL, NULL },
-    { NULL, NULL, NULL, NULL },
-    { NULL, NULL, NULL, NULL },
-    { NULL, NULL, NULL, NULL },
-    { NULL, NULL, NULL, NULL },
-    { NULL, NULL, NULL, NULL },
-    { NULL, NULL, NULL, NULL }
+    { NULL, NULL, NULL, NULL, NULL },
+    { NULL, NULL, NULL, NULL, NULL },
+    { NULL, NULL, NULL, NULL, NULL },
+    { NULL, NULL, NULL, NULL, NULL },
+    { NULL, NULL, NULL, NULL, NULL },
+    { NULL, NULL, NULL, NULL, NULL },
+    { NULL, NULL, NULL, NULL, NULL },
+    { NULL, NULL, NULL, NULL, NULL },
+    { NULL, NULL, NULL, NULL, NULL },
+    { NULL, NULL, NULL, NULL, NULL }
    }
  };
 
@@ -439,7 +457,6 @@ tracer_driver_t *tracer_driver_get_by_name(char* name)
 	  return & (tracer_registered_drivers.drivers[i]);
 	}
     }
-
   return NULL;
 }
 
@@ -447,19 +464,13 @@ tracer_driver_t *tracer_driver_get_by_name(char* name)
 /* ************************************************** */
 /* ************************************************** */
 
-int tracer_file_out_open(tracer_t *t, const char* suffix)
+int tracer_file_out_open(tracer_t *t)
 {
-  if (t->dir_mode)
-    {
-      strncat(t->out_filename,suffix,FILENAME_MAX - strlen(t->out_filename));
-    }
-
   if ((t->out_fd = fopen(t->out_filename,"wb")) == NULL)
     {
+      ERROR("tracer:file: error on open out file %s\n",t->out_filename);
       return 1;
     }
-
-  DMSG(t,"tracer:file: open out %s\n",t->out_filename);
   return 0;
 }
 
@@ -474,6 +485,10 @@ int tracer_file_out_close(tracer_t *t)
       fclose(t->out_fd);
       t->out_fd = NULL;
       return 0;
+    }
+  else
+    {
+      ERROR("tracer:file: close error on output %s\n",t->out_filename);
     }
   return 1;
 }

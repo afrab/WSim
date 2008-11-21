@@ -38,27 +38,11 @@ int drv_sitc_finalize(tracer_t *t);
 tracer_driver_t tracer_driver_sitc = 
   { 
     .name     = "sitc",
+    .ext      = ".sitc",
     .init     = drv_sitc_init,
     .process  = drv_sitc_process,
     .finalize = drv_sitc_finalize
   };
-
-/* ************************************************** */
-/* ************************************************** */
-/* ************************************************** */
-
-/* copy everything except file descriptors */
-static int sitc_tracer_copy(tracer_t *dest,tracer_t *source)
-{
-
-  memcpy(dest,source,sizeof(struct tracer_struct_t));
-  dest->in_fd     = fdopen(dup(fileno(source->in_fd)),"r");
-  dest->out_fd    = NULL;
-  dest->file_mode = 1;
-  dest->dir       = NULL;
-
-  return 0;
-}
 
 /* ************************************************** */
 /* ************************************************** */
@@ -80,7 +64,7 @@ static int end_of_traces(tracer_t **trc_traces,tracer_ev_t *ev_count,int nb_trc_
 /* ************************************************** */
 /* ************************************************** */
 
-static tracer_ev_t select_next_sample(tracer_t *t,tracer_ev_t ev_count,int id,tracer_sample_t *s)
+static tracer_ev_t select_next_sample(tracer_t *t,tracer_ev_t ev_count, tracer_id_t id,tracer_sample_t *s)
 {
   tracer_ev_t count;
 
@@ -182,7 +166,7 @@ static void drv_sitc_dump(tracer_t *t, tracer_t *trc_traces[],int nb_trc_files)
       /* TODO only the all option is implemented currently */
       for (i=0; i<nb_trc_files; i++)
 	{
-	  tracer_file_rewind(trc_traces[i]);
+	  tracer_file_in_rewind(trc_traces[i]);
 	}
 
       if (t->hdr.id_name[id][0] != '\0' && 
@@ -222,12 +206,12 @@ int drv_sitc_process(tracer_t *t)
   if (sitc_trc_count == SITC_TRC_MAX)
     {
       ERROR("tracer:drv:sitc: maximum number of source files reached\n");
-      return 0;
+      return 1;
     }
 
-  /* second fill the filename array */
+  /* fill the filename array */
   sitc_traces[sitc_trc_count] = tracer_create();
-  if (sitc_tracer_copy(sitc_traces[sitc_trc_count],t) != 0)
+  if (tracer_dup(sitc_traces[sitc_trc_count],t) != 0)
     {
       tracer_delete(sitc_traces[sitc_trc_count]);
       return 1;
@@ -244,12 +228,6 @@ int drv_sitc_process(tracer_t *t)
 int drv_sitc_init(tracer_t *t)
 {
   DMSG(t,"tracer:drv:sitc: init\n");
-  if (tracer_file_out_open(t,".sitc") != 0)
-    {
-      DMSG(t,"tracer:drv:gplot: open out error\n");
-      return 1;
-    }
-  DMSG(t,"tracer:drv:sitc: open %s\n",t->out_filename);
   sitc_trc_count = 0;
   return 0;
 }
@@ -262,7 +240,6 @@ int drv_sitc_finalize(tracer_t *t)
 {
   int i;
   DMSG(t,"tracer:drv:sitc finalize\n");
-  /* four: close all the traces  */
   drv_sitc_dump(t,sitc_traces,sitc_trc_count);
   for (i=0; i < sitc_trc_count; i++)
     {
@@ -272,7 +249,6 @@ int drv_sitc_finalize(tracer_t *t)
 	}
       tracer_delete(sitc_traces[i]);
     }
-  tracer_file_out_close(t);
   return 0;
 }
 

@@ -58,7 +58,7 @@ typedef struct tracer_sample_struct_t tracer_sample_t;
    version 2:
       ..
 */
-#define TRACER_VERSION           2
+#define TRACER_VERSION           3
 
 #define TRACER_MAX_ID            255
 #define TRACER_MAX_NAME_LENGTH   30
@@ -68,6 +68,7 @@ struct _tracer_header_t {
   int32_t          need_endian_swap;
   int32_t          header_length;
   int32_t          node_id;
+  uint64_t         initial_time;
 
   /* simulation information for WSim traces */
   uint32_t         backtracks;

@@ -102,6 +102,7 @@ void  tracer_stop            (void);
  * header information 
  */
 void  tracer_set_node_id     (int id);
+void  tracer_set_initial_time(tracer_time_t time);
 
 /*
  * Record a value change for id

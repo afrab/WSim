@@ -109,8 +109,10 @@ typedef struct _tracer_sample_t tracer_sample_t;
    version 1:
       packed struct
       magic_size == 26
+   version 2:
+      initial time
 */
-#define TRACER_VERSION      2
+#define TRACER_VERSION      3
 
 /* ************************************************** */
 /* ************************************************** */
@@ -138,6 +140,7 @@ static tracer_state_t tracer_saved;
 /* values that are not saved during a state_save */
 /* these values will be used to build the header */
 static int32_t                 tracer_node_id      = 0xFFFF;
+static tracer_time_t           tracer_initial_time = 0;
 static unsigned char           tracer_max_id       = TRACER_MAX_ID;
 static char                   *tracer_filename     = NULL;
 static char                    tracer_id_name        [TRACER_MAX_ID][TRACER_MAX_NAME_LENGTH];
@@ -229,6 +232,11 @@ tracer_dump_header()
   size = sizeof(tracer_node_id);
   i   += fwrite(&tracer_node_id,size,1,tracer_datafile);
   DMSG("tracer:hdr:node id  : %d\n",tracer_node_id);
+
+  /* tracer initial time  */
+  size = sizeof(tracer_initial_time);
+  i   += fwrite(&tracer_initial_time,size,1,tracer_datafile);
+  DMSG("tracer:hdr:time     : %"PRIu64"\n",tracer_initial_time);
 
   /* max number of id */
   size = sizeof(tracer_max_id);
@@ -512,6 +520,11 @@ void tracer_set_node_id(int id)
   tracer_node_id = id;
   DMSG_TRACER("tracer:data: node_id to %d (0x%04x)\n",tracer_node_id,tracer_node_id);
 }
+
+void tracer_set_initial_time(tracer_time_t time)
+{
+  tracer_initial_time = time;
+} 
 
 /* ************************************************** */
 /* ************************************************** */

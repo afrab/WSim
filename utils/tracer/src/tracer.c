@@ -243,6 +243,10 @@ static int tracer_load(tracer_t *t)
   r += fread(&(t->hdr.node_id), 1, sizeof(t->hdr.node_id),t->in_fd);
   DMSG(t,"tracer:hdr: node id      : %d\n",t->hdr.node_id);
 
+  /* initial time */
+  r += fread(&(t->hdr.initial_time), 1, sizeof(t->hdr.initial_time),t->in_fd);
+  DMSG(t,"tracer:hdr: init time    : %"PRIu64"\n",t->hdr.initial_time);
+
   /* max number of id */
   r += fread(&(t->hdr.tracer_max_id),1,sizeof(t->hdr.tracer_max_id),t->in_fd);
   DMSG(t,"tracer:hdr: max id       : %d\n",t->hdr.tracer_max_id);
@@ -304,6 +308,7 @@ static void tracer_swap_header(tracer_t *t)
   t->hdr.simul_insn     = endian_swap8(t->hdr.simul_insn);
   t->hdr.simul_nano     = endian_swap8(t->hdr.simul_nano);
   t->hdr.node_id        = endian_swap2(t->hdr.node_id);
+  t->hdr.initial_time   = endian_swap8(t->hdr.initial_time);
   t->hdr.tracer_max_id  = endian_swap4(t->hdr.tracer_max_id);
   t->hdr.ev_count_total = endian_swap4(t->hdr.ev_count_total);
   t->hdr.sim_time_total = endian_swap8(t->hdr.sim_time_total);

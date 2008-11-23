@@ -204,13 +204,33 @@ void vcd_dump_variables(tracer_t *t_out, tracer_t* t, int tnum)
     }
 }
 
+void tr_module_name(char* dst, char *src)
+{
+  int i;
+  for(i=0; src[i] != '\0'; i++)
+    {
+      char c = src[i];
+      switch (src[i])
+	{
+	case '.': c = '-'; break;
+	case '_': c = '-'; break;
+	default :          break;
+	}
+      dst[i] = c;
+    }
+  dst[i] = '\0';
+}
+
 void vcd_dump_scopes(tracer_t *t, tracer_t *trc[], int nb_trc_files)
 {
   int i;
   for(i=0; i<nb_trc_files; i++)
     {
+      char module_name[FILENAME_MAX];
+
       DMSG(t,"tracer:vcd: dump scopes for %s (%d/%d)\n",trc[i]->in_filename,i,nb_trc_files);
-      fprintf(t->out_fd,"$scope module %s $end\n\n", trc[i]->in_filename);
+      tr_module_name(module_name,trc[i]->in_filename);
+      fprintf(t->out_fd,"$scope module %s $end\n\n", module_name);
       DMSG(t,"   vcd: find modules\n");
       vcd_find_modules   (t, trc[i], i);
       DMSG(t,"   vcd: dump modules\n");

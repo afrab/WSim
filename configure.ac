@@ -43,17 +43,6 @@ if test "${ac_cv_c_Wall}" != "no"; then
     CFLAGS="-Wall ${CFLAGS}"
 fi
 
-dnl Wextra && Werror
-dnl ================
-CFLAGS_save="${CFLAGS}"
-AC_ARG_ENABLE([waou],AC_HELP_STRING([--enable-waou],[Wextra Werror mode (default disabled)]))
-if test "${enable_waou}" = "yes"; then
-    CFLAGS="$CFLAGS -Wextra -Werror"
-    waou_sum="yes"
-else
-    waou_sum="no"
-fi
-
 dnl -pipe
 dnl =====
 CFLAGS_save="${CFLAGS}"
@@ -526,15 +515,25 @@ AM_CONDITIONAL([BUILD_MACOSX],  [test "$HOSTTYPE" = "MacOSX"])
 AM_CONDITIONAL([BUILD_MINGW32], [test "$HOSTTYPE" = "Mingw32"])
 AM_CONDITIONAL([BUILD_CYGWIN],  [test "$HOSTTYPE" = "Cygwin"])
 
+dnl Wextra && Werror
+dnl ================
+CFLAGS_save="${CFLAGS}"
+AC_ARG_ENABLE([waou],AC_HELP_STRING([--enable-waou],[Wextra Werror mode (default disabled)]))
+if test "${enable_waou}" = "yes"; then
+    if test "${HOSTTYPE}" != "Cygwin" ; then
+       CFLAGS="$CFLAGS -Wextra -Werror"
+       waou_sum="yes"
+    else
+       waou_sum="no"
+    fi
+else
+    waou_sum="no"
+fi
+
 dnl --------------------------------------------------------------
 dnl Output
 dnl --------------------------------------------------------------
 dnl 
-if test "${ac_cv_c_Werror}" != "no"; then
-   if test "${HOSTTYPE}" != "Cygwin" ; then
-      CFLAGS="${CFLAGS} -Werror"
-   fi
-fi
 
 echo "EXTRALIBS ${EXTRALIBS}"
 AC_SUBST(EXTRALIBS)

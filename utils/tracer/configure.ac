@@ -40,8 +40,12 @@ dnl ================
 CFLAGS_save="${CFLAGS}"
 AC_ARG_ENABLE([waou],AC_HELP_STRING([--enable-waou],[Wextra Werror mode (default disabled)]))
 if test "${enable_waou}" = "yes"; then
-    CFLAGS="$CFLAGS -Wextra -Werror"
-    waou_sum="yes"
+    if test "x${HOSTTYPE}" != "xCygwin" ; then
+       CFLAGS="$CFLAGS -Wextra -Werror"
+       waou_sum="yes"
+    else
+       waou_sum="no"
+    fi
 else
     waou_sum="no"
 fi

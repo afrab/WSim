@@ -227,6 +227,14 @@ if test "${enable_platform_senslab}" = "yes" ; then
 	PLATFORMNAMES="senslab"
 fi
 
+dnl mosar
+AC_ARG_ENABLE([platform-mosar],AS_HELP_STRING([--enable-platform-mosar],[mosar platforms]))
+if test "${enable_platform_mosar}" = "yes" ; then
+	enable_mcu_msp430=yes
+	NPLATFORM=$(($NPLATFORM + 1))
+	PLATFORMNAMES="mosar"
+fi
+
 dnl OT setre 1
 AC_ARG_ENABLE([platform-ot2006],AS_HELP_STRING([--enable-platform-ot2006],[OT 2006 platform]))
 if test "${enable_platform_ot2006}" = "yes" ; then
@@ -310,6 +318,7 @@ fi
 
 AM_CONDITIONAL([BUILD_WSN430],    [test "${enable_platform_wsn430}"    = "yes" -o "$ALL" = "yes" ])
 AM_CONDITIONAL([BUILD_SENSLAB],   [test "${enable_platform_senslab}"   = "yes" -o "$ALL" = "yes" ])
+AM_CONDITIONAL([BUILD_MOSAR],     [test "${enable_platform_mosar}"     = "yes" -o "$ALL" = "yes" ])
 AM_CONDITIONAL([BUILD_OT2006],    [test "${enable_platform_ot2006}"    = "yes"])
 AM_CONDITIONAL([BUILD_OT2007],    [test "${enable_platform_ot2007}"    = "yes" -o "$ALL" = "yes" ])
 AM_CONDITIONAL([BUILD_EZ430],     [test "${enable_platform_ez430}"     = "yes" -o "$ALL" = "yes" ])
@@ -562,6 +571,7 @@ dnl
 platforms/Makefile
 platforms/wsn430/Makefile
 platforms/senslab/Makefile
+platforms/mosar/Makefile
 platforms/ez430/Makefile
 platforms/ot2006/Makefile
 platforms/ot2007/Makefile

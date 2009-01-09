@@ -521,6 +521,60 @@
 #define __msp430_have_adc10
 #define __msp430_have_flash
 
+
+/* ********************************************************************** */
+/* ********************************************************************** */
+/* ********************************************************************** */
+/* ********************************************************************** */
+#elif defined(MSP430f2274)
+
+#define MCU_BFD_MACH_ID   20
+#define MCU_VERSION       "f2274"         // "f201x"
+#define MCU_MODEL_NAME    "msp430f2274"
+
+#define ADDR_FLASH_STOP   0xFFFFu
+#define ADDR_FLASH_START  0xF800u
+#define ADDR_NVM_STOP     0x10ffu
+#define ADDR_NVM_START    0x1000u
+#define ADDR_RAM_STOP     0x027fu
+#define ADDR_RAM_START    0x0200u
+
+#define INTR_RESET        15
+#define INTR_NMI          14
+#define INTR_TIMERB3_0    13
+#define INTR_TIMERB3_1    12
+#define INTR_COMP_A       11
+#define INTR_WATCHDOG     10
+#define INTR_USART0_RX     9
+#define INTR_USART0_TX     8
+#define INTR_ADC12         7
+#define INTR_TIMERA3_0     6 // CCR0 CCIFG
+#define INTR_TIMERA3_1     5 // CCR1, CCR2, TAIFG
+#define INTR_IOPORT1       4
+#define INTR_UNUSED_1      3
+#define INTR_UNUSED_2      2
+#define INTR_IOPORT2       1
+#define INTR_UNUSED_3      0
+
+// system clock
+#define __msp430_have_basic_clock_plus
+#define __msp430_have_xt2 
+
+// 8 bit blocks
+#define __msp430_have_port1
+#define __msp430_have_port2
+#define __msp430_have_port3
+#define __msp430_have_port4
+#define __msp430_have_usart0
+#define __msp430_have_cmpa
+
+// 16 bit blocks
+#define __msp430_have_timera3
+#define __msp430_have_timerb3
+#define __msp430_have_watchdog
+#define __msp430_have_adc10
+#define __msp430_have_flash
+
 /* ********************************************************************** */
 /* ********************************************************************** */
 /* ********************************************************************** */

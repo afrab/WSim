@@ -34,8 +34,8 @@
 #define RADIO_CSn_MASK  CC2420_CSn_MASK
 #define RADIO_CSn_SHIFT CC2420_BIT_CSn
 #define RADIO_DATA_MASK CC2420_DATA_MASK
-#define RADIO_GDO0_MASK CC2420_GDO0_MASK   /* GDO0 -> P1. */
-#define RADIO_GDO2_MASK CC2420_GDO2_MASK   /* GDO2 -> P1. */
+#define RADIO_GDO0_MASK CC2420_GDO0_MASK   /* GDO0 -> P1.3 */
+#define RADIO_GDO2_MASK CC2420_GDO2_MASK   /* GDO2 -> P1.4 */
 #endif
 
 #include "devices/ptty/ptty_dev.h"
@@ -65,16 +65,16 @@
  *   3.6 : utxd1
  *   3.5 : urxd0
  *   3.4 : utxd0
- *   3.3 : uclk0, serial clock, cc1100
- *   3.2 : simo0, serial in, cc1100
- *   3.1 : somi0, serial out, cc1100
+ *   3.3 : uclk0, serial clock, tsl2550
+ *   3.2 : simo0, serial in, tsl2550
+ *   3.1 : somi0, serial out
  *   3.0 : ste0 : NC
  *
  * Port 4
  * ======
  *   4.7 : flash Hold
  *   4.6 : NC
- *   4.5 : NC
+ *   4.5 : tsl2550 Supply
  *   4.4 : flash CS
  *   4.3 : Enable -> battery charger
  *   4.2 : CS_radio, cc1100
@@ -85,9 +85,9 @@
  *   5.6 : LED3
  *   5.5 : LED2
  *   5.4 : LED1
- *   5.3 : uclk1, flash clock
- *   5.2 : somi1, flash out
- *   5.1 : simo1, flash in
+ *   5.3 : uclk1, flash clock, cc1100
+ *   5.2 : somi1, flash out, cc1100
+ *   5.1 : simo1, flash in, cc1100
  *   5.0 : ste1 : NC
  *
  * ***************************************/
@@ -135,12 +135,13 @@ static struct moption_t xt2_opt = {
   .value       = NULL
 };
 
-static struct moption_t xosc_opt = {
+//no needs to customize xosc crystal freq for senslab platform
+/*static struct moption_t xosc_opt = {
   .longname    = "xosc",
   .type        = required_argument,
   .helpstring  = "xosc crystal freq (Hz)",
   .value       = NULL
-};
+};*/
 
 /* ************************************************** */
 /* ************************************************** */
@@ -150,10 +151,10 @@ int devices_options_add(void)
 {
   options_add( &xt1_opt         );
   options_add( &xt2_opt         );
-  options_add( &xosc_opt        );
+  //options_add( &xosc_opt        );
   options_add( &ds2411_opt      );
   m25p_add_options(FLASH,  0, "flash"  );
-  ptty_add_options(SERIAL, 1, "serial1");
+  ptty_add_options(SERIAL, 0, "serial0");
 
   return 0;
 }
@@ -162,12 +163,12 @@ int devices_options_add(void)
 /* ************************************************** */
 /* ************************************************** */
 
-struct wsn430_struct_t {
+struct senslab_struct_t {
   int flash_cs;
   int radio_cs;
 };
 
-#define SYSTEM_DATA      ((struct wsn430_struct_t*)(machine.device[SYSTEM].data))
+#define SYSTEM_DATA      ((struct senslab_struct_t*)(machine.device[SYSTEM].data))
 #define SYSTEM_FLASH_CS  (SYSTEM_DATA->flash_cs)
 #define SYSTEM_RADIO_CS  (SYSTEM_DATA->radio_cs)
 
@@ -186,7 +187,7 @@ int system_create(int dev_num)
   //  struct led_t *dev = (struct led_t*) machine.device[dev_num].data;
   machine.device[dev_num].reset         = system_reset;
   machine.device[dev_num].delete        = system_delete;
-  machine.device[dev_num].state_size    = sizeof(struct wsn430_struct_t);
+  machine.device[dev_num].state_size    = sizeof(struct senslab_struct_t);
   machine.device[dev_num].name          = "System Platform";
   return 0;
 }
@@ -197,6 +198,7 @@ int system_create(int dev_num)
 
 int devices_create(void)
 {
+#define M25P_DATA        (machine.device[FLASH].data)
   int res = 0;
   int xin_freq, xt2_freq, xosc_freq;
 
@@ -219,10 +221,10 @@ int devices_create(void)
     VERBOSE(1,"senslab: xt2 external crystal set to %d Hz\n",xt2_freq);
   }
 
-  if (xosc_opt.value) {
+  /*if (xosc_opt.value) {
     xosc_freq = atoi(xosc_opt.value);
     VERBOSE(1,"senslab: xosc external crystal set to %d Hz\n",xosc_freq);
-  }
+  }*/
 
   /*********************************/
   /* MSP430 MCU                    */
@@ -235,7 +237,7 @@ int devices_create(void)
   /*********************************/
 
   machine.device_max          = BOARD_DEVICE_MAX;
-  machine.device_size[SYSTEM] = sizeof(struct wsn430_struct_t);
+  machine.device_size[SYSTEM] = sizeof(struct senslab_struct_t);
   machine.device_size[FLASH]  = m25p_device_size();   // Flash RAM
   machine.device_size[LED1]   = led_device_size();    // Led1
   machine.device_size[LED2]   = led_device_size();    // Led2
@@ -246,7 +248,7 @@ int devices_create(void)
 #if defined(SLABV13B)
   machine.device_size[RADIO]  = cc1100_device_size(); // cc1100 radio
 #elif defined(SLABV14)
-  machine.device_size[RADIO]  = cc2420_device_size(); // cc1100 radio
+  machine.device_size[RADIO]  = cc2420_device_size(); // cc2420 radio
 #endif
 
 #if defined(LOGO1)
@@ -355,6 +357,7 @@ int devices_update(void)
   int refresh = 0;
 #endif
   int RADIO_CSn = 0;
+  int FLASH_CS = 0;
   uint8_t  val8;
 
   /* *************************************************************************** */
@@ -400,16 +403,13 @@ int devices_update(void)
   /*   P3.6 utxd1 : serial             */
   /*   P3.5 urxd0                      */
   /*   P3.4 utxd0                      */ 
-  /*   P3.3 SPI cc1100 UCLK            */
-  /*   P3.2 SPI cc1100 SOMI            */
-  /*   P3.1 SPI cc1100 SIMO            */
+  /*   P3.3 NC                         */
+  /*   P3.2 NC                         */
+  /*   P3.1 NC                         */
   /*   P3.0 NC                         */
 #if 0
   if (msp430_digiIO_dev_read(PORT3,&val8))
     {
-      /* cc1100 is driven by spi                          */
-      /* we could/should check here that the pins are not */
-      /* driven by the GPIO                               */
     }
 #endif
 
@@ -425,6 +425,7 @@ int devices_update(void)
   /*   P4.0 NC                         */
   if (msp430_digiIO_dev_read(PORT4,&val8))
     {
+      FLASH_CS = BIT(val8,4);
       machine.device[FLASH].write(FLASH, 
 				  M25P_H | M25P_S, 
 				  (BIT(val8,7) << M25P_H_SHIFT) | 
@@ -436,6 +437,11 @@ int devices_update(void)
       machine.device[RADIO].write(RADIO, RADIO_CSn_MASK, RADIO_CSn << RADIO_CSn_SHIFT);
       etracer_slot_access(0x0, 1, ETRACER_ACCESS_WRITE, ETRACER_ACCESS_BIT, ETRACER_ACCESS_LVL_GPIO, 0);
     }
+  else
+    {
+      FLASH_CS = BIT(val8,4);
+      RADIO_CSn = BIT(val8,2);
+    }
 
   /* port 5 :                          */
   /* ========                          */
@@ -443,9 +449,9 @@ int devices_update(void)
   /*   P5.6 led 3 (Blue)               */
   /*   P5.5 led 2 (Green)              */
   /*   P5.4 led 1 (Red)                */
-  /*   P5.3 SPI flash ram UCLK         */
-  /*   P5.2 SPI flash ram SOMI         */
-  /*   P5.1 SPI flash ram SIMO         */
+  /*   P5.3 SPI flash ram UCLK, cc1100 */
+  /*   P5.2 SPI flash ram SOMI, cc1100 */
+  /*   P5.1 SPI flash ram SIMO, cc1100 */
   /*   P5.0 NC                         */
   if (msp430_digiIO_dev_read(PORT5,&val8))
     {
@@ -466,6 +472,10 @@ int devices_update(void)
       tracer_event_record(TRACER_LED3,!BIT(val8,6));
       UPDATE(LED3);
       REFRESH(LED3);
+
+      /* cc1100 is driven by spi                          */
+      /* we could/should check here that the pins are not */
+      /* driven by the GPIO                               */
     }
 
   /* port 6 :                          */
@@ -485,43 +495,46 @@ int devices_update(void)
     }
   */
 
-  /* Usart SPI mode                    */
+  /* Usart0                            */
   /* ==============                    */
-  /* SPI 0 : radio                     */
-  /* SPI 1 : flash                     */
+  /* SPI 0 : NC                        */
+  /* Uart 0 : serial I/O               */
   switch (MCU.usart0.mode)
     {
     case USART_MODE_SPI:
-      if (msp430_usart0_dev_read_spi(&val8))
-	{
-	  machine.device[RADIO].write(RADIO, RADIO_DATA_MASK, val8);
-	  etracer_slot_access(0x0, 1, ETRACER_ACCESS_WRITE, ETRACER_ACCESS_BYTE, ETRACER_ACCESS_LVL_SPI0, 0);
-	}      
-      break; 
+      break;
     case USART_MODE_UART:
+      if (msp430_usart0_dev_read_uart(&val8))
+	{
+	  machine.device[SERIAL].write(SERIAL, PTTY_D, val8);
+	  /* etracer_slot_access(0x0, 1, ETRACER_ACCESS_WRITE, ETRACER_ACCESS_BYTE, ETRACER_ACCESS_LVL_OUT, 0); */
+	}
       break;
     default:
       break;
     }
 
   /* Usart1                            */
-  /* SPI  : flash                      */
-  /* Uart : serial I/O                 */
+  /* ==============                    */
+  /* SPI 1 : flash, radio              */
+  /* Uart 1 : NC                       */
   switch (MCU.usart1.mode)
     {
     case USART_MODE_SPI:
       if (msp430_usart1_dev_read_spi(&val8))
 	{
-	  machine.device[FLASH].write(FLASH, M25P_D, val8);
+          if (!FLASH_CS && !RADIO_CSn)
+	    {
+              ERROR("senslab:devices: flash chip select and radio chip select enabled at the same time on SPI1\n");
+            }
+          machine.device[FLASH].write(FLASH, M25P_D, val8);
+	  etracer_slot_access(0x0, 1, ETRACER_ACCESS_WRITE, ETRACER_ACCESS_BYTE, ETRACER_ACCESS_LVL_SPI1, 0);
+
+	  machine.device[RADIO].write(RADIO, RADIO_DATA_MASK, val8);
 	  etracer_slot_access(0x0, 1, ETRACER_ACCESS_WRITE, ETRACER_ACCESS_BYTE, ETRACER_ACCESS_LVL_SPI1, 0);
 	}
       break;
     case USART_MODE_UART:
-      if (msp430_usart1_dev_read_uart(&val8))
-	{
-	  machine.device[SERIAL].write(SERIAL, PTTY_D, val8);
-	  /* etracer_slot_access(0x0, 1, ETRACER_ACCESS_WRITE, ETRACER_ACCESS_BYTE, ETRACER_ACCESS_LVL_OUT, 0); */
-	}
       break;
     default:
       break;
@@ -549,17 +562,17 @@ int devices_update(void)
   {
     uint32_t mask  = 0;
     uint32_t value = 0;
-    machine.device[ RADIO ].read( RADIO ,&mask,&value);
+    machine.device[ RADIO ].read(RADIO ,&mask,&value);
     if (mask & RADIO_DATA_MASK)
       {
-	if (MCU.usart0.mode != USART_MODE_SPI)
+	if (MCU.usart1.mode != USART_MODE_SPI)
 	  {
 #if defined(DEBUG_ME_HARDER)
 	    ERROR("senslab:devices: read data on radio while not in SPI mode ?\n");
 #endif
 	  }
-	msp430_usart0_dev_write_spi(value & RADIO_DATA_MASK);
-	etracer_slot_access(0x0, 1, ETRACER_ACCESS_READ, ETRACER_ACCESS_BYTE, ETRACER_ACCESS_LVL_SPI0, 0);
+	msp430_usart1_dev_write_spi(value & RADIO_DATA_MASK);
+	etracer_slot_access(0x0, 1, ETRACER_ACCESS_READ, ETRACER_ACCESS_BYTE, ETRACER_ACCESS_LVL_SPI1, 0);
       }
 
     if (mask & RADIO_GDO2_MASK) // GDO2 -> P1.4
@@ -593,13 +606,13 @@ int devices_update(void)
 
 
   /* input on UART serial */
-  if (msp430_usart1_dev_write_uart_ok())
+  if (msp430_usart0_dev_write_uart_ok())
     {
       uint32_t mask,value;
       machine.device[SERIAL].read(SERIAL,&mask,&value);
       if ((mask & PTTY_D) != 0)
 	{
-	  msp430_usart1_dev_write_uart(value & PTTY_D);
+	  msp430_usart0_dev_write_uart(value & PTTY_D);
 	  /* etracer_slot_access(0x0, 1, ETRACER_ACCESS_READ, ETRACER_ACCESS_BYTE, ETRACER_ACCESS_LVL_OUT, 0); */
 	}
     }

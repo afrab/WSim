@@ -4,9 +4,10 @@ noinst_LIBRARIES = \
 	libmsp430f135.a		\
 	libmsp430f149.a		\
 	libmsp430f449.a		\
-	libmsp430f1611.a	\
-	libmsp430f2013.a	\
-	libmsp430f2274.a
+	libmsp430f1611.a	
+
+#	libmsp430f2013.a	\
+#	libmsp430f2274.a
 
 INCLUDES=-I$(top_srcdir)
 

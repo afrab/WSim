@@ -42,7 +42,7 @@ struct msp430_alu_t {
 
 // #define PC_Current MCU_ALU.current_pc
 // #define PC_Next    MCU_ALU.next_pc
-// #define	PC	   MCU_ALU.regs[PC_REG_IDX]
+// #define PC	      MCU_ALU.regs[PC_REG_IDX]
 #define	SP	   MCU_ALU.regs[SP_REG_IDX]
 #define	SR	   MCU_ALU.regs[SR_REG_IDX]
 #define	CG1	   MCU_ALU.regs[CG1_REG_IDX]

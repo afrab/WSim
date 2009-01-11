@@ -28,8 +28,8 @@ extern char* msp430_lpm_names[];
 
 #if defined(DEBUG)
 #define _DEBUG_MSP430
-#define _FETCH_DECODE
-#define _DISASSEMBLE
+#define _DEBUG_FETCH_DECODE
+#define _DEBUG_DISASSEMBLE
 #define _DEBUG_SIGNAL
 #define _DEBUG_REGISTERS
 #define _DEBUG_INTERRUPT
@@ -55,13 +55,13 @@ extern char* msp430_lpm_names[];
 #    define HW_DMSG_MSP(x...) do { } while (0)
 #endif
 
-#ifdef FETCH_DECODE
+#ifdef DEBUG_FETCH_DECODE
 #    define HW_DMSG_FD(x...) HW_DMSG_MCU(x)
 #else
 #    define HW_DMSG_FD(x...) do { } while (0)
 #endif
 
-#ifdef DISASSEMBLE
+#ifdef DEBUG_DISASSEMBLE
 #    define HW_DMSG_DIS(x...) HW_DMSG_MCU(x)
 #else
 #    define HW_DMSG_DIS(x...) do { } while (0)

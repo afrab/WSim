@@ -184,7 +184,7 @@ static inline unsigned int extract_opcode(uint16_t insn)
 
   tmp = (insn >> 12) & 0x0f; // 4 bits
 
-  HW_DMSG_DIS("PC:0x%04x ins:0x%04x  ",mcu_get_pc() & 0xffff,insn & 0xffff);
+  /* HW_DMSG_DIS("PC:0x%04x ins:0x%04x  ",mcu_get_pc() & 0xffff,insn & 0xffff); */
   
   /* type 1 = double operands : opcode 4 bits */
   if ((tmp & 0xc) != 0x0) 
@@ -307,6 +307,25 @@ struct msp430_op_type1
 
 };
 
+
+#if defined(DEBUG_DISASSEMBLE)
+#define ASM_LENGTH      50
+#define ASM_VAR()       char asm_str[ASM_LENGTH];
+#define ASM_START(insn) sprintf(asm_str,"msp430: PC:0x%04x ins:0x%04x  ",mcu_get_pc() & 0xffff,insn & 0xffff)
+#define ASM_ADD(s...)				\
+  do {						\
+    char asm_buff[ASM_LENGTH];			\
+    sprintf(asm_buff,s);			\
+    strncat(asm_str,asm_buff,ASM_LENGTH);	\
+  } while (0)
+#define ASM_END()      HW_DMSG_DIS(asm_str);
+#else
+#define ASM_VAR()       do { } while (0)
+#define ASM_START(insn) do { } while (0)
+#define ASM_ADD(s...)   do { } while (0)
+#define ASM_END()       do { } while (0)
+#endif
+
 /**
  * global variable used for type1 operations
  **/
@@ -317,8 +336,10 @@ static struct msp430_op_type1 opt1;
 /** 
  * opt1 structure decode from instruction 
  **/
+
 static void msp430_type1_double_operands(uint16_t insns)
 {
+  ASM_VAR();
   uint16_t decode_next_pc;
   uint16_t s_offset;
 
@@ -336,7 +357,8 @@ static void msp430_type1_double_operands(uint16_t insns)
   opt1.dst_t_mode = 0xffu;
 #endif
 
-  HW_DMSG_DIS("%s ",msp430_debug_opcode(insns >> 12,opt1.byte));
+  ASM_START(insns);
+  ASM_ADD("%s ",msp430_debug_opcode(insns >> 12,opt1.byte));
 
   decode_next_pc = mcu_get_pc() + 2;
 
@@ -352,12 +374,12 @@ static void msp430_type1_double_operands(uint16_t insns)
 	case CG2_REG_IDX:
 	  opt1.src_val    = 0x0000;
 	  opt1.src_t_mode = SRC_TIMING_0;
-	  HW_DMSG_DIS("#0,");
+	  ASM_ADD("#0,");
 	  break;
 	default:
 	  opt1.src_val    = MCU_ALU.regs[opt1.src_reg];
 	  opt1.src_t_mode = SRC_TIMING_0;
-	  HW_DMSG_DIS("%s,",mcu_regname_str(opt1.src_reg));
+	  ASM_ADD("%s,",mcu_regname_str(opt1.src_reg));
 	  break;
 	}
       break;
@@ -366,29 +388,35 @@ static void msp430_type1_double_operands(uint16_t insns)
       switch (opt1.src_reg)
 	{
 	case PC_REG_IDX: /* symbolic : [ PC+2 ] + PC */ 
+#if 1 /* until the error is found */
 	  s_offset = msp430_read_short( decode_next_pc ) + mcu_get_pc(); // MCU_ALU.regs[opt1.src_reg];
 	  opt1.src_val    = msp430_read_short( s_offset );
 	  opt1.src_t_mode = SRC_TIMING_3;
+#else
+	  s_offset = msp430_read_short( decode_next_pc ); /* HERE_IT_IS */
+	  opt1.src_val = s_offset;
+	  opt1.src_t_mode = SRC_TIMING_1;
+#endif
 	  decode_next_pc += 2;
-	  HW_DMSG_DIS("0x%04x,",s_offset & 0xffff);
+	  ASM_ADD("0x%04x,",opt1.src_val & 0xffff);
 	  break;
 	case CG1_REG_IDX: /* absolute */
 	  s_offset = msp430_read_short( decode_next_pc );
  	  opt1.src_val    = READ_SRC( opt1.byte, s_offset );
 	  opt1.src_t_mode = SRC_TIMING_3;
 	  decode_next_pc += 2;
-	  HW_DMSG_DIS("&0x%04x,",s_offset & 0xffff);
+	  ASM_ADD("&0x%04x,",s_offset & 0xffff);
 	  break;
 	case CG2_REG_IDX: /* CG2 == +1 */
 	  opt1.src_val    = 0x0001;
 	  opt1.src_t_mode = SRC_TIMING_0;
-	  HW_DMSG_DIS("#1,");
+	  ASM_ADD("#1,");
 	  break;
 	default:          /* index */
 	  {
 	    uint16_t off = msp430_read_short( decode_next_pc );
 	    s_offset = off + MCU_ALU.regs[opt1.src_reg];
-	    HW_DMSG_DIS("%d(%s),", off & 0xffff, mcu_regname_str(opt1.src_reg));
+	    ASM_ADD("%d(%s),", off & 0xffff, mcu_regname_str(opt1.src_reg));
 	    opt1.src_val    = READ_SRC(opt1.byte,s_offset);
 	    opt1.src_t_mode = SRC_TIMING_3;
 	    decode_next_pc += 2;
@@ -403,18 +431,19 @@ static void msp430_type1_double_operands(uint16_t insns)
 	case CG1_REG_IDX: /* CG1 == +4 */
 	  opt1.src_val    = 0x0004;
 	  opt1.src_t_mode = SRC_TIMING_0;
-	  HW_DMSG_DIS("#4,");
+	  ASM_ADD("#4,");
 	  break;
 	case CG2_REG_IDX: /* CG2 == +2 */
 	  opt1.src_val    = 0x0002;
 	  opt1.src_t_mode = SRC_TIMING_0;
-	  HW_DMSG_DIS("#2,");
+	  ASM_ADD("#2,");
 	  break;
 	default:
-	  s_offset = MCU_ALU.regs[opt1.src_reg];
-	  opt1.src_val    = READ_SRC(opt1.byte,s_offset);
+	  s_offset        = MCU_ALU.regs[opt1.src_reg];
+	  opt1.src_val    = READ_SRC(opt1.byte, s_offset);
 	  opt1.src_t_mode = SRC_TIMING_1;
-	  HW_DMSG_DIS("@%s,",mcu_regname_str(opt1.src_reg));
+	  ASM_ADD("@%s,",mcu_regname_str(opt1.src_reg));
+	  /* ASM_ADD(" [reg = %x],", s_offset); */
 	  break;
 	}
       break;
@@ -427,19 +456,19 @@ static void msp430_type1_double_operands(uint16_t insns)
 	  opt1.src_val    = READ_SRC(opt1.byte,s_offset);
 	  opt1.src_t_mode = SRC_TIMING_2;
 	  decode_next_pc += 2;
-	  HW_DMSG_DIS("#%d,",opt1.src_val);
+	  ASM_ADD("#%d,",opt1.src_val);
 	  break;
 
 	case CG1_REG_IDX:
 	  opt1.src_val    = 0x0008;
 	  opt1.src_t_mode = SRC_TIMING_0;
-	  HW_DMSG_DIS("#8,");
+	  ASM_ADD("#8,");
 	  break;
 
 	case CG2_REG_IDX:
 	  opt1.src_val    = 0xffff;
 	  opt1.src_t_mode = SRC_TIMING_0;
-	  HW_DMSG_DIS("#-1,");
+	  ASM_ADD("#-1,");
 	  break;
 
 	default:
@@ -447,7 +476,7 @@ static void msp430_type1_double_operands(uint16_t insns)
 	  opt1.src_val    = READ_SRC(opt1.byte,s_offset);
 	  opt1.src_t_mode = SRC_TIMING_2;
 	  MCU_ALU.regs[opt1.src_reg] += opt1.byte ? 1 : 2;
-	  HW_DMSG_DIS("@%s+,",mcu_regname_str(opt1.src_reg));
+	  ASM_ADD("@%s+,",mcu_regname_str(opt1.src_reg));
 	  break;
 	}
       break;
@@ -463,7 +492,7 @@ static void msp430_type1_double_operands(uint16_t insns)
       opt1.dst_mode   = REG_MODE;
       opt1.dst_t_mode = (opt1.dst_reg == PC_REG_IDX) ? DST_TIMING_0 : DST_TIMING_1;
       /* opt1.dst_reg is already set */
-      HW_DMSG_DIS("%s",mcu_regname_str(opt1.dst_reg));
+      ASM_ADD("%s",mcu_regname_str(opt1.dst_reg));
       break;
     case 0x1: /* indexed on dreg */
       opt1.dst_mode   = MEM_MODE;
@@ -472,17 +501,17 @@ static void msp430_type1_double_operands(uint16_t insns)
 	case PC_REG_IDX: /* symbolic */ 
 	  opt1.dst_addr   = msp430_read_short( decode_next_pc ) + decode_next_pc ; // MCU_ALU.regs[opt1.dst_reg];
 	  opt1.dst_t_mode = DST_TIMING_2;
-	  HW_DMSG_DIS("0x%04x",opt1.dst_addr & 0xffff);
+	  ASM_ADD("0x%04x",opt1.dst_addr & 0xffff);
 	  break;
 	case SR_REG_IDX: /* absolute */
 	  opt1.dst_addr   = msp430_read_short( decode_next_pc );
 	  opt1.dst_t_mode = DST_TIMING_2;
-	  HW_DMSG_DIS("&0x%04x",opt1.dst_addr & 0xffff);
+	  ASM_ADD("&0x%04x",opt1.dst_addr & 0xffff);
 	  break;
 	default:         /* index */
 	  opt1.dst_addr   = msp430_read_short( decode_next_pc ) + MCU_ALU.regs[opt1.dst_reg];
 	  opt1.dst_t_mode = DST_TIMING_2;
-	  HW_DMSG_DIS("%d(%s)",msp430_read_short( decode_next_pc ) & 0xffff,mcu_regname_str(opt1.dst_reg));
+	  ASM_ADD("%d(%s)",msp430_read_short( decode_next_pc ) & 0xffff,mcu_regname_str(opt1.dst_reg));
 	  break;
 	}
       decode_next_pc += 2;
@@ -493,7 +522,9 @@ static void msp430_type1_double_operands(uint16_t insns)
   /** operands complete **/
   /***********************/
 
-  HW_DMSG_DIS("\n");
+  ASM_ADD("\n");
+  ASM_END();
+
   mcu_set_pc_next(decode_next_pc);
 #if defined(ETRACE)
   MCU_ALU.sequ_pc = decode_next_pc;
@@ -537,6 +568,7 @@ static struct msp430_op_type2 opt2;
  **/
 static void msp430_type2_single_operand(uint16_t insns)
 {
+  ASM_VAR();
   uint16_t decode_next_pc;
   /*         5 4 3 2 1 0 9 8 7 6 5 4 3 2 1 0  */
   /* T2     [  op             |b| ad| dsreg ] */
@@ -549,7 +581,8 @@ static void msp430_type2_single_operand(uint16_t insns)
   opt2.t_mode = 0xffu;
 #endif
   
-  HW_DMSG_DIS("%s ",msp430_debug_opcode((insns >> 4) & ~7,opt2.byte));
+  ASM_START(insns);
+  ASM_ADD("%s ",msp430_debug_opcode((insns >> 4) & ~7,opt2.byte));
 
   decode_next_pc = mcu_get_pc() + 2;
 
@@ -562,13 +595,13 @@ static void msp430_type2_single_operand(uint16_t insns)
 	  opt2.mode   = CST_MODE;
 	  opt2.val    = 0x0000;
 	  opt2.t_mode = OPT2_TIMING_0;
-	  HW_DMSG_DIS("#0");
+	  ASM_ADD("#0");
 	  break;
 	default:
 	  opt2.mode   = REG_MODE;
 	  opt2.val    = MCU_ALU.regs[opt2.reg];
 	  opt2.t_mode = OPT2_TIMING_0;
-	  HW_DMSG_DIS("%s",mcu_regname_str(opt2.reg));
+	  ASM_ADD("%s",mcu_regname_str(opt2.reg));
 	  break;
 	}
       break;
@@ -582,7 +615,7 @@ static void msp430_type2_single_operand(uint16_t insns)
 	  opt2.val    = msp430_read_short( opt2.addr );
 	  opt2.t_mode = OPT2_TIMING_4;
 	  decode_next_pc += 2;
-	  HW_DMSG_DIS("0x%04x",opt2.addr & 0xffff);
+	  ASM_ADD("0x%04x",opt2.addr & 0xffff);
 	  break;
 	case CG1_REG_IDX: /* absolute */
 	  opt2.mode   = MEM_MODE;
@@ -590,13 +623,13 @@ static void msp430_type2_single_operand(uint16_t insns)
  	  opt2.val    = READ_SRC(opt2.byte,opt2.addr);
 	  opt2.t_mode = OPT2_TIMING_4;
 	  decode_next_pc += 2;
-	  HW_DMSG_DIS("&0x%04x",opt2.addr & 0xffff);
+	  ASM_ADD("&0x%04x",opt2.addr & 0xffff);
 	  break;
 	case CG2_REG_IDX: /* CG2 == +1 */
 	  opt2.mode   = CST_MODE;
 	  opt2.val    = 0x0001;
 	  opt2.t_mode = OPT2_TIMING_0;
-	  HW_DMSG_DIS("#1");
+	  ASM_ADD("#1");
 	  break;
 	default:          /* index */
 	  opt2.mode   = MEM_MODE;
@@ -604,7 +637,7 @@ static void msp430_type2_single_operand(uint16_t insns)
  	  opt2.val    = READ_SRC(opt2.byte,opt2.addr);
 	  opt2.t_mode = OPT2_TIMING_4;
 	  decode_next_pc += 2;
-	  HW_DMSG_DIS("%d(%s)",msp430_read_short( decode_next_pc ) & 0xffff,mcu_regname_str(opt2.reg));
+	  ASM_ADD("%d(%s)",msp430_read_short( decode_next_pc ) & 0xffff,mcu_regname_str(opt2.reg));
 	  break;
 	}
       break;
@@ -616,20 +649,20 @@ static void msp430_type2_single_operand(uint16_t insns)
 	  opt2.mode   = CST_MODE;
 	  opt2.val    = 0x0004;
 	  opt2.t_mode = OPT2_TIMING_0;
-	  HW_DMSG_DIS("#4");
+	  ASM_ADD("#4");
 	  break;
 	case CG2_REG_IDX: /* CG2 == +2 */
 	  opt2.mode   = CST_MODE;
 	  opt2.val    = 0x0002;
 	  opt2.t_mode = OPT2_TIMING_0;
-	  HW_DMSG_DIS("#2");
+	  ASM_ADD("#2");
 	  break;
 	default:  /* indirect */
 	  opt2.mode   = MEM_MODE;
 	  opt2.addr   = MCU_ALU.regs[opt2.reg];
 	  opt2.val    = READ_SRC(opt2.byte,opt2.addr);
 	  opt2.t_mode = OPT2_TIMING_1;
-	  HW_DMSG_DIS("@%s",mcu_regname_str(opt2.reg));
+	  ASM_ADD("@%s",mcu_regname_str(opt2.reg));
 	  break;
 	}
       break;
@@ -643,19 +676,19 @@ static void msp430_type2_single_operand(uint16_t insns)
 	  opt2.val    = msp430_read_short( opt2.addr );
 	  opt2.t_mode = OPT2_TIMING_3;
 	  decode_next_pc += 2;
-	  HW_DMSG_DIS("#%d",opt2.val & 0xffff);
+	  ASM_ADD("#%d",opt2.val & 0xffff);
 	  break;
 	case CG1_REG_IDX:
 	  opt2.mode   = CST_MODE;
 	  opt2.val    = 0x0008;
 	  opt2.t_mode = OPT2_TIMING_0;
-	  HW_DMSG_DIS("#8");
+	  ASM_ADD("#8");
 	  break;
 	case CG2_REG_IDX:
 	  opt2.mode   = CST_MODE; 
 	  opt2.val    = 0xffff;
 	  opt2.t_mode = OPT2_TIMING_0;
-	  HW_DMSG_DIS("#-1");
+	  ASM_ADD("#-1");
 	  break;
 	default:  /* indirect autoincrement */
 	  opt2.mode   = MEM_MODE;
@@ -663,13 +696,15 @@ static void msp430_type2_single_operand(uint16_t insns)
 	  opt2.val    = READ_SRC(opt2.byte,opt2.addr);
 	  opt2.t_mode = OPT2_TIMING_2;
 	  MCU_ALU.regs[opt2.reg] += opt2.byte ? 1 : 2;
-	  HW_DMSG_DIS("@%s+",mcu_regname_str(opt2.reg));
+	  ASM_ADD("@%s+",mcu_regname_str(opt2.reg));
 	  break;
 	}
       break;
     }
 
-  HW_DMSG_DIS("\n");
+  ASM_ADD("\n");
+  ASM_END();
+
   mcu_set_pc_next(decode_next_pc);
 #if defined(ETRACE)
   MCU_ALU.sequ_pc = decode_next_pc;
@@ -688,6 +723,7 @@ static inline int16_t msp430_type3_offset(short insns)
 {
   /*         5 4 3 2 1 0 9 8 7 6 5 4 3 2 1 0  */
   /* T3     [  op |  cc |       offset      ] */
+  ASM_VAR();
   uint16_t decode_next_pc;
   int16_t  res;
 
@@ -701,9 +737,11 @@ static inline int16_t msp430_type3_offset(short insns)
   /* shift by one */
   res <<= 1;
 
-  HW_DMSG_DIS("%s $%s%d\n", 
+  ASM_START(insns);
+  ASM_ADD("%s $%s%d\n", 
 	      msp430_debug_opcode((insns >> 8) & ~3,0), 
 	      ((res + 2) > 0) ? "+" : "", res + 2);
+  ASM_END();
 
   decode_next_pc = mcu_get_pc() + 2;
   mcu_set_pc_next(decode_next_pc);
@@ -984,6 +1022,22 @@ static void msp430_mcu_run_insn()
       MCU_ALU.curr_pc = MCU_ALU.regs[PC_REG_IDX] = MCU_ALU.next_pc;
 
       HW_DMSG_FD("msp430: -- Fetch start - 0x%04x ---------------------------------\n",MCU_ALU.curr_pc);
+
+
+#if defined(FREERTOS_CASE_STUDY_IS_ON)
+      if (MCU_ALU.curr_pc == 0x50e8)
+	{
+	  static int i = 0;
+	  ERROR("msp430: SIGBUS %d ================================================== \n",i);
+	  i++;
+	  if (i==2)
+	    {
+	      mcu_signal_add(SIG_MCU | SIG_MCU_BUS);
+	      return;
+	    }
+	}
+#endif
+
 
       /* fetch + decode + execute */
       insn = msp430_fetch_short(MCU_ALU.curr_pc);

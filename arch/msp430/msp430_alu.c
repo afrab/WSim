@@ -388,20 +388,14 @@ static void msp430_type1_double_operands(uint16_t insns)
       switch (opt1.src_reg)
 	{
 	case PC_REG_IDX: /* symbolic : [ PC+2 ] + PC */ 
-#if 1 /* until the error is found */
-	  s_offset = msp430_read_short( decode_next_pc ) + mcu_get_pc(); // MCU_ALU.regs[opt1.src_reg];
+	  s_offset        = msp430_read_short( decode_next_pc ) + mcu_get_pc() + 2; 
 	  opt1.src_val    = msp430_read_short( s_offset );
 	  opt1.src_t_mode = SRC_TIMING_3;
-#else
-	  s_offset = msp430_read_short( decode_next_pc ); /* HERE_IT_IS */
-	  opt1.src_val = s_offset;
-	  opt1.src_t_mode = SRC_TIMING_1;
-#endif
 	  decode_next_pc += 2;
 	  ASM_ADD("0x%04x,",opt1.src_val & 0xffff);
 	  break;
 	case CG1_REG_IDX: /* absolute */
-	  s_offset = msp430_read_short( decode_next_pc );
+	  s_offset        = msp430_read_short( decode_next_pc );
  	  opt1.src_val    = READ_SRC( opt1.byte, s_offset );
 	  opt1.src_t_mode = SRC_TIMING_3;
 	  decode_next_pc += 2;
@@ -414,8 +408,8 @@ static void msp430_type1_double_operands(uint16_t insns)
 	  break;
 	default:          /* index */
 	  {
-	    uint16_t off = msp430_read_short( decode_next_pc );
-	    s_offset = off + MCU_ALU.regs[opt1.src_reg];
+	    uint16_t off    = msp430_read_short( decode_next_pc );
+	    s_offset        = off + MCU_ALU.regs[opt1.src_reg];
 	    ASM_ADD("%d(%s),", off & 0xffff, mcu_regname_str(opt1.src_reg));
 	    opt1.src_val    = READ_SRC(opt1.byte,s_offset);
 	    opt1.src_t_mode = SRC_TIMING_3;
@@ -1022,22 +1016,6 @@ static void msp430_mcu_run_insn()
       MCU_ALU.curr_pc = MCU_ALU.regs[PC_REG_IDX] = MCU_ALU.next_pc;
 
       HW_DMSG_FD("msp430: -- Fetch start - 0x%04x ---------------------------------\n",MCU_ALU.curr_pc);
-
-
-#if defined(FREERTOS_CASE_STUDY_IS_ON)
-      if (MCU_ALU.curr_pc == 0x50e8)
-	{
-	  static int i = 0;
-	  ERROR("msp430: SIGBUS %d ================================================== \n",i);
-	  i++;
-	  if (i==2)
-	    {
-	      mcu_signal_add(SIG_MCU | SIG_MCU_BUS);
-	      return;
-	    }
-	}
-#endif
-
 
       /* fetch + decode + execute */
       insn = msp430_fetch_short(MCU_ALU.curr_pc);

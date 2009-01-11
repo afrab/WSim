@@ -1,4 +1,4 @@
-if BUILD_WSN430
+if BUILD_SENSLAB
 
 bin_PROGRAMS=wsim-senslabv13b wsim-senslabv14
 if BUILD_WORLDSENS

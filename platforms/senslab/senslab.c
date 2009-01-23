@@ -109,6 +109,9 @@
 #define END_DEV           LOGO1
 #define BOARD_DEVICE_MAX (END_DEV+1)
 
+#define FLASH_ID_0 0
+#define SERIAL_ID_0 0
+
 /* ************************************************** */
 /* ************************************************** */
 /* ************************************************** */
@@ -153,8 +156,8 @@ int devices_options_add(void)
   options_add( &xt2_opt         );
   //options_add( &xosc_opt        );
   options_add( &ds2411_opt      );
-  m25p_add_options(FLASH,  0, "flash"  );
-  ptty_add_options(SERIAL, 0, "serial0");
+  m25p_add_options(FLASH,  FLASH_ID_0, "flash"  );
+  ptty_add_options(SERIAL, SERIAL_ID_0, "serial0");
 
   return 0;
 }
@@ -279,14 +282,14 @@ int devices_create(void)
   res += led_device_create      (LED1,    0xee0000,OFF,BKG);
   res += led_device_create      (LED2,    0x00ee00,OFF,BKG);
   res += led_device_create      (LED3,    0x0000ee,OFF,BKG);
-  res += m25p_device_create     (FLASH,   0);
+  res += m25p_device_create     (FLASH,   FLASH_ID_0);
   res += ds2411_device_create   (DS24,    ds2411_opt.value);
 #if defined(SLABV13B)
   res += cc1100_device_create   (RADIO,   xosc_freq / 1000000);
 #elif defined(SLABV14)
   res += cc2420_device_create   (RADIO,   xosc_freq / 1000000);
 #endif
-  res += ptty_device_create     (SERIAL,  1);
+  res += ptty_device_create     (SERIAL,  SERIAL_ID_0);
 #if defined(LOGO1)
   res += uigfx_device_create    (LOGO1,   wsim);
 #endif

@@ -4,7 +4,7 @@ dnl --------------------------------------------------------------
 dnl configure.in for Worldsens architecture simulator
 dnl --------------------------------------------------------------
 AC_INIT([wsnet1],[0.5])
-AC_CONFIG_SRCDIR(src/main.c)
+AC_CONFIG_SRCDIR(src/worldsens_wsnet.c)
 AC_CANONICAL_TARGET
 AM_INIT_AUTOMAKE
 AM_CONFIG_HEADER([config.h])
@@ -58,6 +58,7 @@ case "${host}" in
 	HOSTTYPE="MacOSX"
 	MACOSX="yes"
 	CFLAGS="$CFLAGS -DDARWIN -DMACOSX"
+	EXTRALIBS=-lm
 	;;
 esac
 
@@ -250,9 +251,18 @@ fi
 dnl --------------------------------------------------------------
 dnl Output
 dnl --------------------------------------------------------------
+dnl AC_DEFINE_UNQUOTED(WORLDSENS,"1",[Host type name])
+CFLAGS="$CFLAGS -DWORLDSENS"
+
 AC_SUBST(EXTRALIBS)
 
 AC_CONFIG_FILES(
+models/Makefile
+models/antenna/Makefile
+models/interference/Makefile
+models/mobility/Makefile
+models/modulation/Makefile
+models/propagation/Makefile
 src/Makefile
 Makefile)
 AC_OUTPUT

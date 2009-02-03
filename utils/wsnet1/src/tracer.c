@@ -83,7 +83,7 @@ tracer_instantiate(char *key, FILE *config_fd)
 		return -1;
 	}
 	
-	tracer_dump_set_format(key);	
+	//tracer_dump_set_format(key);	
 	return 0;
 }
 
@@ -93,7 +93,7 @@ tracer_instantiate(char *key, FILE *config_fd)
 /**************************************************************************/
 void
 tracer_complete(void) {
-	tracer_dump_file(tracer_file);
+  // tracer_dump_file(tracer_file);
 }
 
 

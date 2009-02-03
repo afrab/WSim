@@ -1,0 +1,11 @@
+.cvsignore
+.raw
+cscope.files
+cscope.out
+lib
+lib/
+lib_worldsens
+lib_worldsens/
+worldsens_wsnet
+wsnet
+wsnet.log

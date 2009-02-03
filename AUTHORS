@@ -10,6 +10,7 @@ Authors of WSim.
 
 
 Contributors:
-- Guillaume Chelius   WSNet v1 and cc1100 device
+- Guillaume Chelius   WSNet v1 and first version cc1100 device
 - Nicolas Boulicault  cc2420 device
-- Eric Fleury         ds2411 and mcp73861 devices
+- Loïc Lemaitre       updates on cc2420
+- Eric Fleury         first versions of ds2411 and mcp73861 devices

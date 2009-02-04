@@ -1,6 +1,6 @@
 
 /**
- *  \file   ot2007.c
+ *  \file   otsetre.c
  *  \brief  Platform devices handling functions, OT Setre 2007 edition 
  *  \author Bruno Allard, Antoine Fraboulet
  *  \date   2007
@@ -56,6 +56,7 @@
 #define BLED10        4
 #define LCD           5
 #define SERIAL        6
+#define SERIAL_ID     0
 
 #define LOGO1         7
 #define LOGO2         8
@@ -66,19 +67,15 @@
 //#define DAC           4
 //#define VOL           5
 
+#define NAME "OTSetre"
+
 /* ************************************************** */
 /* ************************************************** */
 /* ************************************************** */
 
 int devices_options_add()
 {
-  ptty_add_options(SERIAL,0,"serial0");
-  VERBOSE(2,"ot2007: boutton 1 = 'a'\n");
-  VERBOSE(2,"ot2007: boutton 2 = 'z'\n");
-  VERBOSE(2,"ot2007: boutton 3 = 'e'\n");
-  VERBOSE(2,"ot2007: boutton 4 = 'r'\n");
-  VERBOSE(2,"ot2007:\n");
-  VERBOSE(2,"ot2007: 'q' pour quitter\n");
+  ptty_add_options(SERIAL,SERIAL_ID,"serial0");
   return 0;
 }
 
@@ -86,14 +83,14 @@ int devices_options_add()
 /* ************************************************** */
 /* ************************************************** */
 
-struct ot2007_struct_t {
+struct otsetre_struct_t {
   uint8_t bar_latch[8];
   int port6_lastvalue;
   int buttons_lastvalue;
   int ui_loop_count;
 };
 
-#define SYSTEM_DATA   ((struct ot2007_struct_t*)(machine.device[SYSTEM].data))
+#define SYSTEM_DATA   ((struct otsetre_struct_t*)(machine.device[SYSTEM].data))
 #define BAR_LATCH     SYSTEM_DATA->bar_latch
 #define PORT6_LAST    SYSTEM_DATA->port6_lastvalue
 #define BUTTONS_LAST  SYSTEM_DATA->buttons_lastvalue
@@ -115,8 +112,20 @@ int system_create(int dev_num)
 {
   machine.device[dev_num].reset         = system_reset;
   machine.device[dev_num].delete        = system_delete;
-  machine.device[dev_num].state_size    = sizeof(struct ot2007_struct_t);
+  machine.device[dev_num].state_size    = sizeof(struct otsetre_struct_t);
   machine.device[dev_num].name          = "System Platform";
+
+  STDOUT("%s:\n", NAME);
+  STDOUT("%s: =========================\n", NAME);
+  STDOUT("%s: boutton 1 = 'a'\n", NAME);
+  STDOUT("%s: boutton 2 = 'z'\n", NAME);
+  STDOUT("%s: boutton 3 = 'e'\n", NAME);
+  STDOUT("%s: boutton 4 = 'r'\n", NAME);
+  STDOUT("%s:\n", NAME);
+  STDOUT("%s: 'q' pour quitter\n", NAME);
+  STDOUT("%s: =========================\n", NAME);
+  STDOUT("%s:\n", NAME);
+
   return 0;
 }
 
@@ -141,7 +150,7 @@ int devices_create()
 
   /* easyweb2 */
   machine.device_max             = BOARD_DEVICE_MAX;
-  machine.device_size[SYSTEM]    = sizeof(struct ot2007_struct_t);
+  machine.device_size[SYSTEM]    = sizeof(struct otsetre_struct_t);
   machine.device_size[LEDstatus] = led_device_size();
   machine.device_size[LCD]       = hd44_device_size();
   machine.device_size[SERIAL]    = ptty_device_size();
@@ -180,10 +189,10 @@ int devices_create()
   res += system_create          (SYSTEM);
   res += led_device_create      (LEDstatus, 0xee0000, OFF, BKG, "status");
   res += hd44_device_create     (LCD,       0xaaaaaa, OFF, BKG);
-  res += ptty_device_create     (SERIAL,    0);
+  res += ptty_device_create     (SERIAL,    SERIAL_ID);
   res += bargraph_device_create (BAGR,      0xee1010, OFF, BKG);
   res += led_device_create      (BLED9,     0x00ee00, OFF, BKG, "led9");
-  /* res += led_device_create      (BLED10,    0x001e00, OFF, BKG); */
+  /* res += led_device_create      (BLED10,    0x001e00, OFF, BKG, "led10"); */
   res += led_device_create      (BLED10,    0x00ee00, OFF, BKG, "led10");
 
   res += uigfx_device_create    (LOGO1,     wsim);
@@ -382,47 +391,47 @@ int devices_update()
 	      if ((machine.ui.b_down & UI_BUTTON_1) != 0)
 		{
 		  b &= ~0x10;
-		  VERBOSE(3,"ot2007: button 1 pressed\n");
+		  VERBOSE(3,"%s: button 1 pressed\n", NAME);
 		}
 	      if ((machine.ui.b_down & UI_BUTTON_2) != 0)
 		{
 		  b &= ~0x20;
-		  VERBOSE(3,"ot2007: button 2 pressed\n");
+		  VERBOSE(3,"%s: button 2 pressed\n", NAME);
 		}
 	      if ((machine.ui.b_down & UI_BUTTON_3) != 0)
 		{
 		  b &= ~0x40;
-		  VERBOSE(3,"ot2007: button 3 pressed\n");
+		  VERBOSE(3,"%s: button 3 pressed\n", NAME);
 		}
 	      if ((machine.ui.b_down & UI_BUTTON_4) != 0)
 		{
 		  b &= ~0x80;
-		  VERBOSE(3,"ot2007: button 4 pressed\n");
+		  VERBOSE(3,"%s: button 4 pressed\n", NAME);
 		}
 
 	      if (b != BUTTONS_LAST)
 		{
 		  int i;
-		  /* VERBOSE(3,"ot2007-2: b 0x%02x last 0x%02x\n",b,BUTTONS_LAST); */
+		  /* VERBOSE(3,"%s: b 0x%02x last 0x%02x\n",NAME,b,BUTTONS_LAST); */
 		  for(i=0; i<4; i++)
 		    {
 		      if (((b            & (0x10<<i)) == 0) && 
 			  ((BUTTONS_LAST & (0x10<<i)) != 0))
 			{
-			  VERBOSE(3,"ot2007-2: button %d pressed\n",i+1);
+			  VERBOSE(3,"%s: button %d pressed\n",NAME,i+1);
 			}
 
 		      if (((b            & (0x10<<i)) != 0) && 
 			  ((BUTTONS_LAST & (0x10<<i)) == 0))
 			{
-			  VERBOSE(3,"ot2007-2: button %d released\n",i+1);
+			  VERBOSE(3,"%s: button %d released\n",NAME,i+1);
 			}
 		    }
 		}
 
 	      /* P4.4-7                                */
 	      /* 4 buttons mask                        */
-	      VERBOSE(4,"ot2007: port4 write 0x%02x\n",b);
+	      VERBOSE(4,"%s: port4 write 0x%02x\n",NAME,b);
 	      msp430_digiIO_dev_write(PORT4, b, 0xf0);
 	      /* p1.7 // Dallas, high to low interrupt */
 	      /* Logical or binded to p1.7 for IRQ     */
@@ -433,13 +442,13 @@ int devices_update()
 	    }
 	    break;
 	  case UI_EVENT_QUIT:
-	    HW_DMSG_UI("ot2007: UI event QUIT\n");
+	    HW_DMSG_UI("%s: UI event QUIT\n",NAME);
 	    MCU_SIGNAL = SIG_UI;
 	    break;
 	  case UI_EVENT_NONE:
 	    break;
 	  default:
-	    ERROR("ot2007: unknown ui event\n");
+	    ERROR("%s: unknown ui event\n",NAME);
 	    break;
 	  }
       }

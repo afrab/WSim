@@ -39,7 +39,7 @@ WSIMADD_WORLDSENS= ${WSIM_BASE} ${WORLDSENSLIB}
 
 export WSIMADD WSIMADD_WORLDSENS
 
-SUBDIRS=wsn430 ot2006 ot2007 ez430 tests telosb \
+SUBDIRS=wsn430 ot2006 otsetre ez430 tests telosb \
 	mosar mica2 micaz iclbsn wisenode senslab
 
 ## iclbsn

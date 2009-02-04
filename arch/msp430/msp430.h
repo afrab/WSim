@@ -66,6 +66,8 @@
 /* ************************************************** */
 /* ************************************************** */
 
+extern int msp430_trace_pc_switch;
+extern int msp430_trace_sp_switch;
 extern tracer_id_t MSP430_TRACER_ACLK;
 extern tracer_id_t MSP430_TRACER_MCLK;
 extern tracer_id_t MSP430_TRACER_SMCLK;
@@ -83,9 +85,18 @@ extern tracer_id_t MSP430_TRACER_PORT6;
 extern tracer_id_t MSP430_TRACER_USART0;
 extern tracer_id_t MSP430_TRACER_USART1;
 
+#define TRACE_MSP430
 #if defined(TRACE_MSP430)
-#define TRACER_TRACE_PC(v)      tracer_event_record(MSP430_TRACER_PC,v)
-#define TRACER_TRACE_SP(v)      tracer_event_record(MSP430_TRACER_SP,v)
+#define TRACER_TRACE_PC(v)			\
+  do {						\
+    if (msp430_trace_pc_switch)			\
+      tracer_event_record(MSP430_TRACER_PC,v);	\
+  } while (0)
+#define TRACER_TRACE_SP(v)			\
+  do {						\
+    if (msp430_trace_pc_switch)			\
+      tracer_event_record(MSP430_TRACER_SP,v);	\
+  } while (0)
 #else
 #define TRACER_TRACE_PC(v)      do { } while (0)
 #define TRACER_TRACE_SP(v)      do { } while (0)

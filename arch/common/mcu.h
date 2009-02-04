@@ -111,7 +111,7 @@ int      mcu_mach_id            (void);
 char*    mcu_name               (void);
 char*    mcu_modelname          (void);
 
-int      mcu_option_add         (void);
+int      mcu_options_add        (void);
 void     mcu_print_description  (void);
 
 void     mcu_reset              (void);

@@ -37,7 +37,9 @@ void     machine_framebuffer_free();
 int machine_options_add()
 {
   int res = 0;
-  /* add all devices options (MCU + peripherals) */
+  /* add options (MCU)                              */
+  res += mcu_options_add();
+  /* add all devices options = Board + peripherals) */
   res += devices_options_add();
   return res;
 }

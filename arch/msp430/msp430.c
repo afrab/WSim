@@ -21,6 +21,9 @@
 struct msp430_mcu_t mcu;
 struct msp430_mcu_t mcu_backup;
 
+int msp430_trace_pc_switch;
+int msp430_trace_sp_switch;
+
 tracer_id_t MSP430_TRACER_ACLK;
 tracer_id_t MSP430_TRACER_MCLK;
 tracer_id_t MSP430_TRACER_SMCLK;
@@ -94,6 +97,31 @@ uint64_t mcu_get_insn(void)
 /* ************************************************** */
 /* ************************************************** */
 
+static struct moption_t trace_pc_opt = {
+  .longname    = "msp430_trc_pc",
+  .type        = no_argument,
+  .helpstring  = "msp430 trace PC register",
+  .value       = NULL
+};
+
+static struct moption_t trace_sp_opt = {
+  .longname    = "msp430_trc_sp",
+  .type        = no_argument,
+  .helpstring  = "msp430 trace SP register",
+  .value       = NULL
+};
+
+int mcu_options_add(void)
+{
+  options_add( &trace_pc_opt );
+  options_add( &trace_sp_opt );
+  return 0;
+}
+
+/* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
+
 #if defined(__msp430_have_xt2)
 int msp430_mcu_create(int xt1, int xt2)
 #else
@@ -114,8 +142,26 @@ int msp430_mcu_create(int xt1)
   mcu_print_description();
   HW_DMSG_MSP("==\n");
 
-  MSP430_TRACER_PC     = tracer_event_add_id(16, "PC",         "msp430");
-  MSP430_TRACER_SP     = tracer_event_add_id(16, "SP",         "msp430");
+  if (trace_pc_opt.isset) 
+    {
+      MSP430_TRACER_PC       = tracer_event_add_id(16, "PC", "msp430");
+      msp430_trace_pc_switch = 1;
+    }
+  else
+    {
+      msp430_trace_pc_switch = 0;
+    }
+
+  if (trace_sp_opt.isset) 
+    {
+      MSP430_TRACER_SP       = tracer_event_add_id(16, "SP", "msp430");
+      msp430_trace_sp_switch = 1;
+    }
+  else
+    {
+      msp430_trace_sp_switch = 0;
+    }
+
   MSP430_TRACER_GIE    = tracer_event_add_id(1,  "gie",        "msp430");
   MSP430_TRACER_INTR   = tracer_event_add_id(8,  "interrupt",  "msp430");
   MSP430_TRACER_LPM    = tracer_event_add_id(8,  "LPM",        "msp430");

@@ -46,7 +46,6 @@
 
 #if defined(DEBUG)
 #define DEBUG_TRACER
-#define DEBUG_EVENT
 #endif
 
 #if defined(DEBUG_TRACER)

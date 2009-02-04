@@ -147,7 +147,7 @@ int msp430_mcu_create(int xt1)
       MSP430_TRACER_PC       = tracer_event_add_id(16, "PC", "msp430");
       msp430_trace_pc_switch = 1;
 #if !defined(XCODE_DEBUG)
-      WARNING("msp430:option trc_pc is inactive, wsim must be compiled with --enable-xcode\n");
+      WARNING("msp430:option trc_pc is inactive, WSim must be compiled with --enable-xcode\n");
 #endif
     }
   else
@@ -160,7 +160,7 @@ int msp430_mcu_create(int xt1)
       MSP430_TRACER_SP       = tracer_event_add_id(16, "SP", "msp430");
       msp430_trace_sp_switch = 1;
 #if !defined(XCODE_DEBUG)
-      WARNING("msp430:option trc_pc is inactive, wsim must be compiled with --enable-xcode\n");
+      WARNING("msp430:option trc_sp is inactive, WSim must be compiled with --enable-xcode\n");
 #endif
     }
   else

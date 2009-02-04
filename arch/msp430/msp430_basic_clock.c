@@ -571,9 +571,6 @@ msp430_basic_clock_printstate()
 #if defined(TRACER_SPEED)
 void msp430_basic_clock_speed_tracer_init()
 {
-  MSP430_TRACER_MCLK  = tracer_event_add_id(32, "mclk",  "msp430");
-  MSP430_TRACER_SMCLK = tracer_event_add_id(32, "smclk", "msp430");
-  MSP430_TRACER_ACLK  = tracer_event_add_id(32, "aclk",  "msp430");
   msp430_basic_clock_speed_tracer_update();
   VERBOSE(2,"msp430:basic_clock: speed tracer start\n");
 }

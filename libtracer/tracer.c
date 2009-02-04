@@ -58,7 +58,7 @@
 #if defined(DEBUG_EVENT)
 #define DMSG_EVENT(x...) HW_DMSG(x)
 #else
-#define DMSG_TRACER(x...) do { } while (0)
+#define DMSG_EVENT(x...) do { } while (0)
 #endif
 
 /****************************************
@@ -376,7 +376,7 @@ void tracer_stop(void)
 /* ************************************************** */
 
 tracer_id_t
-tracer_event_add_id(int width, char* label, char* module)
+tracer_event_add_id(int width, char* name, char* module)
 {
   tracer_id_t i;
   tracer_id_t id;
@@ -384,11 +384,11 @@ tracer_event_add_id(int width, char* label, char* module)
   /* check if mobule/label is already registered :: */
   for(i=0;  i < tracer_registered_id; i++)
     {
-      if (strncmp(tracer_id_name   [i], label,  TRACER_MAX_NAME_LENGTH) == 0 &&
+      if (strncmp(tracer_id_name   [i], name,   TRACER_MAX_NAME_LENGTH) == 0 &&
 	  strncmp(tracer_id_module [i], module, TRACER_MAX_NAME_LENGTH) == 0 &&
 	  tracer_width[i] == width)
 	{
-	  ERROR("tracer: event %s.%s is already registered\n",module,label);
+	  ERROR("tracer: event %s.%s is already registered\n",module,name);
 	  machine_exit(1);
 	  return -1;
 	}
@@ -399,11 +399,11 @@ tracer_event_add_id(int width, char* label, char* module)
 
   if (id >= (TRACER_MAX_ID - 1))
     {
-      ERROR("tracer: max event recording reached, could not register [%s] = %d\n",label,id);
+      ERROR("tracer: max event recording reached, could not register [%s] = %d\n",name,id);
       machine_exit(1);
     }
 
-  if ((label == NULL) || (strlen(label) == 0))
+  if ((name == NULL) || (strlen(name) == 0))
     {
       ERROR("tracer: event id %d must have a valid name (non null)\n",id);
       machine_exit(1);
@@ -414,11 +414,11 @@ tracer_event_add_id(int width, char* label, char* module)
       ERROR("tracer: event id %d must have 0 < width < 65\n",id);
     }
   
-  strncpy(tracer_id_name   [id], label,  TRACER_MAX_NAME_LENGTH);
+  strncpy(tracer_id_name   [id], name,   TRACER_MAX_NAME_LENGTH);
   strncpy(tracer_id_module [id], module, TRACER_MAX_NAME_LENGTH);
   tracer_width[id] = width;
 
-  DMSG_TRACER("tracer:add:id: %s=%d module=%s\n",label,id,module);
+  DMSG_TRACER("tracer:add:id: %d = %s module=%s\n",id,name,module);
   tracer_event_record_time_nocheck(id,0,0);
   return id;
 }

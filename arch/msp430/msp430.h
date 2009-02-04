@@ -93,7 +93,7 @@ extern tracer_id_t MSP430_TRACER_USART1;
   } while (0)
 #define TRACER_TRACE_SP(v)			\
   do {						\
-    if (msp430_trace_pc_switch)			\
+    if (msp430_trace_sp_switch)			\
       tracer_event_record(MSP430_TRACER_SP,v);	\
   } while (0)
 #else

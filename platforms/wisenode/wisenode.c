@@ -177,10 +177,10 @@ int devices_create(void)
 
   res += system_create          (SYSTEM);
   res += m25p_device_create     (FLASH, 0);
-  res += led_device_create      (LED1,0xee,0x00,0x00);
-  res += led_device_create      (LED2,0x00,0xee,0x00);
-  res += led_device_create      (LED3,0x00,0x00,0xee);
-  res += led_device_create      (LED4,0x00,0xee,0xee);
+  res += led_device_create      (LED1,0xee,0x00,0x00,"led1");
+  res += led_device_create      (LED2,0x00,0xee,0x00,"led2");
+  res += led_device_create      (LED3,0x00,0x00,0xee,"led3");
+  res += led_device_create      (LED4,0x00,0xee,0xee,"led4");
   res += cc1100_device_create   (RADIO, xosc_freq / 1000000);
   res += ptty_device_create     (SERIAL,1);
 
@@ -202,11 +202,6 @@ int devices_create(void)
   /*********************************/
   /* end of platform specific part */
   /*********************************/
-
-  tracer_event_add_id(TRACER_LED1, 1, "led1", "");
-  tracer_event_add_id(TRACER_LED2, 1, "led2", "");
-  tracer_event_add_id(TRACER_LED3, 1, "led3", "");
-  tracer_event_add_id(TRACER_LED4, 1, "led4", "");
 
   return res;
 }
@@ -339,25 +334,21 @@ int devices_update(void)
     {
       machine.device[LED1].write(LED1,LED_DATA, ! BIT(val8,4));
       etracer_slot_access(0x0, 1, ETRACER_ACCESS_WRITE, ETRACER_ACCESS_BIT, ETRACER_ACCESS_LVL_GPIO, 0);
-      tracer_event_record(TRACER_LED1,!BIT(val8,4));
       UPDATE(LED1);
       REFRESH(LED1);
 
       machine.device[LED2].write(LED2,LED_DATA, !  BIT(val8,5));
       etracer_slot_access(0x0, 1, ETRACER_ACCESS_WRITE, ETRACER_ACCESS_BIT, ETRACER_ACCESS_LVL_GPIO, 0);
-      tracer_event_record(TRACER_LED2,!BIT(val8,5));
       UPDATE(LED2);
       REFRESH(LED2);
 
       machine.device[LED3].write(LED3,LED_DATA, ! BIT(val8,6));
       etracer_slot_access(0x0, 1, ETRACER_ACCESS_WRITE, ETRACER_ACCESS_BIT, ETRACER_ACCESS_LVL_GPIO, 0);
-      tracer_event_record(TRACER_LED3,!BIT(val8,6));
       UPDATE(LED3);
       REFRESH(LED3);
 
       machine.device[LED4].write(LED4,LED_DATA, ! BIT(val8,7));
       etracer_slot_access(0x0, 1, ETRACER_ACCESS_WRITE, ETRACER_ACCESS_BIT, ETRACER_ACCESS_LVL_GPIO, 0);
-      tracer_event_record(TRACER_LED4,!BIT(val8,7));
       UPDATE(LED4);
       REFRESH(LED4);
     }

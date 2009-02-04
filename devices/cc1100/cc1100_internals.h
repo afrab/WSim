@@ -37,6 +37,9 @@
 
 extern int CC1100_XOSC_FREQ_MHz;
 extern int CC1100_XOSC_PERIOD_NS;
+extern tracer_id_t TRACER_CC1100_STATE;
+extern tracer_id_t TRACER_CC1100_STROBE;
+extern tracer_id_t TRACER_CC1100_CS;
 
 /***************************************************/
 /***************************************************/

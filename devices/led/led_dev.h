@@ -14,7 +14,7 @@
 /**
  *
  **/
-int  led_device_create (int dev_num, uint32_t on, uint32_t off, uint32_t bg);
+int  led_device_create (int dev_num, uint32_t on, uint32_t off, uint32_t bg, char* name);
 int  led_device_size   ();
 
 #endif

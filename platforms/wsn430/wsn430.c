@@ -247,9 +247,9 @@ int devices_create(void)
 #endif
 
   res += system_create          (SYSTEM);
-  res += led_device_create      (LED1,    0xee0000,OFF,BKG);
-  res += led_device_create      (LED2,    0x00ee00,OFF,BKG);
-  res += led_device_create      (LED3,    0x0000ee,OFF,BKG);
+  res += led_device_create      (LED1,    0xee0000,OFF,BKG, "red"  );
+  res += led_device_create      (LED2,    0x00ee00,OFF,BKG, "green");
+  res += led_device_create      (LED3,    0x0000ee,OFF,BKG, "blue" );
   res += m25p_device_create     (FLASH,   0);
   res += ds2411_device_create   (DS24,    ds2411_opt.value);
   res += cc1100_device_create   (RADIO,   xosc_freq / 1000000);
@@ -282,10 +282,6 @@ int devices_create(void)
   /*********************************/
   /* end of platform specific part */
   /*********************************/
-
-  tracer_event_add_id(TRACER_LED1, 1, "led1", "leds");
-  tracer_event_add_id(TRACER_LED2, 1, "led2", "leds");
-  tracer_event_add_id(TRACER_LED3, 1, "led3", "leds");
 
   return res;
 }
@@ -359,7 +355,6 @@ int devices_update(void)
   if (msp430_digiIO_dev_read(PORT2,&val8))
     {
       machine.device[DS24].write(DS24,DS2411_D,BIT(val8,4)); 
-      tracer_event_record(TRACER_DS2411,BIT(val8,4));
       etracer_slot_access(0x0, 1, ETRACER_ACCESS_WRITE, ETRACER_ACCESS_BIT, ETRACER_ACCESS_LVL_GPIO, 0);
     }
 
@@ -420,19 +415,16 @@ int devices_update(void)
     {
       machine.device[LED1].write(LED1,LED_DATA, ! BIT(val8,4));
       etracer_slot_access(0x0, 1, ETRACER_ACCESS_WRITE, ETRACER_ACCESS_BIT, ETRACER_ACCESS_LVL_GPIO, 0);
-      tracer_event_record(TRACER_LED1,!BIT(val8,4));
       UPDATE(LED1);
       REFRESH(LED1);
 
       machine.device[LED2].write(LED2,LED_DATA, !  BIT(val8,5));
       etracer_slot_access(0x0, 1, ETRACER_ACCESS_WRITE, ETRACER_ACCESS_BIT, ETRACER_ACCESS_LVL_GPIO, 0);
-      tracer_event_record(TRACER_LED2,!BIT(val8,5));
       UPDATE(LED2);
       REFRESH(LED2);
 
       machine.device[LED3].write(LED3,LED_DATA, ! BIT(val8,6));
       etracer_slot_access(0x0, 1, ETRACER_ACCESS_WRITE, ETRACER_ACCESS_BIT, ETRACER_ACCESS_LVL_GPIO, 0);
-      tracer_event_record(TRACER_LED3,!BIT(val8,6));
       UPDATE(LED3);
       REFRESH(LED3);
     }
@@ -509,7 +501,6 @@ int devices_update(void)
       {
 	msp430_digiIO_dev_write(PORT2,(value & DS2411_D) << 4, BIT4_MASK); // P2.4
 	etracer_slot_access(0x0, 1, ETRACER_ACCESS_READ, ETRACER_ACCESS_BIT, ETRACER_ACCESS_LVL_GPIO, 0);
-	tracer_event_record(TRACER_DS2411,value & DS2411_D);
       }
   }
 

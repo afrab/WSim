@@ -39,23 +39,24 @@
 /****************************************
  * DEBUG
  * 
- * DMSG is used for general tracer messages
- * DMSG_TRACER is used for event recording messages
+ * DMSG_TRACER is used for general tracer messages
+ * DMSG_EVENT  is used for event recording messages
  * ERROR is used for ... errors
  ****************************************/
 
 #if defined(DEBUG)
-#undef DEBUG
+#define DEBUG_TRACER
+#define DEBUG_EVENT
 #endif
 
-#if defined(DEBUG)
-#define DMSG(x...) HW_DMSG(x)
+#if defined(DEBUG_TRACER)
+#define DMSG_TRACER(x...) HW_DMSG(x)
 #else
-#define DMSG(x...) do {} while(0)
+#define DMSG_TRACER(x...) do { } while (0)
 #endif
 
-#if defined(DEBUG)
-#define DMSG_TRACER(x...) DMSG(x)
+#if defined(DEBUG_EVENT)
+#define DMSG_EVENT(x...) HW_DMSG(x)
 #else
 #define DMSG_TRACER(x...) do { } while (0)
 #endif
@@ -102,7 +103,7 @@ typedef struct _tracer_sample_t tracer_sample_t;
  ****************************************/
 
 #define TRACER_MAGIC        "Worldsens tracer datafile"
-#define TRACER_MAGIC_SIZE   26
+#define TRACER_MAGIC_SIZE   sizeof(TRACER_MAGIC)
 /* version 0: 
       use unpacked struct
       magic_size == 27
@@ -139,16 +140,17 @@ static tracer_state_t tracer_saved;
 
 /* values that are not saved during a state_save */
 /* these values will be used to build the header */
-static int32_t                 tracer_node_id      = 0xFFFF;
-static tracer_time_t           tracer_initial_time = 0;
-static unsigned char           tracer_max_id       = TRACER_MAX_ID;
-static char                   *tracer_filename     = NULL;
+static tracer_id_t             tracer_registered_id = 0; /* registered id from simulation */
+static int32_t                 tracer_node_id       = 0xFFFF;
+static tracer_time_t           tracer_initial_time  = 0;
+static unsigned char           tracer_max_id        = TRACER_MAX_ID;
+static char                   *tracer_filename      = NULL;
 static char                    tracer_id_name        [TRACER_MAX_ID][TRACER_MAX_NAME_LENGTH];
 static char                    tracer_id_module      [TRACER_MAX_ID][TRACER_MAX_NAME_LENGTH];
 static uint8_t                 tracer_width          [TRACER_MAX_ID];
-static get_nanotime_function_t tracer_get_nanotime = NULL;
-static int                     tracer_init_done    = 0;
-static FILE*                   tracer_datafile     = NULL;
+static get_nanotime_function_t tracer_get_nanotime  = NULL;
+static int                     tracer_init_done     = 0;
+static FILE*                   tracer_datafile      = NULL;
 static tracer_sample_t         tracer_buffer[TRACER_BLOCK_EV];
 
 /* block access macro */
@@ -198,55 +200,55 @@ tracer_dump_header()
   /* magic */
   size = sizeof(TRACER_MAGIC);
   i   += fwrite(TRACER_MAGIC,1,size,tracer_datafile);
-  DMSG("tracer:hdr:magic    : %s (%d)\n",TRACER_MAGIC,size);
+  DMSG_TRACER("tracer:hdr:magic    : %s (%d)\n",TRACER_MAGIC,size);
 
   /* version */
   i += fwrite(&v,1,1,tracer_datafile);
-  DMSG("tracer:hdr:version  : %d\n",v);
+  DMSG_TRACER("tracer:hdr:version  : %d\n",v);
 
   /* endianess */
   i += fwrite(&e,1,1,tracer_datafile);
-  DMSG("tracer:hdr:endian   : %d\n",e);
+  DMSG_TRACER("tracer:hdr:endian   : %d\n",e);
 
   /* backtracks uint32_t */
   size = sizeof(machine.backtrack);
   i   += fwrite(&machine.backtrack,size,1,tracer_datafile);
-  DMSG("tracer:hdr:backtrack: %d\n",machine.backtrack);
+  DMSG_TRACER("tracer:hdr:backtrack: %d\n",machine.backtrack);
 
   /* simulated cycles */
   size = sizeof(cycles);
   i   += fwrite(&cycles,size,1,tracer_datafile);
-  DMSG("tracer:hdr:cycles   : %"PRId64"\n",cycles);
+  DMSG_TRACER("tracer:hdr:cycles   : %"PRId64"\n",cycles);
 
   /* simulated nanoseconds */
   size = sizeof(time);
   i   += fwrite(&time,size,1,tracer_datafile);
-  DMSG("tracer:hdr:nano     : %"PRId64"\n",time);
+  DMSG_TRACER("tracer:hdr:nano     : %"PRId64"\n",time);
   
   /* simulated instructions */
   size = sizeof(insn);
   i   += fwrite(&insn,size,1,tracer_datafile);
-  DMSG("tracer:hdr:insn     : %"PRId64"\n",insn);
+  DMSG_TRACER("tracer:hdr:insn     : %"PRId64"\n",insn);
   
   /* tracer node id   */
   size = sizeof(tracer_node_id);
   i   += fwrite(&tracer_node_id,size,1,tracer_datafile);
-  DMSG("tracer:hdr:node id  : %d\n",tracer_node_id);
+  DMSG_TRACER("tracer:hdr:node id  : %d\n",tracer_node_id);
 
   /* tracer initial time  */
   size = sizeof(tracer_initial_time);
   i   += fwrite(&tracer_initial_time,size,1,tracer_datafile);
-  DMSG("tracer:hdr:time     : %"PRIu64"\n",tracer_initial_time);
+  DMSG_TRACER("tracer:hdr:time     : %"PRIu64"\n",tracer_initial_time);
 
   /* max number of id */
   size = sizeof(tracer_max_id);
   i   += fwrite(&tracer_max_id,1,size,tracer_datafile);
-  DMSG("tracer:hdr:max id   : %d (%d)\n",tracer_max_id,size);
+  DMSG_TRACER("tracer:hdr:max id   : %d (%d)\n",tracer_max_id,size);
 
   /* number of events */
   size = sizeof(EVENT_TRACER.ev_count_total);
   i   += fwrite(&EVENT_TRACER.ev_count_total,1,size,tracer_datafile);
-  DMSG("tracer:hdr:number   : %d (%d)\n",EVENT_TRACER.ev_count_total,size);
+  DMSG_TRACER("tracer:hdr:number   : %d (%d)\n",EVENT_TRACER.ev_count_total,size);
 
   /* end simulation time */
   if (tracer_get_nanotime != NULL)
@@ -260,17 +262,17 @@ tracer_dump_header()
 
   size = sizeof(tracer_time_t);
   i   += fwrite(&t,1,size,tracer_datafile);
-  DMSG("tracer:hdr:nano     : %" PRId64 " (%d)\n",t,size);
+  DMSG_TRACER("tracer:hdr:nano     : %" PRId64 " (%d)\n",t,size);
 
   /* events name */
   size = sizeof(tracer_id_name);
   i   += fwrite(tracer_id_name,1,size,tracer_datafile);
-  DMSG("tracer:hdr:events   : name %d bytes\n",size);
+  DMSG_TRACER("tracer:hdr:events   : name %d bytes\n",size);
 
   /* events width */
   size = sizeof(tracer_width);
   i   += fwrite(tracer_width, 1, size, tracer_datafile);
-  DMSG("tracer:hdr:events   : width %d bytes\n",size);
+  DMSG_TRACER("tracer:hdr:events   : width %d bytes\n",size);
 
   /* id_count, id_min, id_max */
   size = sizeof(tracer_ev_t)  * TRACER_MAX_ID;
@@ -280,7 +282,7 @@ tracer_dump_header()
   size = sizeof(tracer_val_t) * TRACER_MAX_ID;
   i   += fwrite(EVENT_TRACER.id_val_max, 1, size, tracer_datafile);
 
-  DMSG("tracer:header: total %d bytes\n",i);
+  DMSG_TRACER("tracer:header: total %d bytes\n",i);
 }
 
 /* ************************************************** */
@@ -322,7 +324,7 @@ tracer_init(char *filename, get_nanotime_function_t f)
 
   tracer_init_done = 1;
   size = sizeof(tracer_sample_t);
-  DMSG("tracer: init ok, sample size = %d\n",size);
+  DMSG_TRACER("tracer: init ok, sample size = %d\n",size);
 }
 
 /* ************************************************** */
@@ -340,7 +342,7 @@ tracer_close(void)
   tracer_dump_data();
   tracer_dump_header();
   fclose(tracer_datafile);
-  DMSG("tracer: close ok\n");
+  DMSG_TRACER("tracer: close ok\n");
 }
 
 /* ************************************************** */
@@ -373,9 +375,28 @@ void tracer_stop(void)
 /* ************************************************** */
 /* ************************************************** */
 
-void
-tracer_event_add_id(tracer_id_t id, int width, char* label, char* module)
+tracer_id_t
+tracer_event_add_id(int width, char* label, char* module)
 {
+  tracer_id_t i;
+  tracer_id_t id;
+  
+  /* check if mobule/label is already registered :: */
+  for(i=0;  i < tracer_registered_id; i++)
+    {
+      if (strncmp(tracer_id_name   [i], label,  TRACER_MAX_NAME_LENGTH) == 0 &&
+	  strncmp(tracer_id_module [i], module, TRACER_MAX_NAME_LENGTH) == 0 &&
+	  tracer_width[i] == width)
+	{
+	  ERROR("tracer: event %s.%s is already registered\n",module,label);
+	  machine_exit(1);
+	  return -1;
+	}
+    }
+
+  /* get new id */
+  id = tracer_registered_id++;
+
   if (id >= (TRACER_MAX_ID - 1))
     {
       ERROR("tracer: max event recording reached, could not register [%s] = %d\n",label,id);
@@ -392,12 +413,6 @@ tracer_event_add_id(tracer_id_t id, int width, char* label, char* module)
     {
       ERROR("tracer: event id %d must have 0 < width < 65\n",id);
     }
-
-  if (tracer_id_name[id][0] != 0)
-    {
-      ERROR("tracer: event id %d for %s is already used by event %s\n",id,label,tracer_id_name[id]);
-      machine_exit(1);
-    }
   
   strncpy(tracer_id_name   [id], label,  TRACER_MAX_NAME_LENGTH);
   strncpy(tracer_id_module [id], module, TRACER_MAX_NAME_LENGTH);
@@ -405,6 +420,7 @@ tracer_event_add_id(tracer_id_t id, int width, char* label, char* module)
 
   DMSG_TRACER("tracer:add:id: %s=%d module=%s\n",label,id,module);
   tracer_event_record_time_nocheck(id,0,0);
+  return id;
 }
 
 /* ************************************************** */
@@ -432,7 +448,7 @@ tracer_dump_data()
   size    = sizeof(tracer_sample_t)*EVENT_TRACER.ev_count;
   written = fwrite(tracer_buffer, 1, size, tracer_datafile);
   assert(written == size);
-  DMSG("tracer:data:dump: write %d ev = %d bytes (%d requested)\n",EVENT_TRACER.ev_count,written,size);
+  DMSG_TRACER("tracer:data:dump: write %d ev = %d bytes (%d requested)\n",EVENT_TRACER.ev_count,written,size);
   EVENT_TRACER.ev_count = 0;
 }
 
@@ -463,7 +479,7 @@ tracer_event_record_time_nocheck(tracer_id_t id, tracer_val_t val, tracer_time_t
 	  ERROR("tracer:error: max event reached\n");
 	}
     }
-  DMSG_TRACER("tracer:add:event: [%s] = (%" PRId64 ",%" PRId64 ")\n",tracer_id_name[id],time,val);
+  DMSG_EVENT("tracer:add:event: [%s] = (%" PRId64 ",%" PRId64 ")\n",tracer_id_name[id],time,val);
 }
 
 /* ************************************************** */

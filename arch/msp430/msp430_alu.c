@@ -1191,7 +1191,7 @@ static void msp430_mcu_run_insn()
 	    SP += 2;
 	    HW_DMSG_INTR("msp430:intr: return from interrupt at pc = 0x%04x new pc is 0x%04x [%"PRIu64"]\n",
 			 MCU_ALU.curr_pc,next_pc, MACHINE_TIME_GET_NANO());
-	    tracer_event_record(TRACER_MCU_INTR,0);
+	    TRACER_TRACE_INTR(0);
 	    /* flags : restored from the stack */
 	    /* modes : restored from the stack */
 	    /* cycle */
@@ -1713,7 +1713,7 @@ void mcu_run()
 		    msp430_lpm_names[prev_run_mode],          
 		    msp430_lpm_names[curr_run_mode], 
 		    MACHINE_TIME_GET_NANO());
-	tracer_event_record(TRACER_MCU_POWER, curr_run_mode);
+	TRACER_TRACE_LPM(curr_run_mode);
 	MCU_CLOCK_SYSTEM_SPEED_TRACER();
 	mcu_signal_remove(SIG_MCU_LPM_CHANGE); 
 	signal = mcu_signal_get();

@@ -1802,7 +1802,7 @@ void mcu_run(void)
 		    atmega128_lpm_names[prev_run_mode],          
 		    atmega128_lpm_names[curr_run_mode], 
 		    MACHINE_TIME_GET_NANO());
-	tracer_event_record(TRACER_MCU_POWER, curr_run_mode);
+	TRACER_TRACE_LPM(curr_run_mode);
 	//MCU_CLOCK_SYSTEM_SPEED_TRACER();
 	MCU_ALU.signal &= ~SIG_MCU_LPM_CHANGE; 
 	

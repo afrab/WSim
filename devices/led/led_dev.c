@@ -17,13 +17,15 @@
 #define LED_DEV_REFRESH  1
 
 struct led_t {
-  int   val;
-  int   update;
+  int               val;
+  int               update;
+  tracer_id_t       trid;
   struct led_img_t *img;
 };
 
 #define ST_VAL    (((struct led_t*)(machine.device[dev].data))->val)
 #define ST_UPDATE (((struct led_t*)(machine.device[dev].data))->update)
+#define ST_ID     (((struct led_t*)(machine.device[dev].data))->trid)
 #define ST_IMG    (((struct led_t*)(machine.device[dev].data))->img)
 
 int  led_reset       (int dev);
@@ -44,13 +46,14 @@ int led_device_size()
   return sizeof(struct led_t);
 }
 
-int led_device_create(int dev_num, uint32_t on, uint32_t off, uint32_t bg)
+int led_device_create(int dev_num, uint32_t on, uint32_t off, uint32_t bg, char* name)
 {
   struct led_t *dev = (struct led_t*) machine.device[dev_num].data;
   
   dev->img      = led_img_create(on,off,bg);
   dev->update   = 0;
   dev->val      = 0;
+  dev->trid     = tracer_event_add_id(1, name, "led");
 
   machine.device[dev_num].reset         = led_reset;
   machine.device[dev_num].delete        = led_delete;
@@ -105,6 +108,7 @@ int led_ui_draw (int dev)
 {
   if (ST_UPDATE == 1)
     {
+      tracer_event_record(ST_ID, ST_VAL);
       led_img_draw (ST_IMG, ST_VAL);
       ST_UPDATE = 0;
       return 1;

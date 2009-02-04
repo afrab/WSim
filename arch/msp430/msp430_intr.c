@@ -92,7 +92,7 @@ int msp430_interrupt_start_if_any(void)
 	      
 	      HW_DMSG_INTR("msp430:intr: IRQ %d [%"PRId64"] PC [0x%04x] jumps to [0x%04x], IV=0x%04x, SR=0x%04x\n",
 			   inum,MACHINE_TIME_GET_NANO(),mcu_get_pc(),next_pc,MCU_IV,SR);
-	      tracer_event_record(TRACER_MCU_INTR,inum);
+	      TRACER_TRACE_INTR(inum);
 	      /* push pc*/
 	      SP -= 2;
 	      /* we are executed at the end of an instruction. As this instruction is

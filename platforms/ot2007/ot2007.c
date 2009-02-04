@@ -178,13 +178,13 @@ int devices_create()
   machine.ui.framebuffer_background = BKG;
 
   res += system_create          (SYSTEM);
-  res += led_device_create      (LEDstatus, 0xee0000, OFF, BKG);
+  res += led_device_create      (LEDstatus, 0xee0000, OFF, BKG, "status");
   res += hd44_device_create     (LCD,       0xaaaaaa, OFF, BKG);
   res += ptty_device_create     (SERIAL,    0);
   res += bargraph_device_create (BAGR,      0xee1010, OFF, BKG);
-  res += led_device_create      (BLED9,     0x00ee00, OFF, BKG);
+  res += led_device_create      (BLED9,     0x00ee00, OFF, BKG, "led9");
   /* res += led_device_create      (BLED10,    0x001e00, OFF, BKG); */
-  res += led_device_create      (BLED10,    0x00ee00, OFF, BKG);
+  res += led_device_create      (BLED10,    0x00ee00, OFF, BKG, "led10");
 
   res += uigfx_device_create    (LOGO1,     wsim);
 
@@ -216,10 +216,6 @@ int devices_create()
   /*********************************/
   /* end of platform specific part */
   /*********************************/
-
-  tracer_event_add_id(TRACER_LED1, 1, "led_status", "");
-  tracer_event_add_id(TRACER_LED2, 1, "led9",       "");
-  tracer_event_add_id(TRACER_LED3, 1, "led10",      "");
 
   return res;
 }
@@ -276,7 +272,6 @@ int devices_update()
   if (msp430_digiIO_dev_read(PORT2,&val8))
     {
       machine.device[LEDstatus].write(LEDstatus,1,1-BIT(val8,1)); /* inversion */
-      tracer_event_record(TRACER_LED1,!BIT(val8,1));
       UPDATE(LEDstatus);
       REFRESH(LEDstatus);
 
@@ -296,12 +291,10 @@ int devices_update()
     {
       /* leds are inverted */
       machine.device[BLED9].write (BLED9 ,1, 1-BIT(val8,1));
-      tracer_event_record(TRACER_LED2,!BIT(val8,1));
       UPDATE(BLED9);
       REFRESH(BLED9);
 
       machine.device[BLED10].write(BLED10,1,   BIT(val8,1));
-      tracer_event_record(TRACER_LED3,BIT(val8,1));
       UPDATE(BLED10);
       REFRESH(BLED10);
       

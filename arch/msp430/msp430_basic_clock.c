@@ -571,9 +571,9 @@ msp430_basic_clock_printstate()
 #if defined(TRACER_SPEED)
 void msp430_basic_clock_speed_tracer_init()
 {
-  tracer_event_add_id(TRACER_MSP430_MCLK,  32, "msp430_mclk",  "");
-  tracer_event_add_id(TRACER_MSP430_SMCLK, 32, "msp430_smclk", "");
-  tracer_event_add_id(TRACER_MSP430_ACLK,  32, "msp430_aclk",  "");
+  MSP430_TRACER_MCLK  = tracer_event_add_id(32, "mclk",  "msp430");
+  MSP430_TRACER_SMCLK = tracer_event_add_id(32, "smclk", "msp430");
+  MSP430_TRACER_ACLK  = tracer_event_add_id(32, "aclk",  "msp430");
   msp430_basic_clock_speed_tracer_update();
   VERBOSE(2,"msp430:basic_clock: speed tracer start\n");
 }
@@ -617,10 +617,10 @@ void msp430_basic_clock_speed_tracer_update()
   aclk  =                          lfxt1 >> MCUBC.bcsctl1.b.diva    ;
   mclk  = (MCU_READ_CPUOFF == 0) ? mclk  >> MCUBC.bcsctl2.b.divm : 0;
   smclk = (MCU_READ_SCG1   == 0) ? smclk >> MCUBC.bcsctl2.b.divs : 0;
-  
-  tracer_event_record(TRACER_MSP430_ACLK,  aclk);
-  tracer_event_record(TRACER_MSP430_MCLK,  mclk);
-  tracer_event_record(TRACER_MSP430_SMCLK, smclk);
+
+  TRACER_TRACE_ACLK (aclk);
+  TRACER_TRACE_MCLK (mclk);
+  TRACER_TRACE_SMCLK(smclk);
 }
 #endif
 

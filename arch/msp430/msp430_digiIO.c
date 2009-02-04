@@ -164,7 +164,7 @@ void msp430_digiIO_mcu_write(uint16_t addr, int8_t val)
     case P1OUT: 
       DIGIIO_OUT(0) = val & DIGIIO_MCU_WOK(0); 
       DIGIIO_OUT_SET_UP(0); 
-      tracer_event_record(TRACER_MCU_PORT1, DIGIIO_OUT(0));
+      TRACER_TRACE_PORT1(DIGIIO_OUT(0));
       break; 
     case P1DIR: DIGIIO_DIR(0) = val; break;
     case P1IFG: 
@@ -184,7 +184,7 @@ void msp430_digiIO_mcu_write(uint16_t addr, int8_t val)
     case P2OUT: 
       DIGIIO_OUT(1) = val & DIGIIO_MCU_WOK(1); 
       DIGIIO_OUT_SET_UP(1); 
-      tracer_event_record(TRACER_MCU_PORT2, DIGIIO_OUT(1));
+      TRACER_TRACE_PORT2(DIGIIO_OUT(1));
       break; 
     case P2DIR: DIGIIO_DIR(1) = val; break; 
     case P2IFG: 
@@ -205,7 +205,7 @@ void msp430_digiIO_mcu_write(uint16_t addr, int8_t val)
     case P3OUT: 
       DIGIIO_OUT(2) = val & DIGIIO_MCU_WOK(2); 
       DIGIIO_OUT_SET_UP(2); 
-      tracer_event_record(TRACER_MCU_PORT3, DIGIIO_OUT(2));
+      TRACER_TRACE_PORT3(DIGIIO_OUT(2));
       break; 
     case P3DIR: DIGIIO_DIR(2) = val; break;
     case P3SEL: DIGIIO_SEL(2) = val; break; 
@@ -217,7 +217,7 @@ void msp430_digiIO_mcu_write(uint16_t addr, int8_t val)
     case P4OUT: 
       DIGIIO_OUT(3) = val & DIGIIO_MCU_WOK(3); 
       DIGIIO_OUT_SET_UP(3); 
-      tracer_event_record(TRACER_MCU_PORT4, DIGIIO_OUT(3));
+      TRACER_TRACE_PORT4(DIGIIO_OUT(3));
       break;
     case P4DIR: DIGIIO_DIR(3) = val; break;
     case P4SEL: DIGIIO_SEL(3) = val; break; 
@@ -229,7 +229,7 @@ void msp430_digiIO_mcu_write(uint16_t addr, int8_t val)
     case P5OUT: 
       DIGIIO_OUT(4) = val & DIGIIO_MCU_WOK(4); 
       DIGIIO_OUT_SET_UP(4); 
-      tracer_event_record(TRACER_MCU_PORT5, DIGIIO_OUT(4));
+      TRACER_TRACE_PORT5(DIGIIO_OUT(4));
       break;
     case P5DIR: DIGIIO_DIR(4) = val; break;
     case P5SEL: DIGIIO_SEL(4) = val; break; 
@@ -241,7 +241,7 @@ void msp430_digiIO_mcu_write(uint16_t addr, int8_t val)
     case P6OUT: 
       DIGIIO_OUT(5) = val & DIGIIO_MCU_WOK(5); 
       DIGIIO_OUT_SET_UP(5); 
-      tracer_event_record(TRACER_MCU_PORT6, DIGIIO_OUT(5));
+      TRACER_TRACE_PORT6(DIGIIO_OUT(5));
       break;
     case P6DIR: DIGIIO_DIR(5) = val; break;
     case P6SEL: DIGIIO_SEL(5) = val; break; 

@@ -213,6 +213,7 @@ static struct moption_t flash_dump_opt = {
   .value       = NULL
 };
 
+tracer_id_t TRACER_AT45DB_STATE;
 
 int at45db_add_options(int UNUSED dev_num, int dev_id, const char UNUSED *dev_name)
 {
@@ -323,7 +324,7 @@ int at45db_device_create(int dev, int UNUSED id)
       memset(AT45_MEMRAW,0xff,AT45_FLASH_SIZE);
     }
 
-  tracer_event_add_id(TRACER_AT45DB_STATE, 8, "at45db_state" , "");
+  TRACER_AT45DB_STATE = tracer_event_add_id(8, "state" , "at45db");
   //  tracer_event_add_id(TRACER_AT45DB_FUNC,  8, "at45db_state" , "");
 
   return 0;

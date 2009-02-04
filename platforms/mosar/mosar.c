@@ -209,8 +209,8 @@ int devices_create(void)
 #  define WSIM wsim
 
   res += system_create          (SYSTEM);
-  res += led_device_create      (LED_RED,   0xee0000,OFF,BKG);
-  res += led_device_create      (LED_GREEN, 0x00ee00,OFF,BKG);
+  res += led_device_create      (LED_RED,   0xee0000,OFF,BKG,"red");
+  res += led_device_create      (LED_GREEN, 0x00ee00,OFF,BKG,"green");
   res += m25p_device_create     (FLASH,     0);
   res += cc1100_device_create   (RADIO,     xosc_freq / 1000000);
   res += ptty_device_create     (SERIAL,    0);
@@ -235,9 +235,6 @@ int devices_create(void)
   /*********************************/
   /* end of platform specific part */
   /*********************************/
-
-  tracer_event_add_id(TRACER_LED_RED,   1, "red",   "leds");
-  tracer_event_add_id(TRACER_LED_GREEN, 1, "green", "leds");
 
   return res;
 }
@@ -288,13 +285,11 @@ int devices_update(void)
     {
       machine.device[LED_RED].write(LED_RED,LED_DATA, ! BIT(val8,0));
       etracer_slot_access(0x0, 1, ETRACER_ACCESS_WRITE, ETRACER_ACCESS_BIT, ETRACER_ACCESS_LVL_GPIO, 0);
-      tracer_event_record(TRACER_LED_RED, BIT(val8,0));
       UPDATE(LED_RED);
       REFRESH(LED_RED);
 
       machine.device[LED_GREEN].write(LED_GREEN,LED_DATA, !  BIT(val8,1));
       etracer_slot_access(0x0, 1, ETRACER_ACCESS_WRITE, ETRACER_ACCESS_BIT, ETRACER_ACCESS_LVL_GPIO, 0);
-      tracer_event_record(TRACER_LED_GREEN, BIT(val8,1));
       UPDATE(LED_GREEN);
       REFRESH(LED_GREEN);
     }
@@ -311,8 +306,6 @@ int devices_update(void)
   /*   P2.0 7seg selector 0            */
   if (msp430_digiIO_dev_read(PORT2,&val8))
     {
-      machine.device[DS24].write(DS24,DS2411_D,BIT(val8,4)); 
-      tracer_event_record(TRACER_DS2411,BIT(val8,4));
       etracer_slot_access(0x0, 1, ETRACER_ACCESS_WRITE, ETRACER_ACCESS_BIT, ETRACER_ACCESS_LVL_GPIO, 0);
     }
 
@@ -381,19 +374,6 @@ int devices_update(void)
   /* *************************************************************************** */
   /* devices -> MCU                                                              */
   /* *************************************************************************** */
-
-  /* input on ds2411 */
-  {
-    uint32_t mask;
-    uint32_t value;
-    machine.device[DS24].read(DS24,&mask,&value);
-    if (mask & DS2411_D)
-      {
-	msp430_digiIO_dev_write(PORT2,(value & DS2411_D) << 4, BIT4_MASK); // P2.4
-	etracer_slot_access(0x0, 1, ETRACER_ACCESS_READ, ETRACER_ACCESS_BIT, ETRACER_ACCESS_LVL_GPIO, 0);
-	tracer_event_record(TRACER_DS2411,value & DS2411_D);
-      }
-  }
 
 
   /* input on radio */
@@ -490,7 +470,6 @@ int devices_update(void)
 
   UPDATE(RADIO);
   UPDATE(FLASH);
-  UPDATE(DS24);
   UPDATE(SERIAL);
 
 #if defined(GUI)

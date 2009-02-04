@@ -34,6 +34,7 @@
 #define CC2420_REG_SIZE   0x40   /* last register is 0x3F */
 #define CC2420_RAM_SIZE   0x16F
 
+extern tracer_id_t TRACER_CC2420_STATE;
 
 /***************************************************/
 /***************************************************/

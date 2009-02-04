@@ -148,6 +148,9 @@ static char *str_ssel[] =
 /**** SPI transmit enable ****/                                     
 /* 
    TODO: SPI à vérifer : baisser urxex pendant que rx shift != empty arrête réception ?? 
+   TODO: AFR: check that SPI SPEED is at most UBRCLK/2
+      SPI_SPY("msp430:usart%d:spi:br0   %x\n",NUM,MCU.USART.uxbr0);
+      SPI_SPY("msp430:usart%d:spi:br1   %x\n",NUM,MCU.USART.uxbr1);
 */
 
 #define SPI_MODE_UPDATE(USART,NUM,ME,IE,IFG)                                  \
@@ -483,7 +486,7 @@ do {                                                                          \
       res = MCU.USART.uxrxbuf;                                                \
       MCU.sfr.IFG.b.urxifg##NUM = 0;                                          \
       MCU.USART.uxrxbuf_full    = 0;                                          \
-      tracer_event_record(TRACER_USART##NUM, TRACER_UART_IDLE);               \
+      TRACER_TRACE_USART##NUM(TRACER_UART_IDLE);                              \
       switch (MCU.USART.mode) {                                               \
       case USART_MODE_UART:                                                   \
         break;                                                                \
@@ -691,14 +694,14 @@ do {                                                                          \
       MCU.sfr.IFG.b.utxifg##NUM    = 0;                                       \
       switch (MCU.USART.mode) {                                               \
       case USART_MODE_UART:                                                   \
-        tracer_event_record(TRACER_USART##NUM, TRACER_UART_TX_RECV);          \
+        TRACER_TRACE_USART##NUM(TRACER_UART_TX_RECV);			      \
         /* can be a dupe from the platform file */                            \
         etracer_slot_event(ETRACER_PER_ID_MCU_USART + NUM,                    \
                            ETRACER_PER_EVT_WRITE_COMMAND,                     \
                            ETRACER_PER_ARG_WR_DST_FIFO, 0);                   \
         break;                                                                \
       case USART_MODE_SPI:                                                    \
-        tracer_event_record(TRACER_USART##NUM, TRACER_SPI_TX_RECV);           \
+        TRACER_TRACE_USART##NUM(TRACER_SPI_TX_RECV);  			      \
         etracer_slot_event(ETRACER_PER_ID_MCU_SPI + NUM,                      \
                            ETRACER_PER_EVT_WRITE_COMMAND,                     \
                            ETRACER_PER_ARG_WR_DST_FIFO | ETRACER_ACCESS_LVL_BUS, 0); \
@@ -706,7 +709,7 @@ do {                                                                          \
         SPI_SPY_PRINT_CONFIG(USART,NUM);                                      \
         break;                                                                \
       case USART_MODE_I2C:                                                    \
-        tracer_event_record(TRACER_USART##NUM, TRACER_I2C_TX_RECV);           \
+        TRACER_TRACE_USART##NUM(TRACER_I2C_TX_RECV);			      \
         break;                                                                \
       }                                                                       \
       break;                                                                  \
@@ -744,7 +747,7 @@ do {                                                                          \
 	  val = MCU.USART.uxtx_shift_buf;                                     \
 	  MCU.USART.uxtx_shift_ready = 0;                                     \
 	  MCU.USART.uxtx_shift_empty = 1;                                     \
-          tracer_event_record(TRACER_USART##NUM, TRACER_UART_IDLE);           \
+          TRACER_TRACE_USART##NUM(TRACER_UART_IDLE);			      \
           etracer_slot_event(ETRACER_PER_ID_MCU_SPI + NUM,                    \
                              ETRACER_PER_EVT_WRITE_COMMAND,                   \
                             (ETRACER_PER_ARG_WR_SRC_FIFO | (ETRACER_ACCESS_LVL_SPI + NUM)), 0); \
@@ -769,7 +772,7 @@ do {                                                                          \
 	}                                                                     \
       else                                                                    \
         {                                                                     \
-	  tracer_event_record(TRACER_USART##NUM, TRACER_SPI_RX_RECV);         \
+	  TRACER_TRACE_USART##NUM(TRACER_SPI_RX_RECV);			      \
           MCU.USART.uxrx_shift_buf   = val;                                   \
           MCU.USART.uxrx_shift_empty = 0;                                     \
           MCU.USART.uxrx_shift_ready = 0;                                     \
@@ -801,7 +804,7 @@ do {                                                                          \
 	  val = MCU.USART.uxtx_shift_buf;                                     \
 	  MCU.USART.uxtx_shift_ready = 0;                                     \
 	  MCU.USART.uxtx_shift_empty = 1;                                     \
-          tracer_event_record(TRACER_USART##NUM, TRACER_UART_IDLE);           \
+          TRACER_TRACE_USART##NUM(TRACER_UART_IDLE);			      \
 	  return 1;                                                           \
 	}                                                                     \
     }                                                                         \
@@ -822,7 +825,7 @@ do {                                                                          \
 	}                                                                     \
       else                                                                    \
         {                                                                     \
-	  tracer_event_record(TRACER_USART##NUM, TRACER_UART_RX_RECV);        \
+	  TRACER_TRACE_USART##NUM(TRACER_UART_RX_RECV);			      \
           MCU.USART.uxrx_shift_buf   = val;                                   \
           MCU.USART.uxrx_shift_empty = 0;                                     \
           MCU.USART.uxrx_shift_ready = 0;                                     \

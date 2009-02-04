@@ -19,15 +19,14 @@
 
 #if defined(BUILD_M25P80)
 #  define M25PNAME      "m25p80"
-#  define TRACER_M25P_STATE     TRACER_M25P80_STATE
-#  define TRACER_M25P_STROBE    TRACER_M25P80_STROBE
 #elif defined(BUILD_M25P10)
 #  define M25PNAME      "m25p10"
-#  define TRACER_M25P_STATE     TRACER_M25P10_STATE
-#  define TRACER_M25P_STROBE    TRACER_M25P10_STROBE
 #else
 #  error "you must define a specific M25P model"
 #endif
+
+tracer_id_t TRACER_M25P_STATE;
+tracer_id_t TRACER_M25P_STROBE;
 
 /***************************************************/
 /***************************************************/
@@ -434,8 +433,8 @@ int m25p_device_create(int dev, int UNUSED id)
       memset(M25P_MEMRAW,0xff,M25P_FLASH_SIZE);
     }
 
-  tracer_event_add_id(TRACER_M25P_STATE,   8, M25PNAME"_state"    , "");
-  tracer_event_add_id(TRACER_M25P_STROBE,  8, M25PNAME"_function" , "");
+  TRACER_M25P_STATE  = tracer_event_add_id(8, "state"    , M25PNAME);
+  TRACER_M25P_STROBE = tracer_event_add_id(8, "function" , M25PNAME);
 
   return 0;
 }

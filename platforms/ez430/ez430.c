@@ -74,7 +74,7 @@ int devices_create()
   /*********************************/
   /* create peripherals            */
   /*********************************/
-  res += led_device_create      (LED1,0,0xee,0);      /* RVB */
+  res += led_device_create      (LED1,0,0xee,0, "led");      /* RVB */
 
   /*********************************/
   /* place peripherals Gui         */

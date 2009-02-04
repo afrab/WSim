@@ -244,9 +244,9 @@ int devices_create(void)
   /*********************************/
 
   res += system_create          (SYSTEM);
-  res += led_device_create      (LED1,0xee, 0,    0); // red
-  res += led_device_create      (LED2,0,    0xee, 0); // green 
-  res += led_device_create      (LED3,0xee, 0xee, 0); // yellow
+  res += led_device_create      (LED1,0xee, 0,    0, "red");   // red
+  res += led_device_create      (LED2,0,    0xee, 0, "green"); // green 
+  res += led_device_create      (LED3,0xee, 0xee, 0, "blue");  // yellow
   res += at45db_device_create   (FLASH,  0);
   res += cc2420_device_create   (RADIO, 16);
   res += ptty_device_create     (SERIAL, 1);
@@ -268,10 +268,6 @@ int devices_create(void)
   /*********************************/
   /* end of platform specific part */
   /*********************************/
-
-  tracer_event_add_id(TRACER_LED1,  1, "led1"  , "");
-  tracer_event_add_id(TRACER_LED2,  1, "led2"  , "");
-  tracer_event_add_id(TRACER_LED3,  1, "led3"  , "");
 
   return res;
 }
@@ -415,17 +411,14 @@ int devices_update()
   if (msp430_digiIO_dev_read(PORT5,&val8))
     {
       machine.device[LED1].write(LED1,LED_DATA, ! BIT(val8,4));
-      tracer_event_record(TRACER_LED1,!BIT(val8,4));
       UPDATE(LED1);
       REFRESH(LED1);
 
       machine.device[LED2].write(LED2,LED_DATA, !  BIT(val8,5));
-      tracer_event_record(TRACER_LED2,!BIT(val8,5));
       UPDATE(LED2);
       REFRESH(LED2);
 
       machine.device[LED3].write(LED3,LED_DATA, ! BIT(val8,6));
-      tracer_event_record(TRACER_LED3,!BIT(val8,6));
       UPDATE(LED3);
       REFRESH(LED3);
     }

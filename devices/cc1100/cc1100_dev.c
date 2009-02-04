@@ -29,6 +29,10 @@
 int  CC1100_XOSC_FREQ_MHz;
 int  CC1100_XOSC_PERIOD_NS;
 
+tracer_id_t TRACER_CC1100_STATE;
+tracer_id_t TRACER_CC1100_STROBE;
+tracer_id_t TRACER_CC1100_CS;
+
 /***************************************************/
 /***************************************************/
 /***************************************************/
@@ -211,9 +215,9 @@ int cc1100_device_create (int dev_num, int fxosc_mhz)
 
   worldsens_c_rx_register((void*)cc1100, cc1100_callback_rx);
 
-  tracer_event_add_id(TRACER_CC1100_STATE,  8, "cc1100_state",  "");
-  tracer_event_add_id(TRACER_CC1100_STROBE, 8, "cc1100_strobe", "");
-  tracer_event_add_id(TRACER_CC1100_CS,     1, "cc1100_cs",     "");
+  TRACER_CC1100_STATE  = tracer_event_add_id(8, "state",  "cc1100");
+  TRACER_CC1100_STROBE = tracer_event_add_id(8, "strobe", "cc1100");
+  TRACER_CC1100_CS     = tracer_event_add_id(1, "cs",     "cc1100");
   
   return 0;
 }

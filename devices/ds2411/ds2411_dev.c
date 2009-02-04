@@ -76,6 +76,12 @@ do {                                                                            
 #endif
 
 /***************************/
+/* Global variables        */
+/***************************/
+
+tracer_id_t TRACER_DS2411;
+
+/***************************/
 /* Time unit factors       */
 /***************************/
 
@@ -510,6 +516,7 @@ void ds2411_read(int dev, uint32_t *mask, uint32_t *val)
     {
       *mask             = 1;
       *val              = DS2411_WIRE_STATE;
+      tracer_event_record(TRACER_DS2411,DS2411_WIRE_STATE);
       DS2411_READ_VALID = 0;
       HW_DMSG_WIRE("ds2411: set wire state %s [%"PRId64"]\n", 
 		   (*val & DS2411_D) ? "HIGH":"LOW", MACHINE_TIME_GET_NANO());  
@@ -535,6 +542,7 @@ void ds2411_write(int dev, uint32_t mask, uint32_t val)
 	  DS2411_WRITE_TRANS = val & DS2411_D; 
 	  DS2411_WRITE_VALID = 1;
 	  DS2411_WIRE_STATE  = val & DS2411_D;
+	  tracer_event_record(TRACER_DS2411,(val & DS2411_D));
 	  HW_DMSG_WIRE("ds2411: write from MCU %s [+%"PRId64"]\n", 
 		       (val & DS2411_D) ? "HIGH":"LOW", MACHINE_TIME_GET_NANO() - DS2411_TIME_IN);  
 	}
@@ -1094,7 +1102,7 @@ ds2411_device_create(int dev, char *serial)
 
   DS2411_ID = ds2411_str_to_id(serial);
 
-  tracer_event_add_id(TRACER_DS2411, 8, "ds2411", "");
+  TRACER_DS2411 = tracer_event_add_id(1, "ds2411", "");
 
   return 0;
 }

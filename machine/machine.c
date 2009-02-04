@@ -76,18 +76,6 @@ int machine_create()
 
   /* machine_reset(); */
 
-  tracer_event_add_id(TRACER_MCU_PC,    16, "mcu_PC",         "mcu");
-  tracer_event_add_id(TRACER_MCU_GIE,    1, "mcu_gie",        "mcu");
-  tracer_event_add_id(TRACER_MCU_INTR,   8, "mcu_interrupt",  "mcu");
-  tracer_event_add_id(TRACER_MCU_POWER,  8, "mcu_power_mode", "mcu");
-  tracer_event_add_id(TRACER_MCU_PORT1,  8, "mcu_port_out_1", "mcu");
-  tracer_event_add_id(TRACER_MCU_PORT2,  8, "mcu_port_out_2", "mcu");
-  tracer_event_add_id(TRACER_MCU_PORT3,  8, "mcu_port_out_3", "mcu");
-  tracer_event_add_id(TRACER_MCU_PORT4,  8, "mcu_port_out_4", "mcu");
-  tracer_event_add_id(TRACER_MCU_PORT5,  8, "mcu_port_out_5", "mcu");
-  tracer_event_add_id(TRACER_MCU_PORT6,  8, "mcu_port_out_6", "mcu");
-  tracer_event_add_id(TRACER_USART0,     8, "Usart0",         "mcu");
-  tracer_event_add_id(TRACER_USART1,     8, "Usart1",         "mcu");
   tracer_set_node_id(machine_get_node_id());
   return res;
 }

@@ -244,11 +244,11 @@ if test "${enable_platform_ot2006}" = "yes" ; then
 fi
 
 dnl OT setre 2007
-AC_ARG_ENABLE([platform-ot2007],AS_HELP_STRING([--enable-platform-ot2007],[OT 2007 platform]))
-if test "${enable_platform_ot2007}" = "yes" ; then
+AC_ARG_ENABLE([platform-otsetre],AS_HELP_STRING([--enable-platform-otsetre],[OT 2007 platform]))
+if test "${enable_platform_otsetre}" = "yes" ; then
 	enable_mcu_msp430=yes
 	NPLATFORM=$(($NPLATFORM + 1))
-	PLATFORMNAMES="ot2007 $PLATFORMNAMES"
+	PLATFORMNAMES="otsetre $PLATFORMNAMES"
 fi
 
 dnl ez430
@@ -320,7 +320,7 @@ AM_CONDITIONAL([BUILD_WSN430],    [test "${enable_platform_wsn430}"    = "yes" -
 AM_CONDITIONAL([BUILD_SENSLAB],   [test "${enable_platform_senslab}"   = "yes" -o "$ALL" = "yes" ])
 AM_CONDITIONAL([BUILD_MOSAR],     [test "${enable_platform_mosar}"     = "yes"])
 AM_CONDITIONAL([BUILD_OT2006],    [test "${enable_platform_ot2006}"    = "yes"])
-AM_CONDITIONAL([BUILD_OT2007],    [test "${enable_platform_ot2007}"    = "yes" -o "$ALL" = "yes" ])
+AM_CONDITIONAL([BUILD_OTSETRE],   [test "${enable_platform_otsetre}"   = "yes" -o "$ALL" = "yes" ])
 AM_CONDITIONAL([BUILD_EZ430],     [test "${enable_platform_ez430}"     = "yes"])
 AM_CONDITIONAL([BUILD_TESTS],     [test "${enable_platform_tests}"     = "yes"])
 AM_CONDITIONAL([BUILD_TELOSB],    [test "${enable_platform_telosb}"    = "yes" -o "$ALL" = "yes" ])
@@ -574,7 +574,7 @@ platforms/senslab/Makefile
 platforms/mosar/Makefile
 platforms/ez430/Makefile
 platforms/ot2006/Makefile
-platforms/ot2007/Makefile
+platforms/otsetre/Makefile
 platforms/tests/Makefile
 platforms/telosb/Makefile
 platforms/wisenode/Makefile

@@ -65,43 +65,47 @@ static void tracer_event_record_time_nocheck(tracer_id_t id, tracer_val_t val, t
 /**************************************************************************/
 /**************************************************************************/
 /**************************************************************************/
-int
-tracer_instantiate(char *key, FILE *config_fd)
+
+int tracer_instantiate(char *key, FILE *config_fd)
 {
-		
-	memset(&EVENT_TRACER, 0, sizeof(EVENT_TRACER));
-	EVENT_TRACER.ev_data = ev_data_buff;
-	if (strcmp(key, "none") == 0) {
-		tracer_stop();
-		return 0;
-	} else {
-		tracer_start();
-	}
+  memset(&EVENT_TRACER, 0, sizeof(EVENT_TRACER));
+  EVENT_TRACER.ev_data = ev_data_buff;
+  if (strcmp(key, "none") == 0) 
+    {
+      tracer_stop();
+      return 0;
+    } 
+  else 
+    {
+      tracer_start();
+    }
 	
-	if (fscanf(config_fd, "%s", tracer_file) != 1) {
-		fprintf(stderr, "tracer_instantiate: failed to read \"tracer.inst\"\n");
-		return -1;
-	}
+  if (fscanf(config_fd, "%s", tracer_file) != 1) 
+    {
+      fprintf(stderr, "tracer_instantiate: failed to read \"tracer.inst\"\n");
+      return -1;
+    }
 	
-	//tracer_dump_set_format(key);	
-	return 0;
+  tracer_dump_set_format(key);	
+  return 0;
 }
 
 
 /**************************************************************************/
 /**************************************************************************/
 /**************************************************************************/
-void
-tracer_complete(void) {
-  // tracer_dump_file(tracer_file);
+
+void tracer_complete(void) 
+{
+  /* tracer_dump_file(tracer_file); */
 }
 
 
 /* ************************************************** */
 /* ************************************************** */
 /* ************************************************** */
-void
-tracer_start()
+
+void tracer_start()
 {
 	tracer_event_record = tracer_event_record_active;
 }
@@ -115,15 +119,37 @@ void tracer_stop()
 /* ************************************************** */
 /* ************************************************** */
 
-void
-tracer_event_add_id(tracer_id_t id, char* label)
+int tracer_dump_set_format(char *format)
 {
-	if (id < (TRACER_MAX_ID - 1))
+  EVENT_TRACER.format = tracer_unknown;
+  
+  if (strcmp(format,TRACER_FMT_GPLOT) == 0)
+    EVENT_TRACER.format = tracer_gplot;
+  
+  if (strcmp(format,TRACER_FMT_ALL) == 0)
+    EVENT_TRACER.format = tracer_all;
+  
+  if (strcmp(format,TRACER_FMT_VCD) == 0)
+    EVENT_TRACER.format = tracer_vcd;
+  
+  if (strcmp(format,TRACER_FMT_RAW) == 0)
+    EVENT_TRACER.format = tracer_raw;
+  
+  return EVENT_TRACER.format;
+}
+
+/* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
+
+void tracer_event_add_id(tracer_id_t id, char* label)
+{
+  if (id < (TRACER_MAX_ID - 1))
     {
-		strncpy(EVENT_TRACER.id_name[id],label,TRACER_MAX_NAME_LENGTH);
-		tracer_event_record_time_nocheck(id,0,0);
+      strncpy(EVENT_TRACER.id_name[id],label,TRACER_MAX_NAME_LENGTH);
+      tracer_event_record_time_nocheck(id,0,0);
     }
-	else
+  else
     {
     }
 }
@@ -131,14 +157,14 @@ tracer_event_add_id(tracer_id_t id, char* label)
 static void
 tracer_event_record_time_nocheck(tracer_id_t id, tracer_val_t val, tracer_time_t time)
 {
-	if (! tracer_end_of_block(EVENT_TRACER.ev_count))
+  if (! tracer_end_of_block(EVENT_TRACER.ev_count))
     {
-		tracer_set_event(EVENT_TRACER.ev_count,id,time,val);
-		EVENT_TRACER.id_last[id] = EVENT_TRACER.ev_count ++; 
-		if (tracer_end_of_block(EVENT_TRACER.ev_count))
-		{
-			 fprintf(stderr, "Tracer: max event reached\n");
-		}
+      tracer_set_event(EVENT_TRACER.ev_count,id,time,val);
+      EVENT_TRACER.id_last[id] = EVENT_TRACER.ev_count ++; 
+      if (tracer_end_of_block(EVENT_TRACER.ev_count))
+	{
+	  fprintf(stderr, "Tracer: max event reached\n");
+	}
     }
 }
 
@@ -149,10 +175,10 @@ tracer_event_record_time_nocheck(tracer_id_t id, tracer_val_t val, tracer_time_t
 static void
 tracer_event_record_time(tracer_id_t id, tracer_val_t val, tracer_time_t time)
 {
-	if (val != tracer_get_event_val(EVENT_TRACER.id_last[id]))
+  if (val != tracer_get_event_val(EVENT_TRACER.id_last[id]))
     {
-		tracer_event_record_time_nocheck(id,val,time);
-    }
+      tracer_event_record_time_nocheck(id,val,time);
+    } 
 }
 
 /* ************************************************** */

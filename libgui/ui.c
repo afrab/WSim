@@ -71,7 +71,7 @@ static struct moption_t gui_opt = {
 };
 
 static struct moption_t title_opt = {
-  .longname    = "title",
+  .longname    = "ui_title",
   .type        = required_argument,
   .helpstring  = "GUI window title",
   .value       = NULL

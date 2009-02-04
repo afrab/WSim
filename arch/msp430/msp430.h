@@ -85,8 +85,7 @@ extern tracer_id_t MSP430_TRACER_PORT6;
 extern tracer_id_t MSP430_TRACER_USART0;
 extern tracer_id_t MSP430_TRACER_USART1;
 
-#define TRACE_MSP430
-#if defined(TRACE_MSP430)
+#if defined(XCODE_DEBUG)
 #define TRACER_TRACE_PC(v)			\
   do {						\
     if (msp430_trace_pc_switch)			\

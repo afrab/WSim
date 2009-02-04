@@ -861,6 +861,10 @@ static inline void WRITE(int m, int b, int r, uint16_t a, int16_t res)
 	      TRACER_TRACE_GIE((res >> SHIFT_GIE)&1);
 	    }
 	}
+      else if (r == SP_REG_IDX) /* SP */
+	{
+	  TRACER_TRACE_SP(SP);
+	}
       MCU_ALU.regs[r] = res;
     }
   else
@@ -1150,6 +1154,7 @@ static void msp430_mcu_run_insn()
 	    /* flags : ---- */
 	    /* modes : ---  */
 	    /* cycles       */
+	    TRACER_TRACE_SP(SP);
 	    SET_CYCLES(opt2_cycles_class2[opt2.t_mode]);
 	  }
           break;
@@ -1165,6 +1170,7 @@ static void msp430_mcu_run_insn()
 	    /* flags : ---- */
 	    /* modes : ---  */
 	    /* cycles       */
+	    TRACER_TRACE_SP(SP);
 	    SET_CYCLES(opt2_cycles_class3[opt2.t_mode]);
 	    ETRACER_BRANCH(ETRACER_BRANCH_CALL);
 	  }
@@ -1202,6 +1208,7 @@ static void msp430_mcu_run_insn()
 	      {
 		HW_DMSG_INTR("msp430:intr: == Return from interrupt with uncleared IFG, setting new interrupt\n");
 	      }
+	    TRACER_TRACE_SP(SP);
 	    ETRACER_BRANCH(ETRACER_BRANCH_NONE);
 	    MCU_ALU.etracer_reti = 1;
 	  }

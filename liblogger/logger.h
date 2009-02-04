@@ -24,7 +24,7 @@ extern int logger_verbose_level;
 void REAL_STDOUT(char* fmt, ...);
 void REAL_STDERR(char* fmp, ...);
 
-#define STDOUT(x...) READ_STDOUT(x)
+#define STDOUT(x...) REAL_STDOUT(x)
 #define STDERR(x...) REAL_STDERR(x)
 
 /* ************************************************** */

@@ -262,6 +262,9 @@ static int tracer_load(tracer_t *t)
   /* events name */
   r += fread(t->hdr.id_name,1,t->hdr.tracer_max_id * TRACER_MAX_NAME_LENGTH,t->in_fd); 
 
+  /* events modules */
+  r += fread(t->hdr.id_module,1,t->hdr.tracer_max_id * TRACER_MAX_NAME_LENGTH,t->in_fd); 
+
   /* events width */
   r += fread(t->hdr.id_width,  1,sizeof(tracer_width_t) * t->hdr.tracer_max_id,t->in_fd);
 
@@ -278,10 +281,8 @@ static int tracer_load(tracer_t *t)
       tracer_swap_header(t);
     }
   
-  /*
-    if (t->debug)
+  if (t->debug)
     tracer_dump_header(t);
-  */
   return 0;
 }
 
@@ -353,8 +354,8 @@ void tracer_dump_header(tracer_t *t)
     {
       if (t->hdr.id_name[i][0] != '\0')
 	{
-	  OUTPUT("tracer:hdr: id %2d %-20s [%d] count=%4d, min=%"PRId64", max=%"PRId64"\n", i,
-		 t->hdr.id_name[i],t->hdr.id_width[i],t->hdr.id_count[i],t->hdr.id_val_min[i],t->hdr.id_val_max[i]);
+	  OUTPUT("tracer:hdr: id=%2d %10s::%-15s [%2d] count=%4d, min=%"PRId64", max=%"PRId64"\n", i,
+		 t->hdr.id_module[i],t->hdr.id_name[i],t->hdr.id_width[i],t->hdr.id_count[i],t->hdr.id_val_min[i],t->hdr.id_val_max[i]);
 	}
     } 
 }

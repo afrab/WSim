@@ -58,7 +58,7 @@ typedef struct tracer_sample_struct_t tracer_sample_t;
    version 2:
       ..
 */
-#define TRACER_VERSION           3
+#define TRACER_VERSION           4
 
 #define TRACER_MAX_ID            255
 #define TRACER_MAX_NAME_LENGTH   30
@@ -82,6 +82,7 @@ struct _tracer_header_t {
   tracer_time_t    sim_time_total;
 
   char             id_name   [TRACER_MAX_ID][TRACER_MAX_NAME_LENGTH];
+  char             id_module [TRACER_MAX_ID][TRACER_MAX_NAME_LENGTH];
   tracer_width_t   id_width  [TRACER_MAX_ID];  /*                        */
   tracer_ev_t      id_count  [TRACER_MAX_ID];  /* count for each id      */
   tracer_val_t     id_val_min[TRACER_MAX_ID];  /* id_min                 */

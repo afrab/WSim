@@ -118,7 +118,7 @@ typedef struct _tracer_sample_t tracer_sample_t;
    version 2:
       initial time
 */
-#define TRACER_VERSION      3
+#define TRACER_VERSION      4
 
 /* ************************************************** */
 /* ************************************************** */
@@ -284,6 +284,11 @@ tracer_dump_header()
   size = sizeof(tracer_id_name);
   i   += fwrite(tracer_id_name,1,size,tracer_datafile);
   DMSG_TRACER("tracer:hdr:events   : name %d bytes\n",size);
+
+  /* events modules */
+  size = sizeof(tracer_id_module);
+  i   += fwrite(tracer_id_module,1,size,tracer_datafile);
+  DMSG_TRACER("tracer:hdr:modules  : name %d bytes\n",size);
 
   /* events width */
   size = sizeof(tracer_width);

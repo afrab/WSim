@@ -6,73 +6,73 @@
  *  Copyright 2005 __WorldSens__. All rights reserved.
  *
  */
-#include <private/models_private.h>
-#include <private/simulation_private.h>
-#include <private/propagation_private.h>
-#include <private/antenna_private.h>
-#include <private/radio_private.h>
-#include <private/mac_private.h>
-#include <private/queue_private.h>
-#include <private/application_private.h>
-#include <private/nodes_private.h>
-#include <private/packets_private.h>
-#include <private/interference_private.h>
-#include <private/mobility_private.h>
-#include <private/modulation_private.h>
-#include <private/core_private.h>
-#include <private/tracer_private.h>
-#include <private/battery_private.h>
+#include "private/models_private.h"
+#include "private/simulation_private.h"
+#include "private/propagation_private.h"
+#include "private/antenna_private.h"
+#include "private/radio_private.h"
+#include "private/mac_private.h"
+#include "private/queue_private.h"
+#include "private/application_private.h"
+#include "private/nodes_private.h"
+#include "private/packets_private.h"
+#include "private/interference_private.h"
+#include "private/mobility_private.h"
+#include "private/modulation_private.h"
+#include "private/core_private.h"
+#include "private/battery_private.h"
 
-#include <public/log.h>
-#include <public/tracer.h>
-
+#include "public/log.h"
 
 /**************************************************************************/
 /**************************************************************************/
 /**************************************************************************/
+
 struct _event *	g_events = NULL;
 int g_events_card = 0;
 
+/**************************************************************************/
+/**************************************************************************/
+/**************************************************************************/
 
-
-/**************************************************************************/
-/**************************************************************************/
-/**************************************************************************/
-void core_runtime_end(void) {
-	struct _packet *packet;
-	struct _event *event;
+void core_runtime_end(void) 
+{
+  struct _packet *packet;
+  struct _event *event;
 
 #ifndef WORLDSENS
   int loop = g_m_nodes;
 	
-  while (loop--) {
-    struct _node *node = &(g_nodes[loop]);
-
-    application_complete(node);
-    queue_complete(node);
-    mac_complete(node);
-    radio_complete(node);
-    antenna_complete(node);
-    battery_complete(node);
-  }
+  while (loop--) 
+    {
+      struct _node *node = &(g_nodes[loop]);
+      
+      application_complete(node);
+      queue_complete(node);
+      mac_complete(node);
+      radio_complete(node);
+      antenna_complete(node);
+      battery_complete(node);
+    }
 #endif //WORLDSENS
 
   modulation_complete();
   interference_complete();
   propagation_complete();
-  tracer_complete();
 
-  while (g_events) {
-	  event = g_events;
-	  g_events = g_events->next;
-	  free(event);
-  }
+  while (g_events) 
+    {
+      event = g_events;
+      g_events = g_events->next;
+      free(event);
+    }
 
-  while (g_packets) {
-	  packet = g_packets;
-	  g_packets = g_packets->next;
-	  packet_destroy(packet);
-  }
+  while (g_packets) 
+    {
+      packet = g_packets;
+      g_packets = g_packets->next;
+      packet_destroy(packet);
+    }
 
   models_clean();
   free(g_nodes);
@@ -120,6 +120,7 @@ void core_notify_carrier_sense(void)  {
 /**************************************************************************/
 /**************************************************************************/
 /**************************************************************************/
+
 int core_start(void) {
   static int evt_nb = 0;
 	

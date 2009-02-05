@@ -124,15 +124,6 @@ int main (int argc, char ** argv) {
 	                         range_propagation_propagation,
 	                         range_propagation_complete );
 
-	/* Initialize simulation */
-
-	if (simulation_init(argc, argv) < 0) {
-		fprintf(stderr, "failed in simulation_init\n");
-		return -1;
-	}
-
 	/* Start simulation */
-
-	simulation_start();
-	return 0;
+	return simulation_start(argc,argv);
 }

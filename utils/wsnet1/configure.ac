@@ -21,61 +21,67 @@ dnl --------------------------------------------------------------
 dnl Host specific workarounds
 dnl --------------------------------------------------------------
 
+HOSTTYPE="none"
+NEEDLARGEFILES="no"
+
 case "${host}" in
-	*-*-linux-* ) 
+	i686-*-linux-* ) 
 	# i686-pc-linux-gnu
-	# x86_64-unknown-linux-gnu
-	# echo "Host is a linux system"
 	HOSTTYPE="Linux"
-	LINUX="yes"
 	CFLAGS="$CFLAGS -DLINUX"
-	EXTRALIBS=-lm
+	NEEDLARGEFILES="yes"
+	EXTRALIBS="$EXTRALIBS -lm"
+	;;
+
+	x86_64-*-linux-* ) 
+	# x86_64-unknown-linux-gnu
+	HOSTTYPE="Linux"
+	CFLAGS="$CFLAGS -DLINUX"
+	NEEDLARGEFILES="yes"
+	EXTRALIBS="$EXTRALIBS -lm"
 	;;
 
 	*-*-solaris* )
         # cimirly  sparc-sun-solaris2.9
         # clash    sparc-sun-solaris2.10
-	# echo "Host is solaris, libsocket and libnsl added"
 	HOSTTYPE="Solaris"
-	SOLARIS="yes"
 	CFLAGS="$CFLAGS -DSOLARIS"
-	EXTRALIBS="-lsocket -lnsl $EXTRALIBS"
+	EXTRALIBS="$EXTRALIBS -lsocket -lnsl"
 	;;
 
 	*-*-cygwin )
+	# xp i686-pc-cygwin
 	HOSTTYPE="Cygwin"
-	EXTRALIBS="-lsocket -lnsl -lSDL $EXTRALIBS"
+	CFLAGS="$CFLAGS -DCYGWIN"
+	NEEDLARGEFILES="yes"
+	#if test "${worldsens_sum}" != "no" ; then
+	#   EXTRALIBS="-lsocket -lnsl"
+        #fi
+	EXTRALIBS="$EXTRALIBS -lwsock32"
+	if test "${enable_gui}" != "no" ; then
+	   EXTRALIBS="$EXTRALIBS -lSDL" 
+	fi
 	;;
 
-	i586-pc-mingw32msvc )
+	*-*-mingw32msvc )
+	# i586-pc-mingw32msvc
 	HOSTTYPE="Mingw32"
-	EXTRALIBS="$EXTRALIBS"
+	CFLAGS="$CFLAGS -DMINGW32"
+	NEEDLARGEFILES="yes"
+	EXTRALIBS="$EXTRALIBS -lwsock32"
+	if test "${enable_gui}" != "no" ; then
+	   EXTRALIBS="$EXTRALIBS -lSDL" 
+	fi
 	;;
 
 	*-apple-darwin* )
         # powerpc-apple-darwin8.6.0 
-	# echo "Host is Darwin/MacOSX"
+	# i686-apple-darwin8.9.1
 	HOSTTYPE="MacOSX"
-	MACOSX="yes"
 	CFLAGS="$CFLAGS -DDARWIN -DMACOSX"
-	EXTRALIBS=-lm
+	NEEDLARGEFILES="yes"
 	;;
 esac
-
-dnl --------------------------------------------------------------
-dnl Checks for compilation flags
-dnl --------------------------------------------------------------
-
-CFLAGS_save="${CFLAGS}"
-AC_CACHE_CHECK([if \$CC accepts -Wall],
-    [ac_cv_c_Wall],
-    [CFLAGS="-Wall ${CFLAGS_save}"
-     AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[]], [[]])],[ac_cv_c_Wall=yes],[ac_cv_c_Wall=no])])
-CFLAGS="${CFLAGS_save}"
-if test "${ac_cv_c_Wall}" != "no"; then
-    CFLAGS="-Wall ${CFLAGS}"
-fi
-
 
 dnl --------------------------------------------------------------
 dnl Checks for compilation flags
@@ -145,65 +151,6 @@ dnl --------------------------------------------------------------
 dnl Host specific workarounds
 dnl --------------------------------------------------------------
 
-HOSTTYPE="none"
-NEEDLARGEFILES="no"
-
-case "${host}" in
-	i686-*-linux-* ) 
-	# i686-pc-linux-gnu
-	HOSTTYPE="Linux"
-	CFLAGS="$CFLAGS -DLINUX"
-	NEEDLARGEFILES="yes"
-	;;
-
-	x86_64-*-linux-* ) 
-	# x86_64-unknown-linux-gnu
-	HOSTTYPE="Linux"
-	CFLAGS="$CFLAGS -DLINUX"
-	NEEDLARGEFILES="yes"
-	;;
-
-	*-*-solaris* )
-        # cimirly  sparc-sun-solaris2.9
-        # clash    sparc-sun-solaris2.10
-	HOSTTYPE="Solaris"
-	CFLAGS="$CFLAGS -DSOLARIS"
-	EXTRALIBS="$EXTRALIBS -lsocket -lnsl"
-	;;
-
-	*-*-cygwin )
-	# xp i686-pc-cygwin
-	HOSTTYPE="Cygwin"
-	CFLAGS="$CFLAGS -DCYGWIN"
-	NEEDLARGEFILES="yes"
-	#if test "${worldsens_sum}" != "no" ; then
-	#   EXTRALIBS="-lsocket -lnsl"
-        #fi
-	EXTRALIBS="$EXTRALIBS -lwsock32"
-	if test "${enable_gui}" != "no" ; then
-	   EXTRALIBS="$EXTRALIBS -lSDL" 
-	fi
-	;;
-
-	*-*-mingw32msvc )
-	# i586-pc-mingw32msvc
-	HOSTTYPE="Mingw32"
-	CFLAGS="$CFLAGS -DMINGW32"
-	NEEDLARGEFILES="yes"
-	EXTRALIBS="$EXTRALIBS -lwsock32"
-	if test "${enable_gui}" != "no" ; then
-	   EXTRALIBS="$EXTRALIBS -lSDL" 
-	fi
-	;;
-
-	*-apple-darwin* )
-        # powerpc-apple-darwin8.6.0 
-	# i686-apple-darwin8.9.1
-	HOSTTYPE="MacOSX"
-	CFLAGS="$CFLAGS -DDARWIN -DMACOSX"
-	NEEDLARGEFILES="yes"
-	;;
-esac
 
 HOSTNAME=`hostname`
 case "$HOSTNAME" in
@@ -252,6 +199,7 @@ dnl --------------------------------------------------------------
 dnl Output
 dnl --------------------------------------------------------------
 dnl AC_DEFINE_UNQUOTED(WORLDSENS,"1",[Host type name])
+
 CFLAGS="$CFLAGS -DWORLDSENS"
 
 AC_SUBST(EXTRALIBS)

@@ -11,64 +11,78 @@
 #include <private/command_line.h>
 #include <private/log_private.h>
 
+#include "libtracer/tracer.h"
 
 /**************************************************************************/
 /**************************************************************************/
 /**************************************************************************/
+
 int g_m_nodes = -1;
 int g_c_nodes = 0;
 	
-double g_x = -1.0;
-double g_y = -1.0;
-double g_z = -1.0;
-
-
-#ifndef WORLDSENS
-int g_error = -1;
-uint64_t g_simend = 0;
-
-#else //WORLDSENS
-struct _worldsens_s worldsens;
-#endif //WORLDSENS
+double g_x    = -1.0;
+double g_y    = -1.0;
+double g_z    = -1.0;
 
 uint64_t g_time = 0;
 
+struct _worldsens_s worldsens;
+
 
 /**************************************************************************/
 /**************************************************************************/
 /**************************************************************************/
-int simulation_init(int argc, char *argv[]) {
-  if (command_line (argc, argv)) {
-    return -1;
-  }
-	
-  if (parse_config ()) {
-    return -1;
-  }
-	
-#ifdef WORLDSENS
+
+int simulation_init(int argc, char *argv[]) 
+{
+  if (command_line (argc, argv)) 
+    {
+      return -1;
+    }
+  
+  if (parse_config ()) 
+    {
+      return -1;
+    }
+  
   if (worldsens_s_initialize(&worldsens))
-    return 0;	/* Initialize simulation */
-#endif //WORLDSENS
+    {
+      return -1;
+    }
 	
   return 0;
 }
 
+/**************************************************************************/
+/**************************************************************************/
+/**************************************************************************/
 
-/**************************************************************************/
-/**************************************************************************/
-/**************************************************************************/
-int simulation_start(void) {
+uint64_t get_wsnet_time()
+{
+  return g_time;
+}
 
-#ifndef WORLDSENS
-  core_start();
-#else //WORLDSENS
+int simulation_start(int argc, char* argv[]) 
+{
+  if (simulation_init(argc, argv) < 0) 
+    {
+      fprintf(stderr, "failed in simulation_init\n");
+      return -1;
+    }
+
+  /* TRACER */
+  tracer_init("wsnet1.trc", get_wsnet_time);
   core_start(&worldsens);
-#endif //WORLDSENS
-	
-  if (g_log_to_file) {
-    fclose(g_log_file);
-  }
+  tracer_close(); 
+
+  if (g_log_to_file) 
+    {
+      fclose(g_log_file);
+    }
 
   return 0;
 }
+
+/**************************************************************************/
+/**************************************************************************/
+/**************************************************************************/

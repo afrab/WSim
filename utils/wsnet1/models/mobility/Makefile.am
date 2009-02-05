@@ -1,5 +1,5 @@
 noinst_LIBRARIES=libmobility.a
-INCLUDES=-I$(top_srcdir)/include
+INCLUDES=-I$(top_srcdir)/include -I$(top_srcdir)/../..
 libmobility_a_SOURCES=	\
 	random_billiard_mobility.c  	\
 	random_static_mobility.c  	\

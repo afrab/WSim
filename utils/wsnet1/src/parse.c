@@ -22,17 +22,17 @@
 #include <private/application_private.h>
 #include <private/queue_private.h>
 #include <private/core_private.h>
-#include <private/tracer_private.h>
 #include <private/battery_private.h>
 
 #include <public/simulation.h>
 #include <public/types.h>
 
+/**************************************************************************/
+/**************************************************************************/
+/**************************************************************************/
 
-/**************************************************************************/
-/**************************************************************************/
-/**************************************************************************/
-int parse_config(void) {
+int parse_config(void) 
+{
   FILE *config_fd;
   char config_file[256];
   char arg_str[256];
@@ -46,71 +46,83 @@ int parse_config(void) {
 #endif //WORLDSENS
 	
   /* Initialize seed value */
-  if (g_seed == -1) {
-    struct timeval tp;
-    gettimeofday(&tp, NULL);
-    srand48(tp.tv_sec + tp.tv_usec);
-  } else {
-    srand48(g_seed);
-  }
+  if (g_seed == -1) 
+    {
+      struct timeval tp;
+      gettimeofday(&tp, NULL);
+      srand48(tp.tv_sec + tp.tv_usec);
+    } 
+  else 
+    {
+      srand48(g_seed);
+    }
 	
 	
   /******************** Simulation.inst ************************/
   /* Open simulation.inst */
   sprintf(config_file, "%s/simulation.inst", g_config_repository);
-  if ((config_fd = fopen(config_file, "r")) == NULL) {
-    perror("Unable to open \"simulation.inst\":");
-    return -1;
-  }
+
+  if ((config_fd = fopen(config_file, "r")) == NULL) 
+    {
+      perror("Unable to open \"simulation.inst\":");
+      return -1;
+    }
 	
 #ifndef WORLDSENS
   /* Get informations*/
   if (fscanf(config_fd, "%d %lf %lf %lf %d %" PRId64 "", 
-	     &g_m_nodes, &g_x, &g_y, &g_z, &g_error, &g_simend) != 6) {
-    fprintf(stderr, "Configuration error: Unable to read \"simulation.inst\"\n");
-    fclose(config_fd);
-    return -1;
-  }
+	     &g_m_nodes, &g_x, &g_y, &g_z, &g_error, &g_simend) != 6) 
+    {
+      fprintf(stderr, "Configuration error: Unable to read \"simulation.inst\"\n");
+      fclose(config_fd);
+      return -1;
+    }
 #else //WORLDSENS	
   /* Get informations*/
   if (fscanf(config_fd, "%d %lf %lf %lf", 
-	     &g_m_nodes, &g_x, &g_y, &g_z) != 4) {
-    fprintf(stderr, "Configuration error: Unable to read \"simulation.inst\"\n");
-    fclose(config_fd);
-    return -1;
-  }
+	     &g_m_nodes, &g_x, &g_y, &g_z) != 4) 
+    {
+      fprintf(stderr, "Configuration error: Unable to read \"simulation.inst\"\n");
+      fclose(config_fd);
+      return -1;
+    }
 #endif //WORLDSENS
 	
-  if (g_m_nodes <= 0) {
-    fprintf(stderr, "Configuration error: maximum number of nodes <= 0\n");	
-    fclose(config_fd);
-    return -1;
-  }
+  if (g_m_nodes <= 0) 
+    {
+      fprintf(stderr, "Configuration error: maximum number of nodes <= 0\n");	
+      fclose(config_fd);
+      return -1;
+    }
 	
-  if (g_x < 0) {
-    fprintf(stderr, "Configuration error: testbed x length <= 0\n");	
-    fclose(config_fd);
-    return -1;
-  }
+  if (g_x < 0) 
+    {
+      fprintf(stderr, "Configuration error: testbed x length <= 0\n");	
+      fclose(config_fd);
+      return -1;
+    }
 	
-  if (g_y < 0) {
-    fprintf(stderr, "Configuration error: testbed y length <= 0\n");	
-    fclose(config_fd);
-    return -1;
-  }
+  if (g_y < 0) 
+    {
+      fprintf(stderr, "Configuration error: testbed y length <= 0\n");	
+      fclose(config_fd);
+      return -1;
+    }
 
-  if (g_z < 0) {
-    fprintf(stderr, "Configuration error: testbed z length <= 0\n");	
-    fclose(config_fd);
-    return -1;
-  }
+  if (g_z < 0) 
+    {
+      fprintf(stderr, "Configuration error: testbed z length <= 0\n");	
+      fclose(config_fd);
+      return -1;
+    }
 
 #ifndef WORLDSENS
-  if (g_simend == 0) {
-    fprintf(stderr, "Configuration error: simulation duration <= 0\n");	
-    fclose(config_fd);
-    return -1;
-  }
+  if (g_simend == 0) 
+    {
+      fprintf(stderr, "Configuration error: simulation duration <= 0\n");	
+      fclose(config_fd);
+      return -1;
+    }
 #endif //WORLDSENS
 	
 
@@ -124,11 +136,12 @@ int parse_config(void) {
 	
   /* For each node */
   loop = g_m_nodes;
-  while (loop--) {
-    struct _node *node = &(g_nodes[loop]);
-		
-    node->addr = loop;
-  }		
+  while (loop--) 
+    {
+      struct _node *node = &(g_nodes[loop]);
+      
+      node->addr = loop;
+    }		
 	
   fclose(config_fd);
 
@@ -181,37 +194,6 @@ int parse_config(void) {
 	
   fclose(config_fd);
 	
-  /************* tracer.inst ***********************/
-  /* Open tracer.inst */
-  config_fd = NULL;
-  sprintf(config_file, "%s/tracer.inst", g_config_repository);
-  if ((config_fd = fopen(config_file, "r")) == NULL) {
-    perror("Unable to open \"tracer.inst\":");
-    return -1;
-  }
-	
-  /* Get informations*/
-  if (fscanf(config_fd, "%s", arg_str) != 1) {
-    fprintf(stderr, "Unable to read \"tracer.inst\"\n");
-    fclose(config_fd);
-    return -1;
-  }
-	
-  if (tracer_instantiate(arg_str, config_fd)) {
-    fclose(config_fd);
-    return -1;
-  }
-	
-  fclose(config_fd);
-
-#ifndef WORLDSENS
-  /* Open trace */
-  loop = g_m_nodes;
-  while (loop--) {
-    sprintf(mylabel, "Node %d Tx (mW)", loop);
-    tracer_event_add_id(loop, mylabel);
-  }
-#endif //WORLDSENS
 	
   /************* modulation.inst ***********************/
   /* Open modulation.inst */

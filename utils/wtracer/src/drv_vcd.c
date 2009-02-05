@@ -153,7 +153,7 @@ void vcd_find_modules(tracer_t UNUSED *t_out, tracer_t *t, int UNUSED tnum)
 		}
 	      if (found == 0)
 		{
-		  // DMSG(t,"    vcd: find module %s\n",ptr);
+		  DMSG(t,"          find new module %s\n",ptr);
 		  strcpy(t->id_module[t->modmax++], ptr);
 		}
 	    }

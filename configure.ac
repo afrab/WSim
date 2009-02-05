@@ -11,8 +11,8 @@ AC_CANONICAL_TARGET
 AM_INIT_AUTOMAKE
 AC_CONFIG_HEADERS([config.h])
 
-AC_DEFINE(WSIM_BUILD_ID,          36  , [build id]   )
-AC_DEFINE(WSIM_BUILD_DATE, "03062008" , [build date] )
+AC_DEFINE(WSIM_BUILD_ID,          56  , [build id]   )
+AC_DEFINE(WSIM_BUILD_DATE, "05022009" , [build date] )
  
 dnl --------------------------------------------------------------
 dnl Checks for programs.

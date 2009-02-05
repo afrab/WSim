@@ -440,7 +440,7 @@ tracer_event_add_id(int width, char* name, char* module)
   strncpy(tracer_id_module [id], module, TRACER_MAX_NAME_LENGTH);
   tracer_width[id] = width;
 
-  DMSG_TRACER("tracer:add:id: %d = %s module=%s\n",id,name,module);
+  DMSG_TRACER("tracer:add:id: %02d=%-10s module=%-10s\n",id,name,module);
   tracer_event_record_time_nocheck(id,0,0);
   return id;
 }

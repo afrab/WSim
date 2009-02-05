@@ -1,0 +1,329 @@
+\input texinfo @c -*- texinfo -*-
+@c %**start of header
+@setfilename wtracer.info
+@settitle WTracer : Worldsens Tracer User Documentation
+@afourpaper
+@c %**end of header
+
+@c ======================================================================
+@c ======================================================================
+@c ======================================================================
+
+@set EDITION      0.2  @c manual edition
+@set VERSION      0.8cvs  @c wsim version
+@set UPDATED 06 May 2007
+@set UPDATE-MONTH May 2007
+
+@c     Send bug reports to @email{antoine.fraboulet@insa-lyon.fr},
+@c     suggestions to the @email{antoine.fraboulet@insa-lyon.fr, same address}.
+
+@c ======================================================================
+@c ======================================================================
+@c ======================================================================
+
+@copying
+This manual is for Wtracer, the execution trace parser for WSim and WSNet, version @value{VERSION}.
+
+Copyright @copyright{} 2006, 2007 Antoine Fraboulet.
+
+@quotation
+Permission is granted to make and distribute verbatim copies
+of this entire document without royalty provided the
+copyright notice and this permission notice are preserved.
+@end quotation
+@end copying
+
+@c ======================================================================
+@c == Title Page ========================================================
+@c ======================================================================
+
+@titlepage
+@title WTracer: Worldsens Trace Parser
+@subtitle User Documentation
+@subtitle @value{UPDATE-MONTH}
+@author Antoine Fraboulet
+
+@page
+@vskip 0pt plus 1filll
+@insertcopying
+
+@c Published by ...
+@end titlepage
+
+@c ======================================================================
+@c == Contents ==========================================================
+@c ======================================================================
+
+@contents
+
+@ifnottex
+@node Top, Introduction, (dir), (dir)
+@top WTracer : Worldsens Trace Parser and Pretty Printer
+
+@insertcopying
+@end ifnottex
+
+@menu
+* Introduction:: Introduction
+* Options:: WTracer Command Line Options
+* Input:: Input Binary Format 
+* Output:: Output Formats
+* Links:: Resources and Links:: External Resources
+@end menu
+
+
+@c ==================================================
+@c ==================================================
+@node Introduction, Options, Top, Top
+@chapter Introduction
+@c ==================================================
+@c ==================================================
+
+
+WTracer is a companion tool of the Worldsens Framework. This tool has
+been designed to parse and pretty print binary traces produced by WSim
+and WSNet during their execution. By keeping full binary traces output
+very basic, simulation time is barely impacted by trace generation and
+offline trace analysis tools can be used.
+
+@image{fig/wsim_mantis_mclk,14cm,,WTracer gnuplot output example:
+MSP430 frequency scaling trace example for MantisOS bootstrap}
+
+
+@c ==================================================
+@c ==================================================
+@node Options, Input, Introduction, Top
+@chapter WTracer Command Line Options
+@c ==================================================
+@c ==================================================
+
+WTracer is a command line tool that can be used in shell scripts. A very small set
+of command line options are used to drive trace parsing and output format selection.
+
+@* 
+
+@c @cartouche
+@example
+@c man begin SYNOPSIS
+usage: wtracer [options]
+@c man end
+@end example
+@c @end cartouche
+
+@* 
+
+@table @option
+@item --in=file
+      Input trace filename
+@item --out=file
+      Output filename
+@item --Dir=directory
+      Input files directory. All files ending with @t{.trc} are processed
+      in the selected directory. 
+@item --signal=name
+      Signal name to be extracted, defaults to all
+@item --format=mode 
+      Select the trace output mode
+      @table @option
+      @item gplot
+        Enables gnuplot output mode.
+
+      @item vcd
+        Enables Value Change Dump (VCD) output file format. This format can be 
+        viewed using signal analyzers such as gtkwave.
+
+      @item raw
+        Enables RAW output format that can be easily parsed using external tools.
+
+      @item all
+        Dumps trace information in all available formats.
+
+      @end table
+@item --begin=time
+      Time reference at which the output trace is to be started expressed in    
+      nanosecond (default = 0)
+@item --end=time   
+      Time reference for output end expressed in nanosecond (default = end of
+      simulation).
+@item --debug
+      Turn on debug information, to be used only when adding a new output format
+      or binary input file version.
+@item --help
+      WTrace command line online help
+@end table
+@*
+
+The most commonly used wtracer command line looks like the following
+
+@example
+$ wtracer --in=wsim.trc --out=wsim.gp --format=gplot
+$ gnuplot < wsim.gp
+@end example
+
+These two lines generates the full list of @t{.eps} figures that can
+be extracted from the simulation trace @t{wsim.trc}.
+
+@c ==================================================
+@c ==================================================
+@node Input, Output, Options, Top
+@chapter Input Formats 
+@c ==================================================
+@c ==================================================
+
+WTracer input file format has been chosen to be regular and very easy
+to generate and parse. The file format is composed of a header
+followed by signal value changes. This format could be compared to a
+binary version of a Value Change Dump file format used by HDL hardware
+simulator to represent signals during simulations.  
+
+The header structure is composed of the following information: a magic cookie
+used to identify Worldsens binary trace format. A version number for header 
+information, 
+
+@example
+  wtracer magic cookie       : "Worldsens tracer datafile"
+  wtracer format version     : 8 bits
+  wtracer endian inforamtion : 8 bits
+@end example
+
+The endianess value is fixed at run time by the machine running the
+simulation such that no transformation has to be done if the
+simulation and trace analysis are performed on the same type of
+machine. A value of 0 means that data are stored in big endian order, 1 is
+used for little endian machines.
+@*
+
+@section Input Format Version 0
+@c ======================
+
+Simulation and events information are stored after this first level header.
+
+@verbatim
+  #define TRACER_MAX_ID                30
+  #define TRACER_MAX_NAME_LENGTH       30
+
+  /* these value are for the complete trace                            */
+  char             tracer_max_id;              /* maximum used id      */
+  tracer_ev_t      ev_count_total;             /* global event counter */
+  tracer_time_t    sim_time_total;             /* simulation time (ns) */
+
+  char             id_name   [TRACER_MAX_ID][TRACER_MAX_NAME_LENGTH];
+  tracer_ev_t      id_count  [TRACER_MAX_ID];  /* counter for each id  */
+  tracer_val_t     id_val_min[TRACER_MAX_ID];  /* id_min               */
+  tracer_val_t     id_val_max[TRACER_MAX_ID];  /* id max               */
+@end verbatim
+@*
+
+Actual data samples start right after the header information.
+Each data sample is recorded using the following, fixed sized, C structure.
+Samples can be read using the structure but value have to be changed according
+to the endianess value stored in the header file.
+
+@verbatim
+  struct tracer_sample_struct_t {
+    tracer_id_t    id;   /* 32 Bits */
+    tracer_time_t  time; /* 64 bits */
+    tracer_val_t   val;  /* 64 bits */
+  };
+  typedef struct tracer_sample_struct_t tracer_sample_t;
+@end verbatim
+
+@c ==================================================
+@c ==================================================
+@node Output, Links, Input, Top
+@chapter Output Formats
+@c ==================================================
+@c ==================================================
+
+WTracer can output traces using Gnuplot, VCD or raw file format. 
+New output drivers can be written for wtracer very easily. The
+@t{raw} output driver can be used as a starting example to derive 
+new output formats suited for better representation.
+
+@section Gnuplot Output Format
+@c ========================
+
+The Gnuplot output format generates datafiles that can be directly
+used as gnuplot command files.
+
+@example
+$ wtracer --in=wsim.trc --out=wsim.gp --format=gplot
+$ gnuplot < wsim.gp
+@end example
+
+WTrace using Gnuplot output is the strandard output format for rapid 
+performance evaluation of WSN  node behavior.
+
+@section VCD Output Format
+@c ========================
+
+VCD traces can be viewed using tools like gtkwave. The following
+screenshot presents the wire activity generated by the 1-wire serial
+protocol used to read the DS2411 serial number during the simulation.
+
+@image{fig/wsim_gtkwave,16cm,,GTKWave screen capture}
+
+
+@section Raw File format 
+@c ========================
+
+The @t{raw} file format can be used with external tools. This Format
+is very easy to parse. The first lines are the trace description,
+including the min/max values as well as the events counter
+numbers. The rest of the file is the list of events which are recorded
+using the simulation time in nanoseconds and the value of the event.
+Lines starting with # can be considered as comments.
+
+@verbatim
+  # ============================
+  id:Interrupt
+  min: 0
+  max: 6
+  count: 3
+
+  0: 0
+  13143812282: 6
+  13143816532: 0
+  # ============================
+  id:Power_mode
+  min: 0
+  max: 0
+  count: 1
+
+  0: 0
+  # ============================
+@end verbatim
+
+
+@c ==================================================
+@c ==================================================
+@node Links,  , Output, Top
+@chapter Resources and Links
+@c ==================================================
+@c ==================================================
+
+      @itemize @bullet
+      @item Gnuplot 
+      
+            @uref{http://www.gnuplot.info/}
+
+      @item GTKWave - Electronic Waveform Viewer 
+
+            @uref{http://sourceforge.net/projects/gtkwave/}
+
+      @end itemize
+
+@c ======================================================================
+@c ======================================================================
+@c ======================================================================
+@c @node Index
+@c @unnumbered Index
+@c @printindex vr
+
+@c ======================================================================
+@c ======================================================================
+@c ======================================================================
+@bye
+@c ======================================================================
+@c ======================================================================
+@c ======================================================================

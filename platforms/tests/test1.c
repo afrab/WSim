@@ -10,10 +10,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifdef __DEBUG
-#  undef DEBUG
-#endif
-
 #include "arch/common/hardware.h"
 #include "arch/msp430/msp430.h"
 #include "devices/devices.h"
@@ -21,9 +17,10 @@
 #include "devices/ptty/ptty_dev.h"
 #include "src/options.h"
 
+#if defined(GUI)
+#include "libgui/ui.h"
 #define UI_EVENT_SKIP (10*1000)
-
-
+#endif
 
 /* ****************************************
  * platform description 
@@ -50,59 +47,64 @@
 /* ************************************************** */
 /* ************************************************** */
 
-#define LED1            0
-#define LED2            1
-#define LED3            2
-#define LED4            3
-#define LED5            4
-#define LED6            5
-#define LED7            6
-#define LED8            7
+#define SYSTEM          0
+#define LED1            1
+#define LED2            2
+#define LED3            3
+#define LED4            4
+#define LED5            5
+#define LED6            6
+#define LED7            7
+#define LED8            8
+#define SERIAL0         9
 
-#if defined(PTTY)
-#   define SERIAL0                8
-#   if #defined(__msp430_have_usart1)
-#       define SERIAL1            9
-#       define FREE_DEVICE_MAX   10
-#   else
-#       define FREE_DEVICE_MAX    9
-#   endif
+#if #defined(__msp430_have_usart1)
+#  define SERIAL1           10
+#  define FREE_DEVICE_MAX   11
 #else
-#   define FREE_DEVICE_MAX        8
+#  define FREE_DEVICE_MAX   10
 #endif
 
 
 /* ************************************************** */
 /* ************************************************** */
 /* ************************************************** */
-
-#if defined(SERIAL0)
-static struct moption_t ptty0_opt = {
-  .longname    = "serial0",
-  .type        = required_argument,
-  .helpstring  = "serial port 0",
-  .value       = NULL
-};
-#endif
-
-#if defined(SERIAL1)
-static struct moption_t ptty1_opt = {
-  .longname    = "serial1",
-  .type        = required_argument,
-  .helpstring  = "serial port 1",
-  .value       = NULL
-};
-#endif
 
 int devices_options_add()
 {
-#if defined(SERIAL0)
-  options_add(&ptty0_opt);
-#endif
-
+  ptty_add_options(SERIAL0, 0, "serial0");
 #if defined(SERIAL1)
-  options_add(&ptty1_opt);
+  ptty_add_options(SERIAL1, 1, "serial1");
 #endif
+  return 0;
+}
+
+/* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
+
+struct test1_struct_t {
+};
+
+#define SYSTEM_DATA   ((struct test1_struct_t*)(machine.device[SYSTEM].data))
+
+int system_reset (int UNUSED dev) 
+{ 
+  return 0; 
+}
+
+int system_delete(int UNUSED dev) 
+{ 
+  return 0; 
+}
+
+int system_create(int dev_num)
+{
+  machine.device[dev_num].reset         = system_reset;
+  machine.device[dev_num].delete        = system_delete;
+  machine.device[dev_num].state_size    = sizeof(struct test1_struct_t);
+  machine.device[dev_num].name          = "System Platform";
+
   return 0;
 }
 
@@ -123,6 +125,7 @@ int devices_create()
   /* fix peripheral sizes          */
   /*********************************/
   machine.device_max           = FREE_DEVICE_MAX;
+  machine.device_size[SYSTEM]  = sizeof(struct test1_struct_t);
   machine.device_size[LED1]    = led_device_size();    // Led1
   machine.device_size[LED2]    = led_device_size();    // Led2
   machine.device_size[LED3]    = led_device_size();    // Led3
@@ -131,9 +134,7 @@ int devices_create()
   machine.device_size[LED6]    = led_device_size();    // Led3
   machine.device_size[LED7]    = led_device_size();    // Led1
   machine.device_size[LED8]    = led_device_size();    // Led2
-#if defined(SERIAL0)
   machine.device_size[SERIAL0] = ptty_device_size();
-#endif
 #if defined(SERIAL1)
   machine.device_size[SERIAL1] = ptty_device_size();
 #endif
@@ -145,19 +146,17 @@ int devices_create()
   /*********************************/
   /* create peripherals            */
   /*********************************/
-  res += led_device_create      (LED1,0xee,0,0);
-  res += led_device_create      (LED2,0xee,0,0);
-  res += led_device_create      (LED3,0xee,0,0);
-  res += led_device_create      (LED4,0xee,0,0);
-  res += led_device_create      (LED5,0xee,0,0);
-  res += led_device_create      (LED6,0xee,0,0);
-  res += led_device_create      (LED7,0xee,0,0);
-  res += led_device_create      (LED8,0xee,0,0);
-#if defined(SERIAL0)
-  res += ptty_device_create     (SERIAL0,0,ptty0_opt.value);
-#endif
+  res += led_device_create      (LED1,0xee,0,0,"led1");
+  res += led_device_create      (LED2,0xee,0,0,"led2");
+  res += led_device_create      (LED3,0xee,0,0,"led3");
+  res += led_device_create      (LED4,0xee,0,0,"led4");
+  res += led_device_create      (LED5,0xee,0,0,"led5");
+  res += led_device_create      (LED6,0xee,0,0,"led6");
+  res += led_device_create      (LED7,0xee,0,0,"led7");
+  res += led_device_create      (LED8,0xee,0,0,"led8");
+  res += ptty_device_create     (SERIAL0,0);
 #if defined(SERIAL1)
-  res += ptty_device_create     (SERIAL1,0,ptty1_opt.value);
+  res += ptty_device_create     (SERIAL1,0);
 #endif
 
   /*********************************/
@@ -224,12 +223,10 @@ int devices_update()
 
   /* port 2 :                           */
   /* ========                           */
-#if defined(SERIAL0)
   if (msp430_usart0_dev_read_uart(&val8))
     {
       machine.device[SERIAL0].write(SERIAL0, PTTY_D, val8);
     }
-#endif
 
 #if defined(SERIAL1)
   if (msp430_usart1_dev_read_uart(&val8))
@@ -247,7 +244,6 @@ int devices_update()
   /* *************************************************************************** */
 
   /* input on usart0 line */
-#if defined(SERIAL0)
   if (msp430_usart0_dev_write_uart_ok())
      {
        uint32_t mask,value;
@@ -255,7 +251,6 @@ int devices_update()
        if ((mask & PTTY_D) != 0)
 	 msp430_usart0_dev_write_uart(value & PTTY_D);
      }
-#endif
 
   /* input on UI */
   {
@@ -269,7 +264,7 @@ int devices_update()
 	  {
 	  case UI_EVENT_QUIT:
 	    HW_DMSG_UI("  devices UI event QUIT\n");
-	    MCU_SIGNAL = SIG_UI;
+	    mcu_signal_set(SIG_UI);
 	    break;
 	  case UI_EVENT_USER:
 	  case UI_EVENT_NONE:
@@ -287,10 +282,7 @@ int devices_update()
   /* *************************************************************************** */
   LIBSELECT_UPDATE();
   LIBWSNET_UPDATE();
-
-#if defined(SERIAL0)
   UPDATE(SERIAL0);
-#endif
 
 #if defined(SERIAL1)
   UPDATE(SERIAL1);

@@ -10,10 +10,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifdef __DEBUG
-#  undef DEBUG
-#endif
-
 #include "arch/common/hardware.h"
 #include "arch/msp430/msp430.h"
 #include "devices/devices.h"
@@ -43,34 +39,60 @@
 /* ************************************************** */
 /* ************************************************** */
 
-#define SEG0     0
-#define SEG1     1
-#define LED1     2
-#define LED2     3
-#define LED3     4
-#define LED4     5
-#define LED5     6
-#define LED6     7
-#define LED7     8
-#define LED8     9
-#define LCD     10
-#define SERIAL0 11
-#define OT_DEVICE_MAX 12
+#define SYSTEM   0
+#define SEG0     1
+#define SEG1     2
+#define LED1     3
+#define LED2     4
+#define LED3     5
+#define LED4     6
+#define LED5     7
+#define LED6     8
+#define LED7     9
+#define LED8    10
+#define LCD     11
+#define SERIAL0 12
+
+#define OT_DEVICE_MAX 13
 
 /* ************************************************** */
 /* ************************************************** */
 /* ************************************************** */
-
-static struct moption_t ptty0_opt = {
-  .longname    = "serial0",
-  .type        = required_argument,
-  .helpstring  = "serial fifo 0",
-  .value       = NULL
-};
 
 int devices_options_add()
 {
-  options_add(&ptty0_opt);
+  ptty_add_options(SERIAL0, 0, "serial0");
+  return 0;
+}
+
+/* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
+
+struct otsetre_struct_t {
+  uint8_t seg_latch;
+};
+
+#define SYSTEM_DATA   ((struct otsetre_struct_t*)(machine.device[SYSTEM].data))
+#define SEG_LATCH     SYSTEM_DATA->seg_latch
+
+int system_reset (int UNUSED dev) 
+{ 
+  return 0; 
+}
+
+int system_delete(int UNUSED dev) 
+{ 
+  return 0; 
+}
+
+int system_create(int dev_num)
+{
+  machine.device[dev_num].reset         = system_reset;
+  machine.device[dev_num].delete        = system_delete;
+  machine.device[dev_num].state_size    = sizeof(struct otsetre_struct_t);
+  machine.device[dev_num].name          = "System Platform";
+
   return 0;
 }
 
@@ -92,6 +114,7 @@ int devices_create()
   /* begin platform specific part  */
   /*********************************/
   machine.device_max           = OT_DEVICE_MAX;
+  machine.device_size[SYSTEM]  = sizeof(struct otsetre_struct_t);
   machine.device_size[SEG0]    = sevenseg_device_size();
   machine.device_size[SEG1]    = sevenseg_device_size();
   machine.device_size[LED1]    = led_device_size();
@@ -115,12 +138,16 @@ int devices_create()
   /*********************************/
   res += sevenseg_device_create(SEG0);
   res += sevenseg_device_create(SEG1);
-  for(i=LED1; i <= LED8; i++) // 8 leds
-    {
-      res += led_device_create(i,0xee,0,0);
-    }
+  res += led_device_create(LED1,0xee,0,0,"led1");
+  res += led_device_create(LED2,0xee,0,0,"led2");
+  res += led_device_create(LED3,0xee,0,0,"led3");
+  res += led_device_create(LED4,0xee,0,0,"led4");
+  res += led_device_create(LED5,0xee,0,0,"led5");
+  res += led_device_create(LED6,0xee,0,0,"led6");
+  res += led_device_create(LED7,0xee,0,0,"led7");
+  res += led_device_create(LED8,0xee,0,0,"led8");
   res += gdm_device_create(LCD);
-  res += ptty_device_create(SERIAL0,0,ptty0_opt.value);
+  res += ptty_device_create(SERIAL0,0);
 
   /*********************************/
   /* end of platform specific part */
@@ -170,7 +197,6 @@ int devices_update()
 
   uint8_t   val8;
   uint32_t  mask32,val32;
-  static uint8_t seg_latch;
 
   /* ************************* */
   /* MCU -> devices            */
@@ -185,7 +211,7 @@ int devices_update()
   //          7seg data out, depends on p6.4 and port6.3
   if (msp430_digiIO_dev_read(PORT3,&val8))
     {
-      seg_latch = val8;
+      SEG_LATCH = val8;
     }
   
   // port 4 : 
@@ -221,14 +247,14 @@ int devices_update()
 
       if (val8 & 0x10) // p6.4
 	{
-	  machine.device[SEG0].write(SEG0,0,seg_latch);
+	  machine.device[SEG0].write(SEG0,0,SEG_LATCH);
 	  UPDATE(SEG0);
 	  REFRESH(SEG0);
 	}
 
       if (val8 & 0x08) // p6.3
 	{
-	  machine.device[SEG1].write(SEG1,0,seg_latch);
+	  machine.device[SEG1].write(SEG1,0,SEG_LATCH);
 	  UPDATE(SEG1);
 	  REFRESH(SEG1);
 	}

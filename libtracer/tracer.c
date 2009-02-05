@@ -15,7 +15,6 @@
 #include <errno.h>
 #include <inttypes.h>
 
-#include "arch/common/hardware.h"
 #include "liblogger/logger.h"
 #include "tracer.h"
 
@@ -34,6 +33,13 @@
  ****************************************/
 #if defined(WORLDSENS)
 #define TRACER_USE_BACKTRACK
+#endif
+
+#if defined(WSNET1)
+#define APP_EXIT(i) exit(i)
+#else
+#include "arch/common/hardware.h"
+#define APP_EXIT(i) machine_exit(i)
 #endif
 
 /****************************************
@@ -174,16 +180,17 @@ static void tracer_dump_header(void);
 static void
 tracer_dump_header()
 {
-  char      v,e;
-  uint32_t  i = 0;
+  char          v,e;
+  uint32_t      i = 0;
   tracer_time_t t = 0;
-  uint64_t  cycles;
-  uint64_t  time;
-  uint64_t  insn;
-  uint32_t  size;
-
+  uint64_t      cycles;
+  uint64_t      time;
+  uint64_t      insn;
+  uint32_t      size;
+  uint32_t      backtracks;
 
   rewind(tracer_datafile);
+
   
   v = TRACER_VERSION;
 #if defined(WORDS_BIGENDIAN)
@@ -192,9 +199,19 @@ tracer_dump_header()
   e = 1;
 #endif
 
-  cycles = mcu_get_cycles();
-  time   = MACHINE_TIME_GET_NANO();
-  insn   = mcu_get_insn();
+
+#if defined(WSNET1)
+  cycles     = 0;
+  insn       = 0;
+  time       = tracer_get_nanotime();
+  backtracks = 0;
+#else
+  cycles     = mcu_get_cycles();
+  insn       = mcu_get_insn();
+  time       = tracer_get_nanotime();
+  backtracks = machine.backtrack;
+#endif
+
 
   /* magic */
   size = sizeof(TRACER_MAGIC);
@@ -210,9 +227,9 @@ tracer_dump_header()
   DMSG_TRACER("tracer:hdr:endian   : %d\n",e);
 
   /* backtracks uint32_t */
-  size = sizeof(machine.backtrack);
-  i   += fwrite(&machine.backtrack,size,1,tracer_datafile);
-  DMSG_TRACER("tracer:hdr:backtrack: %d\n",machine.backtrack);
+  size = sizeof(backtracks);
+  i   += fwrite(&backtracks,size,1,tracer_datafile);
+  DMSG_TRACER("tracer:hdr:backtrack: %d\n",backtracks);
 
   /* simulated cycles */
   size = sizeof(cycles);
@@ -296,7 +313,13 @@ tracer_init(char *filename, get_nanotime_function_t f)
 
   if (filename == NULL)
     return ;
-    
+
+  if (f == NULL)
+    {
+      ERROR("tracer: must define a valid function to get time\n");
+      return ;
+    }
+
   tracer_get_nanotime = f;
   tracer_filename     = strdup(filename);
   for(id=0; id < TRACER_MAX_ID; id++)
@@ -388,7 +411,7 @@ tracer_event_add_id(int width, char* name, char* module)
 	  tracer_width[i] == width)
 	{
 	  ERROR("tracer: event %s.%s is already registered\n",module,name);
-	  machine_exit(1);
+	  APP_EXIT(1);
 	  return -1;
 	}
     }
@@ -399,13 +422,13 @@ tracer_event_add_id(int width, char* name, char* module)
   if (id >= (TRACER_MAX_ID - 1))
     {
       ERROR("tracer: max event recording reached, could not register [%s] = %d\n",name,id);
-      machine_exit(1);
+      APP_EXIT(1);
     }
 
   if ((name == NULL) || (strlen(name) == 0))
     {
       ERROR("tracer: event id %d must have a valid name (non null)\n",id);
-      machine_exit(1);
+      APP_EXIT(1);
     }
 
   if ((width < 1) || (width > 64))

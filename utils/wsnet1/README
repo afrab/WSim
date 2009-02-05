@@ -4,7 +4,9 @@ WSNet1: wireless network simulation for WSim
 This version is a very limited version of the WSNet simulator 
 
 This program is maintained for the sole purpose of using it with
-WSim. If you need full featured WSNet simulation tools please use the
+WSim in tutorials and demos. 
+
+If you need full featured WSNet simulation tools please use the
 newer WSNet2 version. For more information please visit 
   http://wsnet.gforge.inria.fr/
 

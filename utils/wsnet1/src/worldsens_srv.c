@@ -20,6 +20,7 @@
 /**************************************************************************/
 /**************************************************************************/
 /**************************************************************************/
+
 uint16_t g_lport = 9998;
 uint16_t g_mport = 9999;
 char *g_maddr = "224.0.0.1";
@@ -96,7 +97,7 @@ worldsens_s_initialize (struct _worldsens_s *worldsens)
   struct sockaddr_in addr;
 
   /* Unicast socket */
-  if ((worldsens->fd = socket (AF_INET, SOCK_DGRAM, 0)) < 0)
+  if ((worldsens->mfd = socket (AF_INET, SOCK_DGRAM, 0)) < 0)
     {
       perror ("worldsens_s_initialize (socket):");
       return -1;
@@ -108,10 +109,10 @@ worldsens_s_initialize (struct _worldsens_s *worldsens)
 
 
   /* Bind */
-  if (bind (worldsens->fd, (struct sockaddr *) (&addr), sizeof (addr)) != 0)
+  if (bind (worldsens->mfd, (struct sockaddr *) (&addr), sizeof (addr)) != 0)
     {
       perror ("worldsens_s_initialize (bind):");
-      close (worldsens->fd);
+      close (worldsens->mfd);
       return -1;
     }
 
@@ -120,7 +121,7 @@ worldsens_s_initialize (struct _worldsens_s *worldsens)
   if (inet_aton (g_maddr, &worldsens->maddr.sin_addr) == 0)
     {
       perror ("worldsens_s_initialize (inet_aton):");
-      close (worldsens->fd);
+      close (worldsens->mfd);
       return -1;
     }
   worldsens->maddr.sin_port = htons (g_mport);
@@ -154,16 +155,16 @@ worldsens_s_connect (struct _worldsens_s *worldsens, struct sockaddr_in *addr,
       /* Forge */
       s_pkt.type = WORLDSENS_S_NOATTRADDR;
 
-      /* Send */
+      /* Multicast Send */
       if (sendto
-	  (worldsens->fd, (char *) (&s_pkt),
+	  (worldsens->mfd, (char *) (&s_pkt),
 	   sizeof (struct _worldsens_s_connect_pkt), 0,
 	   (struct sockaddr *) addr,
 	   sizeof (struct sockaddr_in)) <
 	  (int) sizeof (struct _worldsens_s_connect_pkt))
 	{
 	  perror ("worldsens_s_connect (sendto)");
-	  close (worldsens->fd);
+	  close (worldsens->mfd);
 	  return -1;
 	}
 
@@ -179,13 +180,13 @@ worldsens_s_connect (struct _worldsens_s *worldsens, struct sockaddr_in *addr,
 
   /* Send */
   if (sendto
-      (worldsens->fd, (char *) (&s_pkt),
+      (worldsens->mfd, (char *) (&s_pkt),
        sizeof (struct _worldsens_s_connect_pkt), 0, (struct sockaddr *) addr,
        sizeof (struct sockaddr_in)) <
       (int) sizeof (struct _worldsens_s_connect_pkt))
     {
       perror ("worldsens_s_connect (sendto)");
-      close (worldsens->fd);
+      close (worldsens->mfd);
       return -1;
     }
 
@@ -233,11 +234,11 @@ worldsens_s_listen_to_next_rp (struct _worldsens_s *worldsens)
       addrlen = sizeof (addr);
       memset (&addr, 0, sizeof (addr));
       if ((len =
-	   recvfrom (worldsens->fd, msg, WORLDSENS_MAX_PKTLENGTH, 0,
+	   recvfrom (worldsens->mfd, msg, WORLDSENS_MAX_PKTLENGTH, 0,
 		     (struct sockaddr *) &addr, &addrlen)) <= 0)
 	{
 	  perror ("worldsens_s_listen_to_next_rp (recvfrom)");
-	  close (worldsens->fd);
+	  close (worldsens->mfd);
 	  return -1;
 	}
 
@@ -417,14 +418,14 @@ worldsens_s_backtrack_async (struct _worldsens_s *worldsens, uint64_t period)
 
   /* Send */
   if (sendto
-      (worldsens->fd, (char *) (&pkt),
+      (worldsens->mfd, (char *) (&pkt),
        sizeof (struct _worldsens_s_backtrack_pkt), 0,
        (struct sockaddr *) &worldsens->maddr,
        sizeof (struct sockaddr_in)) <
       (int) sizeof (struct _worldsens_s_backtrack_pkt))
     {
       perror ("worldsens_s_backtrack_async (sendto)");
-      close (worldsens->fd);
+      close (worldsens->mfd);
       return -1;
     }
 
@@ -462,14 +463,14 @@ worldsens_s_save_release_request (struct _worldsens_s *worldsens,
 
   /* Send */
   if (sendto
-      (worldsens->fd, (char *) (&pkt),
+      (worldsens->mfd, (char *) (&pkt),
        sizeof (struct _worldsens_s_saverel_pkt), 0,
        (struct sockaddr *) &worldsens->maddr,
        sizeof (struct sockaddr_in)) <
       (int) sizeof (struct _worldsens_s_saverel_pkt))
     {
       perror ("worldsens_s_save_release_request (sendto)");
-      close (worldsens->fd);
+      close (worldsens->mfd);
       return -1;
     }
 
@@ -519,11 +520,11 @@ worldsens_s_save_release_request_rx (struct _worldsens_s *worldsens, int node,
 
   /* Send */
   if (sendto
-      (worldsens->fd, reply, length, 0, (struct sockaddr *) &worldsens->maddr,
+      (worldsens->mfd, reply, length, 0, (struct sockaddr *) &worldsens->maddr,
        sizeof (struct sockaddr_in)) < length)
     {
       perror ("worldsens_s_release__request_rx (sendto)");
-      close (worldsens->fd);
+      close (worldsens->mfd);
       return -1;
     }
   WSNET_S_DBG_EXC ("WSNET (%" PRId64 ", %d): <-- SAVE\n", g_time,
@@ -562,24 +563,24 @@ worldsens_s_rx (struct _worldsens_s *worldsens, int node, int radio,
   memcpy (reply + sizeof (struct _worldsens_s_rx_pkt), (char *) data,
 	  g_c_nodes * sizeof (struct _worldsens_data));
 
-  pkt->type = WORLDSENS_S_SYNCH_REQ | WORLDSENS_S_RX;
-  pkt->pkt_seq = htonl (pkt_seq++);
-  pkt->size = htonl (length);
-  pkt->node = htonl (node);
-  pkt->frequency = htonl (radio);
+  pkt->type       = WORLDSENS_S_SYNCH_REQ | WORLDSENS_S_RX;
+  pkt->pkt_seq    = htonl (pkt_seq++);
+  pkt->size       = htonl (length);
+  pkt->node       = htonl (node);
+  pkt->frequency  = htonl (radio);
   pkt->modulation = htonl (modulation);
 
   /* Multicast Send */
   if (sendto
-      (worldsens->fd, reply, length, 0, (struct sockaddr *) &worldsens->maddr,
+      (worldsens->mfd, reply, length, 0, (struct sockaddr *) &worldsens->maddr,
        sizeof (struct sockaddr_in)) < length)
     {
       perror ("worldsens_s_rx (sendto)");
-      close (worldsens->fd);
+      close (worldsens->mfd);
       return -1;
     }
 
-  TRACER_WRITE_ALL_NODE ();
+  //  TRACER_WRITE_ALL_NODE(WORLDSENS_S_SYNCH_REQ | WORLDSENS_S_RX);
   WSNET_S_DBG_EXC ("WSNET (%" PRId64
 		   ", -1): <-- RX (ip: %d, frequency: %d, modulation: %d)\n",
 		   g_time, node, radio, modulation);
@@ -594,7 +595,7 @@ worldsens_s_rx (struct _worldsens_s *worldsens, int node, int radio,
 int
 worldsens_s_clean (struct _worldsens_s *worldsens)
 {
-  close (worldsens->fd);
+  close (worldsens->mfd);
   core_runtime_end ();
   exit (0);
 }

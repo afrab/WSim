@@ -92,14 +92,15 @@
 /**************************************************************************/
 /**************************************************************************/
 /**************************************************************************/
+
 extern uint16_t	g_lport;
 extern uint16_t	g_mport;
 extern char *	g_maddr;
 
+/**************************************************************************/
+/**************************************************************************/
+/**************************************************************************/
 
-/**************************************************************************/
-/**************************************************************************/
-/**************************************************************************/
 typedef void (*callback_rx_t) (void *arg, uint8_t data, 
 			       int frequency, int modulation, 
 			       double rx_mW, double SiNR);
@@ -108,22 +109,32 @@ typedef void (*callback_rx_t) (void *arg, uint8_t data,
 /**************************************************************************/
 /**************************************************************************/
 /**************************************************************************/
-struct __attribute__ ((packed)) _worldsens_c_connect_pkt {
+
+#define PACKED __attribute__ ((packed))
+
+struct PACKED _worldsens_c_connect_pkt 
+{
   char type;
   int  node;
 };
 
-struct __attribute__ ((packed)) _worldsens_c_disconnect_pkt {
+
+struct PACKED _worldsens_c_disconnect_pkt 
+{
   char type;
   int  node;
 };
 
-struct __attribute__ ((packed)) _worldsens_c_synched_pkt {
+
+struct PACKED _worldsens_c_synched_pkt 
+{
   char type;
   int  rp_seq;
 };
 
-struct __attribute__ ((packed)) _worldsens_c_tx_pkt {
+
+struct PACKED _worldsens_c_tx_pkt 
+{
   char	   type;
   int	   node;
   uint64_t period;
@@ -139,26 +150,35 @@ struct __attribute__ ((packed)) _worldsens_c_tx_pkt {
 /**************************************************************************/
 /**************************************************************************/
 /**************************************************************************/
-struct __attribute__ ((packed)) _worldsens_s_header {
+
+
+struct PACKED _worldsens_s_header 
+{
 	char	   type;
 	int	   pkt_seq;
 };
 
-struct __attribute__ ((packed)) _worldsens_s_connect_pkt {
+
+struct PACKED  _worldsens_s_connect_pkt 
+{
   char	   type;
   int	   pkt_seq;
   uint64_t period;
   int	   rp_seq;
 };
 
-struct __attribute__ ((packed)) _worldsens_s_backtrack_pkt {
+
+struct PACKED _worldsens_s_backtrack_pkt 
+{
   char	   type;
   int	   pkt_seq;
   uint64_t period;
   int	   rp_seq;
 };
 
-struct __attribute__ ((packed)) _worldsens_s_saverel_pkt {
+
+struct PACKED _worldsens_s_saverel_pkt 
+{
   char	   type;
   int	   pkt_seq;
   int	   c_rp_seq;
@@ -166,7 +186,9 @@ struct __attribute__ ((packed)) _worldsens_s_saverel_pkt {
   int	   n_rp_seq;
 };
 
-struct __attribute__ ((packed)) _worldsens_s_srrx_pkt {
+
+struct PACKED _worldsens_s_srrx_pkt 
+{
   char	   type;
   int	   pkt_seq;
   int	   c_rp_seq;
@@ -178,7 +200,9 @@ struct __attribute__ ((packed)) _worldsens_s_srrx_pkt {
   int	   modulation;
 };
 
-struct __attribute__ ((packed)) _worldsens_s_rx_pkt {
+
+struct PACKED _worldsens_s_rx_pkt 
+{
   char	   type;
   int	   pkt_seq;
   int	   size;
@@ -191,7 +215,9 @@ struct __attribute__ ((packed)) _worldsens_s_rx_pkt {
 /**************************************************************************/
 /**************************************************************************/
 /**************************************************************************/
-struct _worldsens_c {
+
+struct _worldsens_c 
+{
   int		 u_fd;
   int		 m_fd;
 	
@@ -218,9 +244,10 @@ struct _worldsens_c {
 /**************************************************************************/
 /**************************************************************************/
 /**************************************************************************/
-struct _worldsens_s {
-  int		     fd;
-	
+
+struct _worldsens_s 
+{
+  int		     mfd;
   struct sockaddr_in maddr;
 	
   uint64_t	     rp;
@@ -228,11 +255,12 @@ struct _worldsens_s {
   char		     synched;
 };
 
+/**************************************************************************/
+/**************************************************************************/
+/**************************************************************************/
 
-/**************************************************************************/
-/**************************************************************************/
-/**************************************************************************/
-struct __attribute__ ((packed)) _worldsens_data {
+struct __attribute__ ((packed)) _worldsens_data 
+{
   int		     node;
   char		     data;
   double	     rx_mW;

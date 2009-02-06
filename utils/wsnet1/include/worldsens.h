@@ -65,6 +65,29 @@
 #define WORLDSENS_S_BACKTRACK		0x08
 #define WORLDSENS_S_RX			0x10
 
+  /* TRACER 
+   *
+   * 1: RX connect         from node
+   * 2: TX attach          to node
+   * 3: RX Synch           from node
+   * 4: TX Next RP         to node
+   * 5: BackTrack          to node
+   * 6: RX data from node  from node
+   * 7: TX data to node    to node
+   */
+
+/* from node */
+
+#define TRACER_NODE_CONNECT     0x00010100
+#define TRACER_NODE_DISCONNECT  0x0200
+#define TRACER_NODE_TX          0x0300
+#define TRACER_NODE_SYNCHED     0x0400 /* + data */
+
+#define TRACER_NODE_ATTRADDR    0x1100
+#define TRACER_NODE_NOATTRADDR  0x1200
+#define TRACER_NODE_SYNCH_REQ   0x1300
+#define TRACER_NODE_BACKTRACK   0x1500
+#define TRACER_NODE_RX          0x1500 /* + data */
 
 /**************************************************************************/
 /**************************************************************************/

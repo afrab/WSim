@@ -42,7 +42,7 @@ int node_create(int addr)
       sprintf(mylabel, "node %d tx", addr);
       g_nodes[addr].trc_id = tracer_event_add_id(32, mylabel, "wsnet1");
     }
-  
+
   return 0;
 }
 

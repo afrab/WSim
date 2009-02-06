@@ -49,81 +49,82 @@ don't modify it by hand*/
 
 /* main function */
 
-int main (int argc, char ** argv) {
+int
+main (int argc, char **argv)
+{
 
-	models_add_antenna     ( "OMNI",
-	                         omni_antenna_instantiate,
-	                         omni_antenna_compute_tx,
-	                         omni_antenna_compute_rx,
-	                         omni_antenna_get_ioctl,
-	                         omni_antenna_set_ioctl,
-	                         omni_antenna_complete);
+  models_add_antenna ("OMNI",
+		      omni_antenna_instantiate,
+		      omni_antenna_compute_tx,
+		      omni_antenna_compute_rx,
+		      omni_antenna_get_ioctl,
+		      omni_antenna_set_ioctl, omni_antenna_complete);
 
-	models_add_interference( "NONE",
-	                         no_interference_instantiate,
-	                         no_interference_correlation,
-	                         no_interference_complete);
+  models_add_interference ("NONE",
+			   no_interference_instantiate,
+			   no_interference_correlation,
+			   no_interference_complete);
 
-	models_add_interference( "ORTHO",
-	                         ortho_interference_instantiate,
-	                         ortho_interference_correlation,
-	                         ortho_interference_complete);
+  models_add_interference ("ORTHO",
+			   ortho_interference_instantiate,
+			   ortho_interference_correlation,
+			   ortho_interference_complete);
 
-	models_add_interference( "CDMA",
-	                         cdma_interference_instantiate,
-	                         cdma_interference_correlation,
-	                         cdma_interference_complete);
+  models_add_interference ("CDMA",
+			   cdma_interference_instantiate,
+			   cdma_interference_correlation,
+			   cdma_interference_complete);
 
-	models_add_mobility    ( "STATIC_STATIC",
-	                         static_static_mobility_instantiate,
-	                         static_static_mobility_update,
-	                         static_static_mobility_complete );
+  models_add_mobility ("STATIC_STATIC",
+		       static_static_mobility_instantiate,
+		       static_static_mobility_update,
+		       static_static_mobility_complete);
 
-	models_add_mobility    ( "RANDOM_STATIC",
-	                         random_static_mobility_instantiate,
-	                         random_static_mobility_update,
-	                         random_static_mobility_complete );
+  models_add_mobility ("RANDOM_STATIC",
+		       random_static_mobility_instantiate,
+		       random_static_mobility_update,
+		       random_static_mobility_complete);
 
-	models_add_mobility    ( "RANDOM_BILLIARD",
-	                         random_billiard_mobility_instantiate,
-	                         random_billiard_mobility_update,
-	                         random_billiard_mobility_complete );
+  models_add_mobility ("RANDOM_BILLIARD",
+		       random_billiard_mobility_instantiate,
+		       random_billiard_mobility_update,
+		       random_billiard_mobility_complete);
 
-	models_add_mobility    ( "STATIC_BILLIARD",
-	                         static_billiard_mobility_instantiate,
-	                         static_billiard_mobility_update,
-	                         static_billiard_mobility_complete );
+  models_add_mobility ("STATIC_BILLIARD",
+		       static_billiard_mobility_instantiate,
+		       static_billiard_mobility_update,
+		       static_billiard_mobility_complete);
 
-	models_add_modulation  ( "DUMB",
-	                         dumb_modulation_instantiate,
-	                         dumb_modulation_compute_BER,
-	                         dumb_modulation_complete );
+  models_add_modulation ("DUMB",
+			 dumb_modulation_instantiate,
+			 dumb_modulation_compute_BER,
+			 dumb_modulation_complete);
 
-	models_add_modulation  ( "BPSK",
-	                         bpsk_modulation_instantiate,
-	                         bpsk_modulation_compute_BER,
-	                         bpsk_modulation_complete );
+  models_add_modulation ("BPSK",
+			 bpsk_modulation_instantiate,
+			 bpsk_modulation_compute_BER,
+			 bpsk_modulation_complete);
 
-	models_add_modulation  ( "THRESHOLD",
-	                         threshold_modulation_instantiate,
-	                         threshold_modulation_compute_BER,
-	                         threshold_modulation_complete );
+  models_add_modulation ("THRESHOLD",
+			 threshold_modulation_instantiate,
+			 threshold_modulation_compute_BER,
+			 threshold_modulation_complete);
 
-	models_add_propagation    ( "PATHLOSS",
-	                         pathloss_propagation_instantiate,
-	                         pathloss_propagation_propagation,
-	                         pathloss_propagation_complete );
+  models_add_propagation ("PATHLOSS",
+			  pathloss_propagation_instantiate,
+			  pathloss_propagation_propagation,
+			  pathloss_propagation_complete);
 
-	models_add_propagation    ( "NO_FADING",
-	                         no_fading_propagation_instantiate,
-	                         no_fading_propagation_propagation,
-	                         no_fading_propagation_complete );
+  models_add_propagation ("NO_FADING",
+			  no_fading_propagation_instantiate,
+			  no_fading_propagation_propagation,
+			  no_fading_propagation_complete);
 
-	models_add_propagation    ( "RANGE",
-	                         range_propagation_instantiate,
-	                         range_propagation_propagation,
-	                         range_propagation_complete );
+  models_add_propagation ("RANGE",
+			  range_propagation_instantiate,
+			  range_propagation_propagation,
+			  range_propagation_complete);
 
-	/* Start simulation */
-	return simulation_start(argc,argv);
+  /* Start simulation */
+  return simulation_start (argc, argv);
 }

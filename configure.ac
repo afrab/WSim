@@ -321,7 +321,7 @@ AM_CONDITIONAL([BUILD_SENSLAB],   [test "${enable_platform_senslab}"   = "yes" -
 AM_CONDITIONAL([BUILD_MOSAR],     [test "${enable_platform_mosar}"     = "yes"])
 AM_CONDITIONAL([BUILD_OT2006],    [test "${enable_platform_ot2006}"    = "yes" -o "$ALL" = "yes" ])
 AM_CONDITIONAL([BUILD_OTSETRE],   [test "${enable_platform_otsetre}"   = "yes" -o "$ALL" = "yes" ])
-AM_CONDITIONAL([BUILD_EZ430],     [test "${enable_platform_ez430}"     = "yes"])
+AM_CONDITIONAL([BUILD_EZ430],     [test "${enable_platform_ez430}"     = "yes" -o "$ALL" = "yes" ])
 AM_CONDITIONAL([BUILD_TESTS],     [test "${enable_platform_tests}"     = "yes" -o "$ALL" = "yes" ])
 AM_CONDITIONAL([BUILD_TELOSB],    [test "${enable_platform_telosb}"    = "yes" -o "$ALL" = "yes" ])
 AM_CONDITIONAL([BUILD_WISENODE],  [test "${enable_platform_wisenode}"  = "yes" -o "$ALL" = "yes" ])

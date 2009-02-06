@@ -84,6 +84,7 @@ struct _battery_public {
 struct _node {
   int addr;
   int active;
+  int trc_id;
   double x, y, z;
 	
   struct _model_application * application;

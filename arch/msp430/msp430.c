@@ -168,18 +168,18 @@ int msp430_mcu_create(int xt1)
       msp430_trace_sp_switch = 0;
     }
 
-  MSP430_TRACER_GIE    = tracer_event_add_id(1,  "gie",        "msp430");
-  MSP430_TRACER_INTR   = tracer_event_add_id(8,  "interrupt",  "msp430");
+  MSP430_TRACER_GIE    = tracer_event_add_id(1,  "intr_gie",   "msp430");
+  MSP430_TRACER_INTR   = tracer_event_add_id(8,  "intr_num",   "msp430");
+  MSP430_TRACER_MCLK   = tracer_event_add_id(32, "clk_mclk",   "msp430");
+  MSP430_TRACER_SMCLK  = tracer_event_add_id(32, "clk_smclk",  "msp430");
+  MSP430_TRACER_ACLK   = tracer_event_add_id(32, "clk_aclk",   "msp430");
   MSP430_TRACER_LPM    = tracer_event_add_id(8,  "LPM",        "msp430");
-  MSP430_TRACER_MCLK   = tracer_event_add_id(32, "mclk",       "msp430");
-  MSP430_TRACER_SMCLK  = tracer_event_add_id(32, "smclk",      "msp430");
-  MSP430_TRACER_ACLK   = tracer_event_add_id(32, "aclk",       "msp430");
-  MSP430_TRACER_PORT1  = tracer_event_add_id(8,  "port_out_1", "msp430");
-  MSP430_TRACER_PORT2  = tracer_event_add_id(8,  "port_out_2", "msp430");
-  MSP430_TRACER_PORT3  = tracer_event_add_id(8,  "port_out_3", "msp430");
-  MSP430_TRACER_PORT4  = tracer_event_add_id(8,  "port_out_4", "msp430");
-  MSP430_TRACER_PORT5  = tracer_event_add_id(8,  "port_out_5", "msp430");
-  MSP430_TRACER_PORT6  = tracer_event_add_id(8,  "port_out_6", "msp430");
+  MSP430_TRACER_PORT1  = tracer_event_add_id(8,  "port_out1",  "msp430");
+  MSP430_TRACER_PORT2  = tracer_event_add_id(8,  "port_out2",  "msp430");
+  MSP430_TRACER_PORT3  = tracer_event_add_id(8,  "port_out3",  "msp430");
+  MSP430_TRACER_PORT4  = tracer_event_add_id(8,  "port_out4",  "msp430");
+  MSP430_TRACER_PORT5  = tracer_event_add_id(8,  "port_out5",  "msp430");
+  MSP430_TRACER_PORT6  = tracer_event_add_id(8,  "port_out6",  "msp430");
   MSP430_TRACER_USART0 = tracer_event_add_id(8,  "Usart0",     "msp430");
   MSP430_TRACER_USART1 = tracer_event_add_id(8,  "Usart1",     "msp430");
 

@@ -3,7 +3,7 @@ dnl Process this file with autoconf to produce a configure script.
 dnl --------------------------------------------------------------
 dnl configure.in for Worldsens architecture simulator
 dnl --------------------------------------------------------------
-AC_INIT([worldsens-tracer],[0.7cvs])
+AC_INIT([worldsens-tracer],[0.8svn])
 AC_CONFIG_SRCDIR(src/main.c)
 AC_CANONICAL_TARGET
 AM_INIT_AUTOMAKE

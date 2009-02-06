@@ -68,6 +68,15 @@ tracer_lldbin(tracer_val_t v)
 /* ************************************************** */
 /* ************************************************** */
 
+/**
+ * VCD file header
+ *
+ * date
+ * version
+ * timsescale
+ * FIXED_TIME is used for regression tests 
+ */
+
 static void vcd_dump_header(tracer_t *t)
 {
   fprintf(t->out_fd,"$date\n");
@@ -120,6 +129,9 @@ void numid_to_str(char *str, int num, int id)
 /* ************************************************** */
 /* ************************************************** */
 
+/**
+ * find all modules listed in a TRC header
+ **/
 void vcd_find_modules(tracer_t UNUSED *t_out, tracer_t *t, int UNUSED tnum)
 {
   tracer_id_t     id;
@@ -130,36 +142,29 @@ void vcd_find_modules(tracer_t UNUSED *t_out, tracer_t *t, int UNUSED tnum)
 
   for(id=0; id < TRACER_MAX_ID; id++)
     {
-      if (t->hdr.id_name[id][0] != '\0')
+      if (t->hdr.id_module[id][0] != '\0')
 	{
-	  char *ptr;
-	  char name[TRACER_MAX_NAME_LENGTH]; /* will be used by strtok */
+	  int mod;
+	  int found = 0;
 
-	  strncpy(name,t->hdr.id_name[id],TRACER_MAX_NAME_LENGTH);
-
-	  ptr = strtok(name,"_.");
-	  // DMSG(t,"    vcd: looking for module %s in %s\n",ptr,t->hdr.id_name[id]);
-
-	  if ((ptr != NULL) && (strcmp(ptr,t->hdr.id_name[id]) != 0))
+	  /* search in list of already seen modules */
+	  for(mod=0; mod < t->modmax; mod++)
 	    {
-	      int mod;
-	      int found = 0;
-	      for(mod=0; mod < t->modmax; mod++)
+	      if (strcmp(t->hdr.id_module[id], t->id_module[mod]) == 0)
 		{
-		  if (strcmp(ptr,t->id_module[mod]) == 0)
-		    {
-		      found = 1;
-		    }
+		  found = 1;
 		}
-	      if (found == 0)
-		{
-		  DMSG(t,"          find new module %s\n",ptr);
-		  strcpy(t->id_module[t->modmax++], ptr);
-		}
+	    }
+
+	  if (found == 0)
+	    {
+	      DMSG(t,"          new module %s\n", t->hdr.id_module[id]);
+	      strcpy(t->id_module[t->modmax++], t->hdr.id_module[id]);
 	    }
 	}
     }
 }
+
 
 void vcd_dump_modules(tracer_t *t_out, tracer_t *t, int tnum)
 {
@@ -172,13 +177,7 @@ void vcd_dump_modules(tracer_t *t_out, tracer_t *t, int tnum)
 	{
 	  if (t->hdr.id_name[id][0] != '\0')
 	    {
-	      char *ptr;
-	      char name[TRACER_MAX_NAME_LENGTH];
-
-	      strncpy(name,t->hdr.id_name[id],TRACER_MAX_NAME_LENGTH);
-	      ptr = strtok(name,"_.");
-
-	      if (strcmp(ptr,t->id_module[mod]) == 0)
+	      if (strcmp(t->hdr.id_module[id],t->id_module[mod]) == 0)
 		{
 		  numid_to_str(t->id_var[id], tnum, id);
 		  fprintf(t_out->out_fd,"    $var integer %d %s %s $end\n", 
@@ -189,6 +188,7 @@ void vcd_dump_modules(tracer_t *t_out, tracer_t *t, int tnum)
       fprintf(t_out->out_fd,"$upscope $end\n\n");
     }
 }
+
 
 void vcd_dump_variables(tracer_t *t_out, tracer_t* t, int tnum)
 {
@@ -204,7 +204,13 @@ void vcd_dump_variables(tracer_t *t_out, tracer_t* t, int tnum)
     }
 }
 
-void tr_module_name(char* dst, char *src)
+
+/**
+ * splits a name
+ *
+ **/
+
+static void tr_split_name(char* dst, char *src)
 {
   int i;
   for(i=0; src[i] != '\0'; i++)
@@ -221,6 +227,18 @@ void tr_module_name(char* dst, char *src)
   dst[i] = '\0';
 }
 
+/**
+ * VCD file scopes
+ *
+ * if multiple files are merged a scope for each
+ * file is created.
+ *  
+ * for each file: 
+ *    1 find list of all modules.
+ *    2 dump each modules and their signals
+ *    3 dump variables
+ **/
+
 void vcd_dump_scopes(tracer_t *t, tracer_t *trc[], int nb_trc_files)
 {
   int i;
@@ -228,16 +246,26 @@ void vcd_dump_scopes(tracer_t *t, tracer_t *trc[], int nb_trc_files)
     {
       char module_name[FILENAME_MAX];
 
-      DMSG(t,"tracer:vcd: dump scopes for %s (%d/%d)\n",trc[i]->in_filename,i,nb_trc_files);
-      tr_module_name(module_name,trc[i]->in_filename);
-      fprintf(t->out_fd,"$scope module %s $end\n\n", module_name);
+      DMSG(t,"tracer:vcd: dump scopes for file %s (%d/%d)\n",trc[i]->in_filename,i,nb_trc_files);
+
+      if (nb_trc_files > 1)
+	{
+	  tr_split_name(module_name,trc[i]->in_filename);
+	  fprintf(t->out_fd,"$scope module %s $end\n\n", module_name);
+	}
+
       DMSG(t,"   vcd: find modules\n");
       vcd_find_modules   (t, trc[i], i);
       DMSG(t,"   vcd: dump modules\n");
       vcd_dump_modules   (t, trc[i], i);
       DMSG(t,"   vcd: dump variables\n");
       vcd_dump_variables (t, trc[i], i);
-      fprintf(t->out_fd,"\n$upscope $end\n");
+
+      /* */
+      if (nb_trc_files > 1)
+	{
+	  fprintf(t->out_fd,"\n$upscope $end\n");
+	}
     }
 }
 
@@ -275,8 +303,11 @@ int drv_vcd_process_file(tracer_t *t)
 
   vcd_dump_header(t);                                              /* header             */
   vcd_dump_scopes(t,&t,1);                                         /* scopes             */
+
+  fprintf(t->out_fd,"\n");                                         /* header end         */
   fprintf(t->out_fd,"$enddefinitions $end\n\n");                   /* header end         */
   fprintf(t->out_fd,"$comment\n  %s\n$end\n\n", PACKAGE_STRING);   /* comments           */
+
   vcd_dump_init_vars(t,&t,1);                                      /* dumpvars init to 0 */
   fprintf(t->out_fd,"\n\n\n");                                     /* start data         */
 

@@ -39,7 +39,7 @@ int node_create(int addr)
       g_nodes[addr].addr = addr;
       flogf2(LEVEL_WORLDSENS, g_nodes[addr].addr, -1, EVENT_CREATE, -1, WORLDSENS_LAYER, KEY_CORE, "Node connection");
       /* TRACER */
-      sprintf(mylabel, "node %d tx", addr);
+      sprintf(mylabel, "node_%d_tx", addr);
       g_nodes[addr].trc_id = tracer_event_add_id(32, mylabel, "wsnet1");
     }
 

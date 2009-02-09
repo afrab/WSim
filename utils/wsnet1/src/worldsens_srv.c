@@ -26,7 +26,8 @@ uint16_t g_mport = 9999;
 char *g_maddr = "224.0.0.1";
 char *g_saddr = "localhost";
 
-int pkt_seq = 0;
+int pkt_seq                = 0;
+int simulation_keeps_going = 1;
 
 /**************************************************************************/
 /**************************************************************************/
@@ -92,6 +93,47 @@ htonll (uint64_t v)
 /**************************************************************************/
 
 int
+worldsens_s_sendto(struct _worldsens_s *worldsens, char *pkt, int size, struct sockaddr_in *addr)
+{
+  int ret;
+
+  ret = sendto (worldsens->mfd, pkt, size, 0, (struct sockaddr*) addr, sizeof (struct sockaddr_in));
+  if (ret < size)
+    {
+      perror ("worldsens:multicast:sendto");
+      close (worldsens->mfd);
+      return -1;
+    }
+
+  tracer_event_record(worldsens->trc_mcast_tx, pkt[0]);
+  return 0;
+}
+
+int
+worldsens_s_recvfrom(struct _worldsens_s *worldsens, char *pkt, int sizemax, struct sockaddr_in *addr)
+{
+  int len;
+  socklen_t addrlen;
+
+  addrlen = sizeof (struct sockaddr_in);
+  len = recvfrom(worldsens->mfd, pkt, sizemax, 0, (struct sockaddr *) addr, &addrlen);
+
+  if (len <= 0)
+    {
+      perror ("worldsens:multicast:recvfrom");
+      close  (worldsens->mfd);
+      return -1;
+    }
+
+  tracer_event_record(worldsens->trc_mcast_rx, pkt[0]);
+  return len;
+}
+
+/**************************************************************************/
+/**************************************************************************/
+/**************************************************************************/
+
+int
 worldsens_s_initialize (struct _worldsens_s *worldsens)
 {
   struct sockaddr_in addr;
@@ -111,7 +153,7 @@ worldsens_s_initialize (struct _worldsens_s *worldsens)
   /* Bind */
   if (bind (worldsens->mfd, (struct sockaddr *) (&addr), sizeof (addr)) != 0)
     {
-      perror ("worldsens_s_initialize (bind):");
+      perror ("worldsens_s_initialize:bind:");
       close (worldsens->mfd);
       return -1;
     }
@@ -120,17 +162,21 @@ worldsens_s_initialize (struct _worldsens_s *worldsens)
   memset (&worldsens->maddr, 0, sizeof (worldsens->maddr));
   if (inet_aton (g_maddr, &worldsens->maddr.sin_addr) == 0)
     {
-      perror ("worldsens_s_initialize (inet_aton):");
+      perror ("worldsens_s_initialize:inet_aton:");
       close (worldsens->mfd);
       return -1;
     }
-  worldsens->maddr.sin_port = htons (g_mport);
+  worldsens->maddr.sin_port   = htons (g_mport);
   worldsens->maddr.sin_family = AF_INET;
 
   /* Initialize RP */
-  worldsens->rp_seq = 1;
-  worldsens->rp = WORLDSENS_SYNCH_PERIOD;
-  worldsens->synched = 0;
+  worldsens->rp_seq           = 1;
+  worldsens->rp               = WORLDSENS_SYNCH_PERIOD;
+  worldsens->synched          = 0;
+
+  /* Initialize tracer */
+  worldsens->trc_mcast_rx     = tracer_event_add_id(64,"mcast_rx","wsnet1");
+  worldsens->trc_mcast_tx     = tracer_event_add_id(64,"mcast_tx","wsnet1");
 
   return 0;
 }
@@ -146,6 +192,7 @@ worldsens_s_connect (struct _worldsens_s *worldsens, struct sockaddr_in *addr,
   struct _worldsens_s_connect_pkt s_pkt;
   struct _worldsens_c_connect_pkt *c_pkt =
     (struct _worldsens_c_connect_pkt *) msg;
+  int pktlength = sizeof (struct _worldsens_s_connect_pkt);
 
   WSNET_S_DBG_DBG ("WSNET (%" PRId64 "): --> CONNECT (ip: %d)\n", g_time,
 		   ntohl (c_pkt->node));
@@ -156,6 +203,11 @@ worldsens_s_connect (struct _worldsens_s *worldsens, struct sockaddr_in *addr,
       s_pkt.type = WORLDSENS_S_NOATTRADDR;
 
       /* Multicast Send */
+      if (worldsens_s_sendto(worldsens,(char *) (&s_pkt), pktlength, addr))
+	{
+	  return -1;
+	}
+      /*
       if (sendto
 	  (worldsens->mfd, (char *) (&s_pkt),
 	   sizeof (struct _worldsens_s_connect_pkt), 0,
@@ -167,18 +219,25 @@ worldsens_s_connect (struct _worldsens_s *worldsens, struct sockaddr_in *addr,
 	  close (worldsens->mfd);
 	  return -1;
 	}
-
+      */
       WSNET_S_DBG_EXC ("WSNET (%" PRId64 "): <-- NOATTRADDR\n", g_time);
       return 0;
     }
 
   /* Forge */
-  s_pkt.type = WORLDSENS_S_ATTRADDR;
+  s_pkt.type    = WORLDSENS_S_ATTRADDR;
   s_pkt.pkt_seq = htonl (pkt_seq);
-  s_pkt.period = htonll (worldsens->rp - g_time);
-  s_pkt.rp_seq = htonl (worldsens->rp_seq);
+  s_pkt.period  = htonll (worldsens->rp - g_time);
+  s_pkt.rp_seq  = htonl (worldsens->rp_seq);
+  pktlength     = sizeof(s_pkt);
 
   /* Send */
+  if (worldsens_s_sendto(worldsens,(char *) (&s_pkt), pktlength, addr))
+    {
+      return -1;
+    }
+
+  /*
   if (sendto
       (worldsens->mfd, (char *) (&s_pkt),
        sizeof (struct _worldsens_s_connect_pkt), 0, (struct sockaddr *) addr,
@@ -189,6 +248,7 @@ worldsens_s_connect (struct _worldsens_s *worldsens, struct sockaddr_in *addr,
       close (worldsens->mfd);
       return -1;
     }
+  */
 
   WSNET_S_DBG_DBG ("WSNET (%" PRId64 ", %d): <-- ATTRADDR (ip: %d)\n",
 		   g_time, ntohl (s_pkt.pkt_seq), ntohl (c_pkt->node));
@@ -223,7 +283,6 @@ worldsens_s_listen_to_next_rp (struct _worldsens_s *worldsens)
 {
   char msg[WORLDSENS_MAX_PKTLENGTH];
   int len;
-  socklen_t addrlen;
   struct sockaddr_in addr;
 
   /* Loop */
@@ -231,8 +290,16 @@ worldsens_s_listen_to_next_rp (struct _worldsens_s *worldsens)
     {
 
       /* Wait */
-      addrlen = sizeof (addr);
       memset (&addr, 0, sizeof (addr));
+            
+      if ((len = worldsens_s_recvfrom(worldsens, msg, WORLDSENS_MAX_PKTLENGTH, &addr)) <= 0)
+	{
+	  return -1;
+	}
+            
+      /*            
+      socklen_t addrlen;
+      addrlen = sizeof (addr);
       if ((len =
 	   recvfrom (worldsens->mfd, msg, WORLDSENS_MAX_PKTLENGTH, 0,
 		     (struct sockaddr *) &addr, &addrlen)) <= 0)
@@ -241,6 +308,7 @@ worldsens_s_listen_to_next_rp (struct _worldsens_s *worldsens)
 	  close (worldsens->mfd);
 	  return -1;
 	}
+      */
 
       /* Disconnect */
       if (msg[0] & WORLDSENS_C_DISCONNECT)
@@ -399,7 +467,8 @@ worldsens_s_listen_to_next_rp (struct _worldsens_s *worldsens)
 int
 worldsens_s_backtrack_async (struct _worldsens_s *worldsens, uint64_t period)
 {
-  struct _worldsens_s_connect_pkt pkt;
+  struct _worldsens_s_backtrack_pkt pkt;
+  int pktlength = sizeof(pkt);
 
   /* Update */
   worldsens->rp_seq++;
@@ -411,12 +480,18 @@ worldsens_s_backtrack_async (struct _worldsens_s *worldsens, uint64_t period)
     }
 
   /* Forge */
-  pkt.type = WORLDSENS_S_BACKTRACK;
-  pkt.pkt_seq = htonl (pkt_seq++);
-  pkt.period = htonll (period);
-  pkt.rp_seq = htonl (worldsens->rp_seq);
+  pkt.type    = WORLDSENS_S_BACKTRACK;
+  pkt.pkt_seq = htonl  (pkt_seq++);
+  pkt.period  = htonll (period);
+  pkt.rp_seq  = htonl  (worldsens->rp_seq);
 
   /* Send */
+  if (worldsens_s_sendto(worldsens,(char *) (&pkt), pktlength, &worldsens->maddr))
+    {
+      return -1;
+    }
+  
+  /*
   if (sendto
       (worldsens->mfd, (char *) (&pkt),
        sizeof (struct _worldsens_s_backtrack_pkt), 0,
@@ -428,6 +503,7 @@ worldsens_s_backtrack_async (struct _worldsens_s *worldsens, uint64_t period)
       close (worldsens->mfd);
       return -1;
     }
+  */
 
   WSNET_S_DBG_EXC ("WSNET (%" PRId64 ", %d): <-- BACKTRACK\n",
 		   g_time, pkt_seq - 1);
@@ -448,6 +524,7 @@ worldsens_s_save_release_request (struct _worldsens_s *worldsens,
 				  uint64_t period)
 {
   struct _worldsens_s_saverel_pkt pkt;
+  int pktlength = sizeof(pkt);
 
   /* Update */
   worldsens->rp = g_time + period;
@@ -462,6 +539,12 @@ worldsens_s_save_release_request (struct _worldsens_s *worldsens,
   pkt.n_rp_seq = htonl (worldsens->rp_seq);
 
   /* Send */
+  if (worldsens_s_sendto(worldsens,(char *) (&pkt), pktlength, &worldsens->maddr))
+    {
+      return -1;
+    }
+
+  /*
   if (sendto
       (worldsens->mfd, (char *) (&pkt),
        sizeof (struct _worldsens_s_saverel_pkt), 0,
@@ -473,6 +556,7 @@ worldsens_s_save_release_request (struct _worldsens_s *worldsens,
       close (worldsens->mfd);
       return -1;
     }
+  */
 
   WSNET_S_DBG_EXC ("WSNET (%" PRId64 ", %d): <-- SAVE\n",
 		   g_time, pkt_seq - 1);
@@ -507,18 +591,23 @@ worldsens_s_save_release_request_rx (struct _worldsens_s *worldsens, int node,
   /* Forge */
   memcpy (reply + sizeof (struct _worldsens_s_srrx_pkt), (char *) data,
 	  g_c_nodes * sizeof (struct _worldsens_data));
-  pkt->type = WORLDSENS_S_SYNCH_REQ | WORLDSENS_S_RX;
-  pkt->pkt_seq = htonl (pkt_seq++);
-  pkt->c_rp_seq = htonl (worldsens->rp_seq);
+  pkt->type       = WORLDSENS_S_SYNCH_REQ | WORLDSENS_S_RX;
+  pkt->pkt_seq    = htonl  (pkt_seq++);
+  pkt->c_rp_seq   = htonl  (worldsens->rp_seq);
   worldsens->rp_seq++;
-  pkt->period = htonll (period);
-  pkt->n_rp_seq = htonl (worldsens->rp_seq);
-  pkt->size = htonl (length);
-  pkt->node = htonl (node);
-  pkt->frequency = htonl (radio);
-  pkt->modulation = htonl (modulation);
+  pkt->period     = htonll (period);
+  pkt->n_rp_seq   = htonl  (worldsens->rp_seq);
+  pkt->size       = htonl  (length);
+  pkt->node       = htonl  (node);
+  pkt->frequency  = htonl  (radio);
+  pkt->modulation = htonl  (modulation);
 
   /* Send */
+  if (worldsens_s_sendto(worldsens, reply, length ,&worldsens->maddr))
+    {
+      return -1;
+    }
+  /*
   if (sendto
       (worldsens->mfd, reply, length, 0, (struct sockaddr *) &worldsens->maddr,
        sizeof (struct sockaddr_in)) < length)
@@ -527,6 +616,7 @@ worldsens_s_save_release_request_rx (struct _worldsens_s *worldsens, int node,
       close (worldsens->mfd);
       return -1;
     }
+  */
   WSNET_S_DBG_EXC ("WSNET (%" PRId64 ", %d): <-- SAVE\n", g_time,
 		   pkt_seq - 1);
   WSNET_S_DBG_EXC ("WSNET (%" PRId64 ", %d): <-- RP (seq: %d, period: %"
@@ -571,6 +661,11 @@ worldsens_s_rx (struct _worldsens_s *worldsens, int node, int radio,
   pkt->modulation = htonl (modulation);
 
   /* Multicast Send */
+  if (worldsens_s_sendto(worldsens, reply, length, &worldsens->maddr))
+    {
+      return -1;
+    }
+  /*
   if (sendto
       (worldsens->mfd, reply, length, 0, (struct sockaddr *) &worldsens->maddr,
        sizeof (struct sockaddr_in)) < length)
@@ -579,8 +674,8 @@ worldsens_s_rx (struct _worldsens_s *worldsens, int node, int radio,
       close (worldsens->mfd);
       return -1;
     }
+  */
 
-  //  TRACER_WRITE_ALL_NODE(WORLDSENS_S_SYNCH_REQ | WORLDSENS_S_RX);
   WSNET_S_DBG_EXC ("WSNET (%" PRId64
 		   ", -1): <-- RX (ip: %d, frequency: %d, modulation: %d)\n",
 		   g_time, node, radio, modulation);
@@ -596,8 +691,9 @@ int
 worldsens_s_clean (struct _worldsens_s *worldsens)
 {
   close (worldsens->mfd);
+  simulation_keeps_going = 0;
   core_runtime_end ();
-  exit (0);
+  return 0;
 }
 
 /**************************************************************************/

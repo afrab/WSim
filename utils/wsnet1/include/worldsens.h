@@ -39,6 +39,7 @@
 #include <time.h>
 
 #include "worldsens_debug.h"
+#include "libtracer/tracer.h"
 
 /**************************************************************************/
 /**************************************************************************/
@@ -96,6 +97,7 @@
 extern uint16_t	g_lport;
 extern uint16_t	g_mport;
 extern char *	g_maddr;
+extern int      simulation_keeps_going;
 
 /**************************************************************************/
 /**************************************************************************/
@@ -216,26 +218,23 @@ struct PACKED _worldsens_s_rx_pkt
 /**************************************************************************/
 /**************************************************************************/
 
+/**
+ * Worldsens Client Side
+ * 
+ **/
 struct _worldsens_c 
 {
   int		 u_fd;
   int		 m_fd;
-	
   int		 my_addr;
   int		 pkt_seq;
-	
   int		 my_pkt_seq;
-	
   callback_rx_t	callback_rx;
-
   void *	 arg;
-	
   int		 rp_seq;
   uint64_t	 next_rp;
   uint64_t	 last_rp;
-	
   uint64_t	 n_update;
-
   char		 pending;
   char		 tx_backtracked;
 };
@@ -245,21 +244,27 @@ struct _worldsens_c
 /**************************************************************************/
 /**************************************************************************/
 
+/**
+ * Worldsens Server Side
+ *
+ **/
 struct _worldsens_s 
 {
-  int		     mfd;
-  struct sockaddr_in maddr;
-	
-  uint64_t	     rp;
-  int		     rp_seq;
-  char		     synched;
+  int		     mfd;          /* multicast socket                          */
+  struct sockaddr_in maddr;        /* multicast address                         */ 
+  uint64_t	     rp;           /* Rendez-vous point :: nanosecond           */
+  int		     rp_seq;       /* Rendez-vous point :: index                */
+  char		     synched;      /* number of synchronizes nodes on a barrier */
+  tracer_id_t        trc_mcast_rx; /*                                           */
+  tracer_id_t        trc_mcast_tx; /*                                           */
 };
 
+
 /**************************************************************************/
 /**************************************************************************/
 /**************************************************************************/
 
-struct __attribute__ ((packed)) _worldsens_data 
+struct PACKED _worldsens_data 
 {
   int		     node;
   char		     data;
@@ -271,43 +276,50 @@ struct __attribute__ ((packed)) _worldsens_data
 /**************************************************************************/
 /**************************************************************************/
 /**************************************************************************/
+
 int worldsens_c_initialize (struct _worldsens_c *worldsens, 
 			    char *s_addr, uint16_t s_port, 		 
 			    char *m_addr, uint16_t m_port,
 			    int my_addr,
 			    callback_rx_t callback_rx, 
 			    void *arg);
-int worldsens_c_connect	(struct _worldsens_c *worldsens);
+int worldsens_c_connect    (struct _worldsens_c *worldsens);
 int worldsens_c_disconnect (struct _worldsens_c *worldsens);
-int worldsens_c_synched	(struct _worldsens_c *worldsens);
-int worldsens_c_parse (struct _worldsens_c *worldsens, char *msg, int len);
-int worldsens_c_clean (struct _worldsens_c *worldsens);
-int worldsens_c_tx (struct _worldsens_c *worldsens, char data, 
-		    int frequency, int modulation, 
-		    double tx_mW, uint64_t duration);
-int worldsens_c_update (struct _worldsens_c *worldsens);
+int worldsens_c_synched	   (struct _worldsens_c *worldsens);
+int worldsens_c_parse      (struct _worldsens_c *worldsens, char *msg, int len);
+int worldsens_c_clean      (struct _worldsens_c *worldsens);
 
+int worldsens_c_tx         (struct _worldsens_c *worldsens, char data, 
+			    int frequency, int modulation, 
+			    double tx_mW, uint64_t duration);
+
+int worldsens_c_update     (struct _worldsens_c *worldsens);
 
 /**************************************************************************/
 /**************************************************************************/
 /**************************************************************************/
-int worldsens_s_initialize (struct _worldsens_s *worldsens);
-int worldsens_s_connect	(struct _worldsens_s *worldsens, 
-			 struct sockaddr_in *addr, 
-			 char *msg, int len);
-int worldsens_s_disconnect (struct _worldsens_s *worldsens, 
-			    struct sockaddr_in *addr, 
-			    char *msg, int len);
-int worldsens_s_listen_to_next_rp (struct _worldsens_s *worldsens);
-int worldsens_s_backtrack_async (struct _worldsens_s *worldsens, uint64_t period);
-int worldsens_s_save_release_request (struct _worldsens_s *worldsens, uint64_t period);
+
+int worldsens_s_initialize              (struct _worldsens_s *worldsens);
+int worldsens_s_connect                 (struct _worldsens_s *worldsens, 
+					 struct sockaddr_in *addr, 
+					 char *msg, int len);
+int worldsens_s_disconnect              (struct _worldsens_s *worldsens, 
+					 struct sockaddr_in *addr, 
+					 char *msg, int len);
+int worldsens_s_clean                   (struct _worldsens_s *worldsens);
+
+int worldsens_s_listen_to_next_rp       (struct _worldsens_s *worldsens);
+int worldsens_s_backtrack_async         (struct _worldsens_s *worldsens, uint64_t period);
+int worldsens_s_save_release_request    (struct _worldsens_s *worldsens, uint64_t period);
 int worldsens_s_save_release_request_rx	(struct _worldsens_s *worldsens, int node,  
 					 int radio, int modulation,  
 					 struct _worldsens_data *data, uint64_t period);
-int worldsens_s_rx (struct _worldsens_s *worldsens, int node,
-		    int radio,  int modulation, 
-		    struct _worldsens_data *data);
-int worldsens_s_clean (struct _worldsens_s *worldsens);
+int worldsens_s_rx                      (struct _worldsens_s *worldsens, int node,
+					 int radio,  int modulation, 
+					 struct _worldsens_data *data);
 
+/**************************************************************************/
+/**************************************************************************/
+/**************************************************************************/
 
 #endif

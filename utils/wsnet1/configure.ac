@@ -114,7 +114,7 @@ dnl ==========
 CFLAGS_save="${CFLAGS}"
 AC_ARG_ENABLE([debug],AC_HELP_STRING([--enable-debug],[debug mode (default disabled)]))
 if test "${enable_debug}" = "yes"; then
-    CFLAGS="$CFLAGS -g"
+    CFLAGS="$CFLAGS -g -DDEBUG"
     AC_DEFINE([DEBUG],[1],[WSNet internals debug tools])
     debug_sum="yes"
 else

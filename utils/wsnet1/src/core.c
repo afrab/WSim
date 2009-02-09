@@ -23,6 +23,7 @@
 #include "private/battery_private.h"
 
 #include "public/log.h"
+#include "worldsens.h"
 
 /**************************************************************************/
 /**************************************************************************/
@@ -245,7 +246,9 @@ core_start (struct _worldsens_s *worldsens)
 {
   static int evt_nb = 0;
 
-  while (1)
+  simulation_keeps_going = 1;
+
+  while (simulation_keeps_going == 1)
     {
 
       /* If no event or if event in the future, wait at rp point */

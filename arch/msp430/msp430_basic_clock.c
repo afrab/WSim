@@ -119,7 +119,7 @@ msp430_basic_clock_update(int clock_add)
 #if defined(HIGH_RES_CLOCK)
   float nano_add = 0;
 #else
-  int nano_add = 0;
+  int   nano_add = 0;
 #endif
 
   /********************************************/
@@ -241,6 +241,10 @@ msp430_basic_clock_update(int clock_add)
       MCUBC.MCLK_increment   = clock_add; 
       MCUBC.MCLK_counter    += clock_add;
     }
+  else
+    {
+      MCUBC.MCLK_increment   = 0;
+    }
 
   /* ACLK */
   MCUBC.ACLK_temp           += MCUBC.lfxt1_increment;
@@ -258,6 +262,7 @@ msp430_basic_clock_update(int clock_add)
     }
   else
     {
+      MCUBC.SMCLK_increment  = 0;
       // #define RUNNING_MODE_FROM_REG(R) ((R >> 4) & 0x0fu)
       //
       // #define MCU_READ_GIE     ((uint16_t)(SR & MASK_GIE   ) >> 3)

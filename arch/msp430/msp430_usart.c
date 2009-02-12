@@ -290,7 +290,7 @@ static inline int32_t USART_MODE_UPDATE_BITCLK(int ssel, int num)
   switch (ssel)
     {
     case 0:
-      ERROR("msp430:usart%d: UART TX clk = UCLK\n",num);
+      ERROR("msp430:usart%d: UART clk = UCLK\n",num);
       res = 0;
       break;
     case 1:
@@ -369,20 +369,9 @@ do {                                                                          \
             {                                                                 \
                ERROR("msp430:usart%d: UART listen mode not supported\n",NUM); \
             }                                                                 \
-         switch (MCU.USART.uxtctl.b.ssel)                                     \
-          {                                                                   \
-         case 0:                                                              \
-            ERROR("msp430:usart%d: UART RX clk = UCLK not supported\n",NUM);  \
-            MCU.USART.uxrx_shift_delay = 0;                                   \
-            break;                                                            \
-         case 1:                                                              \
-            MCU.USART.uxrx_shift_delay -= MCU_CLOCK.ACLK_increment;           \
-            break;                                                            \
-         case 2:                                                              \
-         case 3:                                                              \
-            MCU.USART.uxrx_shift_delay -= MCU_CLOCK.SMCLK_increment;          \
-            break;                                                            \
-          }                                                                   \
+								              \
+	  MCU.USART.uxrx_shift_delay -=					      \
+	    USART_MODE_UPDATE_BITCLK(MCU.USART.uxtctl.b.ssel,NUM);	      \
                                                                               \
           if (MCU.USART.uxrx_shift_delay <= 0)                                \
             {                                                                 \
@@ -830,7 +819,7 @@ do {                                                                          \
           MCU.USART.uxrx_shift_empty = 0;                                     \
           MCU.USART.uxrx_shift_ready = 0;                                     \
           MCU.USART.uxrx_shift_delay = MCU.USART.uxbr_div;                    \
-          HW_DMSG_USART("msp430:usart%d: UART rx value 0x%02x\n",NUM,val);    \
+          HW_DMSG_USART("msp430:usart%d: UART rx shift reg value 0x%02x\n",NUM,val);    \
         }                                                                     \
     }                                                                         \
   else                                                                        \

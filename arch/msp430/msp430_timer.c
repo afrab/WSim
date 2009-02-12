@@ -455,7 +455,7 @@ void msp430_timerA3_update(void)
 
   MCU.timerA3.divbuffer +=clock;
 
-  if ((MCU.timerA3.divbuffer & MCU.timerA3.divuppermask) == 0)
+  if ((clock == 0) || ((MCU.timerA3.divbuffer & MCU.timerA3.divuppermask) == 0))
     {
       return;
     }
@@ -979,7 +979,8 @@ void msp430_timerB_update(void)
     }
   
   MCU.timerB.divbuffer +=clock;
-  if ((MCU.timerB.divbuffer & MCU.timerB.divuppermask) == 0)
+
+  if ((clock == 0) || ((MCU.timerB.divbuffer & MCU.timerB.divuppermask) == 0))
     {
       return;
     }

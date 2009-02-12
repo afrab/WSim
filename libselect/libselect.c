@@ -216,7 +216,8 @@ int libselect_update_registered()
   switch (res = select(fd_max + 1, &readfds, NULL, NULL, &timeout))
     {
     case -1: /* error */
-      perror("wsim:libselect:update: error during select()\n");
+      perror("wsim:libselect:update: error during select(), host interrupt\n");
+      mcu_signal_set(SIG_HOST);
       return 1;
     case 0:  /* timeout */
       // DMSG("wsim:libselect: nothing to read on timeout\n");
@@ -239,24 +240,28 @@ int libselect_update_registered()
 	    case ENTRY_FILE:
 	    case ENTRY_UDP:
 	    case ENTRY_TCP:
-	      if ((n = read(fd_in,buffer,BUFFER_MAX)) > 0)
+	      switch (n = read(fd_in,buffer,BUFFER_MAX)) 
 		{
-		  DMSG("wsim:libselect:update: something to read on id %d = %d bytes\n",id,n);
-		  if (libselect_fifo_putblock(libselect.entry[id].fifo_input,buffer,n) < n)
-		    {
-		      ERROR("wsim:libselect:update: fifo overrun on descriptor %d\n",id);
-		    }
-		}
-	      else 
-		{
-		  DMSG("wsim:libselect:update: read id %d returned %d\n",id,n);
+		case -1:
+		  ERROR("wsim:libselect:update: error on descriptor %d:%d\n",id,fd_in);
+		case 0:
 		  if (libselect.entry[id].callback)
 		    {
 		      WARNING("wsim:libselect:update: fifo id %d has been closed\n",id);
 		      libselect.entry[id].callback(id,LIBSELECT_EVT_CLOSE,libselect.entry[id].cb_ptr);
 		    }
+		  libselect_id_unregister(id);
+		  break;
+		default:
+		  DMSG("wsim:libselect:update: something to read on id %d = %d bytes\n",id,n);
+		  if (libselect_fifo_putblock(libselect.entry[id].fifo_input,buffer,n) < n)
+		    {
+		      ERROR("wsim:libselect:update: overrun on descriptor %d\n",id);
+		    }
+		  break;
 		}
 	      break;
+	      
 	    case ENTRY_TCP_SRV:
 	      if (fd_in == libselect.entry[id].skt.socket_listen)
 		{
@@ -297,6 +302,7 @@ int libselect_update_registered()
 		    }
 		}
 	      break;
+
 	    case ENTRY_FD_ONLY:
 	      mcu_signal_add(libselect.entry[id].signal);
 	      DMSG("wsim:libselect: something to read on id %d (signal)\n",id);

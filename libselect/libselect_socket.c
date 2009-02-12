@@ -130,6 +130,24 @@ libselect_log_connection(struct sockaddr_in *cli)
 #define MAX_HOSTNAME 50
 #define MAX_PORT     10
 
+void READ1(char *var, char* delim, int size, int n)
+{
+  char *p;
+  if ((p = strtok(NULL,delim)) != NULL)
+    {
+      strncpy(var, p, size);
+      VERBOSE(2,"libselect:skt: %s\n",var);
+    }
+  else
+    {
+      ERROR("libselect:error: udp or tcp link error (%d)\n", n);
+      /* tcp:s:machine:port         */
+      /* tcp:c:machine:port         */
+      /* udp:local:port:remote:port */
+      exit(1);
+    }
+}
+
 int 
 libselect_skt_init(struct libselect_socket_t *skt, char *name_org)
 {
@@ -218,32 +236,39 @@ libselect_skt_init(struct libselect_socket_t *skt, char *name_org)
       char remot_port[MAX_PORT];
       struct sockaddr_in addr; 
       int lg=sizeof(addr);
+      short remport;
       struct hostent *hp;
 
-      strncpy(local_host, strtok(NULL,delim), MAX_HOSTNAME);
-      strncpy(local_port, strtok(NULL,delim), MAX_PORT);
-      strncpy(remot_host, strtok(NULL,delim), MAX_HOSTNAME);
-      strncpy(remot_port, strtok(NULL,delim), MAX_PORT);
+      READ1(local_host,delim, MAX_HOSTNAME, 1);
+      READ1(local_port,delim, MAX_PORT,     2);
+      READ1(remot_host,delim, MAX_HOSTNAME, 3);
+      READ1(remot_port,delim, MAX_PORT,     4);
+
       skt->port = atoi(local_port);
+      remport   = atoi(remot_port);
 
       DMSG_SKT("wsim:libselect_socket:init: udp link creation for %s:%d to %s:%d\n",
-	       local_host,atoi(local_port),remot_host,atoi(remot_port));
+	       local_host,atoi(local_port),remot_host,remport);
+
       if ((skt->socket = libselect_create_socket(SOCK_DGRAM, local_host, skt->port)) < 0)
 	{
 	  ERROR("wsim:libselect_socket:init create UDP socket not possible\n");
 	  return -1;
 	}
+
       if ((hp = gethostbyname((remot_host))) == NULL)
 	{
 	  ERROR("wsim:libselect_socket:init unknown machine %s\n",remot_host);
 	  return -1;
 	}
+
       addr.sin_family=AF_INET; 
-      addr.sin_port=htons(atoi(remot_port));
+      addr.sin_port=htons(remport);
       memcpy(&(addr.sin_addr.s_addr),hp->h_addr,hp->h_length); 
       if (connect(skt->socket,(struct sockaddr*) &addr, lg) == -1)
 	{
-	  ERROR("wsim:libselect_socket:connect error on %s:%d\n",remot_host,atoi(remot_port));
+	  ERROR("wsim:libselect_socket:connect error on %s:%d\n",remot_host,remport);
+	  perror("wsim:connect");
 	  return -1;
 	} 
     }

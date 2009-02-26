@@ -5,6 +5,7 @@
 \usepackage{fancyhdr}
 \usepackage{color}
 \usepackage{url}
+\usepackage{colortbl}
 
 \topmargin 0pt
 \advance \topmargin by -\headheight
@@ -41,9 +42,9 @@ WSim source code directory (\verb$/wsim$) contains the following subdirectories:
 
   \item \verb$/examples$: example codes to demonstrate WSim main features;
 
-  \item \verb$/libconsole$: carries out the link with wconsole;
+  \item \verb$/libconsole$: handles the WSim console mode;
 
-  \item \verb$/libelf$:
+  \item \verb$/libelf$: interface with the \verb$*.elf$ program
 
   \item \verb$/libetrace$: deals with the trace generation for eSimu;
 
@@ -55,9 +56,9 @@ WSim source code directory (\verb$/wsim$) contains the following subdirectories:
 
   \item \verb$/libselect$: manages inputs and outputs between WSim and external application (WConsole, WSnet);
 
-  \item \verb$/libtracer$: generates WSim traces (*.trc);
+  \item \verb$/libtracer$: generates WSim traces (\verb$*.trc$);
 
-  \item \verb$/libwsnet$: carries out the link with WSnet;
+  \item \verb$/libwsnet$: carries out the link with WSnet application;
 
   \item \verb$/machine$: make the link between platform model and simulator;
 
@@ -72,16 +73,65 @@ WSim source code directory (\verb$/wsim$) contains the following subdirectories:
 \chapter{Program execution overview}
 \label{prog-exec}
 
-The point of entry of the program is the \verb$main.c$ file located in the \verb$src/$ directory. The program starts by adding base options and specific options of the platform.
-Simulation steps:
+The point of entry of the program is the \verb$main.c$ file located in the \verb$src/$ directory.
+
+\section{Initialisation}
+The initialisation is carried out in the \verb$main()$ function of the previous named file.
+\begin{enumerate}
+  \item Program starts by adding program options and specific options of the platform (given on command line);      
+  \item Next step is the initialisation of WSim modules: log messages handler (liblogger), interface with external applications (libselect), traces handler (libtracer and libetrace);
+  \item The machine is then created: machine structure initialisation, and platform (MCU + devices) creation;
+  \item The *.elf program is loaded (if WSim is not in debugging mode);
+  \item Display is created if requested;
+  \item tracer and etracer are started if requested;
+  \item WSim is ready to run.
+\end{enumerate}
+
+\section{Running}
+WSim supports 5 different simulation modes:
+\begin{itemize}
+  \item \textbf{Standard run}: simulation runs until the end of the *.elf program;
+  \item \textbf{Instruction}: simulation runs for a predefined number of MCU instruction;
+  \item \textbf{Time}: simulation runs for a predefined time;
+  \item \textbf{GDB}: simulation runs in debugging mode, being remoted by GDB;
+  \item \textbf{Console}: enables to handle simulation execution from a command line.
+\end{itemize}
+
+At the end of the \verb$main.c$ function, the  \verb$main_run_mode()$ function of the same file is called, in order to select the right simulation mode. At this time WSim is going to execute the first instruction of the *.elf program. Diagram \ref{wsim-instruction} presents the steps of one instruction execution.
 
 \begin{figure}[ht]
 \begin{center}
- \includegraphics[scale=0.4]{figures/wsim_diag.eps}
+  \includegraphics[scale=0.8]{figures/wsim_diag_execution.eps}
 \end{center}
-\caption{WSim execution diagram}
-\label{wsim diagram}
+\caption{Steps of one instruction execution}
+\label{wsim-instruction}
 \end{figure}
+
+The core of the instruction execution is the \verb$msp430_mcu_run_insn()$ function of the\\ \verb$/arch/msp430/msp430_alu.c$ file. This function fetchs, decodes, executes one instruction, launches devices update and IRQ consideration (performed by \verb$msp430_mcu_update()$ function).
+
+If the MCU is in low power mode \verb$msp430_mcu_run_lpm()$ of the \verb$/arch/msp430/msp430_alu.c$ file is called instead of \verb$msp430_mcu_run_insn()$.\\
+
+Next paragraph describes the called functions chains, for each WSim mode, to get from the \verb$main.c$ file to the execution of one instruction.
+\begin{itemize}
+  \item Standard run: \verb$machine_run_free()$ $\longrightarrow$ \verb$machine_run()$ $\longrightarrow$ \verb$mcu_run()$ $\longrightarrow$ \verb$msp430_mcu_run_insn()$ or \verb$msp430_mcu_run_lpm()$ $\longrightarrow$ \verb$msp430_mcu_update()$;
+  \item Instruction mode: \verb$machine_run_insn()$ $\longrightarrow$ \verb$machine_run()$ $\longrightarrow$ \verb$mcu_run()$ $\longrightarrow$ \\\verb$msp430_mcu_run_insn()$ or \verb$msp430_mcu_run_lpm()$ $\longrightarrow$ \verb$msp430_mcu_update()$;
+  \item Time mode: \verb$machine_run_time$ $\longrightarrow$ \verb$machine_run()$ $\longrightarrow$ \verb$mcu_run()$ $\longrightarrow$ \verb$msp430_mcu_run_insn()$ or \verb$msp430_mcu_run_lpm()$ $\longrightarrow$ \verb$msp430_mcu_update()$;
+  \item GDB mode: \verb$libgdb_target_mode_main()$ $\longrightarrow$ \verb$gdbremote_getcmd()$ $\longrightarrow$ \verb$gdbremote_single_step()$ or \verb$gdbremote_continue()$ $\longrightarrow$ \verb$machine_run_free()$ $\longrightarrow$ \verb$machine_run()$ $\longrightarrow$ \verb$mcu_run()$ $\longrightarrow$\\ \verb$msp430_mcu_run_insn()$ or \verb$msp430_mcu_run_lpm()$ $\longrightarrow$ \verb$msp430_mcu_update()$;
+  \item Console mode: \verb$console_mode_main()$ $\longrightarrow$ \verb$console_command()$, then WSim starts one of the four previous mode, depending of the text string you enter on the command line.
+\end{itemize}
+
+\section{End of the simulation}
+The simulation normally ends if one of these cases is true:
+\begin{itemize}
+  \item the \verb$*.elf$ program is finished;
+  \item an illegal instruction has been detected in the \verb$*.elf$ program;
+  \item the exact number of instructions has been executed (only in instructon mode);
+  \item the simulation time is over (only in time mode);
+  \item "quit" command has been typed (only in console mode);
+  \item GBD is closed before the end of the simulation (only in GDB mode).
+\end{itemize}
+
+For standard, instruction and time modes, statistics of the simulation are written in the wsim.log file just before leaving WSim. These statistics are general informations about WSim, and more specific about machine, MCU and devices.
 
 
 \chapter{Main internal features management}
@@ -130,8 +180,96 @@ State backup saves are performed by WSim nodes through the \verb$void machine_st
   \item restoring WSnet state
 \end{itemize}
 
+
+\section{Clocks}
+
+MSP430 time resolution is implemented in nanoseconds in WSim. Each time an instruction is executed, the MCLK is incremented and ACLK, ACLKn, SMCLK are computed according to MCLK value.\\
+
+MSP430 clocks functions are written in the \verb$/arch/msp430/msp430_basic_clock.c$ or\\ \verb$/arch/msp430/msp430_fll_clock.c$ depending of the MSP430 model.\\
+
+The figure \ref{wsim-clocks} presents the clocks update chain.
+
+\begin{figure}[!h]
+\begin{center}
+  \includegraphics[scale=0.9]{figures/wsim_clocks.eps}
+\end{center}
+\caption{WSim MSP430 clocks design}
+\label{wsim-clocks}
+\end{figure}
+
+%%%%%%%%%%%%%%%A COMPRENDRE ET AJOUTER%%%%%%%%%%%%%%%%%%%%%
+%-Correspond aux é ́ché ́ances du traitement des interruptions
+%-Ecriture des modèles de p ́ériph ́ériques en consé ́quences
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
 \section{Signals}
-\verb$/arch/common/mcu.h$
+Signals allows to signal system states switchs or errors on the *elf program executing.
+
+In the \verb$/arch/common/mcu.h$ file you can find this following code with its comments:
+
+\begin{verbatim}
+ MCU signals
+  ===========
+
+  mcu signal is a 32 bits variable that holds signal and 
+  control bitfields
+
+ 
+   .... .... | .... .... | .... .... | XXXX XXXX  : SIG_MCU_xxxx or HOST_SIGNAL
+   .... .... | .... .... | .... ...X | .... ....  : SIG_MCU_LPM_CHANGE
+  
+   .... .... | .... ...X | .... .... | .... ....  : SIG_MCU          (set if SIG_MCU)
+   .... .... | .... ..X. | .... .... | .... ....  : SIG_RUN_INSN     (insn single step mode)
+   .... .... | .... .X.. | .... .... | .... ....  : SIG_RUN_TIME     (time single step mode)
+   .... .... | .... X... | .... .... | .... ....  : SIG_GDB_SINGLE   (gdb  single step mode)
+   .... .... | ...X .... | .... .... | .... ....  : SIG_GDB_IO       (IO TCP/GDB)
+   .... .... | ..X. .... | .... .... | .... ....  : SIG_CON_IO       (IO Console)
+   .... .... | .X.. .... | .... .... | .... ....  : SIG_WORLDSENS_IO (IO UDB/WSNnet)
+   .... .... | X... .... | .... .... | .... ....  : SIG_UI           (IO UI)
+  
+   .... ...X | .... .... | .... .... | .... ....  : SIG_HOST         (Host signal on WSim)
+   .... ..X. | .... .... | .... .... | .... ....  : SIG_MAC          (Memory access control)
+   XXXX X... | .... .... | .... .... | .... ....  : SIG_MAC_xxxx
+
+
+   SIG_MCU 8bits can be set either for an internal MCU signal (identified by the SIG_MCU bit)
+   or for an external Unix signal on the WSim process (identified by SIG_HOST bit).
+
+**********************************************************************************************/
+
+
+/* mcu internal signal id */
+#define SIG_MCU_HUP        0x00000001
+#define SIG_MCU_INT        0x00000002
+#define SIG_MCU_QUIT       0x00000004 /* used */
+#define SIG_MCU_ILL        0x00000008 /* used */
+#define SIG_MCU_TRAP       0x00000010 /* used */
+#define SIG_MCU_ABRT       0x00000020
+#define SIG_MCU_BUS        0x00000040 /* used */
+#define SIG_MCU_TSTP       0x00000080
+#define SIG_MCU_LPM_CHANGE 0x00000100
+#define SIG_MCU_ALL        0x000001ff
+
+#define SIG_HOST_SIGNAL    0x000000ff
+
+/* signal source identifier */
+#define SIG_MCU            0x00010000 /* mcu internal signal     */
+#define SIG_RUN_INSN       0x00020000 /* insn mode               */
+#define SIG_RUN_TIME       0x00040000 /* time mode               */
+#define SIG_GDB_SINGLE     0x00080000 /* simul trap for GDB      */
+
+#define SIG_GDB_IO         0x00100000 /* gdb tcp io request      */
+#define SIG_CON_IO         0x00200000 /* console mode            */
+#define SIG_WORLDSENS_IO   0x00400000 /* worldsens network io    */
+#define SIG_UI             0x00800000 /* ui signal (keyboard)    */
+#define SIG_HOST           0x01000000 /* host signal             */
+#define SIG_MAC            0x02000000 /* mem breakpoint          */
+#define SIG_BREAK_MEM_XX   0xf0000000 /*                 
+\end{verbatim}
+
+This code defines signals values.
 
 \section{I/O}
 \verb$/libselect$
@@ -163,12 +301,13 @@ This function is called only once at the simulation initialisation. This intruct
 \begin{enumerate}
   \item You have first to take into consideration potential specific options, that might have been provided as a command line argument (only if you implement specific option in \verb$devices_option_add()$). This is done by checking the \verb$value$ item of each option structure.
   \item MCU must be initialised by calling its \verb$MCUNAME_create()$ function;
-  \item Fix each device size and store it in the \verb$machine.device_size$ table. Now \verb$devices_memory_allocate()$;
+  \item Fix each device size and store it in the \verb$machine.device_size$ table. Now call the \\ \verb$devices_memory_allocate()$ function of the \verb$/devices/devices.c$ file;
   \item Create each device with its \verb$DEVICENAME_device_create()$ function;
   \item Initialise UIs by getting their sizes (\verb$machine.device[DEVICEID].ui_get_id()$) and set their positions (\verb$machine.device[DEVICEID].ui_set_pos()$).
 \end{enumerate}
 
 \subsubsection{Intructions in devices\_update() function}
+\label{platform-update}
 This function is the core of the platform because it describes GPIO and SPI connections between MCU and . Thus every time the MCU decodes an intruction, this function will be called.
 Instructions sequence is important and you have to follow this order as explained previously (cf chapter \ref{prog-exec} page \pageref{prog-exec}): MCU to devices transfer, devices to MCU transfer, devices update. Otherwise SPI communications might experience dysfunctions.
 
@@ -193,71 +332,274 @@ Instructions sequence is important and you have to follow this order as explaine
 \end{itemize}
 
 
-\subsubsection{SDL/UI - Input}
-UI is considered as a device
+\subsubsection{SDL/UI}
+
+WSim enables you to print on screen an picture associated to your platform. This module is considered as a device, and is thus implemented in the \verb$/devices/uigfx$ folder.
 
 
-\subsection{Making your platform executable}
-To compile WSim, makefiles are generated with the help of the GNU Project Autotools (automake $\ge$ 1.10, autoconf $\ge$ 2.61) \footnote{For further information please see http://www.gnu.org/software/automake/ and 
+\subsection{Making your platform compilable and executable}
+\label{platform-compilation}
+To compile WSim, makefiles are generated with the help of the GNU Project Autotools (automake $\ge$ 1.10, autoconf $\ge$ 2.61) \footnote{For further informations please see http://www.gnu.org/software/automake/ and 
 http://www.gnu.org/software/autoconf/ websites}.
+You have to modify three files to compile your platform : \verb$./configure.ac$, \verb$./platforms/Makefile.am$, \verb$./platforms/YOURPLATFORMFOLDER/Makefile.am$.
 
+\subsubsection{/configure.ac}
+\begin{enumerate}
+  \item In the \verb$platform model$ part, add an option to enable to compile only your platform by using the command \verb$./configure --enable-platform-yourplatformname$:
+\begin{verbatim}
+dnl yourplatformname
+AC_ARG_ENABLE([platform-yourplatformname],AS_HELP_STRING([--enable-\
+platform-yourplatformname],[yourplatformname platform]))
+if test "${enable_platform_senslab}" = "yes" ; then
+	enable_mcu_msp430=yes  dnl or enable_mcu_atmega=yes
+	NPLATFORM=$(($NPLATFORM + 1))
+	PLATFORMNAMES="yourplatformname"
+fi
+\end{verbatim}
+
+  \item And at the end of the \verb$platform model$ part insert the following line:
+\begin{verbatim}
+AM_CONDITIONAL([BUILD_YOURPLATFORMNAME],   [test "${enable_platform_yourplatformname}"   \
+= "yes" -o "$ALL" = "yes" ])
+\end{verbatim}
+This line initialises the \verb$BUILD_YOURPLATFORMNAME$ variable to \verb$1$ if your platform only or all the platforms must be built, else to \verb$0$ (the purpose of this variable is developped in paragraph \ref{yourplatformmakefile} page \pageref{yourplatformmakefile}).\\
+
+  \item Add the path to your platform makefile into \verb$AC_CONFIG_FILES$ of the output part: 
+\begin{verbatim}
+platforms/YOURPLATFORMFOLDER/Makefile
+\end{verbatim}
+\end{enumerate}
+
+\subsubsection{/platforms/Makefile.am}
+Simply add the name of your platform directory in the \verb$SUBDIRS$ variable.
+\begin{verbatim}
+SUBDIRS=wsn430 ot2006 otsetre ez430 tests telosb \
+	mosar mica2 micaz iclbsn wisenode senslab yourplatformname
+\end{verbatim}
+
+\subsubsection{/platforms/YOURPLATFORMFOLDER/Makefile.am}
+\label{yourplatformmakefile}
+\begin{enumerate}
+  \item First test if your platform must be built or not, thanks to the \verb$BUILD_YOURPLATFORMNAME$ variable defined with the \verb$AM_CONDITIONAL$ command in the \verb$configure.ac$ file: 
+\begin{verbatim}
+if BUILD_YOURPLATFORMNAME
+\end{verbatim}
+
+ \item  Next set the program name and the worldsens program name (program running with WSnet) for your platform:
+\begin{verbatim}
+bin_PROGRAMS=wsim-yourplatformname
+if BUILD_WORLDSENS
+bin_PROGRAMS+=worldsens-yourplatformname
+endif
+\end{verbatim}
+
+  \item This line adds preprocessor arguments (here it enables to include /wsim top directory at compilation):
+\begin{verbatim}
+INCLUDES=-I$(top_srcdir)
+\end{verbatim}
+
+  \item Then define the MCU and devices libraries dependances paths. For instance:
+\begin{verbatim}
+YOURPLATFORMNAME_MCU= ../../arch/msp430/libmsp430f1611.a
+YOURPLATFORMNAME_DEV= ../../devices/led/libled.a        \
+                      ../../devices/ds2411/libds2411.a  \
+                      ../../devices/m25p80/libm25p80.a  \
+                      ../../devices/ptty/libptty.a      \
+                      ../../devices/uigfx/libuigfx.a    \
+                      ../../devices/cc1100/libcc1100.a
+\end{verbatim}
+
+  \item Add specific compilation flags:
+\begin{verbatim}
+wsim_yourplatformname_CFLAGS=-DMSP430f1611
+\end{verbatim}
+This flag will define the global macro MSP430f1611 during the compilation.
+
+  \item Declare the name of your platform source file:
+\begin{verbatim}
+wsim_yourplatformname_SOURCES=yourplatformname.c
+\end{verbatim}
+
+  \item Declare the librairies dependances path set below: 
+\begin{verbatim}
+wsim_yourplatformname_LDADD=${YOURPLATFORMNAME_DEV} ${WSIMADD} ${YOURPLATFORMNAME_MCU}
+\end{verbatim}
+\verb!${WSIMADD}! is defined in the \verb$/platform/Makefile.am$ file, and sets some general WSim library dependance.
+
+  \item  Finally do not forget to close the \verb$if BUILD_YOURPLATFORMNAME$
+\begin{verbatim}
+endif
+\end{verbatim}
+
+\end{enumerate}
 
 \section{Device}
 \subsection{Adding a new device model}
 \subsubsection{List of mandatory functions to implement}
 \begin{itemize}
-  \item \verb$int DEVICENAME_add_options()$: enables to add device specific options when starting a simulation.
-  \item \verb$int DEVICENAME_device_size()$: returns size the device structure needs to store its internal states.
-  \item \verb$int DEVICENAME_device_create()$: creates an instance of the device, by initialising the states in \verb$machine.device[DEVICEID].data$ and storing in \verb$machine.device[DEVICEID]$ device private functions to be called during the simulation.
+  \item \verb$int YOURDEVICENAME_add_options()$: enables to add device specific options when starting a simulation.
+  \item \verb$int YOURDEVICENAME_device_size()$: returns size the device structure needs to store its internal states.
+  \item \verb$int YOURDEVICENAME_device_create()$: creates an instance of the device, by initialising the states in \verb$machine.device[DEVICEID].data$ and storing in \verb$machine.device[DEVICEID]$ device private functions to be called during the simulation.
 \end{itemize}
 
 \subsubsection{List of optional functions to implement}
 Depending of devices features some of these private functions have to be implemented:
 \begin{itemize}
-  \item \verb$int DEVICENAME_write()$: transmits MCU informations to the device
-  \item \verb$int DEVICENAME_read()$: transmits device informations to the MCU (for example leds need not this function);
-  \item \verb$int DEVICENAME_update()$: updates internal state of the device after read or write action (for instance emptying radio TX buffer after its content has been transmitted to the MCU);
-  \item \verb$int DEVICENAME_delete()$: frees memory space filled by the device (excepted the device states);
-  \item \verb$int DEVICENAME_reset()$: resets the device (at its default states);
-  \item \verb$int DEVICENAME_power_up()$: for potential futur use;
-  \item \verb$int DEVICENAME_power_down()$: for potential futur use;
-  \item \verb$int DEVICENAME_ui_draw()$: draws device graphical interface;
-  \item \verb$int DEVICENAME_ui_set_pos()$: sets the position of device graphical interface;
-  \item \verb$int DEVICENAME_ui_get_pos()$: gives the position of device graphical interface;
-  \item \verb$int DEVICENAME_ui_get_size()$: gives the size of device graphical interface;
-  \item \verb$int DEVICENAME_statdump()$: may be used to return device statistics (only called at the end of the simulation).
+  \item \verb$int YOURDEVICENAME_write()$: transmits MCU informations to the device
+  \item \verb$int YOURDEVICENAME_read()$: transmits device informations to the MCU (for example leds need not this function);
+  \item \verb$int YOURDEVICENAME_update()$: updates internal state of the device after read or write action (for instance emptying radio TX buffer after its content has been transmitted to the MCU);
+  \item \verb$int YOURDEVICENAME_delete()$: frees memory space filled by the device (excepted the device states);
+  \item \verb$int YOURDEVICENAME_reset()$: resets the device (at its default states);
+  \item \verb$int YOURDEVICENAME_power_up()$: for potential futur use;
+  \item \verb$int YOURDEVICENAME_power_down()$: for potential futur use;
+  \item \verb$int YOURDEVICENAME_ui_draw()$: draws device graphical interface;
+  \item \verb$int YOURDEVICENAME_ui_set_pos()$: sets the position of device graphical interface;
+  \item \verb$int YOURDEVICENAME_ui_get_pos()$: gives the position of device graphical interface;
+  \item \verb$int YOURDEVICENAME_ui_get_size()$: gives the size of device graphical interface;
+  \item \verb$int YOURDEVICENAME_statdump()$: may be used to return device statistics (called only at the end of the simulation).
 \end{itemize}
 
-\subsection{GPIO interface management}
-
-\subsection{SPI interface management}
+\subsection{IO pins interface management}
 \subsubsection{General}
-The SPI interface is implemented in the file \verb$arch/msp430/msp430_usart.c$ for the MSP430 MCU.
+There are 2 main class of IO, GPIOs for general use, and USART. IO device pins are the interface between device and MCU. In the platform file, these pins are going to be read and write from/to MCU, thanks to read and write device functions as described below. To select the device pin to read or write, a mask variable may be used. For example, the following masks are defined for the M25P80 flash memory device (in the \verb$./devices/m25p80/m25p80.h$ file):
 
-\subsubsection{Particular case}
-Although WSim tries to be as close as possible to hardware it simulates, it may remain some differences. That is sometimes the case of the SPI and device communication simulation, depending of the device implementation.\\
+\begin{verbatim}
+#define M25P_W_SHIFT  8 /* write protect */
+#define M25P_S_SHIFT  9 /* select        */
+#define M25P_H_SHIFT 10 /* hold          */
+#define M25P_C_SHIFT 11 /* clock         */
 
-In effect when a byte is written in the SPI UxTXBUF register, this one is sent bit by bit to the SPI linked device, and simultaneously this one replies bit by bit to the UxRXBUF register. Similarly, a dummy byte must be written in the UxTXBUF in order to read data from a SPI device.\\
+#define M25P_D  0x00ff               /** data 8 bits           **/
+#define M25P_W  (1 << M25P_W_SHIFT)  /** write protect negated **/
+#define M25P_S  (1 << M25P_S_SHIFT)  /** chip select negated   **/
+#define M25P_H  (1 << M25P_H_SHIFT)  /** hold negated          **/
+#define M25P_C  (1 << M25P_C_SHIFT)  /** clock                 **/
+\end{verbatim}
 
-Concerning WSim, in the platform description file, the following order must be respected in the \verb$device_update()$ function, as explained previously: write device from MCU, read device from MCU, update device.
-Now, for some devices (cc2420, cc1100, ...), writing on their SPI input (SI) is taken into consideration only when the device is updated at the end of a cycle. As the read action is performed after the write one, no response is sent on the device SPI output (SO) yet.\\
+\medskip
+Table \ref{m25p80-masks} and figure \ref{wsim-m25p80} clarifies this C code:
+
+\begin{table}[!h]
+  \begin{minipage}[b]{0.50\linewidth}
+    \begin{center}
+    \begin{tabular}{|l|l|l|}
+    \hline
+      \rowcolor[gray]{0.9} \textbf{Name} & \textbf{Value} & \textbf{Pin(s)} \\
+    \hline
+      \verb$M25P_D$ & \verb$0000 0000 1111 1111$ & \verb$SPI SDI, SPI SDO$ \\
+    \hline
+      \verb$M25P_W$ & \verb$0000 0001 0000 0000$ & \verb$FLASH W$ \\
+    \hline
+      \verb$M25P_S$ & \verb$0000 0010 0000 0000$ & \verb$FLASH CS$ \\
+    \hline
+      \verb$M25P_H$ & \verb$0000 0100 0000 0000$ & \verb$FLASH HOLD$ \\
+    \hline
+      \verb$M25P_C$ & \verb$0000 1000 0000 0000$ & \verb$SPI CLOCK$ \\
+    \hline
+    \end{tabular}
+    \end{center}
+    \caption{Value of the M25P80 masks}
+    \label{m25p80-masks}
+  \end{minipage}\hfill
+    \begin{minipage}[b]{0.40\linewidth}
+    \begin{center}
+      \centering \includegraphics[scale=0.8]{figures/wsim_m25p80.eps}
+    \end{center}
+    \caption{M25P80 pins configuration}
+    \label{wsim-m25p80}
+  \end{minipage}
+\end{table}
+
+\medskip
+Thus, writing CS and HOLD pins might be implement like this:
+\begin{verbatim}
+uint32_t value = 0000 0110 0000 0000;
+machine.device[FLASH].write(FLASH, M25P_H | M25P_S, value);
+\end{verbatim}
+
+\subsubsection{USART}
+On the MSP430, USART may be configured in three modes: SPI, UART and I2C. However I2C is not implemented in WSim yet.\\
+
+The WSim simulation of USART does not follow exactly the real hardware running. Indeed instead of sending data bit by bit to devices, WSim USART transmits byte by byte, in simulating the time to send one byte. Hence a byte is only ready to be transmitted after 8 UCLK cycles have been counting. The same method is used for USART data reception from devices.
+It allows to simplify USART transfer implementation and to save computation time by avoiding functions calls.\\
+
+This choice of implementation has no effects on the reliability of the simulation.
+
+
+\subsubsection{SPI particularity}
+SPI bus works always in full duplex, that is to say every time data is transmitted to a SPI device, this one sends a synchronized response at the same time. Thus, in order to get data from a SPI device if nothing has to be transfered to it, you must send a dummy data to trigger the device response.\\
+
+In WSim, SPI interface is implemented in the \verb$arch/msp430/msp430_usart.c$ file for the MSP430 MCU. This implementation do not check if SPI communication are full duplex. It may be done in your platform or in your device code.\\
+
+The better way to implement SPI full duplex communications, is to take it into consideration in your device model code. As soon as your device \verb$YOURDEVICENAME_write()$ function is called by your platform for SPI writings, data must be immediately available for \verb$YOURDEVICENAME_read()$ function.
+
+Indeed, as explained in subsection \ref{platform-update} page \pageref{platform-update}, the \verb$device_update()$ function of the platform performs writings (on devices, so readings on MCU), readings (on devices, so writings on MCU), and finally update devices.\\
+
+However all devices models may not be implemented in that way. For some devices (cc2420, cc1100, ...), writing on their SPI input (SI) is taken into consideration only when the device is updated at the end of a updating platform cycle. As the reading action is performed after the writing one, no response is sent on the device SPI output (SO) yet.\\
 
 This leads to a small lag between the simulation and the reality, since the SPI UxRXBUF register receives the response on the next \verb$device_update()$ call, that is to say few MCU cycles later (from 1 to 6).
-The figure~\ref{wsim spi communication} illustrates that.\\
+The figure~\ref{wsim-spi-communication} illustrates that.\\
 
 \begin{figure}[!h]
 \begin{center}
   \includegraphics[scale=1]{figures/wsim_spi.eps}
 \end{center}
 \caption{WSim SPI and device communication particular case}
-\label{wsim spi communication}
+\label{wsim-spi-communication}
 \end{figure}
 
-In most cases this small lag will not be annoying. But if you want to avoid or fix it, you have to write or correct the device model, so that writing and reading on SPI ports trigger immediately an update.
+In most cases this small lag will not be annoying.
 
 
-\subsection{I2C}
-Not implemented yet!
+\subsection{Making your device model compilable}
+The procedure to make your device model compilable is quite similar to the platform one (please refer to the subsection \ref{platform-compilation} page \pageref{platform-compilation} for more details). Thus you have to modify these following files to compile your device : \verb$./configure.ac$, \verb$./devices/Makefile.am$, \verb$./devices/YOURDEVICEFOLDER/Makefile.am$.
+
+\subsubsection{/configure.ac}
+Add the path to your device makefile into \verb$AC_CONFIG_FILES$ of the output part: 
+\begin{verbatim}
+devices/YOURDEVICEFOLDER/Makefile
+\end{verbatim}
+
+\subsubsection{/devices/Makefile.am}
+Simply add the name of your platform directory in the \verb$SUBDIRS$ variable.
+\begin{verbatim}
+SUBDIRS =   \
+    7seg    \
+    at45db  \
+    bargraph\
+    cc1100  \
+    cc2420  \
+    ds2411  \
+    gdm1602a\
+    hd44780 \
+    led     \
+    m25p80  \
+    ptty    \
+    uigfx   \
+    yourdevicename
+\end{verbatim}
+
+\subsubsection{/devices/YOURDEVICEFOLDER/Makefile.am}
+Compilation of your device model source has to build a static library \verb$*.a$, to make it reusable.
+\begin{enumerate}
+  \item First set the name of your device library and require it not be installed:
+\begin{verbatim}
+noinst_LIBRARIES=libyourdevicename.a
+\end{verbatim}
+
+  \item Next add this line to give additional preprocessor arguments (here it enables to include /wsim top directory at compilation):
+\begin{verbatim}
+INCLUDES=-I$(top_srcdir)
+\end{verbatim}
+
+  \item Declare the name of your device model source files, for example:
+\begin{verbatim}
+libled_a_SOURCES=yourdevicename_source1.h yourdevicename_source1.c\
+                 yourdevicename_source2.h yourdevicename_source2.c\
+                 yourdevicename_source3.h yourdevicename_source4.h\
+\end{verbatim}
+
+\end{enumerate}
 
 \section{Special device}
 \subsection{Pseudo serial PTTY}
@@ -332,7 +674,7 @@ Thus you understand that it is quite easy to add your own debug informations, if
 
 Notice that the \verb$wsim.log$ file name may be changed into \verb$NAMEOFYOURCHOICE.log$ by using the option \verb$--logfile=NAMEOFYOURCHOICE.log$.
 
-\section{The ERROR() function}
+\section{ERROR() function}
 The \verb$ERROR()$ function is closed to the \verb$VERBOSE()$ function, excepted that its result is printed in the wsim.log file and in the standard error output too, that is to say the terminal you launch WSim.
 You can insert \verb$ERROR()$ function where you want without needs to declare it. Its syntax is as a \verb$printf()$ function.
 Moreover some ERROR messages are printed only if the macro \verb$DEBUG_ME_HARDER$ is defined:
@@ -384,19 +726,26 @@ Breakpoint 1, main (argc=2, argv=0xbf976f24) at main.c:200
 
 \section{Abbreviations}
 \begin{description}
-  \item CS = Chip Select
-  \item GPIO = General Purpose Input Output
-  \item I2C = Inter Integrated Circuit
-  \item MCU = MicroController Unit
-  \item PTTY =
-  \item SI = SPI device input
-  \item SO = SPI device output
-  \item SPI = Serial Peripheral Interface
-  \item UART = Universal Asynchronous Receiver Transmitter
-  \item UI = User Interface
-  \item USART = Universal Synchronous/Asynchronous Receiver Transmitter
-  \item UxRXBUF = SPI register used for reception
-  \item UxTXBUF = SPI register used for transmission
+  \item \textbf{ACLK} = Auxiliary Clock (of the MCU)
+  \item \textbf{CS} = Chip Select
+  \item \textbf{GPIO} = General Purpose Input Output
+  \item \textbf{I2C} = Inter Integrated Circuit
+  \item \textbf{IO} = Input Ouput
+  \item \textbf{IRQ} = Interrupt Request
+  \item \textbf{LPM} = Low Power Mode (for the MCU)
+  \item \textbf{MCLK} = Master Clock (of the MCU)
+  \item \textbf{MCU} = MicroController Unit
+  \item \textbf{PTTY} = Pseudo Terminal Type
+  \item \textbf{SI} = SPI device input
+  \item \textbf{SMCLK} = Sub Main Clock (of the MCU)
+  \item \textbf{SO} = SPI device output
+  \item \textbf{SPI} = Serial Peripheral Interface
+  \item \textbf{UART} = Universal Asynchronous Receiver Transmitter
+  \item \textbf{UCLK} = Uncore Clock
+  \item \textbf{UI} = User Interface
+  \item \textbf{USART} = Universal Synchronous/Asynchronous Receiver Transmitter
+  \item \textbf{UxRXBUF} = SPI register used for reception
+  \item \textbf{UxTXBUF} = SPI register used for transmission
 \end{description}
 
 

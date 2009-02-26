@@ -3,7 +3,7 @@ NAME = wsim_dev_tutorial
 all: pdf html
 
 pdf: dvi
-	dvipdfm ${NAME}.dvi
+	dvipdf ${NAME}.dvi
 
 dvi: ${NAME}.tex
 	latex -interaction=nonstopmode $<

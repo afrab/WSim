@@ -13,7 +13,8 @@ ICLBSN_MCU2= ../../arch/msp430/libmsp430f1611.a
 ICLBSN_DEV= ../../devices/led/libled.a		        \
 	    ../../devices/at45db/libat45db041b.a	\
             ../../devices/ptty/libptty.a                \
-            ../../devices/cc2420/libcc2420.a
+            ../../devices/cc2420/libcc2420.a		\
+	    ../../devices/uigfx/libuigfx.a
 
 
 ## v1: msp430f149

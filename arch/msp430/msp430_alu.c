@@ -852,13 +852,14 @@ static inline void WRITE(int m, int b, int r, uint16_t a, int16_t res)
 	      // scg1:%d scg0:%d oscoff:%d cpuoff:%d\n", MCU_READ_SCG1,MCU_READ_SCG0,MCU_READ_OSCOFF,MCU_READ_CPUOFF);
 	      mcu_signal_add(SIG_MCU_LPM_CHANGE);
 	    }
+
 	  if ((MCU_ALU.regs[r] & MASK_GIE) != (res & MASK_GIE))
 	    {
 	      HW_DMSG_GIE("msp430:intr: GIE bit %d -> %d at PC 0x%04x [%"PRIu64"]\n",
 			   (MCU_ALU.regs[r] >> SHIFT_GIE)&1,
 			   (res >> SHIFT_GIE)&1, mcu_get_pc(),
 			   MACHINE_TIME_GET_NANO());
-	      TRACER_TRACE_GIE((res >> SHIFT_GIE)&1);
+	      TRACER_TRACE_GIE((res >> SHIFT_GIE) & 1);
 	    }
 	}
       else if (r == SP_REG_IDX) /* SP */
@@ -1641,7 +1642,7 @@ static void msp430_mcu_run_insn()
       if (((debug_SR & MASK_GIE) == 0) && ((SR & MASK_GIE) == MASK_GIE))
 	{
 	  HW_DMSG_INTR("msp430:intr:debug: GIE set back to 1 at PC=0x%04x\n",MCU_ALU.curr_pc);
-	  /* GIE */ tracer_event_record(TRACER_MCU_GIE,1);
+	  TRACER_TRACE_GIE(1);
 	}
 #endif
 

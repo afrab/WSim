@@ -466,7 +466,7 @@ int libselect_id_close(libselect_id_t id)
   switch (libselect.entry[id].entry_type)
     {
     case ENTRY_NONE:
-      ERROR("wsim:libselect:close: error cannot close id %d of type NONE\n",id);
+      /* ERROR("wsim:libselect:close: error cannot close id %d of type NONE\n",id); */
       break;
     case ENTRY_FILE:
       libselect_fifo_delete      (libselect.entry[id].fifo_input);

@@ -94,7 +94,7 @@
  * Port 5
  * ======
  *   5.7 : SVSout (unused)
- *   5.6 : LED3  Yellow
+ *   5.6 : LED3  Blue
  *   5.5 : LED2  Green
  *   5.4 : LED1  Red
  *   5.3 : NC
@@ -127,7 +127,7 @@
 #define RADIO            5
 #define SERIAL           6
 
-#if defined(DBSN2)
+#if defined(BSN2)
 #define LOGO1            7
 #define END_DEV          LOGO1
 #else
@@ -288,11 +288,11 @@ int devices_create(void)
     machine.device[LOGO1].ui_get_size(LOGO1, &log_w, &log_h);
 #endif
 
-    machine.device[LED1].ui_set_pos(LED1,    0,   0);
-    machine.device[LED2].ui_set_pos(LED2, 1*lw,   0);
-    machine.device[LED3].ui_set_pos(LED3, 2*lw,   0);
+    machine.device[LED1 ].ui_set_pos(LED1,    0,   0);
+    machine.device[LED2 ].ui_set_pos(LED2, 1*lw,   0);
+    machine.device[LED3 ].ui_set_pos(LED3, 2*lw,   0);
 #if defined(LOGO1)
-    machine.device[LOGO1].ui_set_pos (LOGO1,        0,   0);
+    machine.device[LOGO1].ui_set_pos(LOGO1,   0,   0);
 #endif
   }
 
@@ -311,10 +311,20 @@ int devices_create(void)
 /* devices init conditions should be written here */
 int devices_reset_post()
 {
+#if defined(GUI)
+  int refresh = 0;
+#endif
   /* flash W~ is set to Vcc */
   machine.device[FLASH].write(FLASH, AT45DB_W, AT45DB_W);
   SYSTEM_FLASH_CS = 0;
   SYSTEM_RADIO_CS = 0;
+
+  REFRESH(LED1);
+  REFRESH(LED2);
+  REFRESH(LED3);
+#if defined(LOGO1)
+  REFRESH(LOGO1);
+#endif
   return 0;
 }
 
@@ -445,7 +455,7 @@ int devices_update()
       UPDATE(LED1);
       REFRESH(LED1);
 
-      machine.device[LED2].write(LED2,LED_DATA, !  BIT(val8,5));
+      machine.device[LED2].write(LED2,LED_DATA, ! BIT(val8,5));
       UPDATE(LED2);
       REFRESH(LED2);
 

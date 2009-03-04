@@ -17,6 +17,7 @@
 /* ************************************************** */
 /* ************************************************** */
 
+#undef DEBUG
 #if defined(DEBUG)
 #define UIIMG_DBG(x...) VERBOSE(3,x)
 #else
@@ -70,15 +71,15 @@ static void uigfx_xpm_parsecolor(char *str, struct uigfx_map_t *cmap, int nc, in
     {
     case 1:
       sscanf(str, "%c c #%c%c%c%c%c%c", &l1, &r1,&r2, &g1,&g2, &b1,&b2);
-      // UIIMG_DBG("ui_img_xmp:R: %c c #%c%c%c%c%c%c\n", l1, r1,r2, g1,g2, b1,b2);
+      UIIMG_DBG("ui_img_xmp:RRR: %c c #%c%c%c%c%c%c\n", l1, r1,r2, g1,g2, b1,b2);
       break;
     case 2:
       sscanf(str, "%c%c c #%c%c%c%c%c%c", &l1,&l2, &r1,&r2, &g1,&g2, &b1,&b2);
-      // UIIMG_DBG("ui_img_xmp:R: %c%c c #%c%c%c%c%c%c\n", l1,l2, r1,r2, g1,g2, b1,b2);
+      UIIMG_DBG("ui_img_xmp:RRR: %c%c c #%c%c%c%c%c%c\n", l1,l2, r1,r2, g1,g2, b1,b2);
       break;
     case 3:
       sscanf(str, "%c%c%c c #%c%c%c%c%c%c", &l1,&l2,&l3, &r1,&r2, &g1,&g2, &b1,&b2);
-      // UIIMG_DBG("ui_img_xmp:R: %c%c%c c #%c%c%c%c%c%c\n", l1,l2,l3, r1,r2, g1,g2, b1,b2);
+      UIIMG_DBG("ui_img_xmp:RRR: %c%c%c c #%c%c%c%c%c%c\n", l1,l2,l3, r1,r2, g1,g2, b1,b2);
       break;
     }
 
@@ -90,10 +91,10 @@ static void uigfx_xpm_parsecolor(char *str, struct uigfx_map_t *cmap, int nc, in
   cmap[nc].g       = uigfx_hexchar2int(g1) << 4 | uigfx_hexchar2int(g2);
   cmap[nc].b       = uigfx_hexchar2int(b1) << 4 | uigfx_hexchar2int(b2);
   
-  /*
-  UIIMG_DBG("ui_img_xpm:C: %02d %2s c #%02x%02x%02x\n", nc, 
+ 
+  UIIMG_DBG("ui_img_xpm:%03d: %2s c #%02x%02x%02x\n", nc, 
 	    cmap[nc].name, cmap[nc].r, cmap[nc].g, cmap[nc].b);
-  */
+ 
 }
 
 /* ************************************************** */
@@ -148,7 +149,7 @@ struct uigfx_img_t* uigfx_xpm_create(char **xpm)
     }
   /* scan size */
   sscanf(xpm[0],"%d %d %d %d",&(img->w),&(img->h),&(img->ncolors),&cpp);
-  /* UIIMG_DBG("uigfx_img: width=%d height=%d ncolors=%d cpp=%d\n",img->w,img->h,img->ncolors,cpp); */
+  UIIMG_DBG("uigfx_img: width=%d height=%d ncolors=%d cpp=%d\n",img->w,img->h,img->ncolors,cpp); 
   img->pixels = (struct uigfx_pixel_t*)malloc(img->w * img->h * sizeof(struct uigfx_pixel_t));
   if (img->pixels == NULL)
     {

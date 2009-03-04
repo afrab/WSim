@@ -84,7 +84,13 @@ static int16_t msp430_read16_sigbus(uint16_t addr)
   ERROR("msp430: =======================\n");
   ERROR("msp430:io: read short at address 0x%04x at pc 0x%04x\n",addr,mcu_get_pc());
   ERROR("msp430:io:     -- target unknown or block not implemented\n");
-  /*  SIGBUS_EXIT(); */
+  /*
+  if (mcu_get_pc() == 0000)
+    {
+      SIGBUS_EXIT(); 
+    }
+  */
+
   /*
   if (((addr & 1) == 0) && (pread16[addr] != msp430_read16_sigbus))
     {
@@ -334,6 +340,11 @@ void msp430_io_init(void)
 #if defined(__msp430_have_cmpa)
       P8(i,CMPA_START,CMPA_END,msp430_cmpa_read,msp430_cmpa_write);
 #endif
+
+#if defined(__msp430_have_hwmul)
+      P16(i,HWMUL_START,HWMUL_END,  msp430_hwmul_read, msp430_hwmul_write);
+      P8 (i,HWMUL_START,HWMUL_END+1,msp430_hwmul_read8,msp430_hwmul_write8);
+#endif
 	
       P8(i,ADDR_FLASH_START,  ADDR_FLASH_STOP,  msp430_read8_flash,        msp430_write8_flash);
       P8(i,ADDR_RAM_START,    ADDR_RAM_STOP,    msp430_read8_ram,          msp430_write8_ram);
@@ -378,9 +389,6 @@ void msp430_io_init(void)
 #if defined(__msp430_have_timerb3) || defined(__msp430_have_timerb7)
 	  P16_ADDR(i,TBIV,msp430_timerB_read,msp430_timerB_write);
 	  P16(i,TIMER_B_START,TIMER_B_END,msp430_timerB_read,msp430_timerB_write);
-#endif
-#if defined(__msp430_have_hwmul)
-	  P16(i,HWMUL_START,HWMUL_END,msp430_hwmul_read,msp430_hwmul_write);
 #endif
 #if defined(__msp430_have_dma)
 	  P16_ADDR(i,DMACTL0,msp430_dma_read,msp430_dma_write);

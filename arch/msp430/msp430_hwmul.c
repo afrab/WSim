@@ -6,7 +6,6 @@
  *  \date   2005
  **/
 
-// FIXME: this file needs a functionnal verification
 
 #include <stdio.h>
 #include <string.h>
@@ -67,6 +66,16 @@ int16_t msp430_hwmul_read  (uint16_t addr)
     }
   HW_DMSG_HWMUL("msp430:hwmul: read [0x%04x] = 0x%04x\n",addr,res);
   return res;
+}
+
+int8_t msp430_hwmul_read8 (uint16_t addr)
+{
+  int8_t  res8;
+  int16_t res16;
+  
+  res16 = msp430_hwmul_read(addr & ~0x1);
+  res8  = ((addr & 0x1) == 0) ? (res16 & 0xff) : ((res16 >> 8) & 0xff); 
+  return res8;
 }
 
 /* ************************************************** */
@@ -161,6 +170,44 @@ void    msp430_hwmul_write (uint16_t addr, int16_t val)
       ERROR("msp430:hwmul: write address error [0x%04x] = 0x%04x\n",addr,val);
       break;
     }
+}
+
+void msp430_hwmul_write8 (uint16_t addr, int8_t val)
+{
+  int16_t val16;
+  int16_t addr16;
+
+  addr16 = addr & ~0x1;
+  val16  = 0;
+
+  switch (addr16)
+    {
+    case HWMUL_MPY      : /* fall through */
+    case HWMUL_MPYS     : /* fall through */
+    case HWMUL_MAC      : /* fall through */
+    case HWMUL_MACS     : val16 = MCU_HWMUL.op1;   break;
+    case HWMUL_OP2      : val16 = MCU_HWMUL.op2;   break;
+    case HWMUL_RESLO    : val16 = MCU_HWMUL.reslo; break;
+    case HWMUL_RESHI    : val16 = MCU_HWMUL.reshi; break;
+    case HWMUL_SUMEXT   : 
+      ERROR("msp430:hwmul: write on SUMEXT which is a read-only register\n");
+      break;
+    default:
+      ERROR("msp430:hwmul: write address error [0x%04x] = 0x%04x\n",addr,val);
+      break;
+    }
+
+  if ((addr & 0x1) != 0)
+    {
+      val16 = (val16 & 0xff00) | (val);
+    }
+  else
+    {
+      int16_t t = val;
+      val16 = ((t << 8) & 0xff00) | (val16 & 0xff);
+    }
+
+  msp430_hwmul_write(addr16,val16);
 }
 
 /* ************************************************** */

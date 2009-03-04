@@ -50,6 +50,9 @@ void    msp430_hwmul_reset ();
 int16_t msp430_hwmul_read  (uint16_t addr);
 void    msp430_hwmul_write (uint16_t addr, int16_t val);
 
+int8_t  msp430_hwmul_read8 (uint16_t addr);
+void    msp430_hwmul_write8(uint16_t addr, int8_t val);
+
 #endif // __have_hwmul
 
 #endif // MSP430

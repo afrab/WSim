@@ -22,9 +22,9 @@ html: wsim.html
 	cp -r css 		htdocs
 
 upload: html 
-	rsync -ruz -e ssh --delete  htdocs/ afraboul@wsim.gforge.inria.fr:/home/groups/wsim/htdocs/tutorials/wsim
-
-#	scp wsim.pdf afraboul@wsim.gforge.inria.fr:/home/groups/wsim/htdocs/tutorials/
+	rsync -ruz -e ssh --delete  htdocs/ \
+	afraboul@scm.gforge.inria.fr:/home/groups/wsim/htdocs/tutorials/wsim
+#	scp wsim.pdf afraboul@scm.gforge.inria.fr:/home/groups/wsim/htdocs/tutorials/
 
 pdf: wsim.pdf
 

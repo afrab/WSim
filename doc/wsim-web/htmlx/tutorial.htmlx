@@ -17,10 +17,18 @@
   		</TR>
   		<TR align="middle" bgcolor="#ffffff">
 			<TD> <b>WSim tutorial</b> </TD>
-			<TD> How to start and user WSim using the WSN430 platform ?</TD>
+			<TD> How to start and use WSim with the WSN430 platform ?</TD>
 			<TD> 
-		           <a href="./tutorials/wsim/index.html" target="_new"><img style="border: 0px solid ; width: 44px; height: 48px;" src="./figures/html.png" alt="" /></a> 
-		           <!-- <a href="./tutorials/wsim.pdf" target="_new"><img style="border: 0px solid ; width: 44px; height: 48px;" src="./figures/pdf.png" alt="" /></a> -->
+		           <a href="./tutorials/wsim/index.html" target="_new">
+			     <img style="border: 0px solid ; width: 44px; height: 48px;" 
+				  src="./figures/html.png" alt="" />
+			   </a> 
+		           <!-- 
+				<a href="./tutorials/wsim.pdf" target="_new">
+				  <img style="border: 0px solid ; width: 44px; height: 48px;" 
+				       src="./figures/pdf.png" alt="" />
+				</a> 
+				-->
                         </TD>
   		</TR>
 	</TABLE> 

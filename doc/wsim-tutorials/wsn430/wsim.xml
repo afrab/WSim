@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
     "/usr/share/sgml/docbook/dtd/4.5/docbookx.dtd">
 
@@ -16,14 +16,16 @@
 				<firstname>Andreea</firstname>
 				<surname>Picu</surname>
 				<affiliation>
-					<orgname>INRIA Rhône Alpes</orgname>
+					<orgname>INRIA Rhone Alpes</orgname>
 					<orgdiv>ARES Project</orgdiv>
-					<address>CITI Laboratory
-					Domaine Scientifique de la Doua, INSA Lyon
-					Bâtiment Leonard de Vinci
-					21, avenue Jean Capelle
-					69621 Villeurbanne Cedex
-					France</address>
+					<address>
+					  CITI Laboratory
+					  Domaine Scientifique de la Doua, INSA de Lyon
+					  Batiment Claude Chappe 
+					  6, avenue des Arts	
+					  69621 Villeurbanne Cedex
+					  France
+					</address>
 				</affiliation>
 			</author>
 		</authorgroup>
@@ -137,20 +139,20 @@
 		<sect1>
 			<title>WSNet: the Worldsens wireless network simulator</title>
 			<para>WSNet is part of the Worldsens development environment. WSNet is a modular 
-			event-driven wireless network simulator. Its architecture consists in diﬀerent blocks that 
+			event-driven wireless network simulator. Its architecture consists in dint blocks that 
 			implement functionnalities of the nodes and the radio medium. As an example, separate 
-			blocks are deﬁned for the radio propagation, the interference computation or the radio 
+			blocks are de for the radio propagation, the interference computation or the radio 
 			modulation. Similarly, a node is itself composed by several blocks: one for the mobility, 
 			one for the application, one for the system queue, one for the mac layer, one for the 
 			radio and one for the antenna.</para>
-			<para>During one simulation, the behaviour of a block is speciﬁed using a model. A 
+			<para>During one simulation, the behaviour of a block is speciusing a model. A 
 			model is one particular implementation of the block functionnalities. If we consider the 
 			radio propagation block, one model implements the free space propagation model; another 
 			one implements a radio range model, etc. Considering the radio modulation block, one 
 			model implements the BPSK modulation, another one the FSK modulation, etc.</para>
 			<para>Models are either provided with the simulator or developped by users. A user can 
 			develop models for any of the blocks and use it for its own simulations. A model must 
-			implement a given API as well as characteristics that are deﬁned by its associated block. 
+			implement a given API as well as characteristics that are de by its associated block. 
 			WSNet should be able to compile on any Unix-like platform and has been tested on 
 			Linux/x86, Linux/x86 64, Linux/ppc32, Linux/Alpha, Solaris9/sparc, Solaris10/sparc, 
 			MacOSX/ppc32, Windows XP (using cygwin).</para>
@@ -160,8 +162,8 @@
 			<para>WSim can be attached to the WSNet simulator through radio interfaces such as 
 			the Chipcon CC1100 model. This allows to build a complete simulation framework that 
 			is able to debug and analyse a complete wireless sensor network. Thus WSim and WSNet 
-			allow to design and reﬁne a full distributed application from the top level speciﬁcations to 
-			the ﬁnal application binary within the same framework and application description: the 
+			allow to design and rea full distributed application from the top level speciions to 
+			the  application binary within the same framework and application description: the 
 			real application code.</para>
 			<figure id="dist-simul">
 				<title>Distributed simulation</title>
@@ -317,7 +319,7 @@ wsim:log:wsim.log</computeroutput></programlisting>
 						</mediaobject>
 					</figure>
 				</step>
-				<step><para>Start the execution by pressing the « Run » button (upper left corner). Don't worry
+				<step><para>Start the execution by pressing the "Run" button (upper left corner). Don't worry
 				about breakpoints, two of them are automatically set for you: one in the beginning of the main
 				function and a second one at the end of the function. You should see this:</para>
 					<figure id="leds-dbg-4">
@@ -473,7 +475,7 @@ wsim:log:wsim.log</computeroutput></programlisting>
 wsim:pid:4343
 wsim:log:wsim.log</computeroutput></programlisting>
 					<para>Once you attach the serial console to the simulated platform's serial port 1, the 
-					application will let you switch between its two modes by typing « Z ». The two available modes 
+					application will let you switch between its two modes by typing "Z". The two available modes 
 					are:
 						<itemizedlist mark="bullet" spacing="normal">
 							<listitem><simpara>IRQ+LPM0: in this mode the program starts by checking if

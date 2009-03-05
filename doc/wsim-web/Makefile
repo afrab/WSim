@@ -27,7 +27,8 @@ all: ${HTML}
 	cp -r tutorials 		htdocs
 
 upload: all
-	rsync -ruz -e ssh --delete --exclude=log/ --exclude=tutorials/wsim/ htdocs/ afraboul@wsim.gforge.inria.fr:/home/groups/wsim/htdocs
+	rsync -ruz -e ssh --delete --exclude=log/ --exclude=tutorials/wsim/ htdocs/ \
+	afraboul@scm.gforge.inria.fr:/home/groups/wsim/htdocs
 
 %.html: htmlx/%.htmlx
 	gcc -E -x c -P -C -Itemplate $< > $@

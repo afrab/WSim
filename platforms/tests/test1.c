@@ -253,6 +253,7 @@ int devices_update()
      }
 
   /* input on UI */
+#if defined(GUI)
   {
     /* poll event every */
     static int loop_count = UI_EVENT_SKIP;
@@ -275,7 +276,7 @@ int devices_update()
 	  }
       }
   }
-
+#endif
 
   /* *************************************************************************** */
   /* update                                                                      */

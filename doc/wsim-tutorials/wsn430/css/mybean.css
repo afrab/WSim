@@ -1,4 +1,4 @@
-h1 { font-size: 1.728em; margin: 0em; }
+h1 { font-size: 1.728em; margin: 0em; color: #ffffff }
 
 h2 { font-size: 1.44em; color: #404040; }
 h2[class~="title"] { margin-top: 1.728em; margin-bottom: 0em; }
@@ -56,7 +56,7 @@ p {
 }
 div + * { margin-top: 1.2em; }
 p   + * { margin-top: 1.2em; }
-p &gt; div { margin-top: 1.2em; }
+/* p &gt; div { margin-top: 1.2em; } */
 p { text-align: justify; }
 
 /*-------------- REVHISTORY -------------*/
@@ -163,7 +163,8 @@ div[class~="list-of-figures"] {
 
 /*-------------- HEADER -------------*/
 div[class~="navheader"] {
-  background: #104E8B url(bg-header.png) repeat-x;
+  /* background: #104E8B url(bg-header.png) repeat-x;*/
+  background: #104E8B ;
   color: #FFFFFF;
   text-align: center;
   font-weight: bold;
@@ -191,7 +192,8 @@ div[class~="navheader"] table tr th {
 
 /*-------------- FOOTER -------------*/
 div[class~="navfooter"] {
-  background: #104E8B url(bg-footer.png) bottom repeat-x;
+  /* background: #104E8B url(bg-footer.png) bottom repeat-x;*/
+  background: #104E8B ;
   color: #FFFFFF;
   text-align: center;
   font-weight: bold;

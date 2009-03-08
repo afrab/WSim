@@ -2,13 +2,13 @@ HTMLSTYLE=htmlconfig.xsl
 #PDFSTYLE=pdfconfig.xsl
 #PDFSTYLE=/usr/share/sgml/docbook/xsl-stylesheets/fo/docbook.xsl
 PDFSTYLE=/usr/share/xml/docbook/stylesheet/nwalsh/fo/docbook.xsl
-HTMLOPTION=html
+HTMLOPTION=xhtml
 PDFOPTION=-pdf
 XMLOPTION=-xml
 XSLOPTION=-xsl
 
 %.html: %.xml
-	xmlto $(HTMLOPTION) -m $(HTMLSTYLE) $<
+	./xmltohtml --stringparam encoding=utf-8 $(HTMLOPTION) -m $(HTMLSTYLE) $<
 
 %.pdf: %.xml
 	fop $(XMLOPTION) $< $(XSLOPTION) $(PDFSTYLE) $(PDFOPTION) wsim.pdf

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="iso-8859-1"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
     "/usr/share/sgml/docbook/dtd/4.5/docbookx.dtd">
 
@@ -15,18 +15,18 @@
 			<author>
 				<firstname>Andreea</firstname>
 				<surname>Picu</surname>
-				<affiliation>
-					<orgname>INRIA Rhône Alpes</orgname>
-					<orgdiv>ARES Project</orgdiv>
-					<address>
-					  CITI Laboratory
-					  Domaine Scientifique de la Doua, INSA de Lyon
-					  Bâtiment Claude Chappe 
-					  6, avenue des Arts	
-					  69621 Villeurbanne Cedex
-					  France
-					</address>
-				</affiliation>
+			<affiliation>
+			  <orgname>INRIA RhÃ´ne Alpes</orgname>
+			  <orgdiv>ARES Project</orgdiv>
+			  <address>
+			    CITI Laboratory
+			    Domaine Scientifique de la Doua, INSA de Lyon
+			    BÃ¢timent Claude Chappe 
+			    6, avenue des Arts	
+			    69621 Villeurbanne Cedex
+			    France
+			  </address>
+			</affiliation>
 			</author>
 		</authorgroup>
 		<revhistory>

@@ -459,7 +459,7 @@ int8_t msp430_read_byte(uint16_t loc)
 int16_t msp430_read_short(uint16_t loc)
 {
   int16_t res = 0;
-  CHECK_ALIGNMENT(loc,"read");
+  CHECK_ALIGNMENT(loc,"read ");
 
   etracer_slot_access(loc, 1, ETRACER_ACCESS_READ, ETRACER_ACCESS_HWORD, ETRACER_ACCESS_LVL_BUS, 0);
   res = pread16[loc](loc);

@@ -267,7 +267,7 @@ int devices_create(void)
   res += led_device_create      (LED2,   0x00ee00, OFF, BKG, "green");
   res += led_device_create      (LED3,   0x0000ee, OFF, BKG, "blue" );
   res += at45db_device_create   (FLASH,  0);
-  res += cc2420_device_create   (RADIO, 16);
+  res += cc2420_device_create   (RADIO, 16); /* 16MHz */
   res += ptty_device_create     (SERIAL, 1);
 #if defined(LOGO1)
   res += uigfx_device_create    (LOGO1,   wsim);
@@ -355,8 +355,7 @@ int devices_update()
    */
    if (msp430_digiIO_dev_read(PORT1,&val8))
     {
-      HW_DMSG("iclbsn: writing on port 1 byte 0x%02x\n",val8 & 0xff);
-      // machine.device[FLASH].write(FLASH, AT45DB_W , (BIT(val8,2) << AT45DB_W_SHIFT));
+      HW_DMSG("iclbsn: writing on port 1 byte 0x%02x at PC 0x%04x\n",val8 & 0xff,mcu_get_pc());
     }
 
   /* port 2 :
@@ -372,7 +371,7 @@ int devices_update()
    */
   if (msp430_digiIO_dev_read(PORT2,&val8))
     {
-      HW_DMSG("iclbsn: writing on port 2 byte 0x%02x\n",val8 & 0xff);
+      HW_DMSG("iclbsn: writing on port 2 byte 0x%02x at PC 0x%04x\n",val8 & 0xff,mcu_get_pc());
     }
 
 
@@ -382,34 +381,29 @@ int devices_update()
    *   3.6 : uart1TX
    *   3.5 : uart0RX
    *   3.4 : uart0TX
-   *   3.3 : uclk0, Radio_sclk
-   *   3.2 : simo0, Radio_Slave_0ut
-   *   3.1 : somi0, Radio_Slave_In
+   *   3.3 : uclk0, SPI_sclk
+   *   3.2 : simo0, SPI_Slave_0ut
+   *   3.1 : somi0, SPI_Slave_In
    *   3.0 : ste0 : NC
    */
   if (msp430_digiIO_dev_read(PORT3,&val8))
     {
-      HW_DMSG("iclbsn: writing on port 3 byte 0x%02x\n",val8 & 0xff); 
-      /* cc2420 is driven by spi                          */
-      /* we could/should check here that the pins are not */
-      /* driven by the GPIO                               */
+      HW_DMSG("iclbsn: writing on port 3 byte 0x%02x at PC 0x%04x\n",val8 & 0xff,mcu_get_pc()); 
     }
 
   /* port 4 :
    * ========
    *   4.7 : xx
-   *   4.6 : out, radio_reset
-   *   4.5 : out, radio_vref_en
+   *   4.6 : out, cc2420 radio_reset
+   *   4.5 : out, cc2420 radio_vref_en
    *   4.4 : out, flash CS
-   *   4.3 : out, flash PWR
-   *   4.2 : out, radio_cs
-   *   4.1 : in,  radio_sfd
+   *   4.3 : out, flash PWR -> flash WP + flash Reset
+   *   4.2 : out, cc2420 radio_cs
+   *   4.1 : in,  cc2420 radio_sfd
    *   4.0 : xx
    */
   if (msp430_digiIO_dev_read(PORT4,&val8))
     {
-      HW_DMSG("iclbsn: writing on port 4 byte 0x%02x\n",val8 & 0xff);
-
 #if defined(DEBUG)
       if (BIT(val8,4) != SYSTEM_FLASH_CS)
 	{
@@ -421,19 +415,19 @@ int devices_update()
 	}
 #endif
 
-      machine.device[FLASH].write(FLASH, AT45DB_S | AT45DB_W, 
+      machine.device[FLASH].write(FLASH, AT45DB_R | AT45DB_W | AT45DB_S, 
+				  (BIT(val8,3) << AT45DB_R_SHIFT) |
 				  (BIT(val8,3) << AT45DB_W_SHIFT) |
 				  (BIT(val8,4) << AT45DB_S_SHIFT));
-
-
+      etracer_slot_access(0x0, 1, ETRACER_ACCESS_WRITE, ETRACER_ACCESS_BIT, ETRACER_ACCESS_LVL_GPIO, 0);
       SYSTEM_FLASH_CS = BIT(val8,4);
       /* waiting for flash update */
       
-      /* cc2420 CS out, SFD in */
-      machine.device[RADIO].write(RADIO, CC2420_CSn_MASK | CC2420_RESET_MASK | CC2420_VREG_EN_MASK,
-				  (BIT(val8,2) << CC2420_BIT_CSn)      |
+      machine.device[RADIO].write(RADIO, CC2420_CSn_MASK | CC2420_VREG_EN_MASK | CC2420_RESET_MASK,
+				  (BIT(val8,2) << CC2420_BIT_CSn)     |
 	                          (BIT(val8,5) << CC2420_BIT_VREG_EN) |
 				  (BIT(val8,6) << CC2420_BIT_RESET));
+      etracer_slot_access(0x0, 1, ETRACER_ACCESS_WRITE, ETRACER_ACCESS_BIT, ETRACER_ACCESS_LVL_GPIO, 0);
       SYSTEM_RADIO_CS = BIT(val8,2);
       /* waiting for cc2420 update */
     }
@@ -452,14 +446,17 @@ int devices_update()
   if (msp430_digiIO_dev_read(PORT5,&val8))
     {
       machine.device[LED1].write(LED1,LED_DATA, ! BIT(val8,4));
+      etracer_slot_access(0x0, 1, ETRACER_ACCESS_WRITE, ETRACER_ACCESS_BIT, ETRACER_ACCESS_LVL_GPIO, 0);
       UPDATE(LED1);
       REFRESH(LED1);
 
       machine.device[LED2].write(LED2,LED_DATA, ! BIT(val8,5));
+      etracer_slot_access(0x0, 1, ETRACER_ACCESS_WRITE, ETRACER_ACCESS_BIT, ETRACER_ACCESS_LVL_GPIO, 0);
       UPDATE(LED2);
       REFRESH(LED2);
 
       machine.device[LED3].write(LED3,LED_DATA, ! BIT(val8,6));
+      etracer_slot_access(0x0, 1, ETRACER_ACCESS_WRITE, ETRACER_ACCESS_BIT, ETRACER_ACCESS_LVL_GPIO, 0);
       UPDATE(LED3);
       REFRESH(LED3);
     }
@@ -477,13 +474,14 @@ int devices_update()
    */
   if (msp430_digiIO_dev_read(PORT6,&val8))
     {
-      HW_DMSG("iclbsn: writing on port 6 byte 0x%02x\n",val8 & 0xff);
+      HW_DMSG("iclbsn: writing on port 6 byte 0x%02x at PC 0x%04x\n",val8 & 0xff,mcu_get_pc());
     }
 
-  /* Usart SPI mode                    */
+  
+  /* Usart0                            */
   /* ==============                    */
-  /* USART 0 : radio + flash           */
-
+  /* Usart SPI mode                    */
+  /* SPI0 : radio + flash              */
   switch (MCU.usart0.mode)
     {
     case USART_MODE_SPI:
@@ -495,20 +493,12 @@ int devices_update()
 	   */
 	  if ((SYSTEM_FLASH_CS == 0) && (SYSTEM_RADIO_CS == 0))
 	    {
-	      WARNING("devices:iclbsn: Flash and Radio SPI are selected at the same time\n");
+	      WARNING("iclbsn: Flash and Radio SPI are selected at the same time\n");
 	    }
 
-	  /* tests can/should be removed */
-	  // if (SYSTEM_FLASH_CS == 0) /* AT45DB CS is negated */
-	    {
-	      machine.device[FLASH].write(FLASH, AT45DB_D, val8);
-	    }
-
-	  /* tests can/should be removed */
-	  // if (SYSTEM_RADIO_CS == 0) /* CC2420 CS is negated */
-	    {
-	      machine.device[RADIO].write(RADIO, CC2420_DATA_MASK, val8);
-	    }
+	  machine.device[FLASH].write(FLASH, AT45DB_D, val8);
+	  machine.device[RADIO].write(RADIO, CC2420_DATA_MASK, val8);
+	  etracer_slot_access(0x0, 1, ETRACER_ACCESS_WRITE, ETRACER_ACCESS_BYTE, ETRACER_ACCESS_LVL_SPI0, 0);
 	}
       break;
     case USART_MODE_UART:
@@ -519,8 +509,8 @@ int devices_update()
     }
 
   /* Usart1                            */
+  /* ==============                    */
   /* Uart : serial I/O                 */
-  /*                                   */
   /*                                   */
   switch (MCU.usart1.mode)
     {
@@ -530,6 +520,7 @@ int devices_update()
       if (msp430_usart1_dev_read_uart(&val8))
 	{
 	  machine.device[SERIAL].write(SERIAL, PTTY_D, val8);
+	  /* etracer_slot_access(0x0, 1, ETRACER_ACCESS_WRITE, ETRACER_ACCESS_BYTE, ETRACER_ACCESS_LVL_OUT, 0); */
 	}
       break;
     case USART_MODE_I2C:
@@ -549,37 +540,32 @@ int devices_update()
       {
 	if (MCU.usart0.mode != USART_MODE_SPI)
 	  {
-	    ERROR("devices: read data on CC2420 radio while not in SPI mode ?\n");
+	    ERROR("iclbsn: read data on CC2420 radio while not in SPI mode ?\n");
 	  }
+	HW_DMSG("iclbsn: read data from CC2420 SPI = 0x%02x\n",value & CC2420_DATA_MASK);
 	msp430_usart0_dev_write_spi(value & CC2420_DATA_MASK);
-	/* ERROR("device: radio write 0x%02x on SPI0 from radio\n",value & AT45DB_D); */
-	// etracer_slot_access(0x0, 1, ETRACER_ACCESS_READ, ETRACER_ACCESS_BYTE, ETRACER_ACCESS_LVL_SPI0, 0);
+	etracer_slot_access(0x0, 1, ETRACER_ACCESS_READ, ETRACER_ACCESS_BYTE, ETRACER_ACCESS_LVL_SPI0, 0);
       }
 
-    // << RADIO_SFD     - CC2420_SFD   - P4.1
-    // << RADIO_PKT_INT - CC2420_FIFOP - P1.0
-    // << RADIO_GIO0    - CC2420_FIFO  - P1.3
-    // << RADIO_GIO1    - CC2420_CCA   - P1.4
-
-    if (mask & CC2420_SFD_MASK)   /* mcu::SFD     */
+    if (mask & CC2420_SFD_MASK)   /* P4.1 mcu::SFD     */
       { 
 	msp430_digiIO_dev_write(PORT4, (value & CC2420_SFD_MASK)   ? 0x02 : 0x00, 0x02);
-	// etracer_slot_access(0x0, 1, ETRACER_ACCESS_READ, ETRACER_ACCESS_BIT, ETRACER_ACCESS_LVL_GPIO, 0);
+	etracer_slot_access(0x0, 1, ETRACER_ACCESS_READ, ETRACER_ACCESS_BIT, ETRACER_ACCESS_LVL_GPIO, 0);
       }
-    if (mask & CC2420_FIFOP_MASK) /* mcu::PKT_INT */
+    if (mask & CC2420_FIFOP_MASK) /* P1.0 mcu::PKT_INT */
       { 
 	msp430_digiIO_dev_write(PORT1, (value & CC2420_FIFOP_MASK) ? 0x01 : 0x00, 0x01);
-	// etracer_slot_access(0x0, 1, ETRACER_ACCESS_READ, ETRACER_ACCESS_BIT, ETRACER_ACCESS_LVL_GPIO, 0);
+	etracer_slot_access(0x0, 1, ETRACER_ACCESS_READ, ETRACER_ACCESS_BIT, ETRACER_ACCESS_LVL_GPIO, 0);
       }
-    if (mask & CC2420_FIFO_MASK)  /* mcu::GIO0    */
+    if (mask & CC2420_FIFO_MASK)  /* P1.3 mcu::GIO0    */
       {
 	msp430_digiIO_dev_write(PORT1, (value & CC2420_FIFO_MASK)  ? 0x08 : 0x00, 0x08);
-	// etracer_slot_access(0x0, 1, ETRACER_ACCESS_READ, ETRACER_ACCESS_BIT, ETRACER_ACCESS_LVL_GPIO, 0);
+	etracer_slot_access(0x0, 1, ETRACER_ACCESS_READ, ETRACER_ACCESS_BIT, ETRACER_ACCESS_LVL_GPIO, 0);
       }
-    if (mask & CC2420_CCA_MASK)   /* mcu::GIO1    */
+    if (mask & CC2420_CCA_MASK)   /* P1.4 mcu::GIO1    */
       {
 	msp430_digiIO_dev_write(PORT1, (value & CC2420_CCA_MASK)   ? 0x10 : 0x00, 0x10);
-	// etracer_slot_access(0x0, 1, ETRACER_ACCESS_READ, ETRACER_ACCESS_BIT, ETRACER_ACCESS_LVL_GPIO, 0);
+	etracer_slot_access(0x0, 1, ETRACER_ACCESS_READ, ETRACER_ACCESS_BIT, ETRACER_ACCESS_LVL_GPIO, 0);
       }
   }
 
@@ -593,15 +579,15 @@ int devices_update()
       {
 	if (MCU.usart0.mode != USART_MODE_SPI)
 	  {
-	    ERROR("devices: read data on STM flash while not in SPI mode\n");
+	    ERROR("iclbsn: read data on flash while not in SPI mode\n");
 	  }
 	if (SYSTEM_FLASH_CS != 0) /* push test above device_read ? */
 	  {
-	    ERROR("devices: read data on flash without CS enabled\n");
+	    ERROR("iclbsn: read data on flash without CS enabled\n");
 	  }
+	HW_DMSG("iclbsn: read data from AT45DB SPI = 0x%02x\n",value & AT45DB_D);
 	msp430_usart0_dev_write_spi(value & AT45DB_D);
-	/* ERROR("device: flash write 0x%02x on SPI0 from flash\n",value & AT45DB_D); */
-	// etracer_slot_access(0x0, 1, ETRACER_ACCESS_READ, ETRACER_ACCESS_BYTE, ETRACER_ACCESS_LVL_SPI1, 0);
+	etracer_slot_access(0x0, 1, ETRACER_ACCESS_READ, ETRACER_ACCESS_BYTE, ETRACER_ACCESS_LVL_SPI1, 0);
       }
   }
 
@@ -613,10 +599,35 @@ int devices_update()
       if ((mask & PTTY_D) != 0)
 	{
 	  msp430_usart1_dev_write_uart(value & PTTY_D);
-	  // etracer_slot_access(0x0, 1, ETRACER_ACCESS_READ, ETRACER_ACCESS_BYTE, ETRACER_ACCESS_LVL_OUT, 0);
+	  /* etracer_slot_access(0x0, 1, ETRACER_ACCESS_READ, ETRACER_ACCESS_BYTE, ETRACER_ACCESS_LVL_OUT, 0); */
 	}
     }
 
+  /* input on UI is disabled */
+#if defined(GUI) // && defined(INPUT_GUI)
+#define UI_EVENT_SKIP 1000
+  {
+    /* poll event every */
+    static int loop_count = UI_EVENT_SKIP;
+    if ((loop_count--) == 0)
+      {
+	int ev;
+	loop_count = UI_EVENT_SKIP;
+	switch ((ev = ui_getevent()))
+	  {
+	  case UI_EVENT_QUIT:
+	    HW_DMSG_UI("iclbsn: UI event QUIT\n");
+	    mcu_signal_add(SIG_UI);
+	    break;
+	  case UI_EVENT_NONE:
+	    break;
+	  default:
+	    ERROR("iclbsn: unknown ui event\n");
+	    break;
+	  }
+      }
+  }
+#endif
 
   /* *************************************************************************** */
   /* update                                                                      */

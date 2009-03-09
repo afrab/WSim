@@ -255,8 +255,8 @@ int devices_create(void)
 #if defined(LOGO1)
 #  define BKG 0xffffff
 #  define OFF 0x202020
-#  include "wsim.xpm"
-#  define WSIM wsim
+#  include "iclbsn2.xpm"
+#  define XPMNAME wsim
 #else
 #  define BKG 0x000000
 #  define OFF 0x202020
@@ -270,7 +270,7 @@ int devices_create(void)
   res += cc2420_device_create   (RADIO, 16); /* 16MHz */
   res += ptty_device_create     (SERIAL, 1);
 #if defined(LOGO1)
-  res += uigfx_device_create    (LOGO1,   wsim);
+  res += uigfx_device_create    (LOGO1,  XPMNAME);
 #endif
 
   /*********************************/

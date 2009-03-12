@@ -430,15 +430,21 @@ worldsens_s_listen_to_next_rp (struct _worldsens_s *worldsens)
 	      packet->tx_end = packet->tx_start + ntohll (pkt->duration);
 
 	      WSNET_S_DBG_DBG ("WSNET (%" PRId64
-			       ", %d): --> TX (ip: %d, data: 0x%x, freq: %d, mod: %d, tx_mW: %lf, duration: %"
+			       ", %d): --> TX (ip: %d, data: 0x%x, freq: %ud, mod: %d, tx_mW: %lf)\n", packet->tx_start, packet->seq,
+			       node->addr, packet->data[0] & 0xff,
+			       (unsigned)packet->radio, packet->modulation, packet->tx_mW);
+
+	      /*
+	      WSNET_S_DBG_DBG ("WSNET (%" PRId64
+			       ", %d): --> TX (ip: %d, data: 0x%x, freq: %ud, mod: %d, tx_mW: %lf, duration: %"
 			       PRId64 ", end: %" PRId64 ", period: %" PRId64
 			       ")\n", packet->tx_start, packet->seq,
 			       node->addr, packet->data[0] & 0xff,
-			       packet->radio, packet->modulation,
+			       (unsigned)packet->radio, packet->modulation,
 			       packet->tx_mW,
 			       packet->tx_end - packet->tx_start,
 			       packet->tx_end, packet->tx_start - g_time);
-
+	      */
 	      /* Create event */
 	      if (core_add_packet (packet))
 		return -1;

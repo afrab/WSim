@@ -244,10 +244,11 @@ do {                                                                          \
           if (MCU.USART.uxrxbuf_full == 1)                                    \
             {                                                                 \
                MCU.USART.uxrctl.b.oe = 1;                                     \
-               ERROR("msp430:usart%d: SPI Rx Overrun (0x%x,%c)\n",NUM,        \
-		     MCU.USART.uxrx_shift_buf,                                \
-                     isgraph(MCU.USART.uxrx_shift_buf) ?                      \
-                     MCU.USART.uxrx_shift_buf : '.');                         \
+               /* sends out lots of debug message for burst writes */         \
+               /* ERROR("msp430:usart%d: SPI Rx Overrun (0x%x,%c)\n",NUM, */  \
+	       /*	     MCU.USART.uxrx_shift_buf,		*/	\
+	       /*   isgraph(MCU.USART.uxrx_shift_buf) ?	*/		\
+	       /*   MCU.USART.uxrx_shift_buf : '.');	*/		\
             }                                                                 \
           /*tracer_event_record(TRACER_USART##NUM, TRACER_SPI_RX_READY);*/    \
           MCU.USART.uxrxbuf          = MCU.USART.uxrx_shift_buf;              \

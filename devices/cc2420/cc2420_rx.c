@@ -137,10 +137,12 @@ void cc2420_record_rssi(struct _cc2420_t * cc2420, uint8_t dBm) {
 int cc2420_check_cca(struct _cc2420_t * cc2420) {
 
     /* we just read the value of CCA_pin since CCA is calculated at RX time with RSSI */
-    if (cc2420->CCA_pin)
-	return 0;
+  int cc = cc2420->CCA_pin;
 
-    return -1;
+  if (cc)
+    return 0;
+  else
+    return 0; /* -1 */
 }
 
 
@@ -527,10 +529,12 @@ int cc2420_rx_check_address(struct _cc2420_t * cc2420 UNUSED) {
 
     /* if there only source addresses, check if we are coordinator and pan ID */
     if ( (cc2420->rx_dst_pan_len == 0) && (cc2420->rx_dst_addr_len == 0) ) {
+      /*
         if (!CC2420_REG_MDMCTRL0_PAN_COORDINATOR(cc2420->registers[CC2420_REG_MDMCTRL0])) {
             CC2420_DEBUG("only source addressing fields, and I'm not a coordinator, dropping\n");
             return -1;
         }
+      */
         /* if there is no pan id, drop */
         if (cc2420->rx_src_pan_len == 0) {
             CC2420_DEBUG("only source addressing fields, but no src pan id, dropping\n");

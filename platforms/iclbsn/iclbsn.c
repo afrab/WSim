@@ -587,7 +587,7 @@ int devices_update()
 	  }
 	HW_DMSG("iclbsn: read data from AT45DB SPI = 0x%02x\n",value & AT45DB_D);
 	msp430_usart0_dev_write_spi(value & AT45DB_D);
-	etracer_slot_access(0x0, 1, ETRACER_ACCESS_READ, ETRACER_ACCESS_BYTE, ETRACER_ACCESS_LVL_SPI1, 0);
+	etracer_slot_access(0x0, 1, ETRACER_ACCESS_READ, ETRACER_ACCESS_BYTE, ETRACER_ACCESS_LVL_SPI0, 0);
       }
   }
 

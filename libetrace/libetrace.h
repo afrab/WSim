@@ -70,7 +70,8 @@
 #define ETRACER_PER_ID_M25P            0x07
 #define ETRACER_PER_ID_DS2411          0x08
 #define ETRACER_PER_ID_CONSOLE         0x09
-#define ETRACER_PER_ID_AT45DB          0x0a
+#define ETRACER_PER_ID_AT45DB          0x07 /* 0x0a */ /* same as M25P until eSimu is updated   */
+#define ETRACER_PER_ID_CC2420          0x06 /* 0x0b */ /* same as CC1100 until eSimu is updated */
 
 /* event_id:5 */
 #define ETRACER_PER_EVT_WRITE_COMMAND  0x00

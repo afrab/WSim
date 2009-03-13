@@ -134,12 +134,12 @@ platforms.
       output peripherals (leds, 7 segments, LCD display, buttons, ...)
 </p>
 </dd>
-<dt> &lsquo;<samp>--mode</samp>&rsquo;</dt>
-<dd><p>      Starts WSim in gdb mode waiting on default port 2159/TCP
+<dt> &lsquo;<samp>--mode=[arg]</samp>&rsquo;</dt>
+<dd><p>      Starts WSim in [arg] mode, can be <samp>time</samp>, <samp>insn</samp> or <samp>gdb</samp>.
 </p>
 </dd>
-<dt> &lsquo;<samp>--modearg=int</samp>&rsquo;</dt>
-<dd><p>      Starts WSim in gdb mode waiting on the specified TCP port
+<dt> &lsquo;<samp>--modearg=[int]</samp>&rsquo;</dt>
+<dd><p>      Argument for the previously given run mode.
 </p>
 </dd>
 <dt> &lsquo;<samp>--verbose=value</samp>&rsquo;</dt>
@@ -602,7 +602,7 @@ its serial port is lost.
 operating system dependant.
 </p>
 <dl compact="compact">
-<dt> &lsquo;<samp>--serial=[name]</samp>&rsquo;</dt>
+<dt> &lsquo;<samp>--serial_io=[name]</samp>&rsquo;</dt>
 <dd>      <dl compact="compact">
 <dt> &lsquo;<samp>stdout</samp>&rsquo;</dt>
 <dd><p>        The special <tt>stdout</tt> name can be used as an option to the 

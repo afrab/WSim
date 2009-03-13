@@ -5,36 +5,49 @@
 
 <div id="main-body">
 
-  <h2 id="intro">Tutorials</h2>
+    <h2 id="intro">Tutorials</h2>
+    
+    <br><br><br>
+	  
+	  <TABLE BORDER="0" width="100%" align="center" cellpadding="2" cellspacing="1" bgcolor="#aebfd1">
+	    <TR align="middle" bgcolor="#7192be">
+	      <TH WIDTH="25%"> Tutorials </TH>
+	      <TH WIDTH="60%"> Description </TH>
+	      <TH WIDTH="15%"> Download </TH>
+	    </TR>
+	
+	    <TR align="middle" bgcolor="#ffffff">
+	      <TD> <b>WSim tutorial</b> </TD>
+	      <TD> How to start and use WSim with the WSN430 platform ?</TD>
+	      <TD> 
+		<a href="./tutorials/wsim/index.html" target="_new">
+		  <img style="border: 0px solid ; width: 44px; height: 48px;" 
+		    src="./figures/html.png" alt="" />
+		</a> 
+	      </TD>
+	    </TR>
+	
+	    <TR align="middle" bgcolor="#ffffff">
+	      <TD> <b>WSim tutorial</b> </TD>
+	      <TD> ICL BSN2 nodes within the <a href="http://www.wasp-project.org/">EU Wasp project</a><br>
+		<img style="border: 0px solid " src="./figures/logo-wasp-150.png" alt="" />   </TD>
+	      <TD> 
+		<a href="./tutorials/wasp/index.html" target="_new">
+		  <img style="border: 0px solid ; width: 44px; height: 48px;" 
+		    src="./figures/html.png" alt="" />
+		</a> 
+	      </TD>
+	    </TR>
 
-	<br><br><br>
-
-	<TABLE BORDER="0" width="100%" align="center" cellpadding="2" cellspacing="1" bgcolor="#aebfd1">
-  		<TR align="middle" bgcolor="#7192be">
-			<TH WIDTH="25%"> Tutorials </TH>
-			<TH WIDTH="60%"> Description </TH>
-			<TH WIDTH="15%"> Download </TH>
-  		</TR>
-  		<TR align="middle" bgcolor="#ffffff">
-			<TD> <b>WSim tutorial</b> </TD>
-			<TD> How to start and use WSim with the WSN430 platform ?</TD>
-			<TD> 
-		           <a href="./tutorials/wsim/index.html" target="_new">
-			     <img style="border: 0px solid ; width: 44px; height: 48px;" 
-				  src="./figures/html.png" alt="" />
-			   </a> 
-		           <!-- 
-				<a href="./tutorials/wsim.pdf" target="_new">
-				  <img style="border: 0px solid ; width: 44px; height: 48px;" 
-				       src="./figures/pdf.png" alt="" />
-				</a> 
-				-->
-                        </TD>
-  		</TR>
-	</TABLE> 
-
-</div>
-
+	  </TABLE> 
+	  
+  </div>
+  
+  <!-- 
+  <a href="./tutorials/wsim.pdf" target="_new">
+  <img style="border: 0px solid ; width: 44px; height: 48px;" src="./figures/pdf.png" alt="" />
+  </a> 
+  -->
 
 <!-- FOOTER -->
 #include "footer.html"

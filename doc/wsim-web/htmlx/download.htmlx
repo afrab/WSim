@@ -8,16 +8,22 @@
 
   <h3>Software distribution</h3>
   
-    The lastest release version of WSim can be found 
-    <a href="http://gforge.inria.fr/projects/wsim/" target="_new">here</a>. </p>
+    The lastest release version of WSim can be found <a
+    href="http://gforge.inria.fr/projects/wsim/"
+    target="_new">here</a>. 
 		
   <h3>SVN instructions</h3>
   
-  <p> Alternatively, WSim SVN repository can be checked out
-  through anonymous access with the following command: </p>
+    <p>Alternatively, WSim SVN repository can be checked out
+      through anonymous access with the following command: </p>
 
   <pre class="terminal">
       <span class="prompt">$ </span><span class="input">svn checkout svn://scm.gforge.inria.fr/svn/wsim</span> </pre>
+
+    or
+
+  <pre class="terminal">
+      <span class="prompt">$ </span><span class="input">svn checkout https://scm.gforge.inria.fr/svn/wsim</span> </pre>
 
 
   <p> If you have an InriaGforge account, you can also use: </p>

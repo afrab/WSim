@@ -336,7 +336,7 @@ wsim:log:wsim.log</computeroutput></programlisting>
 						<title>Fifth debugging snapshot</title>
 						<mediaobject>
 							<imageobject>
-								<imagedata align="center" fileref="figures/wsn430-leds-insight-all.png"/>
+								<imagedata align="center" width="90%" fileref="figures/wsn430-leds-insight-all.png"/>
 							</imageobject>
 						</mediaobject>
 					</figure>
@@ -585,7 +585,7 @@ wsim:log:wsim.log</computeroutput></programlisting>
 				<title>Snapshot of the debugging of the token passing example</title>
 				<mediaobject>
 					<imageobject>
-						<imagedata align="center" fileref="figures/wsn430-token-debug.png" />
+						<imagedata align="center" width="90%" fileref="figures/wsn430-token-debug.png" />
 					</imageobject>
 				</mediaobject>
 			</figure>

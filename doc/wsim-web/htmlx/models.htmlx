@@ -26,7 +26,7 @@
   		</TR>
   		<TR align="middle" bgcolor="#ffffff">
 			<TD> <b>Wireless Chipset</b> </TD>
-			<TD> Chipcon CC1100, CC1101, CC2420</TD>
+			<TD> Chipcon CC1100, CC1101, CC2500, CC2420</TD>
   		</TR>
   		<TR align="middle" bgcolor="#ffffff">
 			<TD> <b>Others</b> </TD>
@@ -36,15 +36,25 @@
 <!-- SEPARATOR -->
   		<TR align="middle" bgcolor="#7192be"> <TD>  </TD> <TD>  </TD> </TR>
 <!-- SEPARATOR -->
-
-  		<TR align="middle" bgcolor="#ffffff">
-			<TD> <b>MSP based Platforms</b> </TD>
-			<TD> INRIA WSN430v1, Berkeley Telosb, CSEM Wisenodes, ICL BSN nodes, Ti eZ430 usb key </TD>
-  		</TR>
-  		<TR align="middle" bgcolor="#ffffff">
-			<TD> <b>ATMega based platforms</b> </TD>
-			<TD> Berkeley MicaZ, Berkelay Mica2 </TD>
-  		</TR>
+	    
+	    <TR align="middle" bgcolor="#ffffff">
+	      <TD> <b>MSP based Platforms</b> </TD>
+	      <TD> 
+		INRIA WSN430v1, WSN430 v13b, WSN430 v14, <br>
+		Berkeley Telosb, <br>
+		CSEM Wisenodes,  <br>
+                ICL BSN nodes,   <br>
+	        Ti eZ430 usb key,<br>
+                ...
+	      </TD>
+	    </TR>
+	    <TR align="middle" bgcolor="#ffffff">
+	      <TD> <b>ATMega based platforms</b> </TD>
+	      <TD> 
+		Berkeley MicaZ, <br>
+		Berkelay Mica2 
+              </TD>
+	    </TR>
 
 <!-- SEPARATOR -->
   		<TR align="middle" bgcolor="#7192be"> <TD>  </TD> <TD>  </TD> </TR>

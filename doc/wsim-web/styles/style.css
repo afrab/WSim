@@ -2,16 +2,16 @@
 
     GSB common CSS <http://gsb.sf.net>
     Chip Cuccio <chipster@norlug.org>
-    $Id: style.css,v 1.1 2008-06-21 14:35:03 afraboul Exp $
+    $Id: style.css 1900 2006-10-04 18:33:20Z chipster_c $
 
-   /* font-family: "Lucida Grande", "Trebuchet MS", "Bitstream Vera Sans", Verdana, Helvetica, Arial, sans-serif; */
 */
 
 /* #### common styles #### */
 
 body {
     color: #000;
-    background-color: #fff;
+    background-color: #333;
+    font-family: "Lucida Grande", "Trebuchet MS", "Bitstream Vera Sans", Verdana, Helvetica, Arial, sans-serif;
     margin: 0;
     padding: 1em 0.4em;
     text-align: center;
@@ -20,11 +20,11 @@ body {
 #wrapper {
     color: inherit;
     background: #fff;
-    border: 1px solid #fff;
+    border: 1px solid #999;
     padding: 0;
     margin: auto;
     text-align: left;
-    width: 80%; /* 970px */
+    width: 80%; 
     position: relative;
 }
 
@@ -37,7 +37,7 @@ body {
 }
 
 #subfoot a {
-    color: #9FEAFF;
+    color: #9FEAFF; 
     background: inherit;
 }
 
@@ -218,7 +218,7 @@ acronym, .titleTip {
     background-color: #5651a1; /* INRIA color */
     margin: 0;
     padding: 0.2ex 1ex 0.2ex 1.5mm;
-             /*    background-image:url(/images/GSB_Logo-3.png); */
+/*    background-image:url(/images/GSB_Logo-3.png); */
     background-repeat:no-repeat;
     background-position: center left;
     height: 111px; /*TODO 141*/

@@ -18,7 +18,7 @@
 
 
 \title{\huge{WSim tutorial for developers}}
-\author{Loic Lemaitre}
+\author{Loïc Lemaître}
 
 
 \begin{document}
@@ -50,7 +50,7 @@ WSim source code directory (\verb$/wsim$) contains the following subdirectories:
 
   \item \verb$/libgdb$: carries out the link with the gdb debugger;
 
-  \item \verb$/libgui$: used to show user interface (i.e. the leds blinking);
+  \item \verb$/libgui$: handles graphical interface;
 
   \item \verb$/liblogger$: deals with error and output messages (wsim.log, error message on terminal);
 
@@ -149,7 +149,7 @@ Moreover saving internal platform states may be necessary. They are then stored 
 The MCU state and its backup are stored into global structures (\verb$mcu$ and \verb$mcu_backup$), since we know the needed space and as there is only one MCU by platform. So we need not indirections (through pointers) to access to the MCU structure, in spite of the device structure.
 
 \subsection{Backtracks}
-Backtracks are used when WSim operates with WSnet. Indeed WSim may need to backtrack in two different cases:
+Backtracks are used when WSim operates with WSnet. WSim may need to backtrack in two different cases indeed:
 \begin{itemize}
   \item when one of WSim nodes runs beyond a meeting point, since nodes synchronisation is done by an appointment method. An other meeting point is then set, and the state of the node is restored to the last state saved;
   \item when one of WSim nodes is in debugging mode, and stopped at a breakpoint, the other nodes are still running. As soon as the WSim node in debugging mode is running again, the other nodes are backtracked.
@@ -205,7 +205,14 @@ The figure \ref{wsim-clocks} presents the clocks update chain.
 
 
 \section{Signals}
-Signals allows to signal system states switchs or errors on the *elf program executing.
+Signals allows to signal switches of system states or errors on the *elf program execution. Two main types of signals are implemented:
+\begin{itemize}
+  \item The MCU internal signals
+  \item The signal source identifiers
+\end{itemize}
+
+
+\subsection{Signals values and usages}
 
 In the \verb$/arch/common/mcu.h$ file you can find this following code with its comments:
 
@@ -271,9 +278,50 @@ In the \verb$/arch/common/mcu.h$ file you can find this following code with its 
 
 This code defines signals values.
 
-\section{I/O}
-\verb$/libselect$
+Table \ref{mcu-signals} describes values and usages of MCU internal signals.
+\begin{table}[!h]
+    \begin{center}
+    \begin{tabular}{|l|c|l|c|}
+    \hline
+      \rowcolor[gray]{0.9} \textbf{Signal} & \textbf{Value} & \textbf{Usage} & \textbf{Status} \\
+    \hline
+      \verb$SIG_MCU_HUP$ & \verb$0x00000001$ & Disconnection detected on the control terminal or & not used \\
+      &  & death of the control processus & \\
+    \hline
+      \verb$SIG_MCU_INT$ & \verb$0x00000002$ & Interrupt from keyboard & not used \\
+    \hline
+      \verb$SIG_MCU_QUIT$ & \verb$0x00000004$ & "Quit" request from keyboard & not used \\
+    \hline
+      \verb$SIG_MCU_ILL$ & \verb$0x00000008$ & Illegal instruction & used\\
+    \hline
+      \verb$SIG_MCU_TRAP$ & \verb$0x00000010$ & Breakpoint reached & used\\
+    \hline
+      \verb$SIG_MCU_ABRT$ & \verb$0x00000020$ & Stop signal from \verb$abort()$ function of \verb$libc$ library & not used\\
+    \hline
+      \verb$SIG_MCU_BUS$ & \verb$0x00000040$ & Reading or writing at an unknown or invalid memory & used \\
+      &  & address & \\
+    \hline
+      \verb$SIG_MCU_TSTP$ & \verb$0x00000080$ & Stop requested from tty & not used\\
+    \hline
+      \verb$SIG_MCU_LPM_CHANGE$ & \verb$0x00000100$ & Power mode change & not used\\
+    \hline
+      \verb$SIG_MCU_ALL$ & \verb$0x00000200$ & ? & not used\\
+    \hline
+    \end{tabular}
+    \end{center}
+    \caption{MCU internal signals}
+    \label{mcu-signals}
+\end{table}
 
+
+\subsection{Signals management}
+Signals are added and removed by using the \verb$mcu_signal_add()$ and \verb$mcu_signal_remove()$ commands of the \verb$arch/msp430/msp430.c$ or \verb$arch/atmega/atmega128.c$ file.
+Signals status are stored in the 32 bits \verb$mcu.alu.signal$ variable.
+
+
+
+\section{I/O}
+\verb$libselect$ is the interface between WSim and external application. Thus \verb$libselect$ implementation is operating system dependant.
 
 \chapter{Implementing new WSim modules}
 
@@ -333,8 +381,44 @@ Instructions sequence is important and you have to follow this order as explaine
 
 
 \subsubsection{SDL/UI}
+\label{SDL-UI}
+If your platform embeddes graphical device, you have to update and refresh them when required. See the leds example:
+\begin{verbatim}
+  /* port 5 :                          */
+  /* ========                          */
+  /*   P5.7 NC                         */
+  /*   P5.6 led 3 (Blue)               */
+  /*   P5.5 led 2 (Green)              */
+  /*   P5.4 led 1 (Red)                */
+  /*   P5.3 SPI flash ram UCLK         */
+  /*   P5.2 SPI flash ram SOMI         */
+  /*   P5.1 SPI flash ram SIMO         */
+  /*   P5.0 NC                         */
+  if (msp430_digiIO_dev_read(PORT5,&val8))
+    {
+      machine.device[LED1].write(LED1,LED_DATA, ! BIT(val8,4));
+      etracer_slot_access(0x0, 1, ETRACER_ACCESS_WRITE, ETRACER_ACCESS_BIT, ETRACER_ACCESS_LVL_GPIO, 0);
+      UPDATE(LED1);
+      REFRESH(LED1);
 
-WSim enables you to print on screen an picture associated to your platform. This module is considered as a device, and is thus implemented in the \verb$/devices/uigfx$ folder.
+      machine.device[LED2].write(LED2,LED_DATA, !  BIT(val8,5));
+      etracer_slot_access(0x0, 1, ETRACER_ACCESS_WRITE, ETRACER_ACCESS_BIT, ETRACER_ACCESS_LVL_GPIO, 0);
+      UPDATE(LED2);
+      REFRESH(LED2);
+
+      machine.device[LED3].write(LED3,LED_DATA, ! BIT(val8,6));
+      etracer_slot_access(0x0, 1, ETRACER_ACCESS_WRITE, ETRACER_ACCESS_BIT, ETRACER_ACCESS_LVL_GPIO, 0);
+      UPDATE(LED3);
+      REFRESH(LED3);
+    }
+\end{verbatim}
+On WSN430 platform leds are connected on pins 5.4, 5.5 and 5.6 of the MSP430, and are refreshed as soon as one of port 5 has been updated.
+
+WSim also enables you to print on screen an image associated to your platform. This module is considered as a device, and is thus implemented in the \verb$/devices/uigfx$ folder. Its creation is follow the same procedure as the other devices one (\verb$uigfx_device_size()$ and \verb$uigfx_device_create()$ function).
+
+For both devices UI and screen image, you must set the place of the graphical interface after creation. Use the device APIs \verb$machine.device[DEVICEID].ui_get_pos()$ and \verb$machine.device[DEVICEID].ui_set_pos()$ to performe this.\\
+
+Finallely if there are one or several graphical UI, the \verb$ui_refresh()$ function of the \verb$/libgui/ui.c$ file has to be called at the end of the \verb$devices_update()$ function. \verb$libgui$ module implementation relies on SDL (Simple Direct media Layer) that is a free and open source software multimedia library.
 
 
 \subsection{Making your platform compilable and executable}
@@ -435,14 +519,16 @@ endif
 
 \section{Device}
 \subsection{Adding a new device model}
-\subsubsection{List of mandatory functions to implement}
+\label{adding-device}
+\subsubsection{List of mandatory APIs to implement}
 \begin{itemize}
   \item \verb$int YOURDEVICENAME_add_options()$: enables to add device specific options when starting a simulation.
   \item \verb$int YOURDEVICENAME_device_size()$: returns size the device structure needs to store its internal states.
   \item \verb$int YOURDEVICENAME_device_create()$: creates an instance of the device, by initialising the states in \verb$machine.device[DEVICEID].data$ and storing in \verb$machine.device[DEVICEID]$ device private functions to be called during the simulation.
 \end{itemize}
 
-\subsubsection{List of optional functions to implement}
+
+\subsubsection{List of private functions to implement}
 Depending of devices features some of these private functions have to be implemented:
 \begin{itemize}
   \item \verb$int YOURDEVICENAME_write()$: transmits MCU informations to the device
@@ -458,6 +544,72 @@ Depending of devices features some of these private functions have to be impleme
   \item \verb$int YOURDEVICENAME_ui_get_size()$: gives the size of device graphical interface;
   \item \verb$int YOURDEVICENAME_statdump()$: may be used to return device statistics (called only at the end of the simulation).
 \end{itemize}
+
+
+\subsubsection{device\_t structure}
+\verb$device_t$ structure stores function adresses described in the previous subsection, in order to make their calls easier. The structure is designed like this:
+\begin{verbatim}
+struct device_t
+{
+  int  (*update)        (int self);
+  void (*read)          (int self, uint32_t *mask, uint32_t *value);
+  void (*write)         (int self, uint32_t  mask, uint32_t  value);
+
+  // create is static
+  // size   is static
+  int  (*delete)        (int self);
+
+  int  (*reset)         (int self);
+  int  (*power_up)      (int self);
+  int  (*power_down)    (int self);
+
+  int  (*ui_draw)       (int self);
+  void (*ui_set_pos)    (int self, int  x, int  y);
+  void (*ui_get_pos)    (int self, int *x, int *y);
+  void (*ui_get_size)   (int self, int *width, int *height);
+
+  void (*statdump)      (int self, int64_t user_nanotime);
+
+  int state_size;
+  int dev_num;
+
+  char* name;
+  void* data;
+};
+\end{verbatim}
+Of course using all items of the structure is not mandatory.
+
+\subsubsection{LED example}
+LED device is the simplest example of device implementation. Only \verb$write()$, \verb$delete()$, \verb$reset()$, and graphical functions are used in the list of \verb$device_t$ private functions.
+However its \verb$create()$ function is closed to the other devices ones. It mainly consists in storing private functions adresses in the \verb$machine.device[DEVICEID]$ structure.
+\begin{verbatim}
+int led_device_create(int dev_num, uint32_t on, uint32_t off, uint32_t bg, char* name)
+{
+  struct led_t *dev = (struct led_t*) machine.device[dev_num].data;
+  
+  dev->img      = led_img_create(on,off,bg);
+  dev->update   = 0;
+  dev->val      = 0;
+  dev->trid     = tracer_event_add_id(1, name, "led");
+
+  machine.device[dev_num].reset         = led_reset;
+  machine.device[dev_num].delete        = led_delete;
+
+  machine.device[dev_num].write         = led_write;
+  machine.device[dev_num].update        = led_update;
+
+  machine.device[dev_num].ui_draw       = led_ui_draw;
+  machine.device[dev_num].ui_get_size   = led_ui_get_size;
+  machine.device[dev_num].ui_set_pos    = led_ui_set_pos;
+  machine.device[dev_num].ui_get_pos    = led_ui_get_pos;
+
+  machine.device[dev_num].state_size    = led_device_size();
+  machine.device[dev_num].name          = "Led display";
+
+  return 0;
+}
+\end{verbatim}
+
 
 \subsection{IO pins interface management}
 \subsubsection{General}
@@ -520,7 +672,7 @@ machine.device[FLASH].write(FLASH, M25P_H | M25P_S, value);
 \subsubsection{USART}
 On the MSP430, USART may be configured in three modes: SPI, UART and I2C. However I2C is not implemented in WSim yet.\\
 
-The WSim simulation of USART does not follow exactly the real hardware running. Indeed instead of sending data bit by bit to devices, WSim USART transmits byte by byte, in simulating the time to send one byte. Hence a byte is only ready to be transmitted after 8 UCLK cycles have been counting. The same method is used for USART data reception from devices.
+The WSim simulation of USART does not follow exactly the real hardware running. Instead of sending data bit by bit to devices, WSim USART transmits byte by byte, in simulating the time to send one byte. Hence a byte is only ready to be transmitted after 8 UCLK cycles have been counting. The same method is used for USART data reception from devices.
 It allows to simplify USART transfer implementation and to save computation time by avoiding functions calls.\\
 
 This choice of implementation has no effects on the reliability of the simulation.
@@ -533,7 +685,7 @@ In WSim, SPI interface is implemented in the \verb$arch/msp430/msp430_usart.c$ f
 
 The better way to implement SPI full duplex communications, is to take it into consideration in your device model code. As soon as your device \verb$YOURDEVICENAME_write()$ function is called by your platform for SPI writings, data must be immediately available for \verb$YOURDEVICENAME_read()$ function.
 
-Indeed, as explained in subsection \ref{platform-update} page \pageref{platform-update}, the \verb$device_update()$ function of the platform performs writings (on devices, so readings on MCU), readings (on devices, so writings on MCU), and finally update devices.\\
+As explained in subsection \ref{platform-update} page \pageref{platform-update}, the \verb$device_update()$ function of the platform performs writings (on devices, so readings on MCU), readings (on devices, so writings on MCU), and finally update devices.\\
 
 However all devices models may not be implemented in that way. For some devices (cc2420, cc1100, ...), writing on their SPI input (SI) is taken into consideration only when the device is updated at the end of a updating platform cycle. As the reading action is performed after the writing one, no response is sent on the device SPI output (SO) yet.\\
 
@@ -602,7 +754,37 @@ libled_a_SOURCES=yourdevicename_source1.h yourdevicename_source1.c\
 \end{enumerate}
 
 \section{Special device}
-\subsection{Pseudo serial PTTY}
+
+We may distinguish 2 special devices: the pseudo serial PTTY and the graphical interface for platform UIGFX. They are special in the meaning that they do not stand for a harware component. Nevertheless their implementation is quite the same as a standard decice, espacially their API functions (please see section \ref{adding-device} page \pageref{adding-device} for more details). They have to be initialised and updated in the platform file like other devices indeed.
+
+\subsection{Pseudo TTY}
+The PTTY (Pseudo TTY) peripheral model is a special peripheral that can be used to connect a platform to a RS232 serial port. The model has the capability to open a full duplex communication stream with the operating system in order to connect the simulator to external tools.
+
+\begin{figure}[!h]
+\begin{center}
+  \includegraphics[scale=1]{figures/wsim_ptty.eps}
+\end{center}
+\caption{WSim PTTY device integration}
+\label{wsim-ptty}
+\end{figure}
+
+The PTTY mainly makes the link between the platform and \verb$libselect$ functionalities.
+\begin{itemize}
+  \item To send data to the OS: PTTY device calls \verb$libselect_id_write()$.
+  \item To get data from the OS: PTTY device calls \verb$libselect_id_read()$.
+  \item To delete the PTTY device: PTTY delete the \verb$libselect$ connection with the \verb$libselect_id_close()$ function.
+\end{itemize}
+
+
+\textbf{Reste à développer:}
+\begin{itemize}
+  \item $ptty\_libselect\_callback?$
+  \item $ptty\_dummy\_read?$
+  \item $ptty\_dummy\_write?$
+\end{itemize}
+
+\subsection{Graphical interface for platform UIGFX}
+Please refer to section \ref{SDL-UI} page \pageref{SDL-UI} for some further informations.
 
 
 \section{Microcontroller}

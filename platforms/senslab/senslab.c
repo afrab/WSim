@@ -34,8 +34,12 @@
 #define RADIO_CSn_MASK  CC2420_CSn_MASK
 #define RADIO_CSn_SHIFT CC2420_BIT_CSn
 #define RADIO_DATA_MASK CC2420_DATA_MASK
-#define RADIO_GDO0_MASK CC2420_GDO0_MASK   /* GDO0 -> P1.3 */
-#define RADIO_GDO2_MASK CC2420_GDO2_MASK   /* GDO2 -> P1.4 */
+#define RADIO_GDO0_MASK CC2420_FIFO_MASK   /* FIFO -> P1.3 */
+#define RADIO_GDO2_MASK CC2420_FIFOP_MASK  /* FIFOP -> P1.4 */
+#define RADIO_SFD_MASK  CC2420_SFD_MASK    /* SFD -> P1.5 */
+#define RADIO_CCA_MASK  CC2420_CCA_MASK    /* CCA -> P1.6 */
+#define RADIO_RESET_MASK CC2420_RESET_MASK /* RESETn -> P1.7 */
+#define RADIO_VREG_EN_MASK CC2420_VREG_EN_MASK  /* VREG_EN  -> P3.0 */
 #endif
 
 #include "devices/ptty/ptty_dev.h"
@@ -47,13 +51,17 @@
 /* ************************************************** */
 
 /* ****************************************
- * platform description for Senslab devices
+ * platform description for Senslab devices V1.3B/V1.4
  *
  * Port 1
  * ======
- *   1.4 : GDO_2, cc1100
- *   1.3 : GDO_0, cc1100
+ *   1.7 : RESETn cc2420(V1.4)
+ *   1.6 : CCA cc2420(V1.4)
+ *   1.5 : SFD cc2420(V1.4)
+ *   1.4 : GDO_2 cc1100(V1.3B)/cc2420(V1.4)
+ *   1.3 : GDO_0 cc1100(V1.3B)/cc2420(V1.4)
  *   1.2 : flash Write protect
+ *
  *
  * Port 2
  * ======
@@ -61,14 +69,14 @@
  *
  * Port 3
  * ======
- *   3.7 : urxd1
- *   3.6 : utxd1
- *   3.5 : urxd0
- *   3.4 : utxd0
- *   3.3 : uclk0, serial clock, tsl2550
- *   3.2 : simo0, serial in, tsl2550
- *   3.1 : somi0, serial out
- *   3.0 : ste0 : NC
+ *   3.7 (urxd1)
+ *   3.6 (utxd1)
+ *   3.5 (urxd0)
+ *   3.4 (utxd0)
+ *   3.3 (uclk0) : serial clock, tsl2550
+ *   3.2 (simo0) : serial in, tsl2550
+ *   3.1 (somi0) : serial out
+ *   3.0 : VREG_EN cc2420(V1.4)
  *
  * Port 4
  * ======
@@ -77,7 +85,7 @@
  *   4.5 : tsl2550 Supply
  *   4.4 : flash CS
  *   4.3 : Enable -> battery charger
- *   4.2 : CS_radio, cc1100
+ *   4.2 : CS_radio cc1100(V1.3B)/cc2420(V1.4)
  *   4.1 : STATUS -> battery charger
  *
  * Port 5
@@ -85,10 +93,10 @@
  *   5.6 : LED3
  *   5.5 : LED2
  *   5.4 : LED1
- *   5.3 : uclk1, flash clock, cc1100
- *   5.2 : somi1, flash out, cc1100
- *   5.1 : simo1, flash in, cc1100
- *   5.0 : ste1 : NC
+ *   5.3 (uclk1) : flash clock, CLOCK cc1100(V1.3B)/cc2420(V1.4)
+ *   5.2 (somi1) : flash out, SDO cc1100(V1.3B)/cc2420(V1.4)
+ *   5.1 (simo1) : flash in, SDI cc1100(V1.3B)/cc2420(V1.4)
+ *   5.0 (ste1) : NC
  *
  * ***************************************/
 
@@ -363,64 +371,71 @@ int devices_update(void)
   /* MCU -> devices                                                              */
   /* *************************************************************************** */
 
-  /* port 1 :                          */
-  /* ========                          */
-  /*   P1.7 NC                         */
-  /*   P1.6 NC                         */
-  /*   P1.5 NC                         */
-  /*   P1.4 cc1100 gd2                 */
-  /*   P1.3 cc1100 gd0                 */
-  /*   P1.2 P_Dvcc -> flash write      */
-  /*   P1.1 NC                         */
-  /*   P1.0 NC                         */
+  /* port 1 :                               */
+  /* ========                               */
+  /*   P1.7 RESETn cc2420(V1.4)             */
+  /*   P1.6 CCA cc2420(V1.4)                */
+  /*   P1.5 SFD cc2420(V1.4)                */
+  /*   P1.4 GDO_2 cc1100(V1.3B)/cc2420(V1.4)*/
+  /*   P1.3 GDO_0 cc1100(V1.3B)/cc2420(V1.4)*/
+  /*   P1.2 flash Write protect             */
+  /*   P1.1 NC                              */
+  /*   P1.0 NC                              */
   if (msp430_digiIO_dev_read(PORT1,&val8))
     {
       machine.device[FLASH].write(FLASH, M25P_W, BIT(val8,2) << M25P_W_SHIFT);
       etracer_slot_access(0x0, 1, ETRACER_ACCESS_WRITE, ETRACER_ACCESS_BIT, ETRACER_ACCESS_LVL_GPIO, 0);
+
+#if defined(SLABV14)
+      machine.device[RADIO].write(RADIO, RADIO_RESET_MASK, BIT(val8,7) << CC2420_BIT_RESET);
+      etracer_slot_access(0x0, 1, ETRACER_ACCESS_WRITE, ETRACER_ACCESS_BIT, ETRACER_ACCESS_LVL_GPIO, 0);
+#endif
     }
   
-  /* port 2 :                          */
-  /* ========                          */
-  /*   P2.7 NC                         */
-  /*   P2.6 NC                         */
-  /*   P2.5 NC                         */
-  /*   P2.4 1wire                      */
-  /*   P2.3 NC                         */
-  /*   P2.3 NC                         */
-  /*   P2.1 7seg selector 1            */
-  /*   P2.0 7seg selector 0            */
+  /* port 2 :                               */
+  /* ========                               */
+  /*   P2.7 NC                              */
+  /*   P2.6 NC                              */
+  /*   P2.5 NC                              */
+  /*   P2.4 1wire                           */
+  /*   P2.3 NC                              */
+  /*   P2.3 NC                              */
+  /*   P2.1 7seg selector 1                 */
+  /*   P2.0 7seg selector 0                 */
   if (msp430_digiIO_dev_read(PORT2,&val8))
     {
       machine.device[DS24].write(DS24,DS2411_D,BIT(val8,4)); 
       etracer_slot_access(0x0, 1, ETRACER_ACCESS_WRITE, ETRACER_ACCESS_BIT, ETRACER_ACCESS_LVL_GPIO, 0);
     }
 
-  /* port 3 :                          */
-  /* ========                          */
-  /*   P3.7 urxd1 : serial             */
-  /*   P3.6 utxd1 : serial             */
-  /*   P3.5 urxd0                      */
-  /*   P3.4 utxd0                      */ 
-  /*   P3.3 NC                         */
-  /*   P3.2 NC                         */
-  /*   P3.1 NC                         */
-  /*   P3.0 NC                         */
-#if 0
+  /* port 3 :                               */
+  /* ========                               */
+  /*   P3.7 urxd1 : serial                  */
+  /*   P3.6 utxd1 : serial                  */
+  /*   P3.5 urxd0                           */
+  /*   P3.4 utxd0                           */ 
+  /*   P3.3 NC                              */
+  /*   P3.2 NC                              */
+  /*   P3.1 NC                              */
+  /*   P3.0 VREG_EN cc2420(V1.4)            */
+#if defined(SLABV14)
   if (msp430_digiIO_dev_read(PORT3,&val8))
     {
+      machine.device[RADIO].write(RADIO, RADIO_VREG_EN_MASK, BIT(val8,0) << CC2420_BIT_VREG_EN);
+      etracer_slot_access(0x0, 1, ETRACER_ACCESS_WRITE, ETRACER_ACCESS_BIT, ETRACER_ACCESS_LVL_GPIO, 0);    
     }
 #endif
 
-  /* port 4 :                          */
-  /* ========                          */
-  /*   P4.7 flash hold                 */
-  /*   P4.6 NC                         */
-  /*   P4.5 NC                         */
-  /*   P4.4 CS flash                   */
-  /*   P4.3 NC                         */
-  /*   P4.2 CS cc1100                  */
-  /*   P4.1 batt status                */
-  /*   P4.0 NC                         */
+  /* port 4 :                               */
+  /* ========                               */
+  /*   P4.7 flash hold                      */
+  /*   P4.6 NC                              */
+  /*   P4.5 NC                              */
+  /*   P4.4 CS flash                        */
+  /*   P4.3 NC                              */
+  /*   P4.2 CS_radio cc1100(V1.3B)/cc2420(V1.4)*/
+  /*   P4.1 batt status                     */
+  /*   P4.0 NC                              */
   if (msp430_digiIO_dev_read(PORT4,&val8))
     {
       FLASH_CS = BIT(val8,4);
@@ -447,9 +462,9 @@ int devices_update(void)
   /*   P5.6 led 3 (Blue)               */
   /*   P5.5 led 2 (Green)              */
   /*   P5.4 led 1 (Red)                */
-  /*   P5.3 SPI flash ram UCLK, cc1100 */
-  /*   P5.2 SPI flash ram SOMI, cc1100 */
-  /*   P5.1 SPI flash ram SIMO, cc1100 */
+  /*   P5.3 flash clock, CLOCK cc1100(V1.3B)/cc2420(V1.4)*/
+  /*   P5.2 flash out, SDO cc1100(V1.3B)/cc2420(V1.4)*/
+  /*   P5.1 flash in, SDI cc1100(V1.3B)/cc2420(V1.4)*/
   /*   P5.0 NC                         */
   if (msp430_digiIO_dev_read(PORT5,&val8))
     {
@@ -468,7 +483,7 @@ int devices_update(void)
       UPDATE(LED3);
       REFRESH(LED3);
 
-      /* cc1100 is driven by spi                          */
+      /* cc1100/cc2420 is driven by spi                   */
       /* we could/should check here that the pins are not */
       /* driven by the GPIO                               */
     }
@@ -520,11 +535,12 @@ int devices_update(void)
 	{
           if (!FLASH_CS && !RADIO_CSn)
 	    {
+#if defined(DEBUG_ME_HARDER)
               ERROR("senslab:devices: flash chip select and radio chip select enabled at the same time on SPI1\n");
+#endif
             }
           machine.device[FLASH].write(FLASH, M25P_D, val8);
 	  etracer_slot_access(0x0, 1, ETRACER_ACCESS_WRITE, ETRACER_ACCESS_BYTE, ETRACER_ACCESS_LVL_SPI1, 0);
-
 	  machine.device[RADIO].write(RADIO, RADIO_DATA_MASK, val8);
 	  etracer_slot_access(0x0, 1, ETRACER_ACCESS_WRITE, ETRACER_ACCESS_BYTE, ETRACER_ACCESS_LVL_SPI1, 0);
 	}
@@ -535,6 +551,7 @@ int devices_update(void)
       break;
     }
     
+
   /* *************************************************************************** */
   /* devices -> MCU                                                              */
   /* *************************************************************************** */
@@ -566,6 +583,7 @@ int devices_update(void)
 #endif
 	  }
 	msp430_usart1_dev_write_spi(value & RADIO_DATA_MASK);
+
 	etracer_slot_access(0x0, 1, ETRACER_ACCESS_READ, ETRACER_ACCESS_BYTE, ETRACER_ACCESS_LVL_SPI1, 0);
       }
 
@@ -579,6 +597,20 @@ int devices_update(void)
 	msp430_digiIO_dev_write(PORT1, (RADIO_GDO0_MASK & value) ? 0x08 : 0x00, 0x08);
 	etracer_slot_access(0x0, 1, ETRACER_ACCESS_READ, ETRACER_ACCESS_BIT, ETRACER_ACCESS_LVL_GPIO, 0);
       }
+
+#if defined(SLABV14)
+    if (mask & RADIO_SFD_MASK) // SFD -> P1.5
+      { 
+	msp430_digiIO_dev_write(PORT1, (RADIO_SFD_MASK & value) ? 0x20 : 0x00, 0x20);
+	etracer_slot_access(0x0, 1, ETRACER_ACCESS_READ, ETRACER_ACCESS_BIT, ETRACER_ACCESS_LVL_GPIO, 0);
+      }
+    if (mask & RADIO_CCA_MASK) // CCA -> P1.6
+      { 
+	msp430_digiIO_dev_write(PORT1, (RADIO_CCA_MASK & value) ? 0x40 : 0x00, 0x40);
+	etracer_slot_access(0x0, 1, ETRACER_ACCESS_READ, ETRACER_ACCESS_BIT, ETRACER_ACCESS_LVL_GPIO, 0);
+      }
+
+#endif
   }
 
 
@@ -596,7 +628,8 @@ int devices_update(void)
 	msp430_usart1_dev_write_spi(value & 0x00FF);
 	etracer_slot_access(0x0, 1, ETRACER_ACCESS_READ, ETRACER_ACCESS_BYTE, ETRACER_ACCESS_LVL_SPI1, 0);
       }
-  }
+
+   }
 
 
   /* input on UART serial */

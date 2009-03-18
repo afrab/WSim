@@ -18,9 +18,8 @@
 #include "devices/m25p80/m25p80_dev.h"
 #include "devices/cc1100/cc1100_dev.h"
 #include "devices/ptty/ptty_dev.h"
+#include "devices/uigfx/uigfx_dev.h"
 #include "src/options.h"
-
-#define INPUT_GUI 1
 
 /* ************************************************** */
 /* ************************************************** */
@@ -34,10 +33,12 @@
 #define LED4    5
 #define RADIO   6
 #define SERIAL  7
+#define LOGO1   8
 
-#define END_DEV SERIAL
-
+#define END_DEV           LOGO1
 #define BOARD_DEVICE_MAX (END_DEV+1)
+
+#define NAME "wisenode"
 
 /* ************************************************** */
 /* ************************************************** */
@@ -114,6 +115,14 @@ int system_create(int dev_num)
   machine.device[dev_num].delete        = system_delete;
   machine.device[dev_num].state_size    = sizeof(struct wisenode_struct_t);
   machine.device[dev_num].name          = "System Platform";
+
+  STDOUT("%s:\n", NAME);
+  STDOUT("%s: =========================\n", NAME);
+  STDOUT("%s: boutton 1 = 'a'\n", NAME);
+  STDOUT("%s: boutton 2 = 'z'\n", NAME);
+  STDOUT("%s: =========================\n", NAME);
+  STDOUT("%s:\n", NAME);
+
   return 0;
 }
 
@@ -132,17 +141,17 @@ int devices_create(void)
 
   if (xt1_opt.value) {
     xin_freq = atoi(xt1_opt.value);
-    VERBOSE(1,"wisenode: xt1 external crystal set to %d Hz\n",xin_freq);
+    VERBOSE(1,"%s: xt1 external crystal set to %d Hz\n",NAME,xin_freq);
   }
 
   if (xt2_opt.value) {
     xt2_freq = atoi(xt2_opt.value);
-    VERBOSE(1,"wisenode: xt2 external crystal set to %d Hz\n",xt2_freq);
+    VERBOSE(1,"%s: xt2 external crystal set to %d Hz\n",NAME,xt2_freq);
   }
 
   if (xosc_opt.value) {
     xosc_freq = atoi(xosc_opt.value);
-    VERBOSE(1,"wisenode: xosc external crystal set to %d Hz\n",xosc_freq);
+    VERBOSE(1,"%s: xosc external crystal set to %d Hz\n",NAME,xosc_freq);
   }
 
   /*********************************/
@@ -164,6 +173,9 @@ int devices_create(void)
   machine.device_size[LED4]   = led_device_size();    // 5 Led4
   machine.device_size[RADIO]  = cc1100_device_size(); // 6 cc1100 radio
   machine.device_size[SERIAL] = ptty_device_size();   // 7 serial
+#if defined(LOGO1)
+  machine.device_size[LOGO1]  = uigfx_device_size();
+#endif
 
   /*********************************/
   /* allocate memory               */
@@ -175,14 +187,27 @@ int devices_create(void)
   /* create peripherals            */
   /*********************************/
 
+#if defined(LOGO1)
+#  define BKG 0xffffff
+#  define OFF 0x202020
+#  include "wisenode.xpm"
+#  define XPMNAME wisenode
+#else
+#  define BKG 0x000000
+#  define OFF 0x202020
+#endif
+
   res += system_create          (SYSTEM);
   res += m25p_device_create     (FLASH, 0);
-  res += led_device_create      (LED1,0xee,0x00,0x00,"led1");
-  res += led_device_create      (LED2,0x00,0xee,0x00,"led2");
-  res += led_device_create      (LED3,0x00,0x00,0xee,"led3");
-  res += led_device_create      (LED4,0x00,0xee,0xee,"led4");
+  res += led_device_create      (LED1,    0xff3232,OFF,BKG, "led1");
+  res += led_device_create      (LED2,    0x32ff32,OFF,BKG, "led2");
+  res += led_device_create      (LED3,    0x3232ff,OFF,BKG, "led3");
+  res += led_device_create      (LED4,    0x00ffff,OFF,BKG, "led4");
   res += cc1100_device_create   (RADIO, xosc_freq / 1000000);
   res += ptty_device_create     (SERIAL,1);
+#if defined(LOGO1)
+  res += uigfx_device_create    (LOGO1,  XPMNAME);
+#endif
 
   /*********************************/
   /* place peripherals Gui         */
@@ -190,13 +215,22 @@ int devices_create(void)
 
   {
     int lw,lh;
+#if defined(LOGO1)
+    int log_w,log_h;
+#endif
 
     machine.device[LED1].ui_get_size(LED1,&lw,&lh);
+#if defined(LOGO1)
+    machine.device[LOGO1].ui_get_size(LOGO1, &log_w, &log_h);
+#endif
 
     machine.device[LED1].ui_set_pos(LED1,    0,   0);
     machine.device[LED2].ui_set_pos(LED2, 1*lw,   0);
     machine.device[LED3].ui_set_pos(LED3, 2*lw,   0);
     machine.device[LED3].ui_set_pos(LED4, 3*lw,   0);
+#if defined(LOGO1)
+    machine.device[LOGO1].ui_set_pos(LOGO1,   0,   0);
+#endif
   }
 
   /*********************************/
@@ -214,8 +248,19 @@ int devices_create(void)
 /* devices init conditions should be written here */
 int devices_reset_post(void)
 {
+#if defined(GUI)
+  int refresh = 0;
+#endif
+
   SYSTEM_FLASH_CS = 0;
   SYSTEM_RADIO_CS = 0;
+
+  REFRESH(LED1);
+  REFRESH(LED2);
+  REFRESH(LED3);
+#if defined(LOGO1)
+  REFRESH(LOGO1);
+#endif
   return 0;
 }
 
@@ -273,11 +318,8 @@ int devices_update(void)
   /*    3.6 : utxd1                    */
   /*    3.7 : urxd1                    */
 #if 0
-  if (msp430_digiIO_dev_read(PORT3,&val8))
-    {
-      /* cc1100 is driven by spi       */
-      /* software spi is not supported */
-    }
+  /* cc1100 is driven by spi       */
+  /* software spi is not supported */
 #endif
 
   /*  port 4 :                         */
@@ -295,11 +337,11 @@ int devices_update(void)
 #if defined(DEBUG)
       if (BIT(val8,6) != SYSTEM_FLASH_CS)
 	{
-	  HW_DMSG_DEV("wisenode: flash CS set to %d\n",BIT(val8,6));
+	  HW_DMSG_DEV("%s: flash CS set to %d\n",NAME,BIT(val8,6));
 	}
       if (BIT(val8,2) != SYSTEM_RADIO_CS)
 	{
-	  HW_DMSG_DEV("wisenode: radio CS set to %d\n",BIT(val8,2));
+	  HW_DMSG_DEV("%s: radio CS set to %d\n",NAME,BIT(val8,2));
 	}
 #endif
 
@@ -368,11 +410,10 @@ int devices_update(void)
 #endif
 
 
-
+  /* Usart0                            */
+  /* ================================= */
   /* Usart SPI mode                    */
-  /* ==============                    */
-  /* SPI 0 : radio + flash             */
-
+  /* SPI0 : radio + flash              */
   switch (MCU.usart0.mode)
     {
     case USART_MODE_SPI:
@@ -384,20 +425,11 @@ int devices_update(void)
 	   */
 	  if ((SYSTEM_FLASH_CS == 0) && (SYSTEM_RADIO_CS == 0))
 	    {
-	      WARNING("wisenode: Flash and Radio SPI are selected at the same time\n");
+	      WARNING("%s: Flash and Radio SPI are selected at the same time\n",NAME);
 	    }
 
-	  /* tests can/should be removed */
-	  // if (SYSTEM_FLASH_CS == 0) /* M25P CS is negated */
-	  {
-	    machine.device[FLASH].write(FLASH, M25P_D, val8);
-	  }
-
-	  /* tests can/should be removed */
-	  // if (SYSTEM_RADIO_CS == 0) /* CC2420 CS is negated */
-	  {
-	    machine.device[RADIO].write(RADIO, CC1100_DATA_MASK, val8);
-	  }
+	  machine.device[FLASH].write(FLASH, M25P_D, val8);
+	  machine.device[RADIO].write(RADIO, CC1100_DATA_MASK, val8);
 	  etracer_slot_access(0x0, 1, ETRACER_ACCESS_WRITE, ETRACER_ACCESS_BYTE, ETRACER_ACCESS_LVL_SPI0, 0);
 	}
       break;
@@ -415,7 +447,6 @@ int devices_update(void)
   switch (MCU.usart1.mode)
     {
     case USART_MODE_SPI:
-      /* not used */
       break;
     case USART_MODE_UART:
       if (msp430_usart1_dev_read_uart(&val8))
@@ -471,7 +502,7 @@ int devices_update(void)
 	  {
 	    ERROR("devices: read data on flash while not in SPI mode ?\n");
 	  }
-	msp430_usart1_dev_write_spi(value & 0x00FF);
+	msp430_usart1_dev_write_spi(value & M25P_D);
 	etracer_slot_access(0x0, 1, ETRACER_ACCESS_READ, ETRACER_ACCESS_BYTE, ETRACER_ACCESS_LVL_SPI1, 0);
       }
   }
@@ -485,12 +516,12 @@ int devices_update(void)
       if ((mask & PTTY_D) != 0)
 	{
 	  msp430_usart1_dev_write_uart(value & PTTY_D);
-	  etracer_slot_access(0x0, 1, ETRACER_ACCESS_READ, ETRACER_ACCESS_BYTE, ETRACER_ACCESS_LVL_OUT, 0);
+	  /* etracer_slot_access(0x0, 1, ETRACER_ACCESS_READ, ETRACER_ACCESS_BYTE, ETRACER_ACCESS_LVL_OUT, 0); */
 	}
     }
 
 
-  /* input on buttons */
+#if defined(GUI) // && defined(INPUT_GUI)
   {
 #define UI_EVENT_SKIP 100
     if ((UI_LOOP_COUNT--) == 0)
@@ -507,12 +538,12 @@ int devices_update(void)
 		if ((machine.ui.b_down & UI_BUTTON_1) != 0)
 		  {
 		    b &= ~0x80;
-		    VERBOSE(3,"wisenode: button 1 pressed\n");
+		    VERBOSE(3,"%s: button 1 pressed\n",NAME);
 		  }
 		if ((machine.ui.b_down & UI_BUTTON_2) != 0)
 		  {
 		    b &= ~0x40;
-		    VERBOSE(3,"wisenode: button 2 pressed\n");
+		    VERBOSE(3,"%s: button 2 pressed\n",NAME);
 		  }
 
 		msp430_digiIO_dev_write(PORT2, b, 0xC0);
@@ -521,18 +552,18 @@ int devices_update(void)
 	    break; /* UI_EVENT_USER */
 
 	  case UI_EVENT_QUIT:
-	    HW_DMSG_UI("wisenode: UI event QUIT\n");
-	    MCU_SIGNAL = SIG_UI;
+	    HW_DMSG_UI("%s: UI event QUIT\n",NAME);
+	    mcu_signal_add(SIG_UI);
 	    break;
 	  case UI_EVENT_NONE:
 	    break;
 	  default:
-	    ERROR("wisenode: unknown ui event\n");
+	    ERROR("%s: unknown ui event\n",NAME);
 	    break;
 	  }
       }
   }
-
+#endif
 
   /* *************************************************************************** */
   /* update                                                                      */

@@ -49,6 +49,24 @@
 		example involving LEDs, another example on timers and LPMs, an example demonstrating 
 		serial port communication and finally an example involving the whole Worldsens framework
 		(including WSNet).</para>
+
+
+    <para>
+      <itemizedlist mark="bullet" spacing="normal">
+        <listitem>
+          <simpara>
+            WSim <ulink url="http://wsim.gforge.inria.fr/">WSim website</ulink>.
+          </simpara>
+        </listitem>
+        <listitem>
+          <simpara>
+            Tutorial Sources <ulink url="files/tutorial-wsn430.tar.gz">Examples tar file</ulink>.
+          </simpara>
+        </listitem>
+      </itemizedlist>
+    </para>
+
+
 	</chapter>
 	<chapter id="tools">
 		<title>Brief Presentation of the Tools</title>

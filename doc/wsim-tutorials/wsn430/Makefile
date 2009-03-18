@@ -20,6 +20,7 @@ html: wsim.html
 	cp -r navig		htdocs
 	cp -r figures		htdocs 
 	cp -r css 		htdocs
+	cp -r files 		htdocs
 
 upload: html 
 	rsync -ruz -e ssh --delete  htdocs/ \

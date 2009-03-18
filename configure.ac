@@ -104,8 +104,8 @@ AM_CONDITIONAL([BUILD_ETRACE], [test "${etrace_sum}" = "yes"])
 
 dnl SDL ui mode
 dnl ===========
-AC_ARG_ENABLE([gui],AS_HELP_STRING([--enable-gui],[GUI for devices (default disabled)]))
-if test "${enable_gui}" = "yes" ; then
+AC_ARG_ENABLE([gui],AS_HELP_STRING([--enable-gui],[GUI for devices (default enabled)]))
+if test "${enable_gui}" != "no" ; then
     sdl_sum="yes"
     AC_DEFINE([GUI],[1],[Defines wether a GUI is available])
 else
@@ -143,8 +143,8 @@ dnl --------------------------------------------------------------
 
 dnl ptty enable
 dnl ===========
-AC_ARG_ENABLE([ptty],AS_HELP_STRING([--enable-ptty],[Pseudo TTY IO device (default disabled)]))
-if test "${enable_ptty}" = "yes" ; then
+AC_ARG_ENABLE([ptty],AS_HELP_STRING([--enable-ptty],[Pseudo TTY IO device (default enabled)]))
+if test "${enable_ptty}" != "no" ; then
    ptty_sum="yes"
    AC_DEFINE([PTTY],[1],[Defines wether libptty is used on the corrent configuration])
 else
@@ -159,8 +159,8 @@ wsnet1_sum="no"
 dnl wsnet1le_sum="no"
 wsnet2_sum="no"
 
-AC_ARG_ENABLE([wsnet1],AS_HELP_STRING([--enable-wsnet1],[WorldSens WSNet1 simulator (default disabled)]))
-if test "${enable_wsnet1}" = "yes" ; then
+AC_ARG_ENABLE([wsnet1],AS_HELP_STRING([--enable-wsnet1],[WorldSens WSNet1 simulator (default enabled)]))
+if test "${enable_wsnet1}" != "no" ; then
    worldsens_sum="wsnet1"
    wsnet1_sum="yes"
 fi 

@@ -123,6 +123,7 @@ uint16_t mcu_jtag_read_word     (uint16_t addr);
 int      mcu_jtag_read_section  (uint8_t *mem, uint16_t start, uint16_t size);
 void     mcu_jtag_write_section (uint8_t *mem, uint16_t start, uint16_t size);
 void     mcu_jtag_write_zero    (uint16_t start, uint16_t size);
+int      mcu_hexfile_load       (char *filename);
 
 int      mcu_registers_number   (void);
 uint16_t mcu_register_get       (int i);

@@ -252,6 +252,12 @@ int main(int argc, char* argv[])
       return 1;
     }
 
+  /* precharge flash with file */
+  if (o.do_precharge)
+    {
+      mcu_hexfile_load(o.precharge);
+    }
+
   /* elf loading */
   if (o.progname)
     {

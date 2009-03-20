@@ -97,15 +97,19 @@ worldsens_s_sendto(struct _worldsens_s *worldsens, char *pkt, int size, struct s
 {
   int ret;
 
-  ret = sendto (worldsens->mfd, pkt, size, 0, (struct sockaddr*) addr, sizeof (struct sockaddr_in));
-  if (ret < size)
+  if (worldsens->mfd > -1)
     {
-      perror ("worldsens:multicast:sendto");
-      close (worldsens->mfd);
-      return -1;
+      ret = sendto (worldsens->mfd, pkt, size, 0, (struct sockaddr*) addr, sizeof (struct sockaddr_in));
+      if (ret < size)
+	{
+	  perror ("worldsens:multicast:sendto");
+	  close (worldsens->mfd);
+	  worldsens->mfd = -1;
+	  return -1;
+	}
+      
+      tracer_event_record(worldsens->trc_mcast_tx, pkt[0]);
     }
-
-  tracer_event_record(worldsens->trc_mcast_tx, pkt[0]);
   return 0;
 }
 
@@ -122,6 +126,7 @@ worldsens_s_recvfrom(struct _worldsens_s *worldsens, char *pkt, int sizemax, str
     {
       perror ("worldsens:multicast:recvfrom");
       close  (worldsens->mfd);
+      worldsens->mfd = -1;
       return -1;
     }
 
@@ -155,6 +160,7 @@ worldsens_s_initialize (struct _worldsens_s *worldsens)
     {
       perror ("worldsens_s_initialize:bind:");
       close (worldsens->mfd);
+      worldsens->mfd = -1;
       return -1;
     }
 
@@ -164,6 +170,7 @@ worldsens_s_initialize (struct _worldsens_s *worldsens)
     {
       perror ("worldsens_s_initialize:inet_aton:");
       close (worldsens->mfd);
+      worldsens->mfd = -1;
       return -1;
     }
   worldsens->maddr.sin_port   = htons (g_mport);
@@ -697,7 +704,8 @@ int
 worldsens_s_clean (struct _worldsens_s *worldsens)
 {
   close (worldsens->mfd);
-  simulation_keeps_going = 0;
+  worldsens->mfd         = -1;
+  simulation_keeps_going =  0;
   core_runtime_end ();
   return 0;
 }

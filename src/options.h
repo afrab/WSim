@@ -34,12 +34,12 @@ struct options_t {
   char               dumpfile   [MAX_FILENAME];
   char               tracefile  [MAX_FILENAME];
   char               etracefile [MAX_FILENAME];
-  char               precharge  [MAX_FILENAME];
+  char               preload    [MAX_FILENAME];
 
   int                do_dump;
   int                do_trace;
   int                do_etrace;
-  int                do_precharge;
+  int                do_preload;
   int                do_etrace_at_begin;
 
   /**

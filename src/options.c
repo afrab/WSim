@@ -129,10 +129,10 @@ static struct moption_t dump_opt = {
   .value       = NULL
 };
 
-static struct moption_t precharge_opt = {
-  .longname    = "precharge",
+static struct moption_t preload_opt = {
+  .longname    = "preload",
   .type        = required_argument,
-  .helpstring  = "precharge flash with hex file",
+  .helpstring  = "preload flash with hex file",
   .value       = NULL
 };
 
@@ -166,7 +166,7 @@ void options_start()
   options_add_base(& version_opt        );
   options_add_base(& mode_opt           );
   options_add_base(& modearg_opt        );
-  options_add_base(& precharge_opt      );
+  options_add_base(& preload_opt        );
   /*  options_add_base(& dump_opt      ); */
   options_add_base(& logfile_opt        );
   options_add_base(& trace_opt          );
@@ -283,7 +283,7 @@ void options_read_cmdline(struct options_t *s, int *argc, char *argv[])
   sprintf(s->tracefile,  "wsim.trc");
   sprintf(s->etracefile, "wsim.etr");
 #endif
-  sprintf(s->precharge,  "none");
+  sprintf(s->preload,    "none");
 
   s->sim_mode           = DEFAULT_SIM_MODE;
   s->gdb_port           = DEFAULT_GDB_PORT;
@@ -292,7 +292,7 @@ void options_read_cmdline(struct options_t *s, int *argc, char *argv[])
   s->do_dump            = DEFAULT_DO_DUMP;
   s->do_trace           = DEFAULT_DO_TRACE;
   s->do_etrace          = DEFAULT_DO_ETRACE;
-  s->do_precharge       = 0;
+  s->do_preload         = 0;
   s->do_etrace_at_begin = DEFAULT_DO_ETRACE_AT_BEGIN;
 
   /* parse all options */
@@ -451,11 +451,11 @@ void options_read_cmdline(struct options_t *s, int *argc, char *argv[])
       options_print_version(s);
     }
 
-  if (precharge_opt.isset)
+  if (preload_opt.isset)
     {
-      s->do_precharge = 1;
-      if (precharge_opt.value)
-	strncpy(s->precharge, precharge_opt.value, MAX_FILENAME);
+      s->do_preload = 1;
+      if (preload_opt.value)
+	strncpy(s->preload, preload_opt.value, MAX_FILENAME);
     }
 
   OPT_DMSG("parseindex = %d, argc = %d\n",parseindex,*argc);

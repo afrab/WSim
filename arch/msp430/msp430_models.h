@@ -116,6 +116,10 @@
 #define __msp430_have_adc12
 #define __msp430_have_flash
 
+// Flash erase timings
+#define FLASH_ERASE_TIMING_MASS  5297
+#define FLASH_ERASE_TIMING_SEG   4819
+
 /* ********************************************************************** */
 /* ********************************************************************** */
 /* ********************************************************************** */
@@ -180,6 +184,10 @@
 #define __msp430_have_timerb7
 #define __msp430_have_watchdog
 #define __msp430_have_flash
+
+// Flash erase timings
+#define FLASH_ERASE_TIMING_MASS  5297
+#define FLASH_ERASE_TIMING_SEG   4819
 
 /* ********************************************************************** */
 /* ********************************************************************** */
@@ -284,6 +292,10 @@
 #define __msp430_have_watchdog
 #define __msp430_have_adc12
 #define __msp430_have_flash
+
+// Flash erase timings
+#define FLASH_ERASE_TIMING_MASS  5297
+#define FLASH_ERASE_TIMING_SEG   4819
 
 /* ********************************************************************** */
 /* ********************************************************************** */
@@ -466,6 +478,10 @@
 #define __msp430_have_dma
 #define __msp430_have_flash
 
+// Flash erase timings
+#define FLASH_ERASE_TIMING_MASS  5297
+#define FLASH_ERASE_TIMING_SEG   4819
+
 /* ********************************************************************** */
 /* ********************************************************************** */
 /* ********************************************************************** */
@@ -521,6 +537,9 @@
 #define __msp430_have_adc10
 #define __msp430_have_flash
 
+// Flash erase timings
+#define FLASH_ERASE_TIMING_MASS  10593
+#define FLASH_ERASE_TIMING_SEG   4819
 
 /* ********************************************************************** */
 /* ********************************************************************** */
@@ -574,6 +593,11 @@
 #define __msp430_have_watchdog
 #define __msp430_have_adc10
 #define __msp430_have_flash
+
+
+// Flash erase timings
+#define FLASH_ERASE_TIMING_MASS  10593
+#define FLASH_ERASE_TIMING_SEG   4819
 
 /* ********************************************************************** */
 /* ********************************************************************** */

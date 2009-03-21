@@ -807,7 +807,7 @@ static ssize_t worldsens_packet_send(int fd, char* msg, size_t len, int flags, i
   if (slen < (int)len)
     {
       ERROR("===================================================\n");
-      ERROR("= worldsens:send:send error - %s\n", strerror(errno));
+      ERROR("= worldsens:send error - %s\n", strerror(errno));
       ERROR("= fd=%d, msg=0x%x, len=%d, slen=%d, flags=%d, dump=%d\n", fd, msg, len, slen, flags, dump); 
       ERROR("= current time = %"PRIu64" ns\n",MACHINE_TIME_GET_NANO());
       ERROR("===================================================\n");
@@ -833,7 +833,7 @@ static ssize_t worldsens_packet_recv(int fd, char* msg, size_t len, int flags, i
   if (srec <= 0)
     {
       ERROR("===================================================\n");
-      ERROR("= worldsens:send:recv error - %s\n", strerror(errno));
+      ERROR("= worldsens:recv error - %s\n", strerror(errno));
       ERROR("= fd=%d, msg=0x%x, len=%d, srec=%d, flags=%d, dump=%d\n", fd, msg, len, srec, flags, dump); 
       ERROR("= current time = %"PRIu64" ns\n",MACHINE_TIME_GET_NANO());
       ERROR("===================================================\n");

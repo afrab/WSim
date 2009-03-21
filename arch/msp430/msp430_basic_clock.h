@@ -124,7 +124,7 @@ struct msp430_basic_clock_t
     int8_t           s;
   } bcsctl2;
 
-  /* external clocks */
+  /* internal clocks */
 
   uint64_t MCLK_counter;
   int      MCLK_increment;
@@ -140,7 +140,7 @@ struct msp430_basic_clock_t
   int      SMCLK_increment;
   int      SMCLK_bitmask;
 
-  /* internal clocks */
+  /* external clocks */
 
   uint32_t lfxt1_freq;
   uint64_t lfxt1_counter;

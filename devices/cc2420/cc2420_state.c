@@ -253,7 +253,7 @@ void cc2420_update_state_rx_sfd_search(struct _cc2420_t * cc2420) {
     }
 
     if (cc2420->rx_fifo_read != prev_read) {
-	//CC2420_DEBUG("************** rx_fifo_read changed : %d -> %d\n", prev_read, cc2420->rx_fifo_read);
+	CC2420_DEBUG("************** rx_fifo_read changed : %d -> %d\n", prev_read, cc2420->rx_fifo_read);
 	if ( (cc2420->rx_fifo_read > (prev_read + 1) ) || ( (cc2420->rx_fifo_read < prev_read) && (cc2420->rx_fifo_read != 0) ) ) {
 	    CC2420_DEBUG("*********************** GOT THE BUG ****************\n");
 	    CC2420_DEBUG("*********************** GOT THE BUG ****************\n");
@@ -603,6 +603,8 @@ void cc2420_update_state_tx_frame(struct _cc2420_t * cc2420) {
 
     uint8_t bytes_to_send;
     uint8_t bytes_from_fifo;
+
+    uint16_t autocrc = CC2420_REG_MDMCTRL0_AUTOCRC(cc2420->registers[CC2420_REG_MDMCTRL0]);
     
     /* if VREG_EN is low, go back to VREG_OFF state */
     if (cc2420->VREG_EN_set) {
@@ -625,13 +627,22 @@ void cc2420_update_state_tx_frame(struct _cc2420_t * cc2420) {
 
     /* number of bytes that have to be sent (tx_frame_len + 1 : length field is not included in length) */
     bytes_to_send   = cc2420->tx_frame_len + 1;
-    /* number of bytes we need from TX FIFO (bytes_to_send - 2 : we add CRC) */
-    bytes_from_fifo = cc2420->tx_frame_len - 1;
+
+
+    /* evaluate number of bytes we need from TX FIFO */
+    if (autocrc) {
+      /* if hardware CRC is enabled, number of bytes we need from TX FIFO = bytes_to_send - 2 (we add CRC) */
+      bytes_from_fifo = cc2420->tx_frame_len - 1;
+    }
+    else {
+      bytes_from_fifo = bytes_to_send;
+    }
+
 
     /* transmit data from FIFO */
     if (cc2420->tx_bytes < bytes_from_fifo) {
 	/* check TX underflow */
-	if (cc2420->tx_bytes >= cc2420->tx_fifo_len) {
+        if (cc2420->tx_bytes >= cc2420->tx_fifo_len) {
 	    CC2420_DEBUG("cc2420_update_state_tx : TX UNDERFLOW\n");
 	    CC2420_TX_UNDERFLOW_ENTER(cc2420);
 	    return;
@@ -642,17 +653,23 @@ void cc2420_update_state_tx_frame(struct _cc2420_t * cc2420) {
 	return;
     }
 
-    /* transmit 1st byte of CRC */
-    if (cc2420->tx_bytes == bytes_from_fifo) {
-	cc2420->tx_fcs = cc2420_icrc(&cc2420->ram[CC2420_RAM_TXFIFO_START] + 1, cc2420->tx_frame_len - 2);
-	cc2420_tx_byte(cc2420, CC2420_LOBYTE(cc2420->tx_fcs));
-	cc2420->tx_bytes++;
-	cc2420->fsm_timer = MACHINE_TIME_GET_NANO() + 2 * CC2420_SYMBOL_PERIOD;
-	return;
-    }
+
+    /* if autocrc is disabled TX is over, else transmit CRC*/
+    if (autocrc) {
+
+      /* transmit 1st byte of CRC */
+      if (cc2420->tx_bytes == bytes_from_fifo) {     
+      cc2420->tx_fcs = cc2420_icrc(&cc2420->ram[CC2420_RAM_TXFIFO_START] + 1, cc2420->tx_frame_len - 2);
+      cc2420_tx_byte(cc2420, CC2420_LOBYTE(cc2420->tx_fcs));
+      cc2420->tx_bytes++;
+      cc2420->fsm_timer = MACHINE_TIME_GET_NANO() + 2 * CC2420_SYMBOL_PERIOD;
+      return;
+      }
 
     /* transmit 2nd byte of CRC, TX is over */
     cc2420_tx_byte(cc2420, CC2420_HIBYTE(cc2420->tx_fcs));
+    }
+
     CC2420_RX_CALIBRATE_ENTER(cc2420);
 
     return;

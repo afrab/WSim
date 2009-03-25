@@ -153,7 +153,10 @@ uint8_t  cc2420_read_register_l(struct _cc2420_t * cc2420, uint8_t addr);
 #define CC2420_REG_RSSI_CCA_THR(x) (x & (0x8000 | 0x4000 | 0x2000 | 0x1000 | 0x0800 | 0x0400 | 0x0200 | 0x0100))
 #define CC2420_REG_RSSI_RSSI_VAL(x) (x & (0x0080 | 0x0040 | 0x0020 | 0x0010 | 0x0008 | 0x0004 | 0x0002 | 0x0001))
 /* RSSI offset value (ie RSSI_VAL = P - RSSI_OFFSET) */
-#define CC2420_RSSI_OFFSET -45
+#define CC2420_RSSI_OFFSET (-45)
+
+/* CC2420 CRC OK, cf fig 21 p39 */
+#define CC2420_CRC_OK 0x80
 
 /* CC2420 Sync Word Register (cf [1] p67) */
 #define CC2420_REG_SYNC_WORD_SYNCWORD(x) (x & 0xFFFF)

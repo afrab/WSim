@@ -34,21 +34,48 @@
  * update rssi value
  */
 
-void cc2420_record_rssi(struct _cc2420_t * cc2420, uint8_t dBm) {
+void cc2420_record_rssi(struct _cc2420_t * cc2420, double dBm) {
 
     uint8_t cca_mode;
     uint8_t cca_threshold;
     uint8_t cca_hyst;
     uint8_t old_CCA_pin;
+    int16_t rx_rssi_value = 0;
+    int i;
 
-    cc2420->rx_rssi_value = ( (cc2420->rx_rssi_values * cc2420->rx_rssi_value) + (dBm - CC2420_RSSI_OFFSET) ) / (cc2420->rx_rssi_values + 1);
-    cc2420->rx_rssi_values ++;					
+    /* if dBm = -100 it means that cc2420 received any value during sync time. Skip this value for rssi average calculation */
+    if (dBm == -100) {
+        cc2420->rx_rssi_value = dBm - CC2420_RSSI_OFFSET;
+    }
+    else {
+        /* we replace the oldest value of rssi in the table by the new we got */
+        cc2420->rx_rssi_samples[cc2420->rx_rssi_sample_index] = dBm - CC2420_RSSI_OFFSET;
 
-    if (cc2420->rx_rssi_values < 8) {				
-	cc2420->rx_rssi_valid = 0;
-    }								
+        /* update samples table index */
+        cc2420->rx_rssi_sample_index = (cc2420->rx_rssi_sample_index + 1) % 8;
 
-    cc2420->rx_rssi_valid = 1;
+        /* compute new rssi average value */
+        for (i = 1 ; i <= cc2420->rx_rssi_values ; i++) {
+            rx_rssi_value = (rx_rssi_value * (i-1) + cc2420->rx_rssi_samples[i-1]) / i;
+        }
+        cc2420->rx_rssi_value = (int8_t)rx_rssi_value;
+
+	/* rssi average value for fcs is only conputed with the first 8 symbols received after SFD */
+        if (cc2420->rx_rssi_values == 7) {
+            cc2420->rx_rssi_value_for_fcs = cc2420->rx_rssi_value;
+        }
+
+        if (cc2420->rx_rssi_values < 8) {			      
+	    cc2420->rx_rssi_valid = 0;
+	    cc2420->rx_rssi_values++;
+
+        }			     
+	else {
+        cc2420->rx_rssi_valid = 1;
+        }
+    }
+
+
     
     /* update RSSI value register */
     cc2420->registers[CC2420_REG_RSSI] |= cc2420->rx_rssi_value;
@@ -187,7 +214,7 @@ int cc2420_rx_filter(struct _cc2420_t * cc2420, double frequency, int modulation
       return -1;
     }
 
-  /* Verify cc1100 modulation */
+  /* Verify cc2420 modulation */
   if (cc2420_get_modulation(cc2420) != modulation) 
     {
       CC2420_DBG_RX("cc2420:rx: dropping received data, wrong modulation\n");
@@ -584,8 +611,8 @@ uint64_t cc2420_callback_rx(void *arg, struct wsnet_rx_info *wrx)
     if (cc2420_rx_filter(cc2420, frequency, modulation, dBm, snr)) {
 	return 0;
     }
-
     uint16_t addr_decode = CC2420_REG_MDMCTRL0_ADR_DECODE(cc2420->registers[CC2420_REG_MDMCTRL0]);
+    uint16_t autocrc = CC2420_REG_MDMCTRL0_AUTOCRC(cc2420->registers[CC2420_REG_MDMCTRL0]);
 
     /* according to current state, deal with data */
     switch (cc2420->fsm_state) {
@@ -639,31 +666,31 @@ uint64_t cc2420_callback_rx(void *arg, struct wsnet_rx_info *wrx)
 	}
 
 	/* first byte of FCF */
-	if (cc2420->rx_data_bytes == 2) {
+	/*	if (cc2420->rx_data_bytes == 2) {
 	    CC2420_DEBUG("1st byte of fcf is %.1x, swapped %.1x\n", rx, swapbyte(rx));
 	    CC2420_DEBUG("swapping byte, todo : check that it's not a bug in cc2420 in cc2420.c/com_send driver\n");
 	    cc2420->rx_fcf = swapbyte(rx);
-	}
+	    }*/
 
 	/* second byte of FCF */
-	if (cc2420->rx_data_bytes == 3) {
+	/*if (cc2420->rx_data_bytes == 3) {
 	    CC2420_DEBUG("2nd byte of fcf is %.1x, swapped %.1x\n", rx, swapbyte(rx));
-	    cc2420->rx_fcf |= swapbyte(rx) << 8;
+	    cc2420->rx_fcf |= swapbyte(rx) << 8;*/
 	    /* the FCF was fully received, process it */
-	    cc2420_rx_process_fcf(cc2420);
-	}
+	/* cc2420_rx_process_fcf(cc2420);
+	}*/
 
 	/* sequence field */
-	if (cc2420->rx_data_bytes == 4) {
+	/*if (cc2420->rx_data_bytes == 4) {
 	    CC2420_DEBUG("seq is %d\n", rx);
-	}
+	    }*/
 
 	/* if first byte of data, set position, needed to unset FIFOP */
-	if (cc2420->rx_data_bytes == 4) {
+      //	if (cc2420->rx_data_bytes == 4) {
 	    /* if we don't already have data bytes in RX FIFO */
 	    if (cc2420->rx_first_data_byte == -1)
 		cc2420->rx_first_data_byte = cc2420->rx_fifo_write;
-	}
+	    //	}
 
 	/* if address recognition is set, and addressing fields were received, deal with address recognition */
 	if (addr_decode) {
@@ -690,13 +717,20 @@ uint64_t cc2420_callback_rx(void *arg, struct wsnet_rx_info *wrx)
 	/* if we got a complete frame, (+1 for length field) */
 	if ( cc2420->rx_data_bytes == (cc2420->rx_len + 1) ) {
 
-	    /* check that received frame is ok, ie crc and address recognition 
-	       else flush the frame */
-	    if (cc2420_rx_check_crc(cc2420)) {
-		CC2420_DEBUG("crc check failed, flushing received frame\n");
-		cc2420_rx_flush_current_frame(cc2420);
-		CC2420_RX_SFD_SEARCH_ENTER(cc2420);
-		return 0;
+	    /* check if hardware CRC is enabled */
+	    if (autocrc) {
+	        /* check that received frame is ok, ie crc and address recognition 
+	        else flush the frame */
+	        if (cc2420_rx_check_crc(cc2420)) {
+		    CC2420_DEBUG("crc check failed, flushing received frame\n");
+		    cc2420_rx_flush_current_frame(cc2420);
+		    CC2420_RX_SFD_SEARCH_ENTER(cc2420);
+		    return 0;
+		}
+		/* CRC is ok, so replace the 2 FCS bytes by RSSI and CRC/Corr (see 16.4 p38) */
+		else {
+		  cc2420_fcs_replace(cc2420);
+		}
 	    }
 
             if (cc2420->rx_addr_decode_failed) {
@@ -743,4 +777,19 @@ uint64_t cc2420_callback_rx(void *arg, struct wsnet_rx_info *wrx)
     }
 
     return 0;
+}
+
+
+/**
+ * Set CRC bit to 1 of the last received frame
+ */
+void cc2420_fcs_replace(struct _cc2420_t *cc2420)
+{
+    /* Set the significant bit in the last byte of the frame to 1 */
+    cc2420->ram[CC2420_RAM_RXFIFO_START + cc2420->rx_len] |= CC2420_CRC_OK;
+
+    /* Replace the first byte of FCS by RSSI average value */
+    cc2420->ram[CC2420_RAM_RXFIFO_START + cc2420->rx_len - 1] = cc2420->rx_rssi_value_for_fcs;
+
+    return;
 }

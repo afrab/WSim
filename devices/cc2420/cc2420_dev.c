@@ -480,6 +480,7 @@ void cc2420_read(int  dev_num, uint32_t  *mask, uint32_t  *value)
   /* "real" output value */
   uint8_t hw_val;
 
+
   /* output data on SPI */
   if (cc2420->CSn_pin == 0x00) 
     {

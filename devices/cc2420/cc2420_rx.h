@@ -62,7 +62,8 @@
  * update rssi values and update cca
  */
 
-void cc2420_record_rssi(struct _cc2420_t * cc2420, uint8_t dBm);
+void cc2420_record_rssi(struct _cc2420_t * cc2420, double dBm);
 int  cc2420_check_cca  (struct _cc2420_t * cc2420);
+void cc2420_fcs_replace (struct _cc2420_t *cc2420);
 
 #endif

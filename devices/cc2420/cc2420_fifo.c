@@ -33,6 +33,8 @@ void cc2420_tx_fifo_write(struct _cc2420_t * cc2420, uint8_t val) {
     /* the address where we have to write data */
     uint8_t addr;
 
+    uint16_t autocrc = CC2420_REG_MDMCTRL0_AUTOCRC(cc2420->registers[CC2420_REG_MDMCTRL0]);
+
     if (cc2420->tx_fifo_len >= CC2420_RAM_TXFIFO_LEN) {
 	CC2420_DEBUG("cc2420_tx_fifo_write : TX FIFO is FULL\n");
 	return;
@@ -49,15 +51,19 @@ void cc2420_tx_fifo_write(struct _cc2420_t * cc2420, uint8_t val) {
 	    cc2420->tx_frame_len = 0;
 	    return;
 	}
-	else if (cc2420->tx_frame_len < 2) {
+	else if ( (cc2420->tx_frame_len < 2 && autocrc) || ( cc2420->tx_frame_len < 1 && !autocrc ) ) {
 	    CC2420_DEBUG("cc2420_tx_fifo_write : frame length is too low, dropping byte\n");
 	    cc2420->tx_frame_len = 0;
 	    return;
-	}
+	    }
 
 	/* calculate the real number of bytes we need before sending */
-	/* add 1 for length (length field is not included in length value) remove 2 for FCS */
-	cc2420->tx_needed_bytes    = 1 + cc2420->tx_frame_len - 2;
+	if (autocrc) {
+	  /* add 1 for length (length field is not included in length value) remove 2 for FCS */
+	  cc2420->tx_needed_bytes = 1 + cc2420->tx_frame_len - 2;
+	}
+	else cc2420->tx_needed_bytes = 1 + cc2420->tx_frame_len;
+
 	cc2420->tx_available_bytes = 0;
 	cc2420->tx_fifo_len ++;
 	cc2420->ram[0] = val;
@@ -87,7 +93,7 @@ void cc2420_tx_fifo_write(struct _cc2420_t * cc2420, uint8_t val) {
 
 int cc2420_rx_fifo_read(struct _cc2420_t * cc2420, uint8_t * val) {
 
-    if (cc2420->rx_fifo_read == cc2420->rx_fifo_write) {
+   if (cc2420->rx_fifo_read == cc2420->rx_fifo_write) {
 	CC2420_DEBUG("cc2420_rx_fifo_read : fifo is empty\n");
 	return -1;
     }
@@ -139,14 +145,16 @@ int cc2420_rx_fifo_pop(struct _cc2420_t * cc2420, uint8_t * val) {
     if (cc2420->rx_fifo_read == CC2420_RAM_RXFIFO_LEN) {
 	cc2420->rx_fifo_read = 0;
     }
-
+ 
     /* if there is another frame in FIFO calculate where it finishes, and set FIFOP */
     if (calculate_length) {
 	/* read len val from FIFO */
 	len_val = cc2420->ram[CC2420_RAM_RXFIFO_START + cc2420->rx_fifo_read];
 	/* calculate where the first data byte of the frame is */
 	/* +4 : cf frame format */
-	cc2420->rx_first_data_byte = cc2420->rx_fifo_read + 4;
+	//	cc2420->rx_first_data_byte = cc2420->rx_fifo_read + 4;
+	/* test cc2420 hardware seems not to deal with 802.15.4 format */
+	cc2420->rx_first_data_byte = cc2420->rx_fifo_read;
 	if (cc2420->rx_first_data_byte >= CC2420_RAM_RXFIFO_LEN)
 	    cc2420->rx_first_data_byte = cc2420->rx_first_data_byte - CC2420_RAM_RXFIFO_LEN;
 

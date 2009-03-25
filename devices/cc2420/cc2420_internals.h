@@ -110,6 +110,7 @@ extern tracer_id_t TRACER_CC2420_STATE;
 #define CC2420_CCA_MODE_BOTH          3 /* both 1 and 2 modes */
 
 
+
 /***************************************************/
 /***************************************************/
 /***************************************************/
@@ -211,8 +212,17 @@ struct _cc2420_t {
     /* next RX symbol time */
     uint64_t rx_sync_timer;
 
-    /* rssi values */
+    /* rssi value */
     int8_t rx_rssi_value;
+
+    /* 8 samples to compute rssi */
+    int8_t rx_rssi_samples [8];
+
+    /* next index of rssi samples tab to be write */
+    int rx_rssi_sample_index;
+  
+    /* rssi value to replace the FCS first byte when CRC is ok (only the 8 first symbols following SFD) */
+    int8_t rx_rssi_value_for_fcs;
     
     /* number of values used to compute rssi */
     uint8_t rx_rssi_values;

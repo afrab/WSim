@@ -22,6 +22,8 @@
 /***************************************************/
 /***************************************************/
 
+//#define DEBUG
+
 #if defined(DEBUG)
 #define CC2420_DEBUG(x...)     VERBOSE(2,x)
 #define CC2420_DBG_RX(x...)    VERBOSE(2,x)

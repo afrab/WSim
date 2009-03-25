@@ -115,6 +115,10 @@ void cc2420_strobe_state_idle(struct _cc2420_t * cc2420)
 	cc2420->FIFOP_pin = 0x00;
 	cc2420->FIFOP_set = 1;
 	break;
+      case CC2420_STROBE_SRFOFF :
+	CC2420_DBG_STROBE("cc2420:strobe:idle: SRFOFF, allowed in idle mode but not usefull!\n");
+	break;
+
       default :
 	CC2420_DEBUG("cc2420:strobe:idle: invalid strobe command %d in idle state\n",
 		     cc2420->SPI_addr);

@@ -192,6 +192,8 @@ enum {
 	cc2420->rx_rssi_value   = 0;					\
 	cc2420->rx_rssi_values  = 0;					\
 	cc2420->rx_rssi_valid   = 0;					\
+	cc2420->rx_rssi_value_for_fcs = 0;                              \
+	cc2420->rx_rssi_sample_index = 0;                               \
 	cc2420->rx_zero_symbols = 0;					\
 	cc2420->rx_len          = 0;					\
 	cc2420->rx_data_bytes   = 0;					\

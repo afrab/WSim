@@ -222,7 +222,9 @@ void mcu_reset(void)
 #endif
 
   /* usart */
+#if defined(__msp430_have_usart0)
   msp430_usart0_reset();
+#endif
 #if defined(__msp430_have_usart1)
   msp430_usart1_reset();
 #endif

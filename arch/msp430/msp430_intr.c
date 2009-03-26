@@ -202,7 +202,9 @@ int msp430_interrupt_checkifg(void)
   res |= msp430_flash_chkifg();
 #endif
   /* usart */
+#if defined(__msp430_have_usart0)
   res |= msp430_usart0_chkifg();
+#endif
 #if defined(__msp430_have_usart1)
   res |= msp430_usart1_chkifg();
 #endif

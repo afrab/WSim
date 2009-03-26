@@ -167,8 +167,14 @@ struct msp430_mcu_t {
 
   struct msp430_digiIO_t       digiIO;
   struct msp430_sfr_t          sfr;
+
+#if defined(__msp430_have_watchdog)
   struct msp430_watchdog_t     watchdog;
+#endif
+
+#if defined(__msp430_have_usart0)
   struct msp430_usart_t        usart0;
+#endif
 
 #if defined(__msp430_have_usart1)
   struct msp430_usart_t        usart1;

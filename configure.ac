@@ -156,7 +156,6 @@ dnl worldsens mode
 dnl ==============
 worldsens_sum="no"
 wsnet1_sum="no"
-dnl wsnet1le_sum="no"
 wsnet2_sum="no"
 
 AC_ARG_ENABLE([wsnet1],AS_HELP_STRING([--enable-wsnet1],[WorldSens WSNet1 simulator (default enabled)]))
@@ -164,12 +163,6 @@ if test "${enable_wsnet1}" != "no" ; then
    worldsens_sum="wsnet1"
    wsnet1_sum="yes"
 fi 
-
-dnl AC_ARG_ENABLE([wsnet1],AS_HELP_STRING([--enable-wsnet1le],[WorldSens WSNet1le simulator (default disabled)]))
-dnl if test "${enable_wsnet1le}" = "yes" ; then
-dnl    worldsens_sum="wsnet1le"
-dnl    wsnet1le_sum="yes"
-dnl fi 
 
 AC_ARG_ENABLE([wsnet2],AS_HELP_STRING([--enable-wsnet2],[WorldSens WSNet2 simulator (default disabled)]))
 if test "${enable_wsnet2}" = "yes" ; then
@@ -189,16 +182,11 @@ fi
 
 AM_CONDITIONAL([BUILD_WORLDSENS],  [test "${worldsens_sum}" != "no"])
 AM_CONDITIONAL([BUILD_WSNET1],     [test "${worldsens_sum}" = "wsnet1"])
-dnl AM_CONDITIONAL([BUILD_WSNET1LE],   [test "${worldsens_sum}" = "wsnet1le"])
 AM_CONDITIONAL([BUILD_WSNET2],     [test "${worldsens_sum}" = "wsnet2"])
 
 if test "$wsnet1_sum" = yes; then
 AC_DEFINE(WSNET1, [1], [Worldsens WSNet1 protocol])
 fi
-
-dnl if test "$wsnet1le_sum" = yes; then
-dnl AC_DEFINE(WSNET1LE, [1], [Worldsens WSNet1LE protocol])
-dnl fi
 
 if test "$wsnet2_sum" = yes; then
 AC_DEFINE(WSNET2, [1], [Worldsens WSNet2 protocol])
@@ -227,14 +215,6 @@ if test "${enable_platform_senslab}" = "yes" ; then
 	PLATFORMNAMES="senslab"
 fi
 
-dnl mosar
-AC_ARG_ENABLE([platform-mosar],AS_HELP_STRING([--enable-platform-mosar],[mosar platforms]))
-if test "${enable_platform_mosar}" = "yes" ; then
-	enable_mcu_msp430=yes
-	NPLATFORM=$(($NPLATFORM + 1))
-	PLATFORMNAMES="mosar"
-fi
-
 dnl OT setre 1
 AC_ARG_ENABLE([platform-ot2006],AS_HELP_STRING([--enable-platform-ot2006],[OT 2006 platform]))
 if test "${enable_platform_ot2006}" = "yes" ; then
@@ -257,6 +237,22 @@ if test "${enable_platform_ez430}" = "yes" ; then
 	enable_mcu_msp430=yes
 	NPLATFORM=$(($NPLATFORM + 1))
 	PLATFORMNAMES="ez430 $PLATFORMNAMES"
+fi
+
+dnl ez430-rf2500
+AC_ARG_ENABLE([platform-ez430rf],AS_HELP_STRING([--enable-platform-ez430rf],[ez430rf2500 platforms]))
+if test "${enable_platform_ez430rf}" = "yes" ; then
+	enable_mcu_msp430=yes
+	NPLATFORM=$(($NPLATFORM + 1))
+	PLATFORMNAMES="ez430rf"
+fi
+
+dnl mosar
+AC_ARG_ENABLE([platform-mosar],AS_HELP_STRING([--enable-platform-mosar],[mosar platforms]))
+if test "${enable_platform_mosar}" = "yes" ; then
+	enable_mcu_msp430=yes
+	NPLATFORM=$(($NPLATFORM + 1))
+	PLATFORMNAMES="mosar"
 fi
 
 dnl Test 
@@ -316,18 +312,19 @@ if test $NPLATFORM -eq 0 ; then
   NPLATFORM=1 
 fi
 
-AM_CONDITIONAL([BUILD_WSN430],    [test "${enable_platform_wsn430}"    = "yes" -o "$ALL" = "yes" ])
-AM_CONDITIONAL([BUILD_SENSLAB],   [test "${enable_platform_senslab}"   = "yes" -o "$ALL" = "yes" ])
-AM_CONDITIONAL([BUILD_MOSAR],     [test "${enable_platform_mosar}"     = "yes"])
-AM_CONDITIONAL([BUILD_OT2006],    [test "${enable_platform_ot2006}"    = "yes" -o "$ALL" = "yes" ])
-AM_CONDITIONAL([BUILD_OTSETRE],   [test "${enable_platform_otsetre}"   = "yes" -o "$ALL" = "yes" ])
-AM_CONDITIONAL([BUILD_EZ430],     [test "${enable_platform_ez430}"     = "yes" -o "$ALL" = "yes" ])
-AM_CONDITIONAL([BUILD_TESTS],     [test "${enable_platform_tests}"     = "yes" -o "$ALL" = "yes" ])
-AM_CONDITIONAL([BUILD_TELOSB],    [test "${enable_platform_telosb}"    = "yes" -o "$ALL" = "yes" ])
-AM_CONDITIONAL([BUILD_WISENODE],  [test "${enable_platform_wisenode}"  = "yes" -o "$ALL" = "yes" ])
-AM_CONDITIONAL([BUILD_ICLBSN],    [test "${enable_platform_iclbsn}"    = "yes" -o "$ALL" = "yes" ])
-AM_CONDITIONAL([BUILD_MICA2],     [test "${enable_platform_mica2}"     = "yes"])
-AM_CONDITIONAL([BUILD_MICAZ],     [test "${enable_platform_micaz}"     = "yes"])
+AM_CONDITIONAL([BUILD_WSN430],    [test "${enable_platform_wsn430}"      = "yes" -o "$ALL" = "yes" ])
+AM_CONDITIONAL([BUILD_SENSLAB],   [test "${enable_platform_senslab}"     = "yes" -o "$ALL" = "yes" ])
+AM_CONDITIONAL([BUILD_OT2006],    [test "${enable_platform_ot2006}"      = "yes" -o "$ALL" = "yes" ])
+AM_CONDITIONAL([BUILD_OTSETRE],   [test "${enable_platform_otsetre}"     = "yes" -o "$ALL" = "yes" ])
+AM_CONDITIONAL([BUILD_EZ430],     [test "${enable_platform_ez430}"       = "yes" -o "$ALL" = "yes" ])
+AM_CONDITIONAL([BUILD_TESTS],     [test "${enable_platform_tests}"       = "yes" -o "$ALL" = "yes" ])
+AM_CONDITIONAL([BUILD_TELOSB],    [test "${enable_platform_telosb}"      = "yes" -o "$ALL" = "yes" ])
+AM_CONDITIONAL([BUILD_WISENODE],  [test "${enable_platform_wisenode}"    = "yes" -o "$ALL" = "yes" ])
+AM_CONDITIONAL([BUILD_ICLBSN],    [test "${enable_platform_iclbsn}"      = "yes" -o "$ALL" = "yes" ])
+AM_CONDITIONAL([BUILD_EZ430RF],   [test "${enable_platform_ez430rf}"     = "yes" -o "$ALL" = "yes" ])
+AM_CONDITIONAL([BUILD_MOSAR],     [test "${enable_platform_mosar}"       = "yes"])
+AM_CONDITIONAL([BUILD_MICA2],     [test "${enable_platform_mica2}"       = "yes"])
+AM_CONDITIONAL([BUILD_MICAZ],     [test "${enable_platform_micaz}"       = "yes"])
 
 AM_CONDITIONAL([BUILD_MSP430],    [test "${enable_mcu_msp430}"         = "yes" -o "$ALL" = "yes" ])
 AM_CONDITIONAL([BUILD_ATMEGA],    [test "${enable_mcu_atmega}"         = "yes" -o "$ALL" = "yes" ])
@@ -573,6 +570,7 @@ platforms/wsn430/Makefile
 platforms/senslab/Makefile
 platforms/mosar/Makefile
 platforms/ez430/Makefile
+platforms/ez430rf/Makefile
 platforms/ot2006/Makefile
 platforms/otsetre/Makefile
 platforms/tests/Makefile

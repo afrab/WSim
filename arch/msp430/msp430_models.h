@@ -279,6 +279,7 @@
 #define __msp430_have_port4
 #define __msp430_have_port5
 #define __msp430_have_port6
+#define __msp430_have_usart0
 #define __msp430_have_usart0_with_i2c
 #define __msp430_have_usart1
 #define __msp430_have_cmpa
@@ -464,6 +465,7 @@
 #define __msp430_have_port4
 #define __msp430_have_port5
 #define __msp430_have_port6
+#define __msp430_have_usart0
 #define __msp430_have_usart0_with_i2c
 #define __msp430_have_usart1
 #define __msp430_have_cmpa
@@ -576,6 +578,7 @@
 #define INTR_UNUSED_3      0
 
 // system clock
+#define __msp430_have_basic_clock
 #define __msp430_have_basic_clock_plus
 #define __msp430_have_xt2 
 
@@ -584,13 +587,20 @@
 #define __msp430_have_port2
 #define __msp430_have_port3
 #define __msp430_have_port4
-#define __msp430_have_usart0
+#define __msp430_have_usci_a0  /* uart/lin + IrDA + SPI */
+#define __msp430_have_usci_b0  /* SPI + I2C             */
+#define __msp430_have_adc10
 #define __msp430_have_cmpa
+#define __msp430_have_cmpa_plus
+
+#define __msp430_have_oa0
+#define __msp430_have_oa1
 
 // 16 bit blocks
 #define __msp430_have_timera3
 #define __msp430_have_timerb3
 #define __msp430_have_watchdog
+#define __msp430_have_watchdog_plus
 #define __msp430_have_adc10
 #define __msp430_have_flash
 

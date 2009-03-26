@@ -401,8 +401,9 @@ void msp430_io_init(void)
 #endif
 
       P8(i,DIGIIO_START,DIGIIO_END,msp430_digiIO_mcu_read,msp430_digiIO_mcu_write);
+#if defined(__msp430_have_usart0)
       P8(i,USART0_START,USART0_END,msp430_usart0_read,msp430_usart0_write);
-
+#endif
 #if defined(__msp430_have_usart1)
       P8(i,USART1_START,USART1_END,msp430_usart1_read,msp430_usart1_write);
 #endif

@@ -37,11 +37,12 @@
     <ol>
       <li><a name="1-1"></a><b>What is WSim ?</b></ br></li>
       <p>
-	WSim is wireless network event-driven simulator. It is largely  
-	similar to other event-driven simulators such as ns2, JiST, GloMoSim,  
-	GTNetS, omnet++ though it differentiates itself with various  
-	functionalities, a precise radio medium simulation and the simulated  
-	node internals.
+	WSim is a full system emulator for microcontroller based platforms.
+	WSim uses a emulation loop that is byte precise and cycle precise
+	on instruction boudaries. This behavior allows to debug and analyse
+	application using the same firmware as the tarfet platform. WSim currently
+	support many Ti MSP430 microcontroller models as well Chipcon radio
+	chips and several other devices.
       </p>
 
       <li><a name="1-2"></a><b>How much does it cost ?</b></ br></li>

@@ -7,8 +7,10 @@ INCLUDES=-I$(top_srcdir)
 MCU_135=../../arch/msp430/libmsp430f135.a
 MCU_1611=../../arch/msp430/libmsp430f1611.a
 
-TEST_DEV=../../devices/led/libled.a   	\
-	../../devices/ptty/libptty.a
+TEST_DEV=../../devices/led/libled.a   		\
+	../../devices/ptty/libptty.a		\
+	../../devices/spidev/libspidev.a	\
+	../../devices/uigfx/libuigfx.a
 
 wsim_msp135_CFLAGS=-DMSP430f135
 wsim_msp135_SOURCES=test1.c

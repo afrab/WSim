@@ -564,6 +564,7 @@ devices/ptty/Makefile
 devices/cc1100/Makefile
 devices/cc2420/Makefile
 devices/uigfx/Makefile
+devices/spidev/Makefile
 dnl
 platforms/Makefile
 platforms/wsn430/Makefile

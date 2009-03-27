@@ -146,6 +146,7 @@ int devices_create()
   /*********************************/
   /* create peripherals            */
   /*********************************/
+  res += system_create          (SYSTEM);
   res += led_device_create      (LED1,0xee,0,0,"led1");
   res += led_device_create      (LED2,0xee,0,0,"led2");
   res += led_device_create      (LED3,0xee,0,0,"led3");

@@ -15,6 +15,8 @@
 #include "devices/devices.h"
 #include "devices/led/led_dev.h"
 #include "devices/ptty/ptty_dev.h"
+#include "devices/spidev/spidev_dev.h"
+#include "devices/uigfx/uigfx_dev.h"
 #include "src/options.h"
 
 #if defined(GUI)
@@ -46,8 +48,10 @@
 #define LED8     8
 #define SERIAL0  9
 #define SERIAL1  10
+#define SPIDEV1  11
+#define LOGO1    12
 
-#define FREE_DEVICE_MAX 11
+#define BOARD_DEVICE_MAX 13
 
 /* ************************************************** */
 /* ************************************************** */
@@ -65,9 +69,13 @@ int devices_options_add()
 /* ************************************************** */
 
 struct test2_struct_t {
+  uint8_t spidev_csn;
+  uint8_t spidev_wn;
 };
 
 #define SYSTEM_DATA   ((struct test2_struct_t*)(machine.device[SYSTEM].data))
+#define SPIDEV_CSn  SYSTEM_DATA->spidev_csn
+#define SPIDEV_Wn   SYSTEM_DATA->spidev_wn
 
 int system_reset (int UNUSED dev) 
 { 
@@ -85,7 +93,6 @@ int system_create(int dev_num)
   machine.device[dev_num].delete        = system_delete;
   machine.device[dev_num].state_size    = sizeof(struct test2_struct_t);
   machine.device[dev_num].name          = "System Platform";
-
   return 0;
 }
 
@@ -105,7 +112,7 @@ int devices_create()
   /*********************************/
   /* fix peripheral sizes          */
   /*********************************/
-  machine.device_max           = FREE_DEVICE_MAX;
+  machine.device_max           = BOARD_DEVICE_MAX;
   machine.device_size[SYSTEM]  = sizeof(struct test2_struct_t);
   machine.device_size[LED1]    = led_device_size();    // Led1
   machine.device_size[LED2]    = led_device_size();    // Led2
@@ -117,6 +124,10 @@ int devices_create()
   machine.device_size[LED8]    = led_device_size();    // Led2
   machine.device_size[SERIAL0] = ptty_device_size();
   machine.device_size[SERIAL1] = ptty_device_size();
+  machine.device_size[SPIDEV1] = spidev_device_size();
+#if defined(LOGO1)
+  machine.device_size[LOGO1]  = uigfx_device_size();
+#endif
 
   /*********************************/
   /* allocate memory               */
@@ -126,16 +137,32 @@ int devices_create()
   /*********************************/
   /* create peripherals            */
   /*********************************/
-  res += led_device_create      (LED1,0xee,0,0,"led1");
-  res += led_device_create      (LED2,0xee,0,0,"led2");
-  res += led_device_create      (LED3,0xee,0,0,"led3");
-  res += led_device_create      (LED4,0xee,0,0,"led4");
-  res += led_device_create      (LED5,0xee,0,0,"led5");
-  res += led_device_create      (LED6,0xee,0,0,"led6");
-  res += led_device_create      (LED7,0xee,0,0,"led7");
-  res += led_device_create      (LED8,0xee,0,0,"led8");
-  res += ptty_device_create     (SERIAL0,0);
-  res += ptty_device_create     (SERIAL1,1);
+
+#if defined(LOGO1)
+#  define BKG 0xffffff
+#  define OFF 0x202020
+#  include "wsim.xpm"
+#  define WSIM wsim
+#else
+#  define BKG 0x000000
+#  define OFF 0x202020
+#endif
+
+  res += system_create          (SYSTEM);
+  res += led_device_create      (LED1,    0xee0000,OFF,BKG,"led1");
+  res += led_device_create      (LED2,    0xee0000,OFF,BKG,"led2");
+  res += led_device_create      (LED3,    0xee0000,OFF,BKG,"led3");
+  res += led_device_create      (LED4,    0xee0000,OFF,BKG,"led4");
+  res += led_device_create      (LED5,    0xee0000,OFF,BKG,"led5");
+  res += led_device_create      (LED6,    0xee0000,OFF,BKG,"led6");
+  res += led_device_create      (LED7,    0xee0000,OFF,BKG,"led7");
+  res += led_device_create      (LED8,    0xee0000,OFF,BKG,"led8");
+  res += ptty_device_create     (SERIAL0, 0);
+  res += ptty_device_create     (SERIAL1, 1);
+  res += spidev_device_create   (SPIDEV1, 0);
+#if defined(LOGO1)
+  res += uigfx_device_create    (LOGO1,   wsim);
+#endif
 
   /*********************************/
   /* place peripherals Gui         */
@@ -143,8 +170,12 @@ int devices_create()
 #if defined(GUI)
   {
     int lw,lh;
+    int LW,LH;
 
     machine.device[LED1].ui_get_size(LED1,&lw,&lh);
+#if defined(LOGO1)
+    machine.device[LOGO1].ui_get_size(LOGO1, &LW, &LH);
+#endif
 
     machine.device[LED1].ui_set_pos(LED1,    0,  0);
     machine.device[LED2].ui_set_pos(LED2,   lw,  0);
@@ -154,6 +185,9 @@ int devices_create()
     machine.device[LED6].ui_set_pos(LED6, 5*lw,  0);
     machine.device[LED7].ui_set_pos(LED7, 6*lw,  0);
     machine.device[LED8].ui_set_pos(LED8, 7*lw,  0);
+#if defined(LOGO1)
+    machine.device[LOGO1].ui_set_pos (LOGO1,        0,   0);
+#endif
   }
 #endif
   /*********************************/
@@ -170,6 +204,23 @@ int devices_create()
 /* devices init conditions should be written here */
 int devices_reset_post()
 {
+#if defined(GUI)
+  int refresh = 0;
+#endif
+
+  SPIDEV_CSn = 0;
+  SPIDEV_Wn  = 0;
+
+  REFRESH(LED1);
+  REFRESH(LED2);
+  REFRESH(LED3);
+  REFRESH(LED4);
+  REFRESH(LED5);
+  REFRESH(LED6);
+  REFRESH(LED7);
+  REFRESH(LED8);
+  REFRESH(LOGO1);
+
   return 0;
 }
 
@@ -180,7 +231,9 @@ int devices_reset_post()
 int devices_update()
 {
   int res = 0;
+#if defined(GUI)
   int refresh = 0;
+#endif
   uint8_t  val8;
 
   /* *************************************************************************** */
@@ -194,14 +247,24 @@ int devices_update()
   /*   P3.5 urxd0                      */
   /*   P3.4 utxd0                      */ 
 
+  /* port 4 :                          */
+  /* ========                          */
+  /*   P4.7 spidev ~CS                 */
+  /*   P4.5 spidev ~W                  */
+  if (msp430_digiIO_dev_read(PORT4,&val8))
+    {
+      machine.device[SPIDEV1].write(SPIDEV1, 
+				  SPIDEV_S | SPIDEV_W, 
+				  (BIT(val8,7) << SPIDEV_S_SHIFT) | 
+				  (BIT(val8,5) << SPIDEV_W_SHIFT));
+      SPIDEV_CSn = BIT(val8,7);
+      SPIDEV_Wn  = BIT(val8,5);
+    }
+
   /* port 5 :                          */
   /* ========                          */
-  /*   P5.7 NC                         */
-  /*   P5.6 led 3                      */
-  /*   P5.5 led 2                      */
-  /*   P5.4 led 1                      */
-  /*   P5.0 NC                         */
-  if (msp430_digiIO_dev_read(PORT1,&val8))
+  /*   P5.x leds                       */
+  if (msp430_digiIO_dev_read(PORT5,&val8))
     {
       int i;
       for(i = LED1; i <= LED8 ; i++)
@@ -257,8 +320,8 @@ while(0)
       }
       break;
     case USART_MODE_SPI:
+      break;
     case USART_MODE_I2C:
-      ERROR("Bad Uart mode\n");
       break;
     }
 
@@ -272,8 +335,8 @@ while(0)
       }
       break;
     case USART_MODE_SPI:
+      break;
     case USART_MODE_I2C:
-      ERROR("Bad Uart mode\n");
       break;
     }
 
@@ -312,6 +375,7 @@ while(0)
 
   UPDATE(SERIAL0);
   UPDATE(SERIAL1);
+  UPDATE(SPIDEV1);
 
 #if defined(GUI)
   if (refresh) {

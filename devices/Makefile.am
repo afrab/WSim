@@ -11,7 +11,8 @@ SUBDIRS = 		\
 	led 		\
 	m25p80 		\
 	ptty            \
-	uigfx
+	uigfx		\
+	spidev
 
 
 noinst_LIBRARIES= libdevices.a

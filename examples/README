@@ -1,9 +1,4 @@
-This file lists the example for the wsn430 platform.
-Order is important, examples are build as a progression.
+This directory contains some small examples that can be run
+using WSim platforms. They can be used to test basic functionnalities
+but do not contain much msp430 software or device drivers.
 
-1- wsn430-leds   
-2- wsn430-clock   
-3- wsn430-serial  
-4- wsn430-timer   
-5- wsn430-ds2411  
-6- wsn430-m25p80  

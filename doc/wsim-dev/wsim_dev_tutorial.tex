@@ -4,8 +4,8 @@
 \usepackage{graphicx}
 \usepackage{fancyhdr}
 \usepackage{color}
-\usepackage{url}
 \usepackage{colortbl}
+\usepackage[dvipdfm,pdfborder={0 0 0}]{hyperref}
 
 \topmargin 0pt
 \advance \topmargin by -\headheight
@@ -107,7 +107,7 @@ At the end of the \verb$main.c$ function, the  \verb$main_run_mode()$ function o
 \label{wsim-instruction}
 \end{figure}
 
-The core of the instruction execution is the \verb$msp430_mcu_run_insn()$ function of the\\ \verb$/arch/msp430/msp430_alu.c$ file. This function fetchs, decodes, executes one instruction, launches devices update and IRQ consideration (performed by \verb$msp430_mcu_update()$ function).
+The core of the instruction execution is the \verb$msp430_mcu_run_insn()$ function of the\\ \verb$/arch/msp430/msp430_alu.c$ file. This function fetches, decodes, executes one instruction, launches devices update and IRQ consideration (performed by \verb$msp430_mcu_update()$ function).
 
 If the MCU is in low power mode \verb$msp430_mcu_run_lpm()$ of the \verb$/arch/msp430/msp430_alu.c$ file is called instead of \verb$msp430_mcu_run_insn()$.\\
 
@@ -125,7 +125,7 @@ The simulation normally ends if one of these cases is true:
 \begin{itemize}
   \item the \verb$*.elf$ program is finished;
   \item an illegal instruction has been detected in the \verb$*.elf$ program;
-  \item the exact number of instructions has been executed (only in instructon mode);
+  \item the exact number of instructions has been executed (only in instruction mode);
   \item the simulation time is over (only in time mode);
   \item "quit" command has been typed (only in console mode);
   \item GBD is closed before the end of the simulation (only in GDB mode).
@@ -138,7 +138,7 @@ For standard, instruction and time modes, statistics of the simulation are writt
 
 \section{Memory}
 \subsection{General}
-Main storages are MCU state, platform external devices state (radio, leds, ...), and possibly internal platform state. A backup of these states is periodically carried out so that it allows to recover easily the previous saved state of the platform in order to backtrack.
+Main storage are MCU state, platform external devices state (radio, leds, ...), and possibly internal platform state. A backup of these states is periodically carried out so that it allows to recover easily the previous saved state of the platform in order to backtrack.
 
 \subsubsection{Devices and platform}
 When a platform is built, an instance of each of its devices is created in order to save its states. The memory allocation  is done by the \verb$devices_memory_allocate()$ function of the \verb$devices.c$ file, located in the \verb$/devices$ directory. This function is called by the platform description file. In this function, the needed space to save the states of every platform device is computed, in order to store all the data in a contiguous memory spaces.  The pointers to access to them are stored into the \verb$machine.devices_state$ and the \verb$machine.devices_state_backup$ (\verb$machine$ is a global structure storing devices states, devices number, devices size and time of simulation).\\
@@ -382,7 +382,7 @@ Instructions sequence is important and you have to follow this order as explaine
 
 \subsubsection{SDL/UI}
 \label{SDL-UI}
-If your platform embeddes graphical device, you have to update and refresh them when required. See the leds example:
+If your platform embeds graphical device, you have to update and refresh them when required. See the leds example:
 \begin{verbatim}
   /* port 5 :                          */
   /* ========                          */
@@ -416,15 +416,15 @@ On WSN430 platform leds are connected on pins 5.4, 5.5 and 5.6 of the MSP430, an
 
 WSim also enables you to print on screen an image associated to your platform. This module is considered as a device, and is thus implemented in the \verb$/devices/uigfx$ folder. Its creation is follow the same procedure as the other devices one (\verb$uigfx_device_size()$ and \verb$uigfx_device_create()$ function).
 
-For both devices UI and screen image, you must set the place of the graphical interface after creation. Use the device APIs \verb$machine.device[DEVICEID].ui_get_pos()$ and \verb$machine.device[DEVICEID].ui_set_pos()$ to performe this.\\
+For both devices UI and screen image, you must set the place of the graphical interface after creation. Use the device APIs \verb$machine.device[DEVICEID].ui_get_pos()$ and \verb$machine.device[DEVICEID].ui_set_pos()$ to perform this.\\
 
-Finallely if there are one or several graphical UI, the \verb$ui_refresh()$ function of the \verb$/libgui/ui.c$ file has to be called at the end of the \verb$devices_update()$ function. \verb$libgui$ module implementation relies on SDL (Simple Direct media Layer) that is a free and open source software multimedia library.
+Finally if there are one or several graphical UI, the \verb$ui_refresh()$ function of the \verb$/libgui/ui.c$ file has to be called at the end of the \verb$devices_update()$ function. \verb$libgui$ module implementation relies on SDL (Simple Direct media Layer) that is a free and open source software multimedia library.
 
 
 \subsection{Making your platform compilable and executable}
 \label{platform-compilation}
-To compile WSim, makefiles are generated with the help of the GNU Project Autotools (automake $\ge$ 1.10, autoconf $\ge$ 2.61) \footnote{For further informations please see http://www.gnu.org/software/automake/ and 
-http://www.gnu.org/software/autoconf/ websites}.
+To compile WSim, makefiles are generated with the help of the GNU Project Autotools \footnote{For further informations please see \href{http://www.gnu.org/software/automake/}{http://www.gnu.org/software/automake/} and 
+\href{http://www.gnu.org/software/autoconf/}{http://www.gnu.org/software/autoconf/} websites} (automake $\ge$ 1.10, autoconf $\ge$ 2.61).
 You have to modify three files to compile your platform : \verb$./configure.ac$, \verb$./platforms/Makefile.am$, \verb$./platforms/YOURPLATFORMFOLDER/Makefile.am$.
 
 \subsubsection{/configure.ac}
@@ -446,7 +446,7 @@ fi
 AM_CONDITIONAL([BUILD_YOURPLATFORMNAME],   [test "${enable_platform_yourplatformname}"   \
 = "yes" -o "$ALL" = "yes" ])
 \end{verbatim}
-This line initialises the \verb$BUILD_YOURPLATFORMNAME$ variable to \verb$1$ if your platform only or all the platforms must be built, else to \verb$0$ (the purpose of this variable is developped in paragraph \ref{yourplatformmakefile} page \pageref{yourplatformmakefile}).\\
+This line initialises the \verb$BUILD_YOURPLATFORMNAME$ variable to \verb$1$ if your platform only or all the platforms must be built, else to \verb$0$ (the purpose of this variable is developed in paragraph \ref{yourplatformmakefile} page \pageref{yourplatformmakefile}).\\
 
   \item Add the path to your platform makefile into \verb$AC_CONFIG_FILES$ of the output part: 
 \begin{verbatim}
@@ -482,7 +482,7 @@ endif
 INCLUDES=-I$(top_srcdir)
 \end{verbatim}
 
-  \item Then define the MCU and devices libraries dependances paths. For instance:
+  \item Then define the MCU and devices libraries dependencies paths. For instance:
 \begin{verbatim}
 YOURPLATFORMNAME_MCU= ../../arch/msp430/libmsp430f1611.a
 YOURPLATFORMNAME_DEV= ../../devices/led/libled.a        \
@@ -504,11 +504,11 @@ This flag will define the global macro MSP430f1611 during the compilation.
 wsim_yourplatformname_SOURCES=yourplatformname.c
 \end{verbatim}
 
-  \item Declare the librairies dependances path set below: 
+  \item Declare the libraries dependencies path set below: 
 \begin{verbatim}
 wsim_yourplatformname_LDADD=${YOURPLATFORMNAME_DEV} ${WSIMADD} ${YOURPLATFORMNAME_MCU}
 \end{verbatim}
-\verb!${WSIMADD}! is defined in the \verb$/platform/Makefile.am$ file, and sets some general WSim library dependance.
+\verb!${WSIMADD}! is defined in the \verb$/platform/Makefile.am$ file, and sets some general WSim library dependence.
 
   \item  Finally do not forget to close the \verb$if BUILD_YOURPLATFORMNAME$
 \begin{verbatim}
@@ -518,7 +518,7 @@ endif
 \end{enumerate}
 
 \section{Device}
-\subsection{Adding a new device model}
+\subsection[Adding a new device model]{Adding a new device model\protect\footnote{Templates sources codes are available in appendix \ref{spi-device-template} page \pageref{spi-device-template}}} 
 \label{adding-device}
 \subsubsection{List of mandatory APIs to implement}
 \begin{itemize}
@@ -536,8 +536,8 @@ Depending of devices features some of these private functions have to be impleme
   \item \verb$int YOURDEVICENAME_update()$: updates internal state of the device after read or write action (for instance emptying radio TX buffer after its content has been transmitted to the MCU);
   \item \verb$int YOURDEVICENAME_delete()$: frees memory space filled by the device (excepted the device states);
   \item \verb$int YOURDEVICENAME_reset()$: resets the device (at its default states);
-  \item \verb$int YOURDEVICENAME_power_up()$: for potential futur use;
-  \item \verb$int YOURDEVICENAME_power_down()$: for potential futur use;
+  \item \verb$int YOURDEVICENAME_power_up()$: for potential future use;
+  \item \verb$int YOURDEVICENAME_power_down()$: for potential future use;
   \item \verb$int YOURDEVICENAME_ui_draw()$: draws device graphical interface;
   \item \verb$int YOURDEVICENAME_ui_set_pos()$: sets the position of device graphical interface;
   \item \verb$int YOURDEVICENAME_ui_get_pos()$: gives the position of device graphical interface;
@@ -547,7 +547,7 @@ Depending of devices features some of these private functions have to be impleme
 
 
 \subsubsection{device\_t structure}
-\verb$device_t$ structure stores function adresses described in the previous subsection, in order to make their calls easier. The structure is designed like this:
+\verb$device_t$ structure stores function addresses described in the previous subsection, in order to make their calls easier. The structure is designed like this:
 \begin{verbatim}
 struct device_t
 {
@@ -581,7 +581,7 @@ Of course using all items of the structure is not mandatory.
 
 \subsubsection{LED example}
 LED device is the simplest example of device implementation. Only \verb$write()$, \verb$delete()$, \verb$reset()$, and graphical functions are used in the list of \verb$device_t$ private functions.
-However its \verb$create()$ function is closed to the other devices ones. It mainly consists in storing private functions adresses in the \verb$machine.device[DEVICEID]$ structure.
+However its \verb$create()$ function is closed to the other devices ones. It mainly consists in storing private functions addresses in the \verb$machine.device[DEVICEID]$ structure.
 \begin{verbatim}
 int led_device_create(int dev_num, uint32_t on, uint32_t off, uint32_t bg, char* name)
 {
@@ -755,7 +755,7 @@ libled_a_SOURCES=yourdevicename_source1.h yourdevicename_source1.c\
 
 \section{Special device}
 
-We may distinguish 2 special devices: the pseudo serial PTTY and the graphical interface for platform UIGFX. They are special in the meaning that they do not stand for a harware component. Nevertheless their implementation is quite the same as a standard decice, espacially their API functions (please see section \ref{adding-device} page \pageref{adding-device} for more details). They have to be initialised and updated in the platform file like other devices indeed.
+We may distinguish 2 special devices: the pseudo serial PTTY and the graphical interface for platform UIGFX. They are special in the meaning that they do not stand for a hardware component. Nevertheless their implementation is quite the same as a standard device, especially their API functions (please see section \ref{adding-device} page \pageref{adding-device} for more details). They have to be initialised and updated in the platform file like other devices indeed.
 
 \subsection{Pseudo TTY}
 The PTTY (Pseudo TTY) peripheral model is a special peripheral that can be used to connect a platform to a RS232 serial port. The model has the capability to open a full duplex communication stream with the operating system in order to connect the simulator to external tools.
@@ -866,13 +866,13 @@ Moreover some ERROR messages are printed only if the macro \verb$DEBUG_ME_HARDER
 #endif
 \end{verbatim}
 
-\section{Wsim trace}
+\section{WSim trace}
 The \verb$tracer_event_record()$ function, insered in the Wsim code, allows to save states of a variable during the simulation. To enable the trace storage, you just have to add the following option when starting a simulation: \verb$--trace$ (example: \verb$wsim-wsn430 --ui --trace --mode=time --modearg=100000000000$ \verb$wsn430-leds.elf$). The trace is then stored in the \verb$wsim.trc$ file and located in the  directory where WSim has been launched.
 
 To make the wsim.trc file usable, you have to convert it with the external wtracer application, according to the following syntax. For instance:
 \begin{itemize}
-  \item\verb$wtracer --in=wsim.trc --out=wsim.gp --format=gplot$ gererates the gnuplot wsim.gp file. 
-  \item\verb$wtracer --in=wsim.trc --out=wsim.vcd --format=vcd$ gererates the vcd wsim.vcd file, readable by GTKwave.
+  \item\verb$wtracer --in=wsim.trc --out=wsim.gp --format=gplot$ generates the gnuplot wsim.gp file. 
+  \item\verb$wtracer --in=wsim.trc --out=wsim.vcd --format=vcd$ generates the vcd wsim.vcd file, readable by GTKwave.
 \end{itemize}
 
 
@@ -912,7 +912,7 @@ Breakpoint 1, main (argc=2, argv=0xbf976f24) at main.c:200
   \item \textbf{CS} = Chip Select
   \item \textbf{GPIO} = General Purpose Input Output
   \item \textbf{I2C} = Inter Integrated Circuit
-  \item \textbf{IO} = Input Ouput
+  \item \textbf{IO} = Input Output
   \item \textbf{IRQ} = Interrupt Request
   \item \textbf{LPM} = Low Power Mode (for the MCU)
   \item \textbf{MCLK} = Master Clock (of the MCU)
@@ -926,10 +926,320 @@ Breakpoint 1, main (argc=2, argv=0xbf976f24) at main.c:200
   \item \textbf{UCLK} = Uncore Clock
   \item \textbf{UI} = User Interface
   \item \textbf{USART} = Universal Synchronous/Asynchronous Receiver Transmitter
-  \item \textbf{UxRXBUF} = SPI register used for reception
-  \item \textbf{UxTXBUF} = SPI register used for transmission
+  \item \textbf{UxRXBUF} = MSP430 SPI register used for reception
+  \item \textbf{UxTXBUF} = MSP430 SPI register used for transmission
 \end{description}
 
+\section{Templates}
+\subsection{SPI device}
+\label{spi-device-template}
 
+These templates are aimed to help you to develop your own SPI device model. You just have to replace \verb$spidev$ string by your device model name, and to implement the body of the functions you need. \verb$spidev_dev.c$ and \verb$spidev_dev.h$ are the minimal files to write a device model. However depending on its complexity, you may need additional files.
+
+These source codes are also available in the \verb$/devices/spidev$ folder.
+
+\subsubsection{spidev\_dev.c}
+\begin{verbatim}
+
+/**
+ *  \file   spidev_dev.c
+ *  \brief  SPI device example
+ *  \author Antoine Fraboulet
+ *  \date   2009
+ **/
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "arch/common/hardware.h"
+#include "devices/spidev/spidev_dev.h"
+#include "src/options.h"
+
+/***************************************************/
+/***************************************************/
+
+#define NAME      "spidev"
+
+tracer_id_t TRACER_SPIDEV_STATE;
+tracer_id_t TRACER_SPIDEV_STROBE;
+
+/***************************************************/
+/***************************************************/
+
+#ifdef DEBUG
+#define MSG_DEVICES       2
+#define DEBUG_ME_HARDER
+#define HW_DMSG_SPI(x...) VERBOSE(MSG_DEVICES,x)
+#else
+#define HW_DMSG_SPI(x...) do {} while(0)
+#endif
+
+/***************************************************/
+/***************************************************/
+/***************************************************/
+
+struct spidev_t 
+{
+
+  uint8_t select_bit;           /* chip select   */
+  uint8_t hold_bit;             /* hold          */
+  uint8_t write_protect_bit;    /* write protect */
+
+  /* data just written */
+  uint8_t data_buffer;
+  uint8_t data_buffer_ok;
+
+  /* data to be read */
+  uint8_t data_ready;
+  uint8_t data_val;
+  
+  /* busy timing */
+  uint64_t end_of_busy_time;
+
+  /* clock pin : unused */
+  uint8_t clock;
+};
+
+#define SPIDEV_DATA        ((struct spidev_t*)(machine.device[dev].data))
+
+/***************************************************/
+/** Flash external entry points ********************/
+/***************************************************/
+
+int  spidev_reset       (int dev);
+int  spidev_delete      (int dev);
+int  spidev_power_up    (int dev);
+int  spidev_power_down  (int dev);
+void spidev_read        (int dev, uint32_t *mask, uint32_t *value);
+void spidev_write       (int dev, uint32_t  mask, uint32_t  value);
+int  spidev_update      (int dev);
+int  spidev_ui_draw     (int dev);
+void spidev_ui_get_size (int dev, int *w, int *h);
+void spidev_ui_set_pos  (int dev, int  x, int  y);
+void spidev_ui_get_pos  (int dev, int *x, int *y);
+
+/***************************************************/
+/***************************************************/
+/***************************************************/
+
+#define MAXNAME 1024
+
+int spidev_add_options(int UNUSED dev_num, int dev_id, const char UNUSED *dev_name)
+{
+  if (dev_id >= 1)
+    {
+      ERROR("spidev: too much devices, please rewrite option handling\n");
+      return -1;
+    }
+
+  return 0;
+}
+
+/***************************************************/
+/***************************************************/
+/***************************************************/
+
+int spidev_device_size()
+{
+  return sizeof(struct spidev_t);
+}
+
+/***************************************************/
+/***************************************************/
+/***************************************************/
+
+int spidev_device_create(int dev, int UNUSED id)
+{
+  machine.device[dev].reset         = spidev_reset;
+  machine.device[dev].delete        = spidev_delete;
+  machine.device[dev].power_up      = spidev_power_up;
+  machine.device[dev].power_down    = spidev_power_down;
+
+  machine.device[dev].read          = spidev_read;
+  machine.device[dev].write         = spidev_write;
+  machine.device[dev].update        = spidev_update;
+
+  machine.device[dev].ui_draw       = spidev_ui_draw;
+  machine.device[dev].ui_get_size   = spidev_ui_get_size;
+  machine.device[dev].ui_set_pos    = spidev_ui_set_pos;
+
+  machine.device[dev].state_size    = spidev_device_size();
+  machine.device[dev].name          = NAME " example";
+
+#if defined(DEBUG_ME_HARDER)
+  HW_DMSG_SPI(NAME ": =================================== \n");
+  HW_DMSG_SPI(NAME ": 0000 CHSW dddd dddd == MASK         \n");
+  HW_DMSG_SPI(NAME ":      C              : Clock         \n");
+  HW_DMSG_SPI(NAME ":       M             : MiSo          \n");
+  HW_DMSG_SPI(NAME ":        S            : Chip Select   \n");
+  HW_DMSG_SPI(NAME ":         W           : Write Protect \n");
+  HW_DMSG_SPI(NAME ":           dddd dddd : SPI data      \n");
+  HW_DMSG_SPI(NAME ": =================================== \n");
+#endif
+
+  TRACER_SPIDEV_STATE  = tracer_event_add_id(8, "state"    , NAME);
+  TRACER_SPIDEV_STROBE = tracer_event_add_id(8, "function" , NAME);
+
+  return 0;
+}
+
+/***************************************************/
+/***************************************************/
+/***************************************************/
+
+int spidev_reset(int UNUSED dev)
+{
+  HW_DMSG_SPI(NAME ": device reset\n");
+  return 0;
+}
+
+/***************************************************/
+/***************************************************/
+/***************************************************/
+
+int spidev_delete(int UNUSED dev)
+{
+  HW_DMSG_SPI(NAME ": device delete\n");
+  return 0;
+}
+
+/***************************************************/
+/***************************************************/
+/***************************************************/
+
+int spidev_power_up(int UNUSED dev)
+{
+  HW_DMSG_SPI(NAME ": device power up\n");
+  return 0;
+}
+
+int spidev_power_down(int UNUSED dev)
+{
+  HW_DMSG_SPI(NAME ": device power down\n");
+  return 0;
+}
+
+/***************************************************/
+/***************************************************/
+/***************************************************/
+
+/*
+ * read is done only on a junk write
+ *
+ */
+
+void spidev_read(int UNUSED dev, uint32_t *mask, uint32_t *value)
+{
+  *mask  = 0;
+  *value = 0;
+  
+  if (*mask != 0)
+    {
+      HW_DMSG_SPI(NAME ": device write to mcu [val=0x%02x,mask=0x%04x] \n", *value, *mask);
+    }
+}
+
+/***************************************************/
+/***************************************************/
+/***************************************************/
+
+void spidev_write(int dev, uint32_t mask, uint32_t value)
+{
+  HW_DMSG_SPI(NAME ": device write from mcu value 0x%04x mask 0x%04x\n",value, mask);
+
+  /***************************
+   * Control pins. WRITE PROTECT
+   ***************************/
+
+  if (mask & SPIDEV_W) /* write protect netgated */
+    {
+      SPIDEV_DATA->write_protect_bit  = ! (value & SPIDEV_W);
+      HW_DMSG_SPI(NAME ":    flash write protect W = %d\n",SPIDEV_DATA->write_protect_bit);
+    }
+
+  /***************************
+   * Control pins. CLOCK
+   ***************************/
+
+  if (mask & SPIDEV_C) /* clock */
+    {
+      ERROR(NAME ":    clock pin should not be used during simulation\n");
+      HW_DMSG_SPI(NAME ":    clock pin should not be used during simulation\n");
+      SPIDEV_DATA->clock = (value >> SPIDEV_C_SHIFT) & 0x1;
+    }
+}
+
+/***************************************************/
+/***************************************************/
+/***************************************************/
+
+int spidev_update(int UNUSED dev)
+{
+  return 0;
+}
+
+/***************************************************/
+/***************************************************/
+/***************************************************/
+
+int spidev_ui_draw      (int UNUSED dev)
+{
+  return 0;
+}
+
+void spidev_ui_get_size (int UNUSED dev, int *w, int *h)
+{
+  w = 0;
+  h = 0;
+}
+
+void spidev_ui_set_pos  (int UNUSED dev, int UNUSED x, int UNUSED y)
+{
+  
+}
+
+void spidev_ui_get_pos  (int UNUSED dev, int *x, int *y)
+{
+  *x = 0;
+  *y = 0;
+}
+
+/***************************************************/
+/***************************************************/
+/***************************************************/
+\end{verbatim}
+
+\subsubsection{spidev\_dev.h}
+
+\begin{verbatim}
+
+/**
+ *  \file   spidev_dev.h
+ *  \brief  SPI device example
+ *  \author Antoine Fraboulet
+ *  \date   2009
+ **/
+
+#ifndef SPIDEV_DEVICES_H
+#define SPIDEV_DEVICES_H
+
+#define SPIDEV_W_SHIFT  8 /* write protect */
+#define SPIDEV_S_SHIFT  9 /* select        */
+#define SPIDEV_M_SHIFT 10 /* MISO          */
+#define SPIDEV_C_SHIFT 11 /* clock         */
+
+#define SPIDEV_D  0x00ff                 /** data 8 bits           **/
+#define SPIDEV_W  (1 << SPIDEV_W_SHIFT)  /** write protect negated **/
+#define SPIDEV_S  (1 << SPIDEV_S_SHIFT)  /** chip select negated   **/
+#define SPIDEV_M  (1 << SPIDEV_M_SHIFT)  /** miso                  **/
+#define SPIDEV_C  (1 << SPIDEV_C_SHIFT)  /** clock                 **/
+
+int  spidev_add_options   (int dev_num, int dev_id, const char *name);
+int  spidev_device_size   ();
+int  spidev_device_create (int dev_num, int dev_id);
+
+#endif
+\end{verbatim}
 
 \end{document}          

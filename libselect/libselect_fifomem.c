@@ -23,7 +23,7 @@
  * while debugging select code
  ****************************************/
 
-#define DEBUG_FIFO
+/* #define DEBUG_FIFO  */
 /* #define DEBUG_INFO2 */
 
 #if defined(DEBUG_FIFO)

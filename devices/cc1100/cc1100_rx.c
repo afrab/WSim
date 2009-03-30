@@ -13,6 +13,7 @@
  *  Modified by Antoine Fraboulet, 2007
  */
 
+#include <ctype.h>
 #include "cc1100_internals.h"
 
 /***************************************************/

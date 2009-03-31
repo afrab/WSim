@@ -39,7 +39,10 @@
 /* Global Variables (not backtracked) */
 int  CC2420_XOSC_FREQ_MHz;
 int  CC2420_XOSC_PERIOD_NS;
+
 tracer_id_t TRACER_CC2420_STATE;
+tracer_id_t TRACER_CC2420_STROBE;
+tracer_id_t TRACER_CC2420_CS;
 
 /***************************************************/
 /***************************************************/
@@ -101,7 +104,10 @@ int cc2420_device_create (int dev_num, int fxosc_mhz)
 
   cc2420->fsm_state = CC2420_STATE_POWER_DOWN;
 
-  TRACER_CC2420_STATE = tracer_event_add_id(32, "cc2420_state", "cc2420");
+  TRACER_CC2420_STATE  = tracer_event_add_id(8, "cc2420_state", "cc2420");
+  TRACER_CC2420_STROBE = tracer_event_add_id(8, "cc2420_strobe", "cc2420");
+  TRACER_CC2420_CS     = tracer_event_add_id(1, "cc2420_cs",     "cc2420");
+  
 
   return 0;
 }
@@ -582,6 +588,7 @@ void cc2420_write(int dev_num, uint32_t mask, uint32_t value)
       if ((value & CC2420_CSn_MASK) != 0)
 	{
 	  cc2420->CSn_pin = 0xFF;
+	  tracer_event_record(TRACER_CC2420_CS, 1);
 	  CC2420_DBG_PINS("cc2420:pins:write: from mcu CSn = 1\n");
 	}
       else 
@@ -591,6 +598,7 @@ void cc2420_write(int dev_num, uint32_t mask, uint32_t value)
 	      CC2420_DBG_PINS("cc2420:pins:write: from mcu CSn = 0\n");
 	    }
 	  cc2420->CSn_pin = 0x00;
+	  tracer_event_record(TRACER_CC2420_CS, 0);
 	}
     }
 

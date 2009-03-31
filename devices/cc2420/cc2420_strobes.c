@@ -755,6 +755,7 @@ void cc2420_strobe_command(struct _cc2420_t * cc2420)
 	}
       return ;
     }
+  tracer_event_record(TRACER_CC2420_STROBE, cc2420->SPI_addr);
 
   switch (cc2420->fsm_state) 
     {

@@ -109,6 +109,13 @@
 #define ETRACER_CC1100_RX              0x05
 #define ETRACER_CC1100_TX              0x06
 
+#define ETRACER_CC2420_IDLE            0x01
+#define ETRACER_CC2420_SLEEP           0x02
+#define ETRACER_CC2420_VREG_OFF        0x03
+#define ETRACER_CC2420_STARTUP         0x04
+#define ETRACER_CC2420_RX              0x05
+#define ETRACER_CC2420_TX              0x06
+
 /* ************************************************** */
 /* ************************************************** */
 /* ************************************************** */

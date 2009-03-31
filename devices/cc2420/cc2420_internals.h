@@ -35,6 +35,8 @@
 #define CC2420_RAM_SIZE   0x16F
 
 extern tracer_id_t TRACER_CC2420_STATE;
+extern tracer_id_t TRACER_CC2420_STROBE;
+extern tracer_id_t TRACER_CC2420_CS;
 
 /***************************************************/
 /***************************************************/

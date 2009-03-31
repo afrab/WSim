@@ -104,8 +104,8 @@ AM_CONDITIONAL([BUILD_ETRACE], [test "${etrace_sum}" = "yes"])
 
 dnl SDL ui mode
 dnl ===========
-AC_ARG_ENABLE([gui],AS_HELP_STRING([--enable-gui],[GUI for devices (default enabled)]))
-if test "${enable_gui}" != "no" ; then
+AC_ARG_ENABLE([gui],AS_HELP_STRING([--enable-gui],[GUI for devices (default disabled)]))
+if test "${enable_gui}" = "yes" ; then
     sdl_sum="yes"
     AC_DEFINE([GUI],[1],[Defines wether a GUI is available])
 else
@@ -303,9 +303,16 @@ if test "${enable_platform_micaz}" = "yes" ; then
 	PLATFORMNAMES="micaz $PLATFORMNAMES"
 fi
 
+dnl All
+ALL="no"
+AC_ARG_ENABLE([platform-all],AS_HELP_STRING([--enable-platform-all],[all platforms]))
+if test "${enable_platform_all}" = "yes" ; then
+        ALL="yes"
+	NPLATFORM=1
+	PLATFORMNAMES="all $PLATFORMNAMES"
+fi
 
 dnl Default is to build all platforms
-ALL="no"
 if test $NPLATFORM -eq 0 ; then
   ALL="yes"
   PLATFORMNAMES="all"
@@ -387,7 +394,7 @@ fi
 dnl --------------------------------------------------------------
 dnl Checks for libraries.
 dnl --------------------------------------------------------------
-if test "${enable_gui}" != "no" ; then
+if test "${enable_gui}" = "yes" ; then
 	SDL_VERSION=1.2.5
 	AM_PATH_SDL($SDL_VERSION,   :,  AC_MSG_ERROR([*** SDL version $SDL_VERSION not found!])	)
 	CFLAGS="$CFLAGS $SDL_CFLAGS"

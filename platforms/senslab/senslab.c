@@ -587,6 +587,8 @@ int devices_update(void)
 	etracer_slot_access(0x0, 1, ETRACER_ACCESS_READ, ETRACER_ACCESS_BYTE, ETRACER_ACCESS_LVL_SPI1, 0);
       }
 
+    /* TODO :: need to handle SO pin on CC1100 */
+
     if (mask & RADIO_GDO2_MASK) // GDO2 -> P1.4
       { 
 	msp430_digiIO_dev_write(PORT1, (RADIO_GDO2_MASK & value) ? 0x10 : 0x00, 0x10);
@@ -609,7 +611,6 @@ int devices_update(void)
 	msp430_digiIO_dev_write(PORT1, (RADIO_CCA_MASK & value) ? 0x40 : 0x00, 0x40);
 	etracer_slot_access(0x0, 1, ETRACER_ACCESS_READ, ETRACER_ACCESS_BIT, ETRACER_ACCESS_LVL_GPIO, 0);
       }
-
 #endif
   }
 

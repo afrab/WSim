@@ -522,6 +522,11 @@ int devices_update(void)
 	etracer_slot_access(0x0, 1, ETRACER_ACCESS_READ, ETRACER_ACCESS_BYTE, ETRACER_ACCESS_LVL_SPI0, 0);
       }
 
+    if (mask & CC1100_SO_MASK)   // SOMI -> P3.2
+      {
+	msp430_digiIO_dev_write(PORT3, (CC1100_SO_MASK & value) ? 0x04 : 0x00, 0x04);
+	/* no etracer */
+      }
     if (mask & CC1100_GDO2_MASK) // GDO2 -> P1.4
       { 
 	msp430_digiIO_dev_write(PORT1, (CC1100_GDO2_MASK & value) ? 0x10 : 0x00, 0x10);

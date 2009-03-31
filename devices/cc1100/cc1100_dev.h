@@ -21,22 +21,20 @@
 /***************************************************/
 /***************************************************/
 
-#define CC1100_INTERNAL_CSn_PIN   0
-#define CC1100_INTERNAL_SI_PIN    1
-#define CC1100_INTERNAL_GO0_PIN   2
-#define CC1100_INTERNAL_GO1_PIN   3
-#define CC1100_INTERNAL_GO2_PIN   4
-
 #define CC1100_DATA_SHIFT         0
 #define CC1100_CSn_SHIFT          8
-#define CC1100_SI_SHIFT           9
-#define CC1100_GDO0_SHIFT        10
-#define CC1100_GDO1_SHIFT        11
-#define CC1100_GDO2_SHIFT        12
+#define CC1100_SO_SHIFT           9
+#define CC1100_SI_SHIFT          10
+#define CC1100_CLK_SHIFT         11
+#define CC1100_GDO0_SHIFT        12
+#define CC1100_GDO1_SHIFT        13
+#define CC1100_GDO2_SHIFT        14
 
 #define CC1100_DATA_MASK         0xff
 #define CC1100_CSn_MASK          (1 << CC1100_CSn_SHIFT)
+#define CC1100_SO_MASK           (1 << CC1100_SO_SHIFT)
 #define CC1100_SI_MASK           (1 << CC1100_SI_SHIFT)
+#define CC1100_CLK_MASK          (1 << CC1100_CLK_SHIFT)
 #define CC1100_GDO0_MASK         (1 << CC1100_GDO0_SHIFT)
 #define CC1100_GDO1_MASK         (1 << CC1100_GDO1_SHIFT)
 #define CC1100_GDO2_MASK         (1 << CC1100_GDO2_SHIFT)

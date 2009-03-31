@@ -40,6 +40,18 @@ extern int CC1100_XOSC_PERIOD_NS;
 extern tracer_id_t TRACER_CC1100_STATE;
 extern tracer_id_t TRACER_CC1100_STROBE;
 extern tracer_id_t TRACER_CC1100_CS;
+extern tracer_id_t TRACER_CC1100_SO;
+
+/***************************************************/
+/***************************************************/
+/***************************************************/
+
+#define CC1100_INTERNAL_CSn_PIN   0
+#define CC1100_INTERNAL_SI_PIN    1
+#define CC1100_INTERNAL_SO_PIN    2
+#define CC1100_INTERNAL_GO0_PIN   3
+#define CC1100_INTERNAL_GO1_PIN   4
+#define CC1100_INTERNAL_GO2_PIN   5
 
 /***************************************************/
 /***************************************************/
@@ -87,58 +99,62 @@ extern tracer_id_t TRACER_CC1100_CS;
 /***************************************************/
 /***************************************************/
 
-struct _cc1100_t {
-	
-	uint8_t		fsm_state;
-	int             fsm_ustate;
-	uint8_t		fsm_pending;
-	uint64_t	fsm_timer;
+struct _cc1100_t 
+{
+  uint8_t	  fsm_state;
+  int             fsm_ustate;
+  uint8_t	  fsm_pending;
+  uint64_t	  fsm_timer;
 
-	int	        fs_cal;
+  int	          fs_cal;
 	
-	uint64_t	clk_timeref;
-	uint64_t	clk_tick;
+  uint64_t	  clk_timeref;
+  uint64_t	  clk_tick;
 	
-	uint64_t	tx_io_timer;
-	uint64_t	rx_io_timer;
+  uint64_t	  tx_io_timer;
+  uint64_t	  rx_io_timer;
 
-	uint8_t		CSn_pin;
-	uint8_t		SI_pin;
-	uint8_t		GO0_pin;
-	uint8_t		GO1_pin;
-	uint8_t		GO2_pin;
-	int		SI_set;
-	int		GO0_set;
-	int		GO1_set;
-	int		GO2_set;
-	
-	uint8_t		SIType;
-	uint8_t		addr;
-	uint8_t		read;
-	
-	uint8_t		txfifo[CC1100_TXFIFO_LENGTH];
-	int		txBytes;
-	int		txOffset;
-	int		txUnderflow;
-	
-	uint8_t		rxfifo[CC1100_RXFIFO_LENGTH];
-	int		rxBytes;
-	int		rxOffset;
-	int		rxOverflow;
-	
-	int		ioOffset;
-	int		ioLength;
-	uint16_t	ioCrc;
+  uint8_t	  CSn_pin;
+  uint8_t	  SI_pin;
+  uint8_t         SO_pin;
+  uint8_t	  GO0_pin;
+  uint8_t	  GO1_pin;
+  uint8_t	  GO2_pin;
 
-	double		lqi;
-	uint8_t		lqi_cnt;
-	int		pqt;
-	uint8_t		addressChk;
+  int             CSn_set;
+  int		  SI_set;
+  int             SO_set;
+  int             GO0_set;
+  int		  GO1_set;
+  int		  GO2_set;
+	
+  uint8_t	  SIType;
+  uint8_t	  addr;
+  uint8_t	  read;
+	
+  uint8_t	  txfifo[CC1100_TXFIFO_LENGTH];
+  int		  txBytes;
+  int		  txOffset;
+  int		  txUnderflow;
+	
+  uint8_t	  rxfifo[CC1100_RXFIFO_LENGTH];
+  int		  rxBytes;
+  int		  rxOffset;
+  int		  rxOverflow;
+	
+  int		  ioOffset;
+  int		  ioLength;
+  uint16_t	  ioCrc;
 
-	uint8_t		registers[0x3F];
+  double	  lqi;
+  uint8_t	  lqi_cnt;
+  int		  pqt;
+  uint8_t	  addressChk;
 
-	uint8_t		patable[8];
-	uint8_t		patable_cnt;
+  uint8_t	  registers[0x3F];
+
+  uint8_t	  patable[8];
+  uint8_t	  patable_cnt;
 };
 
 

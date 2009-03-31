@@ -32,6 +32,7 @@ int  CC1100_XOSC_PERIOD_NS;
 tracer_id_t TRACER_CC1100_STATE;
 tracer_id_t TRACER_CC1100_STROBE;
 tracer_id_t TRACER_CC1100_CS;
+tracer_id_t TRACER_CC1100_SO;
 
 /***************************************************/
 /***************************************************/
@@ -106,11 +107,15 @@ void cc1100_write(int dev_num, uint32_t  mask, uint32_t  value)
 
       if ((value & CC1100_CSn_MASK) != 0)
 	{
-	  if (cc1100->CSn_pin == 0)
+	  if (cc1100->CSn_pin == 0) /* CSn == 1, was 0 --> deselect */
 	    {
-	      CC1100_DBG_PINS ("cc1100:pins: from mcu CSn = 1 **  chip deselected\n");
-	      /* deactivated */
-	      /* will need to change state and go to SLEEP or XOFF */
+	      CC1100_DBG_PINS ("cc1100:pins: from mcu CSn = 1 **  chip deselected, SO high\n");
+	      // desactivated, SO must go highZ, we do this on the 
+	      // same cycle
+	      cc1100->SO_set = 1;
+	      cc1100->SO_pin = 0xff;
+	      tracer_event_record(TRACER_CC1100_SO, 1);
+	      // will need to change state and go to SLEEP or XOFF 
 	      if ((cc1100->fsm_state   == CC1100_STATE_IDLE) && 
 		  (cc1100->fsm_pending == CC1100_STATE_SLEEP))
 		{
@@ -128,10 +133,14 @@ void cc1100_write(int dev_num, uint32_t  mask, uint32_t  value)
 	} 
       else 
 	{
-	  if (cc1100->CSn_pin != 0)
+	  if (cc1100->CSn_pin != 0) /* CSn == 0, was != 0 --> select */
 	    {
-	      CC1100_DBG_PINS ("cc1100:pins: from mcu CSn = 0 ** chip selected\n");
-	      /* activated */
+	      CC1100_DBG_PINS ("cc1100:pins: from mcu CSn = 0 ** chip selected, SO low\n");
+	      // activated, SO must go low when crystal is stable, this device is stable
+	      // on the same cycle.
+	      cc1100->SO_set = 1;
+	      cc1100->SO_pin = 0x00;
+	      tracer_event_record(TRACER_CC1100_SO, 0);
 	    }
 	  cc1100->CSn_pin = 0x00;
 	}
@@ -160,14 +169,23 @@ void cc1100_read(int dev_num, uint32_t  *mask, uint32_t  *value)
   
   *mask  = 0;
   *value = 0;
-  
-  if (cc1100->GO1_set) 
+
+  if (cc1100->SO_set)
     {
-      *mask   = CC1100_DATA_MASK;
-      *value  = cc1100->GO1_pin & 0x00ff;
+      *mask  |= CC1100_SO_MASK;
+      *value |= cc1100->SO_pin ? CC1100_SO_MASK : 0;
+      CC1100_DBG_PINS("cc1100:pins: to mcu SO = 0x%02x\n", cc1100->SO_pin & 0xff);
+      cc1100->SO_set = 0;
+    }
+
+  if (cc1100->GO1_set) /* data */
+    {
+      *mask  |= CC1100_DATA_MASK;
+      *value |= cc1100->GO1_pin & 0x00ff;
       CC1100_DBG_PINS("cc1100:pins: to mcu GDO1 = 0x%02x\n", cc1100->GO1_pin & 0xff);
       cc1100->GO1_set = 0;
     }
+
 	
   if (cc1100->GO2_set) 
     {
@@ -218,6 +236,7 @@ int cc1100_device_create (int dev_num, int fxosc_mhz)
   TRACER_CC1100_STATE  = tracer_event_add_id(8, "state",  "cc1100");
   TRACER_CC1100_STROBE = tracer_event_add_id(8, "strobe", "cc1100");
   TRACER_CC1100_CS     = tracer_event_add_id(1, "cs",     "cc1100");
+  TRACER_CC1100_SO     = tracer_event_add_id(1, "so",     "cc1100");
   
   return 0;
 }

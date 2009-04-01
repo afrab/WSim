@@ -232,6 +232,9 @@ struct _cc2420_t {
     /* rssi validity */
     uint8_t rx_rssi_valid;
 
+    /* rssi validity timer */
+    uint64_t rx_rssi_timer;
+
     /* number of received zero_symbols */
     uint8_t rx_zero_symbols;
 

@@ -76,6 +76,7 @@ enum {
 	cc2420->mem_access  = CC2420_ACCESS_NONE;			\
 	cc2420->xosc_stable = 0;					\
 	cc2420->tx_active   = 0;					\
+	cc2420->rx_rssi_valid = 0;					\
 	CC2420_DBG_STATE("cc2420:state: ENTERING VREG_OFF\n");		\
 	tracer_event_record(TRACER_CC2420_STATE,			\
                             CC2420_STATE_VREG_OFF);			\
@@ -118,7 +119,8 @@ enum {
   do {									\
         cc2420->fsm_state  = CC2420_STATE_RESET;			\
         cc2420->mem_access = CC2420_ACCESS_REGISTERS_ONLY;		\
-	cc2420->tx_active     = 0;					\
+	cc2420->tx_active  = 0;						\
+	cc2420->rx_rssi_valid = 0;					\
         CC2420_DBG_STATE("cc2420:state: ENTERING RESET\n");		\
 	tracer_event_record(TRACER_CC2420_STATE,			\
                             CC2420_STATE_RESET);			\
@@ -134,6 +136,7 @@ enum {
         cc2420->mem_access  = CC2420_ACCESS_REGISTERS_ONLY;		\
 	cc2420->xosc_stable = 0;					\
 	cc2420->tx_active   = 0;					\
+	cc2420->rx_rssi_valid = 0;					\
 	CC2420_DBG_STATE("cc2420:state: ENTERING POWER_DOWN\n");	\
 	tracer_event_record(TRACER_CC2420_STATE,			\
                             CC2420_STATE_POWER_DOWN);			\
@@ -151,6 +154,7 @@ enum {
 	cc2420->rx_fifo_write = 0;					\
 	cc2420->xosc_stable   = 1;					\
 	cc2420->tx_active     = 0;					\
+	cc2420->rx_rssi_valid = 0;					\
 	CC2420_DBG_STATE("cc2420:state: ENTERING IDLE\n");		\
 	tracer_event_record(TRACER_CC2420_STATE,			\
                             CC2420_STATE_IDLE);				\
@@ -168,6 +172,7 @@ enum {
 	cc2420->tx_active = 1;						\
 	cc2420->tx_bytes  = 0;						\
 	cc2420->tx_available_bytes = 0;					\
+	cc2420->rx_rssi_valid = 0;					\
 	tracer_event_record(TRACER_CC2420_STATE,			\
                             CC2420_STATE_TX_CALIBRATE);			\
 	etracer_slot_event(ETRACER_PER_ID_CC2420,			\
@@ -181,6 +186,9 @@ enum {
 	cc2420->fsm_state = CC2420_STATE_RX_CALIBRATE;			\
 	cc2420->fsm_timer = MACHINE_TIME_GET_NANO() + 12 * CC2420_SYMBOL_PERIOD; \
 	cc2420->tx_active = 0;						\
+	cc2420->rx_rssi_valid = 0;					\
+	/* RSSI valid as soon as the receiver has been enabled for at least 8 symbol periods (cf 23 p48) */ \
+	cc2420-> rx_rssi_timer = MACHINE_TIME_GET_NANO() + 8 * CC2420_SYMBOL_PERIOD; \
 	/* update SFD pin (cf [1] p.34) */				\
 	if (cc2420->SFD_pin == 0xFF) {					\
 	    cc2420->SFD_pin    = 0x00;					\
@@ -246,7 +254,6 @@ enum {
 	cc2420->rx_sync_timer   = MACHINE_TIME_GET_NANO() + 2 * CC2420_SYMBOL_PERIOD;\
 	cc2420->rx_rssi_value   = 0;					\
 	cc2420->rx_rssi_values  = 0;					\
-	cc2420->rx_rssi_valid   = 0;					\
 	cc2420->rx_rssi_value_for_fcs = 0;                              \
 	cc2420->rx_rssi_sample_index = 0;                               \
 	cc2420->rx_zero_symbols = 0;					\
@@ -315,6 +322,7 @@ enum {
 	cc2420->tx_active = 1;						\
 	cc2420->tx_bytes  = 0;						\
 	cc2420->tx_available_bytes = 0;					\
+	cc2420->rx_rssi_valid = 0;					\
 	tracer_event_record(TRACER_CC2420_STATE,			\
 			    CC2420_STATE_TX_ACK_CALIBRATE);		\
 	etracer_slot_event(ETRACER_PER_ID_CC2420,			\

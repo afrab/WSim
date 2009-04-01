@@ -224,6 +224,11 @@ void cc2420_update_state_rx_calibrate(struct _cc2420_t * cc2420 UNUSED) {
 	return;
     }
 
+    /* RSSI becomes valid */
+    if (MACHINE_TIME_GET_NANO() >= cc2420->rx_rssi_timer) {
+      cc2420->rx_rssi_valid = 1;
+    }
+
     /* calibration is over */
     if (MACHINE_TIME_GET_NANO() >= cc2420->fsm_timer) {
 	CC2420_RX_SFD_SEARCH_ENTER(cc2420);

@@ -66,13 +66,8 @@ void cc2420_record_rssi(struct _cc2420_t * cc2420, double dBm) {
         }
 
         if (cc2420->rx_rssi_values < 8) {			      
-	    cc2420->rx_rssi_valid = 0;
 	    cc2420->rx_rssi_values++;
-
         }			     
-	else {
-        cc2420->rx_rssi_valid = 1;
-        }
     }
 
 

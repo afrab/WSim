@@ -266,7 +266,7 @@ static void msp430_set_writeptr16(addr_map_write16_t f, uint16_t addr)
 /* ** I/O Function to start flash erase on dummy write ** */
 /* ****************************************************** */
 
-void msp430_set_flash_write_start_erase(uint16_t start, uint16_t stop)
+void msp430_io_set_flash_write_start_erase(uint16_t start, uint16_t stop)
 {
   uint16_t addr;
   
@@ -289,7 +289,7 @@ void msp430_set_flash_write_start_erase(uint16_t start, uint16_t stop)
     }
 }
 
-void msp430_set_flash_write_normal(uint16_t start, uint16_t stop)
+void msp430_io_set_flash_write_normal(uint16_t start, uint16_t stop)
 {
   uint16_t addr;
   for(addr = start; addr <= stop; addr++)
@@ -299,7 +299,7 @@ void msp430_set_flash_write_normal(uint16_t start, uint16_t stop)
     }
 }
 
-void msp430_set_flash_read_jump_pc(uint16_t start, uint16_t stop)
+void msp430_io_set_flash_read_jump_pc(uint16_t start, uint16_t stop)
 {
   uint16_t addr;
   for(addr = start; addr <= stop; addr++)
@@ -308,7 +308,7 @@ void msp430_set_flash_read_jump_pc(uint16_t start, uint16_t stop)
     }
 }
 
-void msp430_set_flash_read_normal (uint16_t start, uint16_t stop)
+void msp430_io_set_flash_read_normal (uint16_t start, uint16_t stop)
 {
   uint16_t addr;
   for(addr = start; addr <= stop; addr++)

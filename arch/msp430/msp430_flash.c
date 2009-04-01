@@ -71,8 +71,8 @@ static void msp430_flash_update_wait(void)
       if (1 /* && timeout */)
 	{
 	  VERBOSE(F2L,"msp430:flash: Start erase\n");
-	  msp430_set_flash_read_normal (ADDR_FLASH_START, ADDR_FLASH_STOP);
-	  msp430_set_flash_write_normal(ADDR_FLASH_START, ADDR_FLASH_STOP);
+	  msp430_io_set_flash_read_normal (ADDR_FLASH_START, ADDR_FLASH_STOP);
+	  msp430_io_set_flash_write_normal(ADDR_FLASH_START, ADDR_FLASH_STOP);
 	  msp430_flash_update_ptr = NULL;
 	  MCUFLASH.fctl3.b.busy   = 0;
 	}
@@ -162,7 +162,7 @@ void msp430_flash_write (uint16_t addr, int16_t val)
 	  {
 	    /* start to wait the dummy write or clear */
 	    VERBOSE(F2L,"msp430:flash: Erase prepared, waiting for dummy write\n");
-	    msp430_set_flash_write_start_erase(ADDR_FLASH_START, ADDR_FLASH_STOP);
+	    msp430_io_set_flash_write_start_erase(ADDR_FLASH_START, ADDR_FLASH_STOP);
 	  }
 
 	MCUFLASH.fctl1.s = 0x09600 | (val & 0xff);
@@ -248,7 +248,7 @@ void msp430_flash_freq_eval(void)
 void msp430_flash_start_erase (uint16_t addr)
 {
   VERBOSE(F2L,"msp430:flash: start erase dummy write at 0x%04x\n",addr);
-  msp430_set_flash_read_jump_pc(ADDR_FLASH_START, ADDR_FLASH_STOP);
+  msp430_io_set_flash_read_jump_pc(ADDR_FLASH_START, ADDR_FLASH_STOP);
   /* memset(region, 0xff, sizeof(region[addr])); */
   MCUFLASH.fctl3.b.busy   = 1;
   msp430_flash_update_ptr = msp430_flash_update_wait;

@@ -7,7 +7,8 @@ WTRC=../../../build/wtracer/src/wtracer
 
 PSER="--serial1_io=/dev/null"
 MODE="--mode=time --modearg=10s"
-UI="--ui"
+#MODE="--mode=gdb"
+#UI="--ui"
 
-${WSIM} ${UI} ${MODE} ${PSER} --trace=wsim.trc --logfile=stdout --verbose=3 test2-spi.elf
+${WSIM} ${UI} ${MODE} ${PSER} --trace=wsim.trc --logfile=stdout --verbose=4 test2-spi.elf
 ${WTRC} --in=wsim.trc --out=wsim.vcd --format=vcd

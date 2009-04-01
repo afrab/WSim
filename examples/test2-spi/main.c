@@ -39,6 +39,8 @@ int uart_cb_echo(uint8_t data)
 /* ************************************************** */
 /* ************************************************** */
 
+int dummy=0; /* gcc needs this */
+
 int main(void)
 {
   WDTCTL = WDTPW + WDTHOLD;                 // Stop WDT

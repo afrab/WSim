@@ -6,7 +6,7 @@ CC=msp430-gcc
 CPU=msp430x1611
 CFLAGS  = -mmcu=${CPU} -Wall
 CFLAGS += -mdisable-hwmul
-CFLAGS += -O2
+CFLAGS += -O2 -g
 
 OBJ_BASE= leds.o clock.o timer.o uart.o spi.o
 

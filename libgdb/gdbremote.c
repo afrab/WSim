@@ -162,6 +162,7 @@ gdbremote_getpacket (struct gdbremote_t *gdb, char* buffer, int size)
   } while(0)
 
 static void
+
 gdbremote_putpacket (struct gdbremote_t *gdb, char *buffer)
 {
   int ret;
@@ -194,6 +195,23 @@ gdbremote_putpacket (struct gdbremote_t *gdb, char *buffer)
       ret = gdbremote_getchar(gdb, &cret);
     }
   while (cret != '+');
+}
+
+void gdbremote_putpacket_hexencoded (struct gdbremote_t *gdb, char *buffer)
+{
+  int i;
+# define HEXBUFF_MAX 1024
+  char hexbuff[HEXBUFF_MAX];
+
+  strcpy(hexbuff,"");
+  for(i=0; (buffer[i] != 0) && ((2*i) < HEXBUFF_MAX); i++)
+    {
+      char byte[3];
+      sprintf(byte,"%02x",buffer[i]);
+      strcat(hexbuff,byte);
+    }
+
+  gdbremote_putpacket(gdb, hexbuff);
 }
 
 #undef GDB_WRITE
@@ -294,8 +312,8 @@ gdbremote_general_query_packet(struct gdbremote_t *gdb, char* buffer, int UNUSED
       threadid = strtol(token,NULL,16);
       if (threadid == 1)
 	{
-	  /* gdbremote_putpacket(gdb,"msp430 running thread"); */
-	  DONT_SUPPORT;
+	  gdbremote_putpacket_hexencoded(gdb,"Runnable");
+	  /* DONT_SUPPORT; */
 	}
       else
 	{

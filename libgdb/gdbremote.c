@@ -294,7 +294,8 @@ gdbremote_general_query_packet(struct gdbremote_t *gdb, char* buffer, int UNUSED
       threadid = strtol(token,NULL,16);
       if (threadid == 1)
 	{
-	  gdbremote_putpacket(gdb,"msp430 running thread");
+	  /* gdbremote_putpacket(gdb,"msp430 running thread"); */
+	  DONT_SUPPORT;
 	}
       else
 	{

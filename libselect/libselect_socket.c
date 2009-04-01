@@ -361,6 +361,7 @@ libselect_skt_close(struct libselect_socket_t *skt)
 int
 libselect_skt_getchar(struct libselect_socket_t *skt, unsigned char *c)
 {
+  int ret;
   *c = 0x55;
 
   if (skt->socket == -1)
@@ -369,16 +370,24 @@ libselect_skt_getchar(struct libselect_socket_t *skt, unsigned char *c)
       return LIBSELECT_SOCKET_GETCHAR_ERROR;
     }
 
-  if (read(skt->socket, c, 1) == -1)
+  ret = read(skt->socket, c, 1);
+  switch (ret)
     {
+    case -1:
       ERROR("wsim:libselect_socket:getchar: read failed - %s\n",strerror(errno));
       close(skt->socket);
       skt->socket = -1;
       return LIBSELECT_SOCKET_GETCHAR_ERROR;
+    case 0:
+      ERROR("wsim:libselect_socket:getchar: read failed - socket closed\n");
+      close(skt->socket);
+      skt->socket = -1;
+      return LIBSELECT_SOCKET_GETCHAR_ERROR;
+    default:
+      DMSG_SKT("wsim:libselect_socket:getchar: 0x%02x %c\n", 
+	       *c, isprint(*c) ? *c : '.');
+      break;
     }
-
-  DMSG_SKT("wsim:libselect_socket:getchar: 0x%02x %c\n", 
-	      *c, isprint(*c) ? *c : '.');
 
   return LIBSELECT_SOCKET_GETCHAR_OK;
 }
@@ -403,7 +412,7 @@ libselect_skt_putchar(struct libselect_socket_t *skt, unsigned char c)
       return LIBSELECT_SOCKET_PUTCHAR_ERROR;
     }
 
-  DMSG_SKT("wsim:libselect_socket:getchar: 0x%02x %c\n", 
+  DMSG_SKT("wsim:libselect_socket:putchar: 0x%02x %c\n", 
 	      c, isprint(c) ? c : '.');
 
   return LIBSELECT_SOCKET_PUTCHAR_OK;

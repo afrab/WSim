@@ -488,7 +488,7 @@ wsim:log:wsim.log</computeroutput></programlisting>
 				<step><para>Launch the simulator and connect it to the previously launched WConsole instance,
 				using the following command (expected output is included):</para>
 					<programlisting>
-<prompt>[wsn430-timer]$</prompt> <userinput>wsim-wsn430 --serial=/dev/pts/3 wsn430-serial.elf</userinput>
+<prompt>[wsn430-timer]$</prompt> <userinput>wsim-wsn430 --serial1_io=/dev/pts/3 wsn430-serial.elf</userinput>
 <computeroutput>WSim 0.82cvs, copyright 2005, 2006, 2007 Worldsens
 wsim:pid:4343
 wsim:log:wsim.log</computeroutput></programlisting>

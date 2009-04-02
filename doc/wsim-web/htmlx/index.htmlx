@@ -6,7 +6,7 @@
   <div id="main-body">
     <br />
 <!--      <div align="center"><img src="./figures/wsim-logo.jpg" alt="" width="660" height="159" /></div>  -->
-      <div align="center"><img src="./figures/dist_simul.png" alt=""  /></div> 
+      <div align="center"><img src="./figures/dist_simul.png" alt="" width="80%" /></div> 
       
       <b><i>Features:</i></b>
       <ul>

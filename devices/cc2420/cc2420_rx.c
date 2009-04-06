@@ -164,7 +164,7 @@ int cc2420_check_cca(struct _cc2420_t * cc2420) {
   if (cc)
     return 0;
   else
-    return 0; /* -1 */
+    return -1;
 }
 
 

@@ -200,7 +200,7 @@
 #define CC1100_REG_PARTNUM                      0x30
 #define CC1100_REG_PARTNUM_DEFAULT              0x00
 #define CC1100_REG_VERSION                      0x31
-#define CC1100_REG_VERSION_DEFAULT              0x01
+#define CC1100_REG_VERSION_DEFAULT              0x03  /* old version number 0x01 replaced by 0x03 according to current used hardware version */
 #define CC1100_REG_FREQEST                      0x32
 #define CC1100_REG_FREQEST_DEFAULT              0x00
 #define CC1100_REG_LQI                          0x33

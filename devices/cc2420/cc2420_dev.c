@@ -175,7 +175,7 @@ void cc2420_reset_internal(struct _cc2420_t * cc2420)
   cc2420->SI_type       = CC2420_SPI_NEXT_ACCESS_TYPE_ADDR; /* reset next SPI access type */
   cc2420->xosc_stable   = 0;                                /* set xosc state to unstable */
   cc2420->tx_active     = 0;                                /* set tx active to false     */
-  cc2420->pll_locked    = 1;                                /* set pll state to locked    */
+  cc2420->pll_locked    = 0;                                /* set pll state to unlocked    */
   cc2420->encoding_busy = 0;                                /* set encoding module state  */
                                                             /*     to idle */
 

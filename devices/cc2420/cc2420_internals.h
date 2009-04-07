@@ -51,6 +51,11 @@ extern tracer_id_t TRACER_CC2420_CS;
 /* TODO:: calculated from bitrate and sb/chip */
 #define CC2420_SYMBOL_PERIOD       16000
 
+
+/* cf p77 */
+#define CC2420_PLL_CALIBRATION_TIME_SHORT 37000
+#define CC2420_PLL_CALIBRATION_TIME_LONG  57000
+
 /*
  * CC2420 SPI access types
  * used in cc2420_dev.c, cc2420_read() to store the SPI access type
@@ -172,6 +177,9 @@ struct _cc2420_t {
 
     /* state of PLL */
     uint8_t  pll_locked;
+
+    /* time to reach for PLL to become locked */
+    uint64_t pll_lock_timer;
 
     /* state of encoding module */
     uint8_t  encoding_busy;

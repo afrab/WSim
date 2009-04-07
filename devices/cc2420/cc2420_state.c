@@ -184,6 +184,8 @@ void cc2420_update_state_xosc_starting(struct _cc2420_t * cc2420) {
 
 void cc2420_update_state_idle(struct _cc2420_t * cc2420 UNUSED) {
 
+    cc2420_pll_register_update(cc2420);
+
     /* if VREG_EN is low, go back to VREG_OFF state */
     if (cc2420->VREG_EN_set) {
 	if (cc2420_read_pin(cc2420, CC2420_INTERNAL_VREG_EN_PIN) == 0x00) {
@@ -222,6 +224,12 @@ void cc2420_update_state_rx_calibrate(struct _cc2420_t * cc2420 UNUSED) {
     if (cc2420_reset_required(cc2420)) {
 	CC2420_RESET_ENTER(cc2420);
 	return;
+    }
+
+    /* PLL is locked */
+    if (MACHINE_TIME_GET_NANO() >= cc2420->pll_lock_timer) {
+        cc2420->pll_locked = 1;
+	cc2420_pll_register_update(cc2420);
     }
 
     /* RSSI becomes valid */
@@ -299,6 +307,13 @@ void cc2420_update_state_tx_ack_calibrate(struct _cc2420_t * cc2420 UNUSED) {
     if (cc2420_reset_required(cc2420)) {
 	CC2420_RESET_ENTER(cc2420);
 	return;
+    }
+
+
+   /* PLL is locked */
+    if (MACHINE_TIME_GET_NANO() >= cc2420->pll_lock_timer) {
+        cc2420->pll_locked = 1;
+	cc2420_pll_register_update(cc2420);
     }
 
     /* calibration is over */
@@ -522,6 +537,13 @@ void cc2420_update_state_tx_calibrate(struct _cc2420_t * cc2420) {
     if (cc2420_reset_required(cc2420)) {
 	CC2420_RESET_ENTER(cc2420);
 	return;
+    }
+
+
+   /* PLL is locked */
+    if (MACHINE_TIME_GET_NANO() >= cc2420->pll_lock_timer) {
+        cc2420->pll_locked = 1;
+	cc2420_pll_register_update(cc2420);
     }
 
     /* wait for 12 symbol periods */
@@ -789,3 +811,6 @@ int cc2420_update(int dev_num)
 
     return 0;
 }
+
+
+

@@ -264,3 +264,46 @@ uint8_t  cc2420_read_register_l(struct _cc2420_t * cc2420, uint8_t addr) {
 
     return (uint8_t )(cc2420->registers[addr]);
 }
+
+
+/**
+ * update pll register
+ */
+
+void	cc2420_pll_register_update(struct _cc2420_t * cc2420){
+
+
+   /* if frequency synthetiser off */
+   if(cc2420->fsm_state == CC2420_STATE_POWER_DOWN || cc2420->fsm_state == CC2420_STATE_IDLE || cc2420->fsm_state != CC2420_STATE_VREG_OFF || cc2420->fsm_state != CC2420_STATE_VREG_STARTING || cc2420->fsm_state != CC2420_STATE_RESET || cc2420->fsm_state != CC2420_STATE_XOSC_STARTING) {
+       /* set pll lock bit of FSCTRL register to 1 */
+       cc2420->registers[CC2420_REG_FSCTRL] |= CC2420_SET_REG_FSCTRL_LOCK_STATUS;
+       /* set pll calibration done bit of FSCTRL register to 0 */
+       cc2420->registers[CC2420_REG_FSCTRL] &= ~CC2420_SET_REG_FSCTRL_CAL_DONE;
+       /* set pll calibration running bit of FSCTRL register to 0 */
+       cc2420->registers[CC2420_REG_FSCTRL] &= ~CC2420_SET_REG_FSCTRL_CAL_RUNNING; 
+       return;
+   }
+
+
+   /* if frequency synthetiser on */
+
+   if(cc2420->pll_locked) {
+       /* set pll lock bit of FSCTRL register to 1 */
+       cc2420->registers[CC2420_REG_FSCTRL] |= CC2420_SET_REG_FSCTRL_LOCK_STATUS;
+       /* set pll calibration done bit of FSCTRL register to 1 */
+       cc2420->registers[CC2420_REG_FSCTRL] |= CC2420_SET_REG_FSCTRL_CAL_DONE;
+       /* set pll calibration running bit of FSCTRL register to 0 */
+       cc2420->registers[CC2420_REG_FSCTRL] &= ~CC2420_SET_REG_FSCTRL_CAL_RUNNING; 
+   }
+
+   else {
+       /* set pll lock bit of FSCTRL register to 0 */
+       cc2420->registers[CC2420_REG_FSCTRL] &= ~CC2420_SET_REG_FSCTRL_LOCK_STATUS;
+       /* set pll calibration done bit of FSCTRL register to 0 */
+       cc2420->registers[CC2420_REG_FSCTRL] &= ~CC2420_SET_REG_FSCTRL_CAL_DONE;
+       /* set pll calibration running bit of FSCTRL register to 1 */
+       cc2420->registers[CC2420_REG_FSCTRL] |= CC2420_SET_REG_FSCTRL_CAL_RUNNING; 
+   }
+
+   return;
+ }

@@ -36,12 +36,17 @@ void cc2420_write_register_h(struct _cc2420_t * cc2420, uint8_t addr, uint8_t va
 void cc2420_write_register_l(struct _cc2420_t * cc2420, uint8_t addr, uint8_t vall);
 
 /*
- * CC2420 read register function
+ * CC2420 read register functions
  */
 
 uint16_t cc2420_read_register  (struct _cc2420_t * cc2420, uint8_t addr);
 uint8_t  cc2420_read_register_h(struct _cc2420_t * cc2420, uint8_t addr);
 uint8_t  cc2420_read_register_l(struct _cc2420_t * cc2420, uint8_t addr);
+
+/*
+ * CC2420 update register function
+ */
+void	cc2420_pll_register_update(struct _cc2420_t * cc2420);
 
 
 /*
@@ -197,6 +202,9 @@ uint8_t  cc2420_read_register_l(struct _cc2420_t * cc2420, uint8_t addr);
 #define CC2420_REG_FSCTRL_LOCK_LENGTH(x) (x & (0x0800))
 #define CC2420_REG_FSCTRL_LOCK_STATUS(x) (x & (0x0400))
 #define CC2420_REG_FSCTRL_FREQ(x) (x & (0x0200 | 0x0100 | 0x0080 | 0x0040 | 0x0020 | 0x0010 | 0x0008 | 0x0004 | 0x0002 | 0x0001))
+#define CC2420_SET_REG_FSCTRL_CAL_DONE    (1 << 13)
+#define CC2420_SET_REG_FSCTRL_CAL_RUNNING (1 << 12)
+#define CC2420_SET_REG_FSCTRL_LOCK_STATUS (1 << 10)
 
 /* CC2420 Security Control 0 Register (cf [1] p71) */
 #define CC2420_REG_SECCTRL0_RXFIFO_PROTECTION(x) (x & (0x0200))

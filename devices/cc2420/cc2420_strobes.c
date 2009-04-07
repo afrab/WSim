@@ -20,6 +20,7 @@
 #include "cc2420_strobes.h"
 #include "cc2420_debug.h"
 #include "cc2420_rx.h"
+#include "cc2420_registers.h"
 
 
 /***************************************************/

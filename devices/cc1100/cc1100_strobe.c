@@ -27,6 +27,7 @@
  *   - SFTX
  *   - SFRX
  *   - STX
+ *   - SIDLE
  **/
 
 /***************************************************/
@@ -187,6 +188,11 @@ void cc1100_strobe_state_fstxon(struct _cc1100_t *cc1100)
     case CC1100_STROBE_SNOP:
       CC1100_DBG_STROBE("cc1100:strobe:fstxon: SNOP\n");
       return;
+      /* Case verified on hardware */
+    case CC1100_STROBE_SIDLE:
+      CC1100_DBG_STROBE("cc1100:strobe:fstxon: SIDLE\n");
+      CC1100_IDLE_ENTER(cc1100);
+      return;
     case CC1100_STROBE_STX:
       CC1100_DBG_STROBE("cc1100:strobe:fstxon: STX\n");
       CC1100_TX_ENTER(cc1100);
@@ -208,6 +214,10 @@ void cc1100_strobe_state_fs_wakeup(struct _cc1100_t *cc1100)
     case CC1100_STROBE_SNOP:
       CC1100_DBG_STROBE("cc1100:strobe:fs_wakeup: SNOP\n");
       return;
+    case CC1100_STROBE_SIDLE:
+      CC1100_DBG_STROBE("cc1100:strobe:fs_wakeup: SIDLE\n");
+      CC1100_IDLE_ENTER(cc1100);
+      return;
     default:
       CC1100_DBG_IMPL("cc1100:strobe:fs_wakeup: refusing (0x%x) commands while waking up\n", cc1100->addr);
       return;
@@ -224,6 +234,10 @@ void cc1100_strobe_state_calibrate(struct _cc1100_t *cc1100)
     {
     case CC1100_STROBE_SNOP:
       CC1100_DBG_STROBE("cc1100:strobe:calibrate: SNOP\n");
+      return;
+    case CC1100_STROBE_SIDLE:
+      CC1100_DBG_STROBE("cc1100:strobe:calibrate: SIDLE\n");
+      CC1100_IDLE_ENTER(cc1100);
       return;
     default:
       CC1100_DBG_IMPL("cc1100:strobe:calibrate: refusing (0x%x) commands while calibrating\n", cc1100->addr);
@@ -242,6 +256,10 @@ void cc1100_strobe_state_fs_calibrate(struct _cc1100_t *cc1100)
     case CC1100_STROBE_SNOP:
       CC1100_DBG_STROBE("cc1100:strobe:fs_calibrate: SNOP\n");
       return;
+    case CC1100_STROBE_SIDLE:
+      CC1100_DBG_STROBE("cc1100:strobe:fs_calibrate: SIDLE\n");
+      CC1100_IDLE_ENTER(cc1100);
+      return;
     default:
       CC1100_DBG_IMPL("cc1100:strobe:fs_calibrate: refusing (0x%x) commands while fs_calibrate\n", cc1100->addr);
       return;
@@ -258,6 +276,11 @@ void cc1100_strobe_state_settling(struct _cc1100_t *cc1100)
     {
     case CC1100_STROBE_SNOP:
       CC1100_DBG_STROBE("cc1100:strobe:settling: SNOP\n");
+      return;
+     /* Case verified on hardware */
+    case CC1100_STROBE_SIDLE:
+      CC1100_DBG_STROBE("cc1100:strobe:settling: SIDLE\n");
+      CC1100_IDLE_ENTER(cc1100);
       return;
     default:
       CC1100_DBG_IMPL("cc1100:strobe:settling: refusing (0x%x) commands while settling\n", cc1100->addr);
@@ -276,6 +299,10 @@ void cc1100_strobe_state_txrx_settling(struct _cc1100_t *cc1100)
     case CC1100_STROBE_SNOP:
       CC1100_DBG_STROBE("cc1100:strobe:txrx_settling: SNOP\n");
       return;
+    case CC1100_STROBE_SIDLE:
+      CC1100_DBG_STROBE("cc1100:strobe:txrx_settling: SIDLE\n");
+      CC1100_IDLE_ENTER(cc1100);
+      return;
     default:
       CC1100_DBG_IMPL("cc1100:strobe:txrx_settling: refusing (0x%x) commands while txrx_settling\n", cc1100->addr);
       return;
@@ -292,6 +319,10 @@ void cc1100_strobe_state_rxtx_settling(struct _cc1100_t *cc1100)
     {
     case CC1100_STROBE_SNOP:
       CC1100_DBG_STROBE("cc1100:strobe:rxtx_settling: SNOP\n");
+      return;
+    case CC1100_STROBE_SIDLE:
+      CC1100_DBG_STROBE("cc1100:strobe:rxtx_settling: SIDLE\n");
+      CC1100_IDLE_ENTER(cc1100);
       return;
     default:
       CC1100_DBG_IMPL("cc1100:strobe:rxtx_settling: refusing (0x%x) commands while rxtx_settling\n", cc1100->addr);
@@ -374,6 +405,28 @@ void cc1100_strobe_state_tx(struct _cc1100_t *cc1100) {
 		case CC1100_STROBE_SNOP:
 			CC1100_DBG_STROBE("cc1100:strobe:tx: SNOP\n");
 			return;
+	        case CC1100_STROBE_SIDLE:
+		        CC1100_DBG_STROBE("cc1100:strobe:tx: SIDLE\n");
+			/*
+			 * page 72: looking for fs_autocal
+			 *
+			 * 0 (00) Never (manually calibrate using SCAL strobe)
+			 * 1 (01) When going from IDLE to RX or TX (or FSTXON)
+			 * 2 (10) When going from RX or TX back to IDLE
+			 * 3 (11) Every 4th time when going from RX or TX to IDLE
+			 */
+			switch ((cc1100->registers[CC1100_REG_MCSM0] & 0x30))
+			  {
+			  case 0x00:
+			  case 0x10: /* Idle */
+			    CC1100_TX_END_ENTER(cc1100);
+			    break;
+			  case 0x20:
+			  case 0x30: /* Calibrating */
+			    CC1100_CALIBRATE_ENTER(cc1100);
+			    break;
+			  }
+			break;
 		default:
 			CC1100_DBG_IMPL("cc1100:strobe:tx: strobe command not implemented in tx state (0x%x)\n", 
 					cc1100_strobe_to_str(cc1100->addr), cc1100->addr);

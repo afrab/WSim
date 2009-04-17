@@ -95,13 +95,13 @@ void cc2420_record_rssi(struct _cc2420_t * cc2420, double dBm) {
 	    cc2420->CCA_pin = 0x00;
 	    break;
 	}
-	if (cc2420->CCA_pin == 0x00) {
-	    if (cc2420->rx_rssi_value > cca_threshold)
-		cc2420->CCA_pin = 0xFF;
-	}
-	else if (cc2420->CCA_pin == 0xFF) {
-	    if (cc2420->rx_rssi_value <= (cca_threshold - cca_hyst) ) {
+	if (cc2420->CCA_pin == 0xFF) {
+	    if (cc2420->rx_rssi_value >= cca_threshold)
 		cc2420->CCA_pin = 0x00;
+	}
+	else if (cc2420->CCA_pin == 0x00) {
+	    if (cc2420->rx_rssi_value < (cca_threshold - cca_hyst) ) {
+		cc2420->CCA_pin = 0xFF;
 	    }
 	}
 	break;
@@ -126,13 +126,13 @@ void cc2420_record_rssi(struct _cc2420_t * cc2420, double dBm) {
 	    cc2420->CCA_pin = 0x00;
 	    break;
 	}
-	if (cc2420->CCA_pin == 0x00) {
-	    if (cc2420->rx_rssi_value > cca_threshold)
-		cc2420->CCA_pin = 0xFF;
-	}
-	else if (cc2420->CCA_pin == 0xFF) {
-	    if (cc2420->rx_rssi_value <= (cca_threshold - cca_hyst) ) {
+	if (cc2420->CCA_pin == 0xFF) {
+	    if (cc2420->rx_rssi_value >= cca_threshold)
 		cc2420->CCA_pin = 0x00;
+	}
+	else if (cc2420->CCA_pin == 0x00) {
+	    if (cc2420->rx_rssi_value < (cca_threshold - cca_hyst) ) {
+		cc2420->CCA_pin = 0xFF;
 	    }
 	}
 	break;
@@ -153,7 +153,7 @@ void cc2420_record_rssi(struct _cc2420_t * cc2420, double dBm) {
 
 /**
  * check if CCA is OK
- * returns 0 if OK, -1 else
+ * returns 1 if OK, 0 else
  */
 
 int cc2420_check_cca(struct _cc2420_t * cc2420) {
@@ -162,9 +162,9 @@ int cc2420_check_cca(struct _cc2420_t * cc2420) {
   int cc = cc2420->CCA_pin;
 
   if (cc)
-    return 0;
+    return 1;
   else
-    return 0; /*-1*/
+    return 0;
 }
 
 

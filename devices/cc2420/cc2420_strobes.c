@@ -336,7 +336,7 @@ void cc2420_strobe_state_rx_calibrate(struct _cc2420_t * cc2420)
       break;
     case CC2420_STROBE_STXONCCA :
       CC2420_DBG_STROBE("cc2420:strobe:rx_calibrate: STXONCCA\n");
-      if (cc2420_check_cca(cc2420))
+      if (!cc2420_check_cca(cc2420))
 	break;
       CC2420_TX_CALIBRATE_ENTER(cc2420);
       break;
@@ -411,7 +411,7 @@ void cc2420_strobe_state_rx_sfd_search(struct _cc2420_t * cc2420)
       break;
     case CC2420_STROBE_STXONCCA :
       CC2420_DBG_STROBE("cc2420:strobe:rx_sfd_search: STXONCCA\n");
-      if (cc2420_check_cca(cc2420))
+      if (!cc2420_check_cca(cc2420))
 	break;
       CC2420_TX_CALIBRATE_ENTER(cc2420);
       break;
@@ -480,7 +480,7 @@ void cc2420_strobe_state_rx_frame(struct _cc2420_t * cc2420)
       break;
     case CC2420_STROBE_STXONCCA :
       CC2420_DBG_STROBE("cc2420:strobe:rx_frame: STXONCCA\n");
-      if (cc2420_check_cca(cc2420))
+      if (!cc2420_check_cca(cc2420))
 	break;
       CC2420_TX_CALIBRATE_ENTER(cc2420);
     case CC2420_STROBE_STXON :
@@ -535,7 +535,7 @@ void cc2420_strobe_state_tx_ack_calibrate(struct _cc2420_t * cc2420)
       break;
     case CC2420_STROBE_STXONCCA :
       CC2420_DBG_STROBE("cc2420:strobe:tx_ack_calibrate: STXONCCA\n");
-      if (cc2420_check_cca(cc2420))
+      if (!cc2420_check_cca(cc2420))
 	break;
       CC2420_TX_CALIBRATE_ENTER(cc2420);
     case CC2420_STROBE_STXON :

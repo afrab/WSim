@@ -164,7 +164,7 @@ int cc2420_check_cca(struct _cc2420_t * cc2420) {
   if (cc)
     return 0;
   else
-    return -1;
+    return 0; /*-1*/
 }
 
 
@@ -601,6 +601,8 @@ uint64_t cc2420_callback_rx(void *arg, struct wsnet_rx_info *wrx)
   int modulation   = wrx->modulation;
   double dBm       = wrx->power_dbm;
   double snr       = wrx->SiNR;
+
+CC2420_DEBUG("cc2420_callback_rx : entering RX Callback\n");
 
     /* check if we are able to receive data */
     if (cc2420_rx_filter(cc2420, frequency, modulation, dBm, snr)) {

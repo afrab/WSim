@@ -43,7 +43,11 @@
   } while (0)
 
 
-#define CC1100_GET_CS(cc1100)                                  1
+/* Carrier Sense (CS) functionnality is not implemented yet. However to
+ * avoid errors in programs using it, CS goes to 1 only when radio is
+ * calibrated (some programs look at CS to know if the RSSI is valid).
+ */
+#define CC1100_GET_CS(cc1100)   (cc1100->fs_cal == 1 ? 1 : 0)
 
 
 #define CC1100_SET_CS(cc1100, dBm)		               \
@@ -208,6 +212,8 @@
   do {									\
     CC1100_DBG_STATE("cc1100:tx:state: TX (enter)\n");			\
     cc1100->fsm_state = CC1100_STATE_TX;				\
+    /* PA_PD signal go from high to low when entering in TX state */	\
+    cc1100_assert_gdo(cc1100, 0x27, CC1100_PIN_DEASSERT);               \
     tracer_event_record(TRACER_CC1100_STATE, CC1100_STATE_TX);		\
     etracer_slot_event(ETRACER_PER_ID_CC1100,				\
 		       ETRACER_PER_EVT_MODE_CHANGED,			\
@@ -304,6 +310,8 @@
 #define CC1100_RX_ENTER(cc1100)						\
   do {									\
     CC1100_DBG_STATE("cc1100:state: RX (enter)\n");			\
+    /* PA_PD signal is high in RX state */				\
+    cc1100_assert_gdo(cc1100, 0x27, CC1100_PIN_ASSERT);			\
     CC1100_SET_CRC_TRUE(cc1100);					\
     cc1100->fsm_state   = CC1100_STATE_RX;				\
     cc1100->fsm_pending = CC1100_STATE_IDLE;				\
@@ -346,6 +354,7 @@
 		       ETRACER_CC1100_STARTUP,0);			\
     cc1100->fsm_timer = MACHINE_TIME_GET_NANO()				\
       + CC1100_CALIBRATE_DELAY_NS;					\
+    cc1100->fs_cal = 0;							\
   } while (0)
 
 /***************************************************/

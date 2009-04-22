@@ -224,6 +224,7 @@ void cc1100_compute_cca(struct _cc1100_t *cc1100)
   if (cc1100->fsm_state != CC1100_STATE_RX)
     {
       cc1100->registers[CC1100_REG_PKTSTATUS] &= ~(0x10);
+      return;
     }
   switch ((cc1100->registers[CC1100_REG_MCSM1] >> 4) && 0x03)
     {
@@ -261,6 +262,7 @@ void cc1100_compute_cca(struct _cc1100_t *cc1100)
       }
       break;
     }
+  return;
 } 
 
 /***************************************************/

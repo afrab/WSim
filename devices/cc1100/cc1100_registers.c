@@ -237,7 +237,7 @@ uint8_t cc1100_compute_pktstatus_register(struct _cc1100_t *cc1100)
 {
   /* CRC value */
   cc1100->registers[CC1100_REG_PKTSTATUS] = cc1100->registers[CC1100_REG_LQI] & 0x80;
-  
+ 
   /* CS */
   if (CC1100_GET_CS(cc1100)) 
     {

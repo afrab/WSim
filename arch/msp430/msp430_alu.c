@@ -1274,7 +1274,6 @@ static void msp430_mcu_run_insn()
 	    /* modes : ---  */
 	    /* cycles       */
 	    SET_CYCLES(opt1_cycles_class[opt1.src_t_mode][opt1.dst_t_mode]);
-#if defined(ETRACE)
 	    if (opt1.src_reg == opt1.dst_reg)
 	      {
 		switch (insn)
@@ -1287,7 +1286,12 @@ static void msp430_mcu_run_insn()
 		    etracer_stop();
 		    WARNING("msp430: PC:0x%04x software internal mov 5 : etracer_stop()\n",MCU_ALU.curr_pc & 0xffff); 
 		    break;
-		  case 0x4606: WARNING("msp430: PC:0x%04x software internal mov 6\n",MCU_ALU.curr_pc & 0xffff); break;
+		  case 0x4606: /* mov r6,r6 */
+		    WARNING("msp430: PC:0x%04x software internal mov 6 : MCU TRAP\n",MCU_ALU.curr_pc & 0xffff); 
+		    mcu_signal_add(SIG_MCU | SIG_MCU_TRAP);
+		    SET_CYCLES(0);
+		    return;
+
 		  case 0x4707: WARNING("msp430: PC:0x%04x software internal mov 7\n",MCU_ALU.curr_pc & 0xffff); break;
 		  case 0x4808: WARNING("msp430: PC:0x%04x software internal mov 8\n",MCU_ALU.curr_pc & 0xffff); break;
 		  case 0x4909: WARNING("msp430: PC:0x%04x software internal mov 9\n",MCU_ALU.curr_pc & 0xffff); break;
@@ -1299,7 +1303,6 @@ static void msp430_mcu_run_insn()
 		  case 0x4f0f: WARNING("msp430: PC:0x%04x software internal mov F\n",MCU_ALU.curr_pc & 0xffff); break;
 		  }
 	      }
-#endif
 	  }
           break;
 

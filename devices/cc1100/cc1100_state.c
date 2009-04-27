@@ -262,7 +262,9 @@ int cc1100_update_state_fstxon (struct _cc1100_t *cc1100) {
 int cc1100_update_state_tx (struct _cc1100_t *cc1100) {
 	if (cc1100->fsm_ustate == 5) {
 		if (MACHINE_TIME_GET_NANO() >= cc1100->fsm_timer) {
-			CC1100_IDLE_ENTER(cc1100);
+		    /* PA_PD signal go from low to high when leaving TX state */
+		    cc1100_assert_gdo(cc1100, 0x1B, CC1100_PIN_ASSERT);   
+		    CC1100_IDLE_ENTER(cc1100);
 		}
 	} else {
 		cc1100_tx(cc1100);

@@ -310,8 +310,6 @@
 #define CC1100_RX_ENTER(cc1100)						\
   do {									\
     CC1100_DBG_STATE("cc1100:state: RX (enter)\n");			\
-    /* PA_PD signal is high in RX state */				\
-    cc1100_assert_gdo(cc1100, 0x1B, CC1100_PIN_ASSERT);			\
     CC1100_SET_CRC_TRUE(cc1100);					\
     cc1100->fsm_state   = CC1100_STATE_RX;				\
     cc1100->fsm_pending = CC1100_STATE_IDLE;				\
@@ -319,6 +317,8 @@
     etracer_slot_event(ETRACER_PER_ID_CC1100,				\
 		       ETRACER_PER_EVT_MODE_CHANGED,			\
 		       ETRACER_CC1100_RX,0);				\
+    /* PA_PD signal must be high in RX state */				\
+    cc1100_assert_gdo(cc1100, 0x1B, CC1100_PIN_ASSERT);			\
     CC1100_RX_EXPECT_PREAMBLE(cc1100);					\
     CC1100_INIT_CS(cc1100);						\
     CC1100_INIT_RSSI(cc1100);						\

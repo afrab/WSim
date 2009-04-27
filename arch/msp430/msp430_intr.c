@@ -151,6 +151,7 @@ int msp430_interrupt_start_if_any(void)
 		  break;
 #endif
 
+#if defined(__msp430_have_usart0)
 		case INTR_USART0_RX:
 		  HW_DMSG_INTR("msp430:intr:   Reset USART0 rx IFG flag\n");
 		  MCU.sfr.ifg1.b.urxifg0 = 0;
@@ -159,6 +160,7 @@ int msp430_interrupt_start_if_any(void)
 		  HW_DMSG_INTR("msp430:intr:   Reset USART0 tx IFG flag\n");
 		  MCU.sfr.ifg1.b.utxifg0 = 0;
 		  break;
+#endif
 		
 #if defined(__msp430_have_usart1)
 		case INTR_USART1_RX:

@@ -854,7 +854,7 @@ In the previous code, we have \verb$#define CC2420_DBG_RX(x...)    VERBOSE(2,x)$
 
 Thus you understand that it is quite easy to add your own debug informations, if you need. You just have to define the print debugging function with its verbose level at the beginning of your file (or its associated *.h file). Then insert it with appropriate debugging message (a \verb$printf()$ function) at the right place.
 
-Notice that the \verb$wsim.log$ file name may be changed into \verb$NAMEOFYOURCHOICE.log$ by using the option \verb$--logfile=NAMEOFYOURCHOICE.log$.
+Note that the \verb$wsim.log$ file name may be changed into \verb$NAMEOFYOURCHOICE.log$ by using the option \verb$--logfile=NAMEOFYOURCHOICE.log$. Moreover WSim \verb$--logfile$ option also supports \verb$stdout$ and \verb$stdin$ redirection (for instance \verb$--logfile=stderr$).
 
 \section{ERROR() function}
 The \verb$ERROR()$ function is closed to the \verb$VERBOSE()$ function, excepted that its result is printed in the wsim.log file and in the standard error output too, that is to say the terminal you launch WSim.

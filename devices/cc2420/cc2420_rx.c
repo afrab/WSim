@@ -303,11 +303,11 @@ int cc2420_rx_check_crc(struct _cc2420_t * cc2420) {
  * swap bits within a byte
  */
 
-uint8_t swapbyte(uint8_t c) {
+uint8_t swapbits(uint8_t c,int count) {
     uint8_t result=0;
     int     i;
  
-    for(i = 0; i < 8; i++) {
+    for(i = 0; i < count; i++) {
 	result  = result << 1;
 	result |= (c & 1);
 	c = c >> 1;
@@ -324,15 +324,16 @@ int cc2420_rx_process_fcf(struct _cc2420_t * cc2420) {
 
     CC2420_DEBUG("got fcf %.2x\n", cc2420->rx_fcf);
 
-    cc2420->rx_frame_type    = CC2420_FCF_FRAME_TYPE   (cc2420->rx_fcf);
-    cc2420->rx_sec_enabled   = CC2420_FCF_SEC_ENABLED  (cc2420->rx_fcf);
-    cc2420->rx_frame_pending = CC2420_FCF_FRAME_PENDING(cc2420->rx_fcf);
-    cc2420->rx_ack_req       = CC2420_FCF_ACK_REQUEST  (cc2420->rx_fcf);
-    cc2420->rx_intra_pan     = CC2420_FCF_INTRA_PAN    (cc2420->rx_fcf);
-    cc2420->rx_dst_addr_mode = CC2420_FCF_DST_ADDR_MODE(cc2420->rx_fcf);
-    cc2420->rx_src_addr_mode = CC2420_FCF_SRC_ADDR_MODE(cc2420->rx_fcf);
+    cc2420->rx_frame_type    = swapbits( CC2420_FCF_FRAME_TYPE   (cc2420->rx_fcf), CC2420_FCF_FRAME_TYPE_LENGTH );
+    cc2420->rx_sec_enabled   = swapbits( CC2420_FCF_SEC_ENABLED  (cc2420->rx_fcf), CC2420_FCF_SEC_ENABLED_LENGTH );
+    cc2420->rx_frame_pending = swapbits( CC2420_FCF_FRAME_PENDING(cc2420->rx_fcf), CC2420_FCF_FRAME_PENDING_LENGTH );
+    cc2420->rx_ack_req       = swapbits( CC2420_FCF_ACK_REQUEST  (cc2420->rx_fcf), CC2420_FCF_ACK_REQUEST_LENGTH );
+    cc2420->rx_intra_pan     = swapbits( CC2420_FCF_INTRA_PAN    (cc2420->rx_fcf), CC2420_FCF_INTRA_PAN_LENGTH );
+    cc2420->rx_dst_addr_mode = swapbits( CC2420_FCF_DST_ADDR_MODE(cc2420->rx_fcf), CC2420_FCF_DST_ADDR_MODE_LENGTH );
+    cc2420->rx_src_addr_mode = swapbits( CC2420_FCF_SRC_ADDR_MODE(cc2420->rx_fcf), CC2420_FCF_SRC_ADDR_MODE_LENGTH );
 
     CC2420_DEBUG("ack_req is %d\n", cc2420->rx_ack_req);
+    CC2420_DEBUG("frame_type is %d\n", cc2420->rx_frame_type);
 
     /* process addressing modes to determine addresses lengths and positions */
 
@@ -415,6 +416,11 @@ void print_buf(char * msg, uint8_t * buf, uint8_t len) {
  */
 
 int cc2420_rx_check_address(struct _cc2420_t * cc2420 UNUSED) {
+
+    /* no address recognition for acknoledge frames */
+    if(cc2420->rx_frame_type == CC2420_FRAME_TYPE_ACK) {
+        return 0;
+    }
     
 //#define CC2420_RX_CHECK_ADDRESS_TEST
 #ifdef  CC2420_RX_CHECK_ADDRESS_TEST
@@ -462,17 +468,6 @@ int cc2420_rx_check_address(struct _cc2420_t * cc2420 UNUSED) {
 
     uint8_t broadcast_addr [8] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 
-    if (cc2420->rx_src_pan_len > 0) {
-	memcpy(src_pan, ptr + offset, cc2420->rx_src_pan_len);
-	offset += cc2420->rx_src_pan_len;
-	print_buf("src_pan  is ", src_pan, cc2420->rx_src_pan_len);
-    }
-
-    if (cc2420->rx_src_addr_len > 0) {
-	memcpy(src_addr, ptr + offset, cc2420->rx_src_addr_len);
-	offset += cc2420->rx_src_addr_len;
-	print_buf("src_addr is ", src_addr, cc2420->rx_src_addr_len);
-    }
 
     if (cc2420->rx_dst_pan_len > 0) {
 	memcpy(dst_pan, ptr + offset, cc2420->rx_dst_pan_len);
@@ -484,6 +479,18 @@ int cc2420_rx_check_address(struct _cc2420_t * cc2420 UNUSED) {
 	memcpy(dst_addr, ptr + offset, cc2420->rx_dst_addr_len);
 	offset += cc2420->rx_dst_addr_len;
 	print_buf("dst_addr is ", dst_addr, cc2420->rx_dst_addr_len);
+    }
+
+    if (cc2420->rx_src_pan_len > 0) {
+	memcpy(src_pan, ptr + offset, cc2420->rx_src_pan_len);
+	offset += cc2420->rx_src_pan_len;
+	print_buf("src_pan  is ", src_pan, cc2420->rx_src_pan_len);
+    }
+
+    if (cc2420->rx_src_addr_len > 0) {
+	memcpy(src_addr, ptr + offset, cc2420->rx_src_addr_len);
+	offset += cc2420->rx_src_addr_len;
+	print_buf("src_addr is ", src_addr, cc2420->rx_src_addr_len);
     }
 
     /* cf [1] p. 31, 41 and [2] p. 139 for address recognition */
@@ -514,8 +521,8 @@ int cc2420_rx_check_address(struct _cc2420_t * cc2420 UNUSED) {
             CC2420_DEBUG("dst pan id is broadcast, not checking\n");
         }
         else {
-            if (memcmp(cc2420->ram + CC2420_RAM_PANID, src_pan, 2)) {
-                CC2420_DEBUG("local pan id and dst pan id are different, dropping\n");
+            if (memcmp(cc2420->ram + CC2420_RAM_PANID, dst_pan, 2)) {
+	      CC2420_DEBUG("local pan id (%x,%x) and dst pan id (%x,%x) are different, dropping\n", *(cc2420->ram + CC2420_RAM_PANID), *(cc2420->ram + CC2420_RAM_PANID + 1), src_pan[0],src_pan[1]);
                 return -1;
             }
         }
@@ -662,35 +669,39 @@ CC2420_DEBUG("cc2420_callback_rx : entering RX Callback\n");
 	    return 0;
 	}
 
-	/* first byte of FCF */
-	/*	if (cc2420->rx_data_bytes == 2) {
-	    CC2420_DEBUG("1st byte of fcf is %.1x, swapped %.1x\n", rx, swapbyte(rx));
-	    CC2420_DEBUG("swapping byte, todo : check that it's not a bug in cc2420 in cc2420.c/com_send driver\n");
-	    cc2420->rx_fcf = swapbyte(rx);
-	    }*/
-
-	/* second byte of FCF */
-	/*if (cc2420->rx_data_bytes == 3) {
-	    CC2420_DEBUG("2nd byte of fcf is %.1x, swapped %.1x\n", rx, swapbyte(rx));
-	    cc2420->rx_fcf |= swapbyte(rx) << 8;*/
-	    /* the FCF was fully received, process it */
-	/* cc2420_rx_process_fcf(cc2420);
-	}*/
-
-	/* sequence field */
-	/*if (cc2420->rx_data_bytes == 4) {
-	    CC2420_DEBUG("seq is %d\n", rx);
-	    }*/
-
-	/* if first byte of data, set position, needed to unset FIFOP */
-      //	if (cc2420->rx_data_bytes == 4) {
-	    /* if we don't already have data bytes in RX FIFO */
-	    if (cc2420->rx_first_data_byte == -1)
-		cc2420->rx_first_data_byte = cc2420->rx_fifo_write;
-	    //	}
 
 	/* if address recognition is set, and addressing fields were received, deal with address recognition */
 	if (addr_decode) {
+
+	/* first byte of FCF */
+      	if (cc2420->rx_data_bytes == 2) {
+	  CC2420_DEBUG("1st byte of fcf is %.1x, swapped %.1x\n", rx, swapbits(rx,8));
+	    CC2420_DEBUG("swapping byte, todo : check that it's not a bug in cc2420 in cc2420.c/com_send driver\n");
+	    cc2420->rx_fcf = swapbits(rx,8);
+	    }
+
+	/* second byte of FCF */
+	if (cc2420->rx_data_bytes == 3) {
+	  CC2420_DEBUG("2nd byte of fcf is %.1x, swapped %.1x\n", rx, swapbits(rx,8));
+	  cc2420->rx_fcf = (cc2420->rx_fcf << 8) | (swapbits(rx,8)) ; //cc2420->rx_fcf |= swapbits(rx,8) << 8;
+	    /* the FCF was fully received, process it */
+	    cc2420_rx_process_fcf(cc2420);
+	}
+
+	/* sequence field */
+	if (cc2420->rx_data_bytes == 4) {
+	    CC2420_DEBUG("seq is %d\n", rx);
+	    }
+
+	/* if first byte of data, set position, needed to unset FIFOP */
+      	if (cc2420->rx_data_bytes == 4) {
+	    /* if we don't already have data bytes in RX FIFO */
+	    if (cc2420->rx_first_data_byte == -1)
+	        cc2420->rx_first_data_byte = cc2420->rx_fifo_write;
+	}
+
+
+	/* if addressing fields were received, deal with address recognition */
 	    if (cc2420->rx_data_bytes == cc2420->rx_src_addr_offset + cc2420->rx_src_addr_len) {
 		CC2420_DEBUG("got last addressing byte, data bytes is %d\n", cc2420->rx_data_bytes);
 		/* if address checking recognition fails, set flag to indicate that frame has to be flushed */
@@ -709,7 +720,8 @@ CC2420_DEBUG("cc2420_callback_rx : entering RX Callback\n");
                     }
 		}
 	    }
-	}
+	} /* End of addressing recognition part */
+
 
 	/* if we got a complete frame, (+1 for length field) */
 	if ( cc2420->rx_data_bytes == (cc2420->rx_len + 1) ) {

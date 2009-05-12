@@ -431,14 +431,17 @@ int cc2420_io_pins(struct _cc2420_t * cc2420)
 	 */
 	CC2420_DBG_ACCESS("cc2420:access: RAM Bank Select address %x\n", cc2420->SPI_addr & 0xff);
 	cc2420->ram_bank = CC2420_RAM_BANK(cc2420->SI_pin);
+	cc2420_spi_output(cc2420, 0x00); /* Send a dummy byte to the SPI */
 	if (CC2420_RAM_READ_ACCESS(cc2420->SI_pin)) 
 	  {
 	    cc2420->SI_type = CC2420_SPI_NEXT_ACCESS_TYPE_RAM_READ_BYTE;
+	    CC2420_DBG_ACCESS("cc2420:access: RAM Bank number %x, access type read\n", cc2420->ram_bank);
 	    return 0;
 	  }
 	else 
 	  {
 	    cc2420->SI_type = CC2420_SPI_NEXT_ACCESS_TYPE_RAM_WRITE_BYTE;
+	    CC2420_DBG_ACCESS("cc2420:access: RAM Bank number %x, access type write\n", cc2420->ram_bank);
 	    return 0;
 	  }
       }

@@ -490,6 +490,7 @@ void cc2420_update_state_tx_ack(struct _cc2420_t * cc2420) {
         cc2420_tx_byte(cc2420, CC2420_HIBYTE(cc2420->tx_fcs));
         cc2420->fsm_timer = MACHINE_TIME_GET_NANO() + 2 * CC2420_SYMBOL_PERIOD;
         CC2420_RX_CALIBRATE_ENTER(cc2420);
+	return;
     }
 
     /* buggy */

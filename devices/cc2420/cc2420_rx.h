@@ -58,6 +58,16 @@
 #define CC2420_FCF_DST_ADDR_MODE(x) ((x & 0x0030) >>  4)
 #define CC2420_FCF_SRC_ADDR_MODE(x) ((x & 0x0003)      )
 
+/* Length of 802.11.4 fcf fields */
+#define CC2420_FCF_FRAME_TYPE_LENGTH    3
+#define CC2420_FCF_SEC_ENABLED_LENGTH   1
+#define CC2420_FCF_FRAME_PENDING_LENGTH 1
+#define CC2420_FCF_ACK_REQUEST_LENGTH   1
+#define CC2420_FCF_INTRA_PAN_LENGTH     1
+#define CC2420_FCF_DST_ADDR_MODE_LENGTH 2
+#define CC2420_FCF_SRC_ADDR_MODE_LENGTH 2
+
+
 /**
  * update rssi values and update cca
  */

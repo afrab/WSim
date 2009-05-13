@@ -31,9 +31,8 @@ tracer_id_t TRACER_M25P_STROBE;
 /***************************************************/
 /***************************************************/
 
-#undef DEBUG
 #ifdef DEBUG
-#define MSG_DEVICES       2
+#define MSG_DEVICES       4
 #define DEBUG_ME_HARDER
 #define HW_DMSG_M25(x...) VERBOSE(MSG_DEVICES,x)
 #else
@@ -708,7 +707,12 @@ void m25p_read(int dev, uint32_t *mask, uint32_t *value)
 				     ETRACER_PER_ARG_WR_SRC | ETRACER_ACCESS_LVL_SPI1, 0);
 		}
 	      break;
-	      
+
+	    case M25P_OP_PP:
+	      *mask  = M25P_D;
+	      *value = 0;
+	      break;
+
 	    default:
 	      HW_DMSG_M25(M25PNAME ": unknown command 0x%x, read dummy in write response\n",M25P_DATA->command & 0xff);
 	      *mask  = M25P_D;
@@ -743,7 +747,7 @@ void m25p_read(int dev, uint32_t *mask, uint32_t *value)
 
   if (*mask != 0)
     {
-      HW_DMSG_M25(M25PNAME ":    m25 --> mcu [val=0x%02x,mask=0x%04x] \n", *value, *mask);
+      HW_DMSG_M25(M25PNAME ": m25 --> mcu [val=0x%02x,mask=0x%04x] \n", *value, *mask);
     }
 
 }
@@ -1041,8 +1045,8 @@ void m25p_write_spidata(int dev, uint32_t UNUSED mask, uint32_t value)
 		  uint16_t page_offset;
 		  page_index  = M25P_DATA->command_pointer / M25P_PAGE_SIZE;
 		  page_offset = M25P_DATA->command_pointer % M25P_PAGE_SIZE;
-		  HW_DMSG_M25(M25PNAME ":    page program (linear=%x, page %x, offset %x)\n",
-			      M25P_DATA->command_pointer, page_index, page_offset);
+		  HW_DMSG_M25(M25PNAME ":    page program (linear=%x, page %x, offset %x) = 0x%x\n",
+			      M25P_DATA->command_pointer, page_index, page_offset, M25P_DATA->data_buffer & 0xff);
 		  M25P_MEMPAGE[page_index][page_offset] &= M25P_DATA->data_buffer;
 		  page_offset ++;
 		  if (page_offset == M25P_PAGE_SIZE)

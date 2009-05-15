@@ -459,6 +459,7 @@ void cc2420_update_state_tx_ack(struct _cc2420_t * cc2420) {
         cc2420_tx_byte(cc2420, fc1);
         cc2420->fsm_timer = MACHINE_TIME_GET_NANO() + 2 * CC2420_SYMBOL_PERIOD;
         cc2420->tx_bytes ++;    
+	return;
     }
 
     /* 2nd byte of FC */
@@ -466,6 +467,7 @@ void cc2420_update_state_tx_ack(struct _cc2420_t * cc2420) {
         cc2420_tx_byte(cc2420, fc2);
         cc2420->fsm_timer = MACHINE_TIME_GET_NANO() + 2 * CC2420_SYMBOL_PERIOD;
         cc2420->tx_bytes ++;
+	return;
     }
 
     /* seq number */
@@ -473,6 +475,7 @@ void cc2420_update_state_tx_ack(struct _cc2420_t * cc2420) {
         cc2420_tx_byte(cc2420, cc2420->rx_sequence);
         cc2420->fsm_timer = MACHINE_TIME_GET_NANO() + 2 * CC2420_SYMBOL_PERIOD;
         cc2420->tx_bytes ++;
+	return;
     }
 
     /* 1st byte of fcs */
@@ -483,6 +486,7 @@ void cc2420_update_state_tx_ack(struct _cc2420_t * cc2420) {
         cc2420_tx_byte(cc2420, CC2420_LOBYTE(cc2420->tx_fcs));
         cc2420->fsm_timer = MACHINE_TIME_GET_NANO() + 2 * CC2420_SYMBOL_PERIOD;
         cc2420->tx_bytes ++;
+	return;
     }
     
     /* 2nd byte of fcs */

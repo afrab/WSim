@@ -41,22 +41,20 @@ struct spidev_t
 {
 
   uint8_t select_bit;           /* chip select   */
-  uint8_t hold_bit;             /* hold          */
   uint8_t write_protect_bit;    /* write protect */
 
   /* data just written */
-  uint8_t data_buffer;
-  uint8_t data_buffer_ok;
+  uint32_t data_w_val;
+  uint32_t data_w_mask;
+  uint8_t  data_w_ready;
 
   /* data to be read */
-  uint8_t data_ready;
-  uint8_t data_val;
+  uint8_t  data_r_ready;        /* boolean */
+  uint32_t data_r_mask;         /* mask    */
+  uint32_t data_r_val;          /* value   */
   
   /* busy timing */
-  uint64_t end_of_busy_time;
-
-  /* clock pin : unused */
-  uint8_t clock;
+  uint64_t end_of_busy_time;    /* nano second */
 };
 
 #define SPIDEV_DATA        ((struct spidev_t*)(machine.device[dev].data))
@@ -136,8 +134,8 @@ int spidev_device_create(int dev, int UNUSED id)
   HW_DMSG_SPI(NAME ": =================================== \n");
 #endif
 
-  TRACER_SPIDEV_STATE  = tracer_event_add_id(8, "state"    , NAME);
-  TRACER_SPIDEV_STROBE = tracer_event_add_id(8, "function" , NAME);
+  TRACER_SPIDEV_STATE  = tracer_event_add_id(8, "state"  , NAME);
+  TRACER_SPIDEV_STROBE = tracer_event_add_id(8, "strobe" , NAME);
 
   return 0;
 }
@@ -191,7 +189,7 @@ void spidev_read(int UNUSED dev, uint32_t *mask, uint32_t *value)
 {
   *mask  = 0;
   *value = 0;
-  
+
   if (*mask != 0)
     {
       HW_DMSG_SPI(NAME ": device write to mcu [val=0x%02x,mask=0x%04x] \n", *value, *mask);
@@ -224,7 +222,7 @@ void spidev_write(int dev, uint32_t mask, uint32_t value)
     {
       ERROR(NAME ":    clock pin should not be used during simulation\n");
       HW_DMSG_SPI(NAME ":    clock pin should not be used during simulation\n");
-      SPIDEV_DATA->clock = (value >> SPIDEV_C_SHIFT) & 0x1;
+      // SPIDEV_DATA->clock = (value >> SPIDEV_C_SHIFT) & 0x1;
     }
 }
 

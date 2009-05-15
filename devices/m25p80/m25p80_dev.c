@@ -17,7 +17,9 @@
 /***************************************************/
 /***************************************************/
 
-#if defined(BUILD_M25P80)
+#if defined(BUILD_M25P64)
+#  define M25PNAME      "m25p64"
+#elif defined(BUILD_M25P80)
 #  define M25PNAME      "m25p80"
 #elif defined(BUILD_M25P10)
 #  define M25PNAME      "m25p10"
@@ -32,8 +34,9 @@ tracer_id_t TRACER_M25P_STROBE;
 /***************************************************/
 
 #ifdef DEBUG
-#define MSG_DEVICES       4
+#define MSG_DEVICES       6
 #define DEBUG_ME_HARDER
+//#define DEBUG_ME_HARDER_2
 #define HW_DMSG_M25(x...) VERBOSE(MSG_DEVICES,x)
 #else
 #define HW_DMSG_M25(x...) do {} while(0)
@@ -1183,8 +1186,8 @@ void m25p_write(int dev, uint32_t mask, uint32_t value)
 	}
       else
 	{
-#if defined(DEBUG_ME_HARDER)
-	  /* debug removed for shared Usart SPI */
+#if defined(DEBUG_ME_HARDER_2)
+	  /* debug removed for shared SPI bus */
 	  if (M25P_DATA->hold_bit == 1)
 	    {
 	      ERROR(M25PNAME ":    write data [val=0x%02x,mask=0x%04x] during hold\n",value & M25P_D,mask);

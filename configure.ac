@@ -5,14 +5,14 @@ dnl configure.ac for Worldsens architecture simulator
 dnl works only for automake 1.10 and above 
 dnl lower versions will have problem with bzero prototype replacement
 dnl --------------------------------------------------------------
-AC_INIT([wsim],[0.99.1svn])
+AC_INIT([wsim],[0.99.5svn])
 AC_CONFIG_SRCDIR(src/main.c)
 AC_CANONICAL_TARGET
 AM_INIT_AUTOMAKE
 AC_CONFIG_HEADERS([config.h])
 
-AC_DEFINE(WSIM_BUILD_ID,          56  , [build id]   )
-AC_DEFINE(WSIM_BUILD_DATE, "05022009" , [build date] )
+AC_DEFINE(WSIM_BUILD_ID,          80  , [build id]   )
+AC_DEFINE(WSIM_BUILD_DATE, "15052009" , [build date] )
  
 dnl --------------------------------------------------------------
 dnl Checks for programs.

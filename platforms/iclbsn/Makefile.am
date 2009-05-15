@@ -1,8 +1,8 @@
 if BUILD_ICLBSN
 
-bin_PROGRAMS=wsim-iclbsn wsim-iclbsn2
+bin_PROGRAMS=wsim-iclbsn wsim-iclbsn2 wsim-iclbsn3
 if BUILD_WORLDSENS
-bin_PROGRAMS+=worldsens-iclbsn worldsens-iclbsn2
+bin_PROGRAMS+=worldsens-iclbsn worldsens-iclbsn2 worldsens-iclbsn3
 endif
 
 INCLUDES=-I$(top_srcdir)
@@ -34,5 +34,14 @@ wsim_iclbsn2_LDADD=${ICLBSN_DEV} ${WSIMADD} ${ICLBSN_MCU2}
 worldsens_iclbsn2_CFLAGS=-DMSP430f1611 -DBSN2
 worldsens_iclbsn2_SOURCES=iclbsn.c
 worldsens_iclbsn2_LDADD=${ICLBSN_DEV} ${WSIMADD_WORLDSENS} ${ICLBSN_MCU2}
+
+## v3: msp430f1611 + SFD on P2.3
+wsim_iclbsn3_CFLAGS=-DMSP430f1611 -DBSN2 -DBSN3
+wsim_iclbsn3_SOURCES=iclbsn.c
+wsim_iclbsn3_LDADD=${ICLBSN_DEV} ${WSIMADD} ${ICLBSN_MCU2}
+
+worldsens_iclbsn3_CFLAGS=-DMSP430f1611 -DBSN2 -DBSN3
+worldsens_iclbsn3_SOURCES=iclbsn.c
+worldsens_iclbsn3_LDADD=${ICLBSN_DEV} ${WSIMADD_WORLDSENS} ${ICLBSN_MCU2}
 
 endif

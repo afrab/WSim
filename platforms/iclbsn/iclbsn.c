@@ -547,9 +547,12 @@ int devices_update()
 	etracer_slot_access(0x0, 1, ETRACER_ACCESS_READ, ETRACER_ACCESS_BYTE, ETRACER_ACCESS_LVL_SPI0, 0);
       }
 
-    if (mask & CC2420_SFD_MASK)   /* P4.1 mcu::SFD     */
+    if (mask & CC2420_SFD_MASK)   /* P4.1 + P2.3 mcu::SFD     */
       { 
 	msp430_digiIO_dev_write(PORT4, (value & CC2420_SFD_MASK)   ? 0x02 : 0x00, 0x02);
+#if defined(BSN3)
+	msp430_digiIO_dev_write(PORT2, (value & CC2420_SFD_MASK)   ? 0x08 : 0x00, 0x08);
+#endif
 	etracer_slot_access(0x0, 1, ETRACER_ACCESS_READ, ETRACER_ACCESS_BIT, ETRACER_ACCESS_LVL_GPIO, 0);
       }
     if (mask & CC2420_FIFOP_MASK) /* P1.0 mcu::PKT_INT */

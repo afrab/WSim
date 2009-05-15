@@ -32,7 +32,7 @@ struct _model_propagation {
 struct _model_interference {
   char key [MODEL_NAME_LEN]; 
   int (* interference_instantiate) (FILE * config_fd);
-  double (* interference_correlation) (double mW, int radio0, int radio1);
+  double (* interference_correlation) (double mW, int freq0, int freq1);
   int (* interference_complete)       (void);
 
   struct _model_interference * next; 

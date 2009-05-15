@@ -92,6 +92,25 @@ htonll (uint64_t v)
 /**************************************************************************/
 /**************************************************************************/
 
+void worldsens_packet_dump(char UNUSED *msg, char UNUSED *pkt, int UNUSED size)
+{
+  /*
+  int i;
+  //  WSNET_S_DBG_DBG ("WSNET:: %s start ================================\n", msg);
+  WSNET_S_DBG_DBG ("WSNET::%s ", msg);
+  for(i=0;i<size; i++)
+    {
+      WSNET_S_DBG_DBG ("%02x:",pkt[i] & 0xff);
+    }
+  WSNET_S_DBG_DBG ("\n");
+  // WSNET_S_DBG_DBG ("WSNET:: %s stop  ================================\n", msg);
+  */
+}
+
+/**************************************************************************/
+/**************************************************************************/
+/**************************************************************************/
+
 int
 worldsens_s_sendto(struct _worldsens_s *worldsens, char *pkt, int size, struct sockaddr_in *addr)
 {
@@ -107,7 +126,7 @@ worldsens_s_sendto(struct _worldsens_s *worldsens, char *pkt, int size, struct s
 	  worldsens->mfd = -1;
 	  return -1;
 	}
-      
+      worldsens_packet_dump("send",pkt,size);
       tracer_event_record(worldsens->trc_mcast_tx, pkt[0]);
     }
   return 0;
@@ -130,6 +149,7 @@ worldsens_s_recvfrom(struct _worldsens_s *worldsens, char *pkt, int sizemax, str
       return -1;
     }
 
+  worldsens_packet_dump("recv",pkt,len);
   tracer_event_record(worldsens->trc_mcast_rx, pkt[0]);
   return len;
 }
@@ -201,8 +221,7 @@ worldsens_s_connect (struct _worldsens_s *worldsens, struct sockaddr_in *addr,
     (struct _worldsens_c_connect_pkt *) msg;
   int pktlength = sizeof (struct _worldsens_s_connect_pkt);
 
-  WSNET_S_DBG_DBG ("WSNET (%" PRId64 "): --> CONNECT (ip: %d)\n", g_time,
-		   ntohl (c_pkt->node));
+  WSNET_S_DBG_DBG ("WSNET:: <-- CONNECT (ip: %d)\n", ntohl (c_pkt->node));
 
   if (node_create (ntohl (c_pkt->node)))
     {
@@ -227,14 +246,14 @@ worldsens_s_connect (struct _worldsens_s *worldsens, struct sockaddr_in *addr,
 	  return -1;
 	}
       */
-      WSNET_S_DBG_EXC ("WSNET (%" PRId64 "): <-- NOATTRADDR\n", g_time);
+      WSNET_S_DBG_EXC ("WSNET:: --> NOATTRADDR\n");
       return 0;
     }
 
   /* Forge */
   s_pkt.type    = WORLDSENS_S_ATTRADDR;
   s_pkt.pkt_seq = htonl (pkt_seq);
-  s_pkt.period  = htonll (worldsens->rp - g_time);
+  s_pkt.period  = htonll (worldsens->rp - get_global_time());
   s_pkt.rp_seq  = htonl (worldsens->rp_seq);
   pktlength     = sizeof(s_pkt);
 
@@ -257,11 +276,10 @@ worldsens_s_connect (struct _worldsens_s *worldsens, struct sockaddr_in *addr,
     }
   */
 
-  WSNET_S_DBG_DBG ("WSNET (%" PRId64 ", %d): <-- ATTRADDR (ip: %d)\n",
-		   g_time, ntohl (s_pkt.pkt_seq), ntohl (c_pkt->node));
-  WSNET_S_DBG_DBG ("WSNET (%" PRId64 ", %d): <-- RP (seq: %d, period: %"
-		   PRId64 ")\n", g_time, pkt_seq, worldsens->rp_seq,
-		   worldsens->rp - g_time);
+  WSNET_S_DBG_DBG ("WSNET:: --> ATTRADDR (seq: %d, ip: %d)\n",
+		   ntohl (s_pkt.pkt_seq), ntohl (c_pkt->node));
+  WSNET_S_DBG_DBG ("WSNET:: --> RP (seq: %d, rp_seq: %d, period: %"PRId64 ")\n", 
+		   pkt_seq, worldsens->rp_seq, worldsens->rp - get_global_time());
   return 0;
 }
 
@@ -276,8 +294,7 @@ worldsens_s_disconnect (struct _worldsens_s UNUSED * worldsens,
 {
   struct _worldsens_c_disconnect_pkt *pkt =
     (struct _worldsens_c_disconnect_pkt *) msg;
-  WSNET_S_DBG_DBG ("WSNET (%" PRId64 ", -1): --> DISCONNECT (ip: %d)\n",
-		   g_time, ntohl (pkt->node));
+  WSNET_S_DBG_DBG ("WSNET:: <-- DISCONNECT (ip: %d)\n", ntohl (pkt->node));
   return node_delete (ntohl (pkt->node));
 }
 
@@ -304,20 +321,9 @@ worldsens_s_listen_to_next_rp (struct _worldsens_s *worldsens)
 	  return -1;
 	}
             
-      /*            
-      socklen_t addrlen;
-      addrlen = sizeof (addr);
-      if ((len =
-	   recvfrom (worldsens->mfd, msg, WORLDSENS_MAX_PKTLENGTH, 0,
-		     (struct sockaddr *) &addr, &addrlen)) <= 0)
-	{
-	  perror ("worldsens_s_listen_to_next_rp (recvfrom)");
-	  close (worldsens->mfd);
-	  return -1;
-	}
-      */
-
-      /* Disconnect */
+      /*****************/
+      /* Disconnect    */
+      /*****************/
       if (msg[0] & WORLDSENS_C_DISCONNECT)
 	{
 	  if (worldsens_s_disconnect (worldsens, &addr, msg, len))
@@ -329,14 +335,14 @@ worldsens_s_listen_to_next_rp (struct _worldsens_s *worldsens)
 	  /* Synched */
 	  if (worldsens->synched == g_c_nodes)
 	    {
-	      g_time = worldsens->rp;
-	      WSNET_S_DBG_DBG ("WSNET (%" PRId64 "): === TIME (seq: %d)\n",
-			       g_time, worldsens->rp_seq);
+	      set_global_time( worldsens->rp );
 	      return 0;
 	    }
 	}
 
-      /* Connect */
+      /*****************/
+      /* Connect       */
+      /*****************/
       if (msg[0] & WORLDSENS_C_CONNECT)
 	{
 	  if (worldsens_s_connect (worldsens, &addr, msg, len))
@@ -346,7 +352,9 @@ worldsens_s_listen_to_next_rp (struct _worldsens_s *worldsens)
 	  continue;
 	}
 
-      /* Sync */
+      /*****************/
+      /* Sync          */
+      /*****************/
       if (msg[0] & WORLDSENS_C_SYNCHED)
 	{
 	  struct _worldsens_c_synched_pkt *c_pkt =
@@ -361,35 +369,31 @@ worldsens_s_listen_to_next_rp (struct _worldsens_s *worldsens)
 	      continue;
 	    }
 
-	  WSNET_S_DBG_DBG ("WSNET (%" PRId64 "): --> SYN  (seq: %d)\n",
-			   g_time, worldsens->rp_seq);
+	  WSNET_S_DBG_DBG ("WSNET:: <-- SYN  (seq: %d)\n",  worldsens->rp_seq);
 
 	  /* Synched */
 	  if (worldsens->synched == g_c_nodes)
 	    {
-	      g_time = worldsens->rp;
-	      WSNET_S_DBG_DBG ("WSNET (%" PRId64 "): === TIME (seq: %d)\n",
-			       g_time, worldsens->rp_seq);
+	      set_global_time( worldsens->rp );
 	      return 0;
 	    }
 	}
 
-      /* Tx */
+      /*****************/
+      /* Tx            */
+      /*****************/
       if (msg[0] & WORLDSENS_C_TX)
 	{
 	  struct _worldsens_c_tx_pkt *pkt =
 	    (struct _worldsens_c_tx_pkt *) msg;
 	  struct _node *node = &g_nodes[ntohl (pkt->node)];
 
-	  if ((g_time + ntohll (pkt->period)) > worldsens->rp)
+	  if ((get_global_time() + ntohll (pkt->period)) > worldsens->rp)
 	    {
 
 	      /* Unsynchronized  */
-	      WSNET_S_DBG_EXC ("WSNET (%" PRId64
-			       ", -1): --> Deprecetated tx (time: %" PRId64
-			       ", rp: %" PRId64 ")\n", g_time,
-			       (g_time + ntohll (pkt->period)),
-			       worldsens->rp);
+	      WSNET_S_DBG_EXC ("WSNET:: <-- Deprecetated tx (time: %"PRId64", current rp: %"PRId64")\n", 
+			       (get_global_time() + ntohll (pkt->period)), worldsens->rp);
 	      continue;
 
 	    }
@@ -405,10 +409,8 @@ worldsens_s_listen_to_next_rp (struct _worldsens_s *worldsens)
 		      && (p_loop->seq == ntohl (pkt->pkt_seq)))
 		    {
 		      /* Retransmission */
-		      WSNET_S_DBG_EXC ("WSNET (%" PRId64
-				       ", -1): -->  Retransmit tx (ip: %d, seq: %d)\n",
-				       g_time, node->addr,
-				       ntohl (pkt->pkt_seq));
+		      WSNET_S_DBG_EXC ("WSNET:: <--  Retransmit tx (ip: %d, seq: %d)\n",
+				       node->addr, ntohl (pkt->pkt_seq));
 		      drop = 1;
 		      break;
 		    }
@@ -429,29 +431,25 @@ worldsens_s_listen_to_next_rp (struct _worldsens_s *worldsens)
 	      packet->x = node->x;
 	      packet->y = node->y;
 	      packet->z = node->z;
-	      packet->radio = ntohl (pkt->frequency);
+	      packet->freq = ntohl (pkt->frequency);
 	      packet->modulation = ntohl (pkt->modulation);
 	      packet->tx_mW = ntohll (pkt->tx_mW);
 	      packet->seq = ntohl (pkt->pkt_seq);
-	      packet->tx_start = g_time + ntohll (pkt->period);
+	      packet->tx_start = get_global_time() + ntohll (pkt->period);
 	      packet->tx_end = packet->tx_start + ntohll (pkt->duration);
 
-	      WSNET_S_DBG_DBG ("WSNET (%" PRId64
-			       ", %d): --> TX (ip: %d, data: 0x%x, freq: %ud, mod: %d, tx_mW: %lf)\n", packet->tx_start, packet->seq,
-			       node->addr, packet->data[0] & 0xff,
-			       (unsigned)packet->radio, packet->modulation, packet->tx_mW);
+	      {
+		int iii;
+		WSNET_S_DBG_DBG ("WSNET:: <-- TX (%"PRId64",%d) (ip:%d,size:%d,data:",
+				 packet->tx_start, packet->seq, node->addr,packet->size);
+		for(iii=0; iii<packet->size; iii++)
+		  {
+		    WSNET_S_DBG_DBG("%02x:", packet->data[ iii ] & 0xff);
+		  }
+		WSNET_S_DBG_DBG (",freq:%gMHz,mod:%d,tx:%lgmW)\n",
+			       (unsigned)packet->freq / 1000000.0, packet->modulation, packet->tx_mW);
+	      }
 
-	      /*
-	      WSNET_S_DBG_DBG ("WSNET (%" PRId64
-			       ", %d): --> TX (ip: %d, data: 0x%x, freq: %ud, mod: %d, tx_mW: %lf, duration: %"
-			       PRId64 ", end: %" PRId64 ", period: %" PRId64
-			       ")\n", packet->tx_start, packet->seq,
-			       node->addr, packet->data[0] & 0xff,
-			       (unsigned)packet->radio, packet->modulation,
-			       packet->tx_mW,
-			       packet->tx_end - packet->tx_start,
-			       packet->tx_end, packet->tx_start - g_time);
-	      */
 	      /* Create event */
 	      if (core_add_packet (packet))
 		return -1;
@@ -460,7 +458,7 @@ worldsens_s_listen_to_next_rp (struct _worldsens_s *worldsens)
 		{
 		  /* Need backtrack and RP */
 		  if (worldsens_s_backtrack_async
-		      (worldsens, packet->tx_end - g_time))
+		      (worldsens, packet->tx_end - get_global_time()))
 		    {
 		      return -1;
 		    }
@@ -485,7 +483,7 @@ worldsens_s_backtrack_async (struct _worldsens_s *worldsens, uint64_t period)
 
   /* Update */
   worldsens->rp_seq++;
-  worldsens->rp = g_time + period;
+  worldsens->rp = get_global_time() + period;
   worldsens->synched = 0;
   if (core_backtrack (worldsens->rp))
     {
@@ -518,11 +516,9 @@ worldsens_s_backtrack_async (struct _worldsens_s *worldsens, uint64_t period)
     }
   */
 
-  WSNET_S_DBG_EXC ("WSNET (%" PRId64 ", %d): <-- BACKTRACK\n",
-		   g_time, pkt_seq - 1);
-  WSNET_S_DBG_EXC ("WSNET (%" PRId64 ", %d): <-- RP (seq: %d, period: %"
-		   PRId64 ", rp: %" PRId64 ")\n", g_time, pkt_seq - 1,
-		   worldsens->rp_seq, period, worldsens->rp);
+  WSNET_S_DBG_EXC ("WSNET:: --> (seq: %d) BACKTRACK \n", pkt_seq - 1);
+  WSNET_S_DBG_EXC ("WSNET:: --> (seq: %d) RP (seq: %d, period: %"PRId64", rp: %"PRId64")\n", 
+		   pkt_seq - 1, worldsens->rp_seq, period, worldsens->rp);
   return 0;
 }
 
@@ -540,7 +536,7 @@ worldsens_s_save_release_request (struct _worldsens_s *worldsens,
   int pktlength = sizeof(pkt);
 
   /* Update */
-  worldsens->rp = g_time + period;
+  worldsens->rp = get_global_time() + period;
   worldsens->synched = 0;
 
   /* Forge */
@@ -557,25 +553,8 @@ worldsens_s_save_release_request (struct _worldsens_s *worldsens,
       return -1;
     }
 
-  /*
-  if (sendto
-      (worldsens->mfd, (char *) (&pkt),
-       sizeof (struct _worldsens_s_saverel_pkt), 0,
-       (struct sockaddr *) &worldsens->maddr,
-       sizeof (struct sockaddr_in)) <
-      (int) sizeof (struct _worldsens_s_saverel_pkt))
-    {
-      perror ("worldsens_s_save_release_request (sendto)");
-      close (worldsens->mfd);
-      return -1;
-    }
-  */
-
-  WSNET_S_DBG_EXC ("WSNET (%" PRId64 ", %d): <-- SAVE\n",
-		   g_time, pkt_seq - 1);
-  WSNET_S_DBG_EXC ("WSNET (%" PRId64 ", %d): <-- RP (seq: %d, period: %"
-		   PRId64 ", rp: %" PRId64 ")\n", g_time, pkt_seq - 1,
-		   worldsens->rp_seq, period, worldsens->rp);
+  WSNET_S_DBG_EXC ("WSNET:: --> (seq:%d) SAVE + RP (seq: %d, period: %"PRId64", rp: %"PRId64")\n", 
+		   pkt_seq - 1, worldsens->rp_seq, period, worldsens->rp);
   return 0;
 }
 
@@ -585,7 +564,7 @@ worldsens_s_save_release_request (struct _worldsens_s *worldsens,
 /**************************************************************************/
 int
 worldsens_s_save_release_request_rx (struct _worldsens_s *worldsens, int node,
-				     int radio, int modulation,
+				     int freq, int modulation,
 				     struct _worldsens_data *data,
 				     uint64_t period)
 {
@@ -598,7 +577,7 @@ worldsens_s_save_release_request_rx (struct _worldsens_s *worldsens, int node,
 
 
   /* Update */
-  worldsens->rp = g_time + period;
+  worldsens->rp = get_global_time() + period;
   worldsens->synched = 0;
 
   /* Forge */
@@ -612,7 +591,7 @@ worldsens_s_save_release_request_rx (struct _worldsens_s *worldsens, int node,
   pkt->n_rp_seq   = htonl  (worldsens->rp_seq);
   pkt->size       = htonl  (length);
   pkt->node       = htonl  (node);
-  pkt->frequency  = htonl  (radio);
+  pkt->frequency  = htonl  (freq);
   pkt->modulation = htonl  (modulation);
 
   /* Send */
@@ -620,24 +599,11 @@ worldsens_s_save_release_request_rx (struct _worldsens_s *worldsens, int node,
     {
       return -1;
     }
-  /*
-  if (sendto
-      (worldsens->mfd, reply, length, 0, (struct sockaddr *) &worldsens->maddr,
-       sizeof (struct sockaddr_in)) < length)
-    {
-      perror ("worldsens_s_release__request_rx (sendto)");
-      close (worldsens->mfd);
-      return -1;
-    }
-  */
-  WSNET_S_DBG_EXC ("WSNET (%" PRId64 ", %d): <-- SAVE\n", g_time,
-		   pkt_seq - 1);
-  WSNET_S_DBG_EXC ("WSNET (%" PRId64 ", %d): <-- RP (seq: %d, period: %"
-		   PRId64 ", rp: %" PRId64 ")\n", g_time, pkt_seq - 1,
-		   worldsens->rp_seq, period, worldsens->rp);
-  WSNET_S_DBG_EXC ("WSNET (%" PRId64
-		   ", -1): <-- RX (ip: %d, frequency: %d, modulation: %d)\n",
-		   g_time, node, radio, modulation);
+
+  WSNET_S_DBG_EXC ("WSNET:: --> (seq: %d) SAVE + RP (seq: %d, period: %"PRId64", rp: %"PRId64")\n",
+		   pkt_seq - 1, worldsens->rp_seq, period, worldsens->rp);
+  WSNET_S_DBG_EXC ("WSNET:: --> RX (ip:%d, freq:%gMHz, modul: %d)\n", 
+		   node, (unsigned)freq / 1000000.0, modulation);
   return 0;
 }
 
@@ -652,7 +618,7 @@ worldsens_s_save_release_request_rx (struct _worldsens_s *worldsens, int node,
  */
 
 int
-worldsens_s_rx (struct _worldsens_s *worldsens, int node, int radio,
+worldsens_s_rx (struct _worldsens_s *worldsens, int node, int freq,
 		int modulation, struct _worldsens_data *data)
 {
   int length =
@@ -670,7 +636,7 @@ worldsens_s_rx (struct _worldsens_s *worldsens, int node, int radio,
   pkt->pkt_seq    = htonl (pkt_seq++);
   pkt->size       = htonl (length);
   pkt->node       = htonl (node);
-  pkt->frequency  = htonl (radio);
+  pkt->frequency  = htonl (freq);
   pkt->modulation = htonl (modulation);
 
   /* Multicast Send */
@@ -678,20 +644,9 @@ worldsens_s_rx (struct _worldsens_s *worldsens, int node, int radio,
     {
       return -1;
     }
-  /*
-  if (sendto
-      (worldsens->mfd, reply, length, 0, (struct sockaddr *) &worldsens->maddr,
-       sizeof (struct sockaddr_in)) < length)
-    {
-      perror ("worldsens_s_rx (sendto)");
-      close (worldsens->mfd);
-      return -1;
-    }
-  */
 
-  WSNET_S_DBG_EXC ("WSNET (%" PRId64
-		   ", -1): <-- RX (ip: %d, frequency: %d, modulation: %d)\n",
-		   g_time, node, radio, modulation);
+  WSNET_S_DBG_EXC ("WSNET:: --> RX (ip: %d, size:%d, freq:%gMHz, modul:%d)\n", 
+		   node, length, (unsigned)freq / 1000000.0, modulation);
   return 0;
 }
 

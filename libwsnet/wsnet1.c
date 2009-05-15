@@ -454,15 +454,6 @@ int worldsens_c_tx(struct wsnet_tx_info *info)
       return -1;
     }
 
-  /*
-  WSNET_TX("WSNet:tx:(%"PRIu64", %d): --> TX (data: 0x%02x, freq: %dHz, mod: %d ," \
-	   "tx_dBm: %lf, duration: %"PRIu64", end: %"PRIu64", period: %"PRIu64")\n", 
-	   MACHINE_TIME_GET_NANO(), WSENS_SEQ_PKT_TX, 
-	   data & 0xff, frequency, modulation, tx_dBm, duration, 
-	   MACHINE_TIME_GET_NANO() + duration, 
-	   MACHINE_TIME_GET_NANO() - WSENS_RDV_LAST_TIME);
-  */
-
   WSENS_SEQ_PKT_TX ++;
 				
   /* Wait */
@@ -867,11 +858,11 @@ static int64_t worldsens_packet_parse_data(char *msg, int UNUSED pkt_seq, int UN
       if (ntohl(data->node) == (unsigned)WSENS_MYADDR) 
 	{
 	  struct wsnet_rx_info info;
-	  WSNET_RX("WSNET (%"PRIu64", %d): <-- RX src=%d[%d] (data: [0x%02x,%c], freq: %dHz, mod: %d, rx: %lfdBm, SiNR: %lf)\n",
+	  WSNET_RX("WSNET (%"PRIu64", %d): <-- RX src=%d[%d] (data: [0x%02x,%c], freq: %gMHz, mod: %d, rx: %lgdBm, SiNR: %lg)\n",
 		   MACHINE_TIME_GET_NANO(), pkt_seq, 
 		   /* RX_line[c_node] */ line, c_node,
 		   data->data & 0xff, isprint(data->data & 0xff ) ? data->data & 0xff : '.',
-		   ntohl(pkt->frequency), 
+		   ntohl(pkt->frequency) / 1000000.0f, 
 		   ntohl(pkt->modulation), 
 		   ntohdbl(data->rx_dBm), 
 		   ntohdbl(data->SiNR));
@@ -1176,7 +1167,7 @@ static void worldsens_packet_dump_send(char *msg, int len)
 	VERBOSE(VLVL,"WSNet:pkt:%s:   node       %d\n",          prfx, ntohl (pkt->node)     );
 	VERBOSE(VLVL,"WSNet:pkt:%s:   period     %"PRIu64"ns\n", prfx, ntohll(pkt->period)   );
 	VERBOSE(VLVL,"WSNet:pkt:%s:   duration   %"PRIu64"ns\n", prfx, ntohll(pkt->duration) );
-	VERBOSE(VLVL,"WSNet:pkt:%s:   freq       %d Hz\n",       prfx, ntohl (pkt->frequency));
+	VERBOSE(VLVL,"WSNet:pkt:%s:   freq       %g MHz\n",      prfx, ntohl (pkt->frequency) / 1000000.0);
 	VERBOSE(VLVL,"WSNet:pkt:%s:   modulation %s (%d)\n",     prfx, 
 		wsnet_modulation_name(ntohl(pkt->modulation)), 
 		ntohl(pkt->modulation));
@@ -1257,7 +1248,7 @@ static void worldsens_packet_dump_recv(char *msg, int len)
 	struct _worldsens_s_srrx_pkt *pkt = (struct _worldsens_s_srrx_pkt *)msg; 
 	VERBOSE(VLVL,"WSNet:pkt:%s:   size       %d\n",        prfx, ntohl(pkt->size));
 	VERBOSE(VLVL,"WSNet:pkt:%s:   node       %d\n",        prfx, ntohl(pkt->node));
-	VERBOSE(VLVL,"WSNet:pkt:%s:   frequency  %dHz\n",      prfx, ntohl(pkt->frequency));
+	VERBOSE(VLVL,"WSNet:pkt:%s:   frequency  %g MHz\n",    prfx, ntohl(pkt->frequency) / 1000000.0f);
 	VERBOSE(VLVL,"WSNet:pkt:%s:   modulation %s (%d)\n",   prfx, 
 		wsnet_modulation_name(ntohl(pkt->modulation)), 
 		ntohl(pkt->modulation));

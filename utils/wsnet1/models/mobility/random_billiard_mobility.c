@@ -80,7 +80,7 @@ int random_billiard_mobility_update(struct _node * node)
   struct  _random_billiard_mobility_private * private = 
     (struct  _random_billiard_mobility_private *) node->mobility_private;
 
-  while  (private->last_update < g_time) {
+  while  (private->last_update < get_global_time()) {
 		
     double t_0, t_1 = -1, t_2 = -1, t_3 = -1, t_4 = -1;
 		
@@ -91,7 +91,7 @@ int random_billiard_mobility_update(struct _node * node)
     t_3 = (0 - node->y) / (private->speed * sin(private->direction));
     t_4 = (g_y - node->y) / (private->speed * sin(private->direction));
 				
-    t_0 = min_pos(t_1, min_pos(t_2, min_pos(t_3, min_pos((g_time - private->last_update), t_4))));
+    t_0 = min_pos(t_1, min_pos(t_2, min_pos(t_3, min_pos((get_global_time() - private->last_update), t_4))));
 
     node->x = private->speed * cos(private->direction)*t_0 + node->x;
     node->y = private->speed * sin(private->direction)*t_0 + node->y;
@@ -109,8 +109,8 @@ int random_billiard_mobility_update(struct _node * node)
     /* if t_0 is g_time - last_update we have to leave  the loop.
      * we have to check this because of the imprecision on the double addition */
 
-    if (t_0 == g_time - private->last_update) {
-      private->last_update = g_time;
+    if (t_0 == get_global_time() - private->last_update) {
+      private->last_update = get_global_time();
       break;
     }
 

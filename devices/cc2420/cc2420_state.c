@@ -694,8 +694,8 @@ void cc2420_update_state_tx_frame(struct _cc2420_t * cc2420) {
       return;
       }
 
-    /* transmit 2nd byte of CRC, TX is over */
-    cc2420_tx_byte(cc2420, CC2420_HIBYTE(cc2420->tx_fcs));
+      /* transmit 2nd byte of CRC, TX is over */
+      cc2420_tx_byte(cc2420, CC2420_HIBYTE(cc2420->tx_fcs));
     }
 
     CC2420_RX_CALIBRATE_ENTER(cc2420);

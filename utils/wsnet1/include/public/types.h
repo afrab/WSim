@@ -129,12 +129,12 @@ struct _packet {
   struct _node * node;
   double x, y, z;
 	
-  int radio;
+  int freq;     
   int modulation;
 	
   double antenna_orientation;
 	
-  double tx_mW;
+  double   tx_mW;
   uint64_t tx_start;
   uint64_t tx_end;
 	

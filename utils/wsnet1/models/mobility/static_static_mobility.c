@@ -49,7 +49,7 @@ int static_static_mobility_update(struct _node *node)
 {
   struct _static_static_mobility_private * private = (struct _static_static_mobility_private *)node->mobility_private;
 
-  private->last_update = g_time;
+  private->last_update = get_global_time();
 
   flogf2(LEVEL_LAYER, node->addr, -1, EVENT_MOVE, -1, MOBILITY_LAYER, key_private, "%lf %lf, %lf", node->x, node->y, node->z);
   return 0;

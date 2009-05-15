@@ -84,7 +84,7 @@ double propagation_compute_rx_mW(struct _node *node, struct _packet *packet) {
 /**************************************************************************/
 /**************************************************************************/
 /**************************************************************************/
-double propagation_compute_noise(struct _node *node, int radio, int p_id, uint64_t time)  {
+double propagation_compute_noise(struct _node *node, int freq, int p_id, uint64_t time)  {
   double noise = 0.0;
   struct _packet *packet;
 	
@@ -110,7 +110,7 @@ double propagation_compute_noise(struct _node *node, int radio, int p_id, uint64
       rx_mW = propagation_compute_rx_mW(node, packet);
 
       /* Add rx power to the noise */
-      noise += g_interference->interference_correlation(rx_mW, packet->radio, radio);
+      noise += g_interference->interference_correlation(rx_mW, packet->freq, freq);
 		
       packet = packet->next;
     }
@@ -140,7 +140,7 @@ double propagation_compute_BER(struct _node *node, struct _packet *packet) {
     double noise;
 		
     /* Compute noise */
-    noise = propagation_compute_noise(node, packet->radio, packet->id, packet->tx_start + (((double) loop) * f_duration));
+    noise = propagation_compute_noise(node, packet->freq, packet->id, packet->tx_start + (((double) loop) * f_duration));
 
     /* Compute SiNR */
     if (noise == 0.0) {

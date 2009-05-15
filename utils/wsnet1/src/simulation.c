@@ -25,23 +25,33 @@ double g_x    = -1.0;
 double g_y    = -1.0;
 double g_z    = -1.0;
 
-uint64_t g_time = 0;
-
 struct _worldsens_s worldsens;
 
-/**************************************************************************/
-/**************************************************************************/
-/**************************************************************************/
 
-uint64_t get_wsnet_time()
-{
-  return g_time;
+
+uint64_t g_sim_time = 0;
+
+uint64_t get_global_time()               
+{ 
+  return g_sim_time; 
 }
+
+void set_global_time(uint64_t time)  
+{ 
+  g_sim_time = time; 
+  WSNET_S_DBG_DBG ("WSNET:: === ==================================================\n");
+  WSNET_S_DBG_DBG ("WSNET:: === TIME  %"PRId64" (seq: %d)\n", time, worldsens.rp_seq);
+  WSNET_S_DBG_DBG ("WSNET:: === ==================================================\n");
+}
+
+/**************************************************************************/
+/**************************************************************************/
+/**************************************************************************/
 
 int simulation_start(int argc, char* argv[]) 
 {
   logger_init("stdout",4);
-  tracer_init("wsnet1.trc", get_wsnet_time);
+  tracer_init("wsnet1.trc", get_global_time);
   tracer_start();
 
   if (command_line (argc, argv)) 

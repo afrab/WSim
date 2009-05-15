@@ -96,7 +96,7 @@ core_notify_carrier_sense (void)
       int i = g_m_nodes;
 
       /* Only deal with packets that start now */
-      if (p_loop->tx_start != g_time)
+      if (p_loop->tx_start != get_global_time())
 	{
 	  p_loop = p_loop->next;
 	  continue;
@@ -113,7 +113,7 @@ core_notify_carrier_sense (void)
 	  rx_mW = propagation_compute_rx_mW (&g_nodes[i], p_loop);
 	  noise =
 	    propagation_compute_noise (&g_nodes[i], p_loop->radio, p_loop->id,
-				       g_time);
+				       get_global_time());
 
 	  /* Notify carrier sense */
 	  radio_carrier_sense (&g_nodes[i], p_loop->id, rx_mW, rx_mW / noise,
@@ -141,16 +141,16 @@ core_start (void)
       struct _event *event = g_events;
 
       /* Perform cs notification before time advances */
-      if (g_time != event->time)
+      if (get_global_time() != event->time)
 	{
 	  core_notify_carrier_sense ();
 	}
 
       /* And time goes on... */
-      g_time = event->time;
-      if (g_time > g_simend)
+      set_global_time( event->time );
+      if (get_global_time() > g_simend)
 	{
-	  g_time = g_simend;
+	  get_global_time() = g_simend;
 	  break;
 	}
       evt_nb++;
@@ -252,7 +252,7 @@ core_start (struct _worldsens_s *worldsens)
     {
 
       /* If no event or if event in the future, wait at rp point */
-      if ((g_events == NULL) || (g_events->time > g_time))
+      if ((g_events == NULL) || (g_events->time > get_global_time()))
 	{
 	  worldsens_s_listen_to_next_rp (worldsens);
 	}
@@ -264,11 +264,11 @@ core_start (struct _worldsens_s *worldsens)
 	      (worldsens, WORLDSENS_SYNCH_PERIOD))
 	    return -1;
 	}
-      else if (g_time < g_events->time)
+      else if (get_global_time() < g_events->time)
 	{
 	  /* If event, program event */
 	  if (worldsens_s_save_release_request
-	      (worldsens, g_events->time - g_time))
+	      (worldsens, g_events->time - get_global_time()))
 	    return -1;
 	}
       else
@@ -276,11 +276,11 @@ core_start (struct _worldsens_s *worldsens)
 	  struct _event *event = g_events;
 
 	  /* And time goes on... */
-	  if (g_time != event->time)
+	  if (get_global_time() != event->time)
 	    {
 	      fprintf (stderr,
 		       "\nEXCEPTION: CORE DESYNCHRONIZATION time=%" PRId64
-		       ", evt_time=%" PRId64 "\n", g_time, event->time);
+		       ", evt_time=%" PRId64 "\n", get_global_time(), event->time);
 	      return -1;
 	    }
 	  evt_nb++;
@@ -324,25 +324,28 @@ core_start (struct _worldsens_s *worldsens)
 	      if (g_events == NULL)
 		{
 		  /* If no more event, backup and program rp point */
-		  if (worldsens_s_save_release_request_rx (worldsens, packet->node->addr, packet->radio, packet->modulation, worldsens_data, 31250))	// ToCheck: optimization to avoir backtracks
+#define MAGIC_VALUE 31250
+		  if (worldsens_s_save_release_request_rx (worldsens, packet->node->addr, 
+							   packet->freq, packet->modulation, 
+							   worldsens_data, MAGIC_VALUE))	// ToCheck: optimization to avoir backtracks
 		    return -1;
 		}
 	      else
 		{
 		  /* If future event, backup and program event */
-		  if (g_events->time > g_time)
+		  if (g_events->time > get_global_time())
 		    {
 		      if (worldsens_s_save_release_request_rx
-			  (worldsens, packet->node->addr, packet->radio,
+			  (worldsens, packet->node->addr, packet->freq,
 			   packet->modulation, worldsens_data,
-			   g_events->time - g_time))
+			   g_events->time - get_global_time()))
 			return -1;
 		    }
 		  else
 		    {
 		      /* If simultaneous events, do nothing */
 		      if (worldsens_s_rx (worldsens, packet->node->addr,
-					  packet->radio, packet->modulation,
+					  packet->freq, packet->modulation,
 					  worldsens_data))
 			return -1;
 		    }
@@ -528,7 +531,7 @@ core_update_packet_list (void)
   uint64_t tx_start;
 
   /* Get date of first "in the air tonight" packet */
-  tx_start = g_time;
+  tx_start = get_global_time();
   while (event)
     {
       if ((event->type == TX_EVENT_TYPE)

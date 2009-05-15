@@ -132,7 +132,7 @@ int parse_config(void)
     fclose(config_fd);
     return -1;
   }
-  memset(g_nodes, 0, sizeof(sizeof(struct _node) * g_m_nodes));
+  memset(g_nodes, 0, sizeof(struct _node) * g_m_nodes);
 	
   /* For each node */
   loop = g_m_nodes;

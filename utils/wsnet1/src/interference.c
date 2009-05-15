@@ -41,8 +41,8 @@ int interference_instantiate(char *key, FILE *config_fd) {
 /**************************************************************************/
 /**************************************************************************/
 /**************************************************************************/
-double interference_correlation(double mW, int radio0, int radio1) {
-  return g_interference->interference_correlation(mW, radio0, radio1);
+double interference_correlation(double mW, int freq0, int freq1) {
+  return g_interference->interference_correlation(mW, freq0, freq1);
 }
 
 

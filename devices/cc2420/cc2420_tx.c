@@ -92,10 +92,11 @@ void cc2420_tx_byte(struct _cc2420_t *cc2420, uint8_t tx_byte)
   tx.modulation  = cc2420_get_modulation(cc2420);
   tx.power_dbm   = cc2420_get_power_dbm(cc2420);
   tx.duration    = 2 * CC2420_SYMBOL_PERIOD; // duration
+
   worldsens_c_tx(&tx);
 
-  CC2420_DBG_TX("cc2420:tx: data %02x, freq: %lfMHz, modulation: %d, "
-		"Power: %lfdBm, time: %" PRId64 " + %" PRId64 " = %" PRId64 " \n", 
+  CC2420_DBG_TX("cc2420:tx: data %02x, freq: %lgMHz, modulation: %d, "
+		"Power: %lgdBm, time: %" PRId64 " + %" PRId64 " = %" PRId64 " \n", 
 		tx.data & 0xff, 
 		tx.freq_mhz,
 		tx.modulation,

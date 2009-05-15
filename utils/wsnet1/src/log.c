@@ -63,7 +63,7 @@ int flogf2 (int level, int node_id, int packet_id,
   if (!g_log_to_file || !g_log_file)
     return 0;
 
-  fprintf(g_log_file, "%s\t% "PRId64"\t%2d\t%2d\t%2d\t%2d\t%s\t%s\t", event_strings[level], g_time, 
+  fprintf(g_log_file, "%s\t% "PRId64"\t%2d\t%2d\t%2d\t%2d\t%s\t%s\t", event_strings[level], get_global_time(), 
 	  node_id, packet_id, event_type, packet_size, layer, key);
 
   va_list(arg);

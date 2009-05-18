@@ -436,21 +436,24 @@ void cc2420_update_state_tx_ack(struct _cc2420_t * cc2420) {
     
     /* 010 (frame type : ACK)  0 (no sec) 0 (no frame pending) 0 (no ack req) 0 (no pan id comp) */
     /* 000 (reserved) 00 (no dst address) 0 (frame version) 00 (no src address) */
-    /* --> 0x2000 */
+    /* --> 0100 0000 0000 0000  field swapped --> 0100 0000 0000 0000 bytes swapped --> 0000 0010 0000 0000 */
+    /* --> 0x0200 */
 
     /* if TX frame pending (ie SACKPEND command strobe) */
     /* 010 (frame type : ACK)  0 (no sec) 1 (frame pending) 0 (no ack req) 0 (no pan id comp) */
     /* 000 (reserved) 00 (no dst address) 0 (frame version) 00 (no src address) */
-    /* --> 0x2400 */
+    /* --> 0100 1000 0000 0000  field swapped --> 0100 1000 0000 0000 bytes swapped --> 0001 0010 0000 0000 */
+    /* --> 0x1200 */
+
     uint8_t fc1;
     uint8_t fc2;
     
     if (!cc2420->tx_frame_pending) {
-        fc1 = 0x20;
+        fc1 = 0x02;
         fc2 = 0x00;
     }
     else {
-        fc1 = 0x24;
+        fc1 = 0x12;
         fc2 = 0x00;
     }
 
@@ -473,6 +476,7 @@ void cc2420_update_state_tx_ack(struct _cc2420_t * cc2420) {
     /* seq number */
     if (cc2420->tx_bytes == 3) {
         cc2420_tx_byte(cc2420, cc2420->rx_sequence);
+	CC2420_DEBUG("cc2420_update_state_tx_ack:rx_sequence=%x\n",cc2420->rx_sequence);
         cc2420->fsm_timer = MACHINE_TIME_GET_NANO() + 2 * CC2420_SYMBOL_PERIOD;
         cc2420->tx_bytes ++;
 	return;

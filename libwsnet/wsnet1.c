@@ -24,6 +24,7 @@
 #include "devices/devices.h"
 #include "machine/machine.h"
 #include "libselect/libselect.h"
+#include "libtracer/tracer.h"
 #include "src/options.h"
 #include "src/mgetopt.h"
 
@@ -745,7 +746,9 @@ static int worldsens_connect_parse_reply(char *msg, int UNUSED len)
 	WSENS_RDV_PENDING    = 0;
 	WSENS_RDV_NEXT_TIME  = MACHINE_TIME_GET_NANO() + ntohll(pkt->period);
 
+	tracer_set_initial_time(ntohll(pkt->cnx_time));
 	machine_state_save();
+
 	WSNET_BKTRK("WSNet:backtrack: connect forces a state save at (time:%"PRIu64", seq:%d)\n",
 		    MACHINE_TIME_GET_NANO(), pkt_seq);
 	return 0;
@@ -1214,6 +1217,7 @@ static void worldsens_packet_dump_recv(char *msg, int len)
 	VERBOSE(VLVL,"WSNet:pkt:%s:   pkt_seq %d\n",           prfx, ntohl (pkt->pkt_seq));
 	VERBOSE(VLVL,"WSNet:pkt:%s:   period  %"PRIu64"\n",    prfx, ntohll(pkt->period));
 	VERBOSE(VLVL,"WSNet:pkt:%s:   rp_seq  %d\n",           prfx, ntohl (pkt->rp_seq));
+	VERBOSE(VLVL,"WSNet:pkt:%s:   cnxtime %"PRIu64"\n",    prfx, ntohll(pkt->cnx_time));
       }
       break;
     case WORLDSENS_S_NOATTRADDR:

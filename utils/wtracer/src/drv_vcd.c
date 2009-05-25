@@ -339,7 +339,7 @@ int drv_vcd_process_file(tracer_t *t)
 }
 
 /* ************************************************** */
-/* ************************************************** */
+/* ** MERGE MODE ************************************ */
 /* ************************************************** */
 
 int drv_vcd_trc_get_next_evtrc(tracer_t *trc[], int nbtrc, 
@@ -364,8 +364,9 @@ int drv_vcd_trc_get_next_evtrc(tracer_t *trc[], int nbtrc,
 		  ERROR("read sample on file %s, ev %d\n",trc[i]->in_filename,ev_num[i]);
 		  return -1;
 		}
-	      ev_valid[i] = 1;
-	      ev_num  [i] ++;
+	      ev_smpl [i].time += trc[i]->hdr.initial_time;
+	      ev_valid[i]       = 1;
+	      ev_num  [i]       ++;
 	    }
 	  else
 	    {

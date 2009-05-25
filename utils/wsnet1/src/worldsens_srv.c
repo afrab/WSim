@@ -216,9 +216,9 @@ int
 worldsens_s_connect (struct _worldsens_s *worldsens, struct sockaddr_in *addr,
 		     char *msg, int UNUSED len)
 {
+  struct _worldsens_c_connect_pkt *c_pkt = (struct _worldsens_c_connect_pkt *) msg;
+
   struct _worldsens_s_connect_pkt s_pkt;
-  struct _worldsens_c_connect_pkt *c_pkt =
-    (struct _worldsens_c_connect_pkt *) msg;
   int pktlength = sizeof (struct _worldsens_s_connect_pkt);
 
   WSNET_S_DBG_DBG ("WSNET:: <-- CONNECT (ip: %d)\n", ntohl (c_pkt->node));
@@ -233,29 +233,18 @@ worldsens_s_connect (struct _worldsens_s *worldsens, struct sockaddr_in *addr,
 	{
 	  return -1;
 	}
-      /*
-      if (sendto
-	  (worldsens->mfd, (char *) (&s_pkt),
-	   sizeof (struct _worldsens_s_connect_pkt), 0,
-	   (struct sockaddr *) addr,
-	   sizeof (struct sockaddr_in)) <
-	  (int) sizeof (struct _worldsens_s_connect_pkt))
-	{
-	  perror ("worldsens_s_connect (sendto)");
-	  close (worldsens->mfd);
-	  return -1;
-	}
-      */
+
       WSNET_S_DBG_EXC ("WSNET:: --> NOATTRADDR\n");
       return 0;
     }
 
   /* Forge */
-  s_pkt.type    = WORLDSENS_S_ATTRADDR;
-  s_pkt.pkt_seq = htonl (pkt_seq);
-  s_pkt.period  = htonll (worldsens->rp - get_global_time());
-  s_pkt.rp_seq  = htonl (worldsens->rp_seq);
-  pktlength     = sizeof(s_pkt);
+  s_pkt.type     = WORLDSENS_S_ATTRADDR;
+  s_pkt.pkt_seq  = htonl (pkt_seq);
+  s_pkt.period   = htonll(worldsens->rp - get_global_time());
+  s_pkt.rp_seq   = htonl (worldsens->rp_seq);
+  s_pkt.cnx_time = htonll(get_global_time());
+  pktlength      = sizeof(s_pkt);
 
   /* Send */
   if (worldsens_s_sendto(worldsens,(char *) (&s_pkt), pktlength, addr))
@@ -263,21 +252,8 @@ worldsens_s_connect (struct _worldsens_s *worldsens, struct sockaddr_in *addr,
       return -1;
     }
 
-  /*
-  if (sendto
-      (worldsens->mfd, (char *) (&s_pkt),
-       sizeof (struct _worldsens_s_connect_pkt), 0, (struct sockaddr *) addr,
-       sizeof (struct sockaddr_in)) <
-      (int) sizeof (struct _worldsens_s_connect_pkt))
-    {
-      perror ("worldsens_s_connect (sendto)");
-      close (worldsens->mfd);
-      return -1;
-    }
-  */
-
-  WSNET_S_DBG_DBG ("WSNET:: --> ATTRADDR (seq: %d, ip: %d)\n",
-		   ntohl (s_pkt.pkt_seq), ntohl (c_pkt->node));
+  WSNET_S_DBG_DBG ("WSNET:: --> ATTRADDR (seq: %d, ip: %d) global time %"PRId64"\n",
+		   ntohl (s_pkt.pkt_seq), ntohl (c_pkt->node), ntohll(s_pkt.cnx_time));
   WSNET_S_DBG_DBG ("WSNET:: --> RP (seq: %d, rp_seq: %d, period: %"PRId64 ")\n", 
 		   pkt_seq, worldsens->rp_seq, worldsens->rp - get_global_time());
   return 0;

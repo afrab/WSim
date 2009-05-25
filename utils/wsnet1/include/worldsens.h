@@ -167,6 +167,7 @@ struct PACKED  _worldsens_s_connect_pkt
   int	   pkt_seq;
   uint64_t period;
   int	   rp_seq;
+  uint64_t cnx_time;
 };
 
 

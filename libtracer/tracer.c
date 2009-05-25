@@ -567,6 +567,9 @@ void tracer_set_node_id(int id)
 void tracer_set_initial_time(tracer_time_t time)
 {
   tracer_initial_time = time;
+  DMSG_TRACER("=================================================\n");
+  DMSG_TRACER("tracer:time: connexion time to WSNET : %"PRIu64" \n", time);
+  DMSG_TRACER("=================================================\n");
 } 
 
 /* ************************************************** */

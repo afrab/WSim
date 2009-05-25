@@ -108,6 +108,7 @@ struct PACKED _worldsens_s_connect_pkt {    /* size 17 */
   int	          pkt_seq;
   uint64_t        period;
   int	          rp_seq;
+  uint64_t        cnx_time;
 };
 
 struct PACKED _worldsens_s_backtrack_pkt {  /* size 17 */

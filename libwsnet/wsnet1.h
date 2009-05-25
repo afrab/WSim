@@ -88,7 +88,7 @@ struct PACKED _worldsens_c_tx_pkt
   uint64_t        duration;
   uint32_t        frequency;
   int             modulation;
-  double          tx_dBm;
+  double          tx_mW;
   int	          pkt_seq;
   char	          data;
 };
@@ -188,12 +188,14 @@ struct _worldsens_c_backtrack {
 struct PACKED _worldsens_data {
   int             node;
   char		  data;
-  double	  rx_dBm;
+  double	  rx_mW;
   double	  SiNR;
 };
 
 /**************************************************************************/
 /**************************************************************************/
 /**************************************************************************/
+
+
 
 #endif

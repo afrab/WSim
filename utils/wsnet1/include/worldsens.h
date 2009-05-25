@@ -104,7 +104,7 @@ extern int      simulation_keeps_going;
 /**************************************************************************/
 
 typedef void (*callback_rx_t) (void *arg, uint8_t data, 
-			       int frequency, int modulation, 
+			       uint32_t frequency, int modulation, 
 			       double rx_mW, double SiNR);
 
 
@@ -141,7 +141,7 @@ struct PACKED _worldsens_c_tx_pkt
   int	   node;
   uint64_t period;
   uint64_t duration;
-  int	   frequency;
+  uint32_t frequency;
   int	   modulation;
   double   tx_mW;
   int	   pkt_seq;
@@ -199,7 +199,7 @@ struct PACKED _worldsens_s_srrx_pkt
   int	   n_rp_seq;
   int	   size;
   int	   node;
-  int	   frequency;
+  uint32_t frequency;
   int	   modulation;
 };
 
@@ -210,7 +210,7 @@ struct PACKED _worldsens_s_rx_pkt
   int	   pkt_seq;
   int	   size;
   int	   node;
-  int	   frequency;
+  uint32_t frequency;
   int	   modulation;
 };
 

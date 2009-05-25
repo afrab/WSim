@@ -213,6 +213,13 @@ htonll (uint64_t v)
 {
   return v;
 }
+
+static double
+htondbl (double v)
+{
+  return v;
+}
+
 #else
 static uint64_t
 htonll (uint64_t v)
@@ -234,6 +241,27 @@ htonll (uint64_t v)
 
   return r;
 }
+
+static double
+htondbl (double v)
+{
+  double r;
+  uint8_t *pv, *pr;
+
+  pv = (uint8_t *) & v;
+  pr = (uint8_t *) & r;
+
+  pr[0] = pv[7];
+  pr[1] = pv[6];
+  pr[2] = pv[5];
+  pr[3] = pv[4];
+  pr[4] = pv[3];
+  pr[5] = pv[2];
+  pr[6] = pv[1];
+  pr[7] = pv[0];
+  return r;
+}
+
 #endif
 
 
@@ -313,7 +341,7 @@ core_start (struct _worldsens_s *worldsens)
 		      worldsens_data[c_node].node = htonl (i);
 		      worldsens_data[c_node].data = packet->data[0];
 		      worldsens_data[c_node].SiNR = htonll (rx_pkt->SiNR[0]);
-		      worldsens_data[c_node].rx_mW = htonll (rx_pkt->rx_mW);
+		      worldsens_data[c_node].rx_mW = htondbl (rx_pkt->rx_mW);
 		      packet_destroy (rx_pkt);	//TODO: optimize.... no need to creat and destroy packet...
 
 		      /* Update considered node */

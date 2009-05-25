@@ -19,6 +19,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
+#include <math.h>
+#include <float.h>
 
 #include "arch/common/hardware.h"
 #include "devices/devices.h"
@@ -54,6 +56,43 @@
 #  define PKT_DMP_RX     0
 #  define PKT_DMP_DISCO  0
 #endif
+
+/**************************************************************************/
+/**************************************************************************/
+/**************************************************************************/
+
+/**
+ * \def MIN_DBM 
+ * \brief Signal strength of a null signal in dBm.
+ **/
+#define MIN_DBM -DBL_MAX
+
+
+/**
+ * \def MAX_SNR 
+ * \brief Maximum SNR value, when there is no interference nor noise.
+ **/
+#define MAX_SNR DBL_MAX
+
+
+/**
+ * \brief Convert a dBm value into a mW value.
+ * \param dBm the dBm value to convert.
+ * \return The converted mW value.
+ **/
+static inline double dBm2mW(double dBm) {
+    return (dBm == MIN_DBM) ? 0 : pow(10, dBm / 10);
+}
+
+
+/**
+ * \brief Convert a mW value into a dBm value.
+ * \param mW the mW value to convert.
+ * \return The converted dBm value.
+ **/
+static inline double mW2dBm(double mW) {
+    return (mW == 0) ? MIN_DBM : (log10(mW) * 10);
+}
 
 /**************************************************************************/
 /**************************************************************************/
@@ -431,7 +470,8 @@ int worldsens_c_tx(struct wsnet_tx_info *info)
   char data           = info->data;
   uint32_t frequency  = info->freq_mhz * 1000000;
   int modulation      = info->modulation;
-  double tx_dBm       = info->power_dbm;
+
+  double tx_dbm        = info->power_dbm;
   uint64_t duration   = info->duration;
 
   struct _worldsens_c_tx_pkt pkt;
@@ -444,7 +484,7 @@ int worldsens_c_tx(struct wsnet_tx_info *info)
   pkt.data            = data;
   pkt.frequency       = htonl(frequency);
   pkt.modulation      = htonl(modulation);
-  pkt.tx_dBm          = htondbl(tx_dBm);
+  pkt.tx_mW           = htondbl(dBm2mW(tx_dbm)); /* conversion from dBm to mW! */
   pkt.pkt_seq         = htonl(WSENS_SEQ_PKT_TX);
   pkt.duration        = htonll(duration);
 
@@ -825,6 +865,7 @@ static ssize_t worldsens_packet_recv(int fd, char* msg, size_t len, int flags, i
   ssize_t srec = 0;
   
   srec = recv(fd,msg,len,flags);
+
   if (srec <= 0)
     {
       ERROR("===================================================\n");
@@ -861,19 +902,19 @@ static int64_t worldsens_packet_parse_data(char *msg, int UNUSED pkt_seq, int UN
       if (ntohl(data->node) == (unsigned)WSENS_MYADDR) 
 	{
 	  struct wsnet_rx_info info;
-	  WSNET_RX("WSNET (%"PRIu64", %d): <-- RX src=%d[%d] (data: [0x%02x,%c], freq: %gMHz, mod: %d, rx: %lgdBm, SiNR: %lg)\n",
+	  WSNET_RX("WSNET (%"PRIu64", %d): <-- RX src=%d[%d] (data: [0x%02x,%c], freq: %gMHz, mod: %d, rx: %gmW, SiNR: %lg)\n",
 		   MACHINE_TIME_GET_NANO(), pkt_seq, 
 		   /* RX_line[c_node] */ line, c_node,
 		   data->data & 0xff, isprint(data->data & 0xff ) ? data->data & 0xff : '.',
 		   ntohl(pkt->frequency) / 1000000.0f, 
 		   ntohl(pkt->modulation), 
-		   ntohdbl(data->rx_dBm), 
+		   ntohdbl(data->rx_mW), 
 		   ntohdbl(data->SiNR));
 	  
 	  info.data       = data->data;
 	  info.freq_mhz   = (double)ntohl(pkt->frequency) / 1000000.0;
 	  info.modulation = ntohl(pkt->modulation);
-	  info.power_dbm  = ntohdbl(data->rx_dBm);
+	  info.power_dbm  = mW2dBm(ntohdbl(data->rx_mW)); /* conversion from mW to dBm! */
 	  info.SiNR       = ntohdbl(data->SiNR);
 
 	  duration += WSENS_CBRX_FUNC(WSENS_CBRX_ARG, &info);
@@ -892,7 +933,7 @@ static int64_t worldsens_packet_parse_data(char *msg, int UNUSED pkt_seq, int UN
 static int64_t worldsens_packet_parse_rp(char *msg, int UNUSED pkt_seq, int UNUSED line)
 {
   struct _worldsens_s_saverel_pkt *pkt = (struct _worldsens_s_saverel_pkt *) msg;
-  
+
   if (ntohl(pkt->c_rp_seq) == (unsigned)WSENS_SEQ_RDV) 
     {
       
@@ -965,7 +1006,7 @@ static int64_t worldsens_packet_parse(char *msg, int UNUSED len)
     case WORLDSENS_S_BACKTRACK:  /* RP point with backtrack */
       {
 	struct _worldsens_s_backtrack_pkt *pkt = (struct _worldsens_s_backtrack_pkt *) msg;
-	
+
 	/*
 	WSNET_DBG("WSNET (%"PRIu64", %d): <-- BACKTRACK (period: %"PRIu64"; time: %"PRIu64", seq: %d)\n", 
 		  MACHINE_TIME_GET_NANO(), pkt_seq, 
@@ -1174,7 +1215,7 @@ static void worldsens_packet_dump_send(char *msg, int len)
 	VERBOSE(VLVL,"WSNet:pkt:%s:   modulation %s (%d)\n",     prfx, 
 		wsnet_modulation_name(ntohl(pkt->modulation)), 
 		ntohl(pkt->modulation));
-	VERBOSE(VLVL,"WSNet:pkt:%s:   tx_dBm     %g\n",          prfx, ntohdbl(pkt->tx_dBm)  );
+	VERBOSE(VLVL,"WSNet:pkt:%s:   tx_mW     %g\n",          prfx, ntohdbl(pkt->tx_mW)  );
 	VERBOSE(VLVL,"WSNet:pkt:%s:   pkt_seq    %d\n",          prfx, ntohl (pkt->pkt_seq)  );
 	VERBOSE(VLVL,"WSNet:pkt:%s:   data       0x%02x (%c)\n", prfx, pkt->data & 0xff,
 		isprint( pkt->data & 0xff) ? pkt->data & 0xff : '.');

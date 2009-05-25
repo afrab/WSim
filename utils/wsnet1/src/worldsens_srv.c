@@ -45,6 +45,19 @@ htonll (uint64_t v)
 {
   return v;
 }
+
+static double
+ntohdbl (double v)
+{
+  return v;
+}
+
+static double
+htondbl (double v)
+{
+  return v;
+}
+
 #else
 static uint64_t
 ntohll (uint64_t v)
@@ -85,6 +98,46 @@ htonll (uint64_t v)
   pr[7] = pv[0];
   return r;
 }
+
+static double
+ntohdbl (double v)
+{
+  double r;
+  uint8_t *pv, *pr;
+
+  pv = (uint8_t *) & v;
+  pr = (uint8_t *) & r;
+
+  pr[0] = pv[7];
+  pr[1] = pv[6];
+  pr[2] = pv[5];
+  pr[3] = pv[4];
+  pr[4] = pv[3];
+  pr[5] = pv[2];
+  pr[6] = pv[1];
+  pr[7] = pv[0];
+  return r;
+}
+
+static double
+htondbl (double v)
+{
+  double r;
+  uint8_t *pv, *pr;
+
+  pv = (uint8_t *) & v;
+  pr = (uint8_t *) & r;
+
+  pr[0] = pv[7];
+  pr[1] = pv[6];
+  pr[2] = pv[5];
+  pr[3] = pv[4];
+  pr[4] = pv[3];
+  pr[5] = pv[2];
+  pr[6] = pv[1];
+  pr[7] = pv[0];
+  return r;
+}
 #endif
 
 
@@ -96,14 +149,14 @@ void worldsens_packet_dump(char UNUSED *msg, char UNUSED *pkt, int UNUSED size)
 {
   /*
   int i;
-  //  WSNET_S_DBG_DBG ("WSNET:: %s start ================================\n", msg);
+  WSNET_S_DBG_DBG ("WSNET:: %s start ================================\n", msg)
   WSNET_S_DBG_DBG ("WSNET::%s ", msg);
   for(i=0;i<size; i++)
     {
       WSNET_S_DBG_DBG ("%02x:",pkt[i] & 0xff);
     }
   WSNET_S_DBG_DBG ("\n");
-  // WSNET_S_DBG_DBG ("WSNET:: %s stop  ================================\n", msg);
+  WSNET_S_DBG_DBG ("WSNET:: %s stop  ================================\n", msg);
   */
 }
 
@@ -409,7 +462,7 @@ worldsens_s_listen_to_next_rp (struct _worldsens_s *worldsens)
 	      packet->z = node->z;
 	      packet->freq = ntohl (pkt->frequency);
 	      packet->modulation = ntohl (pkt->modulation);
-	      packet->tx_mW = ntohll (pkt->tx_mW);
+	      packet->tx_mW = ntohdbl (pkt->tx_mW);
 	      packet->seq = ntohl (pkt->pkt_seq);
 	      packet->tx_start = get_global_time() + ntohll (pkt->period);
 	      packet->tx_end = packet->tx_start + ntohll (pkt->duration);

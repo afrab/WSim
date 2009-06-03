@@ -86,7 +86,7 @@
  *   4.6 : out, radio_reset
  *   4.5 : out, radio_vref_en
  *   4.4 : out, flash CS
- *   4.3 : ?? , flash PWR
+ *   4.3 : out, flash PWR -- RESET
  *   4.2 : out, radio_cs
  *   4.1 : in,  radio_sfd
  *   4.0 : NC

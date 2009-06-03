@@ -472,16 +472,6 @@ int m25p_delete(int dev)
       m25p_flash_dump(dev,M25P_DUMP);
     }
 
-  if (M25P_INIT)
-    {
-      free(M25P_INIT);
-    }
-
-  if (M25P_DUMP)
-    {
-      free(M25P_DUMP);
-    }
-
   return 0;
 }
 

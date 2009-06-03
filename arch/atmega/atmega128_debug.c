@@ -24,6 +24,10 @@ void atmega128_print_SR(void)
   debug_write_binary(SR,8);
   HW_DMSG_DIS("\n");
 }
+#else
+void atmega128_print_SR(void)
+{
+}
 #endif
 
 /* ************************************************** */

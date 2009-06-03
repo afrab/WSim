@@ -21,7 +21,7 @@
 #include "mgetopt.h"
 
 #define DEFAULT_VERBOSE            0
-#define DEFAULT_PROGNAME           "prog.elf"
+#define DEFAULT_PROGNAME           "none"
 #define DEFAULT_SIM_MODE           SIM_MODE_RUN
 #define DEFAULT_GDB_PORT           2159
 #define DEFAULT_RUN_INSN           0
@@ -136,6 +136,13 @@ static struct moption_t preload_opt = {
   .value       = NULL
 };
 
+static struct moption_t noelf_opt = {
+  .longname    = "noelf",
+  .type        = no_argument,
+  .helpstring  = "bypass elf file loading",
+  .value       = NULL
+};
+
 /* ************************************************** */
 /* ************************************************** */
 /* ************************************************** */
@@ -167,6 +174,7 @@ void options_start()
   options_add_base(& mode_opt           );
   options_add_base(& modearg_opt        );
   options_add_base(& preload_opt        );
+  options_add_base(& noelf_opt          );
   /*  options_add_base(& dump_opt      ); */
   options_add_base(& logfile_opt        );
   options_add_base(& trace_opt          );
@@ -293,6 +301,7 @@ void options_read_cmdline(struct options_t *s, int *argc, char *argv[])
   s->do_trace           = DEFAULT_DO_TRACE;
   s->do_etrace          = DEFAULT_DO_ETRACE;
   s->do_preload         = 0;
+  s->do_elfload         = 1;
   s->do_etrace_at_begin = DEFAULT_DO_ETRACE_AT_BEGIN;
 
   /* parse all options */
@@ -458,6 +467,11 @@ void options_read_cmdline(struct options_t *s, int *argc, char *argv[])
 	strncpy(s->preload, preload_opt.value, MAX_FILENAME);
     }
 
+  if (noelf_opt.isset)
+    {
+      s->do_elfload = 0;
+    }
+
   OPT_DMSG("parseindex = %d, argc = %d\n",parseindex,*argc);
   if (parseindex < *argc)
     {
@@ -469,7 +483,7 @@ void options_read_cmdline(struct options_t *s, int *argc, char *argv[])
 	{
 	  OPT_WARNING("\n ** starting in GDB mode without program loaded ** \n\n");
 	}
-      else
+      else if (s->do_elfload == 1)
 	{
 	  OPT_ERROR("\n ** missing exec name, no program loaded ** \n\n");
 	  options_usage(argv[0]);

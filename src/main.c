@@ -259,13 +259,17 @@ int main(int argc, char* argv[])
     }
 
   /* elf loading */
-  if (o.progname)
+  if (strcmp(o.progname,"none") != 0)
     {
       if (machine_load_elf(o.progname,o.verbose))
 	{
 	  machine_delete();
 	  return 1;
 	}
+    }
+  else if (o.do_elfload == 0)
+    {
+      fprintf(stderr,"== Running without elf file \n");
     }
   else if (o.sim_mode == SIM_MODE_GDB)
     {

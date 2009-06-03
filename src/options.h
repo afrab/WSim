@@ -40,6 +40,7 @@ struct options_t {
   int                do_trace;
   int                do_etrace;
   int                do_preload;
+  int                do_elfload;
   int                do_etrace_at_begin;
 
   /**

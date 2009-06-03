@@ -81,7 +81,6 @@ void     machine_exit      (int arg);
   do {                                                          \
     machine.nanotime_incr = n;                                  \
     machine.nanotime     += n;                                  \
-    HW_DMSG_TIME("msp430:time: %"PRId64"\n", machine.nanotime);	\
   } while (0)
 
 #define MACHINE_TIME_CLR_INCR()  do { machine.nanotime_incr = 0; } while (0)

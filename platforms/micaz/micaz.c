@@ -149,9 +149,9 @@ int devices_create(void)
   /*********************************/
 
   res += system_create          (SYSTEM);
-  res += led_device_create      (LED1,0xee0000,0,0);
-  res += led_device_create      (LED2,0x00ee00,0,0);
-  res += led_device_create      (LED3,0x0000ee,0,0);
+  res += led_device_create      (LED1,0xee0000,0,0,"led1");
+  res += led_device_create      (LED2,0x00ee00,0,0,"led2");
+  res += led_device_create      (LED3,0x0000ee,0,0,"led3");
   res += ptty_device_create     (SERIAL,1);
 
   /*********************************/
@@ -171,10 +171,6 @@ int devices_create(void)
   /*********************************/
   /* end of platform specific part */
   /*********************************/
-
-  tracer_event_add_id(TRACER_LED1, 1, "led1", "");
-  tracer_event_add_id(TRACER_LED2, 1, "led2", "");
-  tracer_event_add_id(TRACER_LED3, 1, "led3", "");
 
   return res;
 }

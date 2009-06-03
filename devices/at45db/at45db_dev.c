@@ -16,167 +16,389 @@
 
 #define DEBUG_ME_HARDER
 
-#ifdef _DEBUG
+#ifdef DEBUG
 #define HW_DMSG_AT45(x...) HW_DMSG(x)
 #else
 #define HW_DMSG_AT45(x...) do {} while(0)
 #endif
 
 
-enum at45_power_state_t {
-  AT45_POWER_DEEP_DOWN    = 1,
-  AT45_POWER_STANDBY      = 2,
-  AT45_POWER_ACTIVE       = 3
-};
+/***************************************************/
+/** Flash internal data ****************************/
+/***************************************************/
 
+#define NANO   (1)
+#define MICRO  (1000)
+#define MILLI  (1000 * 1000)
+#define SECOND (1000 * 1000 * 1000)
 
-enum at45_opcode_t {
-  AT45_OP_NOP       = 0x00u,  /* nop                   */
-  AT45_OP_WREN      = 0x06u,  /* write enable          */
-  AT45_OP_WRDI      = 0x04u,  /* write disable         */
-  AT45_OP_RDSR      = 0x05u,  /* read status register  */
-  AT45_OP_WRSR      = 0x01u,  /* write status register */   
-  AT45_OP_READ      = 0x03u,  /* read                  */
-  AT45_OP_FAST_READ = 0x0Bu,  /* fast read             */
-  AT45_OP_PP        = 0x02u,  /* page program          */
-  AT45_OP_SE        = 0xd8u,  /* sector erase          */
-  AT45_OP_BE        = 0xc7u,  /* bulk erase            */
-  AT45_OP_DP        = 0xb9u,  /* deep power down       */
-  AT45_OP_RES       = 0xabu   /* release from DP       */
-};
+#define AT45_MAX_COMMAND_DATA 8
+
+#if defined(AT45DB041B)
+#define AT45_FLASH_SIZE           0x100000 /* */
+#define AT45_PAGE_MAX             2048
+#define AT45_PAGE_SIZE            264
+#define AT45_BLOCK_MAX            256
+#define AT45_PAGE_PER_BLOCK       8
+#define AT45_HIGH_ADDR_MASK       0x0f     /* 4 bits unused */
+#define AT45_DENSITY_BIT_0        1
+#define AT45_DENSITY_BIT_1        1
+#define AT45_DENSITY_BIT_2        1
+#define AT45_DENSITY_BIT_3        0
+
+#define AT45_TIME_RESET        (20  * MILLI)
+#define AT45_TIME_TXFR         (250 * MICRO) /* transfer        */
+#define AT45_TIME_TEP          (20  * MILLI) /* erase + program */
+#define AT45_TIME_TP           (14  * MILLI) /* program         */
+#define AT45_TIME_TPE          (8   * MILLI) /* page erase      */
+#define AT45_TIME_TBE          (12  * MILLI) /* block erase     */
+#else
+#error "you must define a specific Atmel flash model"
+#endif
+
+/*
+ * BFA8 - BFA0            == buffer address
+ * PA10 - PA0 + BA8 - BA0 == page address + byte address
+ * 
+ * this model considers that all 4 access modes are equal
+ *     Inactive Clock Polarity Low or Inactive Clock Polarity High and SPI Mode 0 or SPI Mode 3.
+ * 
+ * 
+ * read commands:
+ *      continuous   == 68|E8 + 24bits + 32bits_dont_care
+ *                             24 bits == xxx+11bits+9bits
+ *      page read    == 52|D2 + 24b(4+11+9)           + 32b
+ *      buffer1 read == 54|D4 + 15b don'tcare + 9bits + 8b
+ *      buffer2 read == 56|D6 + 15b don'tcare + 9bits + 8b
+ *      SR           == 57|D7 + repeat
+ *
+ * erase commands:
+ *    SI --> bufferx
+ *      write buffer1 == 84 + 15b don'tcare + 9bits
+ *      write buffer2 == 87 + 15b don'tcare + 9bits
+ *    Bufferx --> Page + builtin erase
+ *      buffer1       == 83 + 4+11bits + 9b don'tcare (time TEP)
+ *      buffer2       == 86 + 4+11bits + 9b don'tcare (time TEP)
+ *    Bufferx --> Page without erase
+ *      buffer1       == 88 + 4+11bits + 9b don'tcare (time TP)
+ *      buffer2       == 89 + 4+11bits + 9b don'tcare (time TP)
+ *    
+ *    Page erase  == 81 + 4 + 11bits + 9b don'tcare   (time TPE)
+ *    Block erase == 50 + 4 + 8bits + 12bdon'tcare    (time TBE)
+ * 
+ *  Buffer + page program with erase
+ *    buffer1 == 82 + 4+20, writing at end of command       (buffer write + time TEP)
+ *    buffer2 == 85
+ *
+ * Copy:
+ *    page to buffer1 == 53 + 4+11+9don'tcare (time TXFR)
+ *    page to buffer2 == 55 + 4+11+9don'tcare (time TXFR)
+ * 
+ * Compare:
+ *    page to buffer1 == 60 + 4+11+9don'tcare (time TXFR)
+ *    page to buffer2 == 61 + 4+11+9don'tcare (time TXFR)
+ *
+ * Multiple rewrite
+ *    combo :: page to buffer + buffer to page with built in erase
+ *      buffer1 == 58 + 4+11+9don'tcare  (time TEP)
+ *      buffer2 == 59 + 4+11+9don'tcare  (time TEP)
+
+  write()
+    updates internal data
+
+  update()
+    switch (op)
+    updates read value;
+
+  read()
+    sends data to mcu
+
+ */
 
 
 #if defined(WORDS_BIGENDIAN)
 struct __attribute__ ((packed))  at45_status_t {
   uint8_t
-    srwd:1,
+    ready:1,    /* MSB */
+    comp:1,
+    density3:1,
+    density2:1,
+    density1:1,
+    density0:1,
     unused1:1,
-    unused2:1,
-    bp2:1,
-    bp1:1,
-    bp0:1,
-    wel:1,
-    wip:1;
+    unused0:1;
 };
 #else
 struct __attribute__ ((packed)) at45_status_t {
   uint8_t
-    wip:1,
-    wel:1,
-    bp0:1,
-    bp1:1,
-    bp2:1,
-    unused2:1,
+    unused0:1,
     unused1:1,
-    srwd:1;
+    density0:1,
+    density1:1,
+    density2:1,
+    density3:1,
+    comp:1,
+    ready:1;
 };
 #endif
 
-#if defined(DEBUG)
+enum at45_opcode_t {
+  AT45_OP_NOP              = 0x00,  /* nop                   */
+
+  /* read */
+  AT45_OP_CONTREAD_1       = 0x68,
+  AT45_OP_CONTREAD_2       = 0xE8,
+  AT45_OP_PAGE_READ_1      = 0x52,
+  AT45_OP_PAGE_READ_2      = 0xD2,
+  AT45_OP_BUFFER1_READ_1   = 0x54,
+  AT45_OP_BUFFER1_READ_2   = 0xD4,
+  AT45_OP_BUFFER2_READ_1   = 0x56,
+  AT45_OP_BUFFER2_READ_2   = 0xD6,
+  AT45_OP_STATUS_READ_1    = 0x57,
+  AT45_OP_STATUS_READ_2    = 0xD7,
+
+  /* erase */
+  AT45_OP_SI_TO_BUFFER1    = 0x84,
+  AT45_OP_SI_TO_BUFFER2    = 0x87,
+
+  AT45_OP_BUFFER1_WI_ERASE = 0x83,
+  AT45_OP_BUFFER2_WI_ERASE = 0x86,
+  AT45_OP_BUFFER1_WO_ERASE = 0x88,
+  AT45_OP_BUFFER2_WO_ERASE = 0x89,
+
+  AT45_OP_PAGE_ERASE       = 0x81,
+  AT45_OP_BLOCK_ERASE      = 0x50,
+
+  /* erase buffer + page program with erase */
+  AT45_OP_SI_BUFFER1_PPE   = 0x82,
+  AT45_OP_SI_BUFFER2_PPE   = 0x85,
+
+  /* copy / compare */
+  AT45_OP_COPY_BUFFER1     = 0x53,
+  AT45_OP_COPY_BUFFER2     = 0x55,
+  AT45_OP_COMP_BUFFER1     = 0x60,
+  AT45_OP_COMP_BUFFER2     = 0x61,
+
+  /* multiple rewrite */
+  AT45_OP_MULTI_BUFFER1    = 0x58,
+  AT45_OP_MULTI_BUFFER2    = 0x59
+};
+
 const char* str_cmd(int n)
 {
   switch (n)
     {
-    case AT45_OP_WREN:      return "WREN";
-    case AT45_OP_WRDI:      return "WRDI";
-    case AT45_OP_RDSR:      return "RDSR";
-    case AT45_OP_WRSR:      return "WRSR";
-    case AT45_OP_READ:      return "READ";
-    case AT45_OP_FAST_READ: return "FAST READ";
-    case AT45_OP_PP:        return "PAGE PROGRAM";
-    case AT45_OP_SE:        return "SECTOR ERASE";
-    case AT45_OP_BE:        return "BULK ERASE";
-    case AT45_OP_DP:        return "DEEP POWER";
-    case AT45_OP_RES:       return "RES";
+    case AT45_OP_NOP             : return "AT45_OP_NOP"              ;
+
+      /* read */
+    case AT45_OP_CONTREAD_1      : return "AT45_OP_CONTREAD"         ;
+    case AT45_OP_CONTREAD_2      : return "AT45_OP_CONTREAD"         ;
+    case AT45_OP_PAGE_READ_1     : return "AT45_OP_PAGE_READ"        ;
+    case AT45_OP_PAGE_READ_2     : return "AT45_OP_PAGE_READ"        ;
+    case AT45_OP_BUFFER1_READ_1  : return "AT45_OP_BUFFER1_READ"     ;
+    case AT45_OP_BUFFER1_READ_2  : return "AT45_OP_BUFFER1_READ"     ;
+    case AT45_OP_BUFFER2_READ_1  : return "AT45_OP_BUFFER2_READ"     ;
+    case AT45_OP_BUFFER2_READ_2  : return "AT45_OP_BUFFER2_READ"     ;
+    case AT45_OP_STATUS_READ_1   : return "AT45_OP_STATUS_READ"      ;
+    case AT45_OP_STATUS_READ_2   : return "AT45_OP_STATUS_READ"      ;
+
+      /* erase */
+    case AT45_OP_SI_TO_BUFFER1   : return "AT45_OP_SI_TO_BUFFER1"    ;
+    case AT45_OP_SI_TO_BUFFER2   : return "AT45_OP_SI_TO_BUFFER2"    ;
+
+    case AT45_OP_BUFFER1_WI_ERASE: return "AT45_OP_BUFFER1_WI_ERASE" ;
+    case AT45_OP_BUFFER2_WI_ERASE: return "AT45_OP_BUFFER2_WI_ERASE" ;
+    case AT45_OP_BUFFER1_WO_ERASE: return "AT45_OP_BUFFER1_WO_ERASE" ;
+    case AT45_OP_BUFFER2_WO_ERASE: return "AT45_OP_BUFFER1_WO_ERASE" ;
+
+    case AT45_OP_PAGE_ERASE      : return "AT45_OP_PAGE_ERASE"       ;
+    case AT45_OP_BLOCK_ERASE     : return "AT45_OP_BLOCK_ERASE"      ;
+
+      /* erase buffer + page program with erase */
+    case AT45_OP_SI_BUFFER1_PPE  : return "AT45_OP_SI_BUFFER1_PPE"   ;
+    case AT45_OP_SI_BUFFER2_PPE  : return "AT45_OP_SI_BUFFER2_PPE"   ;
+
+      /* copy / compare */
+    case AT45_OP_COPY_BUFFER1    : return "AT45_OP_COPY_BUFFER1"     ;
+    case AT45_OP_COPY_BUFFER2    : return "AT45_OP_COPY_BUFFER2"     ;
+    case AT45_OP_COMP_BUFFER1    : return "AT45_OP_COMP_BUFFER1"     ;
+    case AT45_OP_COMP_BUFFER2    : return "AT45_OP_COMP_BUFFER2"     ;
+
+      /* multiple rewrite */
+    case AT45_OP_MULTI_BUFFER1   : return "AT45_OP_MULTI_BUFFER1"    ;
+    case AT45_OP_MULTI_BUFFER2   : return "AT45_OP_MULTI_BUFFER2"    ;
+
     default:               return "UNKNOWN";
     }
   return "UNKNOWN";
 }
-#endif
 
-/***************************************************/
-/** Flash internal data ****************************/
-/***************************************************/
+int at45db_needed_data(int cmd)
+{
+  switch (cmd) {
+  case AT45_OP_NOP               : return 0;
+  case AT45_OP_CONTREAD_1        :
+  case AT45_OP_CONTREAD_2        : return 3+4;
+  case AT45_OP_PAGE_READ_1       :
+  case AT45_OP_PAGE_READ_2       : return 3+4;
+  case AT45_OP_BUFFER1_READ_1    :
+  case AT45_OP_BUFFER1_READ_2    : return 3;
+  case AT45_OP_BUFFER2_READ_1    :
+  case AT45_OP_BUFFER2_READ_2    : return 3;
+  case AT45_OP_STATUS_READ_1     :
+  case AT45_OP_STATUS_READ_2     : return 0;
+  case AT45_OP_SI_TO_BUFFER1     : 
+  case AT45_OP_SI_TO_BUFFER2     : return 3;
+  case AT45_OP_BUFFER1_WI_ERASE  : 
+  case AT45_OP_BUFFER2_WI_ERASE  : return 3;
+  case AT45_OP_BUFFER1_WO_ERASE  : 
+  case AT45_OP_BUFFER2_WO_ERASE  : return 3;
+  case AT45_OP_PAGE_ERASE        : return 3;
+  case AT45_OP_BLOCK_ERASE       : return 3;
+  case AT45_OP_SI_BUFFER1_PPE    : 
+  case AT45_OP_SI_BUFFER2_PPE    : return 3;
+  case AT45_OP_COPY_BUFFER1      : 
+  case AT45_OP_COPY_BUFFER2      : return 3;
+  case AT45_OP_COMP_BUFFER1      : 
+  case AT45_OP_COMP_BUFFER2      : return 3;
+  case AT45_OP_MULTI_BUFFER1     : 
+  case AT45_OP_MULTI_BUFFER2     : return 3;
+  default:               return 0;
+  }
+  return 0;
+}
 
-/**
- * 8 MB of Flash Memory
- * Page Program (up to 256 Bytes) in 1.4ms (typical)
- * Sector Erase (512 Kbit) in 1s (typical)
- * Bulk Erase (8 Mbit) in 10s (typical)
- * 2.7 to 3.6V Single Supply Voltage
- * SPI Bus Compatible Serial Interface
- * 40MHz Clock Rate (maximum)
- * Deep Power-down Mode 1µA (typical)
- * Electronic Signature (13h)
- * Packages
- * ­ ECOPACK® (RoHS compliant)
- */
+int at45db_need_to_complete(int cmd)
+{
+  switch (cmd) {
+  case AT45_OP_NOP               : return 0;
+  case AT45_OP_CONTREAD_1        :
+  case AT45_OP_CONTREAD_2        : return 0;
+  case AT45_OP_PAGE_READ_1       :
+  case AT45_OP_PAGE_READ_2       : return 0;
+  case AT45_OP_BUFFER1_READ_1    :
+  case AT45_OP_BUFFER1_READ_2    : return 0;
+  case AT45_OP_BUFFER2_READ_1    :
+  case AT45_OP_BUFFER2_READ_2    : return 0;
+  case AT45_OP_STATUS_READ_1     :
+  case AT45_OP_STATUS_READ_2     : return 0;
+  case AT45_OP_SI_TO_BUFFER1     : 
+  case AT45_OP_SI_TO_BUFFER2     : return 0;
+  case AT45_OP_BUFFER1_WI_ERASE  : 
+  case AT45_OP_BUFFER2_WI_ERASE  : return 1;
+  case AT45_OP_BUFFER1_WO_ERASE  : 
+  case AT45_OP_BUFFER2_WO_ERASE  : return 1;
+  case AT45_OP_PAGE_ERASE        : return 1;
+  case AT45_OP_BLOCK_ERASE       : return 1;
+  case AT45_OP_SI_BUFFER1_PPE    : 
+  case AT45_OP_SI_BUFFER2_PPE    : return 1;
+  case AT45_OP_COPY_BUFFER1      : 
+  case AT45_OP_COPY_BUFFER2      : return 1;
+  case AT45_OP_COMP_BUFFER1      : 
+  case AT45_OP_COMP_BUFFER2      : return 1;
+  case AT45_OP_MULTI_BUFFER1     : 
+  case AT45_OP_MULTI_BUFFER2     : return 0;
+  default:               return 0;
+  }
+  return 0;
+}
 
-#define AT45_FLASH_SIZE           0x100000
-#define AT45_SECTOR_MAX           16
-#define AT45_SECTOR_SIZE          65536
-#define AT45_PAGE_MAX             4096
-#define AT45_PAGE_SIZE            264
-
-#define AT45_MAX_COMMAND_DATA     100
-#define AT45_ELECTRONIC_SIGNATURE 0x13
+int at45db_busy_time(int cmd)
+{
+  switch (cmd) {
+  case AT45_OP_NOP               : return 0;
+  case AT45_OP_CONTREAD_1        :
+  case AT45_OP_CONTREAD_2        : return 0;
+  case AT45_OP_PAGE_READ_1       :
+  case AT45_OP_PAGE_READ_2       : return 0;
+  case AT45_OP_BUFFER1_READ_1    :
+  case AT45_OP_BUFFER1_READ_2    : return 0;
+  case AT45_OP_BUFFER2_READ_1    :
+  case AT45_OP_BUFFER2_READ_2    : return 0;
+  case AT45_OP_STATUS_READ_1     :
+  case AT45_OP_STATUS_READ_2     : return 0;
+  case AT45_OP_SI_TO_BUFFER1     : 
+  case AT45_OP_SI_TO_BUFFER2     : return 0;
+  case AT45_OP_BUFFER1_WI_ERASE  : 
+  case AT45_OP_BUFFER2_WI_ERASE  : return AT45_TIME_TEP;
+  case AT45_OP_BUFFER1_WO_ERASE  : 
+  case AT45_OP_BUFFER2_WO_ERASE  : return AT45_TIME_TP;
+  case AT45_OP_PAGE_ERASE        : return AT45_TIME_TPE;
+  case AT45_OP_BLOCK_ERASE       : return AT45_TIME_TBE;
+  case AT45_OP_SI_BUFFER1_PPE    : 
+  case AT45_OP_SI_BUFFER2_PPE    : return AT45_TIME_TEP;
+  case AT45_OP_COPY_BUFFER1      : 
+  case AT45_OP_COPY_BUFFER2      : return AT45_TIME_TXFR;
+  case AT45_OP_COMP_BUFFER1      : 
+  case AT45_OP_COMP_BUFFER2      : return AT45_TIME_TXFR;
+  case AT45_OP_MULTI_BUFFER1     : 
+  case AT45_OP_MULTI_BUFFER2     : return AT45_TIME_TEP;
+  default:               return 0;
+  }
+  return 0;
+}
 
 struct at45db_t 
 {
   union {
     struct at45_status_t b;
-    uint8_t             s;
+    uint8_t              s;
   } status_register;
 
-  uint8_t select_bit;           /* chip select   */
-  uint8_t write_protect_bit;    /* write protect */
+  uint8_t pin_select;           /* IN: chip select   */
+  uint8_t pin_write_protect;    /* IN: write protect */
+  uint8_t pin_reset;            /* IN:  */
+  //  uint8_t pin_ready;            /* OUT: */
 
   uint8_t buffer1[AT45_PAGE_SIZE];
   uint8_t buffer2[AT45_PAGE_SIZE];
 
   union {
     uint8_t raw   [AT45_FLASH_SIZE];
-    uint8_t sector[AT45_SECTOR_MAX][AT45_SECTOR_SIZE];
     uint8_t page  [AT45_PAGE_MAX][AT45_PAGE_SIZE];
   } mem;
 
-  enum at45_power_state_t  power_mode;
-  enum at45_opcode_t       command;
-
-  int32_t                  command_needed_data;
-  uint32_t                 command_pointer;
-
-  uint8_t                  command_need_to_complete;
-  uint8_t                  command_stored_data[AT45_MAX_COMMAND_DATA];
-  uint8_t                  dummy_write_for_read;
-  uint8_t                  command_read_byte;
+  enum at45_opcode_t   command;  /* current command */
+  int                  command_next;
+  int                  command_needed_data;
+  uint32_t             command_need_to_complete;
+  uint32_t             command_stored_data[AT45_MAX_COMMAND_DATA];
+  uint32_t             command_page_addr;
+  uint32_t             command_addr;
+  int                  command_start;
 
   /* data just written */
-  uint8_t data_buffer;
-  uint8_t data_buffer_ok;
+  uint32_t              write_mask;
+  uint32_t              write_data;
+  uint8_t               write_byte_value;
+  uint8_t               write_byte_valid;
 
   /* data to be read */
-  uint8_t data_ready;
-  uint8_t data_val;
-  
-  /* busy timing */
-  uint64_t end_of_busy_time;
+  uint32_t              read_mask;
+  uint32_t              read_data;
 
-  /* clock pin : unused */
-  uint8_t clock;
+  /* busy timing */
+  uint64_t              busy_time;
+  uint64_t              end_of_busy_time;
+
+  int                   compare_value;
+  int                   compare_update;
 
   /* file names */
-  char *file_init;
-  char *file_dump;
+  char                * file_init;
+  char                * file_dump;
 };
 
 #define AT45_DATA        ((struct at45db_t*)(machine.device[dev].data))
+#define AT45_SR          (AT45_DATA->status_register)
 #define AT45_MEMRAW      (AT45_DATA->mem.raw   )
 #define AT45_MEMSECTOR   (AT45_DATA->mem.sector)
 #define AT45_MEMPAGE     (AT45_DATA->mem.page  )
 #define AT45_INIT        (AT45_DATA->file_init )
 #define AT45_DUMP        (AT45_DATA->file_dump )
 
+#define AT45_READ_MASK   (AT45_DATA->read_mask)
+#define AT45_READ_DATA   (AT45_DATA->read_data)
 /***************************************************/
 /** Flash external entry points ********************/
 /***************************************************/
@@ -192,6 +414,9 @@ int  at45db_ui_draw     (int dev);
 void at45db_ui_get_size (int dev, int *w, int *h);
 void at45db_ui_set_pos  (int dev, int  x, int  y);
 void at45db_ui_get_pos  (int dev, int *x, int *y);
+
+void at45db_write_buffer_with_erase(int dev, uint8_t *buffer);
+void at45db_write_buffer_without_erase(int dev, uint8_t *buffer);
 
 /***************************************************/
 /***************************************************/
@@ -317,15 +542,14 @@ int at45db_device_create(int dev, int UNUSED id)
 
   AT45_INIT = flash_init_opt.value;
   AT45_DUMP = flash_dump_opt.value;
-
+  
   if (AT45_INIT == NULL || at45db_flash_load(dev, AT45_INIT))
     {
       HW_DMSG_AT45("at45db: flash memory init to 0xff\n");
       memset(AT45_MEMRAW,0xff,AT45_FLASH_SIZE);
     }
 
-  TRACER_AT45DB_STATE = tracer_event_add_id(8, "state" , "at45db");
-  //  tracer_event_add_id(TRACER_AT45DB_FUNC,  8, "at45db_state" , "");
+  //  TRACER_AT45DB_STATE = tracer_event_add_id(8, "state" , "at45db");
 
   return 0;
 }
@@ -338,14 +562,23 @@ int at45db_reset(int dev)
 {
   HW_DMSG_AT45("at45db: flash reset\n");
   AT45_DATA->command                  = AT45_OP_NOP;
+  AT45_DATA->busy_time                = 0;
+  AT45_DATA->end_of_busy_time         = 0;
   AT45_DATA->command_need_to_complete = 0;
+  AT45_DATA->compare_update           = 0;
   AT45_DATA->status_register.s        = 0;
-  AT45_DATA->power_mode               = AT45_POWER_STANDBY;
+  AT45_DATA->write_mask               = 0;
+  AT45_DATA->write_byte_valid         = 0;
+  AT45_DATA->read_mask                = 0;
 
-  tracer_event_record(TRACER_AT45DB_STATE, AT45_POWER_STANDBY);
-  etracer_slot_event(ETRACER_PER_ID_AT45DB,
-		     ETRACER_PER_EVT_MODE_CHANGED,
-		     ETRACER_AT45DB_POWER_STANDBY, 0);
+  AT45_SR.b.ready    = 1;
+  AT45_SR.b.comp     = 0;
+  AT45_SR.b.density3 = AT45_DENSITY_BIT_3;
+  AT45_SR.b.density2 = AT45_DENSITY_BIT_2;
+  AT45_SR.b.density1 = AT45_DENSITY_BIT_1;
+  AT45_SR.b.density0 = AT45_DENSITY_BIT_0;
+  AT45_SR.b.unused1  = 0;
+  AT45_SR.b.unused0  = 0;
 
   return 0;
 }
@@ -378,29 +611,6 @@ int at45db_delete(int dev)
 /***************************************************/
 /***************************************************/
 
-void at45db_error_dump_internal_state(int UNUSED dev)
-{
-#if defined(DEBUG_ME_HARDER)
-  HW_DMSG_AT45("at45db: Power mode %d\n",AT45_DATA->power_mode);
-  HW_DMSG_AT45("at45db: Command 0x%02x\n",AT45_DATA->command);
-  HW_DMSG_AT45("at45db: need complete %d\n",AT45_DATA->command_need_to_complete);
-  HW_DMSG_AT45("at45db: select %d write protect %d\n",
-	      AT45_DATA->select_bit,AT45_DATA->write_protect_bit);
-  HW_DMSG_AT45("at45db: status register wip  %d\n",AT45_DATA->status_register.b.wip); 
-  HW_DMSG_AT45("at45db:                 wel  %d\n",AT45_DATA->status_register.b.wel); 
-  HW_DMSG_AT45("at45db:                 bp0  %d\n",AT45_DATA->status_register.b.bp0);
-  HW_DMSG_AT45("at45db:                 bp1  %d\n",AT45_DATA->status_register.b.bp1);
-  HW_DMSG_AT45("at45db:                 bp2  %d\n",AT45_DATA->status_register.b.bp2);
-  HW_DMSG_AT45("at45db:                 u2   %d\n",AT45_DATA->status_register.b.unused2);
-  HW_DMSG_AT45("at45db:                 u1   %d\n",AT45_DATA->status_register.b.unused1);
-  HW_DMSG_AT45("at45db:                 srwd %d\n",AT45_DATA->status_register.b.srwd);
-#endif
-}
-
-/***************************************************/
-/***************************************************/
-/***************************************************/
-
 int at45db_power_up(int UNUSED dev)
 {
   /* power up timing doc page 27 */
@@ -418,856 +628,36 @@ int at45db_power_down(int UNUSED dev)
 /***************************************************/
 /***************************************************/
 
-static void at45db_set_write_time(int dev, uint64_t nano)
+static void at45db_set_busy_time(int dev, uint64_t nano)
 {
-  AT45_DATA->status_register.b.wip = 1;
-  AT45_DATA->end_of_busy_time      = MACHINE_TIME_GET_NANO() + nano;
-  HW_DMSG_AT45("at45db: flash busyflag delays %"PRIu64" cycles\n",AT45_DATA->end_of_busy_time);
+  AT45_DATA->busy_time = nano;
 }
 
-/***************************************************/
-/***************************************************/
-/***************************************************/
-
-#define NANO   (1)
-#define MICRO  (1000)
-#define MILLI  (1000 * 1000)
-#define SECOND (1000 * 1000 * 1000)
-
-#define AT45DB_Grade6
-
-// device grade 6 : times in micro seconds
-// 
-#if defined(AT45DB_Grade6)
-#  define Freq_max                   40
-#  define TIME_WRITE_STATUS_REGISTER (5    * MILLI)
-#  define TIME_PAGE_PROGRAM          (1400 * MICRO)
-#  define TIME_SECTOR_ERASE          ( 1000000000ull) /*  1 s */
-#  define TIME_BULK_ERASE            (10000000000ull) /* 10 s */
-/*                                      aaabbbccc             */
-#elif defined(AT45DB_Grade3)
-#  define Freq_max                   25
-#  define TIME_WRITE_STATUS_REGISTER (8    * MILLI)
-#  define TIME_PAGE_PROGRAM          (1500 * MICRO)
-#  define TIME_SECTOR_ERASE          ( 1000000000ull) /*  1 s */
-#  define TIME_BULK_ERASE            (10000000000ull) /* 10 s */
-#else
-#  error "must define speed grade for Flash memory AT45DB"
-#endif
-
-/***************************************************/
-/***************************************************/
-/***************************************************/
-
-static void at45db_erase_sector(int dev, uint32_t address)
+static void at45db_start_write(int dev)
 {
-  /*
-    case 0: // unprotected 
-    case 1: // sector 15 is protected
-    case 2: // sectors 14 and 15 are protected
-    case 3: // sectors 12 to  15 are protected
-    case 4: // sectors  8 to  15 are protected
-    case 5: // sectors 0 to 15 are protected (all)
-    case 6: // sectors 0 to 15 are protected (all)
-    case 7: // sectors 0 to 15 are protected (all)
-  */
-
-  int sector;
-  int protbits;
-  int protection_base[] = { 16, 15, 14, 12, 8, -1, -1, -1 }; 
-
-  sector   = address / AT45_SECTOR_SIZE;
-  protbits = AT45_DATA->status_register.b.bp1 << 2 |
-             AT45_DATA->status_register.b.bp1 << 1 |
-             AT45_DATA->status_register.b.bp0;
-
-  at45db_set_write_time(dev,TIME_SECTOR_ERASE);
-  HW_DMSG_AT45("at45db:  sector %d erase (address=0x%06x)\n",address / AT45_SECTOR_SIZE, address);
-
-  if (sector >= protection_base[protbits])
-    {
-      ERROR      ("at45db: protection error : sector %d protected by bpx bits\n",sector);
-      HW_DMSG_AT45("at45db: protection error : sector %d protected by bpx bits\n",sector);
-    }
-
-  memset(AT45_MEMSECTOR[address / AT45_SECTOR_SIZE],0xff,AT45_SECTOR_SIZE);
+  AT45_DATA->status_register.b.ready = 0;
+  AT45_DATA->end_of_busy_time        = MACHINE_TIME_GET_NANO() + AT45_DATA->busy_time;
+  HW_DMSG_AT45("at45db:    ============================\n");
+  HW_DMSG_AT45("at45db:    AT45DB busyflag start write \n");
+  HW_DMSG_AT45("at45db:    ============================\n");
 }
-
-/***************************************************/
-/***************************************************/
-/***************************************************/
-
-static void at45db_erase_bulk(int dev)
-{
-  int protbits;
-
-  at45db_set_write_time(dev,TIME_BULK_ERASE);
-  HW_DMSG_AT45("at45db:  bulk erase\n");
-
-  protbits = AT45_DATA->status_register.b.bp1 << 2 |
-             AT45_DATA->status_register.b.bp1 << 1 |
-             AT45_DATA->status_register.b.bp0;
-  if (protbits)
-    {
-      ERROR("at45db: protection error = bulk erase with bp0|bp1|bp2 > 0\n");
-      HW_DMSG_AT45("at45db: protection error = bulk erase with bp0|bp1|bp2 > 0\n");
-    }
-  memset(AT45_MEMRAW,0xff,AT45_FLASH_SIZE);
-}
-
-/***************************************************/
-/***************************************************/
-/***************************************************/
-
-static void at45db_write_status_register(int dev, uint8_t value)
-{
-  /* WRSR has no effect on b6, b5, b1 and b0 */
-  AT45_DATA->status_register.s |= (~0x63 & value);
-  at45db_set_write_time(dev,TIME_WRITE_STATUS_REGISTER);	      
-}
-
-/***************************************************/
-/***************************************************/
-/***************************************************/
-
-/*
- * read is done only on a junk write
- *
- */
-
-void at45db_read(int dev, uint32_t *mask, uint32_t *value)
-{
-  if ((AT45_DATA->select_bit == 1) && (AT45_DATA->power_mode == AT45_POWER_ACTIVE))
-    {
-
-      if ((AT45_DATA->dummy_write_for_read == 1) && (AT45_DATA->command_read_byte == 0))
-	{
-	  AT45_DATA->command_read_byte    = 0;
-	  AT45_DATA->dummy_write_for_read = 0;
-	  switch (AT45_DATA->command)
-	    {
-	    case AT45_OP_RDSR:
-	      *mask  = AT45DB_D;
-	      *value = AT45_DATA->status_register.s & 0xff; 
-	      HW_DMSG_AT45("at45db: read status register = 0x%02x\n", *value);
-	      etracer_slot_event(ETRACER_PER_ID_AT45DB, ETRACER_PER_EVT_WRITE_COMMAND, 
-				 ETRACER_PER_ARG_WR_SRC | ETRACER_ACCESS_LVL_SPI1, 0);
-	      
-	      break;
-	      
-	    case AT45_OP_READ:
-	      /* we need to slow down READ to adjust to f_R output frequency    */
-	      /* f_R is 40MHz to 25MHz, should be ok until we get newer devices */
-	      if (AT45_DATA->command_needed_data < 0)
-		{
-		  *mask  = AT45DB_D;
-		  *value = AT45_MEMRAW[AT45_DATA->command_pointer];
-		  HW_DMSG_AT45("at45db: read [0x%06x] = 0x%02x\n",AT45_DATA->command_pointer, *value);
-		  etracer_slot_event(ETRACER_PER_ID_AT45DB,	 ETRACER_PER_EVT_WRITE_COMMAND, 
-				     ETRACER_PER_ARG_WR_SRC | ETRACER_ACCESS_LVL_SPI1, 0);
-		  
-		  AT45_DATA->command_pointer ++;
-		  if (AT45_DATA->command_pointer == AT45_FLASH_SIZE)
-		    {
-		      AT45_DATA->command_pointer = 0;
-		    }
-		}
-	      else
-		{
-		  *mask  = AT45DB_D;
-		  *value = 0;
-		  HW_DMSG_AT45("at45db: read (dummy read, flash sends 0, needed %d)\n",
-			      AT45_DATA->command_needed_data);
-		  etracer_slot_event(ETRACER_PER_ID_AT45DB,	 ETRACER_PER_EVT_WRITE_COMMAND, 
-				     ETRACER_PER_ARG_WR_SRC | ETRACER_ACCESS_LVL_SPI1, 0);
-		}
-	      break;
-	      
-	    case AT45_OP_FAST_READ:
-	      /* fast read is driven by the READ_DEV_TO_SPI clock speed */
-	      /* limited to f_C, same as above on frequencies           */
-	      if (AT45_DATA->command_needed_data < 0)
-		{
-		  *mask  = AT45DB_D;
-		  *value = AT45_MEMRAW[AT45_DATA->command_pointer];
-		  HW_DMSG_AT45("at45db: fast read [0x%06x] = 0x%02x\n",AT45_DATA->command_pointer, *value);
-		  etracer_slot_event(ETRACER_PER_ID_AT45DB,	 ETRACER_PER_EVT_WRITE_COMMAND, 
-				     ETRACER_PER_ARG_WR_SRC | ETRACER_ACCESS_LVL_SPI1, 0);
-		  AT45_DATA->command_pointer ++;
-		  if (AT45_DATA->command_pointer == AT45_FLASH_SIZE)
-		    {
-		      AT45_DATA->command_pointer = 0;
-		    }
-		}
-	      else
-		{
-		  *mask  = AT45DB_D;
-		  *value = 0;
-		  HW_DMSG_AT45("at45db: fast read (dummy read, flash sends 0, needed %d)\n",
-			      AT45_DATA->command_needed_data);
-		  etracer_slot_event(ETRACER_PER_ID_AT45DB,	 ETRACER_PER_EVT_WRITE_COMMAND, 
-				     ETRACER_PER_ARG_WR_SRC | ETRACER_ACCESS_LVL_SPI1, 0);
-		}
-	      break;
-	      
-	    case AT45_OP_RES:
-	      if (AT45_DATA->command_needed_data < 0)
-		{
-		  *mask  = AT45DB_D;
-		  *value = AT45_ELECTRONIC_SIGNATURE;
-		  HW_DMSG_AT45("at45db: read electronic signature = 0x%x\n",*value);
-		  etracer_slot_event(ETRACER_PER_ID_AT45DB,	 ETRACER_PER_EVT_WRITE_COMMAND, 
-				     ETRACER_PER_ARG_WR_SRC | ETRACER_ACCESS_LVL_SPI1, 0);
-		}
-	      else
-		{
-		  *mask  = AT45DB_D;
-		  *value = 0;
-		  HW_DMSG_AT45("at45db: read electronic signature (dummy read, flash sends 0, needed %d)\n",
-			      AT45_DATA->command_needed_data);
-		  etracer_slot_event(ETRACER_PER_ID_AT45DB,	 ETRACER_PER_EVT_WRITE_COMMAND, 
-				     ETRACER_PER_ARG_WR_SRC | ETRACER_ACCESS_LVL_SPI1, 0);
-		}
-	      break;
-	      
-	    default:
-	      HW_DMSG_AT45("at45db: read dummy in write response\n");
-	      *mask  = AT45DB_D;
-	      *value = 0;
-	      etracer_slot_event(ETRACER_PER_ID_AT45DB,	 ETRACER_PER_EVT_WRITE_COMMAND, 
-				 ETRACER_PER_ARG_WR_SRC | ETRACER_ACCESS_LVL_SPI1, 0);
-	      break;
-	    }
-	} // if ((AT45_DATA->dummy_write_for_read == 1) && (AT45_DATA->command_read_byte == 0))
-      else if (AT45_DATA->command_read_byte == 1)
-	{
-	  AT45_DATA->command_read_byte    = 0;
-	  AT45_DATA->dummy_write_for_read = 0;
-	  *mask  = AT45DB_D;
-	  *value = 0;
-	  HW_DMSG_AT45("at45db: read value that corresponds to command\n");
-	  etracer_slot_event(ETRACER_PER_ID_AT45DB,	 ETRACER_PER_EVT_WRITE_COMMAND, 
-			     ETRACER_PER_ARG_WR_SRC | ETRACER_ACCESS_LVL_SPI1, 0);
-	}
-      else 
-	{
-	  /* this is a hit for updates where CS and command are enabled */
-	  *mask  = 0;
-	  *value = 0;
-	}
-    }
-  else //   if ((AT45_DATA->select_bit == 1) && (AT45_DATA->power_mode == AT45_POWER_ACTIVE))
-    {
-      *mask  = 0;
-      *value = 0;
-    }
-
-  if (*mask != 0)
-    {
-      HW_DMSG_AT45("at45db:    read data [val=0x%02x,mask=0x%04x] \n", *value, *mask);
-    }
-
-}
-
-/***************************************************/
-/***************************************************/
-/***************************************************/
-
-#define CHECK_WIP                                                                       \
-do {                                                                                    \
-  if (AT45_DATA->status_register.b.wip == 1)                                             \
-    {                                                                                   \
-      ERROR      ("at45db: ===================================================\n");     \
-      ERROR      ("at45db: == AT45DB Command issued while Write In Progress ==\n");     \
-      ERROR      ("at45db: ===================================================\n");     \
-      HW_DMSG_AT45("at45db: ===================================================\n");     \
-      HW_DMSG_AT45("at45db: == AT45DB Command issued while Write In Progress ==\n");     \
-      HW_DMSG_AT45("at45db: ===================================================\n");     \
-    }                                                                                   \
-} while(0)
-
-#define CHECK_WEL                                                                       \
-do {                                                                                    \
-  if (AT45_DATA->status_register.b.wel == 0)                                             \
-    {                                                                                   \
-      ERROR      ("at45db: ======================================================\n");  \
-      ERROR      ("at45db: == AT45DB Command issued without Write Enable (WEL) ==\n");  \
-      ERROR      ("at45db: ======================================================\n");  \
-      HW_DMSG_AT45("at45db: ======================================================\n");  \
-      HW_DMSG_AT45("at45db: == AT45DB Command issued without Write Enable (WEL) ==\n");  \
-      HW_DMSG_AT45("at45db: ======================================================\n");  \
-    }                                                                                   \
-} while(0)
-
-#define CHECK_COMMAND_ARGS                                                              \
-do {                                                                                    \
-  if (AT45_DATA->command_needed_data > 0)                                                \
-    {                                                                                   \
-      ERROR      ("at45db: ===============================================\n");         \
-      ERROR      ("at45db: == AT45DB Command terminated too early by CS ==\n");         \
-      ERROR      ("at45db: ===============================================\n");         \
-      HW_DMSG_AT45("at45db: ===============================================\n");         \
-      HW_DMSG_AT45("at45db: == AT45DB Command terminated too early by CS ==\n");         \
-      HW_DMSG_AT45("at45db: ===============================================\n");         \
-    }                                                                                   \
-} while(0)
-
-/***************************************************/
-/***************************************************/
-/***************************************************/
-
-void at45db_write_spidata(int dev, uint32_t mask, uint32_t value)
-{
-
-  if (AT45_DATA->command_need_to_complete == 0)
-    {
-      AT45_DATA->data_buffer    = (value & AT45DB_D);
-      AT45_DATA->data_buffer_ok = 1;
-      AT45_DATA->dummy_write_for_read = 1;
-      //HW_DMSG_AT45("at45db:    write data to flash 0x%02x\n",AT45_DATA->data_buffer);
-      
-      switch (AT45_DATA->power_mode)
-	{
-	case AT45_POWER_ACTIVE:
-	  /*********************************************************/
-	  /* stay active : take a look if we just have had a write */
-	  /*   we start a new command by going out of NOP          */
-	  /*********************************************************/
-	  switch (AT45_DATA->command)
-	    {
-	    case AT45_OP_NOP:
-	      /* ========== */
-	      AT45_DATA->command_read_byte = 1;
-	      AT45_DATA->command = AT45_DATA->data_buffer;
-	      switch (AT45_DATA->data_buffer)
-		{
-		case AT45_OP_WREN:
-		  HW_DMSG_AT45("at45db:    =====================\n");
-		  HW_DMSG_AT45("at45db:    starting WREN command\n");
-		  HW_DMSG_AT45("at45db:    =====================\n");
-		  CHECK_WIP;
-		  AT45_DATA->command_need_to_complete   = 1;
-		  break;
-		case AT45_OP_WRDI:
-		  HW_DMSG_AT45("at45db:    =====================\n");
-		  HW_DMSG_AT45("at45db:    starting WRDI command\n");
-		  HW_DMSG_AT45("at45db:    =====================\n");
-		  CHECK_WIP;
-		  AT45_DATA->command_need_to_complete   = 1;
-		  break;
-		case AT45_OP_RDSR: 
-		  HW_DMSG_AT45("at45db:    =====================\n");
-		  HW_DMSG_AT45("at45db:    starting RDSR command\n");
-		  HW_DMSG_AT45("at45db:    =====================\n");
-		  AT45_DATA->command_need_to_complete   = 0;
-		  etracer_slot_event(ETRACER_PER_ID_AT45DB,
-				     ETRACER_PER_EVT_MODE_CHANGED,
-				     ETRACER_AT45DB_POWER_READ, 0);
-		  break;
-		case AT45_OP_WRSR:
-		  HW_DMSG_AT45("at45db:    =====================\n");
-		  HW_DMSG_AT45("at45db:    starting WRSR command\n");
-		  HW_DMSG_AT45("at45db:    =====================\n");
-		  CHECK_WIP;
-		  CHECK_WEL;
-		  AT45_DATA->command_needed_data        = 1;
-		  etracer_slot_event(ETRACER_PER_ID_AT45DB,
-				     ETRACER_PER_EVT_MODE_CHANGED,
-				     ETRACER_AT45DB_POWER_WRITE, 0);
-		  break;
-		case AT45_OP_READ: 
-		  CHECK_WIP;
-		  HW_DMSG_AT45("at45db:    =====================\n");
-		  HW_DMSG_AT45("at45db:    starting READ command\n");
-		  HW_DMSG_AT45("at45db:    =====================\n");
-		  AT45_DATA->command_needed_data        = 3;
-		  etracer_slot_event(ETRACER_PER_ID_AT45DB,
-				     ETRACER_PER_EVT_MODE_CHANGED,
-				     ETRACER_AT45DB_POWER_READ, 0);
-		  break;
-		case AT45_OP_FAST_READ:
-		  CHECK_WIP;
-		  HW_DMSG_AT45("at45db:    ==========================\n");
-		  HW_DMSG_AT45("at45db:    starting FAST READ command\n");
-		  HW_DMSG_AT45("at45db:    ==========================\n");
-		  AT45_DATA->command_needed_data        = 4; /* 3 + dummy byte */
-		  etracer_slot_event(ETRACER_PER_ID_AT45DB,
-				     ETRACER_PER_EVT_MODE_CHANGED,
-				     ETRACER_AT45DB_POWER_READ, 0);
-		  break;
-		case AT45_OP_PP:
-		  HW_DMSG_AT45("at45db:    =============================\n");
-		  HW_DMSG_AT45("at45db:    starting PAGE PROGRAM command\n");
-		  HW_DMSG_AT45("at45db:    =============================\n");
-		  CHECK_WIP;
-		  CHECK_WEL;
-		  AT45_DATA->command_needed_data        = 3;
-		  etracer_slot_event(ETRACER_PER_ID_AT45DB,
-				     ETRACER_PER_EVT_MODE_CHANGED,
-				     ETRACER_AT45DB_POWER_WRITE, 0);
-		  break;
-		case AT45_OP_SE: 
-		  HW_DMSG_AT45("at45db:    =============================\n");
-		  HW_DMSG_AT45("at45db:    starting SECTOR ERASE command\n");
-		  HW_DMSG_AT45("at45db:    =============================\n");
-		  CHECK_WIP;
-		  CHECK_WEL;
-		  AT45_DATA->command_needed_data        = 3;
-		  etracer_slot_event(ETRACER_PER_ID_AT45DB,
-				     ETRACER_PER_EVT_MODE_CHANGED,
-				     ETRACER_AT45DB_POWER_WRITE, 0);
-		  break;
-		case AT45_OP_BE:
-		  HW_DMSG_AT45("at45db:    ===========================\n");
-		  HW_DMSG_AT45("at45db:    starting BULK ERASE command\n");
-		  HW_DMSG_AT45("at45db:    ===========================\n");
-		  CHECK_WIP;
-		  CHECK_WEL;
-		  AT45_DATA->command_need_to_complete   = 1;
-		  etracer_slot_event(ETRACER_PER_ID_AT45DB,
-				     ETRACER_PER_EVT_MODE_CHANGED,
-				     ETRACER_AT45DB_POWER_WRITE, 0);
-		  break;
-		case AT45_OP_DP:
-		  HW_DMSG_AT45("at45db:    ================================\n");
-		  HW_DMSG_AT45("at45db:    starting DEEP POWER MODE command\n");
-		  HW_DMSG_AT45("at45db:    ================================\n");
-		  CHECK_WIP;
-		  AT45_DATA->command_need_to_complete   = 1;
-		  break;
-		case AT45_OP_RES:
-		  HW_DMSG_AT45("at45db:    ====================\n");
-		  HW_DMSG_AT45("at45db:    starting RES command\n");
-		  HW_DMSG_AT45("at45db:    ====================\n");
-		  AT45_DATA->command_needed_data        = 3;
-		  break;
-		default:
-		  HW_DMSG_AT45("at45db:    unknown command 0x%02x\n",AT45_DATA->data_buffer);
-		  ERROR("at45db:    unknown command 0x%02x\n",AT45_DATA->data_buffer);
-		  break;
-		}
-	      break; /* switch AT45_OP_NOP */
-
-	      /***********************************************
-	       * Instructions have already been started, we 
-	       * keep on fetching data until end of instruction
-	       * either by self -> command_need_to_complete or
-	       * when CS goes low
-	       ***********************************************/
-	    case AT45_OP_RDSR:
-	      AT45_DATA->dummy_write_for_read = 1;
-	      break;
-	      
-	    case AT45_OP_WRSR: 
-	      /* =========== */
-	      if (AT45_DATA->command_needed_data > 0) 
-		{
-		  AT45_DATA->command_needed_data = 0;
-		  AT45_DATA->command_stored_data[0] = AT45_DATA->data_buffer;
-		} 
-	      else 
-		{
-		  AT45_DATA->command_needed_data --;
-		  AT45_DATA->command_need_to_complete = 1;
-		}
-	      break;
-	      
-	    case AT45_OP_READ:
-	      /* =========== */
-	      if (AT45_DATA->command_needed_data > 0) 
-		{
-		  AT45_DATA->command_stored_data[3 - AT45_DATA->command_needed_data] = AT45_DATA->data_buffer;
-		  AT45_DATA->command_needed_data --;
-		  if (AT45_DATA->command_needed_data == 0)
-		    {
-		      AT45_DATA->command_pointer = 
-			(AT45_DATA->command_stored_data[0] << 16) | 
-			(AT45_DATA->command_stored_data[1] <<  8) |
-			(AT45_DATA->command_stored_data[2]      );
-		      HW_DMSG_AT45("at45db:    read ready at address 0x%06x (page 0x%04x)\n",
-				  AT45_DATA->command_pointer,AT45_DATA->command_pointer >> 8);
-		    }
-		}
-	      else
-		{
-		  // address is ok
-		  HW_DMSG_AT45("at45db:    READ dummy write for read\n");
-		  AT45_DATA->command_needed_data --;
-		  AT45_DATA->dummy_write_for_read = 1;
-		}
-	      break;
-	      
-	    case AT45_OP_FAST_READ:
-	      /* =========== */
-	      if (AT45_DATA->command_needed_data > 0) 
-		{
-		  AT45_DATA->command_stored_data[4 - AT45_DATA->command_needed_data] = AT45_DATA->data_buffer;
-		  AT45_DATA->command_needed_data --;
-		  if (AT45_DATA->command_needed_data == 0)
-		    {
-		      AT45_DATA->command_pointer = 
-			(AT45_DATA->command_stored_data[0] << 16) | 
-			(AT45_DATA->command_stored_data[1] <<  8) |
-			(AT45_DATA->command_stored_data[2]      );
-		      HW_DMSG_AT45("at45db:    FAST Read ready at address 0x%06x (page 0x%04x)\n",
-				  AT45_DATA->command_pointer,AT45_DATA->command_pointer >> 8);
-		    }
-		} 
-	      else 
-		{
-		  // address is ok
-		  HW_DMSG_AT45("at45db:    FAST READ dummy write for read\n");
-		  AT45_DATA->command_needed_data --;
-		  AT45_DATA->dummy_write_for_read = 1;
-		}
-	      break;
-	      
-	    case AT45_OP_SE:
-	      /* ========= */
-	      if (AT45_DATA->command_needed_data > 0) 
-		{
-		  AT45_DATA->command_stored_data[3 - AT45_DATA->command_needed_data] = AT45_DATA->data_buffer;
-		  AT45_DATA->command_needed_data --;
-		} 
-	      else 
-		{
-		  AT45_DATA->command_pointer = 
-		    (AT45_DATA->command_stored_data[0] << 16) | 
-		    (AT45_DATA->command_stored_data[1] <<  8) |
-		    (AT45_DATA->command_stored_data[2]      );
-		  HW_DMSG_AT45("at45db:    sector erase (linear=%x, sector %x)\n",
-			      AT45_DATA->command_pointer, (AT45_DATA->command_pointer >> 16) & 0xff);
-		  AT45_DATA->command_need_to_complete = 1;
-		}
-	      break;
-	      
-	    case AT45_OP_PP:
-	      /* ========= */
-	      if (AT45_DATA->command_needed_data > 0) 
-		{
-		  AT45_DATA->command_stored_data[3 - AT45_DATA->command_needed_data] = AT45_DATA->data_buffer;
-		  AT45_DATA->command_needed_data --;
-		  if (AT45_DATA->command_needed_data == 0)
-		    {
-		      AT45_DATA->command_pointer = 
-			(AT45_DATA->command_stored_data[0] << 16) | 
-			(AT45_DATA->command_stored_data[1] <<  8) |
-			(AT45_DATA->command_stored_data[2]      );
-		    }
-		} 
-	      else 
-		{
-		  // address is ok, we write at the counter address
-		  uint16_t page_index;
-		  uint16_t page_offset;
-		  page_index  = AT45_DATA->command_pointer / AT45_PAGE_SIZE;
-		  page_offset = AT45_DATA->command_pointer % AT45_PAGE_SIZE;
-		  HW_DMSG_AT45("at45db:    page program (linear=%x, page %x, offset %x)\n",
-			      AT45_DATA->command_pointer, page_index, page_offset);
-		  AT45_MEMPAGE[page_index][page_offset] &= AT45_DATA->data_buffer;
-		  page_offset ++;
-		  if (page_offset == AT45_PAGE_SIZE)
-		    {
-		      AT45_DATA->command_pointer = page_index;
-		    }
-		  else 
-		    {
-		      AT45_DATA->command_pointer ++;
-		    }
-		}
-	      break;
-	      
-	    case AT45_OP_RES:
-	      /* ========== */
-	      if (AT45_DATA->command_needed_data > 0) 
-		{
-		  HW_DMSG_AT45("at45db:    RES dummy write %d\n",3 - AT45_DATA->command_needed_data);
-		  AT45_DATA->command_stored_data[3 - AT45_DATA->command_needed_data] = AT45_DATA->data_buffer;
-		  AT45_DATA->command_needed_data --;
-		}
-	      else
-		{
-		  HW_DMSG_AT45("at45db:    RES dummy write for read\n");
-		  AT45_DATA->command_needed_data --;
-		  AT45_DATA->dummy_write_for_read = 1;
-		}
-	      break;
-	      
-	    default: /* switch command */
-	      ERROR("at45db:    internal error command 0x%02x unknown\n",AT45_DATA->data_buffer);
-	      HW_DMSG_AT45("at45db:    internal error command 0x%02x unknown\n",AT45_DATA->data_buffer);
-	      at45db_error_dump_internal_state(dev);
-	      break;
-	    }
-	  
-	  break;
-	  
-	  /*********************************************************
-	   * End active mode.
-	   *
-	   * next lines are for other power modes 
-	   *********************************************************/
-	  
-	case AT45_POWER_STANDBY:
-	  ERROR("at45db:    error in power standby, flash should not receive data\n");
-	  HW_DMSG_AT45("at45db:    error in power standby, flash should not receive data\n");
-	  break;
-	  
-	case AT45_POWER_DEEP_DOWN:
-	  AT45_DATA->command = AT45_DATA->data_buffer;
-	  if (AT45_DATA->command == AT45_OP_RES)
-	    {
-	      AT45_DATA->data_buffer_ok = 0;
-	      AT45_DATA->power_mode = AT45_POWER_ACTIVE;
-	      tracer_event_record(TRACER_AT45DB_STATE, AT45_POWER_ACTIVE);
-	      etracer_slot_event(ETRACER_PER_ID_AT45DB,
-				 ETRACER_PER_EVT_MODE_CHANGED,
-				 ETRACER_AT45DB_POWER_ACTIVE, 0);
-	      HW_DMSG_AT45("at45db:    Release from Deep Power Down mode\n");
-	    }
-	  break;
-	} /* switch power_mode */
-      
-    }
-  else /* ! need_to_complete */
-    {
-      if (AT45_DATA->command_need_to_complete == 1)
-	{
-	  ERROR("at45db:    write data [val=0x%02x,mask=0x%04x] while needed to complete\n",value & AT45DB_D,mask);
-	  HW_DMSG_AT45("at45db:    write data [val=0x%02x,mask=0x%04x] while needed to complete [PC 0x%4x]\n",
-		      value & AT45DB_D,mask, mcu_get_pc());
-	}
-    }
-}
-
-/***************************************************/
-/***************************************************/
-/***************************************************/
-
-/*
- * - A command is entered when the Opcode byte is written
- * - var command_needed_data is set to the number of argument
- *   bytes needed to start the command.
- * 
- * - at end we have command_need_to_complete = 1
- */
-
-/*
- * _DATA
- *    switch (power_mode)
- *       case active: (waiting for a command)
- *           switch command
- *              case NOP: 
- *                   starting a command;
- *              case XXX: 
- *                   during a command;
- *           end
- *  
- *       case standby:
- *       case deep_power:
- *    end
- *
- * _CS
- *   if (1->0)
- *     switch (command)
- *        case XXX: end command
- *   else
- *     state = Active
- *   end
- *
- * _WRITE
- * _CLOCK
- */
-
-void at45db_write(int dev, uint32_t mask, uint32_t value)
-{
-  HW_DMSG_AT45("at45db: write to flash 0x%04x mask 0x%04x\n",value, mask);
-  
-  /********/
-  /* Data */
-  /********/
-  if ((mask & AT45DB_D))
-    {
-      if (AT45_DATA->select_bit == 1)
-	{
-	  etracer_slot_event(ETRACER_PER_ID_AT45DB,	 ETRACER_PER_EVT_WRITE_COMMAND, 
-			     ETRACER_PER_ARG_WR_DST | ETRACER_ACCESS_LVL_SPI1, 0);
-	  at45db_write_spidata(dev, mask, value);
-	}
-      else
-	{
-	}
-    } /* data (mask & AT45DB_D) */
-
-
-  /***************************
-   * Control pins.
-   * Chip Select
-   ***************************/
-
-#define END_COMMAND()							\
-  do {									\
-  HW_DMSG_AT45("at45db:    End command 0x%02x (%s)\n",			\
-	       AT45_DATA->command, str_cmd(AT45_DATA->command));	\
-  AT45_DATA->command_need_to_complete = 0;				\
-  AT45_DATA->command = AT45_OP_NOP;					\
-  HW_DMSG_AT45("at45db:    chip select : Active -> Standby (end of command)\n"); \
-  } while (0) 
-
-#define END_COMMAND_GO_STANDBY()					\
-  do {									\
-  END_COMMAND();							\
-  AT45_DATA->power_mode = AT45_POWER_STANDBY;				\
-  tracer_event_record(TRACER_AT45DB_STATE, AT45_POWER_STANDBY);		\
-  etracer_slot_event(ETRACER_PER_ID_AT45DB,				\
-		     ETRACER_PER_EVT_MODE_CHANGED,			\
-		     ETRACER_AT45DB_POWER_STANDBY, 0);			\
-  } while (0)
-
-  if (mask & AT45DB_S) /* chip select negated */
-    {
-      uint8_t bit_cs = ! (value & AT45DB_S);
-      HW_DMSG_AT45("at45db:    flash write CS = %d\n",bit_cs);
-
-      if ((AT45_DATA->select_bit == 1) && (bit_cs == 0)) 
-	{ /* CS: 1 -> 0    CS goes low */
-	  AT45_DATA->select_bit = bit_cs;
-
-	  switch (AT45_DATA->command)
-	    {
-	    case AT45_OP_NOP:
-	      break;
-	    case AT45_OP_WREN: 
-	      // AT45_DATA->command_need_to_complete is always set
-	      AT45_DATA->status_register.b.wel    = 1; 
-	      END_COMMAND_GO_STANDBY();
-	      break;
-	    case AT45_OP_WRDI:
-	      // AT45_DATA->command_need_to_complete is always set
-	      AT45_DATA->status_register.b.wel    = 0;
-	      END_COMMAND_GO_STANDBY();
-	      break;
-	    case AT45_OP_RDSR:
-	      // AT45_DATA->command_need_to_complete is NOT set
-	      END_COMMAND_GO_STANDBY();
-	      break;
-	    case AT45_OP_WRSR:
-		  // AT45_DATA->command_need_to_complete MUST be set
-	      CHECK_COMMAND_ARGS;
-	      if (AT45_DATA->command_need_to_complete == 1) {
-		at45db_write_status_register(dev,AT45_DATA->command_stored_data[0]);
-	      }
-	      END_COMMAND_GO_STANDBY();
-	      break;
-	    case AT45_OP_READ:
-	      // AT45_DATA->command_need_to_complete is NOT set
-	      CHECK_COMMAND_ARGS;
-	      END_COMMAND_GO_STANDBY();
-	      break;
-	    case AT45_OP_FAST_READ:
-	      // AT45_DATA->command_need_to_complete is NOT set
-	      CHECK_COMMAND_ARGS;
-	      END_COMMAND_GO_STANDBY();
-	      break;
-	    case AT45_OP_PP: 
-	      // AT45_DATA->command_need_to_complete MIGHT be set
-	      // AT45_DATA->command_needed_data == 0 ?
-	      CHECK_COMMAND_ARGS;
-	      AT45_DATA->status_register.b.wel    = 0;
-	      END_COMMAND();
-	      /* wait busy flag, mode change in update */
-	      break;
-	    case AT45_OP_SE: 
-	      // AT45_DATA->command_need_to_complete MUST be set
-	      CHECK_COMMAND_ARGS;
-	      at45db_erase_sector(dev,AT45_DATA->command_pointer); 
-	      AT45_DATA->status_register.b.wel    = 0;
-	      END_COMMAND();
-	      /* wait busy flag, mode change in update */
-	      break;
-	    case AT45_OP_BE: 
-	      // AT45_DATA->command_need_to_complete is always set
-	      at45db_erase_bulk(dev);  
-	      AT45_DATA->status_register.b.wel    = 0;
-	      END_COMMAND();
-	      /* wait busy flag, mode change in update */
-	      break;
-	    case AT45_OP_DP:
-	      // AT45_DATA->command_need_to_complete is always set
-	      END_COMMAND();
-	      HW_DMSG_AT45("at45db:    Power mode changed to DEEP POWER DOWN\n");	
-	      AT45_DATA->power_mode = AT45_POWER_DEEP_DOWN;
-	      tracer_event_record(TRACER_AT45DB_STATE, AT45_POWER_DEEP_DOWN);
-	      etracer_slot_event(ETRACER_PER_ID_AT45DB,
-				 ETRACER_PER_EVT_MODE_CHANGED,
-				 ETRACER_AT45DB_POWER_DEEP_DOWN, 0);
-	      break;
-	    case AT45_OP_RES:
-	      // AT45_DATA->command_need_to_complete MIGHT be set
-	      // AT45_DATA->command_needed_data is variable		 
-	      END_COMMAND();
-	      HW_DMSG_AT45("at45db:    Power mode changed to ACTIVE\n");
-	      AT45_DATA->power_mode = AT45_POWER_ACTIVE;
-	      tracer_event_record(TRACER_AT45DB_STATE, AT45_POWER_ACTIVE);
-	      etracer_slot_event(ETRACER_PER_ID_AT45DB,
-				 ETRACER_PER_EVT_MODE_CHANGED,
-				 ETRACER_AT45DB_POWER_ACTIVE, 0);
-	      break;
-	    default:
-	      ERROR("at45db:    Unterminated switch/case for end command CS=0\n");
-	      HW_DMSG_AT45("at45db:    Unterminated switch/case for end command CS=0\n");
-	      END_COMMAND();
-	      break;
-	    } /* switch (AT45_DATA->command) */
-	} /* CS goes low */
-      else if ((AT45_DATA->select_bit == 0) && (bit_cs == 1)) 
-	{ /* CS: 0 -> 1,  CS goes high */
-	  AT45_DATA->select_bit = bit_cs;
-	  HW_DMSG_AT45("at45db:    flash write CS = 1 : Standby -> Active\n");
-	  AT45_DATA->power_mode = AT45_POWER_ACTIVE;
-	  tracer_event_record(TRACER_AT45DB_STATE, AT45_POWER_ACTIVE);
-	  etracer_slot_event(ETRACER_PER_ID_AT45DB,
-			     ETRACER_PER_EVT_MODE_CHANGED,
-			     ETRACER_AT45DB_POWER_ACTIVE, 0);
-	}
-    } /* mask & AT45DB_S */ 
-
-  /***************************
-   * Control pins. WRITE PROTECT
-   ***************************/
-
-  if (mask & AT45DB_W) /* write protect netgated */
-    {
-      AT45_DATA->write_protect_bit  = ! (value & AT45DB_W);
-      HW_DMSG_AT45("at45db:    flash write protect W = %d\n",AT45_DATA->write_protect_bit);
-    }
-
-  /***************************
-   * Control pins. CLOCK
-   ***************************/
-
-  if (mask & AT45DB_C) /* clock */
-    {
-      ERROR("at45db:    clock pin should not be used during simulation\n");
-      HW_DMSG_AT45("at45db:    clock pin should not be used during simulation\n");
-      AT45_DATA->clock = (value >> AT45DB_C_SHIFT) & 0x1;
-    }
-}
-
-/***************************************************/
-/***************************************************/
-/***************************************************/
 
 static int at45db_update_write_flag(int dev)
 {
-  if ((AT45_DATA->status_register.b.wip == 1) && (MACHINE_TIME_GET_NANO() >= AT45_DATA->end_of_busy_time))
+  if ((AT45_DATA->status_register.b.ready == 0) && (MACHINE_TIME_GET_NANO() >= AT45_DATA->end_of_busy_time))
     {
-      AT45_DATA->status_register.b.wip = 0;
-      /* AT45_DATA->status_register.b.wel = 0; ok pour WRSR */
-      AT45_DATA->command = AT45_OP_NOP;
-      HW_DMSG_AT45("at45db:    ====================================\n");
-      HW_DMSG_AT45("at45db:    AT45DB display busyflag returns to 0\n");
-      HW_DMSG_AT45("at45db:    ====================================\n");
+      AT45_DATA->status_register.b.ready = 1;
+      AT45_DATA->busy_time               = 0;
+      AT45_DATA->end_of_busy_time        = 0;
+      HW_DMSG_AT45("at45db:    ============================\n");
+      HW_DMSG_AT45("at45db:    AT45DB busyflag returns to 0\n");
+      HW_DMSG_AT45("at45db:    ============================\n");
+      if (AT45_DATA->compare_update)
+	{
+	  /* 0 means page and buffer are equal */
+	  AT45_SR.b.comp = (AT45_DATA->compare_value > 0);
+	  AT45_DATA->compare_update = 0;
+	}
       return 1;
     }
   return 0;
@@ -1277,45 +667,520 @@ static int at45db_update_write_flag(int dev)
 /***************************************************/
 /***************************************************/
 
-int at45db_update(int dev)
+void at45db_read(int UNUSED dev, uint32_t *mask, uint32_t *value)
 {
-  switch (AT45_DATA->power_mode)
-    {
-      /**********************/
-      /* Active poser mode  */
-      /**********************/
-    case AT45_POWER_ACTIVE:
-      /* end current command ? */
-      if (at45db_update_write_flag(dev))
-	{
-	  /* busyflag returned to 0 : end of current command */
-	  if ((AT45_DATA->select_bit == 0))
-	    {
-	      /* going from active to standby */
-	      HW_DMSG_AT45("at45db: update: end of command wip=0: Active -> Standby\n");
-	      tracer_event_record(TRACER_AT45DB_STATE, AT45_POWER_STANDBY);
-	      etracer_slot_event(ETRACER_PER_ID_AT45DB,
-				 ETRACER_PER_EVT_MODE_CHANGED,
-				 ETRACER_AT45DB_POWER_STANDBY, 0);
+  *mask  = AT45_READ_MASK;
+  *value = AT45_READ_DATA;
 
+  AT45_DATA->write_byte_valid = 0;
+
+  if (AT45_SR.b.ready)
+    {
+      *mask  |= AT45DB_RDY;
+      *value |= AT45DB_RDY;
+    }
+
+  if (*mask != 0)
+    {
+      HW_DMSG_AT45("at45db:    read data [val=0x%02x,mask=0x%04x] \n", *value, *mask);
+    }
+
+  AT45_READ_MASK = 0; 
+  AT45_READ_DATA = 0;
+}
+
+/***************************************************/
+/***************************************************/
+/***************************************************/
+
+static
+int check_pin(char* msg, uint32_t mask, uint32_t value, int rshift, uint8_t *current_val)
+{
+  if ((mask >> rshift) & 1)
+    {
+      uint8_t pin = (value >> rshift) & 1;
+      if ((*current_val) != pin)
+	{
+	  HW_DMSG_AT45("at45db: pin %s set to %d\n",msg,pin);
+	  *current_val = pin;
+	  return 1;
+	}
+    }
+  return 0;
+}
+
+
+void at45db_write(int UNUSED dev, uint32_t mask, uint32_t value)
+{
+  int CS,W,R; /* modified flags */
+  HW_DMSG_AT45("at45db: write to flash 0x%04x mask 0x%04x\n",value, mask);
+  
+  CS = check_pin("CS",    mask,value,AT45DB_S_SHIFT, & AT45_DATA->pin_select);
+  W  = check_pin("W",     mask,value,AT45DB_W_SHIFT, & AT45_DATA->pin_write_protect);
+  R  = check_pin("Reset", mask,value,AT45DB_R_SHIFT, & AT45_DATA->pin_reset);
+
+  /*********/
+  /* DATA  */
+  /*********/
+  AT45_DATA->write_byte_valid = 0;
+  if ((mask & AT45DB_D) == AT45DB_D)
+    {
+      if (AT45_DATA->pin_select == 0) /* CS is negated */
+	{
+	  AT45_DATA->write_byte_value = value & AT45DB_D;
+	  AT45_DATA->write_byte_valid = 1;
+	  if (AT45_DATA->command_need_to_complete)
+	    {
+	      HW_DMSG_AT45("at45db: command should be validated \n");
 	    }
 	}
+    }
+
+  /*********/
+  /* WP    */
+  /*********/
+  if (AT45_DATA->pin_write_protect == 0)
+    {
+      HW_DMSG_AT45("at45db: ** WRITE PROTECT IS ON **");
+    }
+  
+  /*********/
+  /* RESET */
+  /*********/
+  if (AT45_DATA->pin_reset == 0)
+    {
+      HW_DMSG_AT45("at45db: ** RESET **");
+    }
+
+  /*********/
+  /* CS    */
+  /*********/
+  if (AT45_DATA->pin_select != 0) /* CS is negated, we're off */
+    {
+      switch (AT45_DATA->command) 
+	{
+	case AT45_OP_SI_BUFFER1_PPE:
+	  at45db_write_buffer_with_erase(dev,AT45_DATA->buffer1);
+	  break;
+	case AT45_OP_SI_BUFFER2_PPE:
+	  at45db_write_buffer_with_erase(dev,AT45_DATA->buffer2);
+	  break;
+	default:
+	  break;
+	}
+
+      if ((AT45_DATA->busy_time != 0) || (AT45_DATA->command_need_to_complete))
+	{
+	  at45db_start_write(dev);
+	  AT45_DATA->command_need_to_complete = 0;
+	}
+
+      AT45_DATA->command                  = AT45_OP_NOP;
+      AT45_DATA->command_needed_data      = 0;
+      AT45_DATA->command_need_to_complete = 0;
+      AT45_DATA->write_byte_valid         = 0;
+    }
+}
+
+/***************************************************/
+/***************************************************/
+/***************************************************/
+
+/* 4 + 11 + 9 :: byte address */   
+/* 0000 pppp ppppppb bbbbbbbb */
+
+inline void READ_PAGE_ADDRESS(int dev)
+{
+  AT45_DATA->command_page_addr  = (AT45_DATA->command_stored_data[1] >> 1) & 0x7F;
+  AT45_DATA->command_page_addr |= (AT45_DATA->command_stored_data[0] & AT45_HIGH_ADDR_MASK) << 7;
+  AT45_DATA->command_page_addr %= AT45_PAGE_MAX;
+}
+
+inline void READ_BYTE_ADDRESS(int dev)
+{
+  AT45_DATA->command_addr       =  AT45_DATA->command_stored_data[2];
+  AT45_DATA->command_addr      |= (AT45_DATA->command_stored_data[1] & 0x01) <<  8;
+  AT45_DATA->command_addr      %= AT45_PAGE_SIZE;
+}
+
+inline void READ_LINEAR_ADDRESS(int dev)
+{
+  AT45_DATA->command_addr       = /* byte address */
+    ((AT45_DATA->command_stored_data[0] & AT45_HIGH_ADDR_MASK)  << 16) |
+    ((AT45_DATA->command_stored_data[1]                      )  <<  8) |
+    ((AT45_DATA->command_stored_data[2]                      )  <<  0);
+  AT45_DATA->command_addr      %= AT45_FLASH_SIZE; 
+}
+
+inline void READ_BLOCK_ADDRESS(int dev)
+{
+  READ_PAGE_ADDRESS(dev);
+  AT45_DATA->command_page_addr = AT45_DATA->command_page_addr >> 3; /* block number */
+}
+
+/***************************************************/
+/***************************************************/
+/***************************************************/
+
+void at45db_read_from_buffer(int dev, uint8_t *buffer)
+{
+  if (AT45_DATA->command_start)
+    {
+      READ_BYTE_ADDRESS(dev);
+      AT45_DATA->command_start = 0;
+    }
+  HW_DMSG_AT45("at45db: %s at address 0x%04x\n",str_cmd(AT45_DATA->command),AT45_DATA->command_addr);
+  AT45_READ_MASK = AT45DB_D; 
+  AT45_READ_DATA = buffer[AT45_DATA->command_addr];
+  AT45_DATA->command_addr = (AT45_DATA->command_addr + 1) % AT45_PAGE_SIZE; 
+}
+
+/***************************************************/
+/***************************************************/
+/***************************************************/
+
+      /*           buffer
+       *           |  0   1
+       *         ----------
+       *         0 |  0   0
+       * flash     |
+       *         1 |  0   1
+       *
+       */
+
+void at45db_write_buffer_without_erase(int dev, uint8_t *buffer)
+{
+  if (AT45_DATA->command_start)
+    {
+      READ_PAGE_ADDRESS(dev);
+      AT45_DATA->command_start = 0;
+    }
+  HW_DMSG_AT45("at45db: %s at page 0x%04x\n", str_cmd(AT45_DATA->command), AT45_DATA->command_page_addr);
+  for(AT45_DATA->command_addr=0; AT45_DATA->command_addr < AT45_PAGE_SIZE; AT45_DATA->command_addr++)
+    { /* we write 0 */
+      AT45_DATA->mem.page[AT45_DATA->command_page_addr][AT45_DATA->command_addr] &= 
+	buffer[AT45_DATA->command_addr];
+    }
+  at45db_set_busy_time(dev,at45db_busy_time(AT45_DATA->command));
+  AT45_DATA->command_need_to_complete = 1;
+  AT45_READ_MASK = AT45DB_D;
+  AT45_READ_DATA = 0;
+}
+
+/***************************************************/
+/***************************************************/
+/***************************************************/
+
+void at45db_write_buffer_with_erase(int dev, uint8_t *buffer)
+{
+  if (AT45_DATA->command_start)
+    {
+      READ_PAGE_ADDRESS(dev);
+      AT45_DATA->command_start = 0;
+    }
+  HW_DMSG_AT45("at45db: %s at page 0x%04x\n", str_cmd(AT45_DATA->command), AT45_DATA->command_page_addr);
+  memcpy(AT45_DATA->mem.page[AT45_DATA->command_page_addr], buffer ,AT45_PAGE_SIZE);
+  at45db_set_busy_time(dev,at45db_busy_time(AT45_DATA->command));
+  AT45_DATA->command_need_to_complete = 1;
+  AT45_READ_MASK = AT45DB_D;
+  AT45_READ_DATA = 0;
+}
+
+/***************************************************/
+/***************************************************/
+/***************************************************/
+
+void at45db_write_si_to_buffer(int dev, uint8_t *buffer)
+{
+  if (AT45_DATA->command_start)
+    {
+      READ_PAGE_ADDRESS(dev);
+      READ_BYTE_ADDRESS(dev);
+      AT45_DATA->command_start = 0;
+    }
+  HW_DMSG_AT45("at45db: %s at address 0x%04x\n",str_cmd(AT45_DATA->command),AT45_DATA->command_addr);
+  buffer[AT45_DATA->command_addr] = AT45_DATA->write_byte_value;
+  AT45_DATA->command_addr = (AT45_DATA->command_addr + 1) % AT45_PAGE_SIZE; 
+  AT45_READ_MASK = AT45DB_D; 
+  AT45_READ_DATA = 0;
+}
+
+/***************************************************/
+/***************************************************/
+/***************************************************/
+
+void at45db_block_erase(int dev)
+{
+  int i;
+  if (AT45_DATA->command_start)
+    {
+      READ_BLOCK_ADDRESS(dev);
+      AT45_DATA->command_start = 0;
+    }
+
+  for(i=0; i < AT45_PAGE_PER_BLOCK; i++)
+    {
+      memset(AT45_DATA->mem.page[AT45_DATA->command_page_addr + i], 1, AT45_FLASH_SIZE);
+    }
+
+  at45db_set_busy_time(dev,at45db_busy_time(AT45_DATA->command));
+  AT45_DATA->command_need_to_complete = 1;
+  AT45_READ_MASK = AT45DB_D;
+  AT45_READ_DATA = 0;
+}
+
+/***************************************************/
+/***************************************************/
+/***************************************************/
+
+void at45db_copy_page_to_buffer(int dev, uint8_t *buffer)
+{
+  if (AT45_DATA->command_start)
+    {
+      READ_PAGE_ADDRESS(dev);
+      AT45_DATA->command_start = 0;
+    }
+  HW_DMSG_AT45("at45db: %s for page 0x%04x\n", str_cmd(AT45_DATA->command), AT45_DATA->command_page_addr);
+  memcpy(buffer, AT45_DATA->mem.page[AT45_DATA->command_page_addr], AT45_PAGE_SIZE);
+  at45db_set_busy_time(dev,at45db_busy_time(AT45_DATA->command));
+  AT45_DATA->command_need_to_complete = 1;
+  AT45_READ_MASK = AT45DB_D;
+  AT45_READ_DATA = 0;
+}
+
+/***************************************************/
+/***************************************************/
+/***************************************************/
+
+void at45db_copy_page_to_buffer_and_back(int dev, uint8_t *buffer)
+{
+  if (AT45_DATA->command_start)
+    {
+      READ_PAGE_ADDRESS(dev);
+      AT45_DATA->command_start = 0;
+    }
+  HW_DMSG_AT45("at45db: %s for page 0x%04x\n", str_cmd(AT45_DATA->command), AT45_DATA->command_page_addr);
+  memcpy(buffer, AT45_DATA->mem.page[AT45_DATA->command_page_addr], AT45_PAGE_SIZE);
+  at45db_set_busy_time(dev,at45db_busy_time(AT45_DATA->command));
+  /* back is a null operation here */
+  AT45_DATA->command_need_to_complete = 1;
+  AT45_READ_MASK = AT45DB_D;
+  AT45_READ_DATA = 0;
+}
+
+/***************************************************/
+/***************************************************/
+/***************************************************/
+
+void at45db_compare_page_to_buffer(int dev, uint8_t *buffer)
+{
+  int cmp = 0;
+
+  if (AT45_DATA->command_start)
+    {
+      READ_PAGE_ADDRESS(dev);
+      AT45_DATA->command_start = 0;
+    }
+  HW_DMSG_AT45("at45db: %s for page 0x%04x\n", str_cmd(AT45_DATA->command), AT45_DATA->command_page_addr);
+
+  for(AT45_DATA->command_addr=0; AT45_DATA->command_addr < AT45_PAGE_SIZE; AT45_DATA->command_addr++)
+    { /* we write 0 */
+      if (AT45_DATA->mem.page[AT45_DATA->command_page_addr][AT45_DATA->command_addr] !=
+	  buffer[AT45_DATA->command_addr])
+	cmp ++;
+    }
+
+  AT45_DATA->compare_value  = cmp;
+  AT45_DATA->compare_update = 1;
+  at45db_set_busy_time(dev,at45db_busy_time(AT45_DATA->command));
+  AT45_DATA->command_need_to_complete = 1;
+  AT45_READ_MASK = AT45DB_D;
+  AT45_READ_DATA = 0;
+}
+
+/***************************************************/
+/***************************************************/
+/***************************************************/
+
+int at45db_update(int dev)
+{
+  if (at45db_update_write_flag(dev))
+    {
+      /* busyflag returned to 0 : end of current command */
+    }
+
+  switch (AT45_DATA->command)
+    {
+    case AT45_OP_NOP: 
+      if (AT45_DATA->write_byte_valid)
+	{
+	  if (AT45_DATA->command_needed_data == 0) /* new command */
+	    {
+	      AT45_DATA->command_next             = AT45_DATA->write_byte_value;
+	      AT45_DATA->command_needed_data      = at45db_needed_data(AT45_DATA->command_next);
+	      AT45_DATA->command_addr             = 0;
+	      AT45_DATA->command_need_to_complete = at45db_need_to_complete(AT45_DATA->command_next);
+	    }
+	  else
+	    {
+	      AT45_DATA->command_stored_data[ AT45_DATA->command_addr ] = AT45_DATA->write_byte_value;
+	      AT45_DATA->command_addr        += 1;
+	      AT45_DATA->command_needed_data -= 1;
+	    }
+
+	  if (AT45_DATA->command_needed_data == 0)
+	    {
+	      AT45_DATA->command       = AT45_DATA->command_next;
+	      AT45_DATA->command_start = 1;
+	    }
+	  AT45_READ_MASK = AT45DB_D; 
+	  AT45_READ_DATA = 0;
+	}
+      break;
+      
+      /********/
+      /* read */
+      /********/
+    case AT45_OP_CONTREAD_1      :
+    case AT45_OP_CONTREAD_2      :
+      if (AT45_DATA->command_start)
+	{
+	  READ_LINEAR_ADDRESS(dev);
+	  AT45_DATA->command_start = 0;
+	}
+      HW_DMSG_AT45("at45db: %s at address 0x%04x\n",str_cmd(AT45_DATA->command),AT45_DATA->command_addr);
+      AT45_READ_MASK = AT45DB_D; 
+      AT45_READ_DATA = AT45_DATA->mem.raw[AT45_DATA->command_addr];
+      AT45_DATA->command_addr = (AT45_DATA->command_addr + 1) % AT45_FLASH_SIZE; 
       break;
 
-      /**********************/
-      /* Standby power mode */
-      /**********************/
-    case AT45_POWER_STANDBY:
-      /* nothing to do                             */
-      /* state is changed in the write switch      */
+    case AT45_OP_PAGE_READ_1     : 
+    case AT45_OP_PAGE_READ_2     : /* wraps at page boundary */
+      if (AT45_DATA->command_start)
+	{
+	  READ_PAGE_ADDRESS(dev);
+	  READ_BYTE_ADDRESS(dev);
+	  AT45_DATA->command_start = 0;
+	}
+      HW_DMSG_AT45("at45db: %s at page 0x%04x addr 0x%04x\n",str_cmd(AT45_DATA->command),
+		   AT45_DATA->command_page_addr,AT45_DATA->command_addr);
+      AT45_READ_MASK = AT45DB_D; 
+      AT45_READ_DATA = AT45_DATA->mem.page[AT45_DATA->command_page_addr][AT45_DATA->command_addr];
+      AT45_DATA->command_addr = (AT45_DATA->command_addr + 1) % AT45_PAGE_SIZE; 
       break;
 
-      /**********************/
-      /* Deep power down    */
-      /**********************/
-    case AT45_POWER_DEEP_DOWN:
-      /* nothing to do                             */
-      /* going out of DP is done in the write loop */
+    case AT45_OP_BUFFER1_READ_1  : 
+    case AT45_OP_BUFFER1_READ_2  : 
+      at45db_read_from_buffer(dev,AT45_DATA->buffer1);
+      break;
+
+    case AT45_OP_BUFFER2_READ_1  :
+    case AT45_OP_BUFFER2_READ_2  :
+      at45db_read_from_buffer(dev,AT45_DATA->buffer2);
+      break;
+
+    case AT45_OP_STATUS_READ_1   :
+    case AT45_OP_STATUS_READ_2   :
+      HW_DMSG_AT45("at45db: %s = 0x%02x\n",AT45_SR.s & 0xff);
+      AT45_READ_MASK = AT45DB_D; 
+      AT45_READ_DATA = AT45_SR.s;
+      break;
+
+      /*********/
+      /* erase */
+      /*********/
+    case AT45_OP_SI_TO_BUFFER1   :
+      at45db_write_si_to_buffer(dev,AT45_DATA->buffer1);
+      break;
+
+    case AT45_OP_SI_TO_BUFFER2   : 
+      at45db_write_si_to_buffer(dev,AT45_DATA->buffer2);
+      break;
+
+    case AT45_OP_BUFFER1_WI_ERASE: 
+      at45db_write_buffer_with_erase(dev,AT45_DATA->buffer1);
+      break;
+
+    case AT45_OP_BUFFER2_WI_ERASE: 
+      at45db_write_buffer_with_erase(dev,AT45_DATA->buffer2);
+      break;
+
+    case AT45_OP_BUFFER1_WO_ERASE:
+      at45db_write_buffer_without_erase(dev,AT45_DATA->buffer1);
+      break;
+
+    case AT45_OP_BUFFER2_WO_ERASE:
+      at45db_write_buffer_without_erase(dev,AT45_DATA->buffer2);
+      break;
+
+    case AT45_OP_PAGE_ERASE      : 
+      if (AT45_DATA->command_start)
+	{
+	  READ_PAGE_ADDRESS(dev);
+	  AT45_DATA->command_start = 0;
+	}
+      memset(AT45_DATA->mem.page[AT45_DATA->command_page_addr], 0, AT45_PAGE_SIZE);
+      at45db_set_busy_time(dev,at45db_busy_time(AT45_DATA->command));
+      AT45_DATA->command_need_to_complete = 1;
+      break;
+
+    case AT45_OP_BLOCK_ERASE     : 
+      at45db_block_erase(dev);
+      break;
+
+      /******************************************/
+      /* erase buffer + page program with erase */
+      /******************************************/
+    case AT45_OP_SI_BUFFER1_PPE  :
+      if (AT45_DATA->command_start)
+	{
+	  READ_PAGE_ADDRESS(dev);
+	}
+      at45db_write_si_to_buffer(dev,AT45_DATA->buffer1);
+      /* write on CS */
+      break;
+
+    case AT45_OP_SI_BUFFER2_PPE  : 
+      if (AT45_DATA->command_start)
+	{
+	  READ_PAGE_ADDRESS(dev);
+	}
+      at45db_write_si_to_buffer(dev,AT45_DATA->buffer2);
+      /* write on CS */
+      break;
+
+      /******************/
+      /* copy / compare */
+      /******************/
+    case AT45_OP_COPY_BUFFER1    : 
+      at45db_copy_page_to_buffer(dev,AT45_DATA->buffer1);
+      break;
+
+    case AT45_OP_COPY_BUFFER2    : 
+      at45db_copy_page_to_buffer(dev,AT45_DATA->buffer2);
+      break;
+
+    case AT45_OP_COMP_BUFFER1    : 
+      at45db_compare_page_to_buffer(dev,AT45_DATA->buffer1);
+      break;
+
+    case AT45_OP_COMP_BUFFER2    : 
+      at45db_compare_page_to_buffer(dev,AT45_DATA->buffer2);
+      break;
+
+      /********************/
+      /* multiple rewrite */
+      /********************/
+    case AT45_OP_MULTI_BUFFER1   : 
+      at45db_copy_page_to_buffer_and_back(dev,AT45_DATA->buffer1);
+      break;
+
+    case AT45_OP_MULTI_BUFFER2   : 
+      at45db_copy_page_to_buffer_and_back(dev,AT45_DATA->buffer2);
+      break;
+
+    default:
+      HW_DMSG_AT45("at45db: unknown command 0x%02x\n", AT45_DATA->command & 0xff);
       break;
     }
   return 0;

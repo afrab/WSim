@@ -74,7 +74,10 @@ CFLAGS_save="${CFLAGS}"
 AC_ARG_ENABLE([xdebug],AS_HELP_STRING([--enable-xdebug],[target code debug (default enabled)]))
 if test "${enable_xdebug}" != "no"; then
     xdebug_sum="yes"
-    AC_DEFINE([XCODE_DEBUG],[1],[WSim target code debug tools])
+    AC_DEFINE([XCODE_DEBUG],       [1],[WSim target code debug tools  ])
+    AC_DEFINE([ENABLE_RAM_CONTROL],[1],[WSim target ram access control])
+#endif
+
 else
     xdebug_sum="no"
 fi
@@ -255,6 +258,14 @@ if test "${enable_platform_mosar}" = "yes" ; then
 	PLATFORMNAMES="mosar"
 fi
 
+dnl mcugen
+AC_ARG_ENABLE([platform-mcugen],AS_HELP_STRING([--enable-platform-mcugen],[mcugen platform]))
+if test "${enable_platform_mcugen}" = "yes" ; then
+	enable_mcu_mcugen=yes
+	NPLATFORM=$(($NPLATFORM + 1))
+	PLATFORMNAMES="mcugen $PLATFORMNAMES"
+fi
+
 dnl Test 
 AC_ARG_ENABLE([platform-tests],AS_HELP_STRING([--enable-platform-tests],[test platform]))
 if test "${enable_platform_tests}" = "yes" ; then
@@ -329,12 +340,14 @@ AM_CONDITIONAL([BUILD_TELOSB],    [test "${enable_platform_telosb}"      = "yes"
 AM_CONDITIONAL([BUILD_WISENODE],  [test "${enable_platform_wisenode}"    = "yes" -o "$ALL" = "yes" ])
 AM_CONDITIONAL([BUILD_ICLBSN],    [test "${enable_platform_iclbsn}"      = "yes" -o "$ALL" = "yes" ])
 AM_CONDITIONAL([BUILD_EZ430RF],   [test "${enable_platform_ez430rf}"     = "yes" -o "$ALL" = "yes" ])
+AM_CONDITIONAL([BUILD_MCUGENP],   [test "${enable_platform_mcugenp}"     = "yes" -o "$ALL" = "yes" ])
 AM_CONDITIONAL([BUILD_MOSAR],     [test "${enable_platform_mosar}"       = "yes"])
-AM_CONDITIONAL([BUILD_MICA2],     [test "${enable_platform_mica2}"       = "yes"])
-AM_CONDITIONAL([BUILD_MICAZ],     [test "${enable_platform_micaz}"       = "yes"])
+AM_CONDITIONAL([BUILD_MICA2],     [test "${enable_platform_mica2}"       = "yes" -o "$ALL" = "yes"])
+AM_CONDITIONAL([BUILD_MICAZ],     [test "${enable_platform_micaz}"       = "yes" -o "$ALL" = "yes"])
 
 AM_CONDITIONAL([BUILD_MSP430],    [test "${enable_mcu_msp430}"         = "yes" -o "$ALL" = "yes" ])
 AM_CONDITIONAL([BUILD_ATMEGA],    [test "${enable_mcu_atmega}"         = "yes" -o "$ALL" = "yes" ])
+AM_CONDITIONAL([BUILD_MCUGEN],    [test "${enable_mcu_mcugen}"         = "yes" -o "$ALL" = "yes" ])
 
 dnl --------------------------------------------------------------
 dnl Checks for header files.
@@ -557,6 +570,7 @@ arch/Makefile
 arch/common/Makefile
 arch/msp430/Makefile
 arch/atmega/Makefile
+arch/mcugen/Makefile
 dnl
 devices/Makefile
 devices/led/Makefile
@@ -587,6 +601,7 @@ platforms/wisenode/Makefile
 platforms/mica2/Makefile
 platforms/micaz/Makefile
 platforms/iclbsn/Makefile
+platforms/mcugen/Makefile
 dnl
 libelf/Makefile
 libgdb/Makefile

@@ -1,1 +1,1 @@
-SUBDIRS = common msp430 atmega
+SUBDIRS = common msp430 atmega mcugen

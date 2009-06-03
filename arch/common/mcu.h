@@ -117,14 +117,6 @@ void     mcu_print_description  (void);
 void     mcu_reset              (void);
 void     mcu_run                (void);
 
-uint8_t  mcu_jtag_read_byte     (uint16_t addr);
-void     mcu_jtag_write_byte    (uint16_t addr, uint8_t val);
-uint16_t mcu_jtag_read_word     (uint16_t addr);
-int      mcu_jtag_read_section  (uint8_t *mem, uint16_t start, uint16_t size);
-void     mcu_jtag_write_section (uint8_t *mem, uint16_t start, uint16_t size);
-void     mcu_jtag_write_zero    (uint16_t start, uint16_t size);
-int      mcu_hexfile_load       (char *filename);
-
 int      mcu_registers_number   (void);
 uint16_t mcu_register_get       (int i);
 void     mcu_register_set       (int i, uint16_t v);
@@ -152,8 +144,38 @@ uint64_t mcu_get_insn           (void);
 /* ************************************** */
 /* ************************************** */
 
+uint8_t  mcu_jtag_read_byte     (uint16_t addr);
+void     mcu_jtag_write_byte    (uint16_t addr, uint8_t val);
+uint16_t mcu_jtag_read_word     (uint16_t addr);
+int      mcu_jtag_read_section  (uint8_t *mem, uint16_t start, uint16_t size);
+void     mcu_jtag_write_section (uint8_t *mem, uint16_t start, uint16_t size);
+void     mcu_jtag_write_zero    (uint16_t start, uint16_t size);
+int      mcu_hexfile_load       (char *filename);
+
+/* ************************************** */
+/* ************************************** */
+/* ************************************** */
+
 char*    mcu_regname_str        (unsigned r);
 char*    mcu_ramctl_str         (int type);
+
+/* ************************************** */
+/* ************************************** */
+/* ************************************** */
+
+#if defined(ENABLE_RAM_CONTROL)
+/* 
+ * This RAM Control is not backtracked since we have to survice a 
+ * backtrack when doing GDB hardware breakpoint while in WSNet mode.
+ * This will have an influence on read before write error detection.
+ *
+ */
+extern uint8_t MCU_RAMCTL [];
+#endif
+
+/* ************************************** */
+/* ************************************** */
+/* ************************************** */
 
 #if defined(ENABLE_RAM_CONTROL)
 void     mcu_ramctl_init        (void);

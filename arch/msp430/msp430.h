@@ -123,20 +123,6 @@ extern tracer_id_t MSP430_TRACER_USART1;
 /* ************************************************** */
 /* ************************************************** */
 
-#if defined(ENABLE_RAM_CONTROL)
-/* 
- * This RAM Control is not backtracked since we have to survice a 
- * backtrack when doing GDB hardware breakpoint while in WSNet mode.
- * This will have an influence on read before write error detection.
- *
- */
-  uint8_t ramctl  [MAX_RAM_SIZE];
-#endif
-
-/* ************************************************** */
-/* ************************************************** */
-/* ************************************************** */
-
 struct msp430_mcu_t {
 
   uint8_t ram     [MAX_RAM_SIZE]; /* ram + flash */
@@ -218,7 +204,6 @@ extern struct msp430_mcu_t mcu_backup;
 #define MCU_HWMUL          MCU.hwmul
 #define MCU_FLASH          MCU.flash
 #define MCU_RAM            MCU.ram
-#define MCU_RAMCTL         ramctl
 
 #if defined(__msp430_have_basic_clock)
 #define MCU_CLOCK          MCU.basic_clock

@@ -18,6 +18,10 @@
 /* ************************************************** */
 /* ************************************************** */
 
+#if defined(ENABLE_RAM_CONTROL)
+uint8_t MCU_RAMCTL  [MAX_RAM_SIZE];
+#endif
+
 struct msp430_mcu_t mcu;
 struct msp430_mcu_t mcu_backup;
 
@@ -312,7 +316,7 @@ void mcu_state_restore()
   HW_DMSG_MSP("msp430: == \n");
   if (old_run_mode != RUNNING_MODE())
     {
-      MCU_SIGNAL |= SIG_MCU_LPM_CHANGE;
+      mcu_signal_add( SIG_MCU_LPM_CHANGE );
     }
 }
 
@@ -482,7 +486,7 @@ void mcu_jtag_write_zero(uint16_t start, uint16_t size)
 }
 
 /* ************************************************** */
-/* ** RAM Control *********************************** */
+/* ************************************************** */
 /* ************************************************** */
 
 #if defined(ENABLE_RAM_CONTROL)
@@ -577,7 +581,3 @@ uint8_t mcu_ramctl_read_ctl(uint16_t addr)
 }
 
 #endif
-
-/* ************************************************** */
-/* ************************************************** */
-/* ************************************************** */

@@ -17,10 +17,6 @@
 #include "arch/common/wsim_stdint.h"
 #endif
 
-#if defined(XCODE_DEBUG)
-#define ENABLE_RAM_CONTROL    /* breakpoints and watchpoints */
-#endif
-
 #include <inttypes.h>
 
 #include "libtracer/tracer.h"

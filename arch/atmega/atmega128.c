@@ -20,6 +20,16 @@
 /* ************************************************** */
 /* ************************************************** */
 
+#if defined(ENABLE_RAM_CONTROL)
+/* 
+ * This RAM Control is not backtracked since we have to survice a 
+ * backtrack when doing GDB hardware breakpoint while in WSNet mode.
+ * This will have an influence on read before write error detection.
+ *
+ */
+uint8_t MCU_RAMCTL  [MAX_RAM_SIZE];
+#endif
+
 struct atmega128_mcu_t mcu;
 struct atmega128_mcu_t mcu_backup;
 
@@ -136,7 +146,7 @@ void mcu_state_restore(void)
   HW_DMSG_ATM("atmega128: == \n");
   if (old_run_mode != RUNNING_MODE())
     {
-      MCU_SIGNAL |= SIG_MCU_LPM_CHANGE;
+      mcu_signal_add( SIG_MCU_LPM_CHANGE );
     }
 }
 
@@ -250,6 +260,15 @@ uint8_t  mcu_jtag_read_byte(uint16_t addr)
 /* ************************************************** */
 /* ************************************************** */
 
+uint16_t  mcu_jtag_read_word(uint16_t addr)
+{
+  return MCU_RAM[addr+1] << 8 | MCU_RAM[addr];
+}
+
+/* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
+
 void mcu_jtag_write_byte(uint16_t addr, uint8_t val)
 {
   MCU_RAM[addr] = val;
@@ -260,9 +279,17 @@ void mcu_jtag_write_byte(uint16_t addr, uint8_t val)
 /* ************************************************** */
 /* ************************************************** */
 
-int mcu_jtag_read_section(uint8_t UNUSED *mem, uint16_t UNUSED start, uint16_t UNUSED size)
+int mcu_jtag_read_section(uint8_t *mem, uint16_t start, uint16_t size)
 {
-  return 0;
+  long max_size;
+  
+  if (start + size > MAX_RAM_SIZE)
+    max_size = (MAX_RAM_SIZE - start) - 1;
+  else
+    max_size = size;
+
+  memcpy(mem, MCU_RAM + start, max_size);
+  return max_size;
 }
 
 /* ************************************************** */
@@ -286,7 +313,7 @@ void mcu_jtag_write_zero(uint16_t start, uint16_t size)
 }
 
 /* ************************************************** */
-/* ** RAM Control *********************************** */
+/* ************************************************** */
 /* ************************************************** */
 
 #if defined(ENABLE_RAM_CONTROL)
@@ -329,13 +356,15 @@ void mcu_ramctl_tst_fetch(uint16_t addr)
 
 void mcu_ramctl_set_bp(uint16_t addr, int type)
 {
-  SW_DMSG_BRK("software: set breakpoint type %d (%s) at 0x%04x\n",
-	      type,mcu_ramctl_str(type),addr);
+  /* SW_DMSG_BRK("software: set breakpoint type %d (%s) at 0x%04x\n",
+     type,mcu_ramctl_str(type),addr); */
   MCU_RAMCTL[addr] |= type;
 }
 
 void mcu_ramctl_unset_bp(uint16_t addr, int type)
 {
+  /* SW_DMSG_BRK("software: del breakpoint type %d (%s) at 0x%04x\n",
+     type,mcu_ramctl_str(type),addr); */
   MCU_RAMCTL[addr] &= ~type;
 }
 
@@ -370,10 +399,16 @@ void mcu_ramctl_write_block(uint16_t addr, int size)
 
 uint8_t mcu_ramctl_read_ctl(uint16_t addr)
 {
-  return MCU_RAMCTL[addr];
+  uint8_t ret = 0;
+  /* if (ret < MAX_RAM_SIZE) */
+    {
+      ret = MCU_RAMCTL[addr];
+    }
+  return ret;
 }
 
 #endif
+
 
 /* ************************************************** */
 /* ************************************************** */

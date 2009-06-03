@@ -91,7 +91,6 @@ extern struct atmega128_mcu_t mcu_backup;
 #define MCU_HWMUL          MCU.hwmul
 #define MCU_FLASH          MCU.flash
 #define MCU_RAM            MCU_ALU.ram
-#define MCU_RAMCTL         MCU_ALU.ramctl
 
 #define MCU_BOOT_ADDRESS   0x0
 

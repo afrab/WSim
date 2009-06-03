@@ -53,9 +53,6 @@ typedef union u_ureg16_t ureg16hl_t;
 
 struct atmega128_alu_t {
   uint8_t          ram[MAX_RAM_SIZE];
-#if defined(ENABLE_RAM_CONTROL)
-  uint8_t          ramctl[MAX_RAM_SIZE];
-#endif
 
   uint16_t         pc;
   uint16_t         next_pc;

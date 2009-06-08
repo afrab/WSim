@@ -60,7 +60,7 @@
         </listitem>
         <listitem>
           <simpara>
-            Tutorial Sources <ulink url="files/tutorial-wsn430.tar.gz">Examples tar file</ulink>.
+            Tutorial examples sources are located in the /examples/wsn430 directory of WSim sources.
           </simpara>
         </listitem>
       </itemizedlist>
@@ -215,7 +215,7 @@
 		<sect1>
 			<title>Compiling and executing the example</title>
 			<para>If you are using the Worldsens Live CD, go to <userinput>/opt/worldsens/examples/wsn430-leds</userinput>.
-			If not, go to <userinput>$WSIM_FOLDER/examples/wsn430-leds</userinput> and type:</para>
+			If not, go to <userinput>$WSIM_FOLDER/examples/wsn430/wsn430-leds</userinput> and type:</para>
 				<programlisting>
 <prompt>[wsn430-leds]$</prompt> <userinput>make</userinput></programlisting>
 			<para>You should see:</para>
@@ -375,7 +375,7 @@ wsim:log:wsim.log</computeroutput></programlisting>
 		<sect1>
 			<title>Compiling and executing the example</title>
 			<para>If you are using the Worldsens Live CD, go to <userinput>/opt/worldsens/examples/wsn430-timer</userinput>.
-			If not, go to <userinput>$WSIM_FOLDER/examples/wsn430-timer and type</userinput>:</para>
+			If not, go to <userinput>$WSIM_FOLDER/examples/wsn430/wsn430-timer and type</userinput>:</para>
 				<programlisting>
 <prompt>[wsn430-timer]$</prompt> <userinput>make</userinput></programlisting>
 			<para>You should see:</para>
@@ -470,7 +470,7 @@ wsim:log:wsim.log</computeroutput></programlisting>
 			<title>Compiling and executing the example</title>
 			<para>To compile the example, follow the same instructions as before. For users of the Worldsens 
 			Live CD, the folder containing this example is <userinput>/opt/worldsens/examples/wsn430-serial</userinput>.
-			For other, go to <userinput>$WSIM_FOLDER/examples/wsn430-serial</userinput>.</para>
+			For other, go to <userinput>$WSIM_FOLDER/examples/wsn430/wsn430-serial</userinput>.</para>
 			<para>To execute the example users will have to follow the procedure below:</para>
 			<procedure>
 				<step><para>Launch an instance of the Worldsens WConsole application, as follows:</para>

@@ -231,10 +231,10 @@ msp430-objdump -dSt wsn430-leds.elf &gt;wsn430-leds.lst</computeroutput></progra
 				<itemizedlist mark="bullet" spacing="normal">
 					<listitem><simpara><userinput>ui</userinput>: to show the user interface (i.e. the LEDs blinking).</simpara></listitem>
 					<listitem><simpara><userinput>trace</userinput>: write simulator traces in a file (<userinput>wsim.trc</userinput>).</simpara></listitem>
-					<listitem><simpara><userinput>mode</userinput>: WSim mode (<userinput>time</userinput>, <userinput>steps</userinput> 
+					<listitem><simpara><userinput>mode</userinput>: WSim mode (<userinput>time</userinput>, <userinput>insn</userinput> 
 						or <userinput>gdb</userinput>); if this is not specified, WSim will run forever.</simpara></listitem>
-					<listitem><simpara><userinput>modearg</userinput>: if mode is <userinput>time</userinput> or <userinput>steps</userinput>,
-						then this option will specify the simulation time in nanoseconds or number of steps.</simpara></listitem>
+					<listitem><simpara><userinput>modearg</userinput>: if mode is <userinput>time</userinput> or <userinput>insn</userinput>,
+						then this option will specify the simulation time in nanoseconds or number of instructions.</simpara></listitem>
 				</itemizedlist>
 			The command to type is therefore the following (expected output is included below):</para>
 				<programlisting>
@@ -309,6 +309,7 @@ wsim:log:wsim.log</computeroutput></programlisting>
 <prompt>[wsn430-leds]$</prompt> <userinput>wsim-wsn430 --ui --trace --mode=gdb wsn430-leds.elf</userinput></programlisting>
 				</step>
 				<step><para>Launch Insight/GDB and load the ELF file as shown below (File menu --> Open):</para>
+					<programlisting><prompt>[wsn430-leds]$</prompt><userinput>msp430-insight</userinput></programlisting>
 					<figure id="leds-dbg-1">
 						<title>First debugging snapshot</title>
 						<mediaobject>
@@ -393,10 +394,10 @@ msp430-objdump -dSt wsn430-timer.elf >wsn430-timer.lst</computeroutput></program
 				<itemizedlist mark="bullet" spacing="normal">
 					<listitem><simpara><userinput>ui</userinput>: to show the user interface (i.e. the LEDs blinking).</simpara></listitem>
 					<listitem><simpara><userinput>trace</userinput>: write simulator traces in a file (<userinput>wsim.trc</userinput>).</simpara></listitem>
-					<listitem><simpara><userinput>mode</userinput>: WSim mode (<userinput>time</userinput>, <userinput>steps</userinput> 
+					<listitem><simpara><userinput>mode</userinput>: WSim mode (<userinput>time</userinput>, <userinput>insn</userinput> 
 						or <userinput>gdb</userinput>); if this is not specified, WSim will run forever.</simpara></listitem>
-					<listitem><simpara><userinput>modearg</userinput>: if mode is <userinput>time</userinput> or <userinput>steps</userinput>,
-						then this option will specify the simulation time in nanoseconds or number of steps.</simpara></listitem>
+					<listitem><simpara><userinput>modearg</userinput>: if mode is <userinput>time</userinput> or <userinput>insn</userinput>,
+						then this option will specify the simulation time in nanoseconds or number of instructions.</simpara></listitem>
 				</itemizedlist>
 			The command to type is therefore the following (expected output is included below):</para>
 				<programlisting>
@@ -554,12 +555,14 @@ wsim:log:wsim.log</computeroutput></programlisting>
 				<step><para>Launch WSNet the network simulator. You must either launch it
 				from the directory containing the example or provide the path of this directory to it
 				as an option (see WSNet Tutorial for more details). This is needed for the configuration
-				of the network simulator (environment, physical layer, MAC layer etc).</para></step>
+				of the network simulator (environment, physical layer, MAC layer etc).</para>
+				<programlisting><prompt>[wsn430-leds]$</prompt><userinput>wsnet1</userinput></programlisting>
+				</step>
 				<step><para>Launch the three WSim nodes. To do so, use the script provided with 
 				the example: <userinput>demo.sh</userinput>. For regular execution (time mode, 
-				10 seconds), use the script with the following arguments:</para>
+				10 seconds), use the script:</para>
 				<programlisting>
-<prompt>[wsn430-token]$</prompt> <userinput>./demo.sh p3 /dev/pts/7 /dev/pts/8 /dev/pts/9</userinput></programlisting></step>
+<prompt>[wsn430-token]$</prompt> <userinput>./demo.sh</userinput></programlisting></step>
 			</procedure>
 			<para><xref linkend="token-petit"/> shows the console output of the 3 nodes. Console 
 			duplicated messages are one of the effects of the distributed simulation mechanims. WSNet 
@@ -589,12 +592,12 @@ wsim:log:wsim.log</computeroutput></programlisting>
 					<listitem><para>To place Node 1 in debug mode and the other two in regular 
 					execution, execute the script with the following arguments:
 					<programlisting>
-<prompt>[wsn430-token]$</prompt> <userinput>./demo.sh d31 /dev/pts/7 /dev/pts/8 /dev/pts/9</userinput></programlisting>
+<prompt>[wsn430-token]$</prompt> <userinput>./demo.sh dbg 1</userinput></programlisting>
 					</para></listitem>
 					<listitem><para>To place Node 2 in debug mode and the other two in regular 
 					execution, execute the script with the following arguments:
 					<programlisting>
-<prompt>[wsn430-token]$</prompt> <userinput>./demo.sh d32 /dev/pts/7 /dev/pts/8 /dev/pts/9</userinput></programlisting></para></listitem>
+<prompt>[wsn430-token]$</prompt> <userinput>./demo.sh dbg 2</userinput></programlisting></para></listitem>
 				</itemizedlist>
 			</para>
 			<para>Once the simulators are launched, you can connect GDB/Insight to the node placed 

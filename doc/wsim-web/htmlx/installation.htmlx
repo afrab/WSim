@@ -13,7 +13,7 @@
     
     <ul style="margin-top: 0pt;">
       <li><span >gcc</span>,  and <span>make</span></li>    		
-      <li><span >libsdl1.2</span></li>
+      <li><span >libsdl1.2 et libsdl1.2-dev</span></li>
       <li><span >automake</span> (>= 1.10), <span>autoconf</span> (>= 2.61)</li>
     </ul>
     
@@ -44,6 +44,18 @@
     <pre class="terminal"><span class="prompt">$ </span> <span class="input">make</span></pre>
     
     <p>Platform specific simulators are compiled in their own platform/xxx directory </p>
+
+    <p>To install executable files, enter the following command (with root privileges): </p>
+
+    <pre class="terminal"><span class="prompt">$ </span> <span class="input">make install</span></pre>
+
+    <p>You can add the WSim install directory in the search path by adding the following entries in ~/.bashrc:</p>
+
+    <p><span class="hilite">PATH=$PATH:/usr/local/wsnet-2.0/bin</span><br>
+    <span class="hilite">export PATH</span>
+    </p>
+
+    <p>Remark: follow the same procedure if you need to install WConsole, WTracer, or WSNet. There source codes are included in WSim repository (in <span class="hilite">./wsim/utils/</span> directory)</p>
 
 </div>
 

@@ -1,13 +1,3 @@
-
-This is the tutorial source repository for WSN430 wireless sensor
-network nodes examples. These examples can be used for the
-hands-on tutorial on WSN430 sensors.
-
-all code written by
-- Antoine Fraboulet <antoine.fraboulet@insa-lyon.fr>
-- Guillaume Chelius <guillaume.chelius@inria.fr>
-- Eric Fleury       <eric.fleury@inria.fr>
-
-This code can be used in projects and derivative work according
-to the GPLv2 License.
-
+This directory contains some small examples that can be run
+using WSim platforms. They can be used to test basic functionnalities
+but do not contain much msp430 software or device drivers.

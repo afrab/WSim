@@ -5,7 +5,7 @@
  *  \date   2007
  **/
 
-#include "worldsens_pkt.h"
+#include "wsnet2_pkt.h"
 
 #if defined(WSIM)
 #include "liblogger/logger.h"
@@ -99,7 +99,7 @@ do {                                 \
     swap8((uint8_t*)&v);             \
   else if (sizeof(v) == 2)           \
     swap2((uint8_t*)&v);             \
-} while (0)
+ } while (0)			     
 
 
 #endif /* SWAP_IS_NOP */
@@ -108,25 +108,25 @@ do {                                 \
 /* ************************************************** */
 /* ************************************************** */
 
-static inline int worldsens_packet_swap(union ws_pkt *pkt)
+static inline int worldsens_packet_swap(union _worldsens_pkt *pkt)
 {
   int ptype = *((ws_pkt_type*)pkt);
   /* int pkt_type = pkt->cnx_req.pkt_id; */ /* could be any struct ws_* */
 
   switch (ptype)
     {
-    case WORLDSENS_CONNECT_REQ:
+    case WORLDSENS_C_CONNECT_REQ:
       SWAPN (pkt->cnx_req.pkt_id);
       SWAPN (pkt->cnx_req.node_id);
       break;
 
-    case WORLDSENS_SYNC_ACK:
+    case WORLDSENS_C_SYNC_ACK:
       SWAPN (pkt->sync_ack.pkt_id);
       SWAPN (pkt->sync_ack.node_id);
       SWAPN (pkt->sync_ack.rp_id);
       break;
 
-    case WORLDSENS_BYTE_TX:
+    case WORLDSENS_C_BYTE_TX:
       SWAPN (pkt->byte_tx.pkt_id);
       SWAPN (pkt->byte_tx.node_id);
       SWAPN (pkt->byte_tx.antenna_id);
@@ -137,17 +137,17 @@ static inline int worldsens_packet_swap(union ws_pkt *pkt)
       SWAPN (pkt->byte_tx.data);
       break;
 
-    case WORLDSENS_MEASURE_REQ:
+    case WORLDSENS_C_MEASURE_REQ:
       SWAPN (pkt->measure_req.pkt_id);
       SWAPN (pkt->measure_req.measure_id);
       break;
 
-    case WORLDSENS_DISCONNECT:
+    case WORLDSENS_C_DISCONNECT:
       SWAPN (pkt->disconnect.pkt_id);
       SWAPN (pkt->disconnect.node_id);
       break;
 
-    case WORLDSENS_CONNECT_RSP:
+    case WORLDSENS_S_CONNECT_RSP_OK:
       SWAPN (pkt->cnx_rsp.pkt_id);
       SWAPN (pkt->cnx_rsp.seq);
       SWAPN (pkt->cnx_rsp.rp_next);
@@ -155,21 +155,21 @@ static inline int worldsens_packet_swap(union ws_pkt *pkt)
       /* .names field left alone */
       break;
 
-    case WORLDSENS_SYNC_REQ:
+    case WORLDSENS_S_SYNC_REQ:
       SWAPN (pkt->sync_req.pkt_id);
       SWAPN (pkt->sync_req.seq);
       SWAPN (pkt->sync_req.rp_next);
       SWAPN (pkt->sync_req.rp_duration);
       break;
 
-    case WORLDSENS_SYNC_RELEASE:
+    case WORLDSENS_S_SYNC_RELEASE:
       SWAPN (pkt->sync_release.pkt_id);
       SWAPN (pkt->sync_release.seq);
       SWAPN (pkt->sync_release.rp_next);
       SWAPN (pkt->sync_release.rp_duration);
       break;
 
-    case WORLDSENS_BYTE_RX:
+    case WORLDSENS_S_BYTE_RX:
       SWAPN (pkt->byte_rx.pkt_id);
       SWAPN (pkt->byte_rx.seq);
       SWAPN (pkt->byte_rx.antenna_id);
@@ -180,14 +180,14 @@ static inline int worldsens_packet_swap(union ws_pkt *pkt)
       SWAPN (pkt->byte_rx.ber);
       break;
 
-    case WORLDSENS_MEASURE_RSP:
+    case WORLDSENS_S_MEASURE_RSP:
       SWAPN (pkt->measure_rsp.pkt_id);
       SWAPN (pkt->measure_rsp.seq);
       SWAPN (pkt->measure_rsp.measure_id);
       SWAPN (pkt->measure_rsp.measure_val);
       break;
 
-    case WORLDSENS_KILLSIM:
+    case WORLDSENS_S_KILLSIM:
       SWAPN (pkt->killsim.pkt_id);
       SWAPN (pkt->killsim.seq);
       break;
@@ -204,12 +204,12 @@ static inline int worldsens_packet_swap(union ws_pkt *pkt)
 /* ************************************************** */
 /* ************************************************** */
 
-int worldsens_packet_hton(union ws_pkt *pkt)
+int worldsens_packet_hton(union _worldsens_pkt *pkt)
 {
   return worldsens_packet_swap(pkt);
 }
 
-int worldsens_packet_ntoh(union ws_pkt *pkt)
+int worldsens_packet_ntoh(union _worldsens_pkt *pkt)
 {
   return worldsens_packet_swap(pkt);
 }
@@ -218,7 +218,7 @@ int worldsens_packet_ntoh(union ws_pkt *pkt)
 /* ************************************************** */
 /* ************************************************** */
 
-int worldsens_packet_dump(union ws_pkt UNUSED *pkt)
+int worldsens_packet_dump(union _worldsens_pkt UNUSED *pkt)
 {
   
   return 0;
@@ -227,3 +227,29 @@ int worldsens_packet_dump(union ws_pkt UNUSED *pkt)
 /* ************************************************** */
 /* ************************************************** */
 /* ************************************************** */
+
+
+uint64_t ntohll  (uint64_t v)
+{
+  SWAPN(v);
+  return v;
+}
+
+uint64_t htonll  (uint64_t v)
+{
+  SWAPN(v);
+  return v;
+}
+
+double   ntohdbl (double v)
+{
+  SWAPN(v);
+  return v;
+}
+
+double   htondbl (double v)
+{
+  SWAPN(v);
+  return v;
+}
+

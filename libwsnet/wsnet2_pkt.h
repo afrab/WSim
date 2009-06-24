@@ -12,6 +12,8 @@
 
 #define __PACKED__  __attribute__((packed))
 
+#define MAX_PKTLENGTH 100
+
 /* ************************************************** */
 /* ************************************************** */
 /* ************************************************** */
@@ -20,19 +22,21 @@ enum woldsens_pkt_type {
   WORLDSENS_UNKNOWN = 0,
 
   /* WSim -> WSNet2 */
-  WORLDSENS_CONNECT_REQ,  /* connection request  */
-  WORLDSENS_SYNC_ACK,     /*                     */
-  WORLDSENS_BYTE_TX,      /* Tx                  */
-  WORLDSENS_MEASURE_REQ,  /* measure request     */
-  WORLDSENS_DISCONNECT,   /* disconnect          */
+  WORLDSENS_C_CONNECT_REQ,     /* connection request  */
+  WORLDSENS_C_SYNC_ACK,        /*                     */
+  WORLDSENS_C_BYTE_TX,         /* Tx                  */
+  WORLDSENS_C_MEASURE_REQ,     /* measure request     */
+  WORLDSENS_C_DISCONNECT,      /* disconnect          */
 
   /* WSNet2 -> WSim */
-  WORLDSENS_CONNECT_RSP,  /* connection granted  */  
-  WORLDSENS_SYNC_REQ,     /* RP request          */
-  WORLDSENS_SYNC_RELEASE, /* RP save and release */
-  WORLDSENS_BYTE_RX,      /* Rx                  */
-  WORLDSENS_MEASURE_RSP,  /* measure response    */
-  WORLDSENS_KILLSIM,
+  WORLDSENS_S_CONNECT_RSP_OK,  /* connection granted  */
+  WORLDSENS_S_CONNECT_RSP_NOK, /* connection refused  */
+  WORLDSENS_S_SYNC_REQ,        /* RP request          */
+  WORLDSENS_S_SYNC_RELEASE,    /* RP save and release */
+  WORLDSENS_S_BACKTRACK,       /* backtrack request   */
+  WORLDSENS_S_BYTE_RX,         /* Rx                  */
+  WORLDSENS_S_MEASURE_RSP,     /* measure response    */
+  WORLDSENS_S_KILLSIM,
 
   /* */
   WORLDSENS_LASTID
@@ -57,23 +61,36 @@ typedef double                  ws_ber;
 typedef uint64_t                ws_time;
 typedef uint8_t                 ws_data;
 
+
+
+
+
+
+
 /* ************************************************** */
 /* ************************************************** */
 /* ************************************************** */
 
-struct __PACKED__ ws_connect_req {
-  ws_pkt_type            pkt_id;
+/* packet sent by a client to the server */
+
+struct __PACKED__ _worldsens_c_header {
+  ws_pkt_type            type;
+  ws_id_node             id;
+};
+
+struct __PACKED__ _worldsens_c_connect_req {
+  ws_pkt_type            type;
   ws_id_node             node_id;
 };
 
-struct __PACKED__ ws_sync_ack {
-  ws_pkt_type            pkt_id;
+struct __PACKED__ _worldsens_c_sync_ack {
+  ws_pkt_type            type;
   ws_id_node             node_id;
   ws_id_rp               rp_id;
 };
 
-struct __PACKED__ ws_byte_tx {
-  ws_pkt_type            pkt_id;
+struct __PACKED__ _worldsens_c_byte_tx {
+  ws_pkt_type            type;
   ws_id_node             node_id;
   ws_id_resource         antenna_id;
   ws_id_resource         modulation_id;
@@ -81,14 +98,16 @@ struct __PACKED__ ws_byte_tx {
   ws_power               power;
   ws_time                duration;
   ws_data                data;
+  ws_time                period;
 };
 
-struct __PACKED__ ws_measure_req {
-  ws_pkt_type            pkt_id;
+struct __PACKED__ _worldsens_c_measure_req {
+  ws_pkt_type            type;
+  ws_id_node             node_id;
   ws_id_resource         measure_id;
 };
 
-struct __PACKED__ ws_disconnect {
+struct __PACKED__ _worldsens_c_disconnect {
   ws_pkt_type            pkt_id;
   ws_id_node             node_id;
 };
@@ -99,9 +118,19 @@ struct __PACKED__ ws_disconnect {
 
 #define WORLDSENS_MAX_MODELS_ID_SIZE 1200
 
-struct __PACKED__ ws_connect_rsp {
-  ws_pkt_type            pkt_id;
+/* packet sent by the server to a client */
+
+struct __PACKED__ _worldsens_s_header {
+  ws_pkt_type            type;
   ws_id_seq              seq;
+};
+
+
+
+struct __PACKED__ _worldsens_s_connect_rsp {
+  ws_pkt_type            type;
+  ws_id_seq              seq;
+  ws_id_rp               rp_current;
   ws_id_rp               rp_next;
   ws_time                rp_duration;
 
@@ -112,22 +141,31 @@ struct __PACKED__ ws_connect_rsp {
   char                   names[WORLDSENS_MAX_MODELS_ID_SIZE];
 };
 
-struct __PACKED__ ws_sync_req {
-  ws_pkt_type            pkt_id;
+struct __PACKED__ _worldsens_s_sync_req {
+  ws_pkt_type            type;
+  ws_id_seq              seq;
+  ws_id_rp               rp_current;
+  ws_id_rp               rp_next;
+  ws_time                rp_duration;
+};
+
+struct __PACKED__ _worldsens_s_sync_release {
+  ws_pkt_type            type;
+  ws_id_seq              seq;
+  ws_id_rp               rp_current;
+  ws_id_rp               rp_next;
+  ws_time                rp_duration;
+};
+
+struct __PACKED__ _worldsens_s_backtrack {
+  ws_pkt_type            type;
   ws_id_seq              seq;
   ws_id_rp               rp_next;
   ws_time                rp_duration;
 };
 
-struct __PACKED__ ws_sync_release {
-  ws_pkt_type            pkt_id;
-  ws_id_seq              seq;
-  ws_id_rp               rp_next;
-  ws_time                rp_duration;
-};
-
-struct __PACKED__ ws_byte_rx {
-  ws_pkt_type            pkt_id;
+struct __PACKED__ _worldsens_s_byte_rx {
+  ws_pkt_type            type;
   ws_id_seq              seq;
   ws_id_resource         antenna_id;
   ws_id_resource         modulation_id;
@@ -137,15 +175,15 @@ struct __PACKED__ ws_byte_rx {
   ws_ber                 ber;
 };
 
-struct __PACKED__ ws_measure_rsp {
-  ws_pkt_type            pkt_id;
+struct __PACKED__ _worldsens_s_measure_rsp {
+  ws_pkt_type            type;
   ws_id_seq              seq;
   ws_id_resource         measure_id;
   ws_measure             measure_val;
 };
 
-struct __PACKED__ ws_killsim {
-  ws_pkt_type            pkt_id;
+struct __PACKED__ _worldsens_s_killsim {
+  ws_pkt_type            type;
   ws_id_seq              seq;
 };
 
@@ -153,22 +191,22 @@ struct __PACKED__ ws_killsim {
 /* ************************************************** */
 /* ************************************************** */
 
-union ws_pkt {
-  struct ws_connect_req        cnx_req;
-  struct ws_connect_rsp        cnx_rsp;
+union _worldsens_pkt {
+  struct _worldsens_c_connect_req        cnx_req;
+  struct _worldsens_s_connect_rsp        cnx_rsp;
 
-  struct ws_byte_tx            byte_tx;
-  struct ws_byte_rx            byte_rx;
+  struct _worldsens_c_byte_tx            byte_tx;
+  struct _worldsens_s_byte_rx            byte_rx;
 
-  struct ws_sync_req           sync_req;
-  struct ws_sync_ack           sync_ack;
-  struct ws_sync_release       sync_release;
+  struct _worldsens_s_sync_req           sync_req;
+  struct _worldsens_c_sync_ack           sync_ack;
+  struct _worldsens_s_sync_release       sync_release;
 
-  struct ws_measure_req        measure_req;
-  struct ws_measure_rsp        measure_rsp;
+  struct _worldsens_c_measure_req        measure_req;
+  struct _worldsens_s_measure_rsp        measure_rsp;
 
-  struct ws_disconnect         disconnect;
-  struct ws_killsim            killsim;
+  struct _worldsens_c_disconnect         disconnect;
+  struct _worldsens_s_killsim            killsim;
 };
 
 /* ************************************************** */
@@ -178,11 +216,17 @@ union ws_pkt {
 /* returns type of packet             */
 /* return type == 0 UNKNOWN on errors */
 
-int worldsens_packet_hton(union ws_pkt *pkt);
-int worldsens_packet_ntoh(union ws_pkt *pkt);
+int worldsens_packet_hton(union _worldsens_pkt *pkt);
+int worldsens_packet_ntoh(union _worldsens_pkt *pkt);
 
 /* dump on stdout */
-int worldsens_packet_dump(union ws_pkt *pkt);
+int worldsens_packet_dump(union _worldsens_pkt *pkt);
+
+
+uint64_t ntohll  (uint64_t);
+uint64_t htonll  (uint64_t);
+double   ntohdbl (double);
+double   htondbl (double);
 
 /* ************************************************** */
 /* ************************************************** */

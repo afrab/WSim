@@ -71,23 +71,29 @@ struct _worldsens_clt {
 /**************************************************************************/
 /**************************************************************************/
 
-void     wsnet2_init           (void);
-void     wsnet2_finalize       (void);
-uint32_t wsnet2_get_node_id    (void);
-void     wsnet2_register_radio (char *, radio_callback_t, void *);
-void     wsnet2_register_phy   (char *channel, phy_callback_t callback, void *);
-int      wsnet2_connect        (char *, uint16_t, char *, uint16_t, uint32_t);
-int      wsnet2_sync           (void);
-int      wsnet2_tx             (char, double, int, double, uint64_t);
-int      wsnet2_parse          (char *);
-int      wsnet2_seq            (char *);
-void     wsnet2_published      (char *);
-int      wsnet2_backtrack      (char *);
-int      wsnet2_sync_release   (char *);
-int      wsnet2_sync_req       (char *);
-int      wsnet2_rx             (char *);
-int      wsnet2_rxreq          (char *);
-int      wsnet2_subscribe      (void);
+/* public */
+void            wsnet2_init           (void);
+void            wsnet2_finalize       (void);
+uint32_t        wsnet2_get_node_id    (void);
+int             wsnet2_update         (void);
+void            wsnet2_register_radio (char *, radio_callback_t, void *);
+void            wsnet2_register_phy   (char *channel, phy_callback_t callback, void *);
+int             wsnet2_connect        (char *, uint16_t, char *, uint16_t, uint32_t);
+int             wsnet2_tx             (char, double, int, double, uint64_t);
+
+/* private */
+static int      wsnet2_sync           (void);
+static int      wsnet2_parse          (char *);
+static int      wsnet2_seq            (char *);
+static void     wsnet2_published      (char *);
+static int      wsnet2_backtrack      (char *);
+static int      wsnet2_sync_release   (char *);
+static int      wsnet2_sync_req       (char *);
+static int      wsnet2_rx             (char *);
+static int      wsnet2_rxreq          (char *);
+static int      wsnet2_subscribe      (void);
+static void     wsnet2_msg_dump       (void *);
+
 
 
 #endif

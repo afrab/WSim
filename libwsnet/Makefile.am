@@ -46,5 +46,7 @@ libwsnet2_a_SOURCES=libwsnet.h	\
 		wsnet2.h	\
 		wsnet2.c	\
 		wsnet2_net.c	\
+                wsnet2_net.h    \
 		wsnet2_pkt.h 	\
-		wsnet2_pkt.c
+		wsnet2_pkt.c    \
+		wsnet2_dbg.h

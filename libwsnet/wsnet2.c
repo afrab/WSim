@@ -15,6 +15,7 @@
 #include "pktlist.h"
 #include "wsnet2_net.h"
 #include "wsnet2.h"
+#include "wsnet2_dbg.h"
 
 
 /**************************************************************************/
@@ -160,13 +161,16 @@ int worldsens_c_initialize(void)
   /* parse options */
   worldsens_option_validate();
 
+  /* structures initialization */
+  wsnet2_init();
+
+ /* initialize multicast and unicast sockets */
   srv_addr = server_ip_opt.value;
   srv_port = atoi(server_port_opt.value);
   mul_addr = multicast_ip_opt.value;
   mul_port = atoi(multicast_port_opt.value);
   node_id  = atoi(node_id_opt.value);
 
-  /* initialize multicast and unicast sockets */
   ret_connect = wsnet2_connect(srv_addr, srv_port, mul_addr, mul_port, node_id);
 
   return ret_connect;

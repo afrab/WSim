@@ -96,7 +96,7 @@ void libelf_dump_section(uint8_t* data, uint32_t addr, uint32_t size, int maxlin
 /***************************************************/
 
 #define SECTION_NUMBER  20
-#define SECTION_MAXNAME 25
+#define SECTION_MAXNAME 100
 
 struct section_info_t {
   char name[SECTION_MAXNAME];
@@ -119,7 +119,7 @@ int libelf_set_section_info(int UNUSED level, int i,char *name, int addr, int of
     {
       ERROR("libelf: too much sections in elf file\n");
     }
-  strcpy(secinfo[i].name,name);
+  strncpy(secinfo[i].name,name, SECTION_MAXNAME);
   secinfo[i].addr   = addr;
   secinfo[i].offset = offset;
   secinfo[i].size   = size;

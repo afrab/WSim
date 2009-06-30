@@ -6,21 +6,11 @@
  *  Copyright 2005 __WorldSens__. All rights reserved.
  *
  */
-#include "private/models_private.h"
+
 #include "private/simulation_private.h"
-#include "private/propagation_private.h"
-#include "private/antenna_private.h"
-#include "private/radio_private.h"
-#include "private/mac_private.h"
-#include "private/queue_private.h"
-#include "private/application_private.h"
 #include "private/nodes_private.h"
 #include "private/packets_private.h"
-#include "private/interference_private.h"
-#include "private/mobility_private.h"
-#include "private/modulation_private.h"
 #include "private/core_private.h"
-#include "private/battery_private.h"
 
 #include "public/log.h"
 #include "worldsens.h"
@@ -42,26 +32,6 @@ core_runtime_end (void)
   struct _packet *packet;
   struct _event *event;
 
-#ifndef WORLDSENS
-  int loop = g_m_nodes;
-
-  while (loop--)
-    {
-      struct _node *node = &(g_nodes[loop]);
-
-      application_complete (node);
-      queue_complete (node);
-      mac_complete (node);
-      radio_complete (node);
-      antenna_complete (node);
-      battery_complete (node);
-    }
-#endif //WORLDSENS
-
-  modulation_complete ();
-  interference_complete ();
-  propagation_complete ();
-
   while (g_events)
     {
       event = g_events;
@@ -76,136 +46,14 @@ core_runtime_end (void)
       packet_destroy (packet);
     }
 
-  models_clean ();
   free (g_nodes);
   return;
 }
 
 
-#ifndef WORLDSENS
 /**************************************************************************/
 /**************************************************************************/
 /**************************************************************************/
-void
-core_notify_carrier_sense (void)
-{
-  struct _packet *p_loop = g_packets;
-
-  while (p_loop)
-    {
-      int i = g_m_nodes;
-
-      /* Only deal with packets that start now */
-      if (p_loop->tx_start != get_global_time())
-	{
-	  p_loop = p_loop->next;
-	  continue;
-	}
-
-      while (i--)
-	{
-	  double rx_mW, noise;
-
-	  /* Update receiving node mobility */
-	  mobility_update (&g_nodes[i]);
-
-	  /* Compute rx_mW and SINR */
-	  rx_mW = propagation_compute_rx_mW (&g_nodes[i], p_loop);
-	  noise =
-	    propagation_compute_noise (&g_nodes[i], p_loop->radio, p_loop->id,
-				       get_global_time());
-
-	  /* Notify carrier sense */
-	  radio_carrier_sense (&g_nodes[i], p_loop->id, rx_mW, rx_mW / noise,
-			       p_loop->radio);
-	}
-
-      p_loop = p_loop->next;
-    }
-
-  return;
-}
-
-
-/**************************************************************************/
-/**************************************************************************/
-/**************************************************************************/
-
-int
-core_start (void)
-{
-  static int evt_nb = 0;
-
-  while (g_events)
-    {
-      struct _event *event = g_events;
-
-      /* Perform cs notification before time advances */
-      if (get_global_time() != event->time)
-	{
-	  core_notify_carrier_sense ();
-	}
-
-      /* And time goes on... */
-      set_global_time( event->time );
-      if (get_global_time() > g_simend)
-	{
-	  get_global_time() = g_simend;
-	  break;
-	}
-      evt_nb++;
-
-
-      if (event->type == SCHED_EVENT_TYPE)
-	{
-	  void *arg = event->arg;
-
-	  /* Remove event before calling callback */
-	  g_events = event->next;
-	  g_events_card--;
-	  event->callback (arg);
-	  free (event);
-
-	}
-      else
-	{
-	  struct _packet *packet = event->packet;
-	  int i = g_m_nodes;
-
-	  /* Remove event */
-	  g_events = event->next;
-	  g_events_card--;
-	  free (event);
-
-	  while (i--)
-	    {
-	      struct _packet *rx_pkt = packet_duplicate (packet);
-
-	      /* Update receiving node mobility */
-	      mobility_update (&g_nodes[i]);
-
-	      /* Compute packet BER/SiNR and notify receiving node */
-	      propagation_compute_BER (&g_nodes[i], rx_pkt);
-	      antenna_rx (&g_nodes[i], rx_pkt);
-	    }
-
-	  /* Update "in the air tonight" packet list */
-	  if (core_update_packet_list ())
-	    {
-	      return -1;
-	    }
-	}
-    }
-
-  core_runtime_end ();
-  return 0;
-}
-
-
-/**************************************************************************/
-/**************************************************************************/
-/**************************************************************************/
-#else //WORLDSENS
 
 #if (BIG_ENDIAN == BYTE_ORDER)
 static uint64_t
@@ -332,16 +180,16 @@ core_start (struct _worldsens_s *worldsens)
 		      struct _packet *rx_pkt = packet_duplicate (packet);
 
 		      /* Update receiving node mobility */
-		      mobility_update (&g_nodes[i]);
+		      //mobility_update (&g_nodes[i]);
 
 		      /* Compute packet BER/SiNR */
-		      propagation_compute_BER (&g_nodes[i], rx_pkt);
+		      //propagation_compute_BER (&g_nodes[i], rx_pkt);
 
 		      /* Record reception and destroy packet */
 		      worldsens_data[c_node].node = htonl (i);
 		      worldsens_data[c_node].data = packet->data[0];
-		      worldsens_data[c_node].SiNR = htonll (rx_pkt->SiNR[0]);
-		      worldsens_data[c_node].rx_mW = htondbl (rx_pkt->rx_mW);
+		      worldsens_data[c_node].SiNR = htonll (0.0);  /* perfect radio layer: no noise */
+		      worldsens_data[c_node].rx_mW = htondbl (rx_pkt->tx_mW);  /* perfect radio layer: no energy dissipation... */
 		      packet_destroy (rx_pkt);	//TODO: optimize.... no need to creat and destroy packet...
 
 		      /* Update considered node */
@@ -390,7 +238,6 @@ core_start (struct _worldsens_s *worldsens)
 
   return 0;
 }
-#endif //WORLDSENS
 
 
 /**************************************************************************/
@@ -602,7 +449,6 @@ core_update_packet_list (void)
 /**************************************************************************/
 /**************************************************************************/
 
-#ifdef WORLDSENS
 int
 core_backtrack (uint64_t time)
 {
@@ -661,7 +507,6 @@ core_backtrack (uint64_t time)
 
   return 0;
 }
-#endif //WORLDSENS
 
 /**************************************************************************/
 /**************************************************************************/

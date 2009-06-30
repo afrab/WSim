@@ -10,7 +10,6 @@
 #include <private/simulation_private.h>
 #include <private/packets_private.h>
 #include <private/nodes_private.h>
-#include <private/mobility_private.h>
 #include <private/core_private.h>
 
 #include <public/types.h>
@@ -456,7 +455,7 @@ worldsens_s_listen_to_next_rp (struct _worldsens_s *worldsens)
 		}
 	      packet->data[0] = pkt->data;
 	      packet->node = node;
-	      mobility_update (node);
+	      //	      mobility_update (node);
 	      packet->x = node->x;
 	      packet->y = node->y;
 	      packet->z = node->z;

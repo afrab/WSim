@@ -7,7 +7,7 @@
  *
  */
 #include <private/core_private.h>
-#include <private/parse.h>
+#include <private/sim_conf.h>
 #include <private/command_line.h>
 #include <private/log_private.h>
 
@@ -59,7 +59,7 @@ int simulation_start(int argc, char* argv[])
       return -1;
     }
   
-  if (parse_config ()) 
+  if (sim_config ()) 
     {
       return -1;
     }

@@ -7,8 +7,7 @@
  *
  */
 #include <private/packets_private.h>
-#include <private/mobility_private.h>
-
+#include <public/types.h>
 
 /**************************************************************************/
 /**************************************************************************/
@@ -49,7 +48,7 @@ struct _packet *packet_create(struct _node *node, int size) {
   packet->size = size;
   packet->node = node;
 	
-  mobility_update(node);
+  //  mobility_update(node);
   packet->x = node->x;
   packet->y = node->y;
   packet->z = node->z;

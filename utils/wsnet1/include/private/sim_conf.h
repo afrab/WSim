@@ -1,19 +1,19 @@
 /*
- *  parse.h
+ *  sim_conf.h
  *  
  *
- *  Created by Guillaume Chelius on 20/11/05.
+ *  Created by Guillaume Chelius on 20/11/05. Modified by Loic Lemaitre on 30/06/09.
  *  Copyright 2005 __WorldSens__. All rights reserved.
  *
  */
-#ifndef _PARSE_H
-#define _PARSE_H
+#ifndef _SIM_CONF_H
+#define _SIM_CONF_H
 
 
 /**************************************************************************/
 /**************************************************************************/
 /**************************************************************************/
-int parse_config (void);
+int sim_config (void);
 
 
-#endif //_PARSE_H
+#endif //_SIM_CONF_H

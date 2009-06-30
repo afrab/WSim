@@ -9,7 +9,6 @@
 
 #include <public/types.h>
 
-#include <private/models_private.h>
 #include <private/log_private.h>
 #include <private/command_line.h>
 

@@ -205,12 +205,6 @@ CFLAGS="$CFLAGS -DWORLDSENS"
 AC_SUBST(EXTRALIBS)
 
 AC_CONFIG_FILES(
-models/Makefile
-models/antenna/Makefile
-models/interference/Makefile
-models/mobility/Makefile
-models/modulation/Makefile
-models/propagation/Makefile
 src/Makefile
 Makefile)
 AC_OUTPUT

@@ -1,1 +1,1 @@
-SUBDIRS = models src
+SUBDIRS = src

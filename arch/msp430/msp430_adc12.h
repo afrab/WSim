@@ -10,6 +10,138 @@
 
 #if defined(__msp430_have_adc12)
 
+#if defined(WORDS_BIGENDIAN)
+struct __attribute__ ((packed)) adc12ctl0_t {
+  uint16_t
+    sht1x:4,
+    sht0x:4,
+    msc:1,
+    ref2_5v:1,
+    refon:1,
+    adc12on:1,
+    adc12ovie:1,
+    adc12tovie:1,
+    enc:1,
+    adc12sc:1;
+};
+#else
+struct __attribute__ ((packed)) adc12ctl0_t {
+  uint16_t
+    adc12sc:1,
+    enc:1,
+    adc12tovie:1,
+    adc12ovie:1,
+    adc12on:1,
+    refon:1,
+    ref2_5v:1,
+    msc:1,
+    sht0x:4,
+    sht1x:4;
+};
+#endif
+
+
+#if defined(WORDS_BIGENDIAN)
+struct __attribute__ ((packed)) adc12ctl1_t {
+  uint16_t
+    cstartaddx:4,
+    shsx:2,
+    shp:1,
+    issh:1,
+    adc12divx:3,
+    adc12sselx:2,
+    conseqx:2,
+    adc12busy:1;
+};
+#else
+struct __attribute__ ((packed)) adc12ctl1_t {
+  uint16_t
+    adc12busy:1,
+    conseqx:2,
+    adc12sselx:2,
+    adc12divx:3,
+    issh:1,
+    shp:1,
+    shsx:2,
+    cstartaddx:4;
+};
+#endif
+
+
+#if defined(WORDS_BIGENDIAN)
+struct __attribute__ ((packed)) adc12memx_t {
+  uint16_t
+    bzero:4,
+    value:12;
+};
+#else
+struct __attribute__ ((packed)) adc12memx_t {
+  uint16_t
+    value:12,
+    bzero:4;
+};
+#endif
+
+
+#if defined(WORDS_BIGENDIAN)
+struct __attribute__ ((packed)) adc12mtclx_t {
+  uint8_t
+    eos:1,
+    sref:3,
+    inch:4;
+};
+#else
+struct __attribute__ ((packed)) adc12mctlx_t {
+  uint8_t
+    inch:4,
+    sref:3,
+    eos:1;
+};
+#endif
+
+
+#if defined(WORDS_BIGENDIAN)
+struct __attribute__ ((packed)) adc12ie_t {
+  uint16_t ie;
+};
+#else
+struct __attribute__ ((packed)) adc12ie_t {
+  uint16_t ie;
+};
+#endif
+
+
+#if defined(WORDS_BIGENDIAN)
+struct __attribute__ ((packed)) adc12ifg_t {
+  uint16_t ifg;
+};
+#else
+struct __attribute__ ((packed)) adc12ifg_t {
+  uint16_t ifg;
+};
+#endif
+
+
+#if defined(WORDS_BIGENDIAN)
+struct __attribute__ ((packed)) adc12iv_t {
+  uint16_t
+    bzero0:10,
+    adc12iv:5,
+    bzero1:1;
+};
+#else
+struct __attribute__ ((packed)) adc12iv_t {
+  uint16_t
+    bzero1:1,
+    adc12iv:5,
+    bzero0:10;
+};
+#endif
+
+/* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
+
 enum adc12_addr_t {
   ADC12CTL0   = 0x01A0, /* 16 */
   ADC12CTL1   = 0x01A2, /* 16 */
@@ -52,19 +184,52 @@ enum adc12_addr_t {
   ADC12MCTL15 = 0x08F
 };
 
+/* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
+
+#define ADC12_CHANNELS 16
+
 struct msp430_adc12_t {
+  union {
+    struct adc12ctl0_t  b;
+    uint16_t            s;
+  } ctl0;
+  union {
+    struct adc12ctl1_t  b;
+    uint16_t            s;
+  } ctl1;
+  uint16_t ifg;
+  uint16_t ie;
+  uint16_t iv;
+
+  union {
+    struct adc12memx_t  b;
+    uint16_t            s;
+  } mem[16];
+
+  union {
+    struct adc12mctlx_t b;
+    uint8_t             s;
+  } mctl[16];
+
+  uint32_t chann_ptr[ADC12_CHANNELS];
+  wsimtime_t   chann_time[ADC12_CHANNELS];
+  wsimtime_t   chann_period[ADC12_CHANNELS];
 };
 
 /* ************************************************** */
 /* ************************************************** */
 /* ************************************************** */
 
-void    msp430_adc12_reset   (void);
-void    msp430_adc12_update  (void);
-int16_t msp430_adc12_read16  (uint16_t addr);
-void    msp430_adc12_write16 (uint16_t addr, int16_t val);
-int8_t  msp430_adc12_read8   (uint16_t addr);
-void    msp430_adc12_write8  (uint16_t addr, int8_t val);
+int     msp430_adc12_option_add (void);
+int     msp430_adc12_init       (void);
+void    msp430_adc12_reset      (void);
+void    msp430_adc12_update     (void);
+int16_t msp430_adc12_read16     (uint16_t addr);
+void    msp430_adc12_write16    (uint16_t addr, int16_t val);
+int8_t  msp430_adc12_read8      (uint16_t addr);
+void    msp430_adc12_write8     (uint16_t addr, int8_t val);
 
 /* ************************************************** */
 /* ************************************************** */

@@ -366,7 +366,7 @@ static void P16(uint16_t i, uint16_t start, uint16_t stop,
 /* ************************************************** */
 /* ************************************************** */
 
-void msp430_io_init(void)
+int msp430_io_init(void)
 {
   int32_t i;
   memset(pread8  ,0,sizeof(pread8));
@@ -497,6 +497,7 @@ void msp430_io_init(void)
   /* Notes:
    * should fill pread/pwrite with memory access functions and test performance
    */
+  return 0;
 }
 
 /* ************************************************** */

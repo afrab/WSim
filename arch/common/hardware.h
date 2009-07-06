@@ -17,6 +17,8 @@
 #include "arch/common/wsim_stdint.h"
 #endif
 
+typedef uint64_t wsimtime_t;
+
 #include <inttypes.h>
 
 #include "libtracer/tracer.h"

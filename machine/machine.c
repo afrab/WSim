@@ -281,7 +281,7 @@ uint64_t machine_run_insn(uint64_t insn)
 /* ************************************************** */
 /* ************************************************** */
 
-uint64_t machine_run_time(uint64_t nanotime)
+wsimtime_t machine_run_time(wsimtime_t nanotime)
 {
   uint32_t sig;
   HW_DMSG_MACH("machine: will run for %" PRIu64 " nano seconds\n",nanotime);
@@ -329,7 +329,7 @@ void machine_print_description()
 /* ************************************************** */
 /* ************************************************** */
 
-inline uint64_t machine_get_nanotime()
+inline wsimtime_t machine_get_nanotime()
 {
   return MACHINE_TIME_GET_NANO();
 }

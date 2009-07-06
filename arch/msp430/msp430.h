@@ -185,6 +185,13 @@ struct msp430_mcu_t {
 #if defined(__msp430_have_svs_at_0x55)
   struct msp430_svs_t          svs;
 #endif
+
+#if defined(__msp430_have_adc10)
+  struct msp430_adc10_t        adc10;
+#endif
+#if defined(__msp430_have_adc12)
+  struct msp430_adc12_t        adc12;
+#endif
 };
 
 /* ************************************************** */

@@ -9,7 +9,7 @@
 #ifndef MSP430_IO_H
 #define MSP430_IO_H
 
-void     msp430_io_init     (void);
+int      msp430_io_init     (void);
 int8_t   msp430_read_byte   (uint16_t loc);
 int16_t  msp430_read_short  (uint16_t loc);
 uint16_t msp430_fetch_short (uint16_t loc);

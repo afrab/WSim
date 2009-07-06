@@ -30,13 +30,14 @@ uint8_t MCU_RAMCTL  [MAX_RAM_SIZE];
 /* ************************************************** */
 /* ************************************************** */
 
-void mcu_ramctl_init(void)
+int mcu_ramctl_init(void)
 {
   int i;
   for(i=0; i<MAX_RAM_SIZE; i++)
     {
       MCU_RAMCTL[i] = MAC_MUST_WRITE_FIRST;
     }
+  return 0;
 }
 
 void mcu_ramctl_tst_read(uint16_t addr)

@@ -178,7 +178,7 @@ extern uint8_t MCU_RAMCTL [];
 /* ************************************** */
 
 #if defined(ENABLE_RAM_CONTROL)
-void     mcu_ramctl_init        (void);
+int      mcu_ramctl_init        (void);
 void     mcu_ramctl_tst_read    (uint16_t addr);
 void     mcu_ramctl_tst_write   (uint16_t addr);
 void     mcu_ramctl_tst_fetch   (uint16_t addr);

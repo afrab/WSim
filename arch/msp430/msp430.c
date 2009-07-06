@@ -119,6 +119,9 @@ int mcu_options_add(void)
 {
   options_add( &trace_pc_opt );
   options_add( &trace_sp_opt );
+#if defined(__msp430_have_adc12)
+  msp430_adc12_option_add();
+#endif
   return 0;
 }
 
@@ -132,19 +135,25 @@ int msp430_mcu_create(int xt1, int xt2)
 int msp430_mcu_create(int xt1)
 #endif
 {
+  int ret = 0;
+
   HW_DMSG_MSP("== MSP430 creation\n");
   MCU_INSN_CPT  = 0;
   MCU_CYCLE_CPT = 0;
-  msp430_io_init();
+  ret += msp430_io_init();
 
   MCU_CLOCK.lfxt1_freq = xt1;
 #if defined(__msp430_have_xt2)
   MCU_CLOCK.xt2_freq   = xt2;
 #endif
 
-  mcu_ramctl_init();
+  ret += mcu_ramctl_init();
   mcu_print_description();
   HW_DMSG_MSP("==\n");
+
+#if defined(__msp430_have_adc12)
+  ret += msp430_adc12_init();
+#endif
 
   if (trace_pc_opt.isset) 
     {
@@ -187,7 +196,7 @@ int msp430_mcu_create(int xt1)
   MSP430_TRACER_USART0 = tracer_event_add_id(8,  "Usart0",     "msp430");
   MSP430_TRACER_USART1 = tracer_event_add_id(8,  "Usart1",     "msp430");
 
-  return 0;
+  return ret;
 }
 
 /* ************************************************** */
@@ -491,13 +500,14 @@ void mcu_jtag_write_zero(uint16_t start, uint16_t size)
 
 #if defined(ENABLE_RAM_CONTROL)
 
-void mcu_ramctl_init(void)
+int mcu_ramctl_init(void)
 {
   int i;
   for(i=0; i<MAX_RAM_SIZE; i++)
     {
       MCU_RAMCTL[i] = MAC_MUST_WRITE_FIRST;
     }
+  return 0;
 }
 
 void mcu_ramctl_tst_read(uint16_t addr)

@@ -12,7 +12,7 @@
 /* ************************************************** */
 /* ************************************************** */
 
-#define MAX_FILENAME 256
+#include "src/options.h" /* defines MAX_FILENAME */
 int libselect_get_system_fifo(char local_name[MAX_FILENAME], char remote_name[MAX_FILENAME]);
 
 /* ************************************************** */

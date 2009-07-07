@@ -18,9 +18,8 @@
 /**************************************************************************/
 /**************************************************************************/
 
-/* TODO: to define phy and radio callback structure specifically */
 typedef wsnet_callback_rx_t radio_callback_t;
-typedef wsnet_callback_rx_t phy_callback_t;
+typedef wsnet_callback_rx_t measure_callback_t;
 
 /**************************************************************************/
 /**************************************************************************/
@@ -38,22 +37,22 @@ typedef wsnet_callback_rx_t phy_callback_t;
 /**************************************************************************/
 
 struct _worldsens_radio_t {
-  radio_callback_t               callback;
+  radio_callback_t        callback;
   void                           *arg;
   char                           *antenna;
   uint32_t                       id;
 };
 
-struct _worldsens_phy_t {
-  phy_callback_t                 callback;
+struct _worldsens_measure_t {
+  measure_callback_t             callback;
   void                           *arg;
-  char                           *channel;
+  char                           *name;
   uint32_t                       id;
 };
  
 struct _worldsens_clt {
-  struct _worldsens_radio_t      radio[MAX_CALLBACKS];
-  struct _worldsens_phy_t        phy  [MAX_CALLBACKS];
+  struct _worldsens_radio_t      radio  [MAX_CALLBACKS];
+  struct _worldsens_measure_t    measure[MAX_CALLBACKS];
   uint32_t                       id;                     /* my address */
   int                            u_fd;                   /* unicast file descriptor */
   int                            m_fd;                   /* multicast file descriptor */
@@ -71,28 +70,14 @@ struct _worldsens_clt {
 /**************************************************************************/
 /**************************************************************************/
 
-/* public */
-void            wsnet2_init           (void);
-void            wsnet2_finalize       (void);
-uint32_t        wsnet2_get_node_id    (void);
-int             wsnet2_update         (void);
-void            wsnet2_register_radio (char *, radio_callback_t, void *);
-void            wsnet2_register_phy   (char *channel, phy_callback_t callback, void *);
-int             wsnet2_connect        (char *, uint16_t, char *, uint16_t, uint32_t);
-int             wsnet2_tx             (char, double, int, double, uint64_t);
-
-/* private */
-static int      wsnet2_sync           (void);
-static int      wsnet2_parse          (char *);
-static int      wsnet2_seq            (char *);
-static void     wsnet2_published      (char *);
-static int      wsnet2_backtrack      (char *);
-static int      wsnet2_sync_release   (char *);
-static int      wsnet2_sync_req       (char *);
-static int      wsnet2_rx             (char *);
-static int      wsnet2_rxreq          (char *);
-static int      wsnet2_subscribe      (void);
-static void     wsnet2_msg_dump       (void *);
+void            wsnet2_init             (void);
+void            wsnet2_finalize         (void);
+uint32_t        wsnet2_get_node_id      (void);
+int             wsnet2_update           (void);
+void            wsnet2_register_radio   (char *, radio_callback_t, void *);
+void            wsnet2_register_measure (char *channel, measure_callback_t callback, void *);
+int             wsnet2_connect          (char *, uint16_t, char *, uint16_t, uint32_t);
+int             wsnet2_tx               (char, double, int, double, uint64_t);
 
 
 

@@ -36,11 +36,6 @@
 /* ************************************************** */
 /* ************************************************** */
 
-#define VLVL 5  /* Verbose level for wsnet2_msg_dump function */
-
-/* ************************************************** */
-/* ************************************************** */
-
 #if defined(DEBUG)
 #define DMSG(x...) VERBOSE(3,x)
 #else
@@ -65,6 +60,21 @@
 /* ************************************************** */
 /* ************************************************** */
 
+static int      wsnet2_sync           (void);
+static int      wsnet2_parse          (char *);
+static int      wsnet2_seq            (char *);
+static int      wsnet2_published      (char *);
+static int      wsnet2_backtrack      (char *);
+static int      wsnet2_sync_release   (char *);
+static int      wsnet2_sync_req       (char *);
+static int      wsnet2_rx             (char *);
+static int      wsnet2_rxreq          (char *);
+static int      wsnet2_subscribe      (void);
+
+/* ************************************************** */
+/* ************************************************** */
+
+
 struct _worldsens_clt wsens;
 
 
@@ -79,7 +89,7 @@ void wsnet2_init(void) {
 
     while (i--) {
         wsens.radio[i].callback = NULL;
-        wsens.phy[i].callback   = NULL;
+        wsens.measure[i].callback   = NULL;
     }
     WSNET2_DBG("Libwsnet2:wsnet2_init: WSNet2 interface initialized\n");
 
@@ -117,27 +127,31 @@ void wsnet2_register_radio(char *antenna, radio_callback_t callback, void *arg) 
         ERROR("Libwsnet2:wsnet2_register_radio: too many registered radio callbacks\n");
         return;
     }
-        
+ 
     wsens.radio[i].callback = callback;
     wsens.radio[i].arg      = arg;
+    wsens.radio[i].antenna = malloc(strlen(antenna));
     strcpy(wsens.radio[i].antenna, antenna);
+
+    WSNET2_DBG("Libwsnet2:wsnet2_register_radio: radio with antenna '%s' register in position %d\n", wsens.radio[i].antenna, i); 
+
     return ;
 }
 
 
-void wsnet2_register_phy(char *channel, phy_callback_t callback, void *arg) {
+void wsnet2_register_measure(char *name, measure_callback_t callback, void *arg) {
     int i = 0;
 
-    while ((wsens.phy[i].callback != NULL) && (++i < MAX_CALLBACKS)) ;
+    while ((wsens.measure[i].callback != NULL) && (++i < MAX_CALLBACKS)) ;
 
     if (i == MAX_CALLBACKS)  {
-        ERROR("Libwsnet2:wsnet2_register_phy: too many registered physical callbacks\n");
+        ERROR("Libwsnet2:wsnet2_register_measure: too many registered measure callbacks\n");
         return;
     }
         
-    wsens.phy[i].callback = callback;
-    wsens.phy[i].arg      = arg;
-    strcpy(wsens.phy[i].channel, channel);
+    wsens.measure[i].callback = callback;
+    wsens.measure[i].arg      = arg;
+    strcpy(wsens.measure[i].name, name);
     return ;
 }
 
@@ -245,34 +259,41 @@ int wsnet2_connect(char *s_addr, uint16_t s_port, char *m_addr, uint16_t m_port,
 
 
 int wsnet2_subscribe(void) {
-    struct _worldsens_c_header header;
+    union _worldsens_pkt pkt;
     char msg[MAX_PKTLENGTH];
     int len;
     
     /* format */
-    header.type = htonl(WORLDSENS_C_CONNECT_REQ);
-    header.id   = htonl(wsens.id);
+    pkt.cnx_req.type    = WORLDSENS_C_CONNECT_REQ;
+    pkt.cnx_req.node_id = wsens.id;
+    worldsens_packet_dump(&pkt);
+    worldsens_packet_hton(&pkt);
+
 	
     /* send */
-    if (send(wsens.u_fd, (char *) (&header), sizeof(struct _worldsens_c_header), 0)  < 0) {
+    if (send(wsens.u_fd, (char *) (&pkt), sizeof(struct _worldsens_c_connect_req), 0)  < 0) {
         perror("(send)");
-	wsnet2_msg_dump(&header);
         goto error;
     }
-    WSNET2_DBG("Libwsnet2:wsnet2_subscribe: connecting with id %d...\n", wsens.id);
-	
+    WSNET2_DBG("Libwsnet2:wsnet2_subscribe: attempting to connect with id %d...\n", wsens.id);
+
+    /* wait for server response */
     wsens.state = WORLDSENS_CLT_STATE_CONNECTING;
     while (wsens.state != WORLDSENS_CLT_STATE_IDLE) {
         /* receive */
+      WSNET2_DBG("Libwsnet2:wsnet2_subscribe: waiting for server response... \n");
         if ((len = recv(wsens.u_fd, msg, MAX_PKTLENGTH, 0)) < 0) {
             perror("(recv)");
             goto error;
         }
-
         if (wsnet2_parse(msg))
-            return -1;
+	  return -1;
     }
-    
+
+    WSNET2_DBG("Libwsnet2:wsnet2_subscribe: connection to server successfull \n");
+
+    return 0; 
+
  error:
     ERROR("Libwsnet2:wsnet2_subscribe: Error when receiving subscribe response\n");
     wsnet2_finalize();
@@ -281,16 +302,17 @@ int wsnet2_subscribe(void) {
 
 
 int wsnet2_unsubscribe(void) {
-    struct _worldsens_c_header header;
+    union _worldsens_pkt pkt;
     
     /* format */
-    header.type = htonl(WORLDSENS_C_DISCONNECT);
-    header.id   = htonl(wsens.id);
-	
+    pkt.disconnect.type    = WORLDSENS_C_DISCONNECT;
+    pkt.disconnect.node_id = wsens.id;
+    worldsens_packet_hton(&pkt);
+
     /* send */
-    if (send(wsens.u_fd, (char *) (&header), sizeof(struct _worldsens_c_header), 0) < 0) {
+    if (send(wsens.u_fd, (char *) (&pkt), sizeof(struct _worldsens_c_disconnect), 0) < 0) {
         perror("(send)");
-	wsnet2_msg_dump(&header);
+	worldsens_packet_dump(&pkt);
         goto error;
     }
     WSNET2_DBG("Libwsnet2:wsnet2_unsubscribe: disconnected id %d\n", wsens.id);
@@ -363,20 +385,20 @@ int wsnet2_update(void) {
 /* ************************************************** */
 /* ************************************************** */
 
-int wsnet2_sync(void) {
+static int wsnet2_sync(void) {
     char msg[MAX_PKTLENGTH];
-    struct _worldsens_c_sync_ack pkt;
+    union _worldsens_pkt pkt;
     int len;
 	
     /* format */
-    pkt.type        = htonl(WORLDSENS_C_SYNC_ACK);
-    pkt.node_id     = htonl(wsens.id);
-    pkt.rp_id       = htonl(wsens.rpseq);
+    pkt.sync_ack.type        = WORLDSENS_C_SYNC_ACK;
+    pkt.sync_ack.node_id     = wsens.id;
+    pkt.sync_ack.rp_id       = wsens.rpseq;
 
     /* send */
     if (send(wsens.u_fd, (char *) (&pkt), sizeof(struct _worldsens_c_sync_ack), 0)  < 0) {
         perror("(send)");
-	wsnet2_msg_dump(&pkt);
+	worldsens_packet_dump(&pkt);
         goto error;
     }
     WSNET2_DBG("Libwsnet2:wsnet2_sync: synched on rp %d\n", wsens.rpseq);
@@ -411,24 +433,25 @@ int wsnet2_sync(void) {
 
 int wsnet2_tx(char data, double freq, int mod, double txdB, uint64_t delay) {
     char msg[MAX_PKTLENGTH];
-    struct _worldsens_c_byte_tx pkt;
+    union _worldsens_pkt pkt;
     int len;
 	
     /* format */
-    pkt.type              = htonl(WORLDSENS_C_BYTE_TX);
-    pkt.node_id           = htonl(wsens.id);
-    pkt.period            = htonll(MACHINE_TIME_GET_NANO() - wsens.l_rp);
-    pkt.data              = data;
-    pkt.freq              = htondbl(freq);
-    pkt.modulation_id     = htonl(mod);
-    pkt.power             = htondbl(txdB);
-    //    pkt.dseq              = htonl(wsens.dseq++);
-    pkt.duration          = htonll(delay);
+    pkt.byte_tx.type              = WORLDSENS_C_BYTE_TX;
+    pkt.byte_tx.node_id           = wsens.id;
+    pkt.byte_tx.period            = MACHINE_TIME_GET_NANO() - wsens.l_rp;
+    pkt.byte_tx.data              = data;
+    pkt.byte_tx.freq              = freq;
+    pkt.byte_tx.modulation_id     = mod;
+    pkt.byte_tx.power             = txdB;
+    //    pkt.byte_tx.dseq              = wsens.dseq++;
+    pkt.byte_tx.duration          = delay;
+    worldsens_packet_hton(&pkt);
 
     /* send */
     if (send(wsens.u_fd, (char *) (&pkt), sizeof(struct _worldsens_c_byte_tx), 0)  < 0) {
         perror("(send)");
-	wsnet2_msg_dump(&pkt);
+	worldsens_packet_dump(&pkt);
         goto error;
     }
     WSNET2_TX("Libwsnet2:wsnet2_tx: packet 0x%02x sent\n",data);
@@ -459,15 +482,18 @@ int wsnet2_tx(char data, double freq, int mod, double txdB, uint64_t delay) {
 /* ************************************************** */
 /* ************************************************** */
 
-int wsnet2_parse(char *msg) {
-  struct _worldsens_s_header *header = (struct _worldsens_s_header *) msg;
-	
-  switch (ntohl(header->type)) {
+static int wsnet2_parse(char *msg) {
+  struct _worldsens_s_header *header = (struct _worldsens_s_header *) msg; 
 
+  switch (header->type) {
+ 
   case WORLDSENS_S_CONNECT_RSP_OK:
       WSNET2_DBG("Libwsnet2:wsnet2_parse: WORLDSENS_S_CONNECT_RSP_OK packet type\n");
-      wsnet2_published(msg);
-      break;
+      if(wsnet2_published(msg)){
+	  WSNET2_DBG("Libwsnet2:wsnet2_parse: error during publishing models\n");	
+          return -1;
+      }
+    break;
   case WORLDSENS_S_CONNECT_RSP_NOK:
       WSNET2_DBG("Libwsnet2:wsnet2_parse: WORLDSENS_S_CONNECT_RSP_NOK packet type\n");
       WSNET2_EXC("Libwsnet2:wsnet2_parse: Connection refused by wsnet2 server\n");
@@ -506,7 +532,8 @@ int wsnet2_parse(char *msg) {
       //    goto error;
       //break;
   default:
-      return 0;
+   ERROR("Libwsnet2:wsnet2_parse: unknown packet type!");
+   goto error;
   }
 
   return 0;
@@ -518,7 +545,7 @@ int wsnet2_parse(char *msg) {
 }
 
 
-int wsnet2_seq(char *msg) {
+static int wsnet2_seq(char *msg) {
    struct _worldsens_s_header *header = (struct _worldsens_s_header *) msg;
 
    if (ntohl(header->seq) > wsens.seq) {
@@ -534,42 +561,58 @@ int wsnet2_seq(char *msg) {
 }
 
 
-void wsnet2_published(char *msg) {
-   struct _worldsens_s_connect_rsp *pkt = (struct _worldsens_s_connect_rsp *) msg;
+static int wsnet2_published(char *msg) {
+   union _worldsens_pkt *pkt = (union _worldsens_pkt *) msg;
+   
    int offset = 0;
+   int match_antenna = 0;
+   uint32_t counter  = 0;
+   int i = 0, j = 0;
 
-   wsens.seq   = ntohl(pkt->seq);
-   wsens.rpseq = ntohl(pkt->rp_current);
-   wsens.n_rp  = MACHINE_TIME_GET_NANO() + ntohll(pkt->rp_duration);
+   worldsens_packet_ntoh(pkt);
+
+   wsens.n_rp  = MACHINE_TIME_GET_NANO() + pkt->cnx_rsp_ok.rp_duration;
    WORLDSENS_SAVE_STATE();
-   WSNET2_DBG("Libwsnet2:wsnet2_published: connected\n");
 
-   while (offset < sizeof(struct _worldsens_s_connect_rsp)) {
-       int i = 0, j = 0;
-        
-       WSNET2_DBG("Libwsnet2:wsnet2_published:          %s -> %d\n", pkt->names, ntohl(*((uint32_t *)(pkt->names + offset))));
+   WSNET2_DBG("Libwsnet2:wsnet2_published: nb models = %d\n", pkt->cnx_rsp_ok.nb_models);
 
+   while (counter < pkt->cnx_rsp_ok.nb_models) {
+       i = 0;
+       j = 0;
+ 
+       WSNET2_DBG("Libwsnet2:wsnet2_published: checking '%s' -> %d\n", pkt->cnx_rsp_ok.names + offset + sizeof(uint32_t), *((uint32_t *)(pkt->cnx_rsp_ok.names + offset)));
+       
        while ((wsens.radio[i].callback != NULL) && (i < MAX_CALLBACKS)) {
-	 if (strcmp(wsens.radio[i].antenna, pkt->names + offset + sizeof(uint32_t)) == 0) {
-	   wsens.radio[i].id = ntohl(*((uint32_t *)(pkt->names + offset)));
-               WSNET2_DBG("Libwsnet2:wsnet2_published:              matched\n");
-              
+	 if (strcmp(wsens.radio[i].antenna, pkt->cnx_rsp_ok.names + offset + sizeof(uint32_t)) == 0) {
+	   wsens.radio[i].id = *((uint32_t *)(pkt->cnx_rsp_ok.names + offset));
+	   WSNET2_DBG("Libwsnet2:wsnet2_published: antenna '%s' matches\n", wsens.radio[i].antenna);
+	   match_antenna++;
            }
            i++;
        }
-       while ((wsens.phy[j].callback != NULL) && (j < MAX_CALLBACKS)) {
-	 if (strcmp(wsens.phy[i].channel,  pkt->names + offset + sizeof(uint32_t)) == 0) {
-	   wsens.phy[i].id = ntohl(*((uint32_t *)(pkt->names + offset)));             
-               WSNET2_DBG("Libwsnet2:wsnet2_published:              matched\n");
-           }
-           j++;
-       }
-       offset += strlen(pkt->names + offset) + sizeof(uint32_t);
+/*        while ((wsens.measure[j].callback != NULL) && (j < MAX_CALLBACKS)) { */
+/* 	 if (strcmp(wsens.measure[i].name,  pkt->cnx_rsp_ok.names + offset + sizeof(uint32_t)) == 0) { */
+/* 	   wsens.measure[i].id = *((uint32_t *)(pkt->cnx_rsp_ok.names + offset));              */
+/*                WSNET2_DBG("Libwsnet2:wsnet2_published:              matched\n"); */
+/*            } */
+/*            j++; */
+/*        } */
+       offset += strlen(pkt->cnx_rsp_ok.names + offset) + sizeof(uint32_t);
+       counter++;
+   }
+
+   /* check if we have at least as many antennas as radios register */
+   if(match_antenna >= i){
+     return 0;
+   }
+   else{
+     ERROR("Libwsnet2:wsnet2_published: not enough antennas registered\n");
+     return -1;
    }
 }
 
 
-int wsnet2_backtrack(char *msg) {
+static int wsnet2_backtrack(char *msg) {
    struct _worldsens_s_backtrack *pkt = (struct _worldsens_s_backtrack *) msg;
    int ret = wsnet2_seq(msg);
 
@@ -593,7 +636,7 @@ int wsnet2_backtrack(char *msg) {
 }
 
 
-int wsnet2_sync_release(char *msg) {
+static int wsnet2_sync_release(char *msg) {
    struct _worldsens_s_sync_release *pkt = (struct _worldsens_s_sync_release *) msg;
    int ret = wsnet2_seq(msg);
 
@@ -621,7 +664,7 @@ int wsnet2_sync_release(char *msg) {
 }
 
 
-int wsnet2_rx(char *msg) {
+static int wsnet2_rx(char *msg) {
    struct _worldsens_s_byte_rx *pkt  = (struct _worldsens_s_byte_rx *) msg;
    //   struct _worldsens_data *data = (struct _worldsens_data *) (msg + sizeof(struct _worldsens_s_byte_rx));
    int ret = wsnet2_seq(msg);
@@ -631,19 +674,20 @@ int wsnet2_rx(char *msg) {
    else if (ret == -2)
        return 0;
    
-   wsnet2_msg_dump(pkt);
+   //   wsnet2_msg_dump(pkt);
 
    //   while (((char *) data) < (msg + ntohl(pkt->length))) {
    //    if (ntohl(data->id) == wsens.id) {
            int i = 0;
 
            while ((wsens.radio[i].callback != NULL) && (i < MAX_CALLBACKS)) {
-               if (ntohl(pkt->antenna_id) == wsens.radio[i].id) {
+	     if ((ntohl(pkt->nodes_infos[i].node_id) == wsens.id) && 
+		 (ntohl(pkt->nodes_infos[i].antenna_id) == wsens.radio[i].id)) {
 		 struct wsnet_rx_info info;
 		 info.data       = pkt->data;
 		 info.freq_mhz   = ntohdbl(pkt->freq);
 		 info.modulation = ntohl(pkt->modulation_id);
-		 info.power_dbm  = ntohdbl(pkt->power);
+		 info.power_dbm  = ntohdbl(pkt->nodes_infos[i].power);
                  //info.SiNR       = ntohdbl(data->SINR);
 		 WSNET2_DBG("Libwsnet2:wsnet2_rx: rxing on antenna %s\n", wsens.radio[i].antenna);
 		 wsens.radio[i].callback(wsens.radio[i].arg, &info);
@@ -709,148 +753,7 @@ int wsnet2_rx(char *msg) {
    }*/
 
 
-int wsnet2_sync_req(char *msg)
+static int wsnet2_sync_req(char *msg)
 {
   return 0;
-}
-
-
-void wsnet2_msg_dump(void *msg)
-{
- struct _worldsens_s_header *header = (struct _worldsens_s_header *)msg;
-
-  VERBOSE(VLVL,"Libwsnet2:pkt: start ====================\n");
-  switch (header->type)
-    {
-      /*WSIM->WSNET2*/
-    case WORLDSENS_C_CONNECT_REQ:
-      {
-	struct _worldsens_c_connect_req *pkt = (struct _worldsens_c_connect_req *)msg;
-	VERBOSE(VLVL,"Libwsnet2:sent:pkt:   type %s\n",              "WORLDSENS_C_CONNECT_REQ");
-	VERBOSE(VLVL,"Libwsnet2:sent:pkt:   node %d\n",              ntohl(pkt->node_id));
-	break;
-      }
-    case WORLDSENS_C_SYNC_ACK:
-      {
-	struct _worldsens_c_sync_ack *pkt = (struct _worldsens_c_sync_ack *)msg;
-	VERBOSE(VLVL,"Libwsnet2:sent:pkt:   type %s\n",              "WORLDSENS_C_SYNC_ACK");
-	VERBOSE(VLVL,"Libwsnet2:sent:pkt:   node %d\n",              ntohl(pkt->node_id));
-	VERBOSE(VLVL,"Libwsnet2:sent:pkt:   rp_id %d\n",             ntohll(pkt->rp_id));
-	break;
-      }
-    case WORLDSENS_C_BYTE_TX:
-      {
-	struct _worldsens_c_byte_tx *pkt = (struct _worldsens_c_byte_tx *)msg;
-	VERBOSE(VLVL,"Libwsnet2:sent:pkt:   type %s\n",              "WORLDSENS_C_BYTE_TX");
-	VERBOSE(VLVL,"Libwsnet2:sent:pkt:   node %d\n",              ntohl(pkt->node_id));
-	VERBOSE(VLVL,"Libwsnet2:sent:pkt:   antenna %d\n",           ntohl(pkt->antenna_id));
-	VERBOSE(VLVL,"Libwsnet2:sent:pkt:   modulation %d\n",        ntohl(pkt->modulation_id));
-	VERBOSE(VLVL,"Libwsnet2:sent:pkt:   frequence %f\n",         ntohdbl(pkt->freq));
-	VERBOSE(VLVL,"Libwsnet2:sent:pkt:   power %f\n",             ntohdbl(pkt->power));
-	VERBOSE(VLVL,"Libwsnet2:sent:pkt:   duration %d\n",          ntohll(pkt->duration));
-	VERBOSE(VLVL,"Libwsnet2:sent:pkt:   data %02x\n",            pkt->data);
-	VERBOSE(VLVL,"Libwsnet2:sent:pkt:   period %d\n",            ntohll(pkt->period));
-	break;
-      }
-    case WORLDSENS_C_MEASURE_REQ:
-      {
-	struct _worldsens_c_measure_req *pkt = (struct _worldsens_c_measure_req *)msg;
-	VERBOSE(VLVL,"Libwsnet2:sent:pkt:   type %s\n",              "WORLDSENS_C_MEASURE_REQ");
-	VERBOSE(VLVL,"Libwsnet2:sent:pkt:   node %d\n",              ntohl(pkt->node_id));
-	VERBOSE(VLVL,"Libwsnet2:sent:pkt:   measure id %d\n",        ntohl(pkt->measure_id));
-	break;
-      }
-    case WORLDSENS_C_DISCONNECT:
-      {
-	struct _worldsens_c_disconnect *pkt = (struct _worldsens_c_disconnect *)msg;
-	VERBOSE(VLVL,"Libwsnet2:sent:pkt:   type %s\n",              "WORLDSENS_C_DISCONNECT");
-	VERBOSE(VLVL,"Libwsnet2:sent:pkt:   node %d\n",              ntohl(pkt->node_id));
-	break;
-      }
-
-      /* WSNET2 -> WSIM */
-    case WORLDSENS_S_CONNECT_RSP_OK:
-      {
-	struct _worldsens_s_connect_rsp *pkt = (struct _worldsens_s_connect_rsp *)msg;
-	VERBOSE(VLVL,"Libwsnet2:rcv:pkt:    type %s\n",              "WORLDSENS_S_CONNECT_RSP_OK");
-	VERBOSE(VLVL,"Libwsnet2:rcv:pkt:    seq  %d\n",              ntohl(pkt->seq));
-	VERBOSE(VLVL,"Libwsnet2:rcv:pkt:    rp_current  %d\n",       ntohll(pkt->rp_current));
-	VERBOSE(VLVL,"Libwsnet2:rcv:pkt:    rp_next  %d\n",          ntohll(pkt->rp_next));
-	VERBOSE(VLVL,"Libwsnet2:rcv:pkt:    rp_duration  %d\n",      ntohll(pkt->rp_duration));
-	VERBOSE(VLVL,"Libwsnet2:rcv:pkt:    nb of antenna  %d\n",    pkt->rp_duration);
-	VERBOSE(VLVL,"Libwsnet2:rcv:pkt:    nb of modulation  %d\n", pkt->rp_duration);
-	VERBOSE(VLVL,"Libwsnet2:rcv:pkt:    nb of measure  %d\n",    pkt->rp_duration);
-	break;
-      }
-    case WORLDSENS_S_CONNECT_RSP_NOK:
-      {
-	struct _worldsens_s_connect_rsp *pkt = (struct _worldsens_s_connect_rsp *)msg;
-	VERBOSE(VLVL,"Libwsnet2:rcv:pkt:    type %s\n",              "WORLDSENS_S_CONNECT_RSP_NOK");
-	VERBOSE(VLVL,"Libwsnet2:rcv:pkt:    seq  %d\n",              ntohl(pkt->seq));
-	break;
-      }
-    case WORLDSENS_S_SYNC_REQ:
-      {
-	struct _worldsens_s_sync_req *pkt = (struct _worldsens_s_sync_req *)msg;
-	VERBOSE(VLVL,"Libwsnet2:rcv:pkt:    type %s\n",              "WORLDSENS_S_SYNC_REQ");
-	VERBOSE(VLVL,"Libwsnet2:rcv:pkt:    seq  %d\n",              ntohl(pkt->seq));
-	VERBOSE(VLVL,"Libwsnet2:rcv:pkt:    rp_current  %d\n",       ntohll(pkt->rp_current));
-	VERBOSE(VLVL,"Libwsnet2:rcv:pkt:    rp_next  %d\n",          ntohll(pkt->rp_next));
-	VERBOSE(VLVL,"Libwsnet2:rcv:pkt:    rp_duration  %d\n",      ntohll(pkt->rp_duration));
-	break;
-      }
-    case WORLDSENS_S_SYNC_RELEASE:
-      {
-	struct _worldsens_s_sync_release *pkt = (struct _worldsens_s_sync_release *)msg;
-	VERBOSE(VLVL,"Libwsnet2:rcv:pkt:    type %s\n",              "WORLDSENS_S_SYNC_REQ");
-	VERBOSE(VLVL,"Libwsnet2:rcv:pkt:    seq  %d\n",              ntohl(pkt->seq));
-	VERBOSE(VLVL,"Libwsnet2:rcv:pkt:    rp_current  %d\n",       ntohll(pkt->rp_current));
-	VERBOSE(VLVL,"Libwsnet2:rcv:pkt:    rp_next  %d\n",          ntohll(pkt->rp_next));
-	VERBOSE(VLVL,"Libwsnet2:rcv:pkt:    rp_duration  %d\n",      ntohll(pkt->rp_duration));
-	break;
-      }
-    case WORLDSENS_S_BACKTRACK:
-      {
-	struct _worldsens_s_backtrack *pkt = (struct _worldsens_s_backtrack *)msg;
-	VERBOSE(VLVL,"Libwsnet2:rcv:pkt:    type %s\n",              "WORLDSENS_S_SYNC_REQ");
-	VERBOSE(VLVL,"Libwsnet2:rcv:pkt:    seq  %d\n",              ntohl(pkt->seq));
-	VERBOSE(VLVL,"Libwsnet2:rcv:pkt:    rp_next  %d\n",          ntohll(pkt->rp_next));
-	VERBOSE(VLVL,"Libwsnet2:rcv:pkt:    rp_duration  %d\n",      ntohll(pkt->rp_duration));
-	break;
-      }
-    case WORLDSENS_S_BYTE_RX:
-      {
-	struct _worldsens_s_byte_rx *pkt = (struct _worldsens_s_byte_rx *)msg;
-	VERBOSE(VLVL,"Libwsnet2:rcv:pkt:   type %s\n",              "WORLDSENS_S_BYTE_RX");
-	VERBOSE(VLVL,"Libwsnet2:rcv:pkt:   seq %d\n",               ntohl(pkt->seq));
-	VERBOSE(VLVL,"Libwsnet2:rcv:pkt:   antenna %d\n",           ntohl(pkt->antenna_id));
-	VERBOSE(VLVL,"Libwsnet2:rcv:pkt:   modulation %d\n",        ntohl(pkt->modulation_id));
-	VERBOSE(VLVL,"Libwsnet2:rcv:pkt:   frequence %f\n",         ntohdbl(pkt->freq));
-	VERBOSE(VLVL,"Libwsnet2:rcv:pkt:   power %f\n",             ntohdbl(pkt->power));
-	VERBOSE(VLVL,"Libwsnet2:rcv:pkt:   data %02x\n",            pkt->data);
-	VERBOSE(VLVL,"Libwsnet2:rcv:pkt:   ber %d\n",               ntohdbl(pkt->ber));
-	break;
-      }
-    case WORLDSENS_S_MEASURE_RSP:
-      {
-	struct _worldsens_s_measure_rsp *pkt = (struct _worldsens_s_measure_rsp *)msg;
-	VERBOSE(VLVL,"Libwsnet2:rcv:pkt:    type %s\n",              "WORLDSENS_S_MEASURE_RSP");
-	VERBOSE(VLVL,"Libwsnet2:rcv:pkt:    seq  %d\n",              ntohl(pkt->seq));
-	VERBOSE(VLVL,"Libwsnet2:sent:pkt:   measure id %d\n",        ntohl(pkt->measure_id));
-	VERBOSE(VLVL,"Libwsnet2:sent:pkt:   measure value %f\n",     ntohdbl(pkt->measure_val));
-	break;
-      }
-    case WORLDSENS_S_KILLSIM:
-      {
-	struct _worldsens_s_killsim *pkt = (struct _worldsens_s_killsim *)msg;
-	VERBOSE(VLVL,"Libwsnet2:rcv:pkt:    type %s\n",              "WORLDSENS_S_KILLSIM");
-	VERBOSE(VLVL,"Libwsnet2:rcv:pkt:    seq  %d\n",              ntohl(pkt->seq));
-	break;
-      }
-    default:
-      {
-	VERBOSE(VLVL,"Libwsnet2:pkt:Invalide packet type: %d \n",header->type);
-      }
-    }
-  VERBOSE(VLVL,"Libwsnet2:pkt: stop =====================\n");
 }

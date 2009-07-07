@@ -240,7 +240,7 @@ int main(int argc, char* argv[])
   /* etrace */
   etracer_init(o.etracefile);
 
-  /* worldsens connect */
+  /* worldsens initialize */
   worldsens_c_initialize();
 
   /* machine creation */
@@ -251,6 +251,9 @@ int main(int argc, char* argv[])
       ERROR("\n");
       return 1;
     }
+
+  /* worldsens connect to wsnet server */
+  worldsens_c_connect();
 
   /* preload flash with file */
   if (o.do_preload)

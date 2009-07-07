@@ -71,6 +71,7 @@ void worldsens_c_rx_register    (void*, wsnet_callback_rx_t);
 
 int  worldsens_c_options_add    (void);
 int  worldsens_c_initialize     (void);
+int  worldsens_c_connect        (void);
 int  worldsens_c_close          (void);
 
 int  worldsens_c_update         (void);

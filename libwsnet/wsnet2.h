@@ -44,6 +44,7 @@ int             worldsens_c_get_node_id           (void);
 void            worldsens_c_rx_register           (void*, wsnet_callback_rx_t);
 
 int             worldsens_c_initialize            (void);
+int             worldsens_c_connect               (void);
 int             worldsens_c_close                 (void);
 int             worldsens_c_tx                    (struct wsnet_tx_info *);
 int             worldsens_c_update                (void);

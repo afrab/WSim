@@ -148,6 +148,7 @@ int             worldsens_c_get_node_id           (void);
 void            worldsens_c_rx_register           (void* arg, wsnet_callback_rx_t cbrx);
 
 int             worldsens_c_initialize            (void);
+int             worldsens_c_connect               (void);
 int             worldsens_c_close                 (void);
 int             worldsens_c_tx                    (struct wsnet_tx_info *info);
 int             worldsens_c_update                (void);
@@ -155,7 +156,7 @@ int             worldsens_c_update                (void);
 /* private */
 static int      worldsens_option_validate         (void);   /* validate options                       */
 static int      worldsens_close_fds               (void);   /* close socket fds                       */
-static int      worldsens_connect                 (void);   /* snd connect pkt,    called by c_init.  */
+static int      worldsens_connect_server          (void);   /* snd connect pkt,    called by c_init.  */
 static int      worldsens_connect_parse_reply     (char *msg, int UNUSED len);
 static int      worldsens_disconnect              (void);   /* snd disconnect pkt, called by c_close  */
 static ssize_t  worldsens_packet_send             (int fd, char* msg, size_t len, int flags, int dump);
@@ -289,6 +290,20 @@ void worldsens_c_rx_register(void* arg, wsnet_callback_rx_t cbrx)
 /**************************************************************************/
 
 int worldsens_c_initialize(void)
+{
+ /* Initialize */
+  memset(&worldsens_nobacktrack, 0, sizeof(struct _worldsens_c_nobacktrack));
+  memset(&worldsens_backtracked, 0, sizeof(struct _worldsens_c_backtrack));
+  memset(&worldsens_backup,      0, sizeof(struct _worldsens_c_backtrack));
+  return 0;
+}
+
+
+/**************************************************************************/
+/**************************************************************************/
+/**************************************************************************/
+
+int worldsens_c_connect(void)
 {	
   int ret_connect;
   int on = 1;
@@ -310,10 +325,7 @@ int worldsens_c_initialize(void)
   mul_port = atoi(multicast_port_opt.value);
   node_id  = atoi(node_id_opt.value);
 
-  /* Initialize */
-  memset(&worldsens_nobacktrack, 0, sizeof(struct _worldsens_c_nobacktrack));
-  memset(&worldsens_backtracked, 0, sizeof(struct _worldsens_c_backtrack));
-  memset(&worldsens_backup,      0, sizeof(struct _worldsens_c_backtrack));
+ 
 
   WSENS_MYADDR = node_id;
 	
@@ -440,7 +452,7 @@ int worldsens_c_initialize(void)
   /* ************************************************** */
   /* Worldsens Connect                                  */
   /* ************************************************** */
-  ret_connect = worldsens_connect();
+  ret_connect = worldsens_connect_server();
   if (ret_connect == 0)
     {
       WSNET_DBG("WSNet:connect:ok, registering fd %d\n",WSENS_MULTICAST);
@@ -727,7 +739,7 @@ static int worldsens_close_fds(void)
 /**************************************************************************/
 /**************************************************************************/
 
-static int worldsens_connect(void)
+static int worldsens_connect_server(void)
 {
   int                              len,snd_len,rcv_len;
   struct _worldsens_c_connect_pkt  pkt;

@@ -22,6 +22,11 @@ int worldsens_c_initialize(void)
   return 0;
 }
 
+int worldsens_c_connect(void)
+{
+  return 0;
+}
+
 int worldsens_c_close(void)
 {
   return 0;

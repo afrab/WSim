@@ -141,7 +141,7 @@ int worldsens_c_get_node_id(void)
 
 void worldsens_c_rx_register(void* arg, wsnet_callback_rx_t cbrx)
 {
-  char antenna[] = "" ;
+  char antenna[] = "omnidirectionnal" ;
   wsnet2_register_radio(antenna, cbrx, arg);
 }
 
@@ -150,6 +150,16 @@ void worldsens_c_rx_register(void* arg, wsnet_callback_rx_t cbrx)
 /**************************************************************************/
 
 int worldsens_c_initialize(void)
+{
+  /* structures initialization */
+  wsnet2_init();
+}
+
+/**************************************************************************/
+/**************************************************************************/
+/**************************************************************************/
+
+int worldsens_c_connect(void)
 {
   int        ret_connect;
   char      *srv_addr;
@@ -160,9 +170,6 @@ int worldsens_c_initialize(void)
 
   /* parse options */
   worldsens_option_validate();
-
-  /* structures initialization */
-  wsnet2_init();
 
  /* initialize multicast and unicast sockets */
   srv_addr = server_ip_opt.value;

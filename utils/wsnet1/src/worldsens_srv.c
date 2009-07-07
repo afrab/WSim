@@ -51,11 +51,13 @@ ntohdbl (double v)
   return v;
 }
 
+/*
 static double
 htondbl (double v)
 {
   return v;
 }
+*/
 
 #else
 static uint64_t
@@ -117,7 +119,7 @@ ntohdbl (double v)
   pr[7] = pv[0];
   return r;
 }
-
+/*
 static double
 htondbl (double v)
 {
@@ -137,6 +139,7 @@ htondbl (double v)
   pr[7] = pv[0];
   return r;
 }
+*/
 #endif
 
 

@@ -13,8 +13,12 @@
 #include "arch/common/hardware.h"
 #include "msp430.h"
 
+
+/****************************************************/
+/****************************************************/
+/****************************************************/
+
 // # DEBUG_TIMER defined in msp430_debug.h
-// #define TIMER_DEBUG_2
 
 #if defined(DEBUG_TIMER)
 char *str_mode[] = 
@@ -22,6 +26,11 @@ char *str_mode[] =
 char *str_clocksrc[] = 
   { "TxCLK", "ACLK", "SMCLK", "INTxCLK" };
 #endif /* DEBUG_TIMER */
+
+
+
+// #define TIMER_DEBUG_2
+
 
 #if defined(TIMER_DEBUG_2)
 static char *str_cap[] = 
@@ -34,6 +43,10 @@ static char *str_ccis[] =
 #else 
 #   define HW_DMSG_2_DBG(x...) do { } while (0)
 #endif
+
+/****************************************************/
+/****************************************************/
+/****************************************************/
 
 static void msp430_timerA3_set_tiv(void);
 static void msp430_timerB_set_tiv (void);
@@ -151,7 +164,11 @@ do {                                                                            
       HW_DMSG_2_DBG("msp430:" TIMERN ":    " cctln			\
 		    ".out  = %d\n",cc.b.out);				\
       if (cc.b.outmod == TIMER_OUTMOD_OUTPUT)				\
-	MCU.TIMER.out[NUM] = cc.b.out;					\
+	{								\
+	  MCU.TIMER.out[NUM] = cc.b.out;				\
+	  HW_DMSG_2_DBG("msp430:"TIMERN": out%d = %d",			\
+			NUM,MCU.TIMER.out[NUM]);			\
+	}								\
     }									\
   else									\
     {									\
@@ -274,16 +291,22 @@ break;
 	      break;							\
 	    case TIMER_OUTMOD_SET          :				\
 	    case TIMER_OUTMOD_SET_RESET    :				\
-	      MCU.TIMER.TCCTL[NUM].b.out = 1;				\
+	      MCU.TIMER.out[NUM] = 1;					\
+	      HW_DMSG_2_DBG("msp430:"TIMERN": out%d = %d",		\
+			    NUM,MCU.TIMER.out[NUM]);			\
 	      break;							\
 	    case TIMER_OUTMOD_TOGGLE_RESET :			        \
 	    case TIMER_OUTMOD_TOGGLE       :				\
 	    case TIMER_OUTMOD_TOGGLE_SET   :				\
-	      MCU.TIMER.TCCTL[NUM].b.out = 1- MCU.TIMER.TCCTL[NUM].b.out;	\
+	      MCU.TIMER.out[NUM] = 1 - MCU.TIMER.out[NUM];		\
+	      HW_DMSG_2_DBG("msp430:"TIMERN": out%d = %d",		\
+			    NUM,MCU.TIMER.out[NUM]);			\
 	      break;							\
 	    case TIMER_OUTMOD_RESET        :				\
 	    case TIMER_OUTMOD_RESET_SET    :				\
-	      MCU.TIMER.TCCTL[NUM].b.out = 0;				\
+	      MCU.TIMER.out[NUM] = 0;					\
+	      HW_DMSG_2_DBG("msp430:"TIMERN": out%d = %d",		\
+			    NUM,MCU.TIMER.out[NUM]);			\
 	      break;							\
 	    }								\
 	  /* FIXME: CCI is latched in SCCI except for TimerB         */ \
@@ -328,16 +351,22 @@ break;
 	      break;							\
 	    case TIMER_OUTMOD_SET          :				\
 	    case TIMER_OUTMOD_SET_RESET    :				\
-	      MCU.TIMER.TCCTL[NUM].b.out = 1;				\
+	      MCU.TIMER.out[NUM] = 1;					\
+	      HW_DMSG_2_DBG("msp430:"TIMERN": out%d = %d",		\
+			    NUM,MCU.TIMER.out[NUM]);			\
 	      break;							\
 	    case TIMER_OUTMOD_TOGGLE_RESET :			        \
 	    case TIMER_OUTMOD_TOGGLE       :				\
 	    case TIMER_OUTMOD_TOGGLE_SET   :				\
-	      MCU.TIMER.TCCTL[NUM].b.out = 1- MCU.TIMER.TCCTL[NUM].b.out;	\
+	      MCU.TIMER.out[NUM] = 1 - MCU.TIMER.out[NUM];		\
+	      HW_DMSG_2_DBG("msp430:"TIMERN": out%d = %d",		\
+			    NUM,MCU.TIMER.out[NUM]);			\
 	      break;							\
 	    case TIMER_OUTMOD_RESET        :				\
 	    case TIMER_OUTMOD_RESET_SET    :				\
-	      MCU.TIMER.TCCTL[NUM].b.out = 0;				\
+	      MCU.TIMER.out[NUM] = 0;					\
+	      HW_DMSG_2_DBG("msp430:"TIMERN": out%d = %d",		\
+			    NUM,MCU.TIMER.out[NUM]);			\
 	      break;							\
 	    }								\
 	  /* FIXME: CCI is latched in SCCI except for TimerB         */	\
@@ -368,11 +397,15 @@ break;
 	break;								\
       case TIMER_OUTMOD_TOGGLE_RESET :					\
       case TIMER_OUTMOD_SET_RESET    :					\
-	MCU.TIMER.TCCTL[NUM].b.out = 0;					\
+	MCU.TIMER.out[NUM] = 0;						\
+	      HW_DMSG_2_DBG("msp430:"TIMERN": out%d = %d",		\
+			    NUM,MCU.TIMER.out[NUM]);			\
 	break;								\
       case TIMER_OUTMOD_TOGGLE_SET   :					\
       case TIMER_OUTMOD_RESET_SET    :					\
-	MCU.TIMER.TCCTL[NUM].b.out = 1;					\
+	MCU.TIMER.out[NUM] = 1;						\
+	      HW_DMSG_2_DBG("msp430:"TIMERN": out%d = %d",		\
+			    NUM,MCU.TIMER.out[NUM]);			\
 	break;								\
       }									\
     MCU.TIMER.b_##CCR [NUM] = 0;					\

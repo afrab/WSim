@@ -14,7 +14,7 @@
 #include "msp430.h"
 
 // # DEBUG_TIMER defined in msp430_debug.h
-#define TIMER_DEBUG_2
+// #define TIMER_DEBUG_2
 
 #if defined(DEBUG_TIMER)
 char *str_mode[] = 
@@ -57,160 +57,185 @@ do {                                                                            
 /* write timer comparator control register          */
 /****************************************************/
 
-#define TCCTLWRITE_BEGIN(ADDR,TYPE,TIMER,TIMERN,cctl,cctln)                            \
-case ADDR:                                                                             \
-{                                                                                      \
-  union TYPE cc;                                                                       \
-  cc.s = val;                                                                          \
-  HW_DMSG_2_DBG("msp430:" TIMERN ": " cctln " = 0x%04x\n",val & 0xffff);               \
-  if (cc.b.cm != MCU.TIMER.cctl.b.cm)                                                  \
-    {                                                                                  \
-      HW_DMSG_2_DBG("msp430:" TIMERN ":    " cctln ".cm   = %d (%s)\n",                \
-		    cc.b.cm,str_capturemode[cc.b.cm]);                                 \
-    }                                                                                  \
-  else                                                                                 \
-    {                                                                                  \
-      HW_DMSG_2_DBG("msp430:" TIMERN ":    " cctln ".cm left to %d (%s)\n",            \
-		    cc.b.cm,str_capturemode[cc.b.cm]);                                 \
-    }                                                                                  \
-  if (cc.b.ccis != MCU.TIMER.cctl.b.ccis)                                              \
-    {                                                                                  \
-      HW_DMSG_2_DBG("msp430:" TIMERN ":    " cctln ".ccis = %d (%s)\n",                \
-                    cc.b.ccis,str_ccis[cc.b.ccis]);                                    \
-    }                                                                                  \
-  else                                                                                 \
-    {                                                                                  \
-      HW_DMSG_2_DBG("msp430:" TIMERN ":    " cctln ".ccis left to %d (%s)\n",          \
-                    cc.b.ccis,str_ccis[cc.b.ccis]);                                    \
-    }                                                                                  \
-  if (cc.b.scs != MCU.TIMER.cctl.b.scs)                                                \
-    {                                                                                  \
-      HW_DMSG_2_DBG("msp430:" TIMERN ":    " cctln ".scs  = %d\n",cc.b.scs);           \
-    }                                                                                  \
-  else                                                                                 \
-    {                                                                                  \
-      HW_DMSG_2_DBG("msp430:" TIMERN ":    " cctln ".scs left to %d\n",cc.b.scs);      \
+#define TCCTLWRITE_BEGIN(ADDR,TYPE,TIMER,TIMERN,cctl,cctln,NUM)		\
+  case ADDR:								\
+  {									\
+  union TYPE cc,mcucc;							\
+  cc.s = val;								\
+  mcucc.s = MCU.TIMER.cctl[NUM].s;					\
+  HW_DMSG_2_DBG("msp430:"TIMERN": "cctln" = 0x%04x\n",val & 0xffff);	\
+  if (cc.b.cm != mcucc.b.cm)						\
+    {									\
+      HW_DMSG_2_DBG("msp430:" TIMERN ":    " cctln			\
+		    ".cm   = %d (%s)\n",				\
+		    cc.b.cm,str_capturemode[cc.b.cm]);			\
+    }									\
+  else									\
+    {									\
+      HW_DMSG_2_DBG("msp430:" TIMERN ":    " cctln			\
+		    ".cm left to %d (%s)\n",				\
+		    cc.b.cm,str_capturemode[cc.b.cm]);			\
+    }									\
+  if (cc.b.ccis != mcucc.b.ccis)					\
+    {									\
+      HW_DMSG_2_DBG("msp430:" TIMERN ":    " cctln			\
+		    ".ccis = %d (%s)\n",				\
+                    cc.b.ccis,str_ccis[cc.b.ccis]);			\
+    }									\
+  else									\
+    {									\
+      HW_DMSG_2_DBG("msp430:" TIMERN ":    " cctln			\
+		    ".ccis left to %d (%s)\n",				\
+                    cc.b.ccis,str_ccis[cc.b.ccis]);			\
+    }									\
+  if (cc.b.scs != mcucc.b.scs)						\
+    {									\
+      HW_DMSG_2_DBG("msp430:" TIMERN ":    " cctln			\
+		    ".scs  = %d\n",cc.b.scs);				\
+    }									\
+  else									\
+    {									\
+      HW_DMSG_2_DBG("msp430:" TIMERN ":    " cctln			\
+		    ".scs left to %d\n",cc.b.scs);			\
     }
-                                                                                       
-                                                                                       \
-#define TCCTLWRITE_END(ADDR,TYPE,TIMER,TIMERN,cctl,cctln)                              \
-  if (cc.b.cap != MCU.TIMER.cctl.b.cap)                                                \
-    {                                                                                  \
-      HW_DMSG_2_DBG("msp430:" TIMERN ":    " cctln ".cap  = %d (%s)\n",                \
-                    cc.b.cap,str_cap[cc.b.cap]);                                       \
-    }                                                                                  \
-  else                                                                                 \
-    {                                                                                  \
-      HW_DMSG_2_DBG("msp430:" TIMERN ":    " cctln ".cap left to %d (%s)\n",           \
-                    cc.b.cap,str_cap[cc.b.cap]);                                       \
-    }                                                                                  \
-  if (cc.b.outmod != MCU.TIMER.cctl.b.outmod)                                          \
-    {                                                                                  \
-      HW_DMSG_2_DBG("msp430:" TIMERN ":    " cctln ".outmod = %d\n",cc.b.outmod);      \
-      ERROR("msp430:" TIMERN ": " cctln ".outmod not supported\n");                    \
-    }                                                                                  \
-  else                                                                                 \
-    {                                                                                  \
-      HW_DMSG_2_DBG("msp430:" TIMERN ":    " cctln ".outmod left to %d\n",cc.b.outmod);\
-    }                                                                                  \
-  if (cc.b.ccie != MCU.TIMER.cctl.b.ccie)                                              \
-    {                                                                                  \
-      HW_DMSG_2_DBG("msp430:" TIMERN ":    " cctln ".ccie = %d\n",cc.b.ccie);          \
-    }                                                                                  \
-  else                                                                                 \
-    {                                                                                  \
-      HW_DMSG_2_DBG("msp430:" TIMERN ":    " cctln ".ccie left to %d\n",cc.b.ccie);    \
-    }                                                                                  \
-  if (cc.b.cci != MCU.TIMER.cctl.b.cci)                                                \
-    {                                                                                  \
-      /* read only  bit */							       \
-      HW_DMSG_TIMER("msp430:" TIMERN ":    " cctln ".cci = %d",cc.b.cci);              \
-      HW_DMSG_TIMER("msp430:" TIMERN ":      * this bit should be read only */\n");    \
-    }                                                                                  \
-  else                                                                                 \
-    {                                                                                  \
-      HW_DMSG_2_DBG("msp430:" TIMERN ":    " cctln ".cci  = %d\n",cc.b.cci);           \
-    }                                                                                  \
-  if (cc.b.out != MCU.TIMER.cctl.b.out)                                                \
-    {                                                                                  \
-      HW_DMSG_2_DBG("msp430:" TIMERN ":    " cctln ".out  = %d\n",cc.b.out);           \
-      ERROR("msp430:" TIMERN ": " cctln ".out not supported\n");                       \
-    }                                                                                  \
-  else                                                                                 \
-    {                                                                                  \
-      HW_DMSG_2_DBG("msp430:" TIMERN ":    " cctln ".out left to %d\n",cc.b.out);      \
-    }                                                                                  \
-  if (cc.b.cov != MCU.TIMER.cctl.b.cov)                                                \
-    {                                                                                  \
-      HW_DMSG_2_DBG("msp430:" TIMERN ":    " cctln ".cov  = %d\n",cc.b.cov);           \
-    }                                                                                  \
-  else                                                                                 \
-    {                                                                                  \
-      HW_DMSG_2_DBG("msp430:" TIMERN ":    " cctln ".cov left to %d\n",cc.b.cov);      \
-    }                                                                                  \
-  if (cc.b.ccifg != MCU.TIMER.cctl.b.ccifg)                                            \
-    {                                                                                  \
-      HW_DMSG_2_DBG("msp430:" TIMERN ":    " cctln ".ccifg = %d\n",cc.b.ccifg);        \
-    }                                                                                  \
-  else                                                                                 \
-    {                                                                                  \
-      HW_DMSG_2_DBG("msp430:" TIMERN ":    " cctln ".ccifg left to %d\n",cc.b.ccifg);  \
-    }                                                                                  \
-  MCU.TIMER.cctl.s = val;                                                              \
-  msp430_##TIMER##_set_tiv();                                                          \
-}                                                                                      \
+
+
+
+#define TCCTLWRITE_END(ADDR,TYPE,TIMER,TIMERN,cctl,cctln,NUM)		\
+  if (cc.b.cap != mcucc.b.cap)						\
+    {									\
+      HW_DMSG_2_DBG("msp430:" TIMERN ":    " cctln ".cap  = %d (%s)\n", \
+                    cc.b.cap,str_cap[cc.b.cap]);			\
+    }									\
+  else									\
+    {									\
+      HW_DMSG_2_DBG("msp430:" TIMERN ":    " cctln			\
+		    ".cap left to %d (%s)\n",				\
+                    cc.b.cap,str_cap[cc.b.cap]);			\
+    }									\
+  if (cc.b.outmod != mcucc.b.outmod)					\
+    {									\
+      HW_DMSG_2_DBG("msp430:" TIMERN ":    " cctln			\
+		    ".outmod = %d\n",cc.b.outmod);			\
+    }									\
+  else									\
+    {									\
+      HW_DMSG_2_DBG("msp430:" TIMERN ":    " cctln			\
+		    ".outmod left to %d\n",cc.b.outmod);		\
+    }									\
+  if (cc.b.ccie != mcucc.b.ccie)					\
+    {									\
+      HW_DMSG_2_DBG("msp430:" TIMERN ":    " cctln			\
+		    ".ccie = %d\n",cc.b.ccie);				\
+    }									\
+  else									\
+    {									\
+      HW_DMSG_2_DBG("msp430:" TIMERN ":    " cctln			\
+		    ".ccie left to %d\n",cc.b.ccie);			\
+    }									\
+  if (cc.b.cci != mcucc.b.cci)						\
+    {									\
+      /* read only  bit */						\
+      HW_DMSG_TIMER("msp430:" TIMERN ":    " cctln			\
+		    ".cci = %d",cc.b.cci);				\
+      HW_DMSG_TIMER("msp430:" TIMERN					\
+		    ":      * this bit should be read only */\n");	\
+    }									\
+  else									\
+    {									\
+      HW_DMSG_2_DBG("msp430:" TIMERN ":    " cctln			\
+		    ".cci  = %d\n",cc.b.cci);				\
+    }									\
+  if (cc.b.out != mcucc.b.out)						\
+    {									\
+      HW_DMSG_2_DBG("msp430:" TIMERN ":    " cctln			\
+		    ".out  = %d\n",cc.b.out);				\
+      if (cc.b.outmod == TIMER_OUTMOD_OUTPUT)				\
+	MCU.TIMER.out[NUM] = cc.b.out;					\
+    }									\
+  else									\
+    {									\
+      HW_DMSG_2_DBG("msp430:" TIMERN ":    " cctln			\
+		    ".out left to %d\n",cc.b.out);			\
+    }									\
+  if (cc.b.cov != mcucc.b.cov)						\
+    {									\
+      HW_DMSG_2_DBG("msp430:" TIMERN ":    " cctln			\
+		    ".cov  = %d\n",cc.b.cov);				\
+    }									\
+  else									\
+    {									\
+      HW_DMSG_2_DBG("msp430:" TIMERN ":    " cctln			\
+		    ".cov left to %d\n",cc.b.cov);			\
+    }									\
+  if (cc.b.ccifg != mcucc.b.ccifg)					\
+    {									\
+      HW_DMSG_2_DBG("msp430:" TIMERN ":    " cctln			\
+		    ".ccifg = %d\n",cc.b.ccifg);			\
+    }									\
+  else									\
+    {									\
+      HW_DMSG_2_DBG("msp430:" TIMERN ":    " cctln			\
+		    ".ccifg left to %d\n",cc.b.ccifg);			\
+    }									\
+  MCU.TIMER.cctl[NUM].s = val;						\
+  msp430_##TIMER##_set_tiv();						\
+  }									\
 break;
 
 
 
-#define TIMERA_TCCTLWRITE(ADDR,TYPE,TIMER,TIMERN,cctl,cctln)                           \
-  TCCTLWRITE_BEGIN(ADDR,TYPE,TIMER,TIMERN,cctl,cctln)                                  \
-  if (cc.b.scci != MCU.TIMER.cctl.b.scci)                                              \
-    { /* timer A */                                                                    \
-      HW_DMSG_TIMER("msp430:" TIMERN ": " cctln ".scci = %d\n",cc.b.scci);             \
-    }                                                                                  \
-  TCCTLWRITE_END(ADDR,TYPE,TIMER,TIMERN,cctl,cctln)
+#define TIMERA_TCCTLWRITE(ADDR,TYPE,TIMER,TIMERN,cctl,cctln,NUM)	\
+  TCCTLWRITE_BEGIN(ADDR,TYPE,TIMER,TIMERN,cctl,cctln,NUM)		\
+  if (cc.b.scci != mcucc.b.scci)					\
+    { /* timer A */							\
+      HW_DMSG_TIMER("msp430:" TIMERN ": " cctln ".scci = %d\n",		\
+		    cc.b.scci);						\
+    }									\
+  TCCTLWRITE_END(ADDR,TYPE,TIMER,TIMERN,cctl,cctln,NUM)
 
 
-#define TIMERB_TCCTLWRITE(ADDR,TYPE,TIMER,TIMERN,cctl,cctln)                           \
-  TCCTLWRITE_BEGIN(ADDR,TYPE,TIMER,TIMERN,cctl,cctln)                                  \
-  if (cc.b.clld != MCU.TIMER.cctl.b.clld)                                              \
-    { /* timer B */                                                                    \
-      HW_DMSG_TIMER("msp430:" TIMERN ": " cctln ".clld = %d\n",cc.b.clld);             \
-      ERROR("msp430:" TIMERN ": " cctln ".clld not supported\n");                      \
-    }                                                                                  \
-  TCCTLWRITE_END(ADDR,TYPE,TIMER,TIMERN,cctl,cctln)
+#define TIMERB_TCCTLWRITE(ADDR,TYPE,TIMER,TIMERN,cctl,cctln,NUM)	\
+  TCCTLWRITE_BEGIN(ADDR,TYPE,TIMER,TIMERN,cctl,cctln,NUM)		\
+  if (cc.b.clld != mcucc.b.clld)					\
+    { /* timer B */							\
+      HW_DMSG_TIMER("msp430:" TIMERN ": " cctln ".clld = %d\n",		\
+		    cc.b.clld);						\
+      ERROR("msp430:" TIMERN ": " cctln ".clld not supported\n");	\
+    }									\
+  TCCTLWRITE_END(ADDR,TYPE,TIMER,TIMERN,cctl,cctln,NUM)
 
 
 /****************************************************/
 /* timer check ifg                                  */
 /****************************************************/
 
-#define TCHKIFG(TIMER,TIMERN,cctl,cctln,intr)                                          \
-if ((MCU.TIMER.cctl.b.ccie == 1) && (MCU.TIMER.cctl.b.ccifg == 1))                     \
-  {                                                                                    \
-     HW_DMSG_TIMER("msp430:" TIMERN ": checkifg " cctln                                \
-                   ".ccifg == 1, interrupt set\n");                                    \
-     msp430_interrupt_set(intr);                                                       \
-     return 1;                                                                         \
-  }
+#define TCHKIFG(TIMER,TIMERN,cctl,cctln,intr)				\
+  if ((MCU.TIMER.cctl.b.ccie == 1) && (MCU.TIMER.cctl.b.ccifg == 1))	\
+    {									\
+      HW_DMSG_TIMER("msp430:" TIMERN ": checkifg " cctln		\
+		    ".ccifg == 1, interrupt set\n");			\
+      msp430_interrupt_set(intr);					\
+      return 1;								\
+    }
 
 
-#define ifset(TIMER,TIMERN,cctl,val)                                                   \
-if (MCU.TIMER.cctl.b.ccifg)                                                            \
-  {                                                                                    \
-    MCU.TIMER.tiv.s = val;                                                             \
-    HW_DMSG_TIMER("msp430:"TIMERN": tiv set to 0x%02x\n",val);                         \
-  }
+#define ifset(TIMER,TIMERN,cctl,val)					\
+  if (MCU.TIMER.cctl.b.ccifg)						\
+    {									\
+      MCU.TIMER.tiv.s = val;						\
+      HW_DMSG_TIMER("msp430:"TIMERN": tiv set to 0x%02x\n",val);	\
+    }
 
 
-#define ifzero(TIMER,TIMERN,cctl,cctln,ccr)                                            \
-if (MCU.TIMER.cctl.b.ccifg)                                                            \
-  {                                                                                    \
-    MCU.TIMER.cctl.b.ccifg = 0;                                                        \
-    HW_DMSG_TIMER("msp430:"TIMERN": "cctln".ifg set to 0      [%"PRId64"]\n",          \
-                  MACHINE_TIME_GET_NANO());                                            \
-  }
+#define ifzero(TIMER,TIMERN,cctl,cctln,ccr)				\
+  if (MCU.TIMER.cctl.b.ccifg)						\
+    {									\
+      MCU.TIMER.cctl.b.ccifg = 0;					\
+      HW_DMSG_TIMER("msp430:"TIMERN": "cctln				\
+		    ".ifg set to 0      [%"PRId64"]\n",			\
+		    MACHINE_TIME_GET_NANO());				\
+    }
 
 
 /****************************************************/
@@ -220,18 +245,19 @@ if (MCU.TIMER.cctl.b.ccifg)                                                     
 #define COMPARE_UNREACHABLE 0x10000u
 #define COMPARE_UNREACHABLE_DOWN -1
 
-
 /* compare ok when     TR >= b_CCR && TR >= CCR */
 #define TIMER_COMPARE(TIMER,TIMERN,TR,CCR,TCCTL,NUM,INTR)		\
-  if (/*(MCU.TIMER.CCR > 0) &&   CCR can be compared to 0 !! */		\
+  if ( /*(MCU.TIMER.CCR > 0) &&   CCR can be compared to 0 !! */	\
       (MCU.TIMER.TCCTL[NUM].b.cap == 0) && /* compare mode */		\
       (MCU.TIMER.TCCTL[NUM].b.ccifg == 0) )				\
     {									\
+      /* TR counts to CCR[NUM] */					\
       if ((MCU.TIMER.TR >= MCU.TIMER.CCR[NUM]) &&			\
 	  (MCU.TIMER.TR >  MCU.TIMER.b_##CCR[NUM]))			\
 	{								\
 	  MCU.TIMER.TCCTL[NUM].b.ccifg = 1;				\
-	  HW_DMSG_TIMER("msp430:"TIMERN": cmp%d ifg set (ccr=0x%04x, tr=0x%04x, b_ccr=0x%06x) [%"PRId64"]\n", \
+	  HW_DMSG_TIMER("msp430:"TIMERN": cmp%d ifg set (ccr=0x%04x, "	\
+			"tr=0x%04x, b_ccr=0x%06x) [%"PRId64"]\n",	\
 			NUM,MCU.TIMER.CCR[NUM],MCU.TIMER.TR,		\
 			MCU.TIMER.b_##CCR[NUM],				\
 			MACHINE_TIME_GET_NANO());			\
@@ -241,11 +267,30 @@ if (MCU.TIMER.cctl.b.ccifg)                                                     
 	  MCU.TIMER.b_##CCR [NUM] = COMPARE_UNREACHABLE;		\
 	  HW_DMSG_2_DBG("msp430:"TIMERN": b_ccr set to 0x%06x\n",	\
 			MCU.TIMER.b_##CCR[NUM]);			\
-	  /* FIXME: set output according to outmod */			\
+	  /* set output according to outmod */				\
+	  switch (MCU.TIMER.TCCTL[NUM].b.outmod)			\
+	    {								\
+	    case TIMER_OUTMOD_OUTPUT       :				\
+	      break;							\
+	    case TIMER_OUTMOD_SET          :				\
+	    case TIMER_OUTMOD_SET_RESET    :				\
+	      MCU.TIMER.TCCTL[NUM].b.out = 1;				\
+	      break;							\
+	    case TIMER_OUTMOD_TOGGLE_RESET :			        \
+	    case TIMER_OUTMOD_TOGGLE       :				\
+	    case TIMER_OUTMOD_TOGGLE_SET   :				\
+	      MCU.TIMER.TCCTL[NUM].b.out = 1- MCU.TIMER.TCCTL[NUM].b.out;	\
+	      break;							\
+	    case TIMER_OUTMOD_RESET        :				\
+	    case TIMER_OUTMOD_RESET_SET    :				\
+	      MCU.TIMER.TCCTL[NUM].b.out = 0;				\
+	      break;							\
+	    }								\
 	  /* FIXME: CCI is latched in SCCI except for TimerB         */ \
 	  if (MCU.TIMER.TCCTL[NUM].b.ccie == 1)				\
 	    {								\
-	      HW_DMSG_TIMER("msp430:"TIMERN": interrupt %d from TIMER_COMPARE %d tiv 0x%x\n", \
+	      HW_DMSG_TIMER("msp430:"TIMERN": interrupt %d from "	\
+			    "TIMER_COMPARE %d tiv 0x%x\n",		\
 			    INTR,NUM,MCU.TIMER.tiv.s);			\
 	      msp430_interrupt_set(INTR);				\
 	    }								\
@@ -276,7 +321,25 @@ if (MCU.TIMER.cctl.b.ccifg)                                                     
 	  MCU.TIMER.b_##CCR[NUM] = COMPARE_UNREACHABLE_DOWN;		\
 	  HW_DMSG_2_DBG("msp430:"TIMERN": b_ccr set to 0x%06x\n",	\
 			MCU.TIMER.b_##CCR[NUM]);			\
-	  /* FIXME: set output according to outmod */			\
+	  /* set output according to outmod */				\
+	  switch (MCU.TIMER.TCCTL[NUM].b.outmod)			\
+	    {								\
+	    case TIMER_OUTMOD_OUTPUT       :				\
+	      break;							\
+	    case TIMER_OUTMOD_SET          :				\
+	    case TIMER_OUTMOD_SET_RESET    :				\
+	      MCU.TIMER.TCCTL[NUM].b.out = 1;				\
+	      break;							\
+	    case TIMER_OUTMOD_TOGGLE_RESET :			        \
+	    case TIMER_OUTMOD_TOGGLE       :				\
+	    case TIMER_OUTMOD_TOGGLE_SET   :				\
+	      MCU.TIMER.TCCTL[NUM].b.out = 1- MCU.TIMER.TCCTL[NUM].b.out;	\
+	      break;							\
+	    case TIMER_OUTMOD_RESET        :				\
+	    case TIMER_OUTMOD_RESET_SET    :				\
+	      MCU.TIMER.TCCTL[NUM].b.out = 0;				\
+	      break;							\
+	    }								\
 	  /* FIXME: CCI is latched in SCCI except for TimerB         */	\
 	  if (MCU.TIMER.TCCTL[NUM].b.ccie == 1)				\
 	    {								\
@@ -292,9 +355,26 @@ if (MCU.TIMER.cctl.b.ccifg)                                                     
     }                                                                                  
 
 
-#define TIMER_COMPARE_WRAPS(TIMER,TIMERN,CCR,NUM)			\
+#define TIMER_COMPARE_WRAPS(TIMER,TIMERN,CCR,TCCTL,NUM)			\
   do {									\
     HW_DMSG_2_DBG("msp430:"TIMERN": b_ccr%d wraps = 0\n",NUM);		\
+    /* set output according to outmod */				\
+    switch (MCU.TIMER.TCCTL[NUM].b.outmod)				\
+      {									\
+      case TIMER_OUTMOD_OUTPUT       :					\
+      case TIMER_OUTMOD_SET          :					\
+      case TIMER_OUTMOD_TOGGLE       :					\
+      case TIMER_OUTMOD_RESET        :					\
+	break;								\
+      case TIMER_OUTMOD_TOGGLE_RESET :					\
+      case TIMER_OUTMOD_SET_RESET    :					\
+	MCU.TIMER.TCCTL[NUM].b.out = 0;					\
+	break;								\
+      case TIMER_OUTMOD_TOGGLE_SET   :					\
+      case TIMER_OUTMOD_RESET_SET    :					\
+	MCU.TIMER.TCCTL[NUM].b.out = 1;					\
+	break;								\
+      }									\
     MCU.TIMER.b_##CCR [NUM] = 0;					\
   } while (0)
 
@@ -515,8 +595,8 @@ void msp430_timerA3_update(void)
 		}
 	      MCU.timerA3.tar -= MCU.timerA3.taccr[0];
 	      HW_DMSG_2_DBG("msp430:timerA3: up mode wraps to 0 ===============================\n");
-              TIMER_COMPARE_WRAPS(timerA3,"timerA3:taccr1",taccr,1);
-	      TIMER_COMPARE_WRAPS(timerA3,"timerA3:taccr2",taccr,2);
+              TIMER_COMPARE_WRAPS(timerA3,"timerA3:taccr1",taccr,tacctl,1);
+	      TIMER_COMPARE_WRAPS(timerA3,"timerA3:taccr2",taccr,tacctl,2);
 	    }
           /**************************/
           /* capture/compare blocks */
@@ -542,9 +622,9 @@ void msp430_timerA3_update(void)
 	  MCU.timerA3.tar -= 0xffffu;
 	  /* contig mode bad wraps */
 	  HW_DMSG_TIMER("msp430:timerA3: contig mode wraps to 0 ===============================\n");
-	  TIMER_COMPARE_WRAPS(timerA3,"timerA3",taccr,0);
-	  TIMER_COMPARE_WRAPS(timerA3,"timerA3",taccr,1);
-	  TIMER_COMPARE_WRAPS(timerA3,"timerA3",taccr,2);
+	  TIMER_COMPARE_WRAPS(timerA3,"timerA3",taccr,tacctl,0);
+	  TIMER_COMPARE_WRAPS(timerA3,"timerA3",taccr,tacctl,1);
+	  TIMER_COMPARE_WRAPS(timerA3,"timerA3",taccr,tacctl,2);
 	}
       /**************************/
       /* capture/compare blocks */
@@ -636,8 +716,8 @@ void msp430_timerA3_update(void)
 		      msp430_interrupt_set(INTR_TIMERA3_1);
 		    }
 		  HW_DMSG_TIMER("msp430:timerA3: Up/Down mode wraps to 0 ===============================\n");
-		  TIMER_COMPARE_WRAPS(timerA3,"timerA3",taccr,1);
-		  TIMER_COMPARE_WRAPS(timerA3,"timerA3",taccr,2);
+		  TIMER_COMPARE_WRAPS(timerA3,"timerA3",taccr,tacctl,1);
+		  TIMER_COMPARE_WRAPS(timerA3,"timerA3",taccr,tacctl,2);
 		}
 	      else
 		{
@@ -741,9 +821,9 @@ void msp430_timerA3_write(uint16_t addr, int16_t val)
       }
       break;
 
-      TIMERA_TCCTLWRITE(TACCTL0,tacctlu_t,timerA3,"timerA3",tacctl[0],"tacctl0")
-      TIMERA_TCCTLWRITE(TACCTL1,tacctlu_t,timerA3,"timerA3",tacctl[1],"tacctl1")
-      TIMERA_TCCTLWRITE(TACCTL2,tacctlu_t,timerA3,"timerA3",tacctl[2],"tacctl2")
+      TIMERA_TCCTLWRITE(TACCTL0,tacctlu_t,timerA3,"timerA3",tacctl,"tacctl0",0)
+      TIMERA_TCCTLWRITE(TACCTL1,tacctlu_t,timerA3,"timerA3",tacctl,"tacctl1",1)
+      TIMERA_TCCTLWRITE(TACCTL2,tacctlu_t,timerA3,"timerA3",tacctl,"tacctl2",2)
 
 
     case TAR:
@@ -1036,13 +1116,13 @@ void msp430_timerB_update(void)
 		}
 	      MCU.timerB.tbr -= MCU.timerB.tbccr[0];
 	      HW_DMSG_TIMER("msp430:"TIMERBNAME": up mode wraps to 0 ===============================\n");
-              TIMER_COMPARE_WRAPS(timerB,TIMERBNAME,tbcl,1);
-              TIMER_COMPARE_WRAPS(timerB,TIMERBNAME,tbcl,2);
+              TIMER_COMPARE_WRAPS(timerB,TIMERBNAME,tbcl,tbcctl,1);
+              TIMER_COMPARE_WRAPS(timerB,TIMERBNAME,tbcl,tbcctl,2);
 #if defined(__msp430_have_timerb7)
-              TIMER_COMPARE_WRAPS(timerB,TIMERBNAME,tbcl,3);
-              TIMER_COMPARE_WRAPS(timerB,TIMERBNAME,tbcl,4);
-              TIMER_COMPARE_WRAPS(timerB,TIMERBNAME,tbcl,5);
-              TIMER_COMPARE_WRAPS(timerB,TIMERBNAME,tbcl,6);
+              TIMER_COMPARE_WRAPS(timerB,TIMERBNAME,tbcl,tbcctl,3);
+              TIMER_COMPARE_WRAPS(timerB,TIMERBNAME,tbcl,tbcctl,4);
+              TIMER_COMPARE_WRAPS(timerB,TIMERBNAME,tbcl,tbcctl,5);
+              TIMER_COMPARE_WRAPS(timerB,TIMERBNAME,tbcl,tbcctl,6);
 #endif
 	    }
           /**************************/
@@ -1074,14 +1154,14 @@ void msp430_timerB_update(void)
 	  MCU.timerB.tbr -= MCU.timerB.tbr_limit;
 	  /* contig mode bad wraps */
 	  HW_DMSG_TIMER("msp430:"TIMERBNAME": contig mode wraps to 0 ===============================\n");
-	  TIMER_COMPARE_WRAPS(timerB,TIMERBNAME,tbcl,0);
-	  TIMER_COMPARE_WRAPS(timerB,TIMERBNAME,tbcl,1);
-	  TIMER_COMPARE_WRAPS(timerB,TIMERBNAME,tbcl,2);
+	  TIMER_COMPARE_WRAPS(timerB,TIMERBNAME,tbcl,tbcctl,0);
+	  TIMER_COMPARE_WRAPS(timerB,TIMERBNAME,tbcl,tbcctl,1);
+	  TIMER_COMPARE_WRAPS(timerB,TIMERBNAME,tbcl,tbcctl,2);
 #if defined(__msp430_have_timerb7)
-	  TIMER_COMPARE_WRAPS(timerB,TIMERBNAME,tbcl,3);
-	  TIMER_COMPARE_WRAPS(timerB,TIMERBNAME,tbcl,4);
-	  TIMER_COMPARE_WRAPS(timerB,TIMERBNAME,tbcl,5);
-	  TIMER_COMPARE_WRAPS(timerB,TIMERBNAME,tbcl,6);
+	  TIMER_COMPARE_WRAPS(timerB,TIMERBNAME,tbcl,tbcctl,3);
+	  TIMER_COMPARE_WRAPS(timerB,TIMERBNAME,tbcl,tbcctl,4);
+	  TIMER_COMPARE_WRAPS(timerB,TIMERBNAME,tbcl,tbcctl,5);
+	  TIMER_COMPARE_WRAPS(timerB,TIMERBNAME,tbcl,tbcctl,6);
 #endif
 	}
       /**************************/
@@ -1154,13 +1234,13 @@ void msp430_timerB_update(void)
 		      msp430_interrupt_set(INTR_TIMERB_1);
 		    }
 		  HW_DMSG_TIMER("msp430:"TIMERBNAME": Up/Down mode wraps to 0 ===============================\n");
-		  TIMER_COMPARE_WRAPS(timerB,TIMERBNAME,tbcl,1);
-		  TIMER_COMPARE_WRAPS(timerB,TIMERBNAME,tbcl,2);
+		  TIMER_COMPARE_WRAPS(timerB,TIMERBNAME,tbcl,tbcctl,1);
+		  TIMER_COMPARE_WRAPS(timerB,TIMERBNAME,tbcl,tbcctl,2);
 #if defined(__msp430_have_timerb7)
-		  TIMER_COMPARE_WRAPS(timerB,TIMERBNAME,tbcl,3);
-		  TIMER_COMPARE_WRAPS(timerB,TIMERBNAME,tbcl,4);
-		  TIMER_COMPARE_WRAPS(timerB,TIMERBNAME,tbcl,5);
-		  TIMER_COMPARE_WRAPS(timerB,TIMERBNAME,tbcl,6);
+		  TIMER_COMPARE_WRAPS(timerB,TIMERBNAME,tbcl,tbcctl,3);
+		  TIMER_COMPARE_WRAPS(timerB,TIMERBNAME,tbcl,tbcctl,4);
+		  TIMER_COMPARE_WRAPS(timerB,TIMERBNAME,tbcl,tbcctl,5);
+		  TIMER_COMPARE_WRAPS(timerB,TIMERBNAME,tbcl,tbcctl,6);
 #endif
 		}
               else
@@ -1295,14 +1375,14 @@ void msp430_timerB_write (uint16_t addr, int16_t val)
       }
       break;
 
-      TIMERB_TCCTLWRITE(TBCCTL0,tbcctlu_t,timerB,TIMERBNAME,tbcctl[0],"tbcctl0")
-      TIMERB_TCCTLWRITE(TBCCTL1,tbcctlu_t,timerB,TIMERBNAME,tbcctl[1],"tbcctl1")
-      TIMERB_TCCTLWRITE(TBCCTL2,tbcctlu_t,timerB,TIMERBNAME,tbcctl[2],"tbcctl2")
+      TIMERB_TCCTLWRITE(TBCCTL0,tbcctlu_t,timerB,TIMERBNAME,tbcctl,"tbcctl0",0)
+      TIMERB_TCCTLWRITE(TBCCTL1,tbcctlu_t,timerB,TIMERBNAME,tbcctl,"tbcctl1",1)
+      TIMERB_TCCTLWRITE(TBCCTL2,tbcctlu_t,timerB,TIMERBNAME,tbcctl,"tbcctl2",2)
 #if defined(__msp430_have_timerb7)
-      TIMERB_TCCTLWRITE(TBCCTL3,tbcctlu_t,timerB,TIMERBNAME,tbcctl[3],"tbcctl3")
-      TIMERB_TCCTLWRITE(TBCCTL4,tbcctlu_t,timerB,TIMERBNAME,tbcctl[4],"tbcctl4")
-      TIMERB_TCCTLWRITE(TBCCTL5,tbcctlu_t,timerB,TIMERBNAME,tbcctl[5],"tbcctl5")
-      TIMERB_TCCTLWRITE(TBCCTL6,tbcctlu_t,timerB,TIMERBNAME,tbcctl[6],"tbcctl6")
+      TIMERB_TCCTLWRITE(TBCCTL3,tbcctlu_t,timerB,TIMERBNAME,tbcctl,"tbcctl3",3)
+      TIMERB_TCCTLWRITE(TBCCTL4,tbcctlu_t,timerB,TIMERBNAME,tbcctl,"tbcctl4",4)
+      TIMERB_TCCTLWRITE(TBCCTL5,tbcctlu_t,timerB,TIMERBNAME,tbcctl,"tbcctl5",5)
+      TIMERB_TCCTLWRITE(TBCCTL6,tbcctlu_t,timerB,TIMERBNAME,tbcctl,"tbcctl6",6)
 #else
       TBCCTLWRITE_ERROR(3)
       TBCCTLWRITE_ERROR(4)

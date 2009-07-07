@@ -45,6 +45,17 @@ enum timer_source_t {
   TIMER_SOURCE_INTxCLK = 0x3
 };
 
+enum timer_outmod_t {
+  TIMER_OUTMOD_OUTPUT       = 0,
+  TIMER_OUTMOD_SET          = 1,
+  TIMER_OUTMOD_TOGGLE_RESET = 2,
+  TIMER_OUTMOD_SET_RESET    = 3,
+  TIMER_OUTMOD_TOGGLE       = 4,
+  TIMER_OUTMOD_RESET        = 5,
+  TIMER_OUTMOD_TOGGLE_SET   = 6,
+  TIMER_OUTMOD_RESET_SET    = 7
+};
+
 /***************************************************/
 /** Timer A3 ***************************************/
 /***************************************************/
@@ -169,6 +180,7 @@ struct msp430_timerA3_t
   int            b_taccr  [TIMERA_COMPARATOR];
   int              taccr  [TIMERA_COMPARATOR];        
   int              equ    [TIMERA_COMPARATOR];
+  int              out    [TIMERA_COMPARATOR];
 
   union {
     struct tiv_t     b;   
@@ -360,6 +372,7 @@ struct msp430_timerB_t
   int            b_tbcl   [TIMERB_COMPARATOR];
   int              tbccr  [TIMERB_COMPARATOR];
   int              equ    [TIMERB_COMPARATOR];
+  int              out    [TIMERB_COMPARATOR];
 
   union {
     struct tiv_t     b; 

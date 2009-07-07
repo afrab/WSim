@@ -138,6 +138,29 @@ struct __attribute__ ((packed)) adc12iv_t {
 };
 #endif
 
+enum adc12ssel_t {
+  ADC12_SSEL_ADC12OSC      = 0,
+  ADC12_SSEL_ACLK          = 1,
+  ADC12_SSEL_MCLK          = 2,
+  ADC12_SSEL_SMCLK         = 3
+};
+
+enum adc12modes_t {
+  ADC12_MODE_SINGLE        = 0,
+  ADC12_MODE_SEQ_CHAN      = 1,
+  ADC12_MODE_REPEAT_SINGLE = 2,
+  ADC12_MODE_REPEAT_SEQ    = 3
+};
+
+enum adc12state_t {
+  ADC12_STATE_OFF          = 0,
+  ADC12_STATE_WAIT_ENABLE  = 1,
+  ADC12_STATE_WAIT_TRIGGER = 2,
+  ADC12_STATE_SAMPLE       = 3,
+  ADC12_STATE_CONVERT      = 4,
+  ADC12_STATE_STORE        = 5
+};
+
 /* ************************************************** */
 /* ************************************************** */
 /* ************************************************** */
@@ -213,9 +236,30 @@ struct msp430_adc12_t {
     uint8_t             s;
   } mctl[16];
 
-  uint32_t chann_ptr[ADC12_CHANNELS];
-  wsimtime_t   chann_time[ADC12_CHANNELS];
+  uint32_t        chann_ptr[ADC12_CHANNELS];     /* current ptr in data */
+  wsimtime_t     chann_time[ADC12_CHANNELS];
   wsimtime_t   chann_period[ADC12_CHANNELS];
+
+
+  enum adc12state_t state;
+  
+  uint32_t adc12osc_freq;
+  uint64_t adc12osc_counter;
+  int      adc12osc_increment;
+  int      adc12osc_temp;
+  uint32_t adc12osc_cycle_nanotime;
+
+  int      adc12clk_increment;
+  int      adc12clk_temp;
+
+  int      sht0_increment;
+  int      sht0_temp;
+
+  int      sht1_increment;
+  int      sht1_temp;
+
+  int      sampcon;
+  int      current_channel;
 };
 
 /* ************************************************** */

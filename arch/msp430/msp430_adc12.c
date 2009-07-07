@@ -11,6 +11,9 @@
 
 #if defined(__msp430_have_adc12)
 
+/* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
 
 #if defined(DEBUG)
 #define HW_DMSG_ADC12(x...) HW_DMSG(x)
@@ -18,6 +21,13 @@
 #define HW_DMSG_ADC12(x...) do { } while (0)
 #endif
 
+#define DEBUG_LEVEL_2 
+
+#if defined(DEBUG_LEVEL_2)
+#define HW_DMSG_2_DBG(x...) HW_DMSG(x)
+#else
+#define HW_DMSG_2_DBG(x...) do { } while (0)
+#endif
 
 /* ************************************************** */
 /* ************************************************** */
@@ -45,12 +55,16 @@ char adc12_modes[ADC12_MODES][ADC12_MODES_NAMES] = {
   "Repeat Single Channel",  "Repeat Sequence of Channels"
 };
 
-enum adc12_modes {
-  adc12_mode_single,
-  adc12_mode_seq_chan,
-  adc12_mode_repeat_single,
-  adc12_mode_repead_seq
-};
+/* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
+
+/* ADC12 internal OSC is ~ 5MHz */
+/* cycle_nanotime == 200        */
+#define NANO                    (  1000*1000*1000)
+#define ADC12OSC_FREQ           (     5*1000*1000)
+
+#define ADC12OSC_CYCLE_NANOTIME (NANO / ADC12OSC_FREQ) 
 
 /* ************************************************** */
 /* ************************************************** */
@@ -230,6 +244,8 @@ int msp430_adc12_init(void)
 
       MCU.adc12.mem[i].s = 0;
     }
+
+  
   return 0;
 }
 
@@ -251,15 +267,135 @@ void msp430_adc12_reset(void)
     {
       MCU.adc12.mctl[i].s = 0;
     }
+
+  MCU.adc12.adc12osc_freq           = ADC12OSC_FREQ;
+  MCU.adc12.adc12osc_cycle_nanotime = ADC12OSC_CYCLE_NANOTIME;
 }
 
 /* ************************************************** */
 /* ************************************************** */
 /* ************************************************** */
 
+#define CHECK_ENC()					\
+  do {							\
+    if (MCU.adc12.ctl0.b.enc == 0)			\
+      {							\
+	MCU.adc12.state = ADC12_STATE_WAIT_ENABLE;	\
+	return;						\
+      }							\
+  } while(0)
+
+
+static const int shtdiv[16] = 
+{
+  4, 8, 16, 32, 64, 96, 128, 192, 256, 384, 512, 768, 1024, 1024, 1024, 1024 
+};
+
+
 void msp430_adc12_update(void)
 {
-  //  HW_DMSG_ADC12("msp430:adc12:update\n");
+  if (MCU.adc12.ctl0.b.adc12on == 0)
+    {
+      MCU.adc12.state = ADC12_STATE_OFF;
+      return;
+    }
+
+  MCU.adc12.adc12osc_temp     += MACHINE_TIME_GET_INCR();
+  MCU.adc12.adc12osc_increment = MCU.adc12.adc12osc_temp / MCU.adc12.adc12osc_cycle_nanotime;
+  MCU.adc12.adc12osc_temp      = MCU.adc12.adc12osc_temp % MCU.adc12.adc12osc_cycle_nanotime;
+  MCU.adc12.adc12osc_counter  += MCU.adc12.adc12osc_increment;
+
+  MCU.adc12.adc12clk_temp     += MCU.adc12.adc12osc_increment;
+  MCU.adc12.adc12clk_increment = MCU.adc12.adc12clk_temp / (MCU.adc12.ctl1.b.adc12divx + 1);
+  MCU.adc12.adc12clk_temp      = MCU.adc12.adc12clk_temp % (MCU.adc12.ctl1.b.adc12divx + 1);
+
+  /* FIXME:: take MSC into account */
+  if (MCU.adc12.ctl1.b.shp == 1)
+    {
+      if ((0 <= MCU.adc12.current_channel) && (MCU.adc12.current_channel <= 7))
+	{
+	  /* registers MEM0 to MEM7  */
+	  MCU.adc12.sht0_temp         += MCU.adc12.adc12clk_increment;
+	  MCU.adc12.sht0_increment     = MCU.adc12.sht0_temp / (shtdiv[MCU.adc12.ctl0.b.sht0x]);
+	  MCU.adc12.sht0_temp          = MCU.adc12.sht0_temp % (shtdiv[MCU.adc12.ctl0.b.sht0x]);
+	  MCU.adc12.sampcon            = MCU.adc12.sht0_increment;
+	}
+      else if ((8 <= MCU.adc12.current_channel) && (MCU.adc12.current_channel <= 15))
+	{
+	  /* registers MEM8 to MEM15 */
+	  MCU.adc12.sht1_temp         += MCU.adc12.adc12clk_increment;
+	  MCU.adc12.sht1_increment     = MCU.adc12.sht1_temp / (shtdiv[MCU.adc12.ctl0.b.sht1x]);
+	  MCU.adc12.sht1_temp          = MCU.adc12.sht1_temp % (shtdiv[MCU.adc12.ctl0.b.sht1x]);
+	  MCU.adc12.sampcon            = MCU.adc12.sht1_increment;
+	}
+      else
+	{
+	  ERROR("msp430:adc12: channel out of bounds\n");
+	  machine_exit(1);
+	}
+    }
+  else
+    {
+      // FIXME::sampcon = SHI
+      ERROR("msp430:adc12: ADC does not currently support SHP = 0 mode\n");
+      MCU.adc12.sampcon = 0;
+    }
+
+
+  switch (MCU.adc12.state)
+    {
+      /***************/
+      /* OFF         */
+      /***************/
+    case ADC12_STATE_OFF: 
+      MCU.adc12.state = ADC12_STATE_WAIT_ENABLE;
+      /* no break */
+
+      /***************/
+      /* ENABLE      */
+      /***************/
+    case ADC12_STATE_WAIT_ENABLE:
+      if (MCU.adc12.ctl0.b.enc)
+	{
+	  MCU.adc12.state = ADC12_STATE_WAIT_TRIGGER; 
+	}
+      if ((MCU.adc12.ctl0.b.enc) && 
+	  (MCU.adc12.ctl0.b.adc12sc == 1) &&
+	  (MCU.adc12.ctl1.b.shsx == 0))
+	{
+	  MCU.adc12.state = ADC12_STATE_SAMPLE; 
+	}
+      break;
+      
+      /***************/
+      /* TRIGGER     */
+      /***************/
+    case ADC12_STATE_WAIT_TRIGGER:
+      CHECK_ENC();
+      break;
+
+      /***************/
+      /* SAMPLE      */
+      /***************/
+    case ADC12_STATE_SAMPLE:
+      CHECK_ENC();
+      break;
+
+      /***************/
+      /* CONVERT     */
+      /***************/
+    case ADC12_STATE_CONVERT:
+      CHECK_ENC();
+      break;
+
+      /***************/
+      /* STORE       */
+      /***************/
+    case ADC12_STATE_STORE:
+      CHECK_ENC();
+      break;
+    }
+
 }
 
 /* ************************************************** */
@@ -323,10 +459,37 @@ int16_t msp430_adc12_read16(uint16_t addr)
     case  ADC12MEM14  :
     case  ADC12MEM15  :
       HW_DMSG_ADC12("msp430:adc12:read16: ADC12MEM%d = 0x%04x\n",addr - ADC12MEM0, 
-		    MCU.adc12.mem[addr - ADC12MEM0].s);
-      ret = MCU.adc12.mem[addr - ADC12MEM0].s;
+		    MCU.adc12.mem[(addr - ADC12MEM0) / 2].s);
+      ret = MCU.adc12.mem[(addr - ADC12MEM0) / 2].s;
       break;
 
+    default:
+      HW_DMSG_ADC12("msp430:adc12:read16: at [0x%04x], unknown address\n",addr);
+      break;
+    }
+
+  return ret;
+}
+
+/* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
+
+int8_t msp430_adc12_read8(uint16_t addr)
+{
+  int8_t ret = 0;
+
+  /*
+  static int tinyos_read_this_too_many_times = 0;
+  if (tinyos_read_this_too_many_times == 0)
+    {
+      HW_DMSG_ADC12("msp430:adc12: read8 at [0x%04x] \n",addr);
+      tinyos_read_this_too_many_times = 1;
+    }
+  */
+
+  switch (addr) 
+    {
     case  ADC12MCTL0  : /*  8 */
     case  ADC12MCTL1  :
     case  ADC12MCTL2  :
@@ -343,16 +506,14 @@ int16_t msp430_adc12_read16(uint16_t addr)
     case  ADC12MCTL13 :
     case  ADC12MCTL14 :
     case  ADC12MCTL15 :
-      HW_DMSG_ADC12("msp430:adc12:read16: ADC12MEMCTL%d = 0x%02x\n", addr - ADC12MCTL0,
+      HW_DMSG_ADC12("msp430:adc12:read08: ADC12MEMCTL%d = 0x%02x\n", addr - ADC12MCTL0,
 		    MCU.adc12.mctl[addr - ADC12MCTL0].s);
       ret = MCU.adc12.mctl[addr - ADC12MCTL0].s & 0xff;
       break;
-
     default:
-      HW_DMSG_ADC12("msp430:adc12:read16: at [0x%04x], unknown address\n",addr);
+      HW_DMSG_ADC12("msp430:adc12:read08: at [0x%04x], unknown address\n",addr);
       break;
     }
-
   return ret;
 }
 
@@ -388,6 +549,65 @@ void msp430_adc12_ctl1details(char* msg, int16_t *val)
   HW_DMSG_ADC12("msp430:adc12:%s adc12busy  %d\n",msg,ctl1->adc12busy);
 }
 
+/* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
+
+void msp430_adc12_start_enc(void)
+{
+  char buff[70];
+#define FORMAT "msp430:adc12:    * %-50s *\n"
+
+#define ADC12PPP(x...) do {			\
+    snprintf(buff,70,x);			\
+    HW_DMSG_ADC12(FORMAT,buff);			\
+  } while (0)
+
+  ADC12PPP("sht0 = 0x%x /%d",MCU.adc12.ctl0.b.sht0x & 0xf,shtdiv[MCU.adc12.ctl0.b.sht0x]);
+  ADC12PPP("sht1 = 0x%x /%d",MCU.adc12.ctl0.b.sht1x & 0xf,shtdiv[MCU.adc12.ctl0.b.sht1x]);
+
+  switch (MCU.adc12.ctl1.b.adc12sselx)
+    {
+    case 0: /* ADC12OSC */
+      ADC12PPP("CLK source = ADC12OSC");
+      break;
+    case 1: /* ACLK */
+      ADC12PPP("CLK source = ACLK");
+      break;
+    case 2: /* MCLK */
+      ADC12PPP("CLK source = MCLK");
+      break;
+    case 3: /* SMCLK */
+      ADC12PPP("CLK source = SMCLK");
+      break;
+    }
+  ADC12PPP("CLK div %d :: /%d",MCU.adc12.ctl1.b.adc12divx,MCU.adc12.ctl1.b.adc12divx+1);
+  ADC12PPP("ISSH input signal [%s]",(MCU.adc12.ctl1.b.issh == 0) ? "normal":"inverted");
+  ADC12PPP("SHP %d :: sourced from %s signal",MCU.adc12.ctl1.b.shp,(MCU.adc12.ctl1.b.shp == 0) ? "sample-input":"sampling");
+  switch (MCU.adc12.ctl1.b.shsx)
+    {
+    case 0: /* ADC12SX bit */
+      ADC12PPP("SHS source = ADC12SC bit");
+      break;
+    case 1: /* TimerA.out1 */
+      ADC12PPP("SHS source = TimerA.OUT1");
+      break;
+    case 2: /* TimerB.out0 */
+      ADC12PPP("SHS source = TimerB.OUT0");
+      break;
+    case 3: /* TimerB.out1 */
+      ADC12PPP("SHS source = TimerB.OUT1");
+      break;
+    }
+  ADC12PPP("ADC12SC             : %d",MCU.adc12.ctl0.b.adc12sc);
+  ADC12PPP("start sequence      : %d",MCU.adc12.ctl1.b.cstartaddx);
+  ADC12PPP("conversion sequence : %s",adc12_modes[MCU.adc12.ctl1.b.conseqx]);
+}
+
+/* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
+
 void msp430_adc12_write16(uint16_t addr, int16_t val)
 {
   switch (addr)
@@ -398,7 +618,22 @@ void msp430_adc12_write16(uint16_t addr, int16_t val)
 	{
 	  msp430_adc12_ctl0details("    ctl0 set ",&val);
 	}
-      MCU.adc12.ctl0.s = val;
+      if (MCU.adc12.ctl0.b.enc == 0)
+	{
+	  struct adc12ctl0_t *bval = (struct adc12ctl0_t *) &val;
+	  if (bval->enc == 1)
+	    {
+	      HW_DMSG_ADC12("msp430:adc12:    ** START ENC **\n");
+	      /* configuratioin is fixed */
+	      msp430_adc12_start_enc();
+	      MCU.adc12.current_channel = MCU.adc12.ctl1.b.cstartaddx;
+	    }
+	  MCU.adc12.ctl0.s = val;
+	}
+      else
+	{
+	  MCU.adc12.ctl0.s = (MCU.adc12.ctl0.s & 0xfff0) | (val & 0xf);
+	}
       break;
 
     case ADC12CTL1    : /* 16 */
@@ -407,7 +642,14 @@ void msp430_adc12_write16(uint16_t addr, int16_t val)
 	{
 	  msp430_adc12_ctl1details("    ctl1 set ",&val);
 	}
-      MCU.adc12.ctl1.s = val;
+      if (MCU.adc12.ctl0.b.enc == 0)
+	{
+	  MCU.adc12.ctl1.s = val;
+	}
+      else
+	{
+	  MCU.adc12.ctl1.s = (MCU.adc12.ctl1.s & 0xfff0) | (val & 0xf);
+	}
       break;
 
     case ADC12IFG     : /* 16 */
@@ -446,10 +688,31 @@ void msp430_adc12_write16(uint16_t addr, int16_t val)
     case  ADC12MEM13  :
     case  ADC12MEM14  :
     case  ADC12MEM15  :
-      HW_DMSG_ADC12("msp430:adc12:write16: ADC12MEM%d = 0x%04x\n",addr - ADC12MEM0, val);
-      MCU.adc12.mem[addr - ADC12MEM0].b.value = val & 0x0FFF;
+      HW_DMSG_ADC12("msp430:adc12:write16: ADC12MEM%d = 0x%04x\n", (addr - ADC12MEM0)/2, val & 0xffff);
+      MCU.adc12.mem[(addr - ADC12MEM0) / 2].b.value = val & 0x0FFF;
       break;
 
+    default:
+      HW_DMSG_ADC12("msp430:adc12:write16: at [0x%04x] = 0x%04x, unknown address\n",addr,val & 0xffff);
+      break;
+    }
+}
+
+/* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
+
+void msp430_adc12_mctl_details(int n, struct adc12mctlx_t *mctl)
+{
+  HW_DMSG_ADC12("msp430:adc12:    mctl%d  eos :%d\n",n,mctl->eos);
+  HW_DMSG_ADC12("msp430:adc12:    mctl%d  sref:%x\n",n,mctl->sref);
+  HW_DMSG_ADC12("msp430:adc12:    mctl%d  inch:%x\n",n,mctl->inch);
+}
+
+void msp430_adc12_write8(uint16_t addr, int8_t val)
+{
+  switch (addr)
+    {
     case  ADC12MCTL0  : /*  8 */
     case  ADC12MCTL1  :
     case  ADC12MCTL2  :
@@ -466,40 +729,17 @@ void msp430_adc12_write16(uint16_t addr, int16_t val)
     case  ADC12MCTL13 :
     case  ADC12MCTL14 :
     case  ADC12MCTL15 :
-      HW_DMSG_ADC12("msp430:adc12:write16: write 16 bits value on 8 bits registers [0x%04x] = 0x%04x\n",
-	    addr & 0xffff, val & 0xffff);
+      HW_DMSG_ADC12("msp430:adc12:write08: ADC12MCTL%d = 0x%02x\n", addr - ADC12MCTL0, val & 0xff);
+      if (MCU.adc12.ctl0.b.enc == 0)
+	{
+	  MCU.adc12.mctl[addr - ADC12MCTL0].s = val & 0xff;
+	  msp430_adc12_mctl_details(addr - ADC12MCTL0, & (MCU.adc12.mctl[addr - ADC12MCTL0].b));
+	}
       break;
-
     default:
-      HW_DMSG_ADC12("msp430:adc12:write16: at [0x%04x] = 0x%04x, unknown address\n",addr,val & 0xffff);
+      HW_DMSG_ADC12("msp430:adc12:write08: unknown address for [0x%04x] = 0x%02x\n",addr,val & 0xff);
       break;
     }
-}
-
-/* ************************************************** */
-/* ************************************************** */
-/* ************************************************** */
-
-int8_t msp430_adc12_read8(uint16_t addr)
-{
-  int8_t ret = 0;
-  static int tinyos_read_this_too_many_times = 0;
-  if (tinyos_read_this_too_many_times == 0)
-    {
-      HW_DMSG_ADC12("msp430:adc12: read8 at [0x%04x] \n",addr);
-      tinyos_read_this_too_many_times = 1;
-    }
-
-  return ret;
-}
-
-/* ************************************************** */
-/* ************************************************** */
-/* ************************************************** */
-
-void msp430_adc12_write8(uint16_t addr, int8_t val)
-{
-  HW_DMSG_ADC12("msp430:adc12: write8 at [0x%04x] = 0x%02x\n",addr,val & 0xff);
 }
 
 /* ************************************************** */

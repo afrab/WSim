@@ -146,6 +146,8 @@ union tacctlu_t {
     uint16_t         s;
 };
 
+#define TIMERA_COMPARATOR 3
+
 struct msp430_timerA3_t 
 {
   union {
@@ -153,9 +155,6 @@ struct msp430_timerA3_t
     uint16_t         s;
   } tactl;                 /* 0x160 */
 
-  union tacctlu_t tacctl0; /* 0x162 */
-  union tacctlu_t tacctl1; /* 0x164 */
-  union tacctlu_t tacctl2; /* 0x166 */
 
   /* input clock is taken before div */
   /* tar is incremented by (divbuffer >> id) */
@@ -166,17 +165,10 @@ struct msp430_timerA3_t
   /* we keep int for counters to detect overflow */
   int      tar;            /* 0x170 */
   
-  int      taccr0;         /* 0x172 */
-  int      taccr1;         /* 0x174 */
-  int      taccr2;         /* 0x176 */
-
-  int      b_taccr0;  /* used in compare mode to detect */
-  int      b_taccr1;
-  int      b_taccr2;
-
-  int      equ0;
-  int      equ1;
-  int      equ2;
+  union tacctlu_t  tacctl [TIMERA_COMPARATOR]; 
+  int            b_taccr  [TIMERA_COMPARATOR];
+  int              taccr  [TIMERA_COMPARATOR];        
+  int              equ    [TIMERA_COMPARATOR];
 
   union {
     struct tiv_t     b;   
@@ -342,6 +334,12 @@ union tbcctlu_t {
     uint16_t         s;
 };
 
+#if defined(__msp430_have_timerb7)
+#define TIMERB_COMPARATOR 7
+#else
+#define TIMERB_COMPARATOR 3
+#endif
+
 struct msp430_timerB_t  
 {
   union {
@@ -349,16 +347,6 @@ struct msp430_timerB_t
     uint16_t         s;
   } tbctl;                  /* 0x180 */
   
-  union tbcctlu_t  tbcctl0; /* 0x182 */
-  union tbcctlu_t  tbcctl1; /* 0x184 */
-  union tbcctlu_t  tbcctl2; /* 0x186 */
-#if defined(__msp430_have_timerb7)
-  union tbcctlu_t  tbcctl3; /* 0x188 */
-  union tbcctlu_t  tbcctl4; /* 0x18A */
-  union tbcctlu_t  tbcctl5; /* 0x18C */
-  union tbcctlu_t  tbcctl6; /* 0x18E */
-#endif
-
   /* input clock is taken before div */
   /* tar is incremented by (divbuffer >> id) */
   unsigned int divbuffer;    /* counts input clocks           */
@@ -367,45 +355,11 @@ struct msp430_timerB_t
 
   /* we keep int for counters to detect overflow */
   int              tbr;     /* 0x190 */
-  int              tbccr0;  /* 0x192 */
-  int              tbccr1;  /* 0x194 */
-  int              tbccr2;  /* 0x196 */
-#if defined(__msp430_have_timerb7)
-  int              tbccr3;  /* 0x198 */
-  int              tbccr4;  /* 0x19a */
-  int              tbccr5;  /* 0x19c */
-  int              tbccr6;  /* 0x19e */
-#endif
-
-  int      tbcl0;
-  int      tbcl1;
-  int      tbcl2;
-#if defined(__msp430_have_timerb7)
-  int      tbcl3;
-  int      tbcl4;
-  int      tbcl5;
-  int      tbcl6;
-#endif
-
-  int      b_tbcl0;  /* used in compare mode to detect */
-  int      b_tbcl1;
-  int      b_tbcl2;
-#if defined(__msp430_have_timerb7)
-  int      b_tbcl3;
-  int      b_tbcl4;
-  int      b_tbcl5;
-  int      b_tbcl6;
-#endif
-
-  int      equ0;
-  int      equ1;
-  int      equ2;
-#if defined(__msp430_have_timerb7)
-  int      equ3;
-  int      equ4;
-  int      equ5;
-  int      equ6;
-#endif
+  union tbcctlu_t  tbcctl [TIMERB_COMPARATOR];
+  int              tbcl   [TIMERB_COMPARATOR];
+  int            b_tbcl   [TIMERB_COMPARATOR];
+  int              tbccr  [TIMERB_COMPARATOR];
+  int              equ    [TIMERB_COMPARATOR];
 
   union {
     struct tiv_t     b; 

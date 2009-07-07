@@ -140,14 +140,14 @@ int msp430_interrupt_start_if_any(void)
 #if defined(__msp430_have_timera3)
 		case INTR_TIMERA3_0:
 		  HW_DMSG_INTR("msp430:intr:   Reset timerA3 taccr0 IFG flag\n");
-		  MCU.timerA3.tacctl0.b.ccifg = 0;
+		  MCU.timerA3.tacctl[0].b.ccifg = 0;
 		  break;
 #endif
 
 #if defined(__msp430_have_timerb3) || defined(__msp430_have_timerb7)
 		case INTR_TIMERB_0:
 		  HW_DMSG_INTR("msp430:intr:   Reset timerB IFG flag\n");
-		  MCU.timerB.tbcctl0.b.ccifg = 0;
+		  MCU.timerB.tbcctl[0].b.ccifg = 0;
 		  break;
 #endif
 

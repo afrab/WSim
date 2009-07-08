@@ -222,9 +222,12 @@ struct msp430_adc12_t {
     struct adc12ctl1_t  b;
     uint16_t            s;
   } ctl1;
+
   uint16_t ifg;
   uint16_t ie;
   uint16_t iv;
+  uint8_t  ov;
+  uint8_t  tov;
 
   union {
     struct adc12memx_t  b;
@@ -259,7 +262,8 @@ struct msp430_adc12_t {
   int      sht1_temp;
 
   int      sampcon;
-  int      current_channel;
+  int      current_x;
+  uint16_t sample;
 };
 
 /* ************************************************** */
@@ -274,6 +278,7 @@ int16_t msp430_adc12_read16     (uint16_t addr);
 void    msp430_adc12_write16    (uint16_t addr, int16_t val);
 int8_t  msp430_adc12_read8      (uint16_t addr);
 void    msp430_adc12_write8     (uint16_t addr, int8_t val);
+int     msp430_adc12_chkifg     (void);
 
 /* ************************************************** */
 /* ************************************************** */

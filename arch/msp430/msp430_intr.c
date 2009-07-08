@@ -226,6 +226,15 @@ int msp430_interrupt_checkifg(void)
 #if defined(__msp430_have_timerb3) || defined(__msp430_have_timerb7)
   res |= msp430_timerB_chkifg();
 #endif
+#if defined(__msp430_have_adc12)
+  res |= msp430_adc12_chkifg();
+#endif
+#if defined(__msp430_have_adc10)
+  res |= msp430_adc10_chkifg();
+#endif
+#if defined(__msp430_have_dac12)
+  res |= msp430_dac12_chkifg();
+#endif
 
   return res;
 }

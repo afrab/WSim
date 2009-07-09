@@ -426,9 +426,10 @@ void msp430_adc12_update(void)
 	   *   SEL = 1  // Selector  = 0:GPIO  1:peripheral
 	   *   DIR = 0  // Direction = 0:input 1:output
 	   */
-	  HW_DMSG_ADC12("msp430:adc12:     sampling on config %d hw_channel %d (%s)\n",
-			MCU.adc12.current_x,MCU.adc12.mctl[MCU.adc12.current_x].b.inch,
-			trace_names[MCU.adc12.mctl[MCU.adc12.current_x].b.inch]);
+	  HW_DMSG_ADC12("msp430:adc12:     sampling on config %d hw_channel %d (%s) [%"PRId64"]\n",
+			MCU.adc12.current_x, MCU.adc12.mctl[MCU.adc12.current_x].b.inch,
+			trace_names[MCU.adc12.mctl[MCU.adc12.current_x].b.inch],
+			MACHINE_TIME_GET_NANO());
 
 	  MCU.adc12.sample = msp430_adc12_sample_input(MCU.adc12.mctl[MCU.adc12.current_x].b.inch);
 
@@ -745,6 +746,7 @@ void msp430_adc12_start_enc(void)
     }
   ADC12PPP("CLK div %d :: /%d",MCU.adc12.ctl1.b.adc12divx,MCU.adc12.ctl1.b.adc12divx+1);
   ADC12PPP("ISSH input signal [%s]",(MCU.adc12.ctl1.b.issh == 0) ? "normal":"inverted");
+  ADC12PPP("MSC %d",MCU.adc12.ctl0.b.msc);
   ADC12PPP("SHP %d :: sourced from %s signal",MCU.adc12.ctl1.b.shp,(MCU.adc12.ctl1.b.shp == 0) ? "sample-input":"sampling");
   switch (MCU.adc12.ctl1.b.shsx)
     {

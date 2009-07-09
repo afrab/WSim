@@ -22,7 +22,7 @@
 #define HW_DMSG_ADC12(x...) do { } while (0)
 #endif
 
-//#define DEBUG_LEVEL_2 
+#define DEBUG_LEVEL_2 
 
 #if defined(DEBUG_LEVEL_2)
 #define HW_DMSG_2_DBG(x...) HW_DMSG(x)

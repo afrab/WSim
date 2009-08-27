@@ -321,6 +321,9 @@ struct _cc2420_t {
 
     /* position in RX FIFO of the last byte of oldest RX frame */
     int16_t rx_frame_end;
+
+    /* radio id in libwsnet2 */
+    int worldsens_radio_id;
 };
 
 uint64_t cc2420_callback_rx    (void *arg, struct wsnet_rx_info *);

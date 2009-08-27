@@ -459,6 +459,7 @@ void cc1100_tx (struct _cc1100_t *cc1100)
     tx.modulation = cc1100_get_modulation(cc1100);
     tx.power_dbm  = cc1100_get_power_dbm(cc1100);
     tx.duration   = duration;
+    tx.radio_id   = cc1100->worldsens_radio_id;
     worldsens_c_tx(&tx);
     
     CC1100_DBG_TX("cc1100:tx:node %d: data %02x, freq: %lfMHz, modulation: %d, "

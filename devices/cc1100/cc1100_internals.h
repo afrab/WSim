@@ -155,6 +155,8 @@ struct _cc1100_t
 
   uint8_t	  patable[8];
   uint8_t	  patable_cnt;
+
+  int             worldsens_radio_id;
 };
 
 

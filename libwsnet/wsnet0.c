@@ -37,8 +37,9 @@ int worldsens_c_get_node_id(void)
   return 0;
 }
 
-void worldsens_c_rx_register(void UNUSED *arg, wsnet_callback_rx_t UNUSED cbrx)
+int worldsens_c_rx_register(void UNUSED *arg, wsnet_callback_rx_t UNUSED cbrx)
 {
+  return 0;
 }
 
 int worldsens_c_tx (struct wsnet_tx_info UNUSED *tx)

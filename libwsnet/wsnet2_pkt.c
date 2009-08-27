@@ -5,20 +5,26 @@
  *  \date   2007
  **/
 
-#include "wsnet2_pkt.h"
-#include "wsnet2_net.h"
-
-#define WSIM
-
-#if defined(WSIM)
-#include "liblogger/logger.h"
-#else
-#include <stdio.h>
-#define ERROR(x...) fprintf(stderr,x)
-#define VERBOSE(x...) fprintf(stderr,x)
-#endif
 
 #define UNUSED __attribute__((unused))
+#define WSIM
+
+#if defined(WSIM) /* WSIM */
+#include "wsnet2_pkt.h"
+#include "wsnet2_net.h"
+#include "liblogger/logger.h"
+#define DIRECTION1 "snd -->"
+#define DIRECTION2 "rcv <--"
+#define SOFT       "Libwsnet"
+#else /* WSNET */
+#include <include/worldsens_pkt.h>
+#include <stdio.h>
+#define ERROR(x...) fprintf(stderr,x)
+#define VERBOSE(UNUSED,x...) fprintf(stderr,x)
+#define DIRECTION1 "rcv <--"
+#define DIRECTION2 "snd -->"
+#define SOFT       "WSNET2:"
+#endif
 
 #define VLVL 5  /* Verbose level for worldsens_packet_dump function */
 
@@ -137,9 +143,10 @@ static inline int worldsens_packet_swap(union _worldsens_pkt *pkt)
       SWAPN (pkt->byte_tx.type);
       SWAPN (pkt->byte_tx.node_id);
       SWAPN (pkt->byte_tx.antenna_id);
-      SWAPN (pkt->byte_tx.modulation_id);
+      SWAPN (pkt->byte_tx.wsnet_mod_id);
+      SWAPN (pkt->byte_tx.wsim_mod_id);
       SWAPN (pkt->byte_tx.freq);
-      SWAPN (pkt->byte_tx.power);
+      SWAPN (pkt->byte_tx.power_dbm);
       SWAPN (pkt->byte_tx.duration);
       SWAPN (pkt->byte_tx.data);
       SWAPN (pkt->byte_tx.period);
@@ -161,7 +168,9 @@ static inline int worldsens_packet_swap(union _worldsens_pkt *pkt)
       SWAPN (pkt->cnx_rsp_ok.seq);
       SWAPN (pkt->cnx_rsp_ok.rp_next);
       SWAPN (pkt->cnx_rsp_ok.rp_duration);
-      SWAPN (pkt->cnx_rsp_ok.nb_models);
+      SWAPN (pkt->cnx_rsp_ok.n_antenna_id);
+      SWAPN (pkt->cnx_rsp_ok.n_modulation_id);
+      SWAPN (pkt->cnx_rsp_ok.n_measure_id);
       /* .names field left alone */
       break;
 
@@ -170,18 +179,9 @@ static inline int worldsens_packet_swap(union _worldsens_pkt *pkt)
       SWAPN (pkt->cnx_rsp_nok.seq);
       break;
 
-    case WORLDSENS_S_SYNC_REQ:
-      SWAPN (pkt->sync_req.type);
-      SWAPN (pkt->sync_req.seq);
-      SWAPN (pkt->sync_req.rp_current);
-      SWAPN (pkt->sync_req.rp_next);
-      SWAPN (pkt->sync_req.rp_duration);
-      break;
-
     case WORLDSENS_S_SYNC_RELEASE:
       SWAPN (pkt->sync_release.type);
       SWAPN (pkt->sync_release.seq);
-      SWAPN (pkt->sync_release.rp_current);
       SWAPN (pkt->sync_release.rp_next);
       SWAPN (pkt->sync_release.rp_duration);
       break;
@@ -197,7 +197,18 @@ static inline int worldsens_packet_swap(union _worldsens_pkt *pkt)
       SWAPN (pkt->byte_rx.type);
       SWAPN (pkt->byte_rx.seq);
       SWAPN (pkt->byte_rx.antenna_id);
-      SWAPN (pkt->byte_rx.modulation_id);
+      SWAPN (pkt->byte_rx.wsim_mod_id);
+      SWAPN (pkt->byte_rx.freq);
+      SWAPN (pkt->byte_rx.data);
+      break;
+
+    case WORLDSENS_S_BYTE_SR_RX:
+      SWAPN (pkt->byte_rx.type);
+      SWAPN (pkt->byte_rx.seq);
+      SWAPN (pkt->sync_release.rp_next);
+      SWAPN (pkt->sync_release.rp_duration);
+      SWAPN (pkt->byte_rx.antenna_id);
+      SWAPN (pkt->byte_rx.wsim_mod_id);
       SWAPN (pkt->byte_rx.freq);
       SWAPN (pkt->byte_rx.data);
       break;
@@ -242,174 +253,6 @@ int worldsens_packet_ntoh(union _worldsens_pkt *pkt)
   return worldsens_packet_swap(pkt);
 }
 
-/* ************************************************** */
-/* ************************************************** */
-/* ************************************************** */
-
-int worldsens_packet_dump(union _worldsens_pkt *msg)
-{
-  struct _worldsens_s_header *header = (struct _worldsens_s_header *) msg;
-
-  VERBOSE(VLVL,"Libwsnet2:pkt: start ====================\n");
-  switch (header->type)
-    {
-      /*WSIM->WSNET2*/
-    case WORLDSENS_C_CONNECT_REQ:
-      {
-	struct _worldsens_c_connect_req *pkt = (struct _worldsens_c_connect_req *)msg;
-	VERBOSE(VLVL,"Libwsnet2:sent:pkt:   type %s\n",              "WORLDSENS_C_CONNECT_REQ");
-	VERBOSE(VLVL,"Libwsnet2:sent:pkt:   node %d\n",              pkt->node_id);
-	break;
-      }
-    case WORLDSENS_C_SYNC_ACK:
-      {
-	struct _worldsens_c_sync_ack *pkt = (struct _worldsens_c_sync_ack *)msg;
-	VERBOSE(VLVL,"Libwsnet2:sent:pkt:   type %s\n",              "WORLDSENS_C_SYNC_ACK");
-	VERBOSE(VLVL,"Libwsnet2:sent:pkt:   node %d\n",              pkt->node_id);
-	VERBOSE(VLVL,"Libwsnet2:sent:pkt:   rp_id %d\n",             pkt->rp_id);
-	break;
-      }
-    case WORLDSENS_C_BYTE_TX:
-      {
-	struct _worldsens_c_byte_tx *pkt = (struct _worldsens_c_byte_tx *)msg;
-	VERBOSE(VLVL,"Libwsnet2:sent:pkt:   type %s\n",              "WORLDSENS_C_BYTE_TX");
-	VERBOSE(VLVL,"Libwsnet2:sent:pkt:   node %d\n",              pkt->node_id);
-	VERBOSE(VLVL,"Libwsnet2:sent:pkt:   antenna %d\n",           pkt->antenna_id);
-	VERBOSE(VLVL,"Libwsnet2:sent:pkt:   modulation %d\n",        pkt->modulation_id);
-	VERBOSE(VLVL,"Libwsnet2:sent:pkt:   frequence %f\n",         pkt->freq);
-	VERBOSE(VLVL,"Libwsnet2:sent:pkt:   power %f\n",             pkt->power);
-	VERBOSE(VLVL,"Libwsnet2:sent:pkt:   duration %d\n",          pkt->duration);
-	VERBOSE(VLVL,"Libwsnet2:sent:pkt:   data %02x\n",            pkt->data);
-	VERBOSE(VLVL,"Libwsnet2:sent:pkt:   period %d\n",            pkt->period);
-	break;
-      }
-    case WORLDSENS_C_MEASURE_REQ:
-      {
-	struct _worldsens_c_measure_req *pkt = (struct _worldsens_c_measure_req *)msg;
-	VERBOSE(VLVL,"Libwsnet2:sent:pkt:   type %s\n",              "WORLDSENS_C_MEASURE_REQ");
-	VERBOSE(VLVL,"Libwsnet2:sent:pkt:   node %d\n",              pkt->node_id);
-	VERBOSE(VLVL,"Libwsnet2:sent:pkt:   measure id %d\n",        pkt->measure_id);
-	break;
-      }
-    case WORLDSENS_C_DISCONNECT:
-      {
-	struct _worldsens_c_disconnect *pkt = (struct _worldsens_c_disconnect *)msg;
-	VERBOSE(VLVL,"Libwsnet2:sent:pkt:   type %s\n",              "WORLDSENS_C_DISCONNECT");
-	VERBOSE(VLVL,"Libwsnet2:sent:pkt:   node %d\n",              pkt->node_id);
-	break;
-      }
-
-      /* WSNET2 -> WSIM */
-    case WORLDSENS_S_CONNECT_RSP_OK:
-      {
-	struct _worldsens_s_connect_rsp_ok *pkt = (struct _worldsens_s_connect_rsp_ok *)msg;
-	VERBOSE(VLVL,"Libwsnet2:rcv:pkt:    type %s\n",              "WORLDSENS_S_CONNECT_RSP_OK");
-	VERBOSE(VLVL,"Libwsnet2:rcv:pkt:    seq  %d\n",              pkt->seq);
-	VERBOSE(VLVL,"Libwsnet2:rcv:pkt:    rp_current  %d\n",       pkt->rp_current);
-	VERBOSE(VLVL,"Libwsnet2:rcv:pkt:    rp_next  %d\n",          pkt->rp_next);
-	VERBOSE(VLVL,"Libwsnet2:rcv:pkt:    rp_duration  %d\n",      pkt->rp_duration);
-	VERBOSE(VLVL,"Libwsnet2:rcv:pkt:    nb of antenna  %d\n",    pkt->n_antenna_id);
-	VERBOSE(VLVL,"Libwsnet2:rcv:pkt:    nb of modulation  %d\n", pkt->n_modulation_id);
-	VERBOSE(VLVL,"Libwsnet2:rcv:pkt:    nb of measure  %d\n",    pkt->n_measure_id);
-	break;
-      }
-    case WORLDSENS_S_CONNECT_RSP_NOK:
-      {
-	struct _worldsens_s_connect_rsp_nok *pkt = (struct _worldsens_s_connect_rsp_nok *)msg;
-	VERBOSE(VLVL,"Libwsnet2:rcv:pkt:    type %s\n",              "WORLDSENS_S_CONNECT_RSP_NOK");
-	VERBOSE(VLVL,"Libwsnet2:rcv:pkt:    seq  %d\n",              pkt->seq);
-	break;
-      }
-    case WORLDSENS_S_SYNC_REQ:
-      {
-	struct _worldsens_s_sync_req *pkt = (struct _worldsens_s_sync_req *)msg;
-	VERBOSE(VLVL,"Libwsnet2:rcv:pkt:    type %s\n",              "WORLDSENS_S_SYNC_REQ");
-	VERBOSE(VLVL,"Libwsnet2:rcv:pkt:    seq  %d\n",              pkt->seq);
-	VERBOSE(VLVL,"Libwsnet2:rcv:pkt:    rp_current  %d\n",       pkt->rp_current);
-	VERBOSE(VLVL,"Libwsnet2:rcv:pkt:    rp_next  %d\n",          pkt->rp_next);
-	VERBOSE(VLVL,"Libwsnet2:rcv:pkt:    rp_duration  %d\n",      pkt->rp_duration);
-	break;
-      }
-    case WORLDSENS_S_SYNC_RELEASE:
-      {
-	struct _worldsens_s_sync_release *pkt = (struct _worldsens_s_sync_release *)msg;
-	VERBOSE(VLVL,"Libwsnet2:rcv:pkt:    type %s\n",              "WORLDSENS_S_SYNC_REQ");
-	VERBOSE(VLVL,"Libwsnet2:rcv:pkt:    seq  %d\n",              pkt->seq);
-	VERBOSE(VLVL,"Libwsnet2:rcv:pkt:    rp_current  %d\n",       pkt->rp_current);
-	VERBOSE(VLVL,"Libwsnet2:rcv:pkt:    rp_next  %d\n",          pkt->rp_next);
-	VERBOSE(VLVL,"Libwsnet2:rcv:pkt:    rp_duration  %d\n",      pkt->rp_duration);
-	break;
-      }
-    case WORLDSENS_S_BACKTRACK:
-      {
-	struct _worldsens_s_backtrack *pkt = (struct _worldsens_s_backtrack *)msg;
-	VERBOSE(VLVL,"Libwsnet2:rcv:pkt:    type %s\n",              "WORLDSENS_S_SYNC_REQ");
-	VERBOSE(VLVL,"Libwsnet2:rcv:pkt:    seq  %d\n",              pkt->seq);
-	VERBOSE(VLVL,"Libwsnet2:rcv:pkt:    rp_next  %d\n",          pkt->rp_next);
-	VERBOSE(VLVL,"Libwsnet2:rcv:pkt:    rp_duration  %d\n",      pkt->rp_duration);
-	break;
-      }
-    case WORLDSENS_S_BYTE_RX:
-      {
-	struct _worldsens_s_byte_rx *pkt = (struct _worldsens_s_byte_rx *)msg;
-	VERBOSE(VLVL,"Libwsnet2:rcv:pkt:   type %s\n",              "WORLDSENS_S_BYTE_RX");
-	VERBOSE(VLVL,"Libwsnet2:rcv:pkt:   seq %d\n",               pkt->seq);
-	VERBOSE(VLVL,"Libwsnet2:rcv:pkt:   antenna %d\n",           pkt->antenna_id);
-	VERBOSE(VLVL,"Libwsnet2:rcv:pkt:   modulation %d\n",        pkt->modulation_id);
-	VERBOSE(VLVL,"Libwsnet2:rcv:pkt:   frequence %f\n",         pkt->freq);
-	VERBOSE(VLVL,"Libwsnet2:rcv:pkt:   data %02x\n",            pkt->data);
-
-/* 	int i = 0; */
-/* 	while ((wsens.radio[i].callback != NULL) && (i < MAX_CALLBACKS)) { */
-/* 	  VERBOSE(VLVL,"Libwsnet2:rcv:pkt:   ****\n"); */
-/* 	  VERBOSE(VLVL,"Libwsnet2:rcv:pkt:   node %i\n",              pkt->nodes_infos[i].node_id); */
-/* 	  VERBOSE(VLVL,"Libwsnet2:rcv:pkt:   antenna %i\n",           pkt->nodes_infos[i].antenna_id); */
-/* 	  VERBOSE(VLVL,"Libwsnet2:rcv:pkt:   ber %d\n",               pkt->nodes_infos[i].ber); */
-/* 	  VERBOSE(VLVL,"Libwsnet2:rcv:pkt:   power %d\n",             pkt->nodes_infos[i].power); */
-/* 	  i++; */
-/* 	} */
-	
-	break;
-      }
-    case WORLDSENS_S_MEASURE_RSP:
-      {
-	struct _worldsens_s_measure_rsp *pkt = (struct _worldsens_s_measure_rsp *)msg;
-	VERBOSE(VLVL,"Libwsnet2:rcv:pkt:    type %s\n",              "WORLDSENS_S_MEASURE_RSP");
-	VERBOSE(VLVL,"Libwsnet2:rcv:pkt:    seq  %d\n",              pkt->seq);
-	VERBOSE(VLVL,"Libwsnet2:sent:pkt:   measure id %d\n",        pkt->measure_id);
-	VERBOSE(VLVL,"Libwsnet2:sent:pkt:   measure value %f\n",     pkt->measure_val);
-	break;
-      }
-    case WORLDSENS_S_KILLSIM:
-      {
-	struct _worldsens_s_killsim *pkt = (struct _worldsens_s_killsim *)msg;
-	VERBOSE(VLVL,"Libwsnet2:rcv:pkt:    type %s\n",              "WORLDSENS_S_KILLSIM");
-	VERBOSE(VLVL,"Libwsnet2:rcv:pkt:    seq  %d\n",              pkt->seq);
-	break;
-      }
-    case WORLDSENS_S_KILL:
-      {
-	struct _worldsens_s_kill *pkt = (struct _worldsens_s_kill *)msg;
-	VERBOSE(VLVL,"Libwsnet2:rcv:pkt:    type %s\n",              "WORLDSENS_S_KILL");
-	VERBOSE(VLVL,"Libwsnet2:rcv:pkt:    seq  %d\n",              pkt->seq);
-	VERBOSE(VLVL,"Libwsnet2:rcv:pkt:    node id  %d\n",          pkt->node_id);
-	break;
-      }
-    default:
-      {
-	VERBOSE(VLVL,"Libwsnet2:pkt:Invalide packet type: %d \n",header->type);
-      }
-    }
-  VERBOSE(VLVL,"Libwsnet2:pkt: stop =====================\n");
-
-  return 0;
-}
-
-/* ************************************************** */
-/* ************************************************** */
-/* ************************************************** */
-
-
 uint64_t ntohll  (uint64_t v)
 {
   SWAPN(v);
@@ -433,3 +276,170 @@ double   htondbl (double v)
   SWAPN(v);
   return v;
 }
+
+/* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
+
+int worldsens_packet_dump(union _worldsens_pkt *msg)
+{
+  struct _worldsens_s_header *header = (struct _worldsens_s_header *) msg;
+
+  VERBOSE(VLVL,"%s:=======:pkt: start ====================\n", SOFT);
+  switch (header->type)
+    {
+      /*WSIM->WSNET2*/
+    case WORLDSENS_C_CONNECT_REQ:
+      {
+	struct _worldsens_c_connect_req *pkt = (struct _worldsens_c_connect_req *)msg;
+	VERBOSE(VLVL,"%s:%s:pkt:    type %s\n",                 SOFT, DIRECTION1, "WORLDSENS_C_CONNECT_REQ");
+	VERBOSE(VLVL,"%s:%s:pkt:    node %d\n",                 SOFT, DIRECTION1, pkt->node_id);
+	break;
+      }
+    case WORLDSENS_C_SYNC_ACK:
+      {
+	struct _worldsens_c_sync_ack *pkt = (struct _worldsens_c_sync_ack *)msg;
+	VERBOSE(VLVL,"%s:%s:pkt:    type %s\n",                 SOFT, DIRECTION1, "WORLDSENS_C_SYNC_ACK");
+	VERBOSE(VLVL,"%s:%s:pkt:    node %d\n",                 SOFT, DIRECTION1, pkt->node_id);
+	VERBOSE(VLVL,"%s:%s:pkt:    rp_id %lld\n",              SOFT, DIRECTION1, pkt->rp_id);
+	break;
+      }
+    case WORLDSENS_C_BYTE_TX:
+      {
+	struct _worldsens_c_byte_tx *pkt = (struct _worldsens_c_byte_tx *)msg;
+	VERBOSE(VLVL,"%s:%s:pkt:    type %s\n",                 SOFT, DIRECTION1, "WORLDSENS_C_BYTE_TX");
+	VERBOSE(VLVL,"%s:%s:pkt:    node %d\n",                 SOFT, DIRECTION1, pkt->node_id);
+	VERBOSE(VLVL,"%s:%s:pkt:    antenna %d\n",              SOFT, DIRECTION1, pkt->antenna_id);
+	VERBOSE(VLVL,"%s:%s:pkt:    wsnet modulation id %d\n",  SOFT, DIRECTION1, pkt->wsnet_mod_id);
+	VERBOSE(VLVL,"%s:%s:pkt:    wsim modulation id %d\n",   SOFT, DIRECTION1, pkt->wsim_mod_id);
+	VERBOSE(VLVL,"%s:%s:pkt:    frequence %f\n",            SOFT, DIRECTION1, pkt->freq);
+	VERBOSE(VLVL,"%s:%s:pkt:    power in dbm %f\n",         SOFT, DIRECTION1, pkt->power_dbm);
+	VERBOSE(VLVL,"%s:%s:pkt:    duration %lld\n",           SOFT, DIRECTION1, pkt->duration);
+	VERBOSE(VLVL,"%s:%s:pkt:    data 0x%02x\n",             SOFT, DIRECTION1, pkt->data);
+	VERBOSE(VLVL,"%s:%s:pkt:    period %lld\n",             SOFT, DIRECTION1, pkt->period);
+	break;
+      }
+    case WORLDSENS_C_MEASURE_REQ:
+      {
+	struct _worldsens_c_measure_req *pkt = (struct _worldsens_c_measure_req *)msg;
+	VERBOSE(VLVL,"%s:%s:pkt:    type %s\n",                 SOFT, DIRECTION1, "WORLDSENS_C_MEASURE_REQ");
+	VERBOSE(VLVL,"%s:%s:pkt:    node %d\n",                 SOFT, DIRECTION1, pkt->node_id);
+	VERBOSE(VLVL,"%s:%s:pkt:    measure id %d\n",           SOFT, DIRECTION1, pkt->measure_id);
+	break;
+      }
+    case WORLDSENS_C_DISCONNECT:
+      {
+	struct _worldsens_c_disconnect *pkt = (struct _worldsens_c_disconnect *)msg;
+	VERBOSE(VLVL,"%s:%s:pkt:    type %s\n",                 SOFT, DIRECTION1, "WORLDSENS_C_DISCONNECT");
+	VERBOSE(VLVL,"%s:%s:pkt:    node %d\n",                 SOFT, DIRECTION1, pkt->node_id);
+	break;
+      }
+
+      /* WSNET2 -> WSIM */
+    case WORLDSENS_S_CONNECT_RSP_OK:
+      {
+	struct _worldsens_s_connect_rsp_ok *pkt = (struct _worldsens_s_connect_rsp_ok *)msg;
+	VERBOSE(VLVL,"%s:%s:pkt:    type %s\n",                 SOFT, DIRECTION2, "WORLDSENS_S_CONNECT_RSP_OK");
+	VERBOSE(VLVL,"%s:%s:pkt:    seq  %lld\n",               SOFT, DIRECTION2, pkt->seq);
+	VERBOSE(VLVL,"%s:%s:pkt:    rp_next  %lld\n",           SOFT, DIRECTION2, pkt->rp_next);
+	VERBOSE(VLVL,"%s:%s:pkt:    rp_duration  %lld\n",       SOFT, DIRECTION2, pkt->rp_duration);
+	VERBOSE(VLVL,"%s:%s:pkt:    nb of antenna  %d\n",       SOFT, DIRECTION2, pkt->n_antenna_id);
+	VERBOSE(VLVL,"%s:%s:pkt:    nb of modulation  %d\n",    SOFT, DIRECTION2, pkt->n_modulation_id);
+	VERBOSE(VLVL,"%s:%s:pkt:    nb of measure  %d\n",       SOFT, DIRECTION2, pkt->n_measure_id);
+	break;
+      }
+    case WORLDSENS_S_CONNECT_RSP_NOK:
+      {
+	struct _worldsens_s_connect_rsp_nok *pkt = (struct _worldsens_s_connect_rsp_nok *)msg;
+	VERBOSE(VLVL,"%s:%s:pkt:    type %s\n",                 SOFT, DIRECTION2, "WORLDSENS_S_CONNECT_RSP_NOK");
+	VERBOSE(VLVL,"%s:%s:pkt:    seq  %lld\n",               SOFT, DIRECTION2, pkt->seq);
+	break;
+      }
+    case WORLDSENS_S_SYNC_RELEASE:
+      {
+	struct _worldsens_s_sync_release *pkt = (struct _worldsens_s_sync_release *)msg;
+	VERBOSE(VLVL,"%s:%s:pkt:    type %s\n",                 SOFT, DIRECTION2, "WORLDSENS_S_RELEASE");
+	VERBOSE(VLVL,"%s:%s:pkt:    seq  %lld\n",               SOFT, DIRECTION2, pkt->seq);
+	VERBOSE(VLVL,"%s:%s:pkt:    rp_next  %lld\n",           SOFT, DIRECTION2, pkt->rp_next);
+	VERBOSE(VLVL,"%s:%s:pkt:    rp_duration  %lld\n",       SOFT, DIRECTION2, pkt->rp_duration);
+	break;
+      }
+    case WORLDSENS_S_BACKTRACK:
+      {
+	struct _worldsens_s_backtrack *pkt = (struct _worldsens_s_backtrack *)msg;
+	VERBOSE(VLVL,"%s:%s:pkt:    type %s\n",                 SOFT, DIRECTION2, "WORLDSENS_S_BACKTRACK");
+	VERBOSE(VLVL,"%s:%s:pkt:    seq  %lld\n",               SOFT, DIRECTION2, pkt->seq);
+	VERBOSE(VLVL,"%s:%s:pkt:    rp_next  %lld\n",           SOFT, DIRECTION2, pkt->rp_next);
+	VERBOSE(VLVL,"%s:%s:pkt:    rp_duration  %lld\n",       SOFT, DIRECTION2, pkt->rp_duration);
+	break;
+      }
+    case WORLDSENS_S_BYTE_RX:
+      {
+	struct _worldsens_s_byte_rx *pkt = (struct _worldsens_s_byte_rx *)msg;
+	VERBOSE(VLVL,"%s:%s:pkt:    type %s\n",                 SOFT, DIRECTION2, "WORLDSENS_S_BYTE_RX");
+	VERBOSE(VLVL,"%s:%s:pkt:    seq %lld\n",                SOFT, DIRECTION2, pkt->seq);
+	VERBOSE(VLVL,"%s:%s:pkt:    antenna %d\n",              SOFT, DIRECTION2, pkt->antenna_id);
+	VERBOSE(VLVL,"%s:%s:pkt:    wsim modulation %d\n",      SOFT, DIRECTION2, pkt->wsim_mod_id);
+	VERBOSE(VLVL,"%s:%s:pkt:    frequence %f\n",            SOFT, DIRECTION2, pkt->freq);
+	VERBOSE(VLVL,"%s:%s:pkt:    data 0x%02x\n",             SOFT, DIRECTION2, pkt->data);
+
+/* 	int i = 0; */
+/* 	while ((wsens.radio[i].callback != NULL) && (i < MAX_CALLBACKS)) { */
+/* 	  VERBOSE(VLVL,"%s:%s:pkt:   ****\n",                    SOFT, DIRECTION2); */
+/* 	  VERBOSE(VLVL,"%s:%s:pkt:   node %i\n",                 SOFT, DIRECTION2, pkt->nodes_infos[i].node_id); */
+/* 	  VERBOSE(VLVL,"%s:%s:pkt:   antenna %i\n",              SOFT, DIRECTION2, pkt->nodes_infos[i].antenna_id); */
+/* 	  VERBOSE(VLVL,"%s:%s:pkt:   ber %d\n",                  SOFT, DIRECTION2, pkt->nodes_infos[i].ber); */
+/* 	  VERBOSE(VLVL,"%s:%s:pkt:   power %d\n",                SOFT, DIRECTION2, pkt->nodes_infos[i].power); */
+/* 	  i++; */
+/* 	} */
+	
+	break;
+      }
+    case WORLDSENS_S_BYTE_SR_RX:
+      {
+	struct _worldsens_s_byte_sr_rx *pkt = (struct _worldsens_s_byte_sr_rx *)msg;
+	VERBOSE(VLVL,"%s:%s:pkt:    type %s\n",                 SOFT, DIRECTION2, "WORLDSENS_S_BYTE_SR_RX");
+	VERBOSE(VLVL,"%s:%s:pkt:    seq %lld\n",                SOFT, DIRECTION2, pkt->seq);
+	VERBOSE(VLVL,"%s:%s:pkt:    rp_next  %lld\n",           SOFT, DIRECTION2, pkt->rp_next);
+	VERBOSE(VLVL,"%s:%s:pkt:    rp_duration  %lld\n",       SOFT, DIRECTION2, pkt->rp_duration);
+	VERBOSE(VLVL,"%s:%s:pkt:    antenna %d\n",              SOFT, DIRECTION2, pkt->antenna_id);
+	VERBOSE(VLVL,"%s:%s:pkt:    wsim modulation %d\n",      SOFT, DIRECTION2, pkt->wsim_mod_id);
+	VERBOSE(VLVL,"%s:%s:pkt:    frequence %f\n",            SOFT, DIRECTION2, pkt->freq);
+	VERBOSE(VLVL,"%s:%s:pkt:    data 0x%02x\n",             SOFT, DIRECTION2, pkt->data);
+	break;
+      }
+    case WORLDSENS_S_MEASURE_RSP:
+      {
+	struct _worldsens_s_measure_rsp *pkt = (struct _worldsens_s_measure_rsp *)msg;
+	VERBOSE(VLVL,"%s:%s:pkt:    type %s\n",                 SOFT, DIRECTION2, "WORLDSENS_S_MEASURE_RSP");
+	VERBOSE(VLVL,"%s:%s:pkt:    seq  %lld\n",               SOFT, DIRECTION2, pkt->seq);
+	VERBOSE(VLVL,"%s:%s:pkt:    measure id %d\n",           SOFT, DIRECTION2, pkt->measure_id);
+	VERBOSE(VLVL,"%s:%s:pkt:    measure value %f\n",        SOFT, DIRECTION2, pkt->measure_val);
+	break;
+      }
+    case WORLDSENS_S_KILLSIM:
+      {
+	struct _worldsens_s_killsim *pkt = (struct _worldsens_s_killsim *)msg;
+	VERBOSE(VLVL,"%s:%s:pkt:    type %s\n",                 SOFT, DIRECTION2, "WORLDSENS_S_KILLSIM");
+	VERBOSE(VLVL,"%s:%s:pkt:    seq  %lld\n",               SOFT, DIRECTION2, pkt->seq);
+	break;
+      }
+    case WORLDSENS_S_KILL:
+      {
+	struct _worldsens_s_kill *pkt = (struct _worldsens_s_kill *)msg;
+	VERBOSE(VLVL,"%s:%s:pkt:    type %s\n",                 SOFT, DIRECTION2, "WORLDSENS_S_KILL");
+	VERBOSE(VLVL,"%s:%s:pkt:    seq  %lld\n",               SOFT, DIRECTION2, pkt->seq);
+	VERBOSE(VLVL,"%s:%s:pkt:    node id  %d\n",             SOFT, DIRECTION2, pkt->node_id);
+	break;
+      }
+    default:
+      {
+	VERBOSE(VLVL,"%s:pkt:Invalide packet type: %d \n", SOFT, header->type);
+      }
+    }
+  VERBOSE(VLVL,"%s:=======:pkt: stop =====================\n", SOFT);
+
+  return 0;
+}
+
+

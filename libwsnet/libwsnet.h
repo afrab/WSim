@@ -58,12 +58,14 @@ struct wsnet_tx_info {
   uint32_t  modulation;
   double    power_dbm;
   uint64_t  duration;
+
+  int       radio_id;
 };
 
 typedef uint64_t (*wsnet_callback_rx_t) (void*, struct wsnet_rx_info *);
 
 int  worldsens_c_tx             (struct wsnet_tx_info *);
-void worldsens_c_rx_register    (void*, wsnet_callback_rx_t);
+int  worldsens_c_rx_register    (void*, wsnet_callback_rx_t);
 
 /**************************************************************************/
 /**************************************************************************/

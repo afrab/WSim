@@ -40,7 +40,9 @@ struct _worldsens_radio_t {
   radio_callback_t        callback;
   void                           *arg;
   char                           *antenna;
-  uint32_t                       id;
+  uint32_t                       antenna_id;
+  char                           *wsnet_modulation;
+  uint32_t                       wsnet_mod_id;
 };
 
 struct _worldsens_measure_t {
@@ -53,16 +55,17 @@ struct _worldsens_measure_t {
 struct _worldsens_clt {
   struct _worldsens_radio_t      radio  [MAX_CALLBACKS];
   struct _worldsens_measure_t    measure[MAX_CALLBACKS];
+  uint16_t                       nb_radios;              /* number of radios registered*/
+  uint16_t                       nb_measures;            /* number of measures registered*/
   uint32_t                       id;                     /* my address */
   int                            u_fd;                   /* unicast file descriptor */
   int                            m_fd;                   /* multicast file descriptor */
-  int                            dseq;
-  int                            seq;  
-  uint32_t                       n_update;               /* next update time */
-  uint32_t                       n_rp;                   /* next rendez-vous */
-  uint32_t                       l_rp;                   /* last rendez-vous */
-  int                            rpseq;                  /* rendez vous sequence */ 
-  int                            state;
+  uint64_t                       seq;                    /* receive packet sequence */
+  uint64_t                       n_update;               /* next update time */
+  uint64_t                       n_rp;                   /* next rendez-vous */
+  uint64_t                       l_rp;                   /* last rendez-vous */
+  uint64_t                       rpseq;                  /* next rendez vous sequence */ 
+  int                            state;                  /* state of wsnet2 client */
 };
 
 
@@ -74,10 +77,10 @@ void            wsnet2_init             (void);
 void            wsnet2_finalize         (void);
 uint32_t        wsnet2_get_node_id      (void);
 int             wsnet2_update           (void);
-void            wsnet2_register_radio   (char *, radio_callback_t, void *);
+int             wsnet2_register_radio   (char *, char *, radio_callback_t, void *);
 void            wsnet2_register_measure (char *channel, measure_callback_t callback, void *);
 int             wsnet2_connect          (char *, uint16_t, char *, uint16_t, uint32_t);
-int             wsnet2_tx               (char, double, int, double, uint64_t);
+int             wsnet2_tx               (char, double, int, double, uint64_t, int);
 
 
 

@@ -57,24 +57,6 @@ static struct moption_t multicast_port_opt = {
   .value       = NULL
 };
 
-
-static struct _worldsens_c_backtrack    worldsens_backtracked;
-static struct _worldsens_c_backtrack    worldsens_backup;
-
-#define WSENS_SEQ_PKT_TX        worldsens_backtracked.tx_pkt_seq
-#define WSENS_SEQ_PKT_RX        worldsens_backtracked.rx_pkt_seq
-#define WSENS_SEQ_RDV           worldsens_backtracked.rp_seq     /* next RDV */
-
-#define WSENS_RDV_LAST_TIME     worldsens_backtracked.last_rp
-#define WSENS_RDV_NEXT_TIME     worldsens_backtracked.next_rp
-#define WSENS_RDV_PENDING       worldsens_backtracked.pending
-
-#define WSENS_TX_BACKTRACKED    worldsens_backtracked.tx_backtracked
-#define WSENS_TIME_TO_WAIT      worldsens_backtracked.min_duration
-
-#define WSENS_PKT_LIST          worldsens_backtracked.pktlist
-
-
 /**************************************************************************/
 /**************************************************************************/
 /**************************************************************************/
@@ -126,12 +108,10 @@ static int worldsens_option_validate(void)
 
 void worldsens_c_state_save     (void)
 {
-  memcpy(&worldsens_backup, &worldsens_backtracked, sizeof(struct _worldsens_c_backtrack));
 }
 
 void worldsens_c_state_restore  (void)
 {
-  memcpy(&worldsens_backtracked, &worldsens_backup, sizeof(struct _worldsens_c_backtrack));
 }
 
 int worldsens_c_get_node_id(void)
@@ -139,10 +119,11 @@ int worldsens_c_get_node_id(void)
   return wsnet2_get_node_id();
 }
 
-void worldsens_c_rx_register(void* arg, wsnet_callback_rx_t cbrx)
+int worldsens_c_rx_register(void* arg, wsnet_callback_rx_t cbrx)
 {
-  char antenna[] = "omnidirectionnal" ;
-  wsnet2_register_radio(antenna, cbrx, arg);
+  char antenna[]    = "omnidirectionnal" ;
+  char modulation[] = "none";
+  return wsnet2_register_radio(antenna, modulation, cbrx, arg);
 }
 
 /**************************************************************************/
@@ -153,6 +134,7 @@ int worldsens_c_initialize(void)
 {
   /* structures initialization */
   wsnet2_init();
+  return 0;
 }
 
 /**************************************************************************/
@@ -205,8 +187,9 @@ int worldsens_c_tx(struct wsnet_tx_info *info)
 
   double tx_dbm       = info->power_dbm;
   uint64_t duration   = info->duration;
+  int radio_id        = info->radio_id;
 
-  if( wsnet2_tx(data, frequency, modulation,tx_dbm, duration) == -1 )
+  if( wsnet2_tx(data, frequency, modulation,tx_dbm, duration, radio_id) == -1 )
     {
       ERROR("wsnet2:tx: error during packet send\n");
       return -1;

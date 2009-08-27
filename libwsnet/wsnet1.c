@@ -145,7 +145,7 @@ int             worldsens_c_options_add           (void);
 void            worldsens_c_state_save            (void);
 void            worldsens_c_state_restore         (void);
 int             worldsens_c_get_node_id           (void);
-void            worldsens_c_rx_register           (void* arg, wsnet_callback_rx_t cbrx);
+int             worldsens_c_rx_register           (void* arg, wsnet_callback_rx_t cbrx);
 
 int             worldsens_c_initialize            (void);
 int             worldsens_c_connect               (void);
@@ -279,10 +279,12 @@ int worldsens_c_get_node_id(void)
   return WSENS_MYADDR;
 }
 
-void worldsens_c_rx_register(void* arg, wsnet_callback_rx_t cbrx)
+int worldsens_c_rx_register(void* arg, wsnet_callback_rx_t cbrx)
 {
   WSENS_CBRX_ARG  = arg;	
   WSENS_CBRX_FUNC = cbrx;
+
+  return 0;
 }
 
 /**************************************************************************/
@@ -483,7 +485,7 @@ int worldsens_c_tx(struct wsnet_tx_info *info)
   uint32_t frequency  = info->freq_mhz * 1000000;
   int modulation      = info->modulation;
 
-  double tx_dbm        = info->power_dbm;
+  double tx_dbm       = info->power_dbm;
   uint64_t duration   = info->duration;
 
   struct _worldsens_c_tx_pkt pkt;

@@ -15,7 +15,7 @@
 #include "liblogger/logger.h"
 #define DIRECTION1 "snd -->"
 #define DIRECTION2 "rcv <--"
-#define SOFT       "Libwsnet"
+#define SOFT       "Libwsnet2"
 #else /* WSNET */
 #include <include/worldsens_pkt.h>
 #include <stdio.h>

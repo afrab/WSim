@@ -128,7 +128,7 @@ int wsnet2_register_radio(char *antenna, char *modulation, radio_callback_t call
 
     if (i == MAX_CALLBACKS) {
         ERROR("Libwsnet2:wsnet2_register_radio: too many registered radio callbacks\n");
-        return;
+        return -1;
     }
  
     wsens.radio[i].callback   = callback;
@@ -257,7 +257,7 @@ int wsnet2_connect(char *s_addr, uint16_t s_port, char *m_addr, uint16_t m_port,
     /* subscribe to server */
     ret = wsnet2_subscribe();
     if (!ret)
-      //libselect_fd_register(wsens.m_fd, SIG_WORLDSENS_IO);   /* TODO: find why errors occur when enabled */
+      libselect_fd_register(wsens.m_fd, SIG_WORLDSENS_IO);   /* TODO: find why errors occur when enabled */
  
     return ret;
 
@@ -348,21 +348,9 @@ int wsnet2_update(void) {
     int len, ret;
     fd_set readfds;
     struct timeval timeout;
-	
-    /* synched */
-    if (MACHINE_TIME_GET_NANO() >= wsens.n_rp) {
-        wsnet2_sync();
-    }
-	
-    /* time to update */
-    if (MACHINE_TIME_GET_NANO() < wsens.n_update) {
-        return 0;
-    } else {
-        wsens.n_update = MACHINE_TIME_GET_NANO() + WORLDSENS_UPDATE_PERIOD;
-    }
 
     /* handle received packets */
-    if (mcu_signal_get() & SIG_WORLDSENS_IO) {
+    if ((mcu_signal_get() & SIG_WORLDSENS_IO) != 0) {
         mcu_signal_remove(SIG_WORLDSENS_IO);
         
         do {
@@ -388,7 +376,12 @@ int wsnet2_update(void) {
             }
         } while (ret != 0 && FD_ISSET(wsens.m_fd, &readfds));    
     }
-	
+
+    /* synched */
+    if (MACHINE_TIME_GET_NANO() >= wsens.n_rp) {
+        wsnet2_sync();
+    }
+
     return 0;
 
  error:

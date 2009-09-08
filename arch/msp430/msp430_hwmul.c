@@ -216,7 +216,8 @@ void msp430_hwmul_write8 (uint16_t addr, int8_t val)
     }
   else
     {
-      val16 = (val16 & 0xff00) | (val);
+      /* sign extension removed :: val16 = (val16 & 0xff00) | (val); */
+      val16 = val;
     }
 
   msp430_hwmul_write(addr16,val16);

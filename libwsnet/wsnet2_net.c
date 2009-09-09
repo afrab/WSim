@@ -42,6 +42,30 @@
 #define DMSG(x...) do {} while(0)
 #endif
 
+/* ************************************************** */
+/* ************************************************** */
+
+/*  wsnet1 modulations ids  :      0     1     2     3     4     5     6     7    */
+/*  wsnet2 modulations names:   |name0|name1|name2|name3|name4|name5|name6|name7| */
+char *wsnet_mod_name_map[WSNET_MAX_MODULATIONS] = {"modulation_none",   /* WSNET_MODULATION_UNKNOWN   */
+						   "modulation_fsk",    /* WSNET_MODULATION_2FSK      */
+						   "modulation_fsk",    /* WSNET_MODULATION_GFSK      */
+						   "modulation_none",   /* WSNET_MODULATION_ASK_OOK   */
+						   "modulation_none",   /* WSNET_MODULATION_MSK       */
+						   "modulation_oqpsk",  /* WSNET_MODULATION_OQPSK     */
+						   "modulation_oqpsk",  /* WSNET_MODULATION_OQPSK_REV */
+						   "modulation_oqpsk"}; /* WSNET_MODULATION_802_15_4  */
+
+/*  wsnet1 modulations ids  :      0     1     2     3     4     5     6     7    */
+/*  wsnet2 modulations ids  :   | id0 | id1 | id2 | id3 | id4 | id5 | id6 | id7 | */
+int wsnet_mod_id_map[WSNET_MAX_MODULATIONS] =     {-1,                  /* WSNET_MODULATION_UNKNOWN   */
+						   -1,                  /* WSNET_MODULATION_2FSK      */
+						   -1,                  /* WSNET_MODULATION_GFSK      */
+						   -1,                  /* WSNET_MODULATION_ASK_OOK   */
+						   -1,                  /* WSNET_MODULATION_MSK       */
+						   -1,                  /* WSNET_MODULATION_OQPSK     */
+						   -1,                  /* WSNET_MODULATION_OQPSK_REV */
+						   -1};                 /* WSNET_MODULATION_802_15_4  */
 
 /* ************************************************** */
 /* ************************************************** */
@@ -121,7 +145,7 @@ uint32_t wsnet2_get_node_id(void)
 
 /* ************************************************** */
 /* ************************************************** */
-int wsnet2_register_radio(char *antenna, char *modulation, radio_callback_t callback, void *arg) {
+int wsnet2_register_radio(char *antenna, radio_callback_t callback, void *arg) {
     int i = 0;
 
     while ((wsens.radio[i].callback != NULL) && (++i < MAX_CALLBACKS)) ;
@@ -135,12 +159,10 @@ int wsnet2_register_radio(char *antenna, char *modulation, radio_callback_t call
     wsens.radio[i].arg        = arg;
     wsens.radio[i].antenna    = malloc(strlen(antenna));
     strcpy(wsens.radio[i].antenna, antenna);
-    wsens.radio[i].wsnet_modulation = malloc(strlen(modulation));
-    strcpy(wsens.radio[i].wsnet_modulation, modulation);
 
     wsens.nb_radios++;
 
-    WSNET2_DBG("Libwsnet2:wsnet2_register_radio: radio with antenna '%s' and modulation '%s' registered in position %d\n", wsens.radio[i].antenna, wsens.radio[i].wsnet_modulation, i); 
+    WSNET2_DBG("Libwsnet2:wsnet2_register_radio: radio with antenna '%s' registered in position %d\n", wsens.radio[i].antenna, i); 
 
     return i;
 }
@@ -275,7 +297,7 @@ int wsnet2_connect(char *s_addr, uint16_t s_port, char *m_addr, uint16_t m_port,
  **/
 int wsnet2_subscribe(void) {
     union _worldsens_pkt pkt;
-    char msg[MAX_PKTLENGTH];
+    char msg[WORLDSENS_MAX_PKTLENGTH];
     int len;
     
     /* format */
@@ -297,7 +319,7 @@ int wsnet2_subscribe(void) {
     while (wsens.state != WORLDSENS_CLT_STATE_IDLE) {
         /* receive */
       WSNET2_DBG("Libwsnet2:wsnet2_subscribe: waiting for server response... \n");
-        if ((len = recv(wsens.u_fd, msg, MAX_PKTLENGTH, 0)) < 0) {
+        if ((len = recv(wsens.u_fd, msg, WORLDSENS_MAX_PKTLENGTH, 0)) < 0) {
             perror("(recv)");
             goto error;
         }
@@ -344,7 +366,7 @@ int wsnet2_unsubscribe(void) {
 /* ************************************************** */
 /* ************************************************** */
 int wsnet2_update(void) {
-    char msg[MAX_PKTLENGTH];
+    char msg[WORLDSENS_MAX_PKTLENGTH];
     int len, ret;
     fd_set readfds;
     struct timeval timeout;
@@ -355,7 +377,7 @@ int wsnet2_update(void) {
         
         do {
             /* receive */
-            if ((len = recv(wsens.m_fd, msg, MAX_PKTLENGTH, 0)) <= 0) {
+            if ((len = recv(wsens.m_fd, msg, WORLDSENS_MAX_PKTLENGTH, 0)) <= 0) {
                 perror("(recv)");
                 goto error;
             }
@@ -397,7 +419,7 @@ int wsnet2_update(void) {
  * Called when libwsnet is sync on rp. Wait for a new rp.
  **/
 static int wsnet2_sync(void) {
-    char msg[MAX_PKTLENGTH];
+    char msg[WORLDSENS_MAX_PKTLENGTH];
     union _worldsens_pkt pkt;
     int len;
 	
@@ -421,7 +443,7 @@ static int wsnet2_sync(void) {
     while (wsens.state != WORLDSENS_CLT_STATE_IDLE) {
 		
         /* receive */
-        if ((len = recv(wsens.m_fd, msg, MAX_PKTLENGTH, 0)) <= 0) {
+        if ((len = recv(wsens.m_fd, msg, WORLDSENS_MAX_PKTLENGTH, 0)) <= 0) {
             perror("(recvfrom)");
             goto error;
         }
@@ -447,7 +469,7 @@ static int wsnet2_sync(void) {
  * TX data to wsnet
  **/
 int wsnet2_tx(char data, double freq, int mod, double txdB, uint64_t delay, int radio_id) {
-    char msg[MAX_PKTLENGTH];
+    char msg[WORLDSENS_MAX_PKTLENGTH];
     union _worldsens_pkt pkt;
     int len;
 
@@ -460,7 +482,8 @@ int wsnet2_tx(char data, double freq, int mod, double txdB, uint64_t delay, int 
     pkt.byte_tx.data              = data;
     pkt.byte_tx.freq              = freq;
     pkt.byte_tx.antenna_id        = wsens.radio[radio_id].antenna_id;
-    pkt.byte_tx.wsnet_mod_id      = wsens.radio[radio_id].wsnet_mod_id;
+    pkt.byte_tx.wsnet_mod_id      = wsnet_mod_id_map[mod];
+    WSNET2_TX("Libwsnet2:wsnet_mod_id_map=%d\n", wsnet_mod_id_map[mod]);
     pkt.byte_tx.wsim_mod_id       = mod;
     pkt.byte_tx.power_dbm         = txdB;
     pkt.byte_tx.duration          = delay;
@@ -484,7 +507,7 @@ int wsnet2_tx(char data, double freq, int mod, double txdB, uint64_t delay, int 
     while (((MACHINE_TIME_GET_NANO() + delay) < wsens.n_rp) && (wsens.state != WORLDSENS_CLT_STATE_IDLE)) {
 		
         /* receive */
-        if ((len = recv(wsens.m_fd, msg, MAX_PKTLENGTH, 0)) <= 0) {
+        if ((len = recv(wsens.m_fd, msg, WORLDSENS_MAX_PKTLENGTH, 0)) <= 0) {
             perror("(recv)");
             goto error;
         }
@@ -595,7 +618,7 @@ static int wsnet2_seq(char *msg) {
 /* ************************************************** */
 /* ************************************************** */
 /**
- * Deals with wsnet connection informations : available antennas, modulations, and measures.
+ * Deal with wsnet connection informations : available antennas, modulations, and measures.
  **/
 static int wsnet2_published(char *msg) {
    union _worldsens_pkt *pkt = (union _worldsens_pkt *) msg;
@@ -606,7 +629,7 @@ static int wsnet2_published(char *msg) {
    int match_measures    = 0;
    uint32_t counter  = 0;
    uint32_t nb_models;
-   int i = 0;
+   int i, j = 0;
 
    /* update */
    wsens.seq = pkt->cnx_rsp_ok.seq; /* initialize next expected packet sequence */
@@ -646,6 +669,8 @@ static int wsnet2_published(char *msg) {
        }
        offset += strlen(pkt->cnx_rsp_ok.names_and_ids + offset + sizeof(uint32_t)) + sizeof(uint32_t) + 1;
        counter++;
+   }
+
    /* checks if we have at least as many antennas as radios registered */
    if(match_antennas != wsens.nb_radios){
        ERROR("Libwsnet2:wsnet2_published: wrong number of antennas registered\n");
@@ -661,24 +686,14 @@ static int wsnet2_published(char *msg) {
        WSNET2_DBG("Libwsnet2:wsnet2_published: checking '%s' -> %d\n", 
 		  pkt->cnx_rsp_ok.names_and_ids + offset + sizeof(uint32_t), 
 		  *((uint32_t *)(pkt->cnx_rsp_ok.names_and_ids + offset)));
-       while ((wsens.radio[i].callback != NULL) && (i < MAX_CALLBACKS)) {
-	   if (strcmp(wsens.radio[i].wsnet_modulation, pkt->cnx_rsp_ok.names_and_ids + offset + sizeof(uint32_t)) == 0) {
-	       wsens.radio[i].wsnet_mod_id = *((uint32_t *)(pkt->cnx_rsp_ok.names_and_ids + offset));
-	       WSNET2_DBG("Libwsnet2:wsnet2_published: modulation '%s' matches\n", wsens.radio[i].wsnet_modulation);
-	       match_modulations++;
+       for (j = 0; j < WSNET_MAX_MODULATIONS; j++) {
+	   if (strcmp(pkt->cnx_rsp_ok.names_and_ids + offset + sizeof(uint32_t), wsnet_mod_name_map[j]) == 0) {
+	     wsnet_mod_id_map[j] =  *((uint32_t *)(pkt->cnx_rsp_ok.names_and_ids + offset));
 	   }
-	   i++;
        }
        offset += strlen(pkt->cnx_rsp_ok.names_and_ids + offset +  sizeof(uint32_t)) + sizeof(uint32_t) + 1;
        counter++;
    }
-
-   /* checks if we have at least as many antennas as radios registered */
-   if(match_modulations != wsens.nb_radios){
-       ERROR("Libwsnet2:wsnet2_published: wrong number of modulations registered\n");
-       return -1;
-   }
-
 
    /* ******************************measures*********************************** */
 /*        while ((wsens.measure[j].callback != NULL) && (j < MAX_CALLBACKS)) { */
@@ -691,7 +706,6 @@ static int wsnet2_published(char *msg) {
 
    return 0;
 
-   }
 }
 
 /* ************************************************** */
@@ -770,14 +784,14 @@ static int wsnet2_rx(char *msg) {
    int i = 0;
    while ((wsens.radio[i].callback != NULL) && (i < MAX_CALLBACKS)) {
        WSNET2_DBG("Libwsnet2:wsnet2_sr_rx: wsens.id=%d, wsens.radio[%d]=%d\n", wsens.id, i, wsens.radio[i].antenna_id);
-       WSNET2_DBG("Libwsnet2:wsnet2_sr_rx: node_id=%d, antenna_id=%d\n", pkt->nodes_infos[0].node_id, pkt->antenna_id);
-       if ((pkt->nodes_infos[0].node_id == wsens.id) && (pkt->antenna_id == wsens.radio[i].antenna_id)) {
+       WSNET2_DBG("Libwsnet2:wsnet2_sr_rx: node_id=%d, antenna_id=%d\n", pkt->node_id, pkt->antenna_id);
+       if ((pkt->node_id == wsens.id) && (pkt->antenna_id == wsens.radio[i].antenna_id)) {
 	   struct wsnet_rx_info info;
 	   info.data       = pkt->data;
 	   info.freq_mhz   = pkt->freq / 1000000.0;
 	   info.modulation = pkt->wsim_mod_id;
-	   info.power_dbm  = ntohdbl(pkt->nodes_infos[0].power_dbm);
-	   //info.SiNR       = data->SINR;
+	   info.power_dbm  = ntohdbl(pkt->power_dbm);
+	   info.SiNR       = pkt->sinr;
 	   WSNET2_DBG("Libwsnet2:wsnet2_sr_rx: rxing at time %lld data 0x%02x on antenna %s with power %g dbm\n", MACHINE_TIME_GET_NANO(), pkt->data, wsens.radio[i].antenna, info.power_dbm);
 	   wsens.radio[i].callback(wsens.radio[i].arg, &info);
        }
@@ -806,14 +820,14 @@ static int wsnet2_sr_rx(char *msg) {
    int i = 0;
    while ((wsens.radio[i].callback != NULL) && (i < MAX_CALLBACKS)) {
        WSNET2_DBG("Libwsnet2:wsnet2_sr_rx: wsens.id=%d, wsens.radio[%d]=%d\n", wsens.id, i, wsens.radio[i].antenna_id);
-       WSNET2_DBG("Libwsnet2:wsnet2_sr_rx: node_id=%d, antenna_id=%d\n", pkt->nodes_infos[0].node_id, pkt->antenna_id);
-       if ((pkt->nodes_infos[0].node_id == wsens.id) && (pkt->antenna_id == wsens.radio[i].antenna_id)) {
+       WSNET2_DBG("Libwsnet2:wsnet2_sr_rx: node_id=%d, antenna_id=%d\n", pkt->node_id, pkt->antenna_id);
+       if ((pkt->node_id == wsens.id) && (pkt->antenna_id == wsens.radio[i].antenna_id)) {
 	   struct wsnet_rx_info info;
 	   info.data       = pkt->data;
 	   info.freq_mhz   = pkt->freq / 1000000.0;
 	   info.modulation = pkt->wsim_mod_id;
-	   info.power_dbm  = ntohdbl(pkt->nodes_infos[0].power_dbm);
-	   //info.SiNR       = data->SINR;
+	   info.power_dbm  = ntohdbl(pkt->power_dbm);
+	   info.SiNR       = pkt->sinr;
 	   WSNET2_DBG("Libwsnet2:wsnet2_sr_rx: rxing at time %lld data 0x%02x on antenna %s with power %g dbm\n", MACHINE_TIME_GET_NANO(), pkt->data, wsens.radio[i].antenna, info.power_dbm);
 	   wsens.radio[i].callback(wsens.radio[i].arg, &info);
        }

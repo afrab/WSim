@@ -15,6 +15,8 @@
 /**************************************************************************/
 /**************************************************************************/
 
+#define WSNET_MAX_MODULATIONS       0x08
+
 #define WSNET_MODULATION_UNKNOWN    0x00
 #define WSNET_MODULATION_2FSK       0x01
 #define WSNET_MODULATION_GFSK       0x02
@@ -23,6 +25,7 @@
 #define WSNET_MODULATION_OQPSK      0x05
 #define WSNET_MODULATION_OQPSK_REV  0x06
 #define WSNET_MODULATION_802_15_4   0x07
+
 
 /**
  * Units:

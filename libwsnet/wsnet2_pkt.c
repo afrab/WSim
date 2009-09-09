@@ -196,21 +196,27 @@ static inline int worldsens_packet_swap(union _worldsens_pkt *pkt)
     case WORLDSENS_S_BYTE_RX:
       SWAPN (pkt->byte_rx.type);
       SWAPN (pkt->byte_rx.seq);
+      SWAPN (pkt->byte_rx.node_id);
       SWAPN (pkt->byte_rx.antenna_id);
       SWAPN (pkt->byte_rx.wsim_mod_id);
       SWAPN (pkt->byte_rx.freq);
+      SWAPN (pkt->byte_rx.power_dbm);
+      SWAPN (pkt->byte_rx.sinr);
       SWAPN (pkt->byte_rx.data);
       break;
 
     case WORLDSENS_S_BYTE_SR_RX:
-      SWAPN (pkt->byte_rx.type);
-      SWAPN (pkt->byte_rx.seq);
-      SWAPN (pkt->sync_release.rp_next);
-      SWAPN (pkt->sync_release.rp_duration);
-      SWAPN (pkt->byte_rx.antenna_id);
-      SWAPN (pkt->byte_rx.wsim_mod_id);
-      SWAPN (pkt->byte_rx.freq);
-      SWAPN (pkt->byte_rx.data);
+      SWAPN (pkt->byte_sr_rx.type);
+      SWAPN (pkt->byte_sr_rx.seq);
+      SWAPN (pkt->byte_sr_rx.rp_next);
+      SWAPN (pkt->byte_sr_rx.rp_duration);
+      SWAPN (pkt->byte_sr_rx.node_id);
+      SWAPN (pkt->byte_sr_rx.antenna_id);
+      SWAPN (pkt->byte_sr_rx.wsim_mod_id);
+      SWAPN (pkt->byte_sr_rx.freq);
+      SWAPN (pkt->byte_sr_rx.power_dbm);
+      SWAPN (pkt->byte_sr_rx.sinr);
+      SWAPN (pkt->byte_sr_rx.data);
       break;
 
     case WORLDSENS_S_MEASURE_RSP:
@@ -309,9 +315,9 @@ int worldsens_packet_dump(union _worldsens_pkt *msg)
 	struct _worldsens_c_byte_tx *pkt = (struct _worldsens_c_byte_tx *)msg;
 	VERBOSE(VLVL,"%s:%s:pkt:    type %s\n",                 SOFT, DIRECTION1, "WORLDSENS_C_BYTE_TX");
 	VERBOSE(VLVL,"%s:%s:pkt:    node %d\n",                 SOFT, DIRECTION1, pkt->node_id);
-	VERBOSE(VLVL,"%s:%s:pkt:    antenna %d\n",              SOFT, DIRECTION1, pkt->antenna_id);
-	VERBOSE(VLVL,"%s:%s:pkt:    wsnet modulation id %d\n",  SOFT, DIRECTION1, pkt->wsnet_mod_id);
-	VERBOSE(VLVL,"%s:%s:pkt:    wsim modulation id %d\n",   SOFT, DIRECTION1, pkt->wsim_mod_id);
+	VERBOSE(VLVL,"%s:%s:pkt:    antenna %lld\n",            SOFT, DIRECTION1, pkt->antenna_id);
+	VERBOSE(VLVL,"%s:%s:pkt:    wsnet modulation id %lld\n",SOFT, DIRECTION1, pkt->wsnet_mod_id);
+	VERBOSE(VLVL,"%s:%s:pkt:    wsim modulation id %lld\n", SOFT, DIRECTION1, pkt->wsim_mod_id);
 	VERBOSE(VLVL,"%s:%s:pkt:    frequence %f\n",            SOFT, DIRECTION1, pkt->freq);
 	VERBOSE(VLVL,"%s:%s:pkt:    power in dbm %f\n",         SOFT, DIRECTION1, pkt->power_dbm);
 	VERBOSE(VLVL,"%s:%s:pkt:    duration %lld\n",           SOFT, DIRECTION1, pkt->duration);
@@ -324,7 +330,7 @@ int worldsens_packet_dump(union _worldsens_pkt *msg)
 	struct _worldsens_c_measure_req *pkt = (struct _worldsens_c_measure_req *)msg;
 	VERBOSE(VLVL,"%s:%s:pkt:    type %s\n",                 SOFT, DIRECTION1, "WORLDSENS_C_MEASURE_REQ");
 	VERBOSE(VLVL,"%s:%s:pkt:    node %d\n",                 SOFT, DIRECTION1, pkt->node_id);
-	VERBOSE(VLVL,"%s:%s:pkt:    measure id %d\n",           SOFT, DIRECTION1, pkt->measure_id);
+	VERBOSE(VLVL,"%s:%s:pkt:    measure id %lld\n",         SOFT, DIRECTION1, pkt->measure_id);
 	break;
       }
     case WORLDSENS_C_DISCONNECT:
@@ -373,26 +379,19 @@ int worldsens_packet_dump(union _worldsens_pkt *msg)
 	VERBOSE(VLVL,"%s:%s:pkt:    rp_duration  %lld\n",       SOFT, DIRECTION2, pkt->rp_duration);
 	break;
       }
+
     case WORLDSENS_S_BYTE_RX:
       {
 	struct _worldsens_s_byte_rx *pkt = (struct _worldsens_s_byte_rx *)msg;
 	VERBOSE(VLVL,"%s:%s:pkt:    type %s\n",                 SOFT, DIRECTION2, "WORLDSENS_S_BYTE_RX");
 	VERBOSE(VLVL,"%s:%s:pkt:    seq %lld\n",                SOFT, DIRECTION2, pkt->seq);
-	VERBOSE(VLVL,"%s:%s:pkt:    antenna %d\n",              SOFT, DIRECTION2, pkt->antenna_id);
-	VERBOSE(VLVL,"%s:%s:pkt:    wsim modulation %d\n",      SOFT, DIRECTION2, pkt->wsim_mod_id);
+	VERBOSE(VLVL,"%s:%s:pkt:    node id %d\n",              SOFT, DIRECTION2, pkt->node_id);
+	VERBOSE(VLVL,"%s:%s:pkt:    antenna %lld\n",            SOFT, DIRECTION2, pkt->antenna_id);
+	VERBOSE(VLVL,"%s:%s:pkt:    wsim modulation %lld\n",    SOFT, DIRECTION2, pkt->wsim_mod_id);
 	VERBOSE(VLVL,"%s:%s:pkt:    frequence %f\n",            SOFT, DIRECTION2, pkt->freq);
+	VERBOSE(VLVL,"%s:%s:pkt:    power %g dbm\n",            SOFT, DIRECTION2, pkt->power_dbm);
+	VERBOSE(VLVL,"%s:%s:pkt:    sinr %g\n",                 SOFT, DIRECTION2, pkt->sinr);
 	VERBOSE(VLVL,"%s:%s:pkt:    data 0x%02x\n",             SOFT, DIRECTION2, pkt->data);
-
-/* 	int i = 0; */
-/* 	while ((wsens.radio[i].callback != NULL) && (i < MAX_CALLBACKS)) { */
-/* 	  VERBOSE(VLVL,"%s:%s:pkt:   ****\n",                    SOFT, DIRECTION2); */
-/* 	  VERBOSE(VLVL,"%s:%s:pkt:   node %i\n",                 SOFT, DIRECTION2, pkt->nodes_infos[i].node_id); */
-/* 	  VERBOSE(VLVL,"%s:%s:pkt:   antenna %i\n",              SOFT, DIRECTION2, pkt->nodes_infos[i].antenna_id); */
-/* 	  VERBOSE(VLVL,"%s:%s:pkt:   ber %d\n",                  SOFT, DIRECTION2, pkt->nodes_infos[i].ber); */
-/* 	  VERBOSE(VLVL,"%s:%s:pkt:   power %d\n",                SOFT, DIRECTION2, pkt->nodes_infos[i].power); */
-/* 	  i++; */
-/* 	} */
-	
 	break;
       }
     case WORLDSENS_S_BYTE_SR_RX:
@@ -402,9 +401,12 @@ int worldsens_packet_dump(union _worldsens_pkt *msg)
 	VERBOSE(VLVL,"%s:%s:pkt:    seq %lld\n",                SOFT, DIRECTION2, pkt->seq);
 	VERBOSE(VLVL,"%s:%s:pkt:    rp_next  %lld\n",           SOFT, DIRECTION2, pkt->rp_next);
 	VERBOSE(VLVL,"%s:%s:pkt:    rp_duration  %lld\n",       SOFT, DIRECTION2, pkt->rp_duration);
-	VERBOSE(VLVL,"%s:%s:pkt:    antenna %d\n",              SOFT, DIRECTION2, pkt->antenna_id);
-	VERBOSE(VLVL,"%s:%s:pkt:    wsim modulation %d\n",      SOFT, DIRECTION2, pkt->wsim_mod_id);
-	VERBOSE(VLVL,"%s:%s:pkt:    frequence %f\n",            SOFT, DIRECTION2, pkt->freq);
+	VERBOSE(VLVL,"%s:%s:pkt:    node id %d\n",              SOFT, DIRECTION2, pkt->node_id);
+	VERBOSE(VLVL,"%s:%s:pkt:    antenna %lld\n",            SOFT, DIRECTION2, pkt->antenna_id);
+	VERBOSE(VLVL,"%s:%s:pkt:    wsim modulation %lld\n",    SOFT, DIRECTION2, pkt->wsim_mod_id);
+	VERBOSE(VLVL,"%s:%s:pkt:    frequence %g\n",            SOFT, DIRECTION2, pkt->freq);
+	VERBOSE(VLVL,"%s:%s:pkt:    power %g dbm\n",            SOFT, DIRECTION2, pkt->power_dbm);
+	VERBOSE(VLVL,"%s:%s:pkt:    sinr %g\n",                 SOFT, DIRECTION2, pkt->sinr);
 	VERBOSE(VLVL,"%s:%s:pkt:    data 0x%02x\n",             SOFT, DIRECTION2, pkt->data);
 	break;
       }
@@ -413,7 +415,7 @@ int worldsens_packet_dump(union _worldsens_pkt *msg)
 	struct _worldsens_s_measure_rsp *pkt = (struct _worldsens_s_measure_rsp *)msg;
 	VERBOSE(VLVL,"%s:%s:pkt:    type %s\n",                 SOFT, DIRECTION2, "WORLDSENS_S_MEASURE_RSP");
 	VERBOSE(VLVL,"%s:%s:pkt:    seq  %lld\n",               SOFT, DIRECTION2, pkt->seq);
-	VERBOSE(VLVL,"%s:%s:pkt:    measure id %d\n",           SOFT, DIRECTION2, pkt->measure_id);
+	VERBOSE(VLVL,"%s:%s:pkt:    measure id %lld\n",         SOFT, DIRECTION2, pkt->measure_id);
 	VERBOSE(VLVL,"%s:%s:pkt:    measure value %f\n",        SOFT, DIRECTION2, pkt->measure_val);
 	break;
       }

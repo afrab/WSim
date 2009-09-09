@@ -77,7 +77,7 @@ void            wsnet2_init             (void);
 void            wsnet2_finalize         (void);
 uint32_t        wsnet2_get_node_id      (void);
 int             wsnet2_update           (void);
-int             wsnet2_register_radio   (char *, char *, radio_callback_t, void *);
+int             wsnet2_register_radio   (char *, radio_callback_t, void *);
 void            wsnet2_register_measure (char *channel, measure_callback_t callback, void *);
 int             wsnet2_connect          (char *, uint16_t, char *, uint16_t, uint32_t);
 int             wsnet2_tx               (char, double, int, double, uint64_t, int);

@@ -12,7 +12,7 @@
 
 #define __PACKED__  __attribute__((packed))
 
-#define MAX_PKTLENGTH 100
+#define WORLDSENS_MAX_PKTLENGTH (sizeof(union _worldsens_pkt))
 
 /* ************************************************** */
 /* ************************************************** */
@@ -50,14 +50,14 @@ enum woldsens_pkt_type {
 typedef uint8_t                 ws_pkt_type;
 
 typedef uint32_t                ws_id_node;
-typedef uint32_t                ws_id_resource;
+typedef int64_t                 ws_id_resource;
 typedef uint64_t                ws_id_rp;
 typedef uint64_t                ws_id_seq;
 
 typedef double                  ws_frequency;
 typedef double                  ws_power;
 typedef double                  ws_measure;
-typedef double                  ws_ber;
+typedef double                  ws_sinr;
 
 typedef uint64_t                ws_time;
 typedef uint8_t                 ws_data;
@@ -115,14 +115,6 @@ struct __PACKED__ _worldsens_c_disconnect {
 /* ************************************************** */
 
 #define WORLDSENS_MAX_MODELS_SIZE    1200
-#define WORLDSENS_MAX_NODES          128
-
-struct __PACKED__ ws_node_infos {
-  ws_id_node             node_id;
-  ws_id_resource         antenna_id;
-  ws_power               power_dbm;
-  ws_ber                 ber;
-};
 
 
 /* packet sent by the server to a client */
@@ -131,8 +123,6 @@ struct __PACKED__ _worldsens_s_header {
   ws_pkt_type            type;
   ws_id_seq              seq;
 };
-
-
 
 struct __PACKED__ _worldsens_s_connect_rsp_ok {
   ws_pkt_type            type;
@@ -167,27 +157,30 @@ struct __PACKED__ _worldsens_s_backtrack {
 };
 
 struct __PACKED__ _worldsens_s_byte_rx {
-  ws_pkt_type            type;                              /**********/
-  ws_id_seq              seq;                               /* common */
-  ws_id_resource         antenna_id;                        /* to     */
-  ws_id_resource         wsim_mod_id;                       /* every  */
-  ws_frequency           freq;                              /* nodes  */
-  ws_data                data;                              /**********/
-  struct ws_node_infos   nodes_infos[WORLDSENS_MAX_NODES];  /* specific to each node */
+  ws_pkt_type            type;                        
+  ws_id_seq              seq;
+  ws_id_node             node_id;                          
+  ws_id_resource         antenna_id;                       
+  ws_id_resource         wsim_mod_id;                      
+  ws_frequency           freq;                                                         
+  ws_power               power_dbm;
+  ws_sinr                sinr;
+  ws_data                data;
 };
 
 struct __PACKED__ _worldsens_s_byte_sr_rx {
-  ws_pkt_type            type;                              /**********/
-  ws_id_seq              seq;                               /*        */
-  ws_id_rp               rp_next;                           /*        */
-  ws_time                rp_duration;                       /* common */
-  ws_id_resource         antenna_id;                        /* to     */
-  ws_id_resource         wsim_mod_id;                       /* every  */
-  ws_frequency           freq;                              /* nodes  */
-  ws_data                data;                              /**********/
-  struct ws_node_infos   nodes_infos[WORLDSENS_MAX_NODES];  /* specific to each node */
+  ws_pkt_type            type;
+  ws_id_seq              seq;
+  ws_id_rp               rp_next;
+  ws_time                rp_duration;
+  ws_id_node             node_id;
+  ws_id_resource         antenna_id;
+  ws_id_resource         wsim_mod_id;
+  ws_frequency           freq;
+  ws_power               power_dbm;
+  ws_sinr                sinr;
+  ws_data                data;
 };
-
 
 struct __PACKED__ _worldsens_s_measure_rsp {
   ws_pkt_type            type;

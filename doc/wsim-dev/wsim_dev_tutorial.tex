@@ -151,7 +151,7 @@ The MCU state and its backup are stored into global structures (\verb$mcu$ and \
 \subsection{Backtracks}
 Backtracks are used when WSim operates with WSnet. WSim may need to backtrack in two different cases indeed:
 \begin{itemize}
-  \item when one of WSim nodes runs beyond a meeting point, since nodes synchronisation is done by an appointment method. An other meeting point is then set, and the state of the node is restored to the last state saved;
+  \item when an event is added before next rendez-vous, and a node is running beyond this event time. An other meeting point is then set at event time, and the state of the node is restored to the last state saved.
   \item when one of WSim nodes is in debugging mode, and stopped at a breakpoint, the other nodes are still running. As soon as the WSim node in debugging mode is running again, the other nodes are backtracked.
 \end{itemize}
 
@@ -159,7 +159,7 @@ Backtracks are used when WSim operates with WSnet. WSim may need to backtrack in
 \begin{center}
   \includegraphics[scale=1]{figures/wsim_backtrack1.eps}
 \end{center}
-\caption{WSim backtrack when a node runs beyond a meeting point}
+\caption{WSim backtrack when a new event is added before next rendez-vous}
 \label{wsim backtrack 1}
 \end{figure}
 
@@ -321,7 +321,34 @@ Signals status are stored in the 32 bits \verb$mcu.alu.signal$ variable.
 
 
 \section{I/O}
-\verb$libselect$ is the interface between WSim and external application. Thus \verb$libselect$ implementation is operating system dependant.
+\subsection{General}
+I/Os between WSim and external applications are handled dynamically by the \verb$libselect$ library. This upper layer allows for instance to create easily an I/O for a WSim device with several possibilities of interface (TCP, UDP, STDOUT, ...). Next section lists APIs supplied by \verb$libselect$ library.
+
+\subsection{Public functions}
+\begin{itemize}
+  \item \verb$libselect_id_t libselect_id_create(char *name, int UNUSED flags)$ : enables to add a dynamic external I/O (from a WSim device for example), which may be of type: TCP server (\verb$tcp:s:$), TCP client (\verb$tcp:c:$), UDP (\verb$udp:$), STDIO (\verb$stdio$), STDIN (\verb$stdin$), STDOUT (\verb$stdout$), or  (\verb$create$).
+
+  \item \verb$int libselect_id_is_valid(libselect_id_t id)$ : to check if I/O \verb$id$ is valid (i.e. created, registered and not closed).
+
+  \item \verb$int libselect_id_close (libselect_id_t id)$ : closes I/O \verb$id$ (deletes it of opened I/O list).
+
+  \item \verb$int libselect_id_register(int id)$ : makes I/O \verb$id$ available.
+
+  \item \verb$int libselect_id_unregister(int id)$ : makes I/O \verb$id$ unavailable.
+
+  \item \verb$int libselect_id_add_callback(int id, libselect_callback callback, void *ptr)$ : function to be called if fifo of the I/O has been closed (only available for TCP I/O).
+
+  \item \verb$uint32_t libselect_id_read(libselect_id_t id, uint8_t *data, uint32_t size)$ : gets data from the I/O fifo.
+
+  \item \verb$uint32_t libselect_id_write(libselect_id_t id, uint8_t *data, uint32_t size)$ : puts data into the I/O fifo.
+
+  \item \verb$int libselect_fd_register(int fd, unsigned int signal)$ : registers a file descriptor for an I/O, but just handles with its signals and reports if data is waiting in its file descriptor.
+
+  \item \verb$int libselect_fd_unregister(int fd)$ : unregisters the file descriptor of the I/O \verb$id$.
+\end{itemize}
+
+You may refer to \verb$/devices/ptty/ptty_dev.c$, where some of these functions are used to manage the I/O of the PTTY and to section \ref{PTTY} page \pageref{PTTY} for more informations on the PTTY.
+
 
 \chapter{Implementing new WSim modules}
 
@@ -758,6 +785,7 @@ libled_a_SOURCES=yourdevicename_source1.h yourdevicename_source1.c\
 We may distinguish 2 special devices: the pseudo serial PTTY and the graphical interface for platform UIGFX. They are special in the meaning that they do not stand for a hardware component. Nevertheless their implementation is quite the same as a standard device, especially their API functions (please see section \ref{adding-device} page \pageref{adding-device} for more details). They have to be initialised and updated in the platform file like other devices indeed.
 
 \subsection{Pseudo TTY}
+\label{PTTY}
 The PTTY (Pseudo TTY) peripheral model is a special peripheral that can be used to connect a platform to a RS232 serial port. The model has the capability to open a full duplex communication stream with the operating system in order to connect the simulator to external tools.
 
 \begin{figure}[!h]
@@ -776,11 +804,11 @@ The PTTY mainly makes the link between the platform and \verb$libselect$ functio
 \end{itemize}
 
 
-\textbf{Reste à développer:}
+These 3 additional functions are designed to avoid and handle with errors :
 \begin{itemize}
-  \item $ptty\_libselect\_callback?$
-  \item $ptty\_dummy\_read?$
-  \item $ptty\_dummy\_write?$
+  \item \verb$ptty_dummy_read()$ : sets value and mask to 0.
+  \item \verb$ptty_dummy_write()$ : writes to \verb$/dev/null$.
+  \item \verb$ptty_libselect_callback()$ : not used.
 \end{itemize}
 
 \subsection{Graphical interface for platform UIGFX}

@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
+    "/usr/share/sgml/docbook/dtd/4.5/docbookx.dtd">
+
+<book lang="en">
+	<bookinfo>
+		<title>WSim Hardware Platform Simulator</title>
+		<copyright><year>2005</year><holder>Worldsens</holder></copyright>
+		<subtitle>Tutorial</subtitle>
+		<authorgroup>
+			<author>
+				<firstname>Antoine</firstname>
+				<surname>Fraboulet</surname>
+			<affiliation>
+			  <orgname>INRIA Rhône Alpes</orgname>
+			  <orgdiv>Amazones Project</orgdiv>
+			  <address>
+			    CITI Laboratory
+			    Domaine Scientifique de la Doua, INSA de Lyon
+			    Bâtiment Claude Chappe 
+			    6, avenue des Arts	
+			    69621 Villeurbanne Cedex
+			    France
+			  </address>
+			</affiliation>
+			</author>
+		</authorgroup>
+		<revhistory>
+			<revision>
+				<revnumber>1.0</revnumber><date>2009-09-07</date>
+				<revremark>First Draft</revremark>
+			</revision>
+		</revhistory>
+		<abstract>
+			<para>WSim tutorial on MSP430 using the ADC12 module.</para>
+		</abstract>
+	</bookinfo>
+
+<!-- ============================================================ -->
+<!-- ============================================================ -->
+<!-- ============================================================ -->
+
+	<chapter id="introduction">
+	  <title>Introduction</title>
+	  
+	  <para>This tutorial is intended to get you started
+	    with WSim and the MSP430 ADC12 peripheral. It shows
+	    you the basics of  executing, debugging and
+	    interpreting results of applications written for
+	    the target microcontrollers.
+	  </para>
+	  
+	  <para>The tutorial uses the wsn430 but any MSP430 based platform
+	    will run the same with regards to the ADC12 peripheral
+	  </para>
+
+	  <para>This tutorial assumes that you are familiar with the basics
+	    of WSim and its associated tools. If not please first visit the
+	    WSim main tutorial.
+	  </para>
+	  
+	  <para>
+	    <itemizedlist mark="bullet" spacing="normal">
+	      <listitem>
+		<simpara>
+		  WSim <ulink url="http://wsim.gforge.inria.fr/">WSim website</ulink>.
+		</simpara>
+	      </listitem>
+	      <listitem>
+		<simpara>
+		  WSim hands-on tutorial <ulink url="http://wsim.gforge.inria.fr/tutorials/wsim/">WSim tutorial</ulink>.
+		</simpara>
+	      </listitem>
+	    </itemizedlist>
+	  </para>
+	</chapter>
+	
+	<!-- ============================================================ -->
+	<!-- ============================================================ -->
+	<!-- ============================================================ -->
+
+<chapter id="adc12">
+  <title>ADC12 module</title>
+  <para>
+      The ADC12 module is a 12bits, 16 channels input peripheral for
+      the MSP430 micro controller.  The WSim simulation model can be
+      used to input predefined (files), random or constant data on
+      each of the input ports. Almost all the registers are taken into
+      account except registers that are used only to 
+  </para>
+
+
+  <sect1>
+    <title>Basic usage</title>
+    <para>
+    The simulation model of the ADC12 only considers the numerical part of the block.
+    </para>
+  </sect1>
+
+  <sect1>
+    <title>How values from the file are truncated / preparing your data</title>
+    <para>
+      The file content is read at the beginning at the simulation and loaded in the
+      simulator. If the simulation is long enough to consume all the data the ADC12
+      model restarts from the beginning and replays the already used samples.
+    </para>
+
+    <para>
+      12 -> dd
+    </para>
+  </sect1>
+
+  <sect1>
+    <title>Some scripts</title>
+      <figure id="runscript">
+	<title>Script to run the simulation using ADC12 second input port with data.dat file</title>
+	<programlisting>
+	  <computeroutput>
+	    #! /bin/sh
+	    
+	    PRG=${WSIM}/platforms/wsn430/wsim-wsn430
+	    
+	    ARG=" --mode=time --modearg=10s --verbose=4"
+	    ARG="$ARG --logfile=wsim.log --trace=wsim.trc"
+	    ARG="$ARG --msp430_adc12=2:data1.dat"
+	    ARG="$ARG adc12.elf"
+	    
+	    ${PRG} ${ARG}
+	  </computeroutput>
+	</programlisting>
+      </figure>
+  </sect1>
+</chapter>
+
+
+
+	<!-- ============================================================ -->
+	<!-- ============================================================ -->
+	<!-- ============================================================ -->
+
+</book>
+
+
+<!-- <figure id="dist-simul"> -->
+<!--   <title>Distributed simulation</title> -->
+<!--   <mediaobject> -->
+<!--     <imageobject> -->
+<!--       <imagedata align="center" fileref="figures/dist_simul.png" /> -->
+<!--     </imageobject> -->
+<!--   </mediaobject> -->
+<!-- </figure> -->
+
+<!-- <programlisting> -->
+<!-- <prompt>[wsn430-timer]$</prompt> <userinput>make</userinput> -->
+<!-- </programlisting> -->
+<!-- <para>You should see:</para> -->
+<!-- <programlisting> -->
+<!--   <computeroutput> -->
+<!--     msp430-gcc -mmcu=msp430x1611 -O2 -Wall  -g   -c -o main.o main.c -->
+<!--     msp430-gcc -c -mmcu=msp430x1611 -O2 -Wall  -g ../wsn430-clock/clock.c -->
+<!--   </computeroutput> -->
+<!-- </programlisting> -->
+
+
+

@@ -30,12 +30,21 @@
 #define HW_DMSG_2_DBG(x...) do { } while (0)
 #endif
 
+
 /* ************************************************** */
 /* ************************************************** */
 /* ************************************************** */
 
 tracer_id_t MSP430_TRACER_ADC12STATE;
 tracer_id_t MSP430_TRACER_ADC12INPUT[ADC12_CHANNELS];
+
+#define ADC12_TRACER_STATE(v)   tracer_event_record(MSP430_TRACER_ADC12STATE, v)
+#define ADC12_TRACER_INPUT(i,v) tracer_event_record(MSP430_TRACER_ADC12INPUT[i], v)
+
+/* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
+
 int         msp430_adc12_channels_valid[ADC12_CHANNELS];
 char        msp430_adc12_channels_name[ADC12_CHANNELS][MAX_FILENAME];
 uint16_t*   msp430_adc12_channels_data[ADC12_CHANNELS];
@@ -43,10 +52,10 @@ uint32_t    msp430_adc12_channels_data_max[ADC12_CHANNELS];
 
 #define ADC12_CHANNEL_NAMES 20
 char trace_names[ADC12_CHANNELS][ADC12_CHANNEL_NAMES] = {
-  "adc12_input00", "adc12_input01", "adc12_input02", "adc12_input03",
-  "adc12_input04", "adc12_input05", "adc12_input06", "adc12_input07",
-  "adc12_input08", "adc12_input09", "adc12_input10", "adc12_input11",
-  "adc12_input12", "adc12_input13", "adc12_input14", "adc12_input15"
+  "adc12_input_00", "adc12_input_01", "adc12_input_02", "adc12_input_03",
+  "adc12_input_04", "adc12_input_05", "adc12_input_06", "adc12_input_07",
+  "adc12_input_08", "adc12_input_09", "adc12_input_10", "adc12_input_11",
+  "adc12_input_12", "adc12_input_13", "adc12_input_14", "adc12_input_15"
 };
 
 #define ADC12_MODES        4
@@ -325,6 +334,7 @@ void msp430_adc12_update(void)
   if (MCU.adc12.ctl0.b.adc12on == 0)
     {
       MCU.adc12.state = ADC12_STATE_OFF;
+      ADC12_TRACER_STATE(0);
       return;
     }
 
@@ -378,6 +388,7 @@ void msp430_adc12_update(void)
     case ADC12_STATE_OFF: 
       HW_DMSG_ADC12("msp430:adc12:     wait for enable\n");
       MCU.adc12.state = ADC12_STATE_WAIT_ENABLE;
+      ADC12_TRACER_STATE(1);
       /* no break */
 
       /***************/
@@ -430,8 +441,9 @@ void msp430_adc12_update(void)
 			MCU.adc12.current_x, MCU.adc12.mctl[MCU.adc12.current_x].b.inch,
 			trace_names[MCU.adc12.mctl[MCU.adc12.current_x].b.inch],
 			MACHINE_TIME_GET_NANO());
-
 	  MCU.adc12.sample = msp430_adc12_sample_input(MCU.adc12.mctl[MCU.adc12.current_x].b.inch);
+
+	  ADC12_TRACER_INPUT( MCU.adc12.mctl[MCU.adc12.current_x].b.inch, MCU.adc12.sample );
 
 	  MCU.adc12.state = ADC12_STATE_CONVERT;
 	  MCU.adc12.sampcon --;

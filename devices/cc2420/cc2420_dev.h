@@ -70,7 +70,7 @@
 /***************************************************/
 /***************************************************/
 
-int cc2420_device_create  (int dev_num, int fxocs_mhz);
+int cc2420_device_create  (int dev_num, int fxocs_mhz, char *antenna);
 int cc2420_device_size    (void);
 
 /***************************************************/

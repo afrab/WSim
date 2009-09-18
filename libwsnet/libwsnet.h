@@ -65,10 +65,11 @@ struct wsnet_tx_info {
   int       radio_id;
 };
 
-typedef uint64_t (*wsnet_callback_rx_t) (void*, struct wsnet_rx_info *);
+typedef uint64_t (*wsnet_callback_rx_t)      (void*, struct wsnet_rx_info *);
+typedef uint64_t (*wsnet_callback_measure_t) (void*, double);
 
 int  worldsens_c_tx             (struct wsnet_tx_info *);
-int  worldsens_c_rx_register    (void*, wsnet_callback_rx_t);
+int  worldsens_c_rx_register    (void*, wsnet_callback_rx_t, char*);
 
 /**************************************************************************/
 /**************************************************************************/

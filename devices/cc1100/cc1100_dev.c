@@ -210,7 +210,7 @@ void cc1100_read(int dev_num, uint32_t  *mask, uint32_t  *value)
 /***************************************************/
 /***************************************************/
 
-int cc1100_device_create (int dev_num, int fxosc_mhz)
+int cc1100_device_create (int dev_num, int fxosc_mhz, char *antenna)
 {	
   struct _cc1100_t *cc1100 = (struct _cc1100_t *) machine.device[dev_num].data;
 
@@ -231,7 +231,7 @@ int cc1100_device_create (int dev_num, int fxosc_mhz)
   CC1100_XOSC_FREQ_MHz  = fxosc_mhz;
   CC1100_XOSC_PERIOD_NS = 1000 / fxosc_mhz;
 
-  cc1100->worldsens_radio_id = worldsens_c_rx_register((void*)cc1100, cc1100_callback_rx);
+  cc1100->worldsens_radio_id = worldsens_c_rx_register((void*)cc1100, cc1100_callback_rx, antenna);
 
   TRACER_CC1100_STATE  = tracer_event_add_id(8, "state",  "cc1100");
   TRACER_CC1100_STROBE = tracer_event_add_id(8, "strobe", "cc1100");

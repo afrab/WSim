@@ -42,7 +42,7 @@
 /**************************************************************************/
 
 /* Maximum worldsens packet length */
-#define WORLDSENS_MAX_PKTLENGTH		100
+#define WORLDSENS_MAX_PKTLENGTH		1000
 
 /* Control packet type */
 #define WORLDSENS_C_CONNECT		0x01

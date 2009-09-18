@@ -18,13 +18,6 @@
 /**************************************************************************/
 /**************************************************************************/
 
-typedef wsnet_callback_rx_t radio_callback_t;
-typedef wsnet_callback_rx_t measure_callback_t;
-
-/**************************************************************************/
-/**************************************************************************/
-/**************************************************************************/
-
 /* wsim client states */
 #define WORLDSENS_CLT_STATE_CONNECTING    1
 #define WORLDSENS_CLT_STATE_IDLE          2
@@ -37,16 +30,14 @@ typedef wsnet_callback_rx_t measure_callback_t;
 /**************************************************************************/
 
 struct _worldsens_radio_t {
-  radio_callback_t        callback;
+  wsnet_callback_rx_t            callback;
   void                           *arg;
   char                           *antenna;
   uint32_t                       antenna_id;
-  char                           *wsnet_modulation;
-  uint32_t                       wsnet_mod_id;
 };
 
 struct _worldsens_measure_t {
-  measure_callback_t             callback;
+  wsnet_callback_measure_t       callback;
   void                           *arg;
   char                           *name;
   uint32_t                       id;
@@ -77,10 +68,11 @@ void            wsnet2_init             (void);
 void            wsnet2_finalize         (void);
 uint32_t        wsnet2_get_node_id      (void);
 int             wsnet2_update           (void);
-int             wsnet2_register_radio   (char *, radio_callback_t, void *);
-void            wsnet2_register_measure (char *channel, measure_callback_t callback, void *);
+int             wsnet2_register_radio   (char *, wsnet_callback_rx_t, void *);
+int             wsnet2_register_measure (char *channel, wsnet_callback_measure_t callback, void *);
 int             wsnet2_connect          (char *, uint16_t, char *, uint16_t, uint32_t);
 int             wsnet2_tx               (char, double, int, double, uint64_t, int);
+int             wsnet2_tx_measure_req   (int);
 
 
 

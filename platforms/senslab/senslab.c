@@ -218,8 +218,10 @@ int devices_create(void)
 
 #if defined(SLABV13B)
   xosc_freq = 27000000; /* 27 MHz */
+  char cc1100_antenna[] = "omnidirectionnal"; /* used by wsnet2, only this model available in wsnet2 */
 #elif defined(SLABV14)
   xosc_freq = 16000000; /* 16 MHz */
+  char cc2420_antenna[] = "omnidirectionnal"; /* used by wsnet2, only this model available in wsnet2 */
 #endif
 
   if (xt1_opt.value) {
@@ -293,9 +295,9 @@ int devices_create(void)
   res += m25p_device_create     (FLASH,   FLASH_ID_0);
   res += ds2411_device_create   (DS24,    ds2411_opt.value);
 #if defined(SLABV13B)
-  res += cc1100_device_create   (RADIO,   xosc_freq / 1000000);
+  res += cc1100_device_create   (RADIO,   xosc_freq / 1000000, cc1100_antenna);
 #elif defined(SLABV14)
-  res += cc2420_device_create   (RADIO,   xosc_freq / 1000000);
+  res += cc2420_device_create   (RADIO,   xosc_freq / 1000000, cc2420_antenna);
 #endif
   res += ptty_device_create     (SERIAL,  SERIAL_ID_0);
 #if defined(LOGO1)

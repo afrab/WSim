@@ -43,7 +43,7 @@
 /***************************************************/
 /***************************************************/
 
-int cc1100_device_create (int dev_num, int fxosc_mhz);
+int cc1100_device_create (int dev_num, int fxosc_mhz, char *antenna);
 int cc1100_device_size   (void);
 
 /***************************************************/

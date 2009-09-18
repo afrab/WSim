@@ -162,6 +162,7 @@ int devices_create(void)
 {
   int res = 0;
   int xin_freq, xt2_freq, xosc_freq;
+  char cc1100_antenna[] = "omnidirectionnal"; /* used by wsnet2, only this model available in wsnet2 */
 
   xin_freq  =        0; /*  0 kHz */
   xt2_freq  =        0; /*  0 MHz */
@@ -203,7 +204,7 @@ int devices_create(void)
   res += system_create          (SYSTEM);
   res += led_device_create      (LED_RED,   0xee0000,OFF,BKG,"red");
   res += led_device_create      (LED_GREEN, 0x00ee00,OFF,BKG,"green");
-  res += cc1100_device_create   (RADIO,     xosc_freq / 1000000);
+  res += cc1100_device_create   (RADIO,     xosc_freq / 1000000, cc1100_antenna);
   res += ptty_device_create     (SERIAL,    0);
   res += uigfx_device_create    (LOGO1,   wsim);
 

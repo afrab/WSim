@@ -203,6 +203,7 @@ int devices_create(void)
 {
   int res = 0;
   int xin_freq, xt2_freq;
+  char cc2420_antenna[] = "omnidirectionnal"; /* used by wsnet2, only this model available in wsnet2 */
 
   xin_freq = 32768;
   xt2_freq = 0; /* xt2 is not used on telosb */
@@ -261,7 +262,7 @@ int devices_create(void)
   res += led_device_create      (LED3,    0x0000ee,OFF,BKG,"blue");
   res += m25p_device_create     (FLASH,   0);
   res += ds2411_device_create   (DS24,    ds2411_opt.value);
-  res += cc2420_device_create   (RADIO,   16);
+  res += cc2420_device_create   (RADIO,   16, cc2420_antenna);
   res += ptty_device_create     (SERIAL,  1);
 #if defined(LOGO1)
   res += uigfx_device_create    (LOGO1,   telosb);

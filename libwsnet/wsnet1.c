@@ -145,7 +145,7 @@ int             worldsens_c_options_add           (void);
 void            worldsens_c_state_save            (void);
 void            worldsens_c_state_restore         (void);
 int             worldsens_c_get_node_id           (void);
-int             worldsens_c_rx_register           (void* arg, wsnet_callback_rx_t cbrx);
+int             worldsens_c_rx_register           (void* arg, wsnet_callback_rx_t cbrx, char UNUSED *antenna);
 
 int             worldsens_c_initialize            (void);
 int             worldsens_c_connect               (void);
@@ -279,7 +279,7 @@ int worldsens_c_get_node_id(void)
   return WSENS_MYADDR;
 }
 
-int worldsens_c_rx_register(void* arg, wsnet_callback_rx_t cbrx)
+int worldsens_c_rx_register(void* arg, wsnet_callback_rx_t cbrx, char UNUSED *antenna)
 {
   WSENS_CBRX_ARG  = arg;	
   WSENS_CBRX_FUNC = cbrx;

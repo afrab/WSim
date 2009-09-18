@@ -79,7 +79,7 @@ uint8_t cc2420_read_pin(struct _cc2420_t * cc2420, uint8_t pin)
 /***************************************************/
 /***************************************************/
 
-int cc2420_device_create (int dev_num, int fxosc_mhz)
+int cc2420_device_create (int dev_num, int fxosc_mhz, char *antenna)
 {
   struct _cc2420_t *cc2420 = (struct _cc2420_t *) machine.device[dev_num].data;
 
@@ -100,7 +100,7 @@ int cc2420_device_create (int dev_num, int fxosc_mhz)
   CC2420_XOSC_FREQ_MHz  = fxosc_mhz;
   CC2420_XOSC_PERIOD_NS = 1000 / fxosc_mhz;
 
-  cc2420->worldsens_radio_id = worldsens_c_rx_register((void*)cc2420,cc2420_callback_rx);
+  cc2420->worldsens_radio_id = worldsens_c_rx_register((void*)cc2420,cc2420_callback_rx, antenna);
 
   cc2420->fsm_state = CC2420_STATE_POWER_DOWN;
 

@@ -22,22 +22,23 @@ enum woldsens_pkt_type {
   WORLDSENS_UNKNOWN = 0,
 
   /* WSim -> WSNet2 */
-  WORLDSENS_C_CONNECT_REQ,     /* connection request  */
-  WORLDSENS_C_SYNC_ACK,        /*                     */
-  WORLDSENS_C_BYTE_TX,         /* Tx                  */
-  WORLDSENS_C_MEASURE_REQ,     /* measure request     */
-  WORLDSENS_C_DISCONNECT,      /* disconnect          */
+  WORLDSENS_C_CONNECT_REQ,     /* connection request          */
+  WORLDSENS_C_SYNC_ACK,        /* node synched                */
+  WORLDSENS_C_BYTE_TX,         /* Tx                          */
+  WORLDSENS_C_MEASURE_REQ,     /* measure request             */
+  WORLDSENS_C_DISCONNECT,      /* disconnect                  */
 
   /* WSNet2 -> WSim */
-  WORLDSENS_S_CONNECT_RSP_OK,  /* connection granted  */
-  WORLDSENS_S_CONNECT_RSP_NOK, /* connection refused  */
-  WORLDSENS_S_SYNC_RELEASE,    /* RP save and release */
-  WORLDSENS_S_BACKTRACK,       /* backtrack request   */
-  WORLDSENS_S_BYTE_RX,         /* Rx                  */
-  WORLDSENS_S_BYTE_SR_RX,      /* RP req and rx       */
-  WORLDSENS_S_MEASURE_RSP,     /* measure response    */
-  WORLDSENS_S_KILLSIM,         /* kill all nodes      */
-  WORLDSENS_S_KILL,            /* kill one node       */
+  WORLDSENS_S_CONNECT_RSP_OK,  /* connection granted          */
+  WORLDSENS_S_CONNECT_RSP_NOK, /* connection refused          */
+  WORLDSENS_S_SYNC_RELEASE,    /* RP save and release         */
+  WORLDSENS_S_BACKTRACK,       /* backtrack request           */
+  WORLDSENS_S_BYTE_RX,         /* Rx                          */
+  WORLDSENS_S_BYTE_SR_RX,      /* RP req and rx               */
+  WORLDSENS_S_MEASURE_RSP,     /* measure response            */
+  WORLDSENS_S_MEASURE_SR_RSP,  /* RP req and measure response */
+  WORLDSENS_S_KILLSIM,         /* kill all nodes              */
+  WORLDSENS_S_KILL,            /* kill one node               */
 
   /* */
   WORLDSENS_LASTID
@@ -103,6 +104,7 @@ struct __PACKED__ _worldsens_c_measure_req {
   ws_pkt_type            type;
   ws_id_node             node_id;
   ws_id_resource         measure_id;
+  ws_time                period;
 };
 
 struct __PACKED__ _worldsens_c_disconnect {
@@ -185,8 +187,19 @@ struct __PACKED__ _worldsens_s_byte_sr_rx {
 struct __PACKED__ _worldsens_s_measure_rsp {
   ws_pkt_type            type;
   ws_id_seq              seq;
+  ws_id_node             node_id;
   ws_id_resource         measure_id;
   ws_measure             measure_val;
+};
+
+struct __PACKED__ _worldsens_s_measure_sr_rsp {
+  ws_pkt_type            type;
+  ws_id_seq              seq;
+  ws_id_node             node_id;
+  ws_id_resource         measure_id;
+  ws_measure             measure_val;
+  ws_id_rp               rp_next;
+  ws_time                rp_duration;
 };
 
 struct __PACKED__ _worldsens_s_killsim {
@@ -223,6 +236,7 @@ union _worldsens_pkt {
 
   struct _worldsens_c_measure_req        measure_req;
   struct _worldsens_s_measure_rsp        measure_rsp;
+  struct _worldsens_s_measure_sr_rsp     measure_sr_rsp;
 
   struct _worldsens_c_disconnect         disconnect;
   struct _worldsens_s_killsim            killsim;

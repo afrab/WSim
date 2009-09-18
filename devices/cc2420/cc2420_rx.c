@@ -597,7 +597,6 @@ void cc2420_rx_flush_current_frame(struct _cc2420_t * cc2420) {
 
 /**
  * rx callback
- * todo : autoack
  */
 
 uint64_t cc2420_callback_rx(void *arg, struct wsnet_rx_info *wrx)

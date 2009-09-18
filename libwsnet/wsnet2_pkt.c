@@ -156,6 +156,7 @@ static inline int worldsens_packet_swap(union _worldsens_pkt *pkt)
       SWAPN (pkt->measure_req.type);
       SWAPN (pkt->measure_req.node_id);
       SWAPN (pkt->measure_req.measure_id);
+      SWAPN (pkt->measure_req.period);
       break;
 
     case WORLDSENS_C_DISCONNECT:
@@ -222,8 +223,19 @@ static inline int worldsens_packet_swap(union _worldsens_pkt *pkt)
     case WORLDSENS_S_MEASURE_RSP:
       SWAPN (pkt->measure_rsp.type);
       SWAPN (pkt->measure_rsp.seq);
+      SWAPN (pkt->measure_rsp.node_id);
       SWAPN (pkt->measure_rsp.measure_id);
       SWAPN (pkt->measure_rsp.measure_val);
+      break;
+
+    case WORLDSENS_S_MEASURE_SR_RSP:
+      SWAPN (pkt->measure_sr_rsp.type);
+      SWAPN (pkt->measure_sr_rsp.seq);
+      SWAPN (pkt->measure_sr_rsp.node_id);
+      SWAPN (pkt->measure_sr_rsp.measure_id);
+      SWAPN (pkt->measure_sr_rsp.measure_val);
+      SWAPN (pkt->measure_sr_rsp.rp_next);
+      SWAPN (pkt->measure_sr_rsp.rp_duration);
       break;
 
     case WORLDSENS_S_KILLSIM:
@@ -331,6 +343,7 @@ int worldsens_packet_dump(union _worldsens_pkt *msg)
 	VERBOSE(VLVL,"%s:%s:pkt:    type %s\n",                 SOFT, DIRECTION1, "WORLDSENS_C_MEASURE_REQ");
 	VERBOSE(VLVL,"%s:%s:pkt:    node %d\n",                 SOFT, DIRECTION1, pkt->node_id);
 	VERBOSE(VLVL,"%s:%s:pkt:    measure id %lld\n",         SOFT, DIRECTION1, pkt->measure_id);
+	VERBOSE(VLVL,"%s:%s:pkt:    period %lld\n",             SOFT, DIRECTION1, pkt->period);
 	break;
       }
     case WORLDSENS_C_DISCONNECT:
@@ -415,8 +428,21 @@ int worldsens_packet_dump(union _worldsens_pkt *msg)
 	struct _worldsens_s_measure_rsp *pkt = (struct _worldsens_s_measure_rsp *)msg;
 	VERBOSE(VLVL,"%s:%s:pkt:    type %s\n",                 SOFT, DIRECTION2, "WORLDSENS_S_MEASURE_RSP");
 	VERBOSE(VLVL,"%s:%s:pkt:    seq  %lld\n",               SOFT, DIRECTION2, pkt->seq);
+	VERBOSE(VLVL,"%s:%s:pkt:    node id %d\n",              SOFT, DIRECTION2, pkt->node_id);
 	VERBOSE(VLVL,"%s:%s:pkt:    measure id %lld\n",         SOFT, DIRECTION2, pkt->measure_id);
 	VERBOSE(VLVL,"%s:%s:pkt:    measure value %f\n",        SOFT, DIRECTION2, pkt->measure_val);
+	break;
+      }
+    case WORLDSENS_S_MEASURE_SR_RSP:
+      {
+	struct _worldsens_s_measure_sr_rsp *pkt = (struct _worldsens_s_measure_sr_rsp *)msg;
+	VERBOSE(VLVL,"%s:%s:pkt:    type %s\n",                 SOFT, DIRECTION2, "WORLDSENS_S_MEASURE_SR_RSP");
+	VERBOSE(VLVL,"%s:%s:pkt:    seq  %lld\n",               SOFT, DIRECTION2, pkt->seq);
+	VERBOSE(VLVL,"%s:%s:pkt:    node id %d\n",              SOFT, DIRECTION2, pkt->node_id);
+	VERBOSE(VLVL,"%s:%s:pkt:    measure id %lld\n",         SOFT, DIRECTION2, pkt->measure_id);
+	VERBOSE(VLVL,"%s:%s:pkt:    measure value %f\n",        SOFT, DIRECTION2, pkt->measure_val);
+	VERBOSE(VLVL,"%s:%s:pkt:    rp_next  %lld\n",           SOFT, DIRECTION2, pkt->rp_next);
+	VERBOSE(VLVL,"%s:%s:pkt:    rp_duration  %lld\n",       SOFT, DIRECTION2, pkt->rp_duration);
 	break;
       }
     case WORLDSENS_S_KILLSIM:

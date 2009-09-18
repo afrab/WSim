@@ -211,6 +211,7 @@ int devices_create(void)
 {
   int res = 0;
   int xin_freq, xt2_freq;
+  char cc2420_antenna[] = "omnidirectionnal"; /* used by wsnet2, only this model available in wsnet2 */
 
   xin_freq = 32768;
   xt2_freq = 0; /* xt2 is not used on iclbsn */
@@ -267,7 +268,7 @@ int devices_create(void)
   res += led_device_create      (LED2,   0x00ee00, OFF, BKG, "green");
   res += led_device_create      (LED3,   0x0000ee, OFF, BKG, "blue" );
   res += at45db_device_create   (FLASH,  0);
-  res += cc2420_device_create   (RADIO, 16); /* 16MHz */
+  res += cc2420_device_create   (RADIO, 16, cc2420_antenna); /* 16MHz */
   res += ptty_device_create     (SERIAL, 1);
 #if defined(LOGO1)
   res += uigfx_device_create    (LOGO1,  XPMNAME);

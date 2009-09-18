@@ -119,9 +119,8 @@ int worldsens_c_get_node_id(void)
   return wsnet2_get_node_id();
 }
 
-int worldsens_c_rx_register(void* arg, wsnet_callback_rx_t cbrx)
+int worldsens_c_rx_register(void* arg, wsnet_callback_rx_t cbrx, char *antenna)
 {
-  char antenna[]    = "omnidirectionnal";
   return wsnet2_register_radio(antenna, cbrx, arg);
 }
 

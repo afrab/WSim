@@ -43,7 +43,7 @@
 	      <TD> <b>msp430 adc12</b> </TD>
 	      <TD> How to use the Ti-MSP430 adc12 in simulation.</TD>
 	      <TD> 
-		<a href="./tutorials/wsn430-adc12/index.html" > <!-- target="_new"> -->
+		<a href="./tutorials/msp430-adc/index.html" > <!-- target="_new"> -->
 		  <img style="border: 0px solid ; width: 44px; height: 48px;" 
 		    src="./figures/html.png" alt="" />
 		</a> 

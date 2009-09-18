@@ -94,7 +94,17 @@
     <title>Basic usage</title>
     <para>
     The simulation model of the ADC12 only considers the numerical part of the block.
+    The msp430 embedded software interface is thus the same as the real target 
+    with respect to timings and input sources.
     </para>
+    <figure id="adc12hw">
+      <title>ADC12 / MSP430 embedded software interface</title>
+      <mediaobject>
+	<imageobject>
+	  <imagedata align="center" fileref="figures/adc12.png"/>
+	</imageobject>
+      </mediaobject>
+    </figure>
   </sect1>
 
   <sect1>
@@ -106,26 +116,170 @@
     </para>
 
     <para>
-      12 -> dd
+      Values are read from the input file at simulation start. Each value is truncated
+      to 12 bits before being fed to the ADC12 device. As an example, consider the test input datafile 
+      that contains a serie from 0 to 12000. These valus will be read from the file
+      and tracated to 12bits (4095 max). The mecanism is also true for signed values and
+      the value -1 is converted to 4095 within the simulator.
     </para>
+    
+    <figure id="adc12bits">
+      <title>ADC12 input data truncated at 4095d (12 bits), screenshot taken from gtkwave</title>
+      <mediaobject>
+	<imageobject>
+	  <imagedata align="center" width="95%" fileref="figures/adc12trunc.png"/>
+	</imageobject>
+      </mediaobject>
+    </figure>
   </sect1>
 
   <sect1>
-    <title>Some scripts</title>
+    <title>Command line options and parameters</title>
+    <para>
+      Different sources and modes can be attached to hardware input channels. Each of the 
+      12 inputs selected by the <computeroutput>INCHx</computeroutput> register within
+      a configuration can be driven on the command line using the following parameters:
+    </para>
+    <figure id="adc12opt">
+      <title>ADC12 command line option using HW channels 1 and 2 on two separate files</title>
+	<programlisting>
+	  <computeroutput>
+--msp430_adc12=1:data1.dat,2:data2.dat
+	  </computeroutput>
+	</programlisting>
+    </figure>
+    
+  <para>
+    The previous example shows how to combine 2 different data
+    files, one for each of the two adc channels that are used during
+    the simulation. Hardware channel configurations are comma separated and a hardware
+    configuration is a tuple <computeroutput>[channel number]:[data file]</computeroutput>.
+  </para>
+  </sect1>
+</chapter>
+
+	<!-- ============================================================ -->
+	<!-- ============================================================ -->
+	<!-- ============================================================ -->
+
+<chapter>
+  <title>Logfiles and trace files</title>
+  <para>
+    Wsim can generate a lot of output and traces to monitor and benchmark 
+    embedded application behavior. Both logs and traces can be used to 
+    retreive information from the application running on top of the msp430
+    and its interaction with the ADC. Logfiles are more often used while
+    debugging I/O while traces and VCD output are used for performance
+    estimation and frequence/latency parameters tuning.
+  </para>
+
+  <sect1>
+    <title>Logfiles</title>
+    <para>
+      Wsim log files will contain, if the verbose level
+      is set high enough (eg. 4), information about the internal behavior of 
+      the ADC12.
+    </para>
+    <figure id="adc12log">
+      <title>ADC12 command line option using HW channels 1 and 2 on two separate files</title>
+      <programlisting>
+	<computeroutput>
+[...]
+msp430:adc12: mode repeat, go to wait_trigger
+msp430:adc12:     trigger ok
+msp430:adc12:     sampling on config 0 hw_channel 1 (adc12_input_01) [375963]
+msp430:adc12:     sample for input channel 1 - data/data2.dat
+msp430:adc12:     convert = 0x0ffd (4093) 
+msp430:adc12:     store sample in ADC12MEM0
+msp430:intr: Interrupt 7 received but GIE = 0 (current PC = 0x40d6 [382629])
+msp430:adc12: mode repeat, go to wait_trigger
+msp430:adc12:     trigger ok
+msp430:adc12:     sampling on config 0 hw_channel 1 (adc12_input_01) [402627]
+msp430:adc12:     sample for input channel 1 - data/data2.dat
+msp430:adc12:     convert = 0x0000 (0) 
+msp430:adc12:     store sample in ADC12MEM0
+msp430:adc12: mode repeat, go to wait_trigger
+msp430:adc12:     trigger ok
+msp430:adc12:     sampling on config 0 hw_channel 1 (adc12_input_01) [429291]
+msp430:adc12:     sample for input channel 1 - data/data2.dat
+[...]
+	</computeroutput>
+      </programlisting>
+    </figure>
+  </sect1>
+
+  <sect1>
+    <title>Traces and VCD files</title>
+    <para>
+      Traces can be used when precise latency and frequency parameters 
+      are to be estimated. To use traces the simulation mode has to be modified
+      using the command line option <computeroutput>--trace=[wsim.trc]</computeroutput> where
+      <computeroutput>wsim.trc</computeroutput> is the filename of the
+      output traces.
+    </para>
+    <para>
+      Value Change Dump (VCD) trace files and several other format can
+      generated from traces. VCD files are often used to asses the
+      quality of the emmbedded application.  Traces can be used to
+      monitor synchronization points between adc12 samples and other
+      peripherals. Latency interrupt is very easily measured using
+      the <computeroutput> gtkwave </computeroutput> program. The next
+      two figures show a sample application on the adc12 for which
+      the <computeroutput>intr_num</computeroutput> line corresponds
+      to the IRQ.7 generated at each sample. Interrupt latency can be
+      preceisely measured using the <computeroutput>
+      gtkwave</computeroutput> timeline. Differences between the two
+      figures are due to the reference clock modification for the MCLK
+      frequency settings. The first version is too slow to handle the
+      ADC sampling rate while the second one can keep up with it.
+    </para>
+    <figure id="adc12vcd1">
+      <title>GtkWave output of WSim traces including IRQ.7, GIE and
+      Main clock frequencies for the test program using a MCLK
+      reference clock at 750kHz (msp430 default)</title>
+      <mediaobject>
+	<imageobject>
+	  <imagedata align="center" width="90%" fileref="figures/adc12_s1.png"/>
+	</imageobject>
+      </mediaobject>
+    </figure>
+    <figure id="adc12vcd2">
+      <title>GtkWave output of WSim traces including IRQ.7, GIE and
+      Main clock frequencies for the test program using a MCLK
+      reference clock à 8MHz.</title>
+      <mediaobject>
+	<imageobject>
+	  <imagedata align="center" width="90%" fileref="figures/adc12_s2.png"/>
+	</imageobject>
+      </mediaobject>
+    </figure>
+  </sect1>
+</chapter>
+
+	<!-- ============================================================ -->
+	<!-- ============================================================ -->
+	<!-- ============================================================ -->
+
+<chapter>
+  <title>Sources and examples</title>
+
+  <sect1>
+    <title>Script used to run the adc12 example</title>
       <figure id="runscript">
 	<title>Script to run the simulation using ADC12 second input port with data.dat file</title>
 	<programlisting>
 	  <computeroutput>
-	    #! /bin/sh
+#! /bin/sh
+   
+PRG=${WSIM}/platforms/wsn430/wsim-wsn430
 	    
-	    PRG=${WSIM}/platforms/wsn430/wsim-wsn430
+ARG=" --mode=time --modearg=10s --verbose=4"
+ARG="$ARG --logfile=wsim.log --trace=wsim.trc"
+ARG="$ARG --msp430_adc12=1:data1.dat"
+ARG="$ARG adc12.elf"
 	    
-	    ARG=" --mode=time --modearg=10s --verbose=4"
-	    ARG="$ARG --logfile=wsim.log --trace=wsim.trc"
-	    ARG="$ARG --msp430_adc12=2:data1.dat"
-	    ARG="$ARG adc12.elf"
-	    
-	    ${PRG} ${ARG}
+${PRG} ${ARG}
+wtracer --in=wsim.trc --out=wsim.vcd --format=vcd
 	  </computeroutput>
 	</programlisting>
       </figure>
@@ -139,27 +293,4 @@
 	<!-- ============================================================ -->
 
 </book>
-
-
-<!-- <figure id="dist-simul"> -->
-<!--   <title>Distributed simulation</title> -->
-<!--   <mediaobject> -->
-<!--     <imageobject> -->
-<!--       <imagedata align="center" fileref="figures/dist_simul.png" /> -->
-<!--     </imageobject> -->
-<!--   </mediaobject> -->
-<!-- </figure> -->
-
-<!-- <programlisting> -->
-<!-- <prompt>[wsn430-timer]$</prompt> <userinput>make</userinput> -->
-<!-- </programlisting> -->
-<!-- <para>You should see:</para> -->
-<!-- <programlisting> -->
-<!--   <computeroutput> -->
-<!--     msp430-gcc -mmcu=msp430x1611 -O2 -Wall  -g   -c -o main.o main.c -->
-<!--     msp430-gcc -c -mmcu=msp430x1611 -O2 -Wall  -g ../wsn430-clock/clock.c -->
-<!--   </computeroutput> -->
-<!-- </programlisting> -->
-
-
 

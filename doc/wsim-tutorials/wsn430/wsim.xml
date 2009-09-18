@@ -101,7 +101,7 @@
 				<title>The place of WSim in the development process</title>
 				<mediaobject>
 					<imageobject>
-						<imagedata align="center" fileref="figures/compile.png"/>
+						<imagedata align="center" width="90%" fileref="figures/compile.png"/>
 					</imageobject>
 				</mediaobject>
 			</figure>
@@ -187,7 +187,7 @@
 				<title>Distributed simulation</title>
 				<mediaobject>
 					<imageobject>
-						<imagedata align="center" fileref="figures/dist_simul.png" />
+						<imagedata align="center" width="90%" fileref="figures/dist_simul.png" />
 					</imageobject>
 				</mediaobject>
 			</figure>
@@ -253,7 +253,7 @@ wsim:log:wsim.log</computeroutput></programlisting>
 				<title>Snapshot of the execution of the LEDs example</title>
 				<mediaobject>
 					<imageobject>
-						<imagedata align="center" fileref="figures/wsn430-leds.png"/>
+						<imagedata align="center" width="90%" fileref="figures/wsn430-leds.png"/>
 					</imageobject>
 				</mediaobject>
 			</figure>
@@ -314,7 +314,7 @@ wsim:log:wsim.log</computeroutput></programlisting>
 						<title>First debugging snapshot</title>
 						<mediaobject>
 							<imageobject>
-								<imagedata align="center" fileref="figures/wsn430-leds-insight-1.png"/>
+								<imagedata align="center" width="90%" fileref="figures/wsn430-leds-insight-1.png"/>
 							</imageobject>
 						</mediaobject>
 					</figure>
@@ -324,7 +324,7 @@ wsim:log:wsim.log</computeroutput></programlisting>
 						<title>Second debugging snapshot</title>
 						<mediaobject>
 							<imageobject>
-								<imagedata align="center" fileref="figures/wsn430-leds-insight-2.png"/>
+								<imagedata align="center" width="90%" fileref="figures/wsn430-leds-insight-2.png"/>
 							</imageobject>
 						</mediaobject>
 					</figure>
@@ -333,7 +333,7 @@ wsim:log:wsim.log</computeroutput></programlisting>
 						<title>Third debugging snapshot</title>
 						<mediaobject>
 							<imageobject>
-								<imagedata align="center" fileref="figures/wsn430-leds-insight-3.png"/>
+								<imagedata align="center" width="90%" fileref="figures/wsn430-leds-insight-3.png"/>
 							</imageobject>
 						</mediaobject>
 					</figure>
@@ -345,7 +345,7 @@ wsim:log:wsim.log</computeroutput></programlisting>
 						<title>Fourth debugging snapshot</title>
 						<mediaobject>
 							<imageobject>
-								<imagedata align="center" fileref="figures/wsn430-leds-insight-4.png"/>
+								<imagedata align="center" width="90%" fileref="figures/wsn430-leds-insight-4.png"/>
 							</imageobject>
 						</mediaobject>
 					</figure>
@@ -417,7 +417,7 @@ wsim:log:wsim.log</computeroutput></programlisting>
 				<title>Snapshot of the execution of the timer example</title>
 				<mediaobject>
 					<imageobject>
-						<imagedata align="center" fileref="figures/wsn430-timer.png"/>
+						<imagedata align="center" width="90%" fileref="figures/wsn430-timer.png"/>
 					</imageobject>
 				</mediaobject>
 			</figure>
@@ -481,7 +481,7 @@ wsim:log:wsim.log</computeroutput></programlisting>
 						<title>Snapshot of the launching of the serial console</title>
 						<mediaobject>
 							<imageobject>
-								<imagedata align="center" fileref="figures/wsn430-serial-wconsole.png"/>
+								<imagedata align="center" width="90%" fileref="figures/wsn430-serial-wconsole.png"/>
 							</imageobject>
 						</mediaobject>
 					</figure>
@@ -512,7 +512,7 @@ wsim:log:wsim.log</computeroutput></programlisting>
 						<title>Snapshot of the execution of the serial example</title>
 						<mediaobject>
 							<imageobject>
-								<imagedata align="center" fileref="figures/wsn430-serial-2.png"/>
+								<imagedata align="center" width="90%" fileref="figures/wsn430-serial-2.png"/>
 							</imageobject>
 						</mediaobject>
 					</figure>
@@ -576,7 +576,7 @@ wsim:log:wsim.log</computeroutput></programlisting>
 				<title>Snapshot of the execution of the token passing example</title>
 				<mediaobject>
 					<imageobject>
-						<imagedata align="center" fileref="figures/wsn430-token-petit.png" />
+						<imagedata align="center" width="90%" fileref="figures/wsn430-token-petit.png" />
 					</imageobject>
 				</mediaobject>
 			</figure>

@@ -16,16 +16,18 @@
 /* ************************************************** */
 /* ************************************************** */
 
+#define ADC12_VERBOSE_LEVEL 4
+#define ADC12_DEBUG_LEVEL_2 
+
 #if defined(DEBUG)
-#define HW_DMSG_ADC12(x...) HW_DMSG(x)
+#define HW_DMSG_ADC12(x...) VERBOSE(ADC12_VERBOSE_LEVEL,x)
 #else 
 #define HW_DMSG_ADC12(x...) do { } while (0)
 #endif
 
-#define DEBUG_LEVEL_2 
 
-#if defined(DEBUG_LEVEL_2)
-#define HW_DMSG_2_DBG(x...) HW_DMSG(x)
+#if defined(ADC12_DEBUG_LEVEL_2)
+#define HW_DMSG_2_DBG(x...) VERBOSE(ADC12_VERBOSE_LEVEL,x)
 #else
 #define HW_DMSG_2_DBG(x...) do { } while (0)
 #endif
@@ -44,6 +46,11 @@ tracer_id_t MSP430_TRACER_ADC12INPUT[ADC12_CHANNELS];
 /* ************************************************** */
 /* ************************************************** */
 /* ************************************************** */
+
+#define ADC12_NONE      0
+#define ADC12_CHANN_PTR 1
+#define ADC12_RND       2
+#define ADC12_WSNET     3
 
 int         msp430_adc12_channels_valid[ADC12_CHANNELS];
 char        msp430_adc12_channels_name[ADC12_CHANNELS][MAX_FILENAME];
@@ -150,7 +157,7 @@ int msp430_adc12_find_inputs()
 	}
 
       HW_DMSG_ADC12("msp430:adc12: channel %02d = %s\n",id, filename);
-      msp430_adc12_channels_valid[id]    = 1;
+      msp430_adc12_channels_valid[id]    = ADC12_CHANN_PTR;
       strncpy(msp430_adc12_channels_name[id], filename, MAX_FILENAME);
     }
   return 0;
@@ -166,7 +173,7 @@ int msp430_adc12_read_inputs()
   uint32_t smpl;
   for(chan=0; chan < ADC12_CHANNELS; chan++)
     {
-      if (msp430_adc12_channels_valid[ chan ])
+      if (msp430_adc12_channels_valid[ chan ] == ADC12_CHANN_PTR)
 	{
 	  FILE* f;
 	  int   val;
@@ -211,7 +218,7 @@ int msp430_adc12_delete_inputs()
   int i;
   for(i=0; i < ADC12_CHANNELS; i++)
     {
-      if (msp430_adc12_channels_valid[i])
+      if (msp430_adc12_channels_valid[i] == ADC12_CHANN_PTR)
 	{
 	  free(msp430_adc12_channels_data[i]);
 	  msp430_adc12_channels_data[i] = NULL;
@@ -220,27 +227,39 @@ int msp430_adc12_delete_inputs()
   return 0;
 }
 
-uint16_t msp430_adc12_sample_input(int channel_x)
+uint16_t msp430_adc12_sample_input(int hw_channel_x)
 {
-  uint16_t sample;
-  if (msp430_adc12_channels_valid[channel_x])
+  uint16_t sample = 0;
+  switch (msp430_adc12_channels_valid[hw_channel_x])
     {
-      HW_DMSG_2_DBG("msp430:adc12: sample for input channel %d - %s\n",
-		    channel_x, msp430_adc12_channels_name[channel_x]);
+    case ADC12_NONE:
+      /* default mode */
+      HW_DMSG_ADC12("msp430:adc12:     0xeaea sample for input channel %d\n", hw_channel_x);
+      sample = 0xeaea;
+      break;
 
-      sample = msp430_adc12_channels_data[ channel_x ][ MCU.adc12.chann_ptr[channel_x] ] ;
+    case ADC12_CHANN_PTR:
+      HW_DMSG_2_DBG("msp430:adc12:     sample for input channel %d - %s\n",
+		    hw_channel_x, msp430_adc12_channels_name[hw_channel_x]);
 
-      MCU.adc12.chann_ptr[channel_x] ++;
-      if (MCU.adc12.chann_ptr[channel_x] == msp430_adc12_channels_data_max[channel_x])
+      sample = msp430_adc12_channels_data[ hw_channel_x ][ MCU.adc12.chann_ptr[ hw_channel_x ] ] ;
+
+      MCU.adc12.chann_ptr[ hw_channel_x ] ++;
+      if (MCU.adc12.chann_ptr[ hw_channel_x ] == msp430_adc12_channels_data_max[ hw_channel_x ])
 	{
-	  MCU.adc12.chann_ptr[channel_x] = 0;
+	  MCU.adc12.chann_ptr[ hw_channel_x ] = 0;
 	}
-    }
-  else
-    {
-      HW_DMSG_ADC12("msp430:adc12: random sample for input channel %d\n",channel_x);
+      break;
+
+    case ADC12_RND:
+      HW_DMSG_ADC12("msp430:adc12:     random sample for input channel %d\n", hw_channel_x);
       sample = random();
+      break;
+
+    case ADC12_WSNET:
+      break;
     }
+  
   return sample & 0x0FFF; /* 12 bits */
 }
 
@@ -255,7 +274,7 @@ int msp430_adc12_init(void)
   for(i=0; i<ADC12_CHANNELS; i++)
     {
       MSP430_TRACER_ADC12INPUT[i]       = 0;
-      msp430_adc12_channels_valid[i]    = 0;
+      msp430_adc12_channels_valid[i]    = ADC12_NONE;
       msp430_adc12_channels_data[i]     = NULL;
       msp430_adc12_channels_data_max[i] = 0;
       strcpy(msp430_adc12_channels_name[i], "none");
@@ -274,7 +293,7 @@ int msp430_adc12_init(void)
   MSP430_TRACER_ADC12STATE    = tracer_event_add_id(1,  "adc12_enable",   "msp430");
   for(i=0; i<ADC12_CHANNELS; i++)
     {
-      if (msp430_adc12_channels_valid[i])
+      if (msp430_adc12_channels_valid[i] != ADC12_NONE )
 	{
 	  MSP430_TRACER_ADC12INPUT[i] = tracer_event_add_id(16,  trace_names[i],   "msp430");
 	}
@@ -346,6 +365,7 @@ void msp430_adc12_update(void)
   MCU.adc12.adc12clk_temp     += MCU.adc12.adc12osc_increment;
   MCU.adc12.adc12clk_increment = MCU.adc12.adc12clk_temp / (MCU.adc12.ctl1.b.adc12divx + 1);
   MCU.adc12.adc12clk_temp      = MCU.adc12.adc12clk_temp % (MCU.adc12.ctl1.b.adc12divx + 1);
+  MCU.adc12.adc12clk_counter  += MCU.adc12.adc12clk_increment;
 
   /* FIXME:: MSC is not taken into account */
   if (MCU.adc12.ctl1.b.shp == 1)
@@ -438,15 +458,19 @@ void msp430_adc12_update(void)
 	   *   DIR = 0  // Direction = 0:input 1:output
 	   */
 	  HW_DMSG_ADC12("msp430:adc12:     sampling on config %d hw_channel %d (%s) [%"PRId64"]\n",
-			MCU.adc12.current_x, MCU.adc12.mctl[MCU.adc12.current_x].b.inch,
+			MCU.adc12.current_x, 
+			MCU.adc12.mctl[MCU.adc12.current_x].b.inch,
 			trace_names[MCU.adc12.mctl[MCU.adc12.current_x].b.inch],
 			MACHINE_TIME_GET_NANO());
+ 
 	  MCU.adc12.sample = msp430_adc12_sample_input(MCU.adc12.mctl[MCU.adc12.current_x].b.inch);
-
+	  
 	  ADC12_TRACER_INPUT( MCU.adc12.mctl[MCU.adc12.current_x].b.inch, MCU.adc12.sample );
 
 	  MCU.adc12.state = ADC12_STATE_CONVERT;
+	  MCU.adc12.adc12clk_reftime = MCU.adc12.adc12clk_counter;
 	  MCU.adc12.sampcon --;
+	  
 	}
       else
 	{
@@ -459,9 +483,8 @@ void msp430_adc12_update(void)
       /***************/
     case ADC12_STATE_CONVERT:
       CHECK_ENC();
-      if (MCU.adc12.adc12clk_increment > 12)
+      if (MCU.adc12.adc12clk_counter > (MCU.adc12.adc12clk_reftime + 12))
 	{
-	  MCU.adc12.adc12clk_increment -= 12;	  
 	  HW_DMSG_ADC12("msp430:adc12:     convert = 0x%04x (%d) \n",MCU.adc12.sample,MCU.adc12.sample);
 	  MCU.adc12.state = ADC12_STATE_STORE;
 	}

@@ -252,6 +252,7 @@ struct msp430_adc12_t {
   int      adc12osc_temp;
   uint32_t adc12osc_cycle_nanotime;
 
+  uint64_t adc12clk_counter;
   int      adc12clk_increment;
   int      adc12clk_temp;
 
@@ -264,6 +265,7 @@ struct msp430_adc12_t {
   int      sampcon;
   int      current_x;
   uint16_t sample;
+  uint64_t adc12clk_reftime; /* used to measure time between sampcon low and convert */
 };
 
 /* ************************************************** */

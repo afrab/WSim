@@ -3,11 +3,39 @@
 #include "header.html"
 <!-- /HEADER  -->
 
+
+
   <div id="main-body">
     <h2 id="intro">Tools / Utilities</h2>
-    <br /><br /><br /><br />
-    <div align="center"><img src="./figures/travaux.gif" alt="" height="134" width="150" /></div>
+    
+  
+    <h3>Associated tools</h3>
+    <ul style="margin-top: 0pt;">
+
+      <li><a href="http://wsnet.gforge.inria.fr/" target="_new" title="WSNet website">WSNet</a>
+	website: an event driven network simulator.</li>
+
+      <li><a href="http://esimu.gforge.inria.fr/" target="_new" title="eSimu website">eSimu</a> 
+	website: Energy and performance estimation with C code annotation.</li>
+
+    </ul>
+
+    <h3>External resources</h3>
+    <ul style="margin-top: 0pt;">
+
+      <li><a href="http://mspgcc.sf.net/" target="_new" title="mspgcc website">MspGCC</a>
+	website: GCC for MSP430 micro-controllers.</li>
+
+      <li><a href="http://gtkwave.sourceforge.net/" target="_new" title="Gtkwave website">Gtkwave</a> 
+	website: VCD file viewer.</li>
+
+      <li><a href="http://kcachegrind.sourceforge.net/html/Home.html" target="_new" title="kCacheGrind website">kCachegrind</a> 
+	website: performance analisys.</li>
+
+    </ul>
+
   </div>
+
 
 <!-- FOOTER -->
 #include "footer.html"

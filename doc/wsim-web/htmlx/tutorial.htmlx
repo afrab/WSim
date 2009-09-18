@@ -20,7 +20,7 @@
 	      <TD> <b>WSim tutorial</b> </TD>
 	      <TD> How to start and use WSim with the WSN430 platform ?</TD>
 	      <TD> 
-		<a href="./tutorials/wsim/index.html" target="_new">
+		<a href="./tutorials/wsim/index.html" > <!-- target="_new"> -->
 		  <img style="border: 0px solid ; width: 44px; height: 48px;" 
 		    src="./figures/html.png" alt="" />
 		</a> 
@@ -29,10 +29,21 @@
 	
 	    <TR align="middle" bgcolor="#ffffff">
 	      <TD> <b>WSim tutorial</b> </TD>
-	      <TD> ICL BSN2 nodes within the <a href="http://www.wasp-project.org/">EU Wasp project</a><br>
-		<img style="border: 0px solid " src="./figures/logo-wasp-150.png" alt="" />   </TD>
+	      <TD> ICL BSN2 nodes <br><a href="http://www.wasp-project.org/">Wasp project</a>
+		<img style="border: 0px solid ; width: 100px;" src="./figures/logo-wasp-150.png" alt="" />   </TD>
 	      <TD> 
-		<a href="./tutorials/wasp/index.html" target="_new">
+		<a href="./tutorials/wasp/index.html" > <!-- target="_new"> -->
+		  <img style="border: 0px solid ; width: 44px; height: 48px;" 
+		    src="./figures/html.png" alt="" />
+		</a> 
+	      </TD>
+	    </TR>
+
+	    <TR align="middle" bgcolor="#ffffff">
+	      <TD> <b>msp430 adc12</b> </TD>
+	      <TD> How to use the Ti-MSP430 adc12 in simulation.</TD>
+	      <TD> 
+		<a href="./tutorials/wsn430-adc12/index.html" > <!-- target="_new"> -->
 		  <img style="border: 0px solid ; width: 44px; height: 48px;" 
 		    src="./figures/html.png" alt="" />
 		</a> 

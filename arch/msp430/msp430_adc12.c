@@ -19,12 +19,7 @@
 #define ADC12_VERBOSE_LEVEL 4
 #define ADC12_DEBUG_LEVEL_2 
 
-#if defined(DEBUG)
 #define HW_DMSG_ADC12(x...) VERBOSE(ADC12_VERBOSE_LEVEL,x)
-#else 
-#define HW_DMSG_ADC12(x...) do { } while (0)
-#endif
-
 
 #if defined(ADC12_DEBUG_LEVEL_2)
 #define HW_DMSG_2_DBG(x...) VERBOSE(ADC12_VERBOSE_LEVEL,x)

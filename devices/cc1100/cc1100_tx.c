@@ -44,8 +44,9 @@ double cc1100_get_frequency_mhz(struct _cc1100_t *cc1100)
   chan      = cc1100->registers[CC1100_REG_CHANNR];
 
   /* page 35 */
+
   Factor_Hz = ((double)CC1100_XOSC_FREQ_MHz * (double)1000000.0) / ((double)(1 << 16)) ;
-  Freq_Hz   = Factor_Hz * (double)(freq + chan * (256 + chan_spcM * (1 << (chan_spcE - 1)) ));
+  Freq_Hz   = Factor_Hz * (double)(freq + chan * ((256 + chan_spcM) * (1 << (chan_spcE - 1))));
   Freq_MHz  = Freq_Hz /  1000000.0;
 
   return Freq_MHz;

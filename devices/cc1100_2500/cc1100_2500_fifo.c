@@ -207,6 +207,8 @@ uint8_t cc1100_get_rx_fifo(struct _cc1100_t *cc1100) {
 	        }
 #elif defined(CC1100)
 		cc1100_assert_gdo(cc1100, 0x07, CC1100_PIN_DEASSERT);
+#else
+#error "you must define CC1100 or CC2500 model"
 #endif
 		val = cc1100->rxfifo[cc1100->rxOffset]; 
 		

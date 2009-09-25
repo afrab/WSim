@@ -21,7 +21,7 @@
 #include "devices/led/led_dev.h"
 #include "devices/m25p80/m25p80_dev.h"
 #include "devices/ds2411/ds2411_dev.h"
-#include "devices/cc1100/cc1100_dev.h"
+#include "devices/cc1100_2500/cc1100_2500_dev.h"
 #include "devices/ptty/ptty_dev.h"
 #include "devices/uigfx/uigfx_dev.h"
 #include "src/options.h"

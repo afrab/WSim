@@ -14,15 +14,15 @@ SENSLAB_DEV= ../../devices/led/libled.a			\
 		../../devices/ptty/libptty.a		\
 		../../devices/uigfx/libuigfx.a
 
-V13B_DEV= ${SENSLAB_DEV} ../../devices/cc1100/libcc1100.a
+V13B_DEV= ${SENSLAB_DEV} ../../devices/cc1100_2500/libcc1100.a
 V14_DEV=  ${SENSLAB_DEV} ../../devices/cc2420/libcc2420.a
 
 ## v1.3b: senslab model
-wsim_senslabv13b_CFLAGS=-DMSP430f1611 -DSLABV13B
+wsim_senslabv13b_CFLAGS=-DMSP430f1611 -DSLABV13B -DCC1100
 wsim_senslabv13b_SOURCES=senslab.c
 wsim_senslabv13b_LDADD=${V13B_DEV} ${WSIMADD} ${SENSLAB_MCU}
 
-worldsens_senslabv13b_CFLAGS=-DMSP430f1611 -DSLABV13B
+worldsens_senslabv13b_CFLAGS=-DMSP430f1611 -DSLABV13B -DCC1100
 worldsens_senslabv13b_SOURCES=senslab.c
 worldsens_senslabv13b_LDADD=${V13B_DEV} ${WSIMADD_WORLDSENS} ${SENSLAB_MCU}
 

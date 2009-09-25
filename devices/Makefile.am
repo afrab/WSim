@@ -3,7 +3,7 @@ SUBDIRS = 		\
 	7seg 		\
 	at45db          \
 	bargraph	\
-	cc1100 		\
+	cc1100_2500	\
 	cc2420		\
 	ds2411		\
 	gdm1602a 	\

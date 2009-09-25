@@ -1,20 +1,20 @@
 
 /**
- *  \file   cc1100_rx.c
- *  \brief  CC1100 Rx methods
+ *  \file   cc1100_2500_rx.c
+ *  \brief  CC1100/CC2500 Rx methods
  *  \author Guillaume Chelius, Antoine Fraboulet
  *  \date   2006 / 2007
  **/
 
 /*
- *  cc1100_rx.c
+ *  cc1100_2500_rx.c
  *  Created by Guillaume Chelius on 16/02/06.
  *  Copyright 2006 __WorldSens__. All rights reserved.
  *  Modified by Antoine Fraboulet, 2007
  */
 
 #include <ctype.h>
-#include "cc1100_internals.h"
+#include "cc1100_2500_internals.h"
 
 /***************************************************/
 /***************************************************/

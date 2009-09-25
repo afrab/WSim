@@ -1,13 +1,13 @@
 
 /**
- *  \file   cc1100_globals.h
- *  \brief  CC1100 global definitions
+ *  \file   cc1100_2500_globals.h
+ *  \brief  CC1100/CC2500 global definitions
  *  \author Guillaume Chelius
  *  \date   2006
  **/
 
 /*
- *  cc1100_globals.h
+ *  cc1100_2500_globals.h
  *  
  *
  *  Created by Guillaume Chelius on 20/11/05.
@@ -124,7 +124,13 @@
 #define CC1100_REG_FSCTRL0                      0x0C
 #define CC1100_REG_FSCTRL0_DEFAULT              0x00
 #define CC1100_REG_FREQ2                        0x0D
+#if defined(CC1100)
 #define CC1100_REG_FREQ2_DEFAULT                0x1E
+#elif defined(CC2500)
+#define CC1100_REG_FREQ2_DEFAULT                0x5E
+#else
+#error "you must define CC1100 or CC2500 model"
+#endif
 #define CC1100_REG_FREQ1                        0x0E
 #define CC1100_REG_FREQ1_DEFAULT                0xC4
 #define CC1100_REG_FREQ0                        0x0F
@@ -198,7 +204,13 @@
 
 /* Read only registers  (cf [1] p60) */
 #define CC1100_REG_PARTNUM                      0x30
+#if defined(CC1100)
 #define CC1100_REG_PARTNUM_DEFAULT              0x00
+#elif defined(CC2500)
+#define CC1100_REG_PARTNUM_DEFAULT              0x80
+#else
+#error "you must define CC1100 or CC2500 model"
+#endif
 #define CC1100_REG_VERSION                      0x31
 #define CC1100_REG_VERSION_DEFAULT              0x03  /* old version number 0x01 replaced by 0x03 according to current used hardware version */
 #define CC1100_REG_FREQEST                      0x32

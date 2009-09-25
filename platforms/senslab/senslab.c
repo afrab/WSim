@@ -23,7 +23,7 @@
 #include "devices/ds2411/ds2411_dev.h"
 
 #if defined(SLABV13B)
-#include "devices/cc1100/cc1100_dev.h"
+#include "devices/cc1100_2500/cc1100_2500_dev.h"
 #define RADIO_CSn_MASK  CC1100_CSn_MASK
 #define RADIO_CSn_SHIFT CC1100_CSn_SHIFT
 #define RADIO_DATA_MASK CC1100_DATA_MASK

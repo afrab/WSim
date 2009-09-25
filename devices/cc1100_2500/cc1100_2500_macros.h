@@ -1,13 +1,13 @@
 
 /**
- *  \file   cc1100_macros.h
- *  \brief  CC1100 macros
+ *  \file   cc1100_2500_macros.h
+ *  \brief  CC1100/CC2500 macros
  *  \author Guillaume Chelius
  *  \date   2006
  **/
 
 /*
- *  cc1100_macros.h
+ *  cc1100_2500_macros.h
  *  
  *
  *  Created by Guillaume Chelius on 20/11/05.
@@ -148,12 +148,27 @@
 /***************************************************/
 /***************************************************/
 
-
-#define CC1100_SET_CRC_TRUE(cc1100)			    \
-  do {							    \
-    cc1100_assert_gdo(cc1100, 0x07, CC1100_PIN_ASSERT);	    \
-    cc1100->registers[CC1100_REG_LQI] |= 0x80;		    \
+#if defined(CC1100)
+#define CC1100_SET_CRC_TRUE(cc1100)					\
+  do {									\
+    cc1100_assert_gdo(cc1100, 0x07, CC1100_PIN_ASSERT);			\
+    cc1100_assert_gdo(cc1100, 0x0F, CC1100_PIN_ASSERT);			\
+    cc1100->registers[CC1100_REG_LQI] |= 0x80;				\
   } while (0)
+
+
+#elif defined(CC2500)
+#define CC1100_SET_CRC_TRUE(cc1100)					\
+  do {									\
+    if( (cc1100_read_register(cc1100, CC1100_REG_PKTCTRL0)) & 0x08 ) {	\
+        cc1100_assert_gdo(cc1100, 0x07, CC1100_PIN_ASSERT);		\
+	cc1100_assert_gdo(cc1100, 0x0F, CC1100_PIN_ASSERT);		\
+    }									\
+    cc1100->registers[CC1100_REG_LQI] |= 0x80;				\
+  } while (0)
+#else
+#error "you must define CC1100 or CC2500 model"
+#endif
 
 #define CC1100_SET_CRC_FALSE(cc1100)		   \
   do {						   \
@@ -307,6 +322,7 @@
     cc1100->fsm_ustate = 4;						\
   } while (0)
 
+#if defined(CC1100)
 #define CC1100_RX_ENTER(cc1100)						\
   do {									\
     CC1100_DBG_STATE("cc1100:state: RX (enter)\n");			\
@@ -319,10 +335,35 @@
 		       ETRACER_CC1100_RX,0);				\
     /* PA_PD signal must be high in RX state */				\
     cc1100_assert_gdo(cc1100, 0x1B, CC1100_PIN_ASSERT);			\
+    cc1100_assert_gdo(cc1100, 0x0F, CC1100_PIN_DEASSERT);		\
     CC1100_RX_EXPECT_PREAMBLE(cc1100);					\
     CC1100_INIT_CS(cc1100);						\
     CC1100_INIT_RSSI(cc1100);						\
   } while (0)
+
+#elif defined(CC2500)
+#define CC1100_RX_ENTER(cc1100)						\
+  do {									\
+    CC1100_DBG_STATE("cc1100:state: RX (enter)\n");			\
+    CC1100_SET_CRC_TRUE(cc1100);					\
+    cc1100->fsm_state   = CC1100_STATE_RX;				\
+    cc1100->fsm_pending = CC1100_STATE_IDLE;				\
+    tracer_event_record(TRACER_CC1100_STATE, CC1100_STATE_RX);		\
+    etracer_slot_event(ETRACER_PER_ID_CC1100,				\
+		       ETRACER_PER_EVT_MODE_CHANGED,			\
+		       ETRACER_CC1100_RX,0);				\
+    /* PA_PD signal must be high in RX state */				\
+    cc1100_assert_gdo(cc1100, 0x1B, CC1100_PIN_ASSERT);			\
+    if( (cc1100_read_register(cc1100, CC1100_REG_PKTCTRL0)) & 0x08 ) {	\
+	cc1100_assert_gdo(cc1100, 0x0F, CC1100_PIN_DEASSERT);		\
+    }									\
+    CC1100_RX_EXPECT_PREAMBLE(cc1100);					\
+    CC1100_INIT_CS(cc1100);						\
+    CC1100_INIT_RSSI(cc1100);						\
+  } while (0)
+#else
+#error "you must define CC1100 or CC2500 model"
+#endif
 
 /***************************************************/
 /***************************************************/

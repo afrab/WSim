@@ -1,13 +1,13 @@
 
 /**
- *  \file   cc1100_dev.c
- *  \brief  CC1100 device model entry point
+ *  \file   cc1100_2500_dev.c
+ *  \brief  CC1100/CC2500 device model entry point
  *  \author Guillaume Chelius
  *  \date   2006
  **/
 
 /*
- *  cc1100_dev.c
+ *  cc1100_2500_dev.c
  *
  *  Created by Guillaume Chelius on 16/02/06.
  *  Copyright 2006 __WorldSens__. All rights reserved.
@@ -19,7 +19,7 @@
 #include "devices/devices.h"
 #include "machine/machine.h"
 
-#include "cc1100_internals.h"
+#include "cc1100_2500_internals.h"
 
 /***************************************************/
 /***************************************************/
@@ -37,11 +37,20 @@ tracer_id_t TRACER_CC1100_SO;
 /***************************************************/
 /***************************************************/
 /***************************************************/
-
+#if defined(CC1100)
 int cc1100_device_size (void) 
 {
   return sizeof(struct _cc1100_t);
 }
+
+#elif defined(CC2500)
+int cc2500_device_size (void) 
+{
+  return sizeof(struct _cc1100_t);
+}
+#else
+#error "you must define CC1100 or CC2500 model"
+#endif
 
 
 /***************************************************/
@@ -144,8 +153,7 @@ void cc1100_write(int dev_num, uint32_t  mask, uint32_t  value)
 	    }
 	  cc1100->CSn_pin = 0x00;
 	}
-    }
-	
+    }	
   if ((mask & CC1100_DATA_MASK) != 0) 
     {
       cc1100->SI_pin = value & CC1100_DATA_MASK;
@@ -210,6 +218,8 @@ void cc1100_read(int dev_num, uint32_t  *mask, uint32_t  *value)
 /***************************************************/
 /***************************************************/
 
+#if defined(CC1100)
+
 int cc1100_device_create (int dev_num, int fxosc_mhz, char *antenna)
 {	
   struct _cc1100_t *cc1100 = (struct _cc1100_t *) machine.device[dev_num].data;
@@ -226,6 +236,7 @@ int cc1100_device_create (int dev_num, int fxosc_mhz, char *antenna)
   machine.device[dev_num].write         = cc1100_write;
   
   machine.device[dev_num].state_size    = cc1100_device_size();
+
   machine.device[dev_num].name          = "cc1100 radio device";
 
   CC1100_XOSC_FREQ_MHz  = fxosc_mhz;
@@ -240,6 +251,43 @@ int cc1100_device_create (int dev_num, int fxosc_mhz, char *antenna)
   
   return 0;
 }
+
+#elif defined(CC2500)
+
+int cc2500_device_create (int dev_num, int fxosc_mhz, char *antenna)
+{	
+  struct _cc1100_t *cc1100 = (struct _cc1100_t *) machine.device[dev_num].data;
+
+  machine.device[dev_num].reset         = cc1100_reset;
+  machine.device[dev_num].delete        = cc1100_delete;
+  
+  machine.device[dev_num].power_up      = cc1100_power_up;
+  machine.device[dev_num].power_down    = cc1100_power_down;
+  
+  machine.device[dev_num].update        = cc1100_update;
+  
+  machine.device[dev_num].read          = cc1100_read;
+  machine.device[dev_num].write         = cc1100_write;
+  
+  machine.device[dev_num].state_size    = cc2500_device_size();
+
+  machine.device[dev_num].name          = "cc2500 radio device";
+
+  CC1100_XOSC_FREQ_MHz  = fxosc_mhz;
+  CC1100_XOSC_PERIOD_NS = 1000 / fxosc_mhz;
+
+  cc1100->worldsens_radio_id = worldsens_c_rx_register((void*)cc1100, cc1100_callback_rx, antenna);
+
+  TRACER_CC1100_STATE  = tracer_event_add_id(8, "state",  "cc2500");
+  TRACER_CC1100_STROBE = tracer_event_add_id(8, "strobe", "cc2500");
+  TRACER_CC1100_CS     = tracer_event_add_id(1, "cs",     "cc2500");
+  TRACER_CC1100_SO     = tracer_event_add_id(1, "so",     "cc2500");
+  
+  return 0;
+}
+#else
+#error "you must define CC1100 or CC2500 model"
+#endif
 
 /***************************************************/
 /***************************************************/

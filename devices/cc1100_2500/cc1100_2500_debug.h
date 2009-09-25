@@ -1,14 +1,14 @@
 
 /**
- *  \file   cc1100_debug.h
- *  \brief  CC1100 debug messages
+ *  \file   cc1100_2500_debug.h
+ *  \brief  CC1100/CC2500 debug messages
  *  \author Guillaume Chelius
  *  \date   2006
  **/
 
 
 /*
- *  cc1100_debug.h
+ *  cc1100_2500_debug.h
  *  
  *
  *  Created by Guillaume Chelius on 16/02/06.

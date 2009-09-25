@@ -1,13 +1,13 @@
 
 /**
- *  \file   cc1100_internals.h
- *  \brief  CC1100 internal definitions and structures
+ *  \file   cc1100_2500_internals.h
+ *  \brief  CC1100/CC2500 internal definitions and structures
  *  \author Guillaume Chelius
  *  \date   2006
  **/
 
 /*
- *  cc1100_internals.h
+ *  cc1100_2500_internals.h
  *  
  *
  *  Created by Guillaume Chelius on 16/02/06.
@@ -22,10 +22,10 @@
 #include "libwsnet/libwsnet.h"
 #include "machine/machine.h"
 
-#include "cc1100_globals.h"
-#include "cc1100_dev.h"
-#include "cc1100_debug.h"
-#include "cc1100_macros.h"
+#include "cc1100_2500_globals.h"
+#include "cc1100_2500_dev.h"
+#include "cc1100_2500_debug.h"
+#include "cc1100_2500_macros.h"
 
 /***************************************************/
 /***************************************************/
@@ -211,7 +211,7 @@ void	 cc1100_flush_rx_fifo	        (struct _cc1100_t *cc1100);
 ***************************************/
 double	 cc1100_get_frequency_mhz       (struct _cc1100_t *cc1100);
 int	 cc1100_get_modulation	        (struct _cc1100_t *cc1100);
-double	 cc1100_get_power_dbm		(struct _cc1100_t *cc1100);
+double	 cc1100_get_power_dbm		(struct _cc1100_t *cc1100, double freq);
 uint64_t cc1100_get_tx_byte_duration    (struct _cc1100_t *cc1100);
 uint8_t  cc1100_get_preamble_length     (struct _cc1100_t *cc1100);
 

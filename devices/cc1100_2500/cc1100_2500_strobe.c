@@ -1,13 +1,13 @@
 
 /**
- *  \file   cc1100_strobe.c
- *  \brief  CC1100 strobe commands
+ *  \file   cc1100_2500_strobe.c
+ *  \brief  CC1100/CC2500 strobe commands
  *  \author Guillaume Chelius
  *  \date   2006
  **/
 
 /*
- *  cc1100_strobe.c
+ *  cc1100_2500_strobe.c
  *  
  *
  *  Created by Guillaume Chelius on 16/02/06.
@@ -15,7 +15,7 @@
  *
  */
 
-#include "cc1100_internals.h"
+#include "cc1100_2500_internals.h"
 
 /**
  * Implemented command strobes:

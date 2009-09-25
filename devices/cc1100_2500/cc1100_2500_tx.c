@@ -1,19 +1,19 @@
 
 /**
- *  \file   cc1100_tx.c
- *  \brief  CC1100 Tx methods
+ *  \file   cc1100_2500_tx.c
+ *  \brief  CC1100/CC2500 Tx methods
  *  \author Guillaume Chelius, Antoine Fraboulet
  *  \date   2006 / 2007
  **/
 
 /*
- *  cc1100_tx.c
+ *  cc1100_2500_tx.c
  *  Created by Guillaume Chelius on 16/02/06.
  *  Copyright 2006 __WorldSens__. All rights reserved.
  *  Modified by Antoine Fraboulet, 2007
  */
-
-#include "cc1100_internals.h"
+#include <math.h>
+#include "cc1100_2500_internals.h"
 
 /***************************************************/
 /***************************************************/
@@ -57,13 +57,125 @@ double cc1100_get_frequency_mhz(struct _cc1100_t *cc1100)
 /***************************************************/
 /***************************************************/
 
-double cc1100_get_power_dbm(struct _cc1100_t UNUSED *cc1100) 
+double cc1100_get_power_dbm(struct _cc1100_t UNUSED *cc1100, double freq)
 {
-  /* page 58 */
-  //  uint8_t pa_entry = cc1100->registers[CC1100_REG_FREND0] & 0x07;
-  //  TODO: cc1100->patable[pa_entry] to dBm
-  //  output is fixed to 0.0 dBm
-  return +5.0;
+  uint8_t pa_entry  = cc1100->registers[CC1100_REG_FREND0] & 0x07;
+  uint8_t pa_value  = cc1100->patable[pa_entry];
+  double dbm;
+  double approx = 1;  /* MHz */
+
+#if defined(CC2500)
+  switch (pa_value) {
+  case 0x00 : dbm = -50; break;
+  case 0x50 : dbm = -30; break;
+  case 0x44 : dbm = -28; break;
+  case 0xC0 : dbm = -26; break;
+  case 0x84 : dbm = -24; break;
+  case 0x81 : dbm = -22; break;
+  case 0x46 : dbm = -20; break;
+  case 0x93 : dbm = -18; break;
+  case 0x55 : dbm = -16; break;
+  case 0x8D : dbm = -14; break;
+  case 0xC6 : dbm = -12; break;
+  case 0x97 : dbm = -10; break;
+  case 0x6E : dbm = - 8; break;
+  case 0x7F : dbm = - 6; break;
+  case 0xA9 : dbm = - 4; break;
+  case 0xBB : dbm = - 2; break;
+  case 0xFE : dbm =   0; break;
+  case 0xFF : dbm =   1; break;
+    
+  default   : dbm =   0;
+  }
+
+
+#elif defined(CC1100)
+  if ((freq > 315.0 - approx) && (freq < 315.0 + approx)) {
+      freq = 315.0;
+  }
+  if ((freq > 433.0 - approx) && (freq < 433.0 + approx)) {
+      freq = 433.0;
+  }
+  if ((freq > 868.0 - approx) && (freq < 868.0 + approx)) {
+      freq = 868.0;
+  }
+  if ((freq > 915.0 - approx) && (freq < 915.0 + approx)) {
+      freq = 915.0;
+  }
+
+  switch((long int)freq) {
+
+  case 315 :
+      switch (pa_value) {
+      case 0x04 : dbm = -30; break;
+      case 0x17 : dbm = -20; break;
+      case 0x1D : dbm = -15; break;
+      case 0x26 : dbm = -10; break;
+      case 0x57 : dbm = - 5; break;
+      case 0x60 : dbm =   0; break;
+      case 0x85 : dbm =   5; break;
+      case 0xCB : dbm =   7; break;
+      case 0xC6 : dbm = 8.7; break;
+      case 0xC2 : dbm =  10; break;	
+      default   : dbm =   0;
+      };
+      break;
+
+  case 433 :
+      switch (pa_value) {
+      case 0x04 : dbm = -30; break;
+      case 0x17 : dbm = -20; break;
+      case 0x1C : dbm = -15; break;
+      case 0x26 : dbm = -10; break;
+      case 0x57 : dbm = - 5; break;
+      case 0x60 : dbm =   0; break;
+      case 0x85 : dbm =   5; break;
+      case 0xC8 : dbm =   7; break;
+      case 0xC6 : dbm = 8.7; break;
+      case 0xC0 : dbm =  10; break;	
+      default   : dbm =   0;
+      };
+      break;
+      
+  case 868 :
+      switch (pa_value) {
+      case 0x03 : dbm = -30; break;
+      case 0x0D : dbm = -20; break;
+      case 0x1C : dbm = -15; break;
+      case 0x34 : dbm = -10; break;
+      case 0x57 : dbm = - 5; break;
+      case 0x8E : dbm =   0; break;
+      case 0x85 : dbm =   5; break;
+      case 0xCC : dbm =   7; break;
+      case 0xC6 : dbm = 8.7; break;
+      case 0xC3 : dbm =  10; break;
+      default   : dbm =   0;
+      };
+      break;
+
+  case 915 :
+      switch (pa_value) {
+      case 0x11 : dbm = -30; break;
+      case 0x0D : dbm = -20; break;
+      case 0x1C : dbm = -15; break;
+      case 0x26 : dbm = -10; break;
+      case 0x57 : dbm = - 5; break;
+      case 0x8E : dbm =   0; break;
+      case 0x83 : dbm =   5; break;
+      case 0xC9 : dbm =   7; break;
+      case 0xC6 : dbm = 8.7; break;
+      case 0xC0 : dbm =  10; break;
+      default   : dbm =   0;
+      };
+      break;
+
+  default : dbm = 0;
+  }
+#else
+#error "you must define CC1100 or CC2500 model"
+#endif
+
+  return dbm;
 }
 
 /***************************************************/
@@ -458,7 +570,7 @@ void cc1100_tx (struct _cc1100_t *cc1100)
     tx.data       = data;
     tx.freq_mhz   = cc1100_get_frequency_mhz(cc1100);
     tx.modulation = cc1100_get_modulation(cc1100);
-    tx.power_dbm  = cc1100_get_power_dbm(cc1100);
+    tx.power_dbm  = cc1100_get_power_dbm(cc1100, tx.freq_mhz);
     tx.duration   = duration;
     tx.radio_id   = cc1100->worldsens_radio_id;
     worldsens_c_tx(&tx);

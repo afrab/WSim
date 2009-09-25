@@ -1,13 +1,13 @@
 
 /**
- *  \file   cc1100_gdo.c
- *  \brief  CC1100 GDOx pins handling
+ *  \file   cc1100_2500_gdo.c
+ *  \brief  CC1100/CC2500 GDOx pins handling
  *  \author Guillaume Chelius
  *  \date   2006
  **/
 
 /*
- *  cc1100_gdo.c
+ *  cc1100_2500_gdo.c
  *  
  *
  *  Created by Guillaume Chelius on 16/02/06.
@@ -19,7 +19,7 @@
  * Implemented signals: 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x29, 0x2E, 0x3F
  */
 
-#include "cc1100_internals.h"
+#include "cc1100_2500_internals.h"
 
 
 /***************************************************/
@@ -201,7 +201,13 @@ void cc1100_update_gdo (struct _cc1100_t *cc1100, uint8_t val) {
 			cc1100_assert_gdo(cc1100, 0x06, CC1100_PIN_DEASSERT);
 			break;
 		case 0x07: //ToCheck
+#if defined(CC2500)
+		        if( (cc1100_read_register(cc1100, CC1100_REG_PKTCTRL0)) & 0x08 ) {
+			    cc1100_assert_gdo(cc1100, 0x07, CC1100_PIN_DEASSERT);
+			}
+#elif defined(CC1100)
 			cc1100_assert_gdo(cc1100, 0x07, CC1100_PIN_DEASSERT);
+#endif
 			break;
 		case 0x29:
 			cc1100_assert_gdo(cc1100, 0x29, CC1100_PIN_ASSERT);

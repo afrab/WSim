@@ -1,13 +1,13 @@
 
 /**
- *  \file   cc1100_state.c
- *  \brief  CC1100 state functions
+ *  \file   cc1100_2500_state.c
+ *  \brief  CC1100/CC2500 state functions
  *  \author Guillaume Chelius
  *  \date   2006
  **/
 
 /*
- *  cc1100_state.c
+ *  cc1100_2500_state.c
  *  
  *
  *  Created by Guillaume Chelius on 16/02/06.
@@ -41,7 +41,7 @@
  *   - TX
  **/
 
-#include "cc1100_internals.h"
+#include "cc1100_2500_internals.h"
 
 /***************************************************/
 /***************************************************/

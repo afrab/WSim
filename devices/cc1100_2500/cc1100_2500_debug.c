@@ -1,7 +1,7 @@
 
 /**
- *  \file   cc1100_debug.c
- *  \brief  CC1100 debug messages
+ *  \file   cc1100_2500_debug.c
+ *  \brief  CC1100/CC2500 debug messages
  *  \author Antoine Fraboulet
  *  \date   2007
  **/
@@ -10,8 +10,8 @@
 #include <string.h>
 
 #include "liblogger/logger.h"
-#include "cc1100_globals.h"
-#include "cc1100_debug.h"
+#include "cc1100_2500_globals.h"
+#include "cc1100_2500_debug.h"
 
 /***************************************************/
 /***************************************************/

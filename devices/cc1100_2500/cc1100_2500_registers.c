@@ -1,7 +1,7 @@
 
 /**
- *  \file   cc1100_registers.c
- *  \brief  CC1100 registers
+ *  \file   cc1100_2500_registers.c
+ *  \brief  CC1100/CC2500 registers
  *  \author Guillaume Chelius
  *  \date   2006
  **/
@@ -15,7 +15,7 @@
  *
  */
 
-#include "cc1100_internals.h"
+#include "cc1100_2500_internals.h"
 
 
 /***************************************************/

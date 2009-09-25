@@ -582,7 +582,7 @@ devices/gdm1602a/Makefile
 devices/hd44780/Makefile
 devices/bargraph/Makefile
 devices/ptty/Makefile
-devices/cc1100/Makefile
+devices/cc1100_2500/Makefile
 devices/cc2420/Makefile
 devices/uigfx/Makefile
 devices/spidev/Makefile

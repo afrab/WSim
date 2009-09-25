@@ -1,20 +1,20 @@
 
 /**
- *  \file   cc1100_fifo.c
- *  \brief  CC1100 Data RX/TX fifo 
+ *  \file   cc1100_2500_fifo.c
+ *  \brief  CC1100/CC2500 Data RX/TX fifo 
  *  \author Guillaume Chelius
  *  \date   2006
  **/
 
 /*
- *  cc1100_fifo.c
+ *  cc1100_2500_fifo.c
  *  
  *
  *  Created by Guillaume Chelius on 16/02/06.
  *  Copyright 2006 __WorldSens__. All rights reserved.
  *
  */
-#include "cc1100_internals.h"
+#include "cc1100_2500_internals.h"
 
 /* Tx/Rx Fifo threshold, page 46
  * value   0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15
@@ -201,9 +201,13 @@ uint8_t cc1100_get_rx_fifo(struct _cc1100_t *cc1100) {
 	if (cc1100->rxBytes == 0) {
 		CC1100_DBG_IMPL("cc1100: (fifo IMPLEMENTATION): RX fifo empty. Unspecified behavior.\n");
 	} else {
-		
+#if defined(CC2500)
+	        if( (cc1100_read_register(cc1100, CC1100_REG_PKTCTRL0)) & 0x08 ) {		
+		    cc1100_assert_gdo(cc1100, 0x07, CC1100_PIN_DEASSERT);
+	        }
+#elif defined(CC1100)
 		cc1100_assert_gdo(cc1100, 0x07, CC1100_PIN_DEASSERT);
-		
+#endif
 		val = cc1100->rxfifo[cc1100->rxOffset]; 
 		
 		cc1100->rxOffset++;

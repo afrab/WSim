@@ -62,7 +62,6 @@ double cc1100_get_power_dbm(struct _cc1100_t UNUSED *cc1100, double freq)
   uint8_t pa_entry  = cc1100->registers[CC1100_REG_FREND0] & 0x07;
   uint8_t pa_value  = cc1100->patable[pa_entry];
   double dbm;
-  double approx = 1;  /* MHz */
 
 #if defined(CC2500)
   switch (pa_value) {
@@ -90,6 +89,7 @@ double cc1100_get_power_dbm(struct _cc1100_t UNUSED *cc1100, double freq)
 
 
 #elif defined(CC1100)
+  double approx = 1;  /* MHz */
   if ((freq > 315.0 - approx) && (freq < 315.0 + approx)) {
       freq = 315.0;
   }

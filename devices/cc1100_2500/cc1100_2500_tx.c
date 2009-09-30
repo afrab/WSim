@@ -57,7 +57,7 @@ double cc1100_get_frequency_mhz(struct _cc1100_t *cc1100)
 /***************************************************/
 /***************************************************/
 
-double cc1100_get_power_dbm(struct _cc1100_t UNUSED *cc1100, double freq)
+double cc1100_get_power_dbm(struct _cc1100_t UNUSED *cc1100, double UNUSED freq)
 {
   uint8_t pa_entry  = cc1100->registers[CC1100_REG_FREND0] & 0x07;
   uint8_t pa_value  = cc1100->patable[pa_entry];

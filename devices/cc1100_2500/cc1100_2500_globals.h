@@ -58,15 +58,15 @@
 #define CC1100_STATE_FS_WAKEUP                  0x06
 #define CC1100_STATE_FS_CALIBRATE               0x08
 #define CC1100_STATE_SETTLING                   0x09
-#define CC1100_STATE_CALIBRATE                  0x12
-#define CC1100_STATE_RX                         0x13
-#define CC1100_STATE_TXRX_SETTLING              0x16
-#define CC1100_STATE_RX_OVERFLOW                0x17
-#define CC1100_STATE_FSTXON                     0x18
-#define CC1100_STATE_TX                         0x19
-#define CC1100_STATE_RXTX_SETTLING              0x21
-#define CC1100_STATE_TX_UNDERFLOW               0x22
-#define CC1100_STATE_IDLING                     0x23
+#define CC1100_STATE_CALIBRATE                  0x0C
+#define CC1100_STATE_RX                         0x0D
+#define CC1100_STATE_TXRX_SETTLING              0x10
+#define CC1100_STATE_RX_OVERFLOW                0x11
+#define CC1100_STATE_FSTXON                     0x12
+#define CC1100_STATE_TX                         0x13
+#define CC1100_STATE_RXTX_SETTLING              0x15
+#define CC1100_STATE_TX_UNDERFLOW               0x16
+#define CC1100_STATE_IDLING                     0x17
 
 
 /* CC1100 RAM & register Access (cf [1] p18) */

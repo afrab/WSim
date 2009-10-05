@@ -25,6 +25,7 @@
 #include "cc2420_tx.h"
 #include "cc2420_rx.h"
 #include "cc2420_crc_ccitt.h"
+#include "cc2420_mux.h"
 
 
 uint8_t cc2420_read_pin  (struct _cc2420_t * cc2420, uint8_t pin);

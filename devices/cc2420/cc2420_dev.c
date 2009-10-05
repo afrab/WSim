@@ -30,6 +30,7 @@
 #include "cc2420_internals.h"
 #include "cc2420_macros.h"
 #include "cc2420_debug.h"
+#include "cc2420_mux.h"
 #include "cc2420_dev.h"
 
 /***************************************************/
@@ -178,8 +179,10 @@ void cc2420_reset_internal(struct _cc2420_t * cc2420)
   cc2420->pll_locked    = 0;                                /* set pll state to unlocked    */
   cc2420->encoding_busy = 0;                                /* set encoding module state  */
                                                             /*     to idle */
+  /* update test output signals */
+  cc2420_update_mux(cc2420, CC2420_REG_IOCFG1_DEFAULT);
 
-    /* update internal rx / tx variables */
+  /* update internal rx / tx variables */
 
   cc2420->tx_frame_pending    = 0;
   cc2420->tx_preamble_symbols = cc2420_tx_preamble_symbols(cc2420);

@@ -20,6 +20,7 @@
 #include "cc2420_registers.h"
 #include "cc2420_tx.h"
 #include "cc2420_debug.h"
+#include "cc2420_mux.h"
 
 /***************************************************/
 /***************************************************/
@@ -122,6 +123,11 @@ void cc2420_write_register(struct _cc2420_t * cc2420, uint8_t addr, uint16_t val
 	/* recalcalculate TX preamble length */
 	/* we do it there to avoid to calculate it again on each tx */
 	cc2420->tx_preamble_symbols = cc2420_tx_preamble_symbols(cc2420);
+    }
+
+    if (addr == CC2420_REG_IOCFG1) {
+        /* maybe need to update CCA and SFD pin */
+        cc2420_update_mux(cc2420, val);
     }
 }
 

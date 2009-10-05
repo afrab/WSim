@@ -13,6 +13,7 @@ CC2420=	cc2420_dev.c	   \
 	cc2420_fifo.c      \
 	cc2420_ram.c       \
 	cc2420_crc_ccitt.c \
+	cc2420_mux.c	   \
 	cc2420_state.h     \
 	cc2420_dev.h	   \
 	cc2420.h           \
@@ -24,7 +25,9 @@ CC2420=	cc2420_dev.c	   \
 	cc2420_ram.h       \
 	cc2420_crc_ccitt.h \
 	cc2420_strobes.h   \
+	cc2420_mux.h       \
 	cc2420_debug.h     
+
 
 libcc2420_a_CFLAGS=
 libcc2420_a_SOURCES=$(CC2420)

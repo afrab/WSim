@@ -38,10 +38,11 @@
 /***************************************************/
 /***************************************************/
 
-#define CC2420_PINS_DEBUG
-#define CC2420_ACCESS_DEBUG
-#define CC2420_STROBE_DEBUG
-#define CC2420_STATE_DEBUG
+#define _CC2420_PINS_DEBUG
+#define _CC2420_ACCESS_DEBUG
+#define _CC2420_STROBE_DEBUG
+#define _CC2420_STATE_DEBUG
+#define _CC2420_MUX_DEBUG
 
 #ifdef CC2420_PINS_DEBUG
 #    define CC2420_DBG_PINS(x...) HW_DMSG(x)
@@ -65,6 +66,12 @@
 #    define CC2420_DBG_STATE(x...) HW_DMSG(x)
 #else
 #    define CC2420_DBG_STATE(x...) do { } while (0)
+#endif
+
+#ifdef CC2420_MUX_DEBUG
+#    define CC2420_DBG_MUX(x...) HW_DMSG(x)
+#else
+#    define CC2420_DBG_MUX(x...) do { } while (0)
 #endif
 
 /***************************************************/

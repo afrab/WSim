@@ -117,6 +117,11 @@ extern tracer_id_t TRACER_CC2420_CS;
 #define CC2420_CCA_MODE_BOTH          3 /* both 1 and 2 modes */
 
 
+/*
+ * Used for test output signals pins (CCA and SFD)
+ */
+#define CC2420_PIN_ASSERT             1
+#define CC2420_PIN_DEASSERT           0
 
 /***************************************************/
 /***************************************************/
@@ -172,20 +177,23 @@ struct _cc2420_t {
     int8_t  cca_threshold;
     uint8_t cca_hyst;
 
+    /* cca value storage when cca pin isn't used to return cca value */
+    uint8_t cca_internal_value;
+
     /* state of XOSC */
-    uint8_t  xosc_stable;
+    uint8_t xosc_stable;
 
     /* state of PLL */
-    uint8_t  pll_locked;
+    uint8_t pll_locked;
 
     /* time to reach for PLL to become locked */
     uint64_t pll_lock_timer;
 
     /* state of encoding module */
-    uint8_t  encoding_busy;
+    uint8_t encoding_busy;
 
     /* is tx active ? */
-    uint8_t  tx_active;
+    uint8_t tx_active;
 
     /* number of user bytes in FIFO */
     uint8_t tx_fifo_len;
@@ -332,13 +340,13 @@ uint8_t  cc2420_read_pin       (struct _cc2420_t * cc2420, uint8_t pin);
 int      cc2420_io_pins        (struct _cc2420_t * cc2420);
 
 
-int      cc2420_reset      (int dev_num);
-int      cc2420_delete     (int dev_num);
-int      cc2420_update     (int dev_num);
-int      cc2420_power_up   (int dev_num);
-int      cc2420_power_down (int dev_num);
+int      cc2420_reset          (int dev_num);
+int      cc2420_delete         (int dev_num);
+int      cc2420_update         (int dev_num);
+int      cc2420_power_up       (int dev_num);
+int      cc2420_power_down     (int dev_num);
 
-void     cc2420_read       (int dev_num, uint32_t *mask, uint32_t *value);
-void     cc2420_write      (int dev_num, uint32_t  mask, uint32_t  value);
+void     cc2420_read           (int dev_num, uint32_t *mask, uint32_t *value);
+void     cc2420_write          (int dev_num, uint32_t  mask, uint32_t  value);
 
 #endif

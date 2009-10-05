@@ -28,6 +28,7 @@
 #include "cc2420_internals.h"
 #include "cc2420_debug.h"
 #include "cc2420_crc_ccitt.h"
+#include "cc2420_mux.h"
 
 
 /**
@@ -39,11 +40,10 @@ void cc2420_record_rssi(struct _cc2420_t * cc2420, double dBm) {
     uint8_t cca_mode;
     uint8_t cca_threshold;
     uint8_t cca_hyst;
-    uint8_t old_CCA_pin;
     int16_t rx_rssi_value = 0;
     int i;
 
-    /* if dBm = -100 it means that cc2420 received any value during sync time. Skip this value for rssi average calculation */
+    /* if dBm = -100 it means that cc2420 didn't  receive any value during sync time. Skip this value for rssi average calculation */
     if (dBm == -100) {
         cc2420->rx_rssi_value = dBm - CC2420_RSSI_OFFSET;
     }
@@ -70,10 +70,10 @@ void cc2420_record_rssi(struct _cc2420_t * cc2420, double dBm) {
         }			     
     }
 
-
     
     /* update RSSI value register */
     cc2420->registers[CC2420_REG_RSSI] |= cc2420->rx_rssi_value;
+
 
     /* 
      * update CCA 
@@ -83,68 +83,81 @@ void cc2420_record_rssi(struct _cc2420_t * cc2420, double dBm) {
     cca_hyst      = CC2420_REG_MDMCTRL0_CCA_HYST(cc2420->registers[CC2420_REG_MDMCTRL0]) >> 8;
     cca_threshold = CC2420_REG_RSSI_CCA_THR (cc2420->registers[CC2420_REG_RSSI]) >> 8;
 
-    old_CCA_pin = cc2420->CCA_pin;
+    uint8_t old_cca_value = cc2420->cca_internal_value;
 	
     switch (cca_mode) {
     case CC2420_CCA_MODE_RESERVED :
-	cc2420->CCA_pin = 0xFF;
+	CC2420_DEBUG("cc2420_record_rssi : bad CCA mode %d (reserved)\n", cca_mode);
+        cc2420_assert_ccamux(cc2420, 0x00, CC2420_PIN_ASSERT);
+	cc2420->cca_internal_value = 0xFF;
 	break;
 
     case CC2420_CCA_MODE_THRESHOLD :
 	if (!cc2420->rx_rssi_valid) {
-	    cc2420->CCA_pin = 0x00;
+	    cc2420_assert_ccamux(cc2420, 0x00, CC2420_PIN_DEASSERT);
+	    cc2420->cca_internal_value = 0x00;
 	    break;
 	}
-	if (cc2420->CCA_pin == 0xFF) {
-	    if (cc2420->rx_rssi_value >= cca_threshold)
-		cc2420->CCA_pin = 0x00;
+	if (cc2420->rx_rssi_value >= cca_threshold) {
+	    cc2420_assert_ccamux(cc2420, 0x00, CC2420_PIN_DEASSERT);
+	    cc2420->cca_internal_value = 0x00;
+	    break;
 	}
-	else if (cc2420->CCA_pin == 0x00) {
-	    if (cc2420->rx_rssi_value < (cca_threshold - cca_hyst) ) {
-		cc2420->CCA_pin = 0xFF;
-	    }
+	if (cc2420->rx_rssi_value < (cca_threshold - cca_hyst) ) {
+	    cc2420_assert_ccamux(cc2420, 0x00, CC2420_PIN_ASSERT);
+	    cc2420->cca_internal_value = 0xFF;
 	}
 	break;
     
     case CC2420_CCA_MODE_DATA :
+	if (!cc2420->rx_rssi_valid) {
+	    cc2420_assert_ccamux(cc2420, 0x00, CC2420_PIN_DEASSERT);
+	    cc2420->cca_internal_value = 0x00;
+	    break;
+	}
 	if (cc2420->rx_data_bytes == 0) {
-	    cc2420->CCA_pin = 0xFF;
+	    cc2420_assert_ccamux(cc2420, 0x00, CC2420_PIN_ASSERT);
+	    cc2420->cca_internal_value = 0xFF;
 	}
 	else {
-	    cc2420->CCA_pin = 0x00;
+	    cc2420_assert_ccamux(cc2420, 0x00, CC2420_PIN_DEASSERT);
+	    cc2420->cca_internal_value = 0x00;
 	}
 	break;
     
     case CC2420_CCA_MODE_BOTH :
+	if (!cc2420->rx_rssi_valid) {
+	    cc2420_assert_ccamux(cc2420, 0x00, CC2420_PIN_DEASSERT);
+	    cc2420->cca_internal_value = 0x00;
+	    break;
+	}
 	/* valid data first */
 	if (cc2420->rx_data_bytes != 0) {
-	    cc2420->CCA_pin = 0x00;
+	    cc2420_assert_ccamux(cc2420, 0x00, CC2420_PIN_DEASSERT);
+	    cc2420->cca_internal_value = 0x00;
 	    break;
 	}
 	/* and check threshold */
-	if (!cc2420->rx_rssi_valid) {
-	    cc2420->CCA_pin = 0x00;
+	if (cc2420->rx_rssi_value >= cca_threshold) {
+	    cc2420_assert_ccamux(cc2420, 0x00, CC2420_PIN_DEASSERT);
+	    cc2420->cca_internal_value = 0x00;
 	    break;
 	}
-	if (cc2420->CCA_pin == 0xFF) {
-	    if (cc2420->rx_rssi_value >= cca_threshold)
-		cc2420->CCA_pin = 0x00;
-	}
-	else if (cc2420->CCA_pin == 0x00) {
-	    if (cc2420->rx_rssi_value < (cca_threshold - cca_hyst) ) {
-		cc2420->CCA_pin = 0xFF;
-	    }
+	if (cc2420->rx_rssi_value < (cca_threshold - cca_hyst) ) {
+	    cc2420_assert_ccamux(cc2420, 0x00, CC2420_PIN_ASSERT);
+	    cc2420->cca_internal_value = 0xFF;
 	}
 	break;
 
     default : 
 	CC2420_DEBUG("cc2420_record_rssi : bad CCA mode %d\n", cca_mode);
-	cc2420->CCA_pin = 0xFF;
+	cc2420_assert_ccamux(cc2420, 0x00, CC2420_PIN_ASSERT);
+	cc2420->cca_internal_value = 0xFF;
 	break;
     }
-	
-    if (cc2420->CCA_pin != old_CCA_pin) {
-	cc2420->CCA_set = 1;
+
+    if (old_cca_value != cc2420->cca_internal_value) {
+      CC2420_DEBUG("cc2420_record_rssi : CCA internal value changed from %02x to %02x\n", old_cca_value, cc2420->cca_internal_value);
     }
 
     return;
@@ -158,8 +171,8 @@ void cc2420_record_rssi(struct _cc2420_t * cc2420, double dBm) {
 
 int cc2420_check_cca(struct _cc2420_t * cc2420) {
 
-    /* we just read the value of CCA_pin since CCA is calculated at RX time with RSSI */
-  int cc = cc2420->CCA_pin;
+    /* we just read the internal value of CCA since CCA is calculated at RX time with RSSI */
+  int cc = cc2420->cca_internal_value;
 
   if (cc)
     return 1;
@@ -739,7 +752,7 @@ CC2420_DEBUG("cc2420_callback_rx : entering RX Callback\n");
 		}
 		/* CRC is ok, so replace the 2 FCS bytes by RSSI and CRC/Corr (see 16.4 p38) */
 		else {
-		  cc2420_fcs_replace(cc2420);
+		    cc2420_fcs_replace(cc2420);
 		}
 	    }
 

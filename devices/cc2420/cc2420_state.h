@@ -79,6 +79,7 @@ enum {
 	cc2420->rx_rssi_valid = 0;					\
 	cc2420->pll_locked = 0;						\
 	cc2420_pll_register_update(cc2420);				\
+	cc2420_assert_ccamux(cc2420, 0x18, CC2420_PIN_DEASSERT);	\
 	CC2420_DBG_STATE("cc2420:state: ENTERING VREG_OFF\n");		\
 	tracer_event_record(TRACER_CC2420_STATE,			\
                             CC2420_STATE_VREG_OFF);			\
@@ -143,6 +144,7 @@ enum {
 	cc2420->rx_rssi_valid = 0;					\
 	cc2420->pll_locked = 0;						\
 	cc2420_pll_register_update(cc2420);				\
+	cc2420_assert_ccamux(cc2420, 0x18, CC2420_PIN_DEASSERT);	\
 	CC2420_DBG_STATE("cc2420:state: ENTERING POWER_DOWN\n");	\
 	tracer_event_record(TRACER_CC2420_STATE,			\
                             CC2420_STATE_POWER_DOWN);			\
@@ -162,6 +164,7 @@ enum {
 	cc2420->tx_active     = 0;					\
 	cc2420->rx_rssi_valid = 0;					\
 	cc2420->pll_locked = 0;						\
+	cc2420_assert_ccamux(cc2420, 0x18, CC2420_PIN_ASSERT);		\
 	cc2420_pll_register_update(cc2420);				\
 	CC2420_DBG_STATE("cc2420:state: ENTERING IDLE\n");		\
 	tracer_event_record(TRACER_CC2420_STATE,			\
@@ -217,8 +220,7 @@ enum {
 	cc2420_pll_register_update(cc2420);				\
 	/* update SFD pin (cf [1] p.34) */				\
 	if (cc2420->SFD_pin == 0xFF) {					\
-	    cc2420->SFD_pin    = 0x00;					\
-	    cc2420->SFD_set    = 1;					\
+	    cc2420_assert_sfdmux(cc2420, 0x00, CC2420_PIN_DEASSERT);	\
 	}								\
 	CC2420_DBG_STATE("cc2420:state: ENTERING RX_CALIBRATE\n");	\
 	tracer_event_record(TRACER_CC2420_STATE,			\
@@ -249,8 +251,7 @@ enum {
 	cc2420->tx_bytes   = 0;						\
 	cc2420->fsm_ustate = CC2420_USTATE_TX_FRAME_DATA;		\
 	/* update SFD pin (cf [1] p.34) */				\
-	cc2420->SFD_pin    = 0xFF;					\
-	cc2420->SFD_set    = 1;						\
+	cc2420_assert_sfdmux(cc2420, 0x00, CC2420_PIN_ASSERT);		\
 	CC2420_DBG_STATE("cc2420:state: ENTERING TX_FRAME\n");		\
 	tracer_event_record(TRACER_CC2420_STATE,			\
                             CC2420_STATE_TX_FRAME);			\
@@ -286,8 +287,7 @@ enum {
 	cc2420->rx_len          = 0;					\
 	cc2420->rx_data_bytes   = 0;					\
 	cc2420->rx_fcf          = 0;					\
-	cc2420->SFD_pin         = 0x00;					\
-	cc2420->SFD_set         = 1;					\
+	cc2420_assert_sfdmux(cc2420, 0x00, CC2420_PIN_DEASSERT);	\
 	cc2420->rx_addr_decode_failed = 0;				\
 	CC2420_DBG_STATE("cc2420:state: ENTERING RX_SFD_SEARCH\n");	\
 	tracer_event_record(TRACER_CC2420_STATE,			\
@@ -304,8 +304,7 @@ enum {
 	cc2420->rx_data_bytes  = 0;					\
 	cc2420->rx_frame_start = cc2420->rx_fifo_write;			\
 	cc2420->rx_sync_timer  = MACHINE_TIME_GET_NANO() + 2 * CC2420_SYMBOL_PERIOD; \
-	cc2420->SFD_pin        = 0xFF;					\
-	cc2420->SFD_set        = 1;					\
+	cc2420_assert_sfdmux(cc2420, 0x00, CC2420_PIN_ASSERT);		\
 	CC2420_DBG_STATE("cc2420:state: ENTERING RX_FRAME\n");		\
 	tracer_event_record(TRACER_CC2420_STATE,			\
                             CC2420_STATE_RX_FRAME);			\
@@ -386,8 +385,7 @@ enum {
 	cc2420->tx_bytes   = 0;                                         \
 	cc2420->fsm_ustate = CC2420_USTATE_TX_FRAME_DATA;               \
 	/* update SFD pin (cf [1] p.34) */                              \
-	cc2420->SFD_pin    = 0xFF;                                      \
-	cc2420->SFD_set    = 1;                                         \
+	cc2420_assert_sfdmux(cc2420, 0x00, CC2420_PIN_ASSERT);		\
 	CC2420_DBG_STATE("cc2420:state: ENTERING TX_FRAME\n");		\
 	tracer_event_record(TRACER_CC2420_STATE,			\
 			    CC2420_STATE_TX_ACK);			\

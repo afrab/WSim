@@ -21,6 +21,7 @@
 #include "cc2420_debug.h"
 #include "cc2420_rx.h"
 #include "cc2420_registers.h"
+#include "cc2420_mux.h"
 
 
 /***************************************************/

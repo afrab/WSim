@@ -12,6 +12,7 @@
  *
  *  Created by Nicolas Boulicault
  *  Copyright 2005 __WorldSens__. All rights reserved.
+ *  Modified by Loic Lemaitre 2009
  *
  */
 #include <stdio.h>
@@ -371,8 +372,7 @@ int cc2420_io_pins(struct _cc2420_t * cc2420)
 	 */
 	CC2420_DBG_ACCESS("cc2420:access: write address 0x%x / REG byte2 = 0x%02x\n", 
 			  cc2420->SPI_addr & 0xff, cc2420->SI_pin & 0xff);
-	cc2420_write_register_h(cc2420, cc2420->SPI_addr,cc2420->SI_byte1);
-	cc2420_write_register_l(cc2420, cc2420->SPI_addr,cc2420->SI_pin);
+	cc2420_write_register(cc2420, cc2420->SPI_addr, (cc2420->SI_byte1 << 8) | cc2420->SI_pin);	
 	cc2420->SI_type = CC2420_SPI_NEXT_ACCESS_TYPE_ADDR;
 	cc2420_spi_output(cc2420, 0x00); /*Send a dummy byte to the SPI. Value got by experimental test on hardware*/ 
 	return 0;

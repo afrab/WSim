@@ -32,8 +32,8 @@ void cc2420_reset_registers(struct _cc2420_t * cc2420);
  */
 
 void cc2420_write_register  (struct _cc2420_t * cc2420, uint8_t addr, uint16_t val);
-void cc2420_write_register_h(struct _cc2420_t * cc2420, uint8_t addr, uint8_t valh);
-void cc2420_write_register_l(struct _cc2420_t * cc2420, uint8_t addr, uint8_t vall);
+//void cc2420_write_register_h(struct _cc2420_t * cc2420, uint8_t addr, uint8_t valh);
+//void cc2420_write_register_l(struct _cc2420_t * cc2420, uint8_t addr, uint8_t vall);
 
 /*
  * CC2420 read register functions

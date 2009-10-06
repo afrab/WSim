@@ -117,6 +117,22 @@ void cc2420_write_register(struct _cc2420_t * cc2420, uint8_t addr, uint16_t val
 	return;
     }
 
+    /* Need pins values to be marked as updated? */
+    if (addr == CC2420_REG_IOCFG0) {
+        if (CC2420_REG_IOCFG0_FIFO_POLARITY(val)  != CC2420_REG_IOCFG0_FIFO_POLARITY(cc2420->registers[addr])) {
+	    cc2420->FIFO_set = 1;
+	}
+        if (CC2420_REG_IOCFG0_FIFOP_POLARITY(val) != CC2420_REG_IOCFG0_FIFOP_POLARITY(cc2420->registers[addr])) {
+	    cc2420->FIFOP_set = 1;
+	}
+        if (CC2420_REG_IOCFG0_SFD_POLARITY(val)   != CC2420_REG_IOCFG0_SFD_POLARITY(cc2420->registers[addr])) {
+	    cc2420->SFD_set = 1;
+	}
+        if (CC2420_REG_IOCFG0_CCA_POLARITY(val)   != CC2420_REG_IOCFG0_CCA_POLARITY(cc2420->registers[addr])) {
+	    cc2420->CCA_set = 1;
+	}
+    }
+
     cc2420->registers[addr] = val;
 
     if (addr == CC2420_REG_MDMCTRL0) {
@@ -138,31 +154,31 @@ void cc2420_write_register(struct _cc2420_t * cc2420, uint8_t addr, uint16_t val
  * if address is not valid, nothing's done
  */
 
-void cc2420_write_register_h(struct _cc2420_t * cc2420, uint8_t addr, uint8_t valh) {
+/* void cc2420_write_register_h(struct _cc2420_t * cc2420, uint8_t addr, uint8_t valh) { */
 
-    /* register is not available */
-    if (cc2420_check_register_access(cc2420, addr)) {
-	return;
-    }
+/*     /\* register is not available *\/ */
+/*     if (cc2420_check_register_access(cc2420, addr)) { */
+/* 	return; */
+/*     } */
 
-    /* check address range */
-    if ( (addr < 0x10) || (addr > 0x3F) ) {
-	CC2420_DEBUG("cc2420_write_register : bad address\n");
-	return;
-    }
+/*     /\* check address range *\/ */
+/*     if ( (addr < 0x10) || (addr > 0x3F) ) { */
+/* 	CC2420_DEBUG("cc2420_write_register : bad address\n"); */
+/* 	return; */
+/*     } */
 
-    /* check read only buffers */
-    if (addr == CC2420_REG_FSMSTATE) {
-	CC2420_DEBUG("cc2420_write_register : can't write register CC2420_REG_FSMSTATE\n");
-	return;
-    }
+/*     /\* check read only buffers *\/ */
+/*     if (addr == CC2420_REG_FSMSTATE) { */
+/* 	CC2420_DEBUG("cc2420_write_register : can't write register CC2420_REG_FSMSTATE\n"); */
+/* 	return; */
+/*     } */
 
-    /* clear and write high byte */
-    cc2420->registers[addr] &= 0X00FF;
-    cc2420->registers[addr] |= ((uint16_t) (valh)) << 8;
+/*     /\* clear and write high byte *\/ */
+/*     cc2420->registers[addr] &= 0X00FF; */
+/*     cc2420->registers[addr] |= ((uint16_t) (valh)) << 8; */
 
-    return;
-}
+/*     return; */
+/* } */
 
 
 /**
@@ -170,31 +186,31 @@ void cc2420_write_register_h(struct _cc2420_t * cc2420, uint8_t addr, uint8_t va
  * if address is not valid, nothing's done
  */
 
-void cc2420_write_register_l(struct _cc2420_t * cc2420, uint8_t addr, uint8_t vall) {
+/* void cc2420_write_register_l(struct _cc2420_t * cc2420, uint8_t addr, uint8_t vall) { */
 
-    /* register is not available */
-    if (cc2420_check_register_access(cc2420, addr)) {
-	return;
-    }
+/*     /\* register is not available *\/ */
+/*     if (cc2420_check_register_access(cc2420, addr)) { */
+/* 	return; */
+/*     } */
 
-    /* check address range */
-    if ( (addr < 0x10) || (addr > 0x3F) ) {
-	CC2420_DEBUG("cc2420_write_register : bad address\n");
-	return;
-    }
+/*     /\* check address range *\/ */
+/*     if ( (addr < 0x10) || (addr > 0x3F) ) { */
+/* 	CC2420_DEBUG("cc2420_write_register : bad address\n"); */
+/* 	return; */
+/*     } */
 
-    /* check read-only buffers */
-    if (addr == CC2420_REG_FSMSTATE) {
-	CC2420_DEBUG("cc2420_write_register : can't write register CC2420_REG_FSMSTATE\n");
-	return;
-    }
+/*     /\* check read-only buffers *\/ */
+/*     if (addr == CC2420_REG_FSMSTATE) { */
+/* 	CC2420_DEBUG("cc2420_write_register : can't write register CC2420_REG_FSMSTATE\n"); */
+/* 	return; */
+/*     } */
 
-    /* clear and write low byte */
-    cc2420->registers[addr] &= 0XFF00;
-    cc2420->registers[addr] |= ((uint16_t) (vall));
+/*     /\* clear and write low byte *\/ */
+/*     cc2420->registers[addr] &= 0XFF00; */
+/*     cc2420->registers[addr] |= ((uint16_t) (vall)); */
 
-    return;
-}
+/*     return; */
+/* } */
 
 
 /**

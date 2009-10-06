@@ -303,10 +303,18 @@ int devices_create(void)
 /* devices init conditions should be written here */
 int devices_reset_post()
 {
+#if defined(GUI)
+  int refresh = 0;
+#endif
+
   /* flash W~ is set to Vcc */
   machine.device[FLASH].write(FLASH, M25P_W, M25P_W);
   SYSTEM_FLASH_CS = 0;
   SYSTEM_RADIO_CS = 0;
+
+  REFRESH(LED1);
+  REFRESH(LED2);
+  REFRESH(LED3);
   return 0;
 }
 

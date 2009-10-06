@@ -129,6 +129,7 @@ void cc2420_write_register(struct _cc2420_t * cc2420, uint8_t addr, uint16_t val
         /* maybe need to update CCA and SFD pin */
         cc2420_update_mux(cc2420, val);
     }
+
 }
 
 

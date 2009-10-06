@@ -37,6 +37,10 @@
 extern tracer_id_t TRACER_CC2420_STATE;
 extern tracer_id_t TRACER_CC2420_STROBE;
 extern tracer_id_t TRACER_CC2420_CS;
+extern tracer_id_t TRACER_CC2420_FIFOP;
+extern tracer_id_t TRACER_CC2420_FIFO;
+extern tracer_id_t TRACER_CC2420_CCA;
+extern tracer_id_t TRACER_CC2420_SFD;
 
 /***************************************************/
 /***************************************************/

@@ -44,6 +44,10 @@ int  CC2420_XOSC_PERIOD_NS;
 tracer_id_t TRACER_CC2420_STATE;
 tracer_id_t TRACER_CC2420_STROBE;
 tracer_id_t TRACER_CC2420_CS;
+tracer_id_t TRACER_CC2420_FIFOP;
+tracer_id_t TRACER_CC2420_FIFO;
+tracer_id_t TRACER_CC2420_CCA;
+tracer_id_t TRACER_CC2420_SFD;
 
 /***************************************************/
 /***************************************************/
@@ -105,10 +109,13 @@ int cc2420_device_create (int dev_num, int fxosc_mhz, char *antenna)
 
   cc2420->fsm_state = CC2420_STATE_POWER_DOWN;
 
-  TRACER_CC2420_STATE  = tracer_event_add_id(8, "cc2420_state", "cc2420");
+  TRACER_CC2420_STATE  = tracer_event_add_id(8, "cc2420_state",  "cc2420");
   TRACER_CC2420_STROBE = tracer_event_add_id(8, "cc2420_strobe", "cc2420");
   TRACER_CC2420_CS     = tracer_event_add_id(1, "cc2420_cs",     "cc2420");
-  
+  TRACER_CC2420_FIFOP  = tracer_event_add_id(1, "cc2420_fifop",  "cc2420");
+  TRACER_CC2420_FIFO   = tracer_event_add_id(1, "cc2420_fifo",   "cc2420");
+  TRACER_CC2420_CCA    = tracer_event_add_id(1, "cc2420_cca",    "cc2420");
+  TRACER_CC2420_SFD    = tracer_event_add_id(1, "cc2420_sfd",    "cc2420"); 
 
   return 0;
 }
@@ -516,13 +523,15 @@ void cc2420_read(int  dev_num, uint32_t  *mask, uint32_t  *value)
 	{
 	  *value |= CC2420_FIFOP_MASK;
 	  CC2420_DBG_PINS("cc2420:pins:read: setting FIFOP pin\n");
+	  tracer_event_record(TRACER_CC2420_FIFOP, 1);
 	}
       else 
 	{
 	  *value &= ~CC2420_FIFOP_MASK;
 	  CC2420_DEBUG("cc2420:pins:read: unsetting FIFOP pin\n");
+	  tracer_event_record(TRACER_CC2420_FIFOP, 0);
 	}
-    }
+   }
 
 
   if (cc2420->FIFO_set) 
@@ -535,10 +544,12 @@ void cc2420_read(int  dev_num, uint32_t  *mask, uint32_t  *value)
 	{
 	  *value |= CC2420_FIFO_MASK;	    
 	  CC2420_DBG_PINS("cc2420:pins:read: setting FIFO pin\n");
+	  tracer_event_record(TRACER_CC2420_FIFO, 1);
 	}
       else {
-	*value &= ~CC2420_FIFO_MASK;
-	CC2420_DBG_PINS("cc2420:pins:read: unsetting FIFO pin\n");
+	  *value &= ~CC2420_FIFO_MASK;
+	  CC2420_DBG_PINS("cc2420:pins:read: unsetting FIFO pin\n");
+	  tracer_event_record(TRACER_CC2420_FIFO, 0);
       }
     }
 
@@ -553,11 +564,13 @@ void cc2420_read(int  dev_num, uint32_t  *mask, uint32_t  *value)
 	  {
 	    *value |= CC2420_CCA_MASK;	    
 	    CC2420_DBG_PINS("cc2420:pins:read: setting CCA pin\n");
+	    tracer_event_record(TRACER_CC2420_CCA, 1);
 	  }
 	else 
 	  {
 	    *value &= ~CC2420_CCA_MASK;
 	    CC2420_DBG_PINS("cc2420:pins:read: unsetting CCA pin\n");
+	    tracer_event_record(TRACER_CC2420_CCA, 0);
 	  }
       }
 
@@ -572,11 +585,13 @@ void cc2420_read(int  dev_num, uint32_t  *mask, uint32_t  *value)
 	  {
 	    *value |= CC2420_SFD_MASK;
 	    CC2420_DBG_PINS("cc2420:pins:read: setting SFD pin\n");
+	    tracer_event_record(TRACER_CC2420_SFD, 1);
 	  }
 	else 
 	  {
 	    *value &= ~CC2420_SFD_MASK;
 	    CC2420_DBG_PINS("cc2420:pins:read: unsetting SFD pin\n");
+	    tracer_event_record(TRACER_CC2420_SFD, 0);
 	  }
       }
 }

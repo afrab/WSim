@@ -12,6 +12,7 @@
  *
  *  Created by Nicolas Boulicault on 04/06/07.
  *  Copyright 2007 __WorldSens__. All rights reserved.
+ *  Modified by Loic Lemaitre 2009
  *
  */
 
@@ -157,7 +158,7 @@ void cc2420_record_rssi(struct _cc2420_t * cc2420, double dBm) {
     }
 
     if (old_cca_value != cc2420->cca_internal_value) {
-      CC2420_DEBUG("cc2420_record_rssi : CCA internal value changed from %02x to %02x\n", old_cca_value, cc2420->cca_internal_value);
+      CC2420_DEBUG("cc2420_record_rssi : CCA internal value changed from 0x%02x to 0x%02x\n", old_cca_value, cc2420->cca_internal_value);
     }
 
     return;
@@ -671,6 +672,12 @@ CC2420_DEBUG("cc2420_callback_rx : entering RX Callback\n");
 	/* update number of received bytes */
 	cc2420->rx_data_bytes ++;
 
+	/* if first byte of data, save firts byte position in RX FIFO */
+	if (cc2420->rx_data_bytes == 1) {
+	    /* if we don't already have data bytes in RX FIFO */
+	    cc2420->rx_first_data_byte = cc2420->rx_fifo_write;
+	}
+
 	/* write byte to RX FIFO */
 	if (cc2420_rx_fifo_push(cc2420, rx) < 0) {
 	    CC2420_DEBUG("cc2420_callback_rx : failed in push\n");
@@ -681,7 +688,6 @@ CC2420_DEBUG("cc2420_callback_rx : entering RX Callback\n");
 	    cc2420->FIFO_set  = 1;
 	    return 0;
 	}
-
 
 	/* if address recognition is set, and addressing fields were received, deal with address recognition */
 	if (addr_decode) {
@@ -706,14 +712,6 @@ CC2420_DEBUG("cc2420_callback_rx : entering RX Callback\n");
 	    cc2420->rx_sequence = rx;
 	    CC2420_DEBUG("seq is %d\n", rx);
 	  }
-
-	  /* if first byte of data, set position, needed to unset FIFOP */
-	  if (cc2420->rx_data_bytes == 4) {
-	    /* if we don't already have data bytes in RX FIFO */
-	    if (cc2420->rx_first_data_byte == -1)
-	        cc2420->rx_first_data_byte = cc2420->rx_fifo_write;
-	  }
-
 
 	  /* if addressing fields were received, deal with address recognition */
 	  if (cc2420->rx_data_bytes == cc2420->rx_src_addr_offset + cc2420->rx_src_addr_len) {

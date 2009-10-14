@@ -134,6 +134,8 @@ int cc2420_rx_fifo_pop(struct _cc2420_t * cc2420, uint8_t * val) {
        update the number of frames in RX FIFO */
     if (cc2420->rx_fifo_read == cc2420->rx_frame_end) {
 	cc2420->nb_rx_frames --;
+	CC2420_DEBUG("cc2420_rx_fifo_pop : nb frames in rx fifo decremented from %d to %d\n", 
+		     cc2420->nb_rx_frames + 1, cc2420->nb_rx_frames);
 	if (cc2420->nb_rx_frames > 0)
 	    calculate_length = 1;
     }

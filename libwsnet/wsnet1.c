@@ -948,7 +948,9 @@ static int64_t worldsens_packet_parse_rp(char *msg, int UNUSED pkt_seq, int UNUS
 {
   struct _worldsens_s_saverel_pkt *pkt = (struct _worldsens_s_saverel_pkt *) msg;
 
-  if (ntohl(pkt->c_rp_seq) == (unsigned)WSENS_SEQ_RDV) 
+  int rp_seq = ntohl(pkt->c_rp_seq); /* current RP */
+
+  if ((unsigned)rp_seq == (unsigned)WSENS_SEQ_RDV) 
     {
       
       /* WSNET_DBG("WSNET (%"PRIu64", %d): <-- REL%d (seq: %d)\n",
@@ -958,7 +960,7 @@ static int64_t worldsens_packet_parse_rp(char *msg, int UNUSED pkt_seq, int UNUS
       WSENS_RDV_PENDING   = 0;
 
       WSENS_RDV_NEXT_TIME = MACHINE_TIME_GET_NANO() + ntohll(pkt->period);
-      WSENS_SEQ_RDV       = ntohl(pkt->n_rp_seq);
+      WSENS_SEQ_RDV       = ntohl(pkt->n_rp_seq); /* next RP */
 
       machine_state_save();
       WSNET_BKTRK("WSNet:backtrack: next RP forces a save state at (time:%"PRIu64", seq:%d)\n",
@@ -972,7 +974,7 @@ static int64_t worldsens_packet_parse_rp(char *msg, int UNUSED pkt_seq, int UNUS
   else 
     {
       ERROR("WSNet:rendez-vous: Deprecated RP = %d (received: %d, expected: %d)\n", 
-	    pkt_seq, pkt->c_rp_seq, WSENS_SEQ_RDV);
+	    pkt_seq, rp_seq, WSENS_SEQ_RDV);
     }
   return 0;
 }

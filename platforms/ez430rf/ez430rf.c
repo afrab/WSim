@@ -162,7 +162,7 @@ int devices_create(void)
 {
   int res = 0;
   int xin_freq, xt2_freq, xosc_freq;
-  char cc1100_antenna[] = "omnidirectionnal"; /* used by wsnet2, only this model available in wsnet2 */
+  char cc2500_antenna[] = "omnidirectionnal"; /* used by wsnet2, only this model available in wsnet2 */
 
   xin_freq  =        0; /*  0 kHz */
   xt2_freq  =        0; /*  0 MHz */
@@ -182,7 +182,7 @@ int devices_create(void)
   machine.device_size[SYSTEM]    = sizeof(struct ez430rf_struct_t);
   machine.device_size[LED_RED]   = led_device_size();    
   machine.device_size[LED_GREEN] = led_device_size();    
-  machine.device_size[RADIO]     = cc1100_device_size(); 
+  machine.device_size[RADIO]     = cc2500_device_size(); 
   machine.device_size[SERIAL]    = ptty_device_size();
   machine.device_size[LOGO1]     = uigfx_device_size();
 
@@ -204,7 +204,7 @@ int devices_create(void)
   res += system_create          (SYSTEM);
   res += led_device_create      (LED_RED,   0xee0000,OFF,BKG,"red");
   res += led_device_create      (LED_GREEN, 0x00ee00,OFF,BKG,"green");
-  res += cc1100_device_create   (RADIO,     xosc_freq / 1000000, cc1100_antenna);
+  res += cc2500_device_create   (RADIO,     xosc_freq / 1000000, cc2500_antenna);
   res += ptty_device_create     (SERIAL,    0);
   res += uigfx_device_create    (LOGO1,   wsim);
 
@@ -261,7 +261,7 @@ int devices_update(void)
 #if defined(GUI)
   int refresh = 0;
 #endif
-  int CC1100_CSn = 0;
+  int CC2500_CSn = 0;
   uint8_t  val8;
 
   /* *************************************************************************** */
@@ -304,14 +304,14 @@ int devices_update(void)
   /*   P3.6 utxd1 : serial             */
   /*   P3.5 urxd0                      */
   /*   P3.4 utxd0                      */ 
-  /*   P3.3 SPI cc1100 UCLK            */
-  /*   P3.2 SPI cc1100 SOMI            */
-  /*   P3.1 SPI cc1100 SIMO            */
+  /*   P3.3 SPI cc2500 UCLK            */
+  /*   P3.2 SPI cc2500 SOMI            */
+  /*   P3.1 SPI cc2500 SIMO            */
   /*   P3.0 NC                         */
 #if 0
   if (msp430_digiIO_dev_read(PORT3,&val8))
     {
-      /* cc1100 is driven by spi                          */
+      /* cc2500 is driven by spi                          */
       /* we could/should check here that the pins are not */
       /* driven by the GPIO                               */
     }
@@ -324,13 +324,13 @@ int devices_update(void)
   /*   P4.5 NC                         */
   /*   P4.4 CS flash                   */
   /*   P4.3 NC                         */
-  /*   P4.2 CS cc1100                  */
+  /*   P4.2 CS cc2500                  */
   /*   P4.1 batt status                */
   /*   P4.0 NC                         */
   if (msp430_digiIO_dev_read(PORT4,&val8))
     {
-      CC1100_CSn = BIT(val8,2);
-      machine.device[RADIO].write(RADIO, CC1100_CSn_MASK, CC1100_CSn << CC1100_CSn_SHIFT);
+      CC2500_CSn = BIT(val8,2);
+      machine.device[RADIO].write(RADIO, CC2500_CSn_MASK, CC2500_CSn << CC2500_CSn_SHIFT);
       etracer_slot_access(0x0, 1, ETRACER_ACCESS_WRITE, ETRACER_ACCESS_BIT, ETRACER_ACCESS_LVL_GPIO, 0);
     }
 
@@ -344,7 +344,7 @@ int devices_update(void)
     case USART_MODE_SPI:
       if (msp430_usart0_dev_read_spi(&val8))
 	{
-	  machine.device[RADIO].write(RADIO, CC1100_DATA_MASK, val8);
+	  machine.device[RADIO].write(RADIO, CC2500_DATA_MASK, val8);
 	  etracer_slot_access(0x0, 1, ETRACER_ACCESS_WRITE, ETRACER_ACCESS_BYTE, ETRACER_ACCESS_LVL_SPI0, 0);
 	}      
       break; 
@@ -365,7 +365,7 @@ int devices_update(void)
     uint32_t mask  = 0;
     uint32_t value = 0;
     machine.device[ RADIO ].read( RADIO ,&mask,&value);
-    if (mask & CC1100_DATA_MASK)
+    if (mask & CC2500_DATA_MASK)
       {
 #if 0
 	if (MCU.usart0.mode != USART_MODE_SPI)
@@ -374,19 +374,19 @@ int devices_update(void)
 	    ERROR("wsn430:devices: read data on radio while not in SPI mode ?\n");
 #endif
 	  }
-	msp430_usart0_dev_write_spi(value & CC1100_DATA_MASK);
+	msp430_usart0_dev_write_spi(value & CC2500_DATA_MASK);
 	etracer_slot_access(0x0, 1, ETRACER_ACCESS_READ, ETRACER_ACCESS_BYTE, ETRACER_ACCESS_LVL_SPI0, 0);
 #endif
       }
 
-    if (mask & CC1100_GDO2_MASK) // GDO2 -> P1.4
+    if (mask & CC2500_GDO2_MASK) // GDO2 -> P1.4
       { 
-	msp430_digiIO_dev_write(PORT1, (CC1100_GDO2_MASK & value) ? 0x10 : 0x00, 0x10);
+	msp430_digiIO_dev_write(PORT1, (CC2500_GDO2_MASK & value) ? 0x10 : 0x00, 0x10);
 	etracer_slot_access(0x0, 1, ETRACER_ACCESS_READ, ETRACER_ACCESS_BIT, ETRACER_ACCESS_LVL_GPIO, 0);
       }
-    if (mask & CC1100_GDO0_MASK) // GDO0 -> P1.3
+    if (mask & CC2500_GDO0_MASK) // GDO0 -> P1.3
       { 
-	msp430_digiIO_dev_write(PORT1, (CC1100_GDO0_MASK & value) ? 0x08 : 0x00, 0x08);
+	msp430_digiIO_dev_write(PORT1, (CC2500_GDO0_MASK & value) ? 0x08 : 0x00, 0x08);
 	etracer_slot_access(0x0, 1, ETRACER_ACCESS_READ, ETRACER_ACCESS_BIT, ETRACER_ACCESS_LVL_GPIO, 0);
       }
   }

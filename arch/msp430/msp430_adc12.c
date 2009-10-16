@@ -814,8 +814,12 @@ void msp430_adc12_write16(uint16_t addr, int16_t val)
 	}
       if (MCU.adc12.ctl0.b.enc == 0)
 	{
-	  struct adc12ctl0_t *bval = (struct adc12ctl0_t *) &val;
-	  if (bval->enc == 1)
+	  union {
+	    int16_t s;
+	    struct adc12ctl0_t b;
+	  } pval;
+	  pval.s = val;
+	  if (pval.b.enc == 1)
 	    {
 	      HW_DMSG_ADC12("msp430:adc12:    ** START ENC **\n");
 	      /* configuratioin is fixed */

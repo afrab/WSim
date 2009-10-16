@@ -29,7 +29,7 @@ char *str_clocksrc[] =
 
 
 
-// #define TIMER_DEBUG_2
+//#define TIMER_DEBUG_2
 
 
 #if defined(TIMER_DEBUG_2)
@@ -666,43 +666,6 @@ void msp430_timerA3_update(void)
       TIMER_COMPARE(timerA3,"timerA3",tar,taccr,tacctl,1,INTR_TIMERA3_1)
       TIMER_COMPARE(timerA3,"timerA3",tar,taccr,tacctl,2,INTR_TIMERA3_1)
 
-      /**************************/
-      /* capture/compare blocks */
-      /**************************/
-      if (MCU.timerA3.tacctl[2].b.cap ==1 && 
-	  MCU.timerA3.tacctl[2].b.cm > 0)
-	{
-	  /* 
-	     at this time we don't care about:
-	     SCS  : synchroneous capture source
-	     SCCI : Synchronized capture/compare input
-	  */ 
-	  switch (MCU.timerA3.tacctl[2].b.ccis)
-	    {
-	    case 0: /* CCIxA = TA2 */
-	      break;
-	    case 1: /* CCIxB */
-	      /* on msp430f1611 this pin in internal ACLK */
-	      if (MCU_CLOCK.ACLK_increment > 0)
-		{
-		  MCU.timerA3.taccr[2] = MCU.timerA3.tar;
-		  MCU.timerA3.tacctl[2].b.ccifg = 1;
-		  msp430_timerA3_set_tiv();
-		  if (MCU.timerA3.tacctl[2].b.ccie == 1)
-		    {
-		      HW_DMSG_TIMER("msp430:timerA3: set interrupt TIMERA3_1 from CAPTURE 2\n");
-		      msp430_interrupt_set(INTR_TIMERA3_1);
-		    }
-		}
-	      break;
-	    case 2: /* GND */
-	      break;
-	    case 3: /* Vcc */
-	      break;
-	    }
-	}
-
-
       break;
 
     case TIMER_UD:      /* UP/DOWN counter */
@@ -760,6 +723,49 @@ void msp430_timerA3_update(void)
 	    }
 	}
       break;
+    }
+}
+
+/* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
+
+void msp430_timerA3_capture(void)
+{
+  if (MCU.timerA3.tacctl[2].b.cap ==1 && 
+      MCU.timerA3.tacctl[2].b.cm > 0)
+    {
+      /* 
+	 at this time we don't care about:
+	 SCS  : synchroneous capture source
+	 SCCI : Synchronized capture/compare input
+      */ 
+      switch (MCU.timerA3.tacctl[2].b.ccis)
+	{
+	case 0: /* CCIxA = TA2 */
+	  HW_DMSG_TIMER("msp430:timerB: capture not implemented on this port\n");
+	  break;
+	case 1: /* CCIxB */
+	  /* on msp430f1611 this pin in internal ACLK */
+	  if (MCU_CLOCK.ACLK_increment > 0)
+	    {
+	      MCU.timerA3.taccr[2] = MCU.timerA3.tar;
+	      MCU.timerA3.tacctl[2].b.ccifg = 1;
+	      msp430_timerA3_set_tiv();
+	      if (MCU.timerA3.tacctl[2].b.ccie == 1)
+		{
+		  HW_DMSG_TIMER("msp430:timerA3: set interrupt TIMERA3_1 from CAPTURE 2\n");
+		  msp430_interrupt_set(INTR_TIMERA3_1);
+		}
+	    }
+	  break;
+	case 2: /* GND */
+	  HW_DMSG_TIMER("msp430:timerA3: capture not implemented on this port\n");
+	  break;
+	case 3: /* Vcc */
+	  HW_DMSG_TIMER("msp430:timerA3: capture not implemented on this port\n");
+	  break;
+	}
     }
 }
 
@@ -994,6 +1000,12 @@ void msp430_timerA5_reset(void)
 /* ************************************************** */
 
 void msp430_timerA5_update(void)
+{
+}
+
+/* ************************************************** */
+
+void msp430_timerA5_capture(void)
 {
 }
 
@@ -1305,6 +1317,61 @@ void msp430_timerB_update(void)
   case TBCCTL##NUM :							\
   ERROR("msp430:" TIMERBNAME ": tbcctl%d not present\n",NUM);		\
   break;
+
+
+/* ************************************************** */
+
+void msp430_timerB_capture(void)
+{
+  if (MCU.timerB.tbcctl[1].b.cap ==1 && 
+      MCU.timerB.tbcctl[1].b.cm > 0)
+    {
+
+#if defined(MSP430f1611)
+      /* 
+	 at this time we don't care about:
+	 SCS  : synchroneous capture source
+	 SCCI : Synchronized capture/compare input
+      */ 
+      switch (MCU.timerB.tbcctl[1].b.ccis)
+	{
+	case 0: /* CCIxA = TB1 */
+	  /* on msp430f1611 this capture pin is p4.1 */
+	    if (MCU.digiIO.in_updated[3] & 0x02)
+	      {
+	      int rising_edge  = (MCU.timerB.tbcctl[1].b.cm == 1) &&  (MCU.digiIO.in[3] & 0x02);
+	      int falling_edge = (MCU.timerB.tbcctl[1].b.cm == 2) && !(MCU.digiIO.in[3] & 0x02);
+	      int both_edges   = (MCU.timerB.tbcctl[1].b.cm == 3);
+	      if (rising_edge || falling_edge || both_edges) 
+		{
+		MCU.timerB.tbccr[1] = MCU.timerB.tbr;
+		MCU.timerB.tbcctl[1].b.ccifg = 1;
+		msp430_timerB_set_tiv();
+		if (MCU.timerB.tbcctl[1].b.ccie == 1)
+		  {
+		    HW_DMSG_TIMER("msp430:" TIMERBNAME ": set interrupt TIMERA7_1 from CAPTURE 1\n");
+		    msp430_interrupt_set(INTR_TIMERB_1);
+		  }
+		}
+	      }
+	  break;
+	case 1: /* CCIxB */
+	  HW_DMSG_TIMER("msp430:" TIMERBNAME ": capture not implemented on this port\n");
+	  break;
+	case 2: /* GND */
+	  HW_DMSG_TIMER("msp430:" TIMERBNAME ": capture not implemented on this port\n");
+	  break;
+	case 3: /* Vcc */
+	  HW_DMSG_TIMER("msp430:" TIMERBNAME ": capture not implemented on this port\n");
+	  break;
+	}
+
+#else
+HW_DMSG_TIMER("msp430:timerB: capture not implemented on this MSP430 model yet\n");
+#endif
+    }
+
+}
 
 
 /* ************************************************** */

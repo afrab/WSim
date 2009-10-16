@@ -962,6 +962,19 @@ static inline void msp430_mcu_update(unsigned int msp430_instruction_cycles)
   /***************************/
   devices_update(); /* update digi IO ports */
   
+  /************************************/
+  /* timers capture operations        */
+  /************************************/
+#if defined(__msp430_have_timera3)
+  msp430_timerA3_capture();
+#endif
+#if defined(__msp430_have_timera5)
+  msp430_timerA5_capture();
+#endif
+#if defined(__msp430_have_timerb3) || defined(__msp430_have_timerb7)
+  msp430_timerB_capture();
+#endif
+
   /******************************************/
   /* clear update flags on internal devices */
   /******************************************/

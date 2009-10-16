@@ -81,8 +81,8 @@
 
 struct msp430_digiIO_t
 {
-  uint8_t in_updated;
-  uint8_t out_updated;
+  uint8_t in_updated[6];
+  uint8_t out_updated[6];
 
   uint8_t in[6];  
   uint8_t out[6];

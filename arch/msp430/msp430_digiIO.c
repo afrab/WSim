@@ -45,6 +45,7 @@
  * output register 
  * 8bit register
  */
+
 #define DIGIIO_OUT(p)    MCU.digiIO.out[p]
 
 /* slau056e.pdf page 9-3 */
@@ -63,8 +64,8 @@
 /* #define DIGIIO_IN_UP(p)      (MCU.digiIO.in_updated   & DIGIIO_P##p) */
 /* #define DIGIIO_OUT_UP(p)     (MCU.digiIO.out_updated  & DIGIIO_P##p) */
 
-#define DIGIIO_IN_SET_UP(p)   do { MCU.digiIO.in_updated  |= DIGIIO_P##p; } while (0)
-#define DIGIIO_OUT_SET_UP(p)  do { MCU.digiIO.out_updated |= DIGIIO_P##p; } while (0)
+//#define DIGIIO_IN_SET_UP(p)   do { MCU.digiIO.in_updated  |= DIGIIO_P##p; } while (0)
+//#define DIGIIO_OUT_SET_UP(p)  do { MCU.digiIO.out_updated |= DIGIIO_P##p; } while (0)
 
 /* MCU can write on output port even if this port is selected IN */
 /* see Figure page 49 of [msp430f1611.pdf]                       */
@@ -155,6 +156,8 @@ int8_t msp430_digiIO_mcu_read (uint16_t addr)
 
 void msp430_digiIO_mcu_write(uint16_t addr, int8_t val)
 {
+  uint8_t oldval;
+
   HW_DMSG_DIGI_IO("msp430:dio: write from MCU [%s:0x%02x] = 0x%02x\n",msp430_debug_portname(addr),addr,val & 0xff); 
 
   switch (addr)
@@ -162,8 +165,9 @@ void msp430_digiIO_mcu_write(uint16_t addr, int8_t val)
       /* port 1 */
     case P1IN:  ERROR("msp430:dio: write on P1IN (read only)\n"); break;
     case P1OUT: 
+      oldval = DIGIIO_OUT(0);
       DIGIIO_OUT(0) = val & DIGIIO_MCU_WOK(0); 
-      DIGIIO_OUT_SET_UP(0); 
+      MCU.digiIO.out_updated[0] = oldval ^ DIGIIO_OUT(0); 
       TRACER_TRACE_PORT1(DIGIIO_OUT(0));
       break; 
     case P1DIR: DIGIIO_DIR(0) = val; break;
@@ -181,9 +185,10 @@ void msp430_digiIO_mcu_write(uint16_t addr, int8_t val)
 
       /* port 2 */
     case P2IN:  ERROR("msp430:dio: write on P2IN (read only)\n"); break;
-    case P2OUT: 
+    case P2OUT:
+      oldval = DIGIIO_OUT(1); 
       DIGIIO_OUT(1) = val & DIGIIO_MCU_WOK(1); 
-      DIGIIO_OUT_SET_UP(1); 
+      MCU.digiIO.out_updated[1] = oldval ^ DIGIIO_OUT(1); 
       TRACER_TRACE_PORT2(DIGIIO_OUT(1));
       break; 
     case P2DIR: DIGIIO_DIR(1) = val; break; 
@@ -202,9 +207,10 @@ void msp430_digiIO_mcu_write(uint16_t addr, int8_t val)
       /* port 3 */
 #if defined(__msp430_have_port3)
     case P3IN : ERROR("msp430:dio: write on P3IN (read only)\n"); break;
-    case P3OUT: 
-      DIGIIO_OUT(2) = val & DIGIIO_MCU_WOK(2); 
-      DIGIIO_OUT_SET_UP(2); 
+    case P3OUT:
+      oldval = DIGIIO_OUT(2); 
+      DIGIIO_OUT(2) = val & DIGIIO_MCU_WOK(2);  
+      MCU.digiIO.out_updated[2] = oldval ^ DIGIIO_OUT(2); 
       TRACER_TRACE_PORT3(DIGIIO_OUT(2));
       break; 
     case P3DIR: DIGIIO_DIR(2) = val; break;
@@ -215,8 +221,9 @@ void msp430_digiIO_mcu_write(uint16_t addr, int8_t val)
 #if defined(__msp430_have_port4)
     case P4IN : ERROR("msp430:dio: write on P4IN (read only)\n"); break;
     case P4OUT: 
-      DIGIIO_OUT(3) = val & DIGIIO_MCU_WOK(3); 
-      DIGIIO_OUT_SET_UP(3); 
+      oldval = DIGIIO_OUT(3); 
+      DIGIIO_OUT(3) = val & DIGIIO_MCU_WOK(3);  
+      MCU.digiIO.out_updated[3] = oldval ^ DIGIIO_OUT(3); 
       TRACER_TRACE_PORT4(DIGIIO_OUT(3));
       break;
     case P4DIR: DIGIIO_DIR(3) = val; break;
@@ -227,8 +234,9 @@ void msp430_digiIO_mcu_write(uint16_t addr, int8_t val)
 #if defined(__msp430_have_port5)
     case P5IN : ERROR("msp430:dio: write on P5IN (read only)\n"); break;
     case P5OUT: 
-      DIGIIO_OUT(4) = val & DIGIIO_MCU_WOK(4); 
-      DIGIIO_OUT_SET_UP(4); 
+      oldval = DIGIIO_OUT(4); 
+      DIGIIO_OUT(4) = val & DIGIIO_MCU_WOK(4);  
+      MCU.digiIO.out_updated[4] = oldval ^ DIGIIO_OUT(4); 
       TRACER_TRACE_PORT5(DIGIIO_OUT(4));
       break;
     case P5DIR: DIGIIO_DIR(4) = val; break;
@@ -239,8 +247,9 @@ void msp430_digiIO_mcu_write(uint16_t addr, int8_t val)
 #if defined(__msp430_have_port6)
     case P6IN : ERROR("msp430:dio: write on P6IN (read only)\n"); break;
     case P6OUT: 
-      DIGIIO_OUT(5) = val & DIGIIO_MCU_WOK(5); 
-      DIGIIO_OUT_SET_UP(5); 
+      oldval = DIGIIO_OUT(5); 
+      DIGIIO_OUT(5) = val & DIGIIO_MCU_WOK(5);  
+      MCU.digiIO.out_updated[5] = oldval ^ DIGIIO_OUT(5); 
       TRACER_TRACE_PORT6(DIGIIO_OUT(5));
       break;
     case P6DIR: DIGIIO_DIR(5) = val; break;
@@ -261,7 +270,7 @@ int msp430_digiIO_dev_read (int port_number, uint8_t *val)
 {
   //  HW_DMSG_DIGI_IO("   Digital IO read from devices on port %d\n",port_number);
   *val = DIGIIO_OUT(port_number);
-  return MCU.digiIO.out_updated & (1 << port_number); // port has been updated ?
+  return MCU.digiIO.out_updated[port_number]; // port has been updated ?
 }
 
 /* ************************************************** */
@@ -277,7 +286,10 @@ void msp430_digiIO_dev_write(int port_number, uint8_t val, uint8_t bitmask)
 
   HW_DMSG_DIGI_IO("msp430:dio: write from devices on port %d val 0x%02x -> 0x%02x\n",port_number + 1,oldval & 0xff,DIGIIO_IN(port_number) & 0xff);
 
-  MCU.digiIO.in_updated |= 1 << port_number;
+  MCU.digiIO.in_updated[port_number] = oldval ^ DIGIIO_IN(port_number);
+  if (MCU.digiIO.in_updated[3] & 0x02) {
+    HW_DMSG_DIGI_IO("msp430:dio: SFD updated (telosb)\n");
+  }
                                                                             
 #if defined(IFG_BIT_IS_SET_ONLY_WITH_IE_BIT_IS_ALSO_SET)
   if ((port_number < 2) &&  ((DIGIIO_IEN(port_number) & bitmask) != 0))
@@ -329,17 +341,13 @@ void msp430_digiIO_internal_dev_write(int port_number, uint8_t val, uint8_t bitm
 /* ************************************************** */
 
 void msp430_digiIO_update_done(void)
-{
-  MCU.digiIO.in_updated  = 0;
-  MCU.digiIO.out_updated = 0;
-  /*
+{ 
   int i;
   for(i=0; i<6; i++)
     {
-      DIGIIO_IN_UP(i) = 0;
-      DIGIIO_OUT_UP(i) = 0;
+      MCU.digiIO.in_updated[i]  = 0;
+      MCU.digiIO.out_updated[i] = 0;
     }
-  */
 }
 
 /* ************************************************** */

@@ -672,7 +672,7 @@ void cc2420_write(int dev_num, uint32_t mask, uint32_t value)
 	    cc2420->RESET_pin = 0x00;
 	  }
 	cc2420->RESET_set = 1;
-    }
+      }
 
 
   if (mask & CC2420_FIFO_MASK) 

@@ -41,7 +41,7 @@ int cc2420_reset_required(struct _cc2420_t * cc2420) {
     uint16_t value;
 
     /* check reset pin (active low) */
-    if ( (cc2420->RESET_set) && (cc2420->RESET_pin == 0x00) ) {
+    if (cc2420->RESET_pin == 0x00) {
 	CC2420_DEBUG("cc2420_update : reset pin is set\n");
 	return 1;
     }
@@ -709,7 +709,9 @@ void cc2420_update_state_tx_frame(struct _cc2420_t * cc2420) {
       cc2420_tx_byte(cc2420, CC2420_HIBYTE(cc2420->tx_fcs));
       CC2420_DEBUG("cc2420:update_state_tx_frame: val [0x%02x] pop from tx fifo\n", CC2420_HIBYTE(cc2420->tx_fcs));
     }
-
+    
+    /* all tx fifo must have been sent, so reset tx fifo offset and go to RX_CALIBRATE state */
+    cc2420->tx_fifo_len = 0;
     CC2420_RX_CALIBRATE_ENTER(cc2420);
 
     return;

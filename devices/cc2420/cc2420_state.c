@@ -685,7 +685,7 @@ void cc2420_update_state_tx_frame(struct _cc2420_t * cc2420) {
 	    return;
 	}
 	cc2420_tx_byte(cc2420, cc2420->ram[CC2420_RAM_TXFIFO_START + cc2420->tx_bytes]);
-	CC2420_DBG("cc2420:update_state_tx_frame: val [0x%02x] pop from tx fifo\n", cc2420->ram[CC2420_RAM_TXFIFO_START + cc2420->tx_bytes);
+	CC2420_DEBUG("cc2420:update_state_tx_frame: val [0x%02x] pop from tx fifo\n", cc2420->ram[CC2420_RAM_TXFIFO_START + cc2420->tx_bytes]);
 	cc2420->tx_bytes++;
 	cc2420->fsm_timer = MACHINE_TIME_GET_NANO() + 2 * CC2420_SYMBOL_PERIOD;
 	return;
@@ -699,7 +699,7 @@ void cc2420_update_state_tx_frame(struct _cc2420_t * cc2420) {
       if (cc2420->tx_bytes == bytes_from_fifo) {     
       cc2420->tx_fcs = cc2420_icrc(&cc2420->ram[CC2420_RAM_TXFIFO_START] + 1, cc2420->tx_frame_len - 2);
       cc2420_tx_byte(cc2420, CC2420_LOBYTE(cc2420->tx_fcs));
-      CC2420_DBG("cc2420:update_state_tx_frame: val [0x%02x] pop from tx fifo\n", CC2420_LOBYTE(cc2420->tx_fcs));
+      CC2420_DEBUG("cc2420:update_state_tx_frame: val [0x%02x] pop from tx fifo\n", CC2420_LOBYTE(cc2420->tx_fcs));
       cc2420->tx_bytes++;
       cc2420->fsm_timer = MACHINE_TIME_GET_NANO() + 2 * CC2420_SYMBOL_PERIOD;
       return;
@@ -707,7 +707,7 @@ void cc2420_update_state_tx_frame(struct _cc2420_t * cc2420) {
 
       /* transmit 2nd byte of CRC, TX is over */
       cc2420_tx_byte(cc2420, CC2420_HIBYTE(cc2420->tx_fcs));
-      CC2420_DBG("cc2420:update_state_tx_frame: val [0x%02x] pop from tx fifo\n", CC2420_HIBYTE(cc2420->tx_fcs));
+      CC2420_DEBUG("cc2420:update_state_tx_frame: val [0x%02x] pop from tx fifo\n", CC2420_HIBYTE(cc2420->tx_fcs));
     }
 
     CC2420_RX_CALIBRATE_ENTER(cc2420);

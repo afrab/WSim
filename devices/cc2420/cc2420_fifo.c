@@ -67,6 +67,7 @@ void cc2420_tx_fifo_write(struct _cc2420_t * cc2420, uint8_t val) {
 	cc2420->tx_available_bytes = 0;
 	cc2420->tx_fifo_len ++;
 	cc2420->ram[0] = val;
+	CC2420_DEBUG("cc2420_tx_fifo_write : val 0x%02x written in fifo at address 0x%02x\n", val, 0);
 	return;
     }
 
@@ -78,6 +79,7 @@ void cc2420_tx_fifo_write(struct _cc2420_t * cc2420, uint8_t val) {
 
     addr = CC2420_RAM_TXFIFO_START + cc2420->tx_fifo_len;
     cc2420->ram[addr] = val;
+    CC2420_DEBUG("cc2420_tx_fifo_write : val 0x%02x written in fifo at address 0x%02x\n", val, addr);
     cc2420->tx_fifo_len++;
     cc2420->tx_available_bytes ++;
 

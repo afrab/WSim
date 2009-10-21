@@ -33,6 +33,8 @@ tracer_id_t TRACER_CC1100_STATE;
 tracer_id_t TRACER_CC1100_STROBE;
 tracer_id_t TRACER_CC1100_CS;
 tracer_id_t TRACER_CC1100_SO;
+tracer_id_t TRACER_CC1100_GDO0;
+tracer_id_t TRACER_CC1100_GDO2;
 
 /***************************************************/
 /***************************************************/
@@ -200,6 +202,7 @@ void cc1100_read(int dev_num, uint32_t  *mask, uint32_t  *value)
       *mask  |= CC1100_GDO2_MASK;
       *value |= cc1100->GO2_pin ? CC1100_GDO2_MASK : 0;
       CC1100_DBG_PINS("cc1100:pins: to mcu GDO2 = 0x%02x\n", cc1100->GO2_pin & 0xff);
+      tracer_event_record(TRACER_CC1100_GDO2, cc1100->GO2_pin ? 1 : 0 );
       cc1100->GO2_set = 0;
     }
 	
@@ -208,6 +211,7 @@ void cc1100_read(int dev_num, uint32_t  *mask, uint32_t  *value)
       *mask  |= CC1100_GDO0_MASK;
       *value |= cc1100->GO0_pin ? CC1100_GDO0_MASK : 0; 
       CC1100_DBG_PINS("cc1100:pins: to mcu GDO0 = 0x%02x\n", cc1100->GO0_pin & 0xff);
+      tracer_event_record(TRACER_CC1100_GDO0, cc1100->GO0_pin ? 1 : 0 );
       cc1100->GO0_set = 0;
     }
 
@@ -248,7 +252,9 @@ int cc1100_device_create (int dev_num, int fxosc_mhz, char *antenna)
   TRACER_CC1100_STROBE = tracer_event_add_id(8, "strobe", "cc1100");
   TRACER_CC1100_CS     = tracer_event_add_id(1, "cs",     "cc1100");
   TRACER_CC1100_SO     = tracer_event_add_id(1, "so",     "cc1100");
-  
+  TRACER_CC1100_GDO0   = tracer_event_add_id(1, "gdo0",   "cc1100");
+  TRACER_CC1100_GDO2   = tracer_event_add_id(1, "gdo2",   "cc1100");
+ 
   return 0;
 }
 
@@ -282,7 +288,9 @@ int cc2500_device_create (int dev_num, int fxosc_mhz, char *antenna)
   TRACER_CC1100_STROBE = tracer_event_add_id(8, "strobe", "cc2500");
   TRACER_CC1100_CS     = tracer_event_add_id(1, "cs",     "cc2500");
   TRACER_CC1100_SO     = tracer_event_add_id(1, "so",     "cc2500");
-  
+  TRACER_CC1100_GDO0   = tracer_event_add_id(1, "gdo0",   "cc2500");
+  TRACER_CC1100_GDO2   = tracer_event_add_id(1, "gdo2",   "cc2500");
+
   return 0;
 }
 #else

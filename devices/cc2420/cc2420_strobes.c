@@ -745,6 +745,8 @@ void cc2420_strobe_state_rx_overflow(struct _cc2420_t * cc2420)
 
 void cc2420_strobe_command(struct _cc2420_t * cc2420) 
 {
+  tracer_event_record(TRACER_CC2420_STROBE, cc2420->SPI_addr);
+
   if (cc2420->SPI_addr == CC2420_STROBE_SNOP) 
     {
       /* even for a noop do nothing in those states */
@@ -757,7 +759,6 @@ void cc2420_strobe_command(struct _cc2420_t * cc2420)
 	}
       return ;
     }
-  tracer_event_record(TRACER_CC2420_STROBE, cc2420->SPI_addr);
 
   switch (cc2420->fsm_state) 
     {

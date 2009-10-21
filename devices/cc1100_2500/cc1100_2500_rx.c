@@ -62,16 +62,16 @@ int cc1100_rx_filter(struct _cc1100_t *cc1100, double frequency, int modulation,
   /* Verify cc1100 state */
   if (cc1100->fsm_state !=  CC1100_STATE_RX) 
     {
-      CC1100_DBG_RX("cc1100:rx:filter:node %d: dropping received data, not in rx state\n",
-		    machine_get_node_id());
+      CC1100_DBG_RX("cc1100:rx:filter:node %d: dropping received data [0x%02x,%c], not in rx state\n",
+		    machine_get_node_id(), data & 0xff, isprint(data) ? data:'.');
       return -1;
     }
 
   /* Verify cc1100 signal strength */
   if (dBm < -90) 
     {
-      CC1100_DBG_RX("cc1100:rx:filter:node %d: dropping received data, below sensibility\n",
-		    machine_get_node_id());
+      CC1100_DBG_RX("cc1100:rx:filter:node %d: dropping received data [0x%02x,%c], below sensibility\n",
+		    machine_get_node_id(), data & 0xff, isprint(data) ? data:'.');
       return -1;
     }
 	
@@ -82,8 +82,8 @@ int cc1100_rx_filter(struct _cc1100_t *cc1100, double frequency, int modulation,
   if ((freq_cc - frequency > FREQ_FILTER_THRESHOLD) || 
       (frequency - freq_cc > FREQ_FILTER_THRESHOLD)) /* fabs */
     {
-      CC1100_DBG_RX("cc1100:rx:filter:node %d: dropping received data, frequency mismatch (device:%lf,pkt:%lf)\n",
-		    machine_get_node_id(), freq_cc, frequency);
+      CC1100_DBG_RX("cc1100:rx:filter:node %d: dropping received data [0x%02x,%c], frequency mismatch (device:%lf,pkt:%lf)\n",
+		    machine_get_node_id(), data & 0xff, isprint(data) ? data:'.', freq_cc, frequency);
       return -1;
     }
 	
@@ -93,8 +93,8 @@ int cc1100_rx_filter(struct _cc1100_t *cc1100, double frequency, int modulation,
   /* Verify cc1100 modulation */
   if (cc1100_get_modulation(cc1100) != modulation) 
     {
-      CC1100_DBG_RX("cc1100:rx:filter:node %d: dropping received data, modulation mismatch (dev:%d,pkt:%d)\n",
-		    cc1100_get_modulation(cc1100),modulation);
+      CC1100_DBG_RX("cc1100:rx:filter:node %d: dropping received data [0x%02x,%c], modulation mismatch (dev:%d,pkt:%d)\n", 
+		    machine_get_node_id(), data & 0xff, isprint(data) ? data:'.', cc1100_get_modulation(cc1100),modulation);
       return -1;
     }
 	
@@ -113,7 +113,7 @@ int cc1100_rx_filter(struct _cc1100_t *cc1100, double frequency, int modulation,
       if      (MACHINE_TIME_GET_NANO() <  /* too early */
 	       (cc1100->rx_io_timer - CC1100_SYNCHRO_DELAY_THRESHOLD))
 	{
-	  CC1100_DBG_RX("cc1100:rx:filter:node %d: dropping received data [%02x,%c], early synchro io_timer:%lld > time:%lld (diff=%lld, dur=%lld)\n", 
+	  CC1100_DBG_RX("cc1100:rx:filter:node %d: dropping received data [0x%02x,%c], early synchro io_timer:%lld > time:%lld (diff=%lld, dur=%lld)\n", 
 			machine_get_node_id(), data & 0xff, isprint(data) ? data:'.',
 			cc1100->rx_io_timer,  MACHINE_TIME_GET_NANO(), 
 			cc1100->rx_io_timer - MACHINE_TIME_GET_NANO(), 
@@ -123,7 +123,7 @@ int cc1100_rx_filter(struct _cc1100_t *cc1100, double frequency, int modulation,
       else if (MACHINE_TIME_GET_NANO() > /* too late */
 	       (cc1100->rx_io_timer + CC1100_SYNCHRO_DELAY_THRESHOLD))
 	{
-	  CC1100_DBG_RX("cc1100:rx:filter:node %d: dropping received data [%02x,%c], late synchro io_timer:%lld < time:%lld (diff=%lld, dur=%lld)\n", 
+	  CC1100_DBG_RX("cc1100:rx:filter:node %d: dropping received data [0x%02x,%c], late synchro io_timer:%lld < time:%lld (diff=%lld, dur=%lld)\n", 
 			machine_get_node_id(), data & 0xff, isprint(data) ? data:'.',
 			cc1100->rx_io_timer,  MACHINE_TIME_GET_NANO(), 
 			MACHINE_TIME_GET_NANO() - cc1100->rx_io_timer,
@@ -435,6 +435,7 @@ void cc1100_rx_crc(struct _cc1100_t *cc1100, uint8_t rx) {
 	
 	if (crc == cc1100->ioCrc) {
 		CC1100_SET_CRC_TRUE(cc1100);
+		CC1100_DBG_RX("cc1100:rx_crc: crc set true\n");
 	} else {
 		CC1100_SET_CRC_FALSE(cc1100);
 	}
@@ -478,6 +479,13 @@ void cc1100_rx_preamble(struct _cc1100_t *cc1100, uint8_t rx,  double UNUSED dBm
 	}	
     }
   
+  if (rx != CC1100_PREAMBLE_PATTERN)
+    {
+      CC1100_DBG_RX("cc1100:rx_preamble: received a none preamble byte, reinit preamble phase\n"); 
+      CC1100_RX_EXPECT_PREAMBLE(cc1100);
+      return;
+    }
+
   CC1100_UPDATE_PQT(cc1100, rx);
   cc1100->ioOffset++;
   

@@ -20,6 +20,9 @@
 /* TODO: this must be parameterized according to bandwith and MCU speed */
 #define CC1100_SYNCHRO_DELAY_THRESHOLD          5000  /* ns */
 
+/* Preamble pattern byte (alternating sequence of 1 and 0) */
+#define CC1100_PREAMBLE_PATTERN 0x55
+
 /* CC1100 time constants (cf [1] p33) */
 #define CC1100_POWER_UP_DELAY_NS                40000
 #define CC1100_POWER_UP_DELAY_US                40

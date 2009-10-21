@@ -537,7 +537,7 @@ int cc2420_rx_check_address(struct _cc2420_t * cc2420 UNUSED) {
         }
         else {
             if (memcmp(cc2420->ram + CC2420_RAM_PANID, dst_pan, 2)) {
-	      CC2420_DEBUG("local pan id (%x,%x) and dst pan id (%x,%x) are different, dropping\n", *(cc2420->ram + CC2420_RAM_PANID), *(cc2420->ram + CC2420_RAM_PANID + 1), src_pan[0],src_pan[1]);
+	      CC2420_DEBUG("local pan id (%x,%x) and dst pan id (%x,%x) are different, dropping\n", *(cc2420->ram + CC2420_RAM_PANID), *(cc2420->ram + CC2420_RAM_PANID + 1), dst_pan[0], dst_pan[1]);
                 return -1;
             }
         }
@@ -623,7 +623,7 @@ uint64_t cc2420_callback_rx(void *arg, struct wsnet_rx_info *wrx)
   double dBm       = wrx->power_dbm;
   double snr       = wrx->SiNR;
 
-CC2420_DEBUG("cc2420_callback_rx : entering RX Callback\n");
+  CC2420_DEBUG("cc2420_callback_rx : entering RX Callback, rx data 0x%02x\n", rx);
 
     /* check if we are able to receive data */
     if (cc2420_rx_filter(cc2420, frequency, modulation, dBm, snr)) {

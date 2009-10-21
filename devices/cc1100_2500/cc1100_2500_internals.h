@@ -41,6 +41,8 @@ extern tracer_id_t TRACER_CC1100_STATE;
 extern tracer_id_t TRACER_CC1100_STROBE;
 extern tracer_id_t TRACER_CC1100_CS;
 extern tracer_id_t TRACER_CC1100_SO;
+extern tracer_id_t TRACER_CC1100_GDO0;
+extern tracer_id_t TRACER_CC1100_GDO2;
 
 /***************************************************/
 /***************************************************/

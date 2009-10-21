@@ -163,8 +163,8 @@
     if( (cc1100_read_register(cc1100, CC1100_REG_PKTCTRL0)) & 0x08 ) {	\
         cc1100_assert_gdo(cc1100, 0x07, CC1100_PIN_ASSERT);		\
 	cc1100_assert_gdo(cc1100, 0x0F, CC1100_PIN_ASSERT);		\
+	cc1100->registers[CC1100_REG_LQI] |= 0x80;			\
     }									\
-    cc1100->registers[CC1100_REG_LQI] |= 0x80;				\
   } while (0)
 #else
 #error "you must define CC1100 or CC2500 model"
@@ -267,7 +267,6 @@
 #define CC1100_RX_END_FORCED(cc1100)					\
   do {									\
     cc1100_assert_gdo(cc1100, 0x06, CC1100_PIN_DEASSERT);		\
-    cc1100_assert_gdo(cc1100, 0x01, CC1100_PIN_ASSERT);			\
     CC1100_DBG_PKT("cc1100:rx:packet: RX FORCED\n");			\
   } while (0)
 
@@ -326,7 +325,7 @@
 #define CC1100_RX_ENTER(cc1100)						\
   do {									\
     CC1100_DBG_STATE("cc1100:state: RX (enter)\n");			\
-    CC1100_SET_CRC_TRUE(cc1100);					\
+    CC1100_SET_CRC_FALSE(cc1100);					\
     cc1100->fsm_state   = CC1100_STATE_RX;				\
     cc1100->fsm_pending = CC1100_STATE_IDLE;				\
     tracer_event_record(TRACER_CC1100_STATE, CC1100_STATE_RX);		\
@@ -345,7 +344,7 @@
 #define CC1100_RX_ENTER(cc1100)						\
   do {									\
     CC1100_DBG_STATE("cc1100:state: RX (enter)\n");			\
-    CC1100_SET_CRC_TRUE(cc1100);					\
+    CC1100_SET_CRC_FALSE(cc1100);					\
     cc1100->fsm_state   = CC1100_STATE_RX;				\
     cc1100->fsm_pending = CC1100_STATE_IDLE;				\
     tracer_event_record(TRACER_CC1100_STATE, CC1100_STATE_RX);		\

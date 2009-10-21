@@ -288,7 +288,7 @@ uint8_t cc1100_get_preamble_length(struct _cc1100_t *cc1100)
 
 uint8_t cc1100_tx_preamble (struct _cc1100_t *cc1100) 
 {
-  uint8_t data = 0x55;
+  uint8_t data = CC1100_PREAMBLE_PATTERN;
 	
   cc1100->ioOffset++;
 	
@@ -496,11 +496,13 @@ uint8_t cc1100_tx_crc (struct _cc1100_t *cc1100)
     {
       data = (uint8_t) ((cc1100->ioCrc >> 8) & 0x00FF);
       cc1100->ioOffset++;
+      CC1100_DBG_TX("cc1100:tx_crc: 1st byte of crc = 0x%02x\n",data);
     } 
   else 
     {
       data = (uint8_t) (cc1100->ioCrc & 0x00FF);
       CC1100_TX_END(cc1100);
+      CC1100_DBG_TX("cc1100:tx_crc: 2nd byte of crc = 0x%02x\n",data);
     }
   return data;
 }

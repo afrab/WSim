@@ -12,6 +12,7 @@
  *  Copyright 2005 __WorldSens__. All rights reserved.
  *  Created by Guillaume Chelius on 20/11/05.
  *  Rewrite Antoine Fraboulet, 2007
+ *  Modified by Loic Lemaitre 2009
  *
  */
 
@@ -163,8 +164,10 @@ static ssize_t  worldsens_packet_send             (int fd, char* msg, size_t len
 static ssize_t  worldsens_packet_recv             (int fd, char* msg, size_t len, int flags, int dump);
 static int      worldsens_packet_waiting_in_queue (int fd); /* pkt waiting in fd,  called by c_update */
 
-static int64_t  worldsens_packet_parse_data       (char *msg, int pkt_seq, int line);
-                                                            /* called by packet_parse                */
+static int64_t  worldsens_packet_parse_data_rx    (char *msg, int pkt_seq, int line);
+                                                            /* called by packet_parse (for rx packet) */
+static int64_t  worldsens_packet_parse_data_srrx  (char *msg, int pkt_seq, int line);
+                                                            /* called by packet_parse (for rx+rp packets) */
 static int64_t  worldsens_packet_parse_rp         (char *msg, int pkt_seq, int line);
                                                             /* called by packet_parse                */
 static int64_t  worldsens_packet_parse            (char *msg, int UNUSED len);
@@ -901,16 +904,62 @@ static ssize_t worldsens_packet_recv(int fd, char* msg, size_t len, int flags, i
 /**************************************************************************/
 /**************************************************************************/
 
-static int64_t worldsens_packet_parse_data(char *msg, int UNUSED pkt_seq, int UNUSED line)
-{      
-  struct _worldsens_s_srrx_pkt  *pkt = (struct _worldsens_s_srrx_pkt *) msg;
-  struct _worldsens_data       *data = (struct _worldsens_data *)      (msg + sizeof(struct _worldsens_s_srrx_pkt));
+/* parse rx data: extract data related to this node */
+static int64_t worldsens_packet_parse_data_rx(char *msg, int UNUSED pkt_seq, int UNUSED line)
+{
+
+  struct _worldsens_s_rx_pkt *pkt  = (struct _worldsens_s_rx_pkt *) msg;
+  struct _worldsens_data       *data = (struct _worldsens_data *)(msg + sizeof(struct _worldsens_s_rx_pkt));
   unsigned int                length = ntohl(pkt->size);
   int                         c_node = 0;
   int64_t                   duration = 0;
 
+
   /* c_node = number of extra '_worldsens_data' packet sent in the same rx_pkt, must be at least 1 */
   while (((c_node * sizeof(struct _worldsens_data)) + sizeof(struct _worldsens_s_rx_pkt)) < length) 
+    {
+      
+      if (ntohl(data->node) == (unsigned)WSENS_MYADDR) 
+	{
+	  struct wsnet_rx_info info;
+	  WSNET_RX("WSNET (%"PRIu64", %d): <-- RX src=%d[%d] (data: [0x%02x,%c], freq: %gMHz, mod: %d, rx: %gmW, SiNR: %lg)\n",
+		   MACHINE_TIME_GET_NANO(), pkt_seq, 
+		   /* RX_line[c_node] */ line, c_node,
+		   data->data & 0xff, isprint(data->data & 0xff ) ? data->data & 0xff : '.',
+		   ntohl(pkt->frequency) / 1000000.0f, 
+		   ntohl(pkt->modulation), 
+		   ntohdbl(data->rx_mW), 
+		   ntohdbl(data->SiNR));
+	  
+	  info.data       = data->data;
+	  info.freq_mhz   = (double)ntohl(pkt->frequency) / 1000000.0;
+	  info.modulation = ntohl(pkt->modulation);
+	  info.power_dbm  = mW2dBm(ntohdbl(data->rx_mW)); /* conversion from mW to dBm! */
+	  info.SiNR       = ntohdbl(data->SiNR);
+
+	  duration += WSENS_CBRX_FUNC(WSENS_CBRX_ARG, &info);
+	}
+      
+      c_node++;
+      data++; /* next data */
+    }
+  return duration;
+}
+
+/* same function as the previous one, excepted pkt structure type (struct _worldsens_s_srrx_pkt instead of
+struct _worldsens_s_rx_pkt) */
+static int64_t worldsens_packet_parse_data_srrx(char *msg, int UNUSED pkt_seq, int UNUSED line)
+{
+
+  struct _worldsens_s_srrx_pkt *pkt  = (struct _worldsens_s_srrx_pkt *) msg;
+  struct _worldsens_data       *data = (struct _worldsens_data *)(msg + sizeof(struct _worldsens_s_srrx_pkt));
+  unsigned int                length = ntohl(pkt->size);
+  int                         c_node = 0;
+  int64_t                   duration = 0;
+
+
+  /* c_node = number of extra '_worldsens_data' packet sent in the same rx_pkt, must be at least 1 */
+  while (((c_node * sizeof(struct _worldsens_data)) + sizeof(struct _worldsens_s_srrx_pkt)) < length) 
     {
       
       if (ntohl(data->node) == (unsigned)WSENS_MYADDR) 
@@ -1052,7 +1101,7 @@ static int64_t worldsens_packet_parse(char *msg, int UNUSED len)
       }
 	
     case WORLDSENS_S_RX:                           /* Rx data */
-      duration = worldsens_packet_parse_data(msg,pkt_seq,1);
+      duration = worldsens_packet_parse_data_rx(msg,pkt_seq,1);
       break;
   
     case WORLDSENS_S_SYNCH_REQ:                    /* RP point */
@@ -1060,7 +1109,7 @@ static int64_t worldsens_packet_parse(char *msg, int UNUSED len)
       return 0;
 
     case (WORLDSENS_S_SYNCH_REQ | WORLDSENS_S_RX): /* RP Point and Rx data */
-      duration = worldsens_packet_parse_data  (msg,pkt_seq,2);
+      duration = worldsens_packet_parse_data_srrx(msg,pkt_seq,2);
       worldsens_packet_parse_rp(msg,pkt_seq,2);
       break;
 
@@ -1209,15 +1258,15 @@ static void worldsens_packet_dump_send(char *msg, int len)
     case WORLDSENS_C_CONNECT:
       {
 	struct _worldsens_c_connect_pkt *pkt = (struct _worldsens_c_connect_pkt *)msg;
-	VERBOSE(VLVL,"WSNet:pkt:%s:   type %s\n",              prfx, "WORLDSENS_C_CONNECT");
-	VERBOSE(VLVL,"WSNet:pkt:%s:   node %d\n",              prfx, ntohl(pkt->node));
+	VERBOSE(VLVL,"WSNet:pkt:%s:   type       %s\n",          prfx, "WORLDSENS_C_CONNECT");
+	VERBOSE(VLVL,"WSNet:pkt:%s:   node       %d\n",          prfx, ntohl(pkt->node));
       }
       break;
     case WORLDSENS_C_SYNCHED:
       {
 	struct _worldsens_c_synched_pkt *pkt = (struct _worldsens_c_synched_pkt *)msg;
-	VERBOSE(VLVL,"WSNet:pkt:%s:   type   %s\n",            prfx, "WORLDSENS_C_SYNCHED");
-	VERBOSE(VLVL,"WSNet:pkt:%s:   rp_seq %d\n",            prfx, ntohl(pkt->rp_seq));
+	VERBOSE(VLVL,"WSNet:pkt:%s:   type       %s\n",          prfx, "WORLDSENS_C_SYNCHED");
+	VERBOSE(VLVL,"WSNet:pkt:%s:   rp_seq     %d\n",          prfx, ntohl(pkt->rp_seq));
       }
       break;
     case WORLDSENS_C_TX:
@@ -1231,7 +1280,7 @@ static void worldsens_packet_dump_send(char *msg, int len)
 	VERBOSE(VLVL,"WSNet:pkt:%s:   modulation %s (%d)\n",     prfx, 
 		wsnet_modulation_name(ntohl(pkt->modulation)), 
 		ntohl(pkt->modulation));
-	VERBOSE(VLVL,"WSNet:pkt:%s:   tx_mW     %g\n",          prfx, ntohdbl(pkt->tx_mW)  );
+	VERBOSE(VLVL,"WSNet:pkt:%s:   tx_mW      %g\n",          prfx, ntohdbl(pkt->tx_mW)  );
 	VERBOSE(VLVL,"WSNet:pkt:%s:   pkt_seq    %d\n",          prfx, ntohl (pkt->pkt_seq)  );
 	VERBOSE(VLVL,"WSNet:pkt:%s:   data       0x%02x (%c)\n", prfx, pkt->data & 0xff,
 		isprint( pkt->data & 0xff) ? pkt->data & 0xff : '.');
@@ -1240,15 +1289,15 @@ static void worldsens_packet_dump_send(char *msg, int len)
     case WORLDSENS_C_DISCONNECT:
       {
 	struct _worldsens_c_disconnect_pkt *pkt = (struct _worldsens_c_disconnect_pkt *)msg; 
-	VERBOSE(VLVL,"WSNet:pkt:%s:   type %s\n",              prfx, "WORLDSENS_C_DISCONNECT");
-	VERBOSE(VLVL,"WSNet:pkt:%s:   node %d\n",              prfx, ntohl(pkt->node));
+	VERBOSE(VLVL,"WSNet:pkt:%s:   type       %s\n",          prfx, "WORLDSENS_C_DISCONNECT");
+	VERBOSE(VLVL,"WSNet:pkt:%s:   node       %d\n",          prfx, ntohl(pkt->node));
       }
       break;
     default:
       {
 	VERBOSE(VLVL,"WSNet:pkt:%s:   %s\n", prfx, "UNKNOWN PACKET");
-	VERBOSE(VLVL,"WSNet:pkt:%s:   type %d\n",              prfx, sh->type);
-	VERBOSE(VLVL,"WSNet:pkt:%s:   size %d\n",              prfx, len);
+	VERBOSE(VLVL,"WSNet:pkt:%s:   type       %d\n",          prfx, sh->type);
+	VERBOSE(VLVL,"WSNet:pkt:%s:   size       %d\n",          prfx, len);
 	wsnet_packet_dump(msg, len, SNDSTR);
       }
       break;
@@ -1270,65 +1319,74 @@ static void worldsens_packet_dump_recv(char *msg, int len)
     case WORLDSENS_S_ATTRADDR:
       {
 	struct _worldsens_s_connect_pkt *pkt = (struct _worldsens_s_connect_pkt *)msg;
-	VERBOSE(VLVL,"WSNet:pkt:%s:   type    %s\n",           prfx, "WORLDSENS_S_ATTRADDR");
-	VERBOSE(VLVL,"WSNet:pkt:%s:   pkt_seq %d\n",           prfx, ntohl (pkt->pkt_seq));
-	VERBOSE(VLVL,"WSNet:pkt:%s:   period  %"PRIu64"\n",    prfx, ntohll(pkt->period));
-	VERBOSE(VLVL,"WSNet:pkt:%s:   rp_seq  %d\n",           prfx, ntohl (pkt->rp_seq));
-	VERBOSE(VLVL,"WSNet:pkt:%s:   cnxtime %"PRIu64"\n",    prfx, ntohll(pkt->cnx_time));
+	VERBOSE(VLVL,"WSNet:pkt:%s:   type       %s\n",          prfx, "WORLDSENS_S_ATTRADDR");
+	VERBOSE(VLVL,"WSNet:pkt:%s:   pkt_seq    %d\n",          prfx, ntohl (pkt->pkt_seq));
+	VERBOSE(VLVL,"WSNet:pkt:%s:   period     %"PRIu64"\n",   prfx, ntohll(pkt->period));
+	VERBOSE(VLVL,"WSNet:pkt:%s:   rp_seq     %d\n",          prfx, ntohl (pkt->rp_seq));
+	VERBOSE(VLVL,"WSNet:pkt:%s:   cnxtime    %"PRIu64"\n",   prfx, ntohll(pkt->cnx_time));
       }
       break;
     case WORLDSENS_S_NOATTRADDR:
       {
 	struct _worldsens_s_header *pkt = (struct _worldsens_s_header *)msg;
-	VERBOSE(VLVL,"WSNet:pkt:%s:   type    %s\n",           prfx, "WORLDSENS_S_NOATTRADDR");
-	VERBOSE(VLVL,"WSNet:pkt:%s:   pkt_seq %d\n",           prfx, ntohl(pkt->pkt_seq));
-	VERBOSE(VLVL,"WSNet:pkt:%s:   no information\n",       prfx);
+	VERBOSE(VLVL,"WSNet:pkt:%s:   type       %s\n",          prfx, "WORLDSENS_S_NOATTRADDR");
+	VERBOSE(VLVL,"WSNet:pkt:%s:   pkt_seq    %d\n",          prfx, ntohl(pkt->pkt_seq));
+	VERBOSE(VLVL,"WSNet:pkt:%s:   no information\n",         prfx);
       }
       break;
     case WORLDSENS_S_RX:
-    case WORLDSENS_S_SYNCH_REQ:
-    case WORLDSENS_S_RX | WORLDSENS_S_SYNCH_REQ:
       {
-	char *str;
-	switch (sh->type) {
-	case WORLDSENS_S_RX:        str = "WORLDSENS_S_RX";        break;
-	case WORLDSENS_S_SYNCH_REQ: str = "WORLDSENS_S_SYNCH_REQ"; break;
-	default:                    str = "WORLDSENS_S_ [ RX + SYNCH_REQ ]"; break;
-	}
-	VERBOSE(VLVL,"WSNet:pkt:%s:   type     %s\n",          prfx, str);
-      };
-      {
-	struct _worldsens_s_saverel_pkt *pkt = (struct _worldsens_s_saverel_pkt *)msg;
-	VERBOSE(VLVL,"WSNet:pkt:%s:   pkt_seq  %d\n",          prfx, ntohl(pkt->pkt_seq));
-	VERBOSE(VLVL,"WSNet:pkt:%s:   c_rp_seq %d\n",          prfx, ntohl(pkt->c_rp_seq));
-	VERBOSE(VLVL,"WSNet:pkt:%s:   period %"PRIu64"\n",     prfx, ntohll(pkt->period));
-	VERBOSE(VLVL,"WSNet:pkt:%s:   n_rp_seq %d\n",          prfx, ntohl(pkt->n_rp_seq));
-      }
-      if ((sh->type & WORLDSENS_S_RX) != 0)
-      {
-	struct _worldsens_s_srrx_pkt *pkt = (struct _worldsens_s_srrx_pkt *)msg; 
-	VERBOSE(VLVL,"WSNet:pkt:%s:   size       %d\n",        prfx, ntohl(pkt->size));
-	VERBOSE(VLVL,"WSNet:pkt:%s:   node       %d\n",        prfx, ntohl(pkt->node));
-	VERBOSE(VLVL,"WSNet:pkt:%s:   frequency  %g MHz\n",    prfx, ntohl(pkt->frequency) / 1000000.0f);
-	VERBOSE(VLVL,"WSNet:pkt:%s:   modulation %s (%d)\n",   prfx, 
+	struct _worldsens_s_rx_pkt *pkt = (struct _worldsens_s_rx_pkt *)msg;
+	VERBOSE(VLVL,"WSNet:pkt:%s:   type       %s\n",          prfx, "WORLDSENS_S_RX");
+	VERBOSE(VLVL,"WSNet:pkt:%s:   pkt_seq    %d\n",          prfx, ntohl(pkt->pkt_seq));
+	VERBOSE(VLVL,"WSNet:pkt:%s:   size       %d\n",          prfx, ntohl(pkt->size));
+	VERBOSE(VLVL,"WSNet:pkt:%s:   node       %d\n",          prfx, ntohl(pkt->node));
+	VERBOSE(VLVL,"WSNet:pkt:%s:   frequency  %g MHz\n",      prfx, ntohl(pkt->frequency) / 1000000.0f);
+	VERBOSE(VLVL,"WSNet:pkt:%s:   modulation %s (%d)\n",     prfx, 
 		wsnet_modulation_name(ntohl(pkt->modulation)), 
 		ntohl(pkt->modulation));
       }
       break;
+    case WORLDSENS_S_SYNCH_REQ:
+      {
+        struct _worldsens_s_saverel_pkt *pkt = (struct _worldsens_s_saverel_pkt *)msg; 
+	VERBOSE(VLVL,"WSNet:pkt:%s:   type       %s\n",          prfx, "WORLDSENS_S_SYNC_REQ");
+	VERBOSE(VLVL,"WSNet:pkt:%s:   pkt_seq    %d\n",          prfx, ntohl(pkt->pkt_seq));
+	VERBOSE(VLVL,"WSNet:pkt:%s:   c_rp_seq   %d\n",          prfx, ntohl(pkt->c_rp_seq));
+	VERBOSE(VLVL,"WSNet:pkt:%s:   period     %"PRIu64"\n",   prfx, ntohll(pkt->period));
+	VERBOSE(VLVL,"WSNet:pkt:%s:   n_rp_seq   %d\n",          prfx, ntohl(pkt->n_rp_seq));
+      }
+      break;
+    case WORLDSENS_S_RX | WORLDSENS_S_SYNCH_REQ:
+      {
+	struct _worldsens_s_srrx_pkt *pkt = (struct _worldsens_s_srrx_pkt *)msg;
+	VERBOSE(VLVL,"WSNet:pkt:%s:   type       %s\n",          prfx, "WORLDSENS_S_ [ RX + SYNCH_REQ ]");
+	VERBOSE(VLVL,"WSNet:pkt:%s:   pkt_seq    %d\n",          prfx, ntohl(pkt->pkt_seq));
+	VERBOSE(VLVL,"WSNet:pkt:%s:   c_rp_seq   %d\n",          prfx, ntohl(pkt->c_rp_seq));
+	VERBOSE(VLVL,"WSNet:pkt:%s:   period     %"PRIu64"\n",   prfx, ntohll(pkt->period));
+	VERBOSE(VLVL,"WSNet:pkt:%s:   n_rp_seq   %d\n",          prfx, ntohl(pkt->n_rp_seq));
+	VERBOSE(VLVL,"WSNet:pkt:%s:   size       %d\n",          prfx, ntohl(pkt->size));
+	VERBOSE(VLVL,"WSNet:pkt:%s:   node       %d\n",          prfx, ntohl(pkt->node));
+	VERBOSE(VLVL,"WSNet:pkt:%s:   frequency  %g MHz\n",      prfx, ntohl(pkt->frequency) / 1000000.0f);
+	VERBOSE(VLVL,"WSNet:pkt:%s:   modulation %s (%d)\n",     prfx, 
+		wsnet_modulation_name(ntohl(pkt->modulation)), 
+		ntohl(pkt->modulation));
+      }
+	break;
     case WORLDSENS_S_BACKTRACK:
       {
 	struct _worldsens_s_backtrack_pkt *pkt = (struct _worldsens_s_backtrack_pkt *)msg;
-	VERBOSE(VLVL,"WSNet:pkt:%s:   type     %s\n",          prfx, "WORLDSENS_S_BACKTRACK");
-	VERBOSE(VLVL,"WSNet:pkt:%s:   pkt_seq  %d\n",          prfx, ntohl (pkt->pkt_seq));
-	VERBOSE(VLVL,"WSNet:pkt:%s:   period   %"PRIu64"\n",   prfx, ntohll(pkt->period));
-	VERBOSE(VLVL,"WSNet:pkt:%s:   rp_seq   %d\n",          prfx, ntohl (pkt->rp_seq));
+	VERBOSE(VLVL,"WSNet:pkt:%s:   type       %s\n",          prfx, "WORLDSENS_S_BACKTRACK");
+	VERBOSE(VLVL,"WSNet:pkt:%s:   pkt_seq    %d\n",          prfx, ntohl (pkt->pkt_seq));
+	VERBOSE(VLVL,"WSNet:pkt:%s:   period     %"PRIu64"\n",   prfx, ntohll(pkt->period));
+	VERBOSE(VLVL,"WSNet:pkt:%s:   rp_seq     %d\n",          prfx, ntohl (pkt->rp_seq));
       }
       break;
     default:
       {
-	VERBOSE(VLVL,"WSNet:pkt:%s:   %s\n",                   prfx, "UNKNOWN PACKET");
-	VERBOSE(VLVL,"WSNet:pkt:%s:   type %02x\n",            prfx, sh->type);
-	VERBOSE(VLVL,"WSNet:pkt:%s:   size %d\n",              prfx, len);
+	VERBOSE(VLVL,"WSNet:pkt:%s:   %s\n",                     prfx, "UNKNOWN PACKET");
+	VERBOSE(VLVL,"WSNet:pkt:%s:   type       %02x\n",        prfx, sh->type);
+	VERBOSE(VLVL,"WSNet:pkt:%s:   size       %d\n",          prfx, len);
 	wsnet_packet_dump(msg, len, RCVSTR);
       }
       break;

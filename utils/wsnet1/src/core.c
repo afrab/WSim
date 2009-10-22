@@ -4,6 +4,7 @@
  *
  *  Created by Guillaume Chelius on 20/11/05.
  *  Copyright 2005 __WorldSens__. All rights reserved.
+ *  Modified Loic Lemaitre 2009
  *
  */
 

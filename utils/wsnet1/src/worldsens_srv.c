@@ -3,6 +3,7 @@
  *  
  *  Created by Guillaume Chelius on 20/11/05.
  *  Copyright 2005 __WorldSens__. All rights reserved.
+ *  Modified by Loic Lemaitre 2009
  *
  */
 #include "worldsens.h"
@@ -149,9 +150,9 @@ htondbl (double v)
 
 void worldsens_packet_dump(char UNUSED *msg, char UNUSED *pkt, int UNUSED size)
 {
-  /*
+  /*  
   int i;
-  WSNET_S_DBG_DBG ("WSNET:: %s start ================================\n", msg)
+  WSNET_S_DBG_DBG ("WSNET:: %s start ================================\n", msg);
   WSNET_S_DBG_DBG ("WSNET::%s ", msg);
   for(i=0;i<size; i++)
     {
@@ -633,8 +634,8 @@ worldsens_s_save_release_request_rx (struct _worldsens_s *worldsens, int node,
 
   WSNET_S_DBG_EXC ("WSNET:: --> (seq: %d) SAVE + RP (seq: %d, period: %"PRId64", rp: %"PRId64")\n",
 		   pkt_seq - 1, worldsens->rp_seq, period, worldsens->rp);
-  WSNET_S_DBG_EXC ("WSNET:: --> RX (ip:%d, freq:%gMHz, modul: %d)\n", 
-		   node, (unsigned)freq / 1000000.0, modulation);
+  WSNET_S_DBG_EXC ("WSNET:: --> RX (ip:%d, size:%d, freq:%gMHz, modul:%d)\n", 
+		   node, length, (unsigned)freq / 1000000.0, modulation);
   return 0;
 }
 
@@ -663,7 +664,7 @@ worldsens_s_rx (struct _worldsens_s *worldsens, int node, int freq,
   memcpy (reply + sizeof (struct _worldsens_s_rx_pkt), (char *) data,
 	  g_c_nodes * sizeof (struct _worldsens_data));
 
-  pkt->type       = WORLDSENS_S_SYNCH_REQ | WORLDSENS_S_RX;
+  pkt->type       = WORLDSENS_S_RX;
   pkt->pkt_seq    = htonl (pkt_seq++);
   pkt->size       = htonl (length);
   pkt->node       = htonl (node);
@@ -676,8 +677,9 @@ worldsens_s_rx (struct _worldsens_s *worldsens, int node, int freq,
       return -1;
     }
 
-  WSNET_S_DBG_EXC ("WSNET:: --> RX (ip: %d, size:%d, freq:%gMHz, modul:%d)\n", 
+  WSNET_S_DBG_EXC ("WSNET:: --> RX (ip:%d, size:%d, freq:%gMHz, modul:%d)\n", 
 		   node, length, (unsigned)freq / 1000000.0, modulation);
+
   return 0;
 }
 

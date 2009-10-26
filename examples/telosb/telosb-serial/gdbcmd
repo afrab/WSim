@@ -1,4 +1,0 @@
-file ../../../build/wsim-debug/platforms/telosb/wsim-telosb
-watch tracer_get_nanotime
-b tracer_event_record_active
-run --serial=stdout --mode=time --modearg=50000000000 --trace=wsim.trc test_printf.elf 

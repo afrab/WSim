@@ -21,7 +21,8 @@ world:
 
 ## builds wsim/wtracer/wconsole/wsnet1le
 worldsens:
-	cd utils/tracer 
+	cd utils/wtracer 
+	cd utils/wsnet1
 
 tests:
 	echo "This is a test"

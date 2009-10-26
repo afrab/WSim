@@ -85,6 +85,25 @@ AM_CONDITIONAL([BUILD_XCODE_DEBUG], [test "${xdebug_sum}" != "no"])
 
 dnl eTrace mode
 dnl ===========
+CFLAGS_save="${CFLAGS}"
+AC_ARG_ENABLE([etrace],AS_HELP_STRING([--enable-etrace],[etrace mode (default disabled)]))
+if test "${enable_etrace}" = "yes"; then
+    AC_CHECK_LIB(z, compress)
+    AC_DEFINE([ETRACE],[1],[eSimu energy tracer])
+    etrace_sum="yes"
+else
+    etrace_sum="no"
+fi
+AM_CONDITIONAL([BUILD_ETRACE], [test "${etrace_sum}" = "yes"])
+
+AC_ARG_WITH([etracelib-prefix], AS_HELP_STRING([--with-etracelib-prefix=DIR],[etracelib path]),
+	    [CFLAGS="-I$withval $CFLAGS" 
+	     LDFLAGS="-L$withval $LDFLAGS"
+	     EXTRALIBS="$withval/libetrace.a $EXTRALIBS"
+
+	     etracelib_prefix=$withval],
+	    [etracelib_prefix=""])
+
 zlib_sum="system" 
 AC_ARG_WITH([zlib-prefix], AS_HELP_STRING([--with-zlib-prefix=DIR],[zlib path]),
 	    [CFLAGS="-I$withval/include $CFLAGS" 
@@ -92,18 +111,6 @@ AC_ARG_WITH([zlib-prefix], AS_HELP_STRING([--with-zlib-prefix=DIR],[zlib path]),
 	     zlib_sum="yes" 
 	     zlib_prefix=$withval],
 	    [zlib_prefix=""])
-
-CFLAGS_save="${CFLAGS}"
-AC_ARG_ENABLE([etrace],AS_HELP_STRING([--enable-etrace],[etrace mode (default disabled)]))
-if test "${enable_etrace}" = "yes"; then
-    AC_CHECK_LIB(z, compress)
-    AC_DEFINE([ETRACE],[1],[eSimu energy tracer])
-    EXTRALIBS="${ETRACELIBPATH}/${ETRACELIBNAME} $EXTRALIBS"
-    etrace_sum="yes"
-else
-    etrace_sum="no"
-fi
-AM_CONDITIONAL([BUILD_ETRACE], [test "${etrace_sum}" = "yes"])
 
 dnl SDL ui mode
 dnl ===========

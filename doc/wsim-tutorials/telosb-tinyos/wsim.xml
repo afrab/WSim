@@ -1,129 +1,257 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
-    "/usr/share/sgml/docbook/dtd/4.5/docbookx.dtd">
+	  "/usr/share/sgml/docbook/dtd/4.5/docbookx.dtd">
 
 <book lang="en">
-	<bookinfo>
-		<title>WSim Hardware Platform Simulator</title>
-		<copyright><year>2005</year><holder>Worldsens</holder></copyright>
-		<subtitle>Tutorial</subtitle>
-		<authorgroup>
-			<author>
-				<firstname>Antoine</firstname>
-				<surname>Fraboulet</surname>
-			<affiliation>
-			  <orgname>INRIA Rhône Alpes</orgname>
-			  <orgdiv>Amazones Project</orgdiv>
-			  <address>
-			    CITI Laboratory
-			    Domaine Scientifique de la Doua, INSA de Lyon
-			    Bâtiment Claude Chappe 
-			    6, avenue des Arts	
-			    69621 Villeurbanne Cedex
-			    France
-			  </address>
-			</affiliation>
-			</author>
-		</authorgroup>
-		<revhistory>
-			<revision>
-				<revnumber>1.0</revnumber><date>2009-09-07</date>
-				<revremark>First Draft</revremark>
-			</revision>
-		</revhistory>
-		<abstract>
-			<para>WSim tutorial for TinyOS simulation.</para>
-		</abstract>
-	</bookinfo>
+  <bookinfo>
+    <title>WSim Hardware Platform Simulator</title>
+    <copyright><year>2005</year><holder>Worldsens</holder></copyright>
+    <subtitle>Tutorial</subtitle>
+    <authorgroup>
+      <author>
+	<firstname>Antoine</firstname>
+	<surname>Fraboulet</surname>
+      </author>
+      <author>
+	<firstname>Loïc</firstname>
+	<surname>Lemaître</surname>
+	<affiliation>
+	  <orgname>INRIA Rhône Alpes</orgname>
+	  <orgdiv>Amazones Project</orgdiv>
+	  <address>
+	    CITI Laboratory
+	    Domaine Scientifique de la Doua, INSA de Lyon
+	    Bâtiment Claude Chappe 
+	    6, avenue des Arts	
+	    69621 Villeurbanne Cedex
+	    France
+	  </address>
+	</affiliation>
+      </author>
+    </authorgroup>
+    <revhistory>
+      <revision>
+	<revnumber>1.0</revnumber><date>2009-10-26</date>
+	<revremark>First Draft</revremark>
+      </revision>
+    </revhistory>
+    <abstract>
+      <para>WSim tutorial for TinyOS simulation.</para>
+    </abstract>
+  </bookinfo>
 
-<!-- ============================================================ -->
-<!-- ============================================================ -->
-<!-- ============================================================ -->
+  <!-- ============================================================ -->
+  <!-- ============================================================ -->
+  <!-- ============================================================ -->
 
-	<chapter id="introduction">
-	  <title>Introduction</title>
-	  
-	  <para>This tutorial is intended to get you started
-	    with WSim and TinyOS development. It shows
-	    you the basics of  executing, debugging and
-	    interpreting results of applications written for
-	    the target microcontrollers.
-	  </para>
-	  
-	  <para>The tutorial uses the telosb model but any WSim platform
-	    will run the same with regards to TinyOS.
-	  </para>
+  <chapter id="introduction">
+    <title>Introduction</title>
+    
+    <para>
+      This tutorial is intended to get you started with WSim and TinyOS development. It shows you the basics of  executing, debugging and interpreting results of applications written for the target microcontrollers.
+    </para>
+    
+    <para>
+      The tutorial uses the telosb model but any WSim platform will run the same with regards to TinyOS.
+    </para>
 
-	  <para>This tutorial assumes that you are familiar with the basics
-	    of WSim and its associated tools. If not please first visit the
-	    WSim main tutorial.
-	  </para>
-	  
-	  <para>
-	    <itemizedlist mark="bullet" spacing="normal">
-	      <listitem>
-		<simpara>
-		  WSim <ulink url="http://wsim.gforge.inria.fr/">WSim website</ulink>.
-		</simpara>
-	      </listitem>
-	      <listitem>
-		<simpara>
-		  WSim hands-on tutorial <ulink url="http://wsim.gforge.inria.fr/tutorials/wsim/">WSim tutorial</ulink>.
-		</simpara>
-	      </listitem>
-	    </itemizedlist>
-	  </para>
-	</chapter>
-	
-	<!-- ============================================================ -->
-	<!-- ============================================================ -->
-	<!-- ============================================================ -->
+    <para>
+      This tutorial assumes that you are familiar with the basics of WSim and its associated tools. If not please first visit the WSim main tutorial.
+    </para>
+    
+    <para>
+      <itemizedlist mark="bullet" spacing="normal">
+	<listitem>
+	  <simpara>
+	    WSim <ulink url="http://wsim.gforge.inria.fr/">WSim website</ulink>.
+	  </simpara>
+	</listitem>
+	<listitem>
+	  <simpara>
+	    WSim hands-on tutorial <ulink url="http://wsim.gforge.inria.fr/tutorials/wsim/">WSim tutorial</ulink>.
+	  </simpara>
+	</listitem>
+      </itemizedlist>
+    </para>
+  </chapter>
+
+  <!-- ============================================================ -->
+  <!-- ============================================================ -->
+  <!-- ============================================================ -->
 
 
-<chapter id="run">
-  <title>WSim and Tossim</title>
-  <para>
-    WSim is a full platform simulator/emulator. The purpose of WSim is
-    to have a precise hardware model on which we can run the full
-    binary that could be used otherwise to flash the target. This
-    precision level allows WSim to gather precise performance data on
-    the code it runs including mechanisms like software frequency
-    scaling, peripheral and interrupt latencies, precise power
-    consumption, etc. The result of the simulation is precise with regards
-    to the target device assembly instructions so that a precise observation
-    of the embedded software can be build from the simulation.
-  </para>
-  <para>
-    TOSSIM relies on . This means that the application TinyOS code is
-    compiled for the machine TOSSIM runs on. Target specific modules
-    like hardware drivers in the TinyOS component hierarchy are
-    replaced at compile time by native modules that will simulate
-    peripherals at the TinyOS API level. This simulation level implies
-    that the real target binary is not generated. TOSSIM is thus
-    limited to functional simulation and has a very limited feedback
-    for performance and precise timings within the simulation. However,
-    since the simulation is simpler than using WSim it is also faster.
-  </para>
-  <para>
-    From the programmers' point of view, especially while debuging
-    applications, WSim and TOSSIM are quite different in what we can
-    observe at the TinyOS component level interface. TOSSIM simulates
-    components behavior and gives back information at the TinyOS
-    programming. WSim, in contrast, uses assembly instruction and
-    provides feedback at C source level
-    (the <computeroutput>app.c</computeroutput> file generated
-    by <computeroutput>nesc</computeroutput>). Although TinyOS includes 
-    compiler helpers to go back from the <computeroutput>app.c</computeroutput>
-    to TinyOS components we do not use this feature in this tutorial
-    and we will present how to debug TinyOS application starting from
-    <computeroutput>app.c</computeroutput> file.
-  </para>
+  <chapter id="run">
+    <title>WSim and Tossim</title>
+    <para>
+      WSim is a full platform simulator/emulator. The purpose of WSim is
+      to have a precise hardware model on which we can run the full
+      binary that could be used otherwise to flash the target. This
+      precision level allows WSim to gather precise performance data on
+      the code it runs including mechanisms like software frequency
+      scaling, peripheral and interrupt latencies, precise power
+      consumption, etc. The result of the simulation is precise with regards
+      to the target device assembly instructions so that a precise observation
+      of the embedded software can be build from the simulation.
+    </para>
+    <para>
+      TOSSIM relies on . This means that the application TinyOS code is
+      compiled for the machine TOSSIM runs on. Target specific modules
+      like hardware drivers in the TinyOS component hierarchy are
+      replaced at compile time by native modules that will simulate
+      peripherals at the TinyOS API level. This simulation level implies
+      that the real target binary is not generated. TOSSIM is thus
+      limited to functional simulation and has a very limited feedback
+      for performance and precise timings within the simulation. However,
+      since the simulation is simpler than using WSim it is also faster.
+    </para>
+    <para>
+      From the programmers' point of view, especially while debuging
+      applications, WSim and TOSSIM are quite different in what we can
+      observe at the TinyOS component level interface. TOSSIM simulates
+      components behavior and gives back information at the TinyOS
+      programming. WSim, in contrast, uses assembly instruction and
+      provides feedback at C source level
+      (the <emphasis role="bold"><computeroutput>app.c</computeroutput></emphasis> file generated
+      by <emphasis role="bold"><computeroutput>nesc</computeroutput></emphasis>). Although TinyOS includes 
+      compiler helpers to go back from the <emphasis role="bold"><computeroutput>app.c</computeroutput></emphasis>
+      to TinyOS components we do not use this feature in this tutorial
+      and we will present how to debug TinyOS application starting from
+      <emphasis role="bold"><computeroutput>app.c</computeroutput></emphasis> file.
+    </para>
 
-</chapter>
+  </chapter>
 
-	<!-- ============================================================ -->
-	<!-- ============================================================ -->
-	<!-- ============================================================ -->
+  <!-- ============================================================ -->
+  <!-- ============================================================ -->
+  <!-- ============================================================ -->
+
+  <chapter id="compilation">
+    <title>Compiling a TinyOS example for WSim</title>
+
+    <para>
+      This tutorial is based on TinyOS 2.1.0 version. It assumes that your TinyOS environment is correctly set up. If not, please first have a look to this <ulink url="http://docs.tinyos.net/index.php/Getting_Started_with_TinyOS">TinyOS tutorial</ulink>.
+    </para>
+
+    <para>
+      We are going to compile the RadioCountToLeds TinyOS example for TelosB. This program broadcasts a 4Hz counter value (every time it changes). When a node is in RX mode and received a valid packet that contains a counter value, it displays the lowest three bits on its leds.
+    </para>
+
+    <para>
+      Go to the RadioCountToLeds folder and compile it for TelosB platform:
+      <programlisting>
+	$cd ./apps/RadioCountToLeds/
+	$make telosb
+      </programlisting>
+    </para>
+
+    <para>
+      The <emphasis role="bold"><computeroutput>main.exe</computeroutput></emphasis> binary program is generated into the <emphasis role="bold"><computeroutput>.apps/RadioCountToLeds/build/telosb</computeroutput></emphasis> folder. You can use it with WSim by renaming it into a <emphasis role="bold"><computeroutput>*.elf</computeroutput></emphasis> file.
+    </para>
+
+    <para>
+      However TinyOS examples programs are compiled without debug infos, so if you proceed as previously, you won't be able to use the debugger with WSim. 
+    </para>
+
+    <para>
+      To avoid this drawback, you just have to compile manually with <emphasis role="bold"><computeroutput>mspgcc</computeroutput></emphasis> the Nesc generated <emphasis role="bold"><computeroutput>app.c</computeroutput></emphasis> file, which has been created in the <emphasis role="bold"><computeroutput>./apps/RadioCountToLeds/build/telosb/</computeroutput></emphasis> folder :
+      <programlisting>
+	$msp430-gcc app.c -mmcu=msp430x1611 -g -o radiocounttoleds.elf
+      </programlisting>
+    </para>
+
+  </chapter>
+
+  <!-- ============================================================ -->
+  <!-- ============================================================ -->
+  <!-- ============================================================ -->
+
+  <chapter id="debugging">
+    <title>Using WSim traces to debug</title>
+
+    <section id="start_simulation">
+      <title>Start simulation</title>
+
+      <para>
+	In this section, we will show you how to start a simulation involving two nodes executing RadioCountToLeds program. To achieve that, we need to launch two WSim instances (one per node), and WSNet. Here are the commands to execute in three terminals :
+	<programlisting>
+	  $wsnet1
+	</programlisting>
+
+	<programlisting>
+	  $worldsens-telosb --ui --mode=time --modearg=5s --node-id=0 --trace=trace0.trc radiocounttoleds.elf
+	</programlisting>
+
+	<programlisting>
+	  $worldsens-telosb --ui --mode=time --modearg=5s --node-id=1 --trace=trace1.trc radiocounttoleds.elf
+	</programlisting>
+	The <emphasis role="bold"><computeroutput>--trace</computeroutput></emphasis> option enables to gather traces during the WSim simulation.
+      </para>
+
+      <figure id="radiocounttoleds_simulation">
+	<title>Simulation with WSim and WSNet of RadioCountToLeds TinyOS program</title>
+	<mediaobject>
+	  <imageobject>
+	    <imagedata align="center" width="90%" fileref="figures/radiocounttoleds_simulation.png"/>
+	  </imageobject>
+	</mediaobject>
+      </figure>
+
+    </section>
+
+    <section id="traces">
+      <title>WSim output traces</title>
+
+      <para>
+	In order to interprete WSim traces, you may use <ulink url="http://gtkwave.sourceforge.net/">GtkWave software</ulink>. You need first to convert <emphasis role="bold"><computeroutput>*.trc</computeroutput></emphasis> files into <emphasis role="bold"><computeroutput>*.vcd</computeroutput></emphasis> files by using WTracer tool (available in WSim  <emphasis role="bold"><computeroutput>./utils/wtracer/</computeroutput></emphasis> sources) :
+	<programlisting>
+	  $wtracer --in=trace0.trc --out=trace0.vcd --format=vcd
+	  $wtracer --in=trace1.trc --out=trace1.vcd --format=vcd
+	</programlisting>
+	Note that you may find further informations on <emphasis role="bold"><computeroutput>VCD</computeroutput></emphasis> format in the <ulink url="http://wsim.gforge.inria.fr/tutorials/msp430-adc/ch03.html#id522665">ADC tutorial</ulink>.
+      </para>
+
+      <para>
+	Then you just have to run GtkWave with the appropriate file, for example to see node 0 traces :
+	<programlisting>
+	  $gtkwave trace0.vcd
+	</programlisting>
+      </para>
+
+      <figure id="radiocounttoleds_gtkwave1">
+	<title>WSim output traces of node 0 with RadioCountToLeds TinyOS program in GtkWave</title>
+	<mediaobject>
+	  <imageobject>
+	    <imagedata align="center" width="90%" fileref="figures/radiocounttoleds_gtkwave1.png"/>
+	  </imageobject>
+	</mediaobject>
+      </figure>
+
+      <para>
+	In order to compare easily several nodes traces, WTracer allows to merge several <emphasis role="bold"><computeroutput>*.trc</computeroutput></emphasis> files into only one <emphasis role="bold"><computeroutput>*.vcd</computeroutput></emphasis> file. For instance with our example :
+	<programlisting>
+	  $wtracer --out=multi.vcd --format=vcd --merge --multi trace*.trc
+ 	  $gtkwave multi.vcd
+	</programlisting>
+      </para>
+
+
+      <figure id="radiocounttoleds_gtkwave2">
+	<title>WSim output traces of node 0 and 1 with RadioCountToLeds TinyOS program in GtkWave</title>
+	<mediaobject>
+	  <imageobject>
+	    <imagedata align="center" width="90%" fileref="figures/radiocounttoleds_gtkwave2.png"/>
+	  </imageobject>
+	</mediaobject>
+      </figure>
+
+    </section>
+
+  </chapter>
+
+  <!-- ============================================================ -->
+  <!-- ============================================================ -->
+  <!-- ============================================================ -->
+
 
 </book>
 

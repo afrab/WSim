@@ -32,7 +32,7 @@ extern char* msp430_lpm_names[];
 #define _DEBUG_DISASSEMBLE
 #define _DEBUG_SIGNAL
 #define _DEBUG_REGISTERS
-#define DEBUG_INTERRUPT
+#define _DEBUG_INTERRUPT
 #define _DEBUG_GIE
 #define _DEBUG_LPM            /* low power mode */
 #define _DEBUG_SYSTEM_TIME    /* nano time      */
@@ -40,7 +40,8 @@ extern char* msp430_lpm_names[];
 #define _DEBUG_IO             /* mcu bus io     */
 #define _DEBUG_SFR            /* sfr registers  */
 
-#define DEBUG_TIMER          /* timer Ax Bx    */
+
+#define _DEBUG_TIMER          /* timer Ax Bx    */
 #define _DEBUG_HWMUL          /* hardware mult. */
 #define _DEBUG_BASIC_TIMER    /* basic timer    */
 #define _DEBUG_WATCHDOG       /* watchdog       */

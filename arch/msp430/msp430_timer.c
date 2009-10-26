@@ -25,11 +25,9 @@ char *str_mode[] =
   { "TIMER_STOP", "TIMER_UP", "TIMER_CONT", "TIMER_UD" };
 char *str_clocksrc[] = 
   { "TxCLK", "ACLK", "SMCLK", "INTxCLK" };
+
+#define TIMER_DEBUG_2
 #endif /* DEBUG_TIMER */
-
-
-
-//#define TIMER_DEBUG_2
 
 
 #if defined(TIMER_DEBUG_2)

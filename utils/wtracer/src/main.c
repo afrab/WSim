@@ -37,7 +37,11 @@ void usage(char* prog)
   --end=time       default: max       \n\
   --debug          default: no        \n\
   --merge          default: no        \n\
-  --help                              \n", prog);
+  --help                              \n\
+\n\
+  ex:\n\
+    wtracer --in=wsim.trc --out=wsim.vcd --format=vcd\n\
+    wtracer --out=glob.vcd --format=vcd --merge --multi wsim*.trc\n", prog);
 
   exit(1);
 }

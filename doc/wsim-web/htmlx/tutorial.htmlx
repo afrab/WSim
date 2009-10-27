@@ -50,6 +50,17 @@
 	      </TD>
 	    </TR>
 
+	    <TR align="middle" bgcolor="#ffffff">
+	      <TD> <b>TinyOS 2.1 and TelosB</b> </TD>
+	      <TD> How to use WSim with TinyOS and TelosB nodes.</TD>
+	      <TD> 
+		<a href="./tutorials/telosb-tinyos/index.html" > <!-- target="_new"> -->
+		  <img style="border: 0px solid ; width: 44px; height: 48px;" 
+		    src="./figures/html.png" alt="" />
+		</a> 
+	      </TD>
+	    </TR>
+
 	  </TABLE> 
 	  
   </div>

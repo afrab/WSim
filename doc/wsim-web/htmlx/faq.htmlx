@@ -64,9 +64,14 @@
       
     <h2 id="intro">For users</h2>
       <ol>
-      <li><a name="2-1"></a><b> ?</b></br>
+      <li><a name="2-1"></a><b> Can I use WSim for TinyOS applications ?</b></br>
       </li>
       <p>
+	WSim is independant of any operating system. You can use
+	TinyOS, MantisOS, FreeRTOS, Contiki or any embedded OS with
+	WSim. Please see the
+	<a href="http://wsim.gforge.inria.fr/tutorials/telosb-tinyos/index.html">TinyOS/Wsim</a>
+	tutorial.
       </p>
       </ol>
       
@@ -74,8 +79,15 @@
       
     <h2 id="intro">Tools</h2>
     <ol>
-      <li><a name="3-1"></a><b> ?</b></ br></li>
+      <li><a name="3-1"></a><b> How can I compare easily two or more
+      traces coming from different nodes ?</b></ br></li>
       <p>
+	You have to use the <code>--merge</code> option
+	in <code>wtracer</code>. This option synchronizes all the
+	different traces so that events can be compared in time.
+	The <code>--merge</code> option can be
+	seen <a href="http://wsim.gforge.inria.fr/tutorials/telosb-tinyos/debugging.html#traces">here</a>
+	on TinyOS traces.
       </p>
     </ol>
       

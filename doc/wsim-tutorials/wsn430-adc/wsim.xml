@@ -50,8 +50,8 @@
 	    the target microcontrollers.
 	  </para>
 	  
-	  <para>The tutorial uses the wsn430 but any MSP430 based platform
-	    will run the same with regards to the ADC12 peripheral
+	  <para>The tutorial uses the wsn430 platform but any MSP430 based platform
+	    will run the same way with regards to the ADC12 peripheral
 	  </para>
 
 	  <para>This tutorial assumes that you are familiar with the basics

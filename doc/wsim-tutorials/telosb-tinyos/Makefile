@@ -24,7 +24,7 @@ html: wsim.html
 
 upload: html 
 	rsync -ruz -e ssh --delete  htdocs/ \
-	afraboul@scm.gforge.inria.fr:/home/groups/wsim/htdocs/tutorials/wsim
+	afraboul@scm.gforge.inria.fr:/home/groups/wsim/htdocs/tutorials/telosb-tinyos
 #	scp wsim.pdf afraboul@scm.gforge.inria.fr:/home/groups/wsim/htdocs/tutorials/
 
 pdf: wsim.pdf

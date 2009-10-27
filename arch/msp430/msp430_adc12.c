@@ -196,7 +196,13 @@ int msp430_adc12_read_inputs()
 	  fseek(f,0,SEEK_SET);
 	  for(smpl=0; smpl<msp430_adc12_channels_data_max[ chan ]; smpl++)
 	    {
-	      fscanf(f,"%d",&val);
+	      if (fscanf(f,"%d",&val) != 1)
+		{
+		  val = 0;
+		  ERROR("msp430:adc12: ======================================\n");
+		  ERROR("msp430:adc12: cannot read value from data input file\n");
+		  ERROR("msp430:adc12: ======================================\n");
+		}
 	      msp430_adc12_channels_data[ chan ][ smpl ] = val & 0xfff; /* 12 bits */
 	    }
 

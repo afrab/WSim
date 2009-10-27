@@ -781,7 +781,9 @@ uint64_t cc2420_callback_rx(void *arg, struct wsnet_rx_info *wrx)
 	    cc2420->FIFOP_set = 1;
 
             /* if ack is requested */
-            if (cc2420->rx_ack_req && cc2420->rx_frame_type != CC2420_FRAME_TYPE_ACK) {
+            if ( (cc2420_read_register(cc2420, CC2420_REG_MDMCTRL0) & 0x10)
+		 && cc2420->rx_ack_req 
+		 && cc2420->rx_frame_type != CC2420_FRAME_TYPE_ACK) {
                 CC2420_TX_ACK_CALIBRATE_ENTER(cc2420);
                 return 0;
             }

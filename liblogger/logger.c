@@ -130,7 +130,7 @@ void ERROR(char* fmt, ...)
   fprintf(logger_logfile,buf);
   if ((logger_logfile != stdout) && (logger_logfile != stderr))
     {
-      fprintf(stderr        ,buf);
+      fprintf(stderr,buf);
     }
 }
 

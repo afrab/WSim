@@ -130,7 +130,7 @@ static int16_t msp430_read16_flash_jump_pc(uint16_t UNUSED addr)
 
 /* these functions are called using funtion pointer arrays */
 /* the inline keyword is almost usless, need to check asm  */
-/* when compiler with -O3                                  */
+/* when compiled with -O3                                  */
 #define MEM_INLINE inline
 
 static MEM_INLINE void msp430_write8_ram(uint16_t addr, int8_t val)

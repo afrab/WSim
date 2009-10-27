@@ -5,7 +5,6 @@
  *  \date   2006
  **/
 
-
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -18,6 +17,11 @@
 #define VELF 4
 #define VSYS 5
 #define VDMP 6
+
+/* ************************************************** */
+/* libentry point is libelf_load_exec_code()          */
+/* ************************************************** */
+
 
 /* ************************************************** */
 /* ** ELF Types ************************************* */
@@ -496,6 +500,9 @@ typedef enum elf32_sh_flags_enum_t elf32_sh_flags_t;
 /* ************************************************** */
 /* ************************************************** */
 
+int libelf_find_section_by_name(elf32_t elf, char* name);
+int libelf_find_section_by_type(elf32_t elf, elf32_sh_type_t type);
+
 char* libelf_get_elf_section_name(elf32_t elf, int i)
 {
   return (char*)&( elf->file_raw[ elf->elf_section[ elf->elf_header.shstrndx ].sh_offset + elf->elf_section[ i ].sh_name ]);
@@ -653,54 +660,250 @@ static int libelf_read_elf_program_headers(elf32_t elf)
 /* ************************************************** */
 /* ************************************************** */
 
+struct elf32_symtab_struct_t
+{
+  elf32_word_t  st_name;                /* Symbol name (string tbl index) */
+  elf32_addr_t  st_value;               /* Symbol value */
+  elf32_word_t  st_size;                /* Symbol size */
+  unsigned char st_info;                /* Symbol type and binding [] */
+  unsigned char st_other;               /* Symbol visibility */
+  elf32_half_t  st_shndx;               /* Section index */
+};
+typedef struct elf32_symtab_struct_t elf32_symtab_t;
+
+#define STT_NOTYPE      0               /* Symbol type is unspecified */
+#define STT_OBJECT      1               /* Symbol is a data object */
+#define STT_FUNC        2               /* Symbol is a code object */
+#define STT_SECTION     3               /* Symbol associated with a section */
+#define STT_FILE        4               /* Symbol's name is file name */
+#define STT_COMMON      5               /* Symbol is a common data object */
+#define STT_TLS         6               /* Symbol is thread-local data object*/
+#define STT_NUM         7               /* Number of defined types.  */
+#define STT_LOOS        10              /* Start of OS-specific */
+#define STT_HIOS        12              /* End of OS-specific */
+#define STT_LOPROC      13              /* Start of processor-specific */
+#define STT_HIPROC      15              /* End of processor-specific */
+
+/* How to extract and insert information held in the st_info field.  */
+
+#define ELF32_ST_BIND(val)              (((unsigned char) (val)) >> 4)
+#define ELF32_ST_TYPE(val)              ((val) & 0xf)
+#define ELF32_ST_INFO(bind, type)       (((bind) << 4) + ((type) & 0xf))
+
+char* sttype_chr(int n)
+{
+  switch (n)
+    {
+    case STT_NOTYPE  : return "NOTYPE";
+    case STT_OBJECT  : return "OBJECT";
+    case STT_FUNC    : return "FUNC";
+    case STT_SECTION : return "SECTION";
+    case STT_FILE    : return "FILE";
+    case STT_COMMON  : return "COMMON";
+    case STT_TLS     : return "TLS";
+    case STT_NUM     : return "NUM";
+    case STT_LOOS    : return "LOOS";
+    case STT_HIOS    : return "HIOS";
+    case STT_LOPROC  : return "LOPROC";
+    case STT_HIPROC  : return "HIPROC";
+    }
+  return "unknown";
+}
+
+#define STB_LOCAL       0               /* Local symbol */
+#define STB_GLOBAL      1               /* Global symbol */
+#define STB_WEAK        2               /* Weak symbol */
+#define STB_NUM         3               /* Number of defined types.  */
+#define STB_LOOS        10              /* Start of OS-specific */
+#define STB_HIOS        12              /* End of OS-specific */
+#define STB_LOPROC      13              /* Start of processor-specific */
+#define STB_HIPROC      15              /* End of processor-specific */
+
+char* stbind_chr(int n)
+{
+  switch (n)
+    {
+    case STB_LOCAL  : return "LOCAL";
+    case STB_GLOBAL : return "GLOBAL";
+    case STB_WEAK   : return "WEAK";
+    case STB_NUM    : return "NUM";
+    case STB_LOOS   : return "LOOS";
+    case STB_HIOS   : return "HIOS";
+    case STB_LOPROC : return "LOPROC";
+    case STB_HIPROC : return "HIPROC";
+    }
+  return "unknown";
+}
+
+#define STV_DEFAULT     0               /* Default symbol visibility rules */
+#define STV_INTERNAL    1               /* Processor specific hidden class */
+#define STV_HIDDEN      2               /* Sym unavailable in other modules */
+#define STV_PROTECTED   3               /* Not preemptible, not exported */
+
+#define ELF32_ST_VISIBILITY(o)  ((o) & 0x03)
+
+char* stvis_chr(int n)
+{
+  switch (n)
+    {
+    case STV_DEFAULT  : return "DEFAULT";
+    case STV_INTERNAL : return "INTERNAL";
+    case STV_HIDDEN   : return "HIDDEN";
+    case STV_PROTECTED: return "PROTECTED";
+    }
+  return "unknown";
+}
+
+#define SHN_UNDEF       0               /* Undefined section */
+#define SHN_LORESERVE   0xff00          /* Start of reserved indices */
+#define SHN_LOPROC      0xff00          /* Start of processor-specific */
+#define SHN_BEFORE      0xff00          /* Order section before all others (Solaris).  */
+#define SHN_AFTER       0xff01          /* Order section after all others (Solaris).  */
+#define SHN_HIPROC      0xff1f          /* End of processor-specific */
+#define SHN_LOOS        0xff20          /* Start of OS-specific */
+#define SHN_HIOS        0xff3f          /* End of OS-specific */
+#define SHN_ABS         0xfff1          /* Associated symbol is absolute */
+#define SHN_COMMON      0xfff2          /* Associated symbol is common */
+#define SHN_XINDEX      0xffff          /* Index is in extra table.  */
+#define SHN_HIRESERVE   0xffff          /* End of reserved indices */
+
+char* stshn_chr(int n)
+{
+# define BUF_MAX 200
+  static char numvalue[BUF_MAX];
+  switch (n)
+    {
+    case SHN_UNDEF     : return "UND";
+    case SHN_LORESERVE : return "LORESERVE";
+      //case SHN_LOPROC    : return "LOPROC";
+      //case SHN_BEFORE    : return "BEFORE";
+    case SHN_AFTER     : return "AFTER";
+    case SHN_HIPROC    : return "HIPROC";
+    case SHN_LOOS      : return "LOOS";
+    case SHN_HIOS      : return "HIOS";
+    case SHN_ABS       : return "ABS";
+    case SHN_COMMON    : return "COMMON";
+    case SHN_XINDEX    : return "XINDEX";
+      //case SHN_HIRESERVE : return "HIRESERVE";
+    }
+  snprintf(numvalue,BUF_MAX,"%d",n);
+  return numvalue;
+}
+
+static void libelf_read_symtab(elf32_t elf, int n, int UNUSED verbose_level)
+{
+  uint32_t i;
+  int size             = sizeof(elf32_symtab_t);
+  elf32_sh_t     *s    = &(elf->elf_section[n]);
+
+  VERBOSE(VELF,"libelf: looking at section %s\n",libelf_get_elf_section_name(elf,n));
+  VERBOSE(VELF,"libelf: offset 0x%x size 0x%x (%d), sizeof(struct) = %d, num entries %d\n", 
+	  s->sh_offset, s->sh_size, s->sh_size, size, s->sh_size / size);
+
+  if (s->sh_size % size != 0)
+    {
+      VERBOSE(VELF,"libelf: symtab read error, section size is not a multiple of struct size\n");
+      return;
+    }
+
+  int             strtab_n = libelf_find_section_by_name(elf,".strtab");
+  elf32_sh_t     *strtab_s = &(elf->elf_section[ strtab_n ]);
+  char*           strtab_p = ((char*)elf->file_raw) + strtab_s->sh_offset;
+
+  //VERBOSE(VELF,"libelf: strtab == section number %d (%x+%x = %x)\n", strtab_n, elf->file_raw, strtab_s->sh_offset, strtab_p );
+  //libelf_dump_section((uint8_t*)strtab_p, 0, 64, 8);
+  //VERBOSE(VELF,"libelf: strtab == section number %d\n", strtab_n);
+
+  VERBOSE(VELF,"libelf:   Num:    Value  Size Type    Bind   Vis      Ndx Name\n");
+
+  for(i=0; i < (s->sh_size / size); i++)
+    {
+      uint8_t *section_start = ((uint8_t*)elf->file_raw) + s->sh_offset;
+      elf32_symtab_t *stab = (elf32_symtab_t *)(section_start);
+
+      VERBOSE(VELF,"libelf:   %3d: %08x   %3d %-7s %-6s %-8s %3s", 
+	      i, stab[i].st_value, stab[i].st_size,
+	      sttype_chr(ELF32_ST_TYPE(stab[i].st_info)),
+	      stbind_chr(ELF32_ST_BIND(stab[i].st_info)),
+	      stvis_chr (ELF32_ST_VISIBILITY(stab[i].st_other)),
+	      stshn_chr (stab[i].st_shndx)
+	      );
+
+      //VERBOSE(VELF," 0x%08x", stab[i].st_name);
+
+      if ( (stab[i].st_name > 0) && (stab[i].st_name < strtab_s->sh_size) )
+	{
+	  VERBOSE(VELF," %s", strtab_p + stab[i].st_name);
+	}
+
+      VERBOSE(VELF,"\n");
+    }
+}
+
+/* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
+
 #define MSP430_DATA_INIT_WORKAROUND 1
 
-void libelf_load_section(elf32_t elf, int n, int UNUSED verbose_level)
+static void libelf_load_section(elf32_t elf, int n, int UNUSED verbose_level)
 {
   elf32_sh_t *s = &(elf->elf_section[n]);
 #if defined(MSP430_DATA_INIT_WORKAROUND)
   static uint16_t text_end    = 0; /* section text end in ram adress */
 #endif
 
-  if (s->sh_type == elf_sh_type_PROGBITS)
+  switch (s->sh_type)
     {
-      if (s->sh_flags & elf_sh_flags_ALLOC)
-	{
-	  VERBOSE(VELF,"libelf: looking at section %s\n",libelf_get_elf_section_name(elf,n));
-	  VERBOSE(VELF,"libelf:    - allocating %d bytes at 0x%04x\n",s->sh_size,s->sh_addr);
-	  VERBOSE(VELF,"libelf:    - copying 0x%04x bytes from file to 0x%04x in mem\n",s->sh_size,s->sh_addr);
-	  mcu_jtag_write_section(elf->file_raw + s->sh_offset, s->sh_addr, s->sh_size);
-	  if (verbose_level >= VDMP)
-	    {
-	      VERBOSE(VDMP,"\n");
-	      libelf_dump_section(elf->file_raw, s->sh_offset, s->sh_size, 8);
-	    }
-
+    case elf_sh_type_PROGBITS:
+      {
+	if (s->sh_flags & elf_sh_flags_ALLOC)
+	  {
+	    VERBOSE(VELF,"libelf: looking at section %s\n",libelf_get_elf_section_name(elf,n));
+	    VERBOSE(VELF,"libelf:    - allocating %d bytes at 0x%04x\n",s->sh_size,s->sh_addr);
+	    VERBOSE(VELF,"libelf:    - copying 0x%04x bytes from file to 0x%04x in mem\n",s->sh_size,s->sh_addr);
+	    mcu_jtag_write_section(elf->file_raw + s->sh_offset, s->sh_addr, s->sh_size);
+	    if (verbose_level >= VDMP)
+	      {
+		VERBOSE(VDMP,"\n");
+		libelf_dump_section(elf->file_raw, s->sh_offset, s->sh_size, 8);
+	      }
+	    
 #if defined(MSP430_DATA_INIT_WORKAROUND)
-	  if (strcmp(mcu_name(),"msp430") == 0)
-	    {
-	      if (strcmp(libelf_get_elf_section_name(elf,n),".text") == 0)
-		{
-		  text_end    = s->sh_addr + s->sh_size;
-		}
-
-	      if (strcmp(libelf_get_elf_section_name(elf,n),".data") == 0)
-		{
-		  if (text_end == 0)
-		    {
-		      VERBOSE(VELF,"libelf: msp430 init data : section text is missing\n");
-		    }
-		  VERBOSE(VELF,"libelf: msp430 init data section workaround: copy %d data bytes at 0x%04x\n",s->sh_size,text_end);
-		  mcu_jtag_write_section(elf->file_raw + s->sh_offset, text_end, s->sh_size);
-		}
-	    }
+	    if (strcmp(mcu_name(),"msp430") == 0)
+	      {
+		if (strcmp(libelf_get_elf_section_name(elf,n),".text") == 0)
+		  {
+		    text_end    = s->sh_addr + s->sh_size;
+		  }
+		
+		if (strcmp(libelf_get_elf_section_name(elf,n),".data") == 0)
+		  {
+		    if (text_end == 0)
+		      {
+			VERBOSE(VELF,"libelf: msp430 init data : section text is missing\n");
+		      }
+		    VERBOSE(VELF,"libelf: msp430 init data section workaround: copy %d data bytes at 0x%04x\n",s->sh_size,text_end);
+		    mcu_jtag_write_section(elf->file_raw + s->sh_offset, text_end, s->sh_size);
+		  }
+	      }
 #endif
-	  VERBOSE(VELF,"\n");
+	    VERBOSE(VELF,"\n");
+	  }
+      }
+      break;
+    case elf_sh_type_SYMTAB:
+      VERBOSE(VELF,"libelf: looking at section %-12s -- symbol table\n",libelf_get_elf_section_name(elf,n));
+      libelf_read_symtab(elf,n,verbose_level);
+      break;
+    default:
+      VERBOSE(VELF,"libelf: looking at section %-12s (%d) -- not loaded\n",libelf_get_elf_section_name(elf,n), n);
+      if (verbose_level >= VDMP)
+	{
+	  VERBOSE(VDMP,"\n");
+	  libelf_dump_section(elf->file_raw, s->sh_offset, s->sh_size, 8);
 	}
-    }
-  else
-    {
-      VERBOSE(VELF,"libelf: looking at section %-12s -- not loaded\n",libelf_get_elf_section_name(elf,n));
+      break;
     }
 
 #if defined(INITIALIZE_ALLOCATED_SECTION)
@@ -732,6 +935,32 @@ void libelf_map_over_section(elf32_t elf,
     }
 }
 
+int libelf_find_section_by_name(elf32_t elf, char* name)
+{
+  int i;
+  for(i=0; i < elf->elf_header.shnum; i++)
+    {
+      if (strcmp(libelf_get_elf_section_name(elf,i),name) == 0)
+	{
+	  return i;
+	}
+    }
+  return -1;
+}
+
+int libelf_find_section_by_type(elf32_t elf, elf32_sh_type_t type)
+{
+  int i;
+  for(i=0; i < elf->elf_header.shnum; i++)
+    {
+      if (elf->elf_section[i].sh_type == type)
+	{
+	  return i;
+	}
+    }
+  return -1;
+}
+
 /* ************************************************** */
 /* ************************************************** */
 /* ************************************************** */
@@ -744,7 +973,7 @@ if ( test )                                                           \
 }
 
 /* ************************************************** */
-/* ************************************************** */
+/* ** ENTRY POINT *********************************** */
 /* ************************************************** */
 
 int libelf_load_exec_code(const char* filename, int verbose_level)

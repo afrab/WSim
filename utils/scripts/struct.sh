@@ -36,10 +36,11 @@ graph()
 
 sloc()
 {
+    LIST="arch devices libconsole libelf libgdb liblogger libselect libtracer machine platforms src utils"
     echo "====================="
     echo "Sloc count           "
     echo "====================="
-    sloccount arch devices libconsole libelf libgdb liblogger libselect libtracer machine platforms src utils 
+    sloccount $LIST
 }
 
 

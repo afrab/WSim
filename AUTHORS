@@ -1,6 +1,6 @@
 Authors of WSim.
 
-  Copyright (C) 2005, 2006, 2007, 2008 Antoine Fraboulet
+  Copyright (C) 2005 Antoine Fraboulet
 
   Copying and distribution of this file, with or without modification,
   are permitted in any medium without royalty provided the copyright
@@ -12,5 +12,6 @@ Authors of WSim.
 Contributors:
 - Guillaume Chelius   WSNet v1 and first version cc1100 device
 - Nicolas Boulicault  cc2420 device
-- Loïc Lemaitre       updates on cc2420
+- Loïc Lemaître       updates on cc2420, wsnet 1&2, cc1100 / cc2500, test and debug
 - Eric Fleury         first versions of ds2411 and mcp73861 devices
+- Nicolas Fournel     etracelib and esimu

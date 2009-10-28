@@ -27,7 +27,8 @@
  * This will have an influence on read before write error detection.
  *
  */
-uint8_t MCU_RAMCTL  [MAX_RAM_SIZE];
+uint8_t  MCU_RAMCTL      [MAX_RAM_SIZE];
+uint32_t MCU_RAMCTL_ADDR;
 #endif
 
 struct atmega128_mcu_t mcu;
@@ -325,6 +326,7 @@ int mcu_ramctl_init(void)
     {
       MCU_RAMCTL[i] = MAC_MUST_WRITE_FIRST;
     }
+  MCU_RAMCTL_ADDR = 0;
   return 0;
 }
 
@@ -334,6 +336,7 @@ void mcu_ramctl_tst_read(uint16_t addr)
   if ((b & MAC_WATCH_READ) != 0)
     {
       mcu_signal_add( SIG_MAC | MAC_TO_SIG(MAC_WATCH_READ) );
+      MCU_RAMCTL_ADDR = addr;
     }
 }
 
@@ -343,6 +346,7 @@ void mcu_ramctl_tst_write(uint16_t addr)
   if ((b & MAC_WATCH_WRITE) != 0)
     {
       mcu_signal_add( SIG_MAC | MAC_TO_SIG(MAC_WATCH_WRITE) );
+      MCU_RAMCTL_ADDR = addr;
     }
 } 
 
@@ -352,6 +356,7 @@ void mcu_ramctl_tst_fetch(uint16_t addr)
   if ((b & MAC_BREAK_WATCH_FETCH) != 0)
     {
       mcu_signal_add( SIG_MAC | MAC_TO_SIG(b & MAC_BREAK_WATCH_FETCH) );
+      MCU_RAMCTL_ADDR = addr;
     }
 }
 

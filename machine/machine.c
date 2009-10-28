@@ -27,8 +27,10 @@ struct machine_t machine;
 /* ************************************************** */
 /* ************************************************** */
 
-void     machine_framebuffer_allocate();
-void     machine_framebuffer_free();
+void     machine_framebuffer_allocate (void);
+void     machine_framebuffer_free     (void);
+
+void     machine_monitor_add_trace    (void);
 
 /* ************************************************** */
 /* ************************************************** */
@@ -201,17 +203,36 @@ static inline uint32_t machine_run(void)
     mcu_run();
 
     sig = mcu_signal_get();
-    if ((sig & MAC_TO_SIG(MAC_MUST_WRITE_FIRST)) != 0)
+    if ((sig & SIG_MAC) != 0)
       {
-	WARNING("wsim: ========================================\n");
-	WARNING("wsim: Read before Write from PC=0x%04x - 0x%x - %s\n",mcu_get_pc(),sig,mcu_signal_str());
-	WARNING("wsim: ========================================\n");
-	mcu_signal_remove(MAC_TO_SIG(MAC_MUST_WRITE_FIRST));
-	sig = mcu_signal_get();
-	return sig;
+	mcu_signal_remove(SIG_MAC);
+	if ((sig & MAC_TO_SIG(MAC_MUST_WRITE_FIRST)) != 0)
+	  {
+	    WARNING("wsim: ========================================\n");
+	    WARNING("wsim: Read before Write from PC=0x%04x - 0x%x - %s\n", 
+		    mcu_get_pc(),sig,mcu_signal_str());
+	    WARNING("wsim: ========================================\n");
+	    mcu_signal_remove(MAC_TO_SIG(MAC_MUST_WRITE_FIRST));
+	    sig = mcu_signal_get();
+	  }
+
+	if ((sig & MAC_TO_SIG(MAC_WATCH_READ)) != 0)
+	  {
+	    mcu_signal_remove(SIG_MAC | MAC_TO_SIG(MAC_WATCH_READ));
+	    machine_monitor_add_trace();
+	    sig = mcu_signal_get();
+	  }
+
+	if ((sig & MAC_TO_SIG(MAC_WATCH_WRITE)) != 0)
+	  {
+	    mcu_signal_remove(SIG_MAC | MAC_TO_SIG(MAC_WATCH_WRITE));
+	    machine_monitor_add_trace();
+	    sig = mcu_signal_get();
+	  }
       }
 
   } while (sig == 0);
+
   return sig;
 }
 
@@ -299,21 +320,6 @@ wsimtime_t machine_run_time(wsimtime_t nanotime)
 	      TEST_SIGNAL_PRINT("time");
 	      return MACHINE_TIME_GET_NANO();
 	    }
-	  else if ((sig & SIG_MAC) != 0)
-	    {
-	      // ERROR("MAC signal %x\n",sig);
-	      // ( SIG_MAC | MAC_TO_SIG(MAC_WATCH_READ) );
-	      // ( SIG_MAC | MAC_TO_SIG(MAC_WATCH_WRITE) );
-	      mcu_signal_remove(SIG_MAC | 
-				MAC_TO_SIG(MAC_WATCH_READ) |
-				MAC_TO_SIG(MAC_WATCH_WRITE));
-	      /* TODO: need to add VCD traces */
-	      // mcu_signal_clr();
-	    }
-	  else
-	    {
-	      ERROR("signal %x\n",sig);
-	    }
 	}
     }
   return MACHINE_TIME_GET_NANO();
@@ -364,7 +370,11 @@ void machine_monitor_print()
     }
 }
 
-void machine_monitor_vcd_start()
+/* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
+
+void machine_monitor_vcd_start(void)
 {
   int i;
   for(i=0; i<watchpoint_max; i++)
@@ -379,7 +389,11 @@ void machine_monitor_vcd_start()
     }
 }
 
-void machine_monitor_vcd_stop()
+/* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
+
+void machine_monitor_vcd_stop(void)
 {
   int i;
   for(i=0; i<watchpoint_max; i++)
@@ -387,6 +401,54 @@ void machine_monitor_vcd_stop()
       mcu_ramctl_unset_bp(watchpoint[i].addr,watchpoint[i].mode);
     }  
 }
+
+/* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
+
+void machine_monitor_add_trace(void)
+{
+  int i,found = 0;
+  uint32_t addr = MCU_RAMCTL_ADDR;
+  for(i=0; i<watchpoint_max; i++)
+    {
+      if ((addr >= (watchpoint[i].addr)) &&
+	  (addr <= (watchpoint[i].addr + watchpoint[i].size)))
+	{
+	  uint32_t value;
+	  switch (watchpoint[i].size)
+	    {
+	    case 0:
+	      value = mcu_jtag_read_byte(addr);
+	      break;
+	    case 1:
+	      value = mcu_jtag_read_byte(addr);
+	      break;
+	    case 2:
+	      value = mcu_jtag_read_word(addr & ~1); /* align read */
+	      break;
+	    default:
+	      value = mcu_jtag_read_word(addr & ~1); /* align read */
+	      break;
+	    }
+
+	  VERBOSE(6,"machine:monitor: value changed for watchpoint %s at 0x%04x = 0x%04x\n",
+		  watchpoint[i].name, watchpoint[i].addr, value);
+
+	  tracer_event_record(watchpoint[i].trc_id,value);
+
+	  found = 1;
+	}
+    }
+  if (found == 0)
+    {
+      WARNING("machine:monitor: watchpoint trace undefined for address 0x%04x\n",addr);
+    }
+}
+
+/* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
 
 void machine_monitor_read_arg(char *subtoken)
 {
@@ -406,6 +468,10 @@ void machine_monitor_read_arg(char *subtoken)
 	watchpoint[watchpoint_max].mode |= MAC_WATCH_WRITE;
     }
 }
+
+/* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
 
 void machine_start_monitor(char* args)
 {

@@ -170,7 +170,8 @@ char*    mcu_ramctl_str         (int type);
  * This will have an influence on read before write error detection.
  *
  */
-extern uint8_t MCU_RAMCTL [];
+extern uint8_t   MCU_RAMCTL [];
+extern uint32_t  MCU_RAMCTL_ADDR;
 #endif
 
 /* ************************************** */

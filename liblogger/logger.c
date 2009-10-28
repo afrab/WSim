@@ -102,11 +102,11 @@ mylog(char* fmt, va_list ap)
   if (buf[length-1] == '\n')
     {
       /* buf[--length] = '\0'; */
-      fprintf(logger_logfile,buf);
+      fprintf(logger_logfile,"%s",buf);
     }
   else
     {
-      fprintf(logger_logfile,buf);
+      fprintf(logger_logfile,"%s",buf);
     }
 
   /*  fprintf(out," @ PC=[0x%04x]\n",MCU_GET_PC()); */
@@ -127,10 +127,10 @@ void ERROR(char* fmt, ...)
   length = vsnprintf(buf,MAX_VNSPRINTF_BUF_LENGTH,fmt,ap);
   va_end(ap);
 
-  fprintf(logger_logfile,buf);
+  fprintf(logger_logfile,"%s",buf);
   if ((logger_logfile != stdout) && (logger_logfile != stderr))
     {
-      fprintf(stderr,buf);
+      fprintf(stderr,"%s",buf);
     }
 }
 

@@ -22,6 +22,7 @@
  * global variable
  **/
 struct machine_t machine;
+elf32_t machine_elf;
 
 /* ************************************************** */
 /* ************************************************** */
@@ -94,6 +95,7 @@ int machine_delete()
 
   ret +=  devices_delete();
   machine_framebuffer_free();
+  libelf_close(machine_elf);
 
   return ret;
 }
@@ -331,9 +333,8 @@ wsimtime_t machine_run_time(wsimtime_t nanotime)
 
 int machine_load_elf(const char* filename, int verbose_level)
 {
-  int ret;
-  ret = libelf_load_exec_code(filename, verbose_level);
-  return ret;
+  machine_elf = libelf_load(filename, verbose_level);
+  return machine_elf == NULL;
 }
 
 /* ************************************************** */
@@ -360,7 +361,7 @@ void machine_monitor_print()
   int i;
   for(i=0; i<watchpoint_max; i++)
     {
-      OUTPUT("monitor: %s 0x%04x:%d %c%c\n",
+      OUTPUT("  monitor: %s 0x%04x:%d %c%c\n",
 	     watchpoint[i].name,
 	     watchpoint[i].addr,
 	     watchpoint[i].size,
@@ -432,8 +433,13 @@ void machine_monitor_add_trace(void)
 	      break;
 	    }
 
-	  VERBOSE(6,"machine:monitor: value changed for watchpoint %s at 0x%04x = 0x%04x\n",
+	  /*
+	   * insert code for special purpose symbol here 
+	   */
+	  /*
+	  VERBOSE(6,"machine:monitor: value changed watchpoint %s at 0x%04x=0x%04x\n",
 		  watchpoint[i].name, watchpoint[i].addr, value);
+	  */	  
 
 	  tracer_event_record(watchpoint[i].trc_id,value);
 
@@ -473,7 +479,7 @@ void machine_monitor_read_arg(char *subtoken)
 /* ************************************************** */
 /* ************************************************** */
 
-void machine_start_monitor(char* args)
+void machine_monitor_start(char* args)
 {
   /* --monitor=0xAAAA:size:rw,symbol:rw ... */
   char delim1[] = ",";
@@ -485,7 +491,7 @@ void machine_start_monitor(char* args)
 
 
   OUTPUT("==\n");
-  OUTPUT(" Memory monitor = %s\n",args);
+  OUTPUT("Memory monitor = %s\n",args);
   watchpoint_max = 0;
 
   for (j = 1, str1 = args; ; j++, str1 = NULL) 
@@ -512,16 +518,26 @@ void machine_start_monitor(char* args)
 	{
 	  /* hexa */
 	  sscanf(subtoken, "0x%x",& watchpoint[watchpoint_max].addr);
-	  //OUTPUT("addr 0x%04x\n", watchpoint[watchpoint_max].addr);
 	}
       else
 	{
-	  /* 
-	     watchpoint[watchpoint_max].addr = 
-	     symtab_find_symbol_by_name( subtoken ) 
-	  */
+	  watchpoint[watchpoint_max].addr = 
+	    libelf_symtab_find_addr_by_name(machine_elf, subtoken );
+
+	  watchpoint[watchpoint_max].size =
+	    libelf_symtab_find_size_by_name(machine_elf, subtoken );
+
+	  if ((watchpoint[watchpoint_max].addr == 0) &&
+	      (watchpoint[watchpoint_max].size == -1))
+	    {
+	      ERROR("monitor: cannot find symbol \"%s\"\n",subtoken);
+	    }
 	}
 
+      /*
+      VERBOSE(6,"  monitor: probe \"%s\" = 0x%04x\n", watchpoint[watchpoint_max].name, 
+	      watchpoint[watchpoint_max].addr);
+      */
       subtoken = strtok_r(NULL, delim2, &saveptr2);
       //OUTPUT("  %s\n",subtoken);
       if (subtoken == NULL) 
@@ -545,7 +561,7 @@ void machine_start_monitor(char* args)
 
   machine_monitor_print();
   machine_monitor_vcd_start();
-  OUTPUT("\n==\n");
+  OUTPUT("==\n");
 }
 
 /* ************************************************** */

@@ -156,7 +156,7 @@ struct elf32_struct_t {
   elf32_sh_t       *elf_section;
   elf32_ph_t       *elf_program;
 };
-typedef struct elf32_struct_t *elf32_t;
+
 
 /* ************************************************** */
 /* ************************************************** */
@@ -792,52 +792,88 @@ char* stshn_chr(int n)
 
 static void libelf_read_symtab(elf32_t elf, int n, int UNUSED verbose_level)
 {
-  uint32_t i;
-  int size             = sizeof(elf32_symtab_t);
-  elf32_sh_t     *s    = &(elf->elf_section[n]);
-
-  VERBOSE(VELF,"libelf: looking at section %s\n",libelf_get_elf_section_name(elf,n));
-  VERBOSE(VELF,"libelf: offset 0x%x size 0x%x (%d), sizeof(struct) = %d, num entries %d\n", 
-	  s->sh_offset, s->sh_size, s->sh_size, size, s->sh_size / size);
-
-  if (s->sh_size % size != 0)
-    {
-      VERBOSE(VELF,"libelf: symtab read error, section size is not a multiple of struct size\n");
-      return;
-    }
+  uint32_t        i;
+  // int             symtab_n = libelf_find_section_by_name(elf,".symtab");
+  elf32_sh_t     *symtab_s = &(elf->elf_section[ n ]);
+  elf32_symtab_t *symtab_p = (elf32_symtab_t *)((char*)(elf->file_raw) + symtab_s->sh_offset);
 
   int             strtab_n = libelf_find_section_by_name(elf,".strtab");
   elf32_sh_t     *strtab_s = &(elf->elf_section[ strtab_n ]);
   char*           strtab_p = ((char*)elf->file_raw) + strtab_s->sh_offset;
 
-  //VERBOSE(VELF,"libelf: strtab == section number %d (%x+%x = %x)\n", strtab_n, elf->file_raw, strtab_s->sh_offset, strtab_p );
-  //libelf_dump_section((uint8_t*)strtab_p, 0, 64, 8);
-  //VERBOSE(VELF,"libelf: strtab == section number %d\n", strtab_n);
-
-  VERBOSE(VELF,"libelf:   Num:    Value  Size Type    Bind   Vis      Ndx Name\n");
-
-  for(i=0; i < (s->sh_size / size); i++)
+  if ((symtab_s->sh_size % sizeof(elf32_symtab_t)) != 0)
     {
-      uint8_t *section_start = ((uint8_t*)elf->file_raw) + s->sh_offset;
-      elf32_symtab_t *stab = (elf32_symtab_t *)(section_start);
+      VERBOSE(VELF,"libelf: symtab read error, section size is not a multiple of struct size\n");
+      return;
+    }
 
-      VERBOSE(VELF,"libelf:   %3d: %08x   %3d %-7s %-6s %-8s %3s", 
-	      i, stab[i].st_value, stab[i].st_size,
-	      sttype_chr(ELF32_ST_TYPE(stab[i].st_info)),
-	      stbind_chr(ELF32_ST_BIND(stab[i].st_info)),
-	      stvis_chr (ELF32_ST_VISIBILITY(stab[i].st_other)),
-	      stshn_chr (stab[i].st_shndx)
+  VERBOSE(VDMP,"\nlibelf:   Num:    Value  Size Type    Bind   Vis      Ndx Name\n");
+  for(i=0; i < (symtab_s->sh_size / sizeof(elf32_symtab_t)); i++)
+    {
+      VERBOSE(VDMP,"libelf:   %3d: %08x   %3d %-7s %-6s %-8s %3s", 
+	      i, symtab_p[i].st_value, symtab_p[i].st_size,
+	      sttype_chr(ELF32_ST_TYPE(symtab_p[i].st_info)),
+	      stbind_chr(ELF32_ST_BIND(symtab_p[i].st_info)),
+	      stvis_chr (ELF32_ST_VISIBILITY(symtab_p[i].st_other)),
+	      stshn_chr (symtab_p[i].st_shndx)
 	      );
 
-      //VERBOSE(VELF," 0x%08x", stab[i].st_name);
-
-      if ( (stab[i].st_name > 0) && (stab[i].st_name < strtab_s->sh_size) )
+      if ( (symtab_p[i].st_name > 0) && (symtab_p[i].st_name < strtab_s->sh_size) )
 	{
-	  VERBOSE(VELF," %s", strtab_p + stab[i].st_name);
+	  VERBOSE(VDMP," %s", strtab_p + symtab_p[i].st_name);
 	}
 
-      VERBOSE(VELF,"\n");
+      VERBOSE(VDMP,"\n");
     }
+  VERBOSE(VDMP,"\n");
+}
+
+elf32_symtab_t *libelf_symtab_find_by_name(elf32_t elf, const char* name)
+{
+  uint32_t        i;
+  int             symtab_n = libelf_find_section_by_name(elf,".symtab");
+  elf32_sh_t     *symtab_s = &(elf->elf_section[ symtab_n ]);
+  elf32_symtab_t *symtab_p = (elf32_symtab_t *)((char*)(elf->file_raw) + symtab_s->sh_offset);
+
+  int             strtab_n = libelf_find_section_by_name(elf,".strtab");
+  elf32_sh_t     *strtab_s = &(elf->elf_section[ strtab_n ]);
+  char*           strtab_p = (char*)(elf->file_raw) + strtab_s->sh_offset;
+
+  for(i=0; i < (symtab_s->sh_size / sizeof(elf32_symtab_t)); i++)
+    {
+      if ( (symtab_p[i].st_name > 0) && (symtab_p[i].st_name < strtab_s->sh_size) )
+	{
+	  if (strcmp(name, strtab_p + symtab_p[i].st_name) == 0)
+	    {
+	      VERBOSE(VELF,"libelf:symtab:find_by_name %s found index %d\n",
+		      strtab_p + symtab_p[i].st_name, i);
+	      return symtab_p + i;
+	    }
+	}
+    }
+  return NULL;
+}
+
+uint32_t libelf_symtab_find_addr_by_name(elf32_t elf, const char *name)
+{
+  elf32_symtab_t *s = libelf_symtab_find_by_name(elf, name);
+  if (s != NULL)
+    {
+      return s->st_value;
+    }
+  VERBOSE(VDMP,"libelf:symtab:find_addr_by_name %s not found\n",name);
+  return 0;
+}
+
+int libelf_symtab_find_size_by_name(elf32_t elf, const char *name)
+{
+  elf32_symtab_t *s = libelf_symtab_find_by_name(elf, name);
+  if (s != NULL)
+    {
+      return s->st_size;
+    }
+  VERBOSE(VDMP,"libelf:symtab:find_size_by_name %s not found\n",name);
+  return -1;
 }
 
 /* ************************************************** */
@@ -866,7 +902,7 @@ static void libelf_load_section(elf32_t elf, int n, int UNUSED verbose_level)
 	    if (verbose_level >= VDMP)
 	      {
 		VERBOSE(VDMP,"\n");
-		libelf_dump_section(elf->file_raw, s->sh_offset, s->sh_size, 8);
+		libelf_dump_section(elf->file_raw, s->sh_offset, s->sh_size, DUMP_COLS);
 	      }
 	    
 #if defined(MSP430_DATA_INIT_WORKAROUND)
@@ -901,7 +937,8 @@ static void libelf_load_section(elf32_t elf, int n, int UNUSED verbose_level)
       if (verbose_level >= VDMP)
 	{
 	  VERBOSE(VDMP,"\n");
-	  libelf_dump_section(elf->file_raw, s->sh_offset, s->sh_size, 8);
+	  libelf_dump_section(elf->file_raw, s->sh_offset, s->sh_size, DUMP_COLS);
+	  VERBOSE(VDMP,"\n");
 	}
       break;
     }
@@ -969,21 +1006,21 @@ int libelf_find_section_by_type(elf32_t elf, elf32_sh_type_t type)
 if ( test )                                                           \
 {                                                                     \
    ERROR("%s\n", msg );                                               \
-   return 1;                                                          \
+   return NULL;                                                       \
 }
 
 /* ************************************************** */
 /* ** ENTRY POINT *********************************** */
 /* ************************************************** */
 
-int libelf_load_exec_code(const char* filename, int verbose_level)
+elf32_t libelf_load(const char* filename, int verbose_level)
 {
   elf32_t elf;
 
   if ((elf = libelf_open(filename)) == NULL)
     {
       ERROR("libelf: error while opening elf file [%s]\n",filename);
-      return 1;
+      return NULL;
     }
 
   VERBOSE(VSYS,"libelf: opening elf file %s\n",filename);
@@ -1008,7 +1045,7 @@ int libelf_load_exec_code(const char* filename, int verbose_level)
       ERROR("Elf arch id : %d\n",elf->arch);
       ERROR("Simulator arch id : %d (%s)\n",mcu_arch_id(),mcu_name());
       ERROR("===================================================================\n");
-      return 1;
+      return NULL;
     }
   else if (elf->mach != mcu_mach_id())
     {
@@ -1017,7 +1054,7 @@ int libelf_load_exec_code(const char* filename, int verbose_level)
       ERROR("Elf machine id : %ld\n",elf->mach);
       ERROR("Simulator machine id : %d (%s)\n",mcu_mach_id(),mcu_modelname());
       ERROR("===================================================================\n");
-      return 1;
+      return NULL;
     }
 
   VERBOSE(VELF,"\nlibelf: all tests passed\n");
@@ -1034,9 +1071,8 @@ int libelf_load_exec_code(const char* filename, int verbose_level)
   VERBOSE(VELF,"libelf: PC set to 0x%x\n",elf->elf_header.entry);
   libelf_map_over_section(elf,libelf_load_section,verbose_level);
 
-  libelf_close(elf);
   VERBOSE(VELF,"\n");
-  return 0;
+  return elf;
 }
 
 /* ************************************************** */

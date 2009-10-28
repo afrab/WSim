@@ -266,6 +266,7 @@ int main(int argc, char* argv[])
     {
       if (machine_load_elf(o.progname,o.verbose))
 	{
+	  ERROR("wsim: error while loading Elf file\n");
 	  machine_delete();
 	  return 1;
 	}
@@ -314,7 +315,7 @@ int main(int argc, char* argv[])
   if (o.do_monitor)
     {
       VERBOSE(2,"wsim: starting memory monitor\n");
-      machine_start_monitor(o.monitor);
+      machine_monitor_start(o.monitor);
     }
 
   /* go */

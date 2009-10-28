@@ -116,6 +116,8 @@ void cc2420_strobe_state_idle(struct _cc2420_t * cc2420)
 	cc2420->nb_rx_frames = 0;
 	cc2420->FIFOP_pin = 0x00;
 	cc2420->FIFOP_set = 1;
+	cc2420->FIFO_pin  = 0x00;
+	cc2420->FIFO_set  = 1;
 	break;
       case CC2420_STROBE_SRFOFF :
 	CC2420_DBG_STROBE("cc2420:strobe:idle: SRFOFF, allowed in idle mode but not usefull!\n");
@@ -167,6 +169,8 @@ void cc2420_strobe_state_tx_calibrate(struct _cc2420_t * cc2420)
       cc2420->nb_rx_frames = 0;
       cc2420->FIFOP_pin = 0x00;
       cc2420->FIFOP_set = 1;
+      cc2420->FIFO_pin  = 0x00;
+      cc2420->FIFO_set  = 1;
       break;
     default :
       CC2420_DEBUG("cc2420:strobe:calibrate: invalid strobe command %d in tx_calibrate state\n",
@@ -214,6 +218,8 @@ void cc2420_strobe_state_tx_preamble(struct _cc2420_t * cc2420)
       cc2420->nb_rx_frames = 0;
       cc2420->FIFOP_pin = 0x00;
       cc2420->FIFOP_set = 1;
+      cc2420->FIFO_pin  = 0x00;
+      cc2420->FIFO_set  = 1;
       CC2420_RX_SFD_SEARCH_ENTER(cc2420);
       break;
     default :
@@ -261,6 +267,8 @@ void cc2420_strobe_state_tx_frame(struct _cc2420_t * cc2420)
       cc2420->nb_rx_frames = 0;
       cc2420->FIFOP_pin = 0x00;
       cc2420->FIFOP_set = 1;
+      cc2420->FIFO_pin  = 0x00;
+      cc2420->FIFO_set  = 1;
       break;
     default :
       CC2420_DEBUG("cc2420:strobe:tx_frame: invalid strobe command %d in tx_frame state\n",
@@ -307,6 +315,8 @@ void cc2420_strobe_state_tx_underflow(struct _cc2420_t * cc2420)
       cc2420->nb_rx_frames = 0;
       cc2420->FIFOP_pin = 0x00;
       cc2420->FIFOP_set = 1;
+      cc2420->FIFO_pin  = 0x00;
+      cc2420->FIFO_set  = 1;
       break;
     default :
       CC2420_DEBUG("cc2420:strobe:tx_underflow: invalid strobe command %d in tx_underflow state\n",
@@ -363,6 +373,8 @@ void cc2420_strobe_state_rx_calibrate(struct _cc2420_t * cc2420)
       cc2420->nb_rx_frames = 0;
       cc2420->FIFOP_pin = 0x00;
       cc2420->FIFOP_set = 1;
+      cc2420->FIFO_pin  = 0x00;
+      cc2420->FIFO_set  = 1;
       break;
     default :
       CC2420_DEBUG("cc2420:strobe:rx_calibrate: invalid strobe command %d in rx_calibrate state\n",
@@ -409,6 +421,8 @@ void cc2420_strobe_state_rx_sfd_search(struct _cc2420_t * cc2420)
       cc2420->nb_rx_frames = 0;
       cc2420->FIFOP_pin = 0x00;
       cc2420->FIFOP_set = 1;
+      cc2420->FIFO_pin  = 0x00;
+      cc2420->FIFO_set  = 1;
       break;
     case CC2420_STROBE_STXONCCA :
       CC2420_DBG_STROBE("cc2420:strobe:rx_sfd_search: STXONCCA\n");
@@ -478,6 +492,8 @@ void cc2420_strobe_state_rx_frame(struct _cc2420_t * cc2420)
       cc2420->nb_rx_frames = 0;
       cc2420->FIFOP_pin = 0x00;
       cc2420->FIFOP_set = 1;
+      cc2420->FIFO_pin  = 0x00;
+      cc2420->FIFO_set  = 1;
       break;
     case CC2420_STROBE_STXONCCA :
       CC2420_DBG_STROBE("cc2420:strobe:rx_frame: STXONCCA\n");
@@ -533,6 +549,8 @@ void cc2420_strobe_state_tx_ack_calibrate(struct _cc2420_t * cc2420)
       cc2420->nb_rx_frames = 0;
       cc2420->FIFOP_pin = 0x00;
       cc2420->FIFOP_set = 1;
+      cc2420->FIFO_pin  = 0x00;
+      cc2420->FIFO_set  = 1;
       break;
     case CC2420_STROBE_STXONCCA :
       CC2420_DBG_STROBE("cc2420:strobe:tx_ack_calibrate: STXONCCA\n");
@@ -634,6 +652,8 @@ void cc2420_strobe_state_tx_ack(struct _cc2420_t * cc2420)
       cc2420->nb_rx_frames = 0;
       cc2420->FIFOP_pin = 0x00;
       cc2420->FIFOP_set = 1;
+      cc2420->FIFO_pin  = 0x00;
+      cc2420->FIFO_set  = 1;
       break;
     default :
       CC2420_DEBUG("cc2420:strobe:tx_ack: invalid strobe command %d in tx_ack state\n",
@@ -680,6 +700,8 @@ void cc2420_strobe_state_rx_wait(struct _cc2420_t * cc2420)
       cc2420->nb_rx_frames = 0;
       cc2420->FIFOP_pin = 0x00;
       cc2420->FIFOP_set = 1;
+      cc2420->FIFO_pin  = 0x00;
+      cc2420->FIFO_set  = 1;
       break;
     default :
       CC2420_DEBUG("cc2420:strobe:rx_wait: invalid strobe command %d in rx_wait state\n",
@@ -726,6 +748,8 @@ void cc2420_strobe_state_rx_overflow(struct _cc2420_t * cc2420)
       cc2420->nb_rx_frames = 0;
       cc2420->FIFOP_pin = 0x00;
       cc2420->FIFOP_set = 1;
+      cc2420->FIFO_pin  = 0x00;
+      cc2420->FIFO_set  = 1;
       CC2420_RX_SFD_SEARCH_ENTER(cc2420);
       break;
     default :

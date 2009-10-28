@@ -12,6 +12,7 @@
 #include <limits.h>
 
 #include "console_utils.h"
+#include "liblogger/logger.h"
 
 /* ************************************************** */
 /* ************************************************** */
@@ -97,7 +98,12 @@ int console_write(console_state cs, char* fmt, ...)
       break;
     }
 
-  write(cs->fd_output,buff,length);
+  if (write(cs->fd_output,buff,length) == -1)
+    {
+      ERROR("libconsole: ======================================\n");
+      ERROR("libconsole: cannot write value to file descriptor \n");
+      ERROR("libconsole: ======================================\n");
+    }
   va_end(ap);
 
   return CON_IO_OK;

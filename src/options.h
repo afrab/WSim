@@ -43,6 +43,9 @@ struct options_t {
   int                do_elfload;
   int                do_etrace_at_begin;
 
+  int                do_monitor;
+  char              *monitor;
+
   /**
    * bool
    */

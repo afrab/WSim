@@ -45,6 +45,10 @@ int machine_reset();
  **/
 int machine_load_elf(const char* filename, int verbose_level);
 
+/**
+ * machine_start_monitor
+ **/
+void machine_start_monitor(char* args);
 
 /**
  * machine_print_description

@@ -299,6 +299,21 @@ wsimtime_t machine_run_time(wsimtime_t nanotime)
 	      TEST_SIGNAL_PRINT("time");
 	      return MACHINE_TIME_GET_NANO();
 	    }
+	  else if ((sig & SIG_MAC) != 0)
+	    {
+	      // ERROR("MAC signal %x\n",sig);
+	      // ( SIG_MAC | MAC_TO_SIG(MAC_WATCH_READ) );
+	      // ( SIG_MAC | MAC_TO_SIG(MAC_WATCH_WRITE) );
+	      mcu_signal_remove(SIG_MAC | 
+				MAC_TO_SIG(MAC_WATCH_READ) |
+				MAC_TO_SIG(MAC_WATCH_WRITE));
+	      /* TODO: need to add VCD traces */
+	      // mcu_signal_clr();
+	    }
+	  else
+	    {
+	      ERROR("signal %x\n",sig);
+	    }
 	}
     }
   return MACHINE_TIME_GET_NANO();
@@ -310,7 +325,161 @@ wsimtime_t machine_run_time(wsimtime_t nanotime)
 
 int machine_load_elf(const char* filename, int verbose_level)
 {
-  return libelf_load_exec_code(filename, verbose_level);
+  int ret;
+  ret = libelf_load_exec_code(filename, verbose_level);
+  return ret;
+}
+
+/* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
+
+#define MONITOR_DEFAULT_SIZE        1
+#define MONITOR_MAX_VARIABLE_NAME  50
+#define MONITOR_MAX_WATCHPOINT     20
+
+struct watchpoint_t {
+  char        name[MONITOR_MAX_VARIABLE_NAME];
+  uint32_t    addr;
+  int         size; /* bytes */
+  int         mode; /* MAC_WATCH_WRITE | MAC_WATCH_READ */
+  tracer_id_t trc_id;
+};
+
+static struct watchpoint_t watchpoint[MONITOR_MAX_WATCHPOINT];
+static int watchpoint_max;
+
+void machine_monitor_print()
+{
+  int i;
+  for(i=0; i<watchpoint_max; i++)
+    {
+      OUTPUT("monitor: %s 0x%04x:%d %c%c\n",
+	     watchpoint[i].name,
+	     watchpoint[i].addr,
+	     watchpoint[i].size,
+	     (watchpoint[i].mode & MAC_WATCH_READ ) ? 'r':' ',
+	     (watchpoint[i].mode & MAC_WATCH_WRITE) ? 'w':' '
+	     );
+    }
+}
+
+void machine_monitor_vcd_start()
+{
+  int i;
+  for(i=0; i<watchpoint_max; i++)
+    {
+      watchpoint[i].trc_id = tracer_event_add_id(
+						 watchpoint[i].size * 8,
+						 watchpoint[i].name,
+						 "monitor"
+						 );
+
+      mcu_ramctl_set_bp(watchpoint[i].addr,watchpoint[i].mode);
+    }
+}
+
+void machine_monitor_vcd_stop()
+{
+  int i;
+  for(i=0; i<watchpoint_max; i++)
+    {
+      mcu_ramctl_unset_bp(watchpoint[i].addr,watchpoint[i].mode);
+    }  
+}
+
+void machine_monitor_read_arg(char *subtoken)
+{
+  if ((subtoken[0] >= '0') && (subtoken[0] <= '9'))
+    {
+      watchpoint[watchpoint_max].size = atoi(subtoken);
+    }
+  else
+    {
+      char c0 = tolower(subtoken[0]);
+      char c1 = tolower(subtoken[1]);
+
+      if (c0 == 'r' || c1 == 'r')
+	watchpoint[watchpoint_max].mode |= MAC_WATCH_READ;
+
+      if (c0 == 'w' || c1 == 'w')
+	watchpoint[watchpoint_max].mode |= MAC_WATCH_WRITE;
+    }
+}
+
+void machine_start_monitor(char* args)
+{
+  /* --monitor=0xAAAA:size:rw,symbol:rw ... */
+  char delim1[] = ",";
+  char delim2[] = ":";
+  char *str1,*str2;
+  char *token,*subtoken;
+  char *saveptr1,*saveptr2;
+  int  j;
+
+
+  OUTPUT("==\n");
+  OUTPUT(" Memory monitor = %s\n",args);
+  watchpoint_max = 0;
+
+  for (j = 1, str1 = args; ; j++, str1 = NULL) 
+    {
+      token = strtok_r(str1, delim1, &saveptr1);
+      if (token == NULL)
+	break;
+    
+      str2 = token;
+      subtoken = strtok_r(str2, delim2, &saveptr2);
+      if (subtoken == NULL) 
+	{ 
+	  /* error */
+	  continue;
+	}
+      //OUTPUT("%s\n",subtoken);
+      strncpy(watchpoint[watchpoint_max].name,subtoken,
+	      MONITOR_MAX_VARIABLE_NAME);
+      watchpoint[watchpoint_max].addr = 0;
+      watchpoint[watchpoint_max].size = MONITOR_DEFAULT_SIZE;
+      watchpoint[watchpoint_max].mode = 0;
+
+      if (subtoken[0] == '0')
+	{
+	  /* hexa */
+	  sscanf(subtoken, "0x%x",& watchpoint[watchpoint_max].addr);
+	  //OUTPUT("addr 0x%04x\n", watchpoint[watchpoint_max].addr);
+	}
+      else
+	{
+	  /* 
+	     watchpoint[watchpoint_max].addr = 
+	     symtab_find_symbol_by_name( subtoken ) 
+	  */
+	}
+
+      subtoken = strtok_r(NULL, delim2, &saveptr2);
+      //OUTPUT("  %s\n",subtoken);
+      if (subtoken == NULL) 
+	{
+	  goto my_next_watchpoint;
+	}
+      machine_monitor_read_arg(subtoken);
+
+      subtoken = strtok_r(NULL, delim2, &saveptr2);
+      //OUTPUT("  %s\n",subtoken);
+      if (subtoken == NULL) 
+	{
+	  goto my_next_watchpoint;
+	}
+      machine_monitor_read_arg(subtoken);
+
+    my_next_watchpoint:
+      watchpoint_max ++;
+    }
+
+
+  machine_monitor_print();
+  machine_monitor_vcd_start();
+  OUTPUT("\n==\n");
 }
 
 /* ************************************************** */

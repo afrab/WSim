@@ -72,7 +72,7 @@
  * dimensions are fixed
  ****************************************/
 
-#define TRACER_MAX_ID                30
+#define TRACER_MAX_ID                100
 #define TRACER_MAX_NAME_LENGTH       30
 
 /*

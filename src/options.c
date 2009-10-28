@@ -121,6 +121,14 @@ static struct moption_t etrace_start_opt = {
   .value       = NULL
 };
 
+/* monitor is used in machine.c */
+static struct moption_t mem_monitor_opt = {
+  .longname    = "monitor",
+  .type        = required_argument,
+  .helpstring  = "variables and address to monitor",
+  .value       = NULL
+};
+
 /* dump */
 static struct moption_t dump_opt = {
   .longname    = "dump",
@@ -181,6 +189,9 @@ void options_start()
 #if defined(ETRACE)
   options_add_base(& etrace_opt         );
   options_add_base(& etrace_start_opt   );
+#endif
+#if defined(ENABLE_RAM_CONTROL)
+  options_add_base(& mem_monitor_opt    );
 #endif
   options_add_base(& verbose_opt        );
 }
@@ -300,6 +311,7 @@ void options_read_cmdline(struct options_t *s, int *argc, char *argv[])
   s->do_dump            = DEFAULT_DO_DUMP;
   s->do_trace           = DEFAULT_DO_TRACE;
   s->do_etrace          = DEFAULT_DO_ETRACE;
+  s->do_monitor         = 0;
   s->do_preload         = 0;
   s->do_elfload         = 1;
   s->do_etrace_at_begin = DEFAULT_DO_ETRACE_AT_BEGIN;
@@ -453,6 +465,12 @@ void options_read_cmdline(struct options_t *s, int *argc, char *argv[])
     {
       s->do_etrace = 1; /* --esimu-start implies --esimu */
       s->do_etrace_at_begin = 1;
+    }
+
+  if (mem_monitor_opt.isset)
+    {
+      s->do_monitor = 1;
+      s->monitor = mem_monitor_opt.value;
     }
 
   if (version_opt.isset)

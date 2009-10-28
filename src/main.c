@@ -311,6 +311,12 @@ int main(int argc, char* argv[])
       etracer_start(); 
     }
 
+  if (o.do_monitor)
+    {
+      VERBOSE(2,"wsim: starting memory monitor\n");
+      machine_start_monitor(o.monitor);
+    }
+
   /* go */
   main_run_mode(&o);
 

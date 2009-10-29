@@ -194,6 +194,9 @@ int cc2420_rx_fifo_push(struct _cc2420_t * cc2420, uint8_t val) {
 
     cc2420->ram[CC2420_RAM_RXFIFO_START + cc2420->rx_fifo_write] = val;
 
+    CC2420_DEBUG("cc2420_rx_fifo_push: data 0x%02x written in fifo at addr 0x%02x\n", 
+		 val, CC2420_RAM_RXFIFO_START + cc2420->rx_fifo_write);
+
     /* update write pointer */
     cc2420->rx_fifo_write ++;
 

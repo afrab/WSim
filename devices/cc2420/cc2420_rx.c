@@ -391,14 +391,13 @@ int cc2420_rx_process_fcf(struct _cc2420_t * cc2420) {
 	break;
     }
 
-//    cc2420->rx_dst_pan_offset  = 3; /* 3 for length field and FCF */
-    cc2420->rx_dst_pan_offset  = 4; /* 4 for length field and FCF ( ??? ) */
+    cc2420->rx_dst_pan_offset  = 4; /* 4 for length field, FCF and sequence field */
     cc2420->rx_dst_addr_offset = cc2420->rx_dst_pan_offset  + cc2420->rx_dst_pan_len;
     cc2420->rx_src_pan_offset  = cc2420->rx_dst_addr_offset + cc2420->rx_dst_addr_len;
     cc2420->rx_src_addr_offset = cc2420->rx_src_pan_offset  + cc2420->rx_src_pan_len;
     
-    CC2420_DEBUG("in process_fcf, dst addr len is %d/%d, src addr len is %d/%d\n", cc2420->rx_src_addr_len, cc2420->rx_src_pan_len, 
-			 cc2420->rx_dst_addr_len, cc2420->rx_dst_pan_len);
+    CC2420_DEBUG("in process_fcf, dst addr len is %d/%d, src addr len is %d/%d\n",
+		 cc2420->rx_src_addr_len, cc2420->rx_src_pan_len, cc2420->rx_dst_addr_len, cc2420->rx_dst_pan_len);
 
     return 0;
 }
@@ -470,7 +469,7 @@ int cc2420_rx_check_address(struct _cc2420_t * cc2420 UNUSED) {
     uint8_t buffer[256];
     
     /* get buffer corresponding to src and dst addresses */
-    cc2420_rx_fifo_get_buffer(cc2420, cc2420->rx_dst_pan_offset, buffer, addr_len);
+    cc2420_rx_fifo_get_buffer(cc2420, cc2420->rx_frame_start + cc2420->rx_dst_pan_offset, buffer, addr_len);
 
     uint8_t offset = 0;
 

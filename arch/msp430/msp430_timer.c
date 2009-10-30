@@ -164,7 +164,7 @@ do {                                                                            
       if (cc.b.outmod == TIMER_OUTMOD_OUTPUT)				\
 	{								\
 	  MCU.TIMER.out[NUM] = cc.b.out;				\
-	  HW_DMSG_2_DBG("msp430:"TIMERN": out%d = %d",			\
+	  HW_DMSG_2_DBG("msp430:"TIMERN": out%d = %d\n",		\
 			NUM,MCU.TIMER.out[NUM]);			\
 	}								\
     }									\
@@ -239,7 +239,8 @@ break;
   if (MCU.TIMER.cctl.b.ccifg)						\
     {									\
       MCU.TIMER.tiv.s = val;						\
-      HW_DMSG_TIMER("msp430:"TIMERN": tiv set to 0x%02x\n",val);	\
+      HW_DMSG_TIMER("msp430:"TIMERN": tiv set to 0x%02x [%"PRId64"]\n", \
+		    val,MACHINE_TIME_GET_NANO());			\
     }
 
 
@@ -290,20 +291,20 @@ break;
 	    case TIMER_OUTMOD_SET          :				\
 	    case TIMER_OUTMOD_SET_RESET    :				\
 	      MCU.TIMER.out[NUM] = 1;					\
-	      HW_DMSG_2_DBG("msp430:"TIMERN": out%d = %d",		\
+	      HW_DMSG_2_DBG("msp430:"TIMERN": out%d = %d\n",		\
 			    NUM,MCU.TIMER.out[NUM]);			\
 	      break;							\
 	    case TIMER_OUTMOD_TOGGLE_RESET :			        \
 	    case TIMER_OUTMOD_TOGGLE       :				\
 	    case TIMER_OUTMOD_TOGGLE_SET   :				\
 	      MCU.TIMER.out[NUM] = 1 - MCU.TIMER.out[NUM];		\
-	      HW_DMSG_2_DBG("msp430:"TIMERN": out%d = %d",		\
+	      HW_DMSG_2_DBG("msp430:"TIMERN": out%d = %d\n",		\
 			    NUM,MCU.TIMER.out[NUM]);			\
 	      break;							\
 	    case TIMER_OUTMOD_RESET        :				\
 	    case TIMER_OUTMOD_RESET_SET    :				\
 	      MCU.TIMER.out[NUM] = 0;					\
-	      HW_DMSG_2_DBG("msp430:"TIMERN": out%d = %d",		\
+	      HW_DMSG_2_DBG("msp430:"TIMERN": out%d = %d\n",		\
 			    NUM,MCU.TIMER.out[NUM]);			\
 	      break;							\
 	    }								\
@@ -350,20 +351,20 @@ break;
 	    case TIMER_OUTMOD_SET          :				\
 	    case TIMER_OUTMOD_SET_RESET    :				\
 	      MCU.TIMER.out[NUM] = 1;					\
-	      HW_DMSG_2_DBG("msp430:"TIMERN": out%d = %d",		\
+	      HW_DMSG_2_DBG("msp430:"TIMERN": out%d = %d\n",		\
 			    NUM,MCU.TIMER.out[NUM]);			\
 	      break;							\
 	    case TIMER_OUTMOD_TOGGLE_RESET :			        \
 	    case TIMER_OUTMOD_TOGGLE       :				\
 	    case TIMER_OUTMOD_TOGGLE_SET   :				\
 	      MCU.TIMER.out[NUM] = 1 - MCU.TIMER.out[NUM];		\
-	      HW_DMSG_2_DBG("msp430:"TIMERN": out%d = %d",		\
+	      HW_DMSG_2_DBG("msp430:"TIMERN": out%d = %d\n",		\
 			    NUM,MCU.TIMER.out[NUM]);			\
 	      break;							\
 	    case TIMER_OUTMOD_RESET        :				\
 	    case TIMER_OUTMOD_RESET_SET    :				\
 	      MCU.TIMER.out[NUM] = 0;					\
-	      HW_DMSG_2_DBG("msp430:"TIMERN": out%d = %d",		\
+	      HW_DMSG_2_DBG("msp430:"TIMERN": out%d = %d\n",		\
 			    NUM,MCU.TIMER.out[NUM]);			\
 	      break;							\
 	    }								\
@@ -396,13 +397,13 @@ break;
       case TIMER_OUTMOD_TOGGLE_RESET :					\
       case TIMER_OUTMOD_SET_RESET    :					\
 	MCU.TIMER.out[NUM] = 0;						\
-	      HW_DMSG_2_DBG("msp430:"TIMERN": out%d = %d",		\
+	      HW_DMSG_2_DBG("msp430:"TIMERN": out%d = %d\n",		\
 			    NUM,MCU.TIMER.out[NUM]);			\
 	break;								\
       case TIMER_OUTMOD_TOGGLE_SET   :					\
       case TIMER_OUTMOD_RESET_SET    :					\
 	MCU.TIMER.out[NUM] = 1;						\
-	      HW_DMSG_2_DBG("msp430:"TIMERN": out%d = %d",		\
+	      HW_DMSG_2_DBG("msp430:"TIMERN": out%d = %d\n",		\
 			    NUM,MCU.TIMER.out[NUM]);			\
 	break;								\
       }									\

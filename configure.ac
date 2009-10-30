@@ -5,14 +5,14 @@ dnl configure.ac for Worldsens architecture simulator
 dnl works only for automake 1.10 and above 
 dnl lower versions will have problem with bzero prototype replacement
 dnl --------------------------------------------------------------
-AC_INIT([wsim],[0.99.5svn])
+AC_INIT([wsim],[0.99.5ssvn])
 AC_CONFIG_SRCDIR(src/main.c)
 AC_CANONICAL_TARGET
 AM_INIT_AUTOMAKE
 AC_CONFIG_HEADERS([config.h])
 
-AC_DEFINE(WSIM_BUILD_ID,          80  , [build id]   )
-AC_DEFINE(WSIM_BUILD_DATE, "15052009" , [build date] )
+AC_DEFINE(WSIM_BUILD_ID,          88  , [build id]   )
+AC_DEFINE(WSIM_BUILD_DATE, "30102009" , [build date] )
  
 dnl --------------------------------------------------------------
 dnl Checks for programs.
@@ -464,20 +464,18 @@ HOSTTYPE="none"
 NEEDLARGEFILES="no"
 
 case "${host}" in
-	i686-*-linux-* ) 
-	# i686-pc-linux-gnu
-	HOSTTYPE="Linux"
-	CFLAGS="$CFLAGS -DLINUX"
-	NEEDLARGEFILES="yes"
-	;;
 
-	x86_64-*-linux-* ) 
+	*-*-linux-* ) 
+	# linux
+	# i686-*-linux-* ) 
+	# i686-pc-linux-gnu )
+	# x86_64-*-linux-* ) 
 	# x86_64-unknown-linux-gnu
 	HOSTTYPE="Linux"
 	CFLAGS="$CFLAGS -DLINUX"
 	NEEDLARGEFILES="yes"
 	;;
-
+   
 	*-*-solaris* )
         # cimirly  sparc-sun-solaris2.9
         # clash    sparc-sun-solaris2.10

@@ -436,10 +436,11 @@ void machine_monitor_add_trace(void)
 	  /*
 	   * insert code for special purpose symbol here 
 	   */
+
 	  /*
 	  VERBOSE(6,"machine:monitor: value changed watchpoint %s at 0x%04x=0x%04x\n",
 		  watchpoint[i].name, watchpoint[i].addr, value);
-	  */	  
+ 	  */	  
 
 	  tracer_event_record(watchpoint[i].trc_id,value);
 

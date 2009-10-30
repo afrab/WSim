@@ -152,7 +152,10 @@
 		<sect1>
 			<title>WTracer: the Worldsens trace reading tool</title>
 			<para>WSim traces are output in binary format. The WTracer tool transforms the traces
-			in the Gnuplot format.</para>
+			in the Gnuplot, VCD or linear formats. The most commonly used output format is VCD. All
+			WSim traces are starting from 0 and several individual traces can be merged and compared
+                        using the <computeroutput>--compare</computeroutput> option of WTracer. An example of VCD traces is available in the
+                        <ulink url="http://wsim.gforge.inria.fr/tutorials/telosb-tinyos/debugging.html#traces">TinyOS tutorial</ulink>.</para>
 		</sect1>
 		<sect1>
 			<title>WSNet: the Worldsens wireless network simulator</title>

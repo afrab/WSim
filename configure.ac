@@ -465,12 +465,13 @@ NEEDLARGEFILES="no"
 
 case "${host}" in
 
-	*-*-linux-* ) 
+	*-*-linux* ) 
 	# linux
 	# i686-*-linux-* ) 
 	# i686-pc-linux-gnu )
 	# x86_64-*-linux-* ) 
 	# x86_64-unknown-linux-gnu
+	# i686-suse-linux )
 	HOSTTYPE="Linux"
 	CFLAGS="$CFLAGS -DLINUX"
 	NEEDLARGEFILES="yes"

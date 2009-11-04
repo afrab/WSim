@@ -808,10 +808,10 @@ uint64_t cc2420_callback_rx(void *arg, struct wsnet_rx_info *wrx)
 void cc2420_fcs_replace(struct _cc2420_t *cc2420)
 {
     /* Set the significant bit in the last byte of the frame to 1 */
-    cc2420->ram[CC2420_RAM_RXFIFO_START + cc2420->rx_len] |= CC2420_CRC_OK;
+    cc2420->ram[CC2420_RAM_RXFIFO_START + cc2420->rx_frame_start + cc2420->rx_len] = CC2420_CRC_OK;
 
     /* Replace the first byte of FCS by RSSI average value */
-    cc2420->ram[CC2420_RAM_RXFIFO_START + cc2420->rx_len - 1] = cc2420->rx_rssi_value_for_fcs;
+    cc2420->ram[CC2420_RAM_RXFIFO_START + cc2420->rx_frame_start + cc2420->rx_len - 1] = cc2420->rx_rssi_value_for_fcs;
 
     return;
 }

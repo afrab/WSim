@@ -1081,8 +1081,10 @@ static int64_t worldsens_packet_parse(char *msg, int UNUSED len)
 	if (MACHINE_TIME_GET_NANO() > (WSENS_RDV_LAST_TIME + ntohll(pkt->period))) 
 	  {
 	    WSNET_BKTRK("WSNet:backtrack: ");
-	    WSNET_BKTRK("from (time:%"PRIu64",seq:%d) ", MACHINE_TIME_GET_NANO(), pkt_seq);
+	    WSNET_BKTRK("from (time:%"PRIu64",seq:%d)\n", MACHINE_TIME_GET_NANO(), pkt_seq);
 	    machine_state_restore(); /* backtracks also struct _worldsens_c */
+
+	    WSNET_BKTRK("WSNet:backtrack: ");
 	    WSNET_BKTRK(" to (time:%"PRIu64",seq:%d)\n", MACHINE_TIME_GET_NANO(), pkt_seq);
 	  }
 	

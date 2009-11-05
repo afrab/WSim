@@ -91,8 +91,8 @@ int libselect_id_add_callback(libselect_id_t fd, libselect_callback callback, vo
  * this function only returns value according to select() results
  * returns : size if ok, -1 on error
  */
-uint32_t libselect_id_read(libselect_id_t id, uint8_t *data, uint32_t size);
-uint32_t libselect_id_write(libselect_id_t id, uint8_t *data, uint32_t size);
+uint32_t libselect_id_read  (libselect_id_t id, uint8_t *data, uint32_t size);
+uint32_t libselect_id_write (libselect_id_t id, uint8_t *data, uint32_t size);
 
 /***************************************************/
 /***************************************************/
@@ -100,6 +100,13 @@ uint32_t libselect_id_write(libselect_id_t id, uint8_t *data, uint32_t size);
 
 int libselect_fd_register    (int fd, unsigned int signal);
 int libselect_fd_unregister  (int fd);
+
+/***************************************************/
+/***************************************************/
+/***************************************************/
+
+void libselect_state_save    (void);
+void libselect_state_restore (void);
 
 /***************************************************/
 /***************************************************/

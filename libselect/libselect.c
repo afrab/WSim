@@ -38,13 +38,14 @@
  * while debugging select code
  ****************************************/
 
-
 // #undef DEBUG
 
 #if defined(DEBUG)
 #define DMSG(x...) VERBOSE(3,x)
+#define DMSG_BK(x...) VERBOSE(3,x)
 #else
 #define DMSG(x...) do {} while(0)
+#define DMSG_BK(x...) do {} while(0)
 #endif
 
 /****************************************
@@ -58,8 +59,9 @@
 #define LIBSELECT_UPDATE_SKIP   200
 #endif
 
-#define DEFAULT_FIFO_SIZE       512
+#define DEFAULT_FIFO_SIZE       5120
 #define LIBSELECT_MAX_ENTRY     20
+#define BUFFER_MAX              DEFAULT_FIFO_SIZE /* max 64ko == IP datagram max size */
 
 /****************************************
  * libselect internal structure
@@ -93,10 +95,13 @@ struct libselect_entry_t {
 
   unsigned int              fifo_size;     /* i/o fifo size                      */
   libselect_fifo_t          fifo_input;    /* input data fifo : from fd to wsim  */
+  libselect_fifo_t          fifo_output;   /* output data fifo : from wsim to fd */
 
   libselect_callback        callback;      /* callback function()                */
   void                     *cb_ptr;        /* registered data for callback func. */
   unsigned int              signal;        /* signal associated with fifo events */
+
+  int                       backtrack;     /* should we commit on save           */
 };
 
 struct libselect_t {
@@ -132,6 +137,7 @@ int libselect_init(void)
       libselect.entry[id].fd_out     = -1;
       libselect.entry[id].registered = 0;
       libselect.entry[id].signal     = 0;
+      libselect.entry[id].backtrack  = 0;
       libselect.entry[id].callback   = NULL;
     }
   return 0;
@@ -159,7 +165,6 @@ int libselect_close (void)
 /* ************************************************** */
 /* ************************************************** */
 
-#define BUFFER_MAX (64*1024) /* 64ko == IP datagram max size */
 static inline int libselect_max(int a, int b) { return ((a)<(b) ? (b):(a)); }
 
 int libselect_update_registered()
@@ -454,7 +459,7 @@ libselect_id_t libselect_id_create(char *name, int UNUSED flags)
     return -1;
 }
 
-int libselect_id_is_valid(libselect_id_t id)
+inline int libselect_id_is_valid(libselect_id_t id)
 {
   int ret = 0;
   ret += (libselect.entry[id].entry_type != ENTRY_NONE);
@@ -503,7 +508,7 @@ int libselect_id_close(libselect_id_t id)
 /* ************************************************** */
 /* ************************************************** */
 
-int libselect_id_register(int id)
+int libselect_id_register(libselect_id_t id)
 {
   if (libselect_init_done == 0)
     {
@@ -541,7 +546,7 @@ int libselect_id_register(int id)
 /* ************************************************** */
 /* ************************************************** */
 
-int libselect_id_unregister(int id)
+int libselect_id_unregister(libselect_id_t id)
 {
   if (libselect.state == 0)
     {
@@ -574,7 +579,7 @@ int libselect_id_unregister(int id)
 /* ************************************************** */
 /* ************************************************** */
 
-int libselect_id_add_callback(int id, libselect_callback callback, void *ptr)
+int libselect_id_add_callback(libselect_id_t id, libselect_callback callback, void *ptr)
 {
   if (libselect_id_is_valid(id) == 0)
     {
@@ -592,7 +597,7 @@ int libselect_id_add_callback(int id, libselect_callback callback, void *ptr)
 /* ************************************************** */
 /* ************************************************** */
 
-uint32_t libselect_id_read(int id, uint8_t *data, uint32_t size)
+uint32_t libselect_id_read(libselect_id_t id, uint8_t *data, uint32_t size)
 {
   uint32_t ret = 0;
   if (libselect.entry[id].fifo_input)
@@ -602,33 +607,20 @@ uint32_t libselect_id_read(int id, uint8_t *data, uint32_t size)
   return ret;
 }
 
-uint32_t libselect_id_write(int id, uint8_t *data, uint32_t size)
+uint32_t libselect_id_write(libselect_id_t id, uint8_t *data, uint32_t size)
 {
   uint32_t ret = -1;
   if (libselect.entry[id].fd_out != -1)
     {
+      DMSG("wsim:libselect: write [%c]\n",isprint(data[0])?data[0]:'.');
       ret = write(libselect.entry[id].fd_out, data, size);
+      if (ret != size)
+	{
+	  ERROR("libselect want to write %d, but %d written\n", size, ret);
+	}
     }
   return ret;
 }
-
-/* ************************************************** */
-/* ************************************************** */
-/* ************************************************** */
-
-/*
-uint32_t libselect_read_flush(int fd)
-{
-  uint32_t n = 0;
-
-  if (libselect.entry[fd].entry_type == ENTRY_FIFO)
-    {
-      n += libselect_fifo_size(libselect.entry[fd].fifo_input);
-      libselect_fifo_flush(libselect.entry[fd].fifo_input);
-    }
-  return n;
-}
-*/
 
 /* ************************************************** */
 /* ************************************************** */
@@ -651,6 +643,7 @@ int libselect_fd_register(int fd, unsigned int signal)
 	  libselect.entry[id].fd_in      = fd;
 	  libselect.entry[id].registered = 1;
 	  libselect.entry[id].signal     = signal;
+	  libselect.entry[id].backtrack  = 0;
 	  libselect.state               += 1;
 	  libselect_update_ptr           = libselect_update_registered;
 	  return id;
@@ -673,6 +666,7 @@ int libselect_fd_unregister(int fd)
 	  libselect.entry[id].fd_out     = -1;
 	  libselect.entry[id].registered = 0;
 	  libselect.entry[id].signal     = 0;
+	  libselect.entry[id].backtrack  = 0;
 	  libselect.state               -= 1;
 	  if (libselect.state == 0)
 	    {
@@ -683,6 +677,51 @@ int libselect_fd_unregister(int fd)
     }
   ERROR("libselect:fd: trying to un-register fd %d that is not registered\n",fd);
   return -1;
+}
+
+/* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
+
+void libselect_state_save(void)
+{
+  int size;
+  uint8_t data[BUFFER_MAX];
+  libselect_id_t id;
+  for(id=0; id < LIBSELECT_MAX_ENTRY; id++)
+    {
+      if (libselect_id_is_valid(id) && 
+	  libselect.entry[id].backtrack)
+	{
+	  size = libselect_fifo_size ( libselect.entry[id].fifo_output );
+	  libselect_fifo_getblock    ( libselect.entry[id].fifo_output, data, size );
+	  libselect_fifo_flush       ( libselect.entry[id].fifo_output) ;
+	  if (write(libselect.entry[id].fd_out, data, size) != size)
+	    {
+	      ERROR("wsim:libselect:bk: error on write id=%d, fd=%d\n",
+		    id,libselect.entry[id].fd_out);
+	    }
+	  DMSG_BK("wsim:libselect:bk: SAVE id=%d, fd=%d, write %d bytes\n",
+		  id,libselect.entry[id].fd_out,size);
+	}      
+    }
+}
+
+void libselect_state_restore(void)
+{
+  int size;
+  libselect_id_t id;
+  for(id=0; id < LIBSELECT_MAX_ENTRY; id++)
+    {
+      if (libselect_id_is_valid(id) &&
+	  libselect.entry[id].backtrack)
+	{
+	  size = libselect_fifo_size ( libselect.entry[id].fifo_output );
+	  libselect_fifo_flush(libselect.entry[id].fifo_output);
+	  DMSG_BK("wsim:libselect:bk: RESTORE id=%d, fd=%d, cancel %d bytes\n",
+		  id,libselect.entry[id].fd_out,size);
+	}      
+    }
 }
 
 /* ************************************************** */

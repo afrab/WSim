@@ -30,7 +30,6 @@ elf32_t machine_elf;
 
 void     machine_framebuffer_allocate (void);
 void     machine_framebuffer_free     (void);
-
 void     machine_monitor_add_trace    (void);
 
 /* ************************************************** */
@@ -597,6 +596,8 @@ void machine_state_save()
   machine.nanotime_backup = machine.nanotime;
   /* devices          */
   memcpy(machine.devices_state_backup, machine.devices_state, machine.devices_state_size);
+  /* libselect        */
+  libselect_state_save();
   /* event tracer     */
   tracer_state_save();
   /* esimu tracer     */
@@ -616,6 +617,8 @@ void machine_state_restore()
   machine.nanotime = machine.nanotime_backup;
   /* devices          */
   memcpy(machine.devices_state, machine.devices_state_backup, machine.devices_state_size);
+  /* libselect        */
+  libselect_state_restore();
   /* event tracer     */
   tracer_state_restore();
   /* esimu tracer     */

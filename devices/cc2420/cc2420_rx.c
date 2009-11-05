@@ -386,10 +386,14 @@ int cc2420_rx_process_fcf(struct _cc2420_t * cc2420) {
 	cc2420->rx_src_addr_len    = 2;
 	break;
     case CC2420_ADDR_MODE_64_BITS :
-	cc2420->rx_src_pan_len     = 2;
+        cc2420->rx_src_pan_len     = 2;
 	cc2420->rx_src_addr_len    = 8;
 	break;
     }
+
+    /* if intra-pan bit set, dest and src pan id are the same, so src pan id is not in the frame */
+    if (cc2420->rx_intra_pan)
+        cc2420->rx_src_pan_len = 0;
 
     cc2420->rx_dst_pan_offset  = 4; /* 4 for length field, FCF and sequence field */
     cc2420->rx_dst_addr_offset = cc2420->rx_dst_pan_offset  + cc2420->rx_dst_pan_len;
@@ -430,28 +434,24 @@ void print_buf(char * msg, uint8_t * buf, uint8_t len) {
 
 int cc2420_rx_check_address(struct _cc2420_t * cc2420 UNUSED) {
 
+    uint8_t buffer[256];
+    uint8_t offset = 0;
+
+    uint8_t src_addr[8];
+    uint8_t src_pan [2];
+    uint8_t dst_addr[8];
+    uint8_t dst_pan [2];
+
+    uint8_t broadcast_addr [8] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
+
+
     /* no address recognition for acknoledge frames */
     if(cc2420->rx_frame_type == CC2420_FRAME_TYPE_ACK) {
-      CC2420_DEBUG("Frame type = ACK, no adress recognition\n");
+        CC2420_DEBUG("Frame type = ACK, no adress recognition\n");
         return 0;
     }
-    
-//#define CC2420_RX_CHECK_ADDRESS_TEST
-#ifdef  CC2420_RX_CHECK_ADDRESS_TEST
-    /* for test, refuse half of packets */
-    static int i = 0;
-    if (i) {
-	/* refuse address */
-	i = 0;
-	return 1;
-    }
-    else {
-	i = 1;
-	return 0;
-    }
-#else
-
-    /* TODO : implement here different address recognition modes */
+  
+  
     /* calculate size corresponding to addresses */
 
     uint8_t addr_len = cc2420->rx_src_addr_offset + cc2420->rx_src_addr_len - cc2420->rx_dst_pan_offset;
@@ -465,22 +465,11 @@ int cc2420_rx_check_address(struct _cc2420_t * cc2420 UNUSED) {
 	CC2420_DEBUG("no address, check what to do here\n");
 	return 0;
     }
-
-    uint8_t buffer[256];
     
     /* get buffer corresponding to src and dst addresses */
     cc2420_rx_fifo_get_buffer(cc2420, cc2420->rx_frame_start + cc2420->rx_dst_pan_offset, buffer, addr_len);
 
-    uint8_t offset = 0;
-
     uint8_t * ptr = &buffer[0];
-
-    uint8_t src_addr[8];
-    uint8_t src_pan [2];
-    uint8_t dst_addr[8];
-    uint8_t dst_pan [2];
-
-    uint8_t broadcast_addr [8] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 
 
     if (cc2420->rx_dst_pan_len > 0) {
@@ -572,12 +561,12 @@ int cc2420_rx_check_address(struct _cc2420_t * cc2420 UNUSED) {
 
     /* if there only source addresses, check if we are coordinator and pan ID */
     if ( (cc2420->rx_dst_pan_len == 0) && (cc2420->rx_dst_addr_len == 0) ) {
-      /*
+
         if (!CC2420_REG_MDMCTRL0_PAN_COORDINATOR(cc2420->registers[CC2420_REG_MDMCTRL0])) {
             CC2420_DEBUG("only source addressing fields, and I'm not a coordinator, dropping\n");
             return -1;
         }
-      */
+
         /* if there is no pan id, drop */
         if (cc2420->rx_src_pan_len == 0) {
             CC2420_DEBUG("only source addressing fields, but no src pan id, dropping\n");
@@ -591,7 +580,6 @@ int cc2420_rx_check_address(struct _cc2420_t * cc2420 UNUSED) {
     }
 
     return 0;
-#endif
 }
 
 
@@ -671,8 +659,8 @@ uint64_t cc2420_callback_rx(void *arg, struct wsnet_rx_info *wrx)
 	/* update number of received bytes */
 	cc2420->rx_data_bytes ++;
 
-	/* if first byte of data, save firts byte position in RX FIFO */
-	if (cc2420->rx_data_bytes == 1) {
+	/* if first byte of data and no other pending frame in rx fifo, save firts byte position in RX FIFO */
+	if (cc2420->rx_data_bytes == 1 && cc2420->nb_rx_frames == 0) {
 	    /* if we don't already have data bytes in RX FIFO */
 	    cc2420->rx_first_data_byte = cc2420->rx_fifo_write;
 	}

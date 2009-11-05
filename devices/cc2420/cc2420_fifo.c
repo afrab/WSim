@@ -12,6 +12,7 @@
  *
  *  Created by Nicolas Boulicault on 06/06/07.
  *  Copyright 2007 __WorldSens__. All rights reserved.
+ *  Modified by Loic Lemaitre 2009
  *
  */
 
@@ -154,10 +155,7 @@ int cc2420_rx_fifo_pop(struct _cc2420_t * cc2420, uint8_t * val) {
     if (calculate_length) {
 	/* read len val from FIFO */
 	len_val = cc2420->ram[CC2420_RAM_RXFIFO_START + cc2420->rx_fifo_read];
-	/* calculate where the first data byte of the frame is */
-	/* +4 : cf frame format */
-	//	cc2420->rx_first_data_byte = cc2420->rx_fifo_read + 4;
-	/* test cc2420 hardware seems not to deal with 802.15.4 format */
+        /* set first data byte position of next frame */
 	cc2420->rx_first_data_byte = cc2420->rx_fifo_read;
 	if (cc2420->rx_first_data_byte >= CC2420_RAM_RXFIFO_LEN)
 	    cc2420->rx_first_data_byte = cc2420->rx_first_data_byte - CC2420_RAM_RXFIFO_LEN;

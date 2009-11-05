@@ -322,141 +322,142 @@ int libselect_update_registered()
 /* ************************************************** */
 /* ************************************************** */
 
-libselect_id_t libselect_id_create(char *name, int UNUSED flags)
+libselect_id_t libselect_id_create(char *argname, int UNUSED flags)
 {
-  int id;
+  int  id;
+  char *cmdline;
+
   if (libselect_init_done == 0)
     {
       ERROR("wsim:libselect: id_create before libselect_init()\n");
       return -1;
     }
 
-    for(id=0; id < LIBSELECT_MAX_ENTRY; id++)
+  /* find the first available id */
+  for(id=0; id < LIBSELECT_MAX_ENTRY; id++)
     {
       if (libselect.entry[id].entry_type == ENTRY_NONE)
 	{
-	  if (strstr(name,"tcp:s:") == name)
-	    {
-	      if (libselect_skt_init(& libselect.entry[id].skt, name) == -1)
-		{
-		  ERROR("wsim:libselect: Cannot open TCP SRV socket %s\n",name);
-		  return -1;
-		}
-	      libselect.entry[id].entry_type = ENTRY_TCP_SRV;
-	      libselect.entry[id].fd_in      = libselect.entry[id].skt.socket_listen;
-	      libselect.entry[id].fd_out     = -1;
-	      libselect.entry[id].signal     = 0;
-	      libselect.entry[id].callback   = NULL;
-	      libselect.entry[id].cb_ptr     = NULL;
-	      libselect.entry[id].fifo_size  = DEFAULT_FIFO_SIZE;
-	      libselect.entry[id].fifo_input = libselect_fifo_create( libselect.entry[id].fifo_size );
-	    }
-	  else if (strstr(name,"tcp:c:") == name)
-	    {
-	      if (libselect_skt_init(& libselect.entry[id].skt, name) == -1)
-		{
-		  ERROR("wsim:libselect: Cannot open TCP socket %s\n",name);
-		  return -1;
-		}
-	      libselect.entry[id].entry_type = ENTRY_TCP;
-	      libselect.entry[id].fd_in      = libselect.entry[id].skt.socket;
-	      libselect.entry[id].fd_out     = libselect.entry[id].skt.socket;;
-	      libselect.entry[id].signal     = 0;
-	      libselect.entry[id].callback   = NULL;
-	      libselect.entry[id].cb_ptr     = NULL;
-	      libselect.entry[id].fifo_size  = DEFAULT_FIFO_SIZE;
-	      libselect.entry[id].fifo_input = libselect_fifo_create( libselect.entry[id].fifo_size );
-	    }
-	  else if (strstr(name,"udp:") == name)
-	    {
-	      if (libselect_skt_init(& libselect.entry[id].skt, name) == -1)
-		{
-		  ERROR("wsim:libselect: Cannot open UDP socket %s\n",id,name);
-		  return -1;
-		}
-	      libselect.entry[id].entry_type = ENTRY_UDP;
-	      libselect.entry[id].fd_in      = libselect.entry[id].skt.socket;
-	      libselect.entry[id].fd_out     = libselect.entry[id].skt.socket;;
-	      libselect.entry[id].signal     = 0;
-	      libselect.entry[id].callback   = NULL;
-	      libselect.entry[id].cb_ptr     = NULL;
-	      libselect.entry[id].fifo_size  = DEFAULT_FIFO_SIZE;
-	      libselect.entry[id].fifo_input = libselect_fifo_create( libselect.entry[id].fifo_size );
-	    }
-	  else if (strcmp(name,"stdio") == 0)
-	    {
-	      libselect.entry[id].entry_type = ENTRY_FILE;
-	      libselect.entry[id].fd_in      = 0;
-	      libselect.entry[id].fd_out     = 1;
-	      libselect.entry[id].signal     = 0;
-	      libselect.entry[id].callback   = NULL;
-	      libselect.entry[id].cb_ptr     = NULL;
-	      libselect.entry[id].fifo_size  = DEFAULT_FIFO_SIZE;
-	      libselect.entry[id].fifo_input = libselect_fifo_create( libselect.entry[id].fifo_size );
-	    }
-	  else if (strcmp(name,"stdin") == 0)
-	    {
-	      libselect.entry[id].entry_type = ENTRY_FILE;
-	      libselect.entry[id].fd_in      = 0;
-	      libselect.entry[id].fd_out     = -1;
-	      libselect.entry[id].signal     = 0;
-	      libselect.entry[id].callback   = NULL;
-	      libselect.entry[id].cb_ptr     = NULL;
-	      libselect.entry[id].fifo_size  = DEFAULT_FIFO_SIZE;
-	      libselect.entry[id].fifo_input = libselect_fifo_create( libselect.entry[id].fifo_size );
-	    }
-	  else if (strcmp(name,"stdout") == 0)
-	    {
-	      libselect.entry[id].entry_type = ENTRY_FILE;
-	      libselect.entry[id].fd_in      = -1;
-	      libselect.entry[id].fd_out     = 1;
-	      libselect.entry[id].signal     = 0;
-	      libselect.entry[id].callback   = NULL;
-	      libselect.entry[id].cb_ptr     = NULL;
-	      libselect.entry[id].fifo_size  = 0;
-	      libselect.entry[id].fifo_input = NULL;
-	    }
-	  else if (strcmp(name,"create") == 0)
-	    {
-	      int fd;
-	      char f_local [MAX_FILENAME];
-	      char f_remote[MAX_FILENAME];
-	      if ((fd = libselect_get_system_fifo(f_local, f_remote)) == -1)
-		{
-		  ERROR("wsim:libselect: Cannot create system fifo\n");
-		  return -1;
-		}
-	      libselect.entry[id].entry_type = ENTRY_FILE;
-	      libselect.entry[id].fd_in      = fd;
-	      libselect.entry[id].fd_out     = fd;
-	      libselect.entry[id].signal     = 0;
-	      libselect.entry[id].callback   = NULL;
-	      libselect.entry[id].cb_ptr     = NULL;
-	      libselect.entry[id].fifo_size  = DEFAULT_FIFO_SIZE;
-	      libselect.entry[id].fifo_input = libselect_fifo_create( libselect.entry[id].fifo_size );
-	    }
-	  else 
-	    {
-	      int fd;
-	      if ((fd = open(name,O_RDWR)) == -1)
-		{
-		  ERROR("wsim:libselect: Cannot open file %s\n",name);
-		  return -1;
-		}
-	      libselect.entry[id].entry_type = ENTRY_FILE;
-	      libselect.entry[id].fd_in      = fd;
-	      libselect.entry[id].fd_out     = fd;
-	      libselect.entry[id].signal     = 0;
-	      libselect.entry[id].callback   = NULL;
-	      libselect.entry[id].cb_ptr     = NULL;
-	      libselect.entry[id].fifo_size  = DEFAULT_FIFO_SIZE;
-	      libselect.entry[id].fifo_input = libselect_fifo_create( libselect.entry[id].fifo_size );
-	    }
-	  DMSG("wsim:libselect:create: %s, id=%d, fd_in=%d\n",name,id,libselect.entry[id].fd_in);
-	  return id;
+	  break;
 	}
     }
-    return -1;
+
+  if (id == LIBSELECT_MAX_ENTRY)
+    {
+      return -1;
+    }
+
+  cmdline = argname;
+  if (strstr(cmdline,"bk:") == cmdline)
+    {
+      cmdline += 3;
+      DMSG("wsim:libselect: open file %s with backtrack buffer on output\n",cmdline);
+      libselect.entry[id].backtrack = 1;
+    }
+  else
+    {
+      libselect.entry[id].backtrack = 0;
+    }
+
+  libselect.entry[id].signal      = 0;
+  libselect.entry[id].callback    = NULL;
+  libselect.entry[id].cb_ptr      = NULL;
+  libselect.entry[id].fifo_size   = DEFAULT_FIFO_SIZE;
+  libselect.entry[id].fifo_input  = NULL;
+  libselect.entry[id].fifo_output = NULL;
+  
+  if (strstr(cmdline,"tcp:s:") == cmdline)
+    {
+      if (libselect_skt_init(& libselect.entry[id].skt, cmdline) == -1)
+	{
+	  ERROR("wsim:libselect: Cannot open TCP SRV socket %s\n",cmdline);
+	  return -1;
+	}
+      libselect.entry[id].entry_type = ENTRY_TCP_SRV;
+      libselect.entry[id].fd_in      = libselect.entry[id].skt.socket_listen;
+      libselect.entry[id].fd_out     = -1;
+    }
+  else if (strstr(cmdline,"tcp:c:") == cmdline)
+    {
+      if (libselect_skt_init(& libselect.entry[id].skt, cmdline) == -1)
+	{
+	  ERROR("wsim:libselect: Cannot open TCP socket %s\n",cmdline);
+	  return -1;
+	}
+      libselect.entry[id].entry_type = ENTRY_TCP;
+      libselect.entry[id].fd_in      = libselect.entry[id].skt.socket;
+      libselect.entry[id].fd_out     = libselect.entry[id].skt.socket;;
+    }
+  else if (strstr(cmdline,"udp:") == cmdline)
+    {
+      if (libselect_skt_init(& libselect.entry[id].skt, cmdline) == -1)
+	{
+	  ERROR("wsim:libselect: Cannot open UDP socket %s\n",id,cmdline);
+	  return -1;
+	}
+      libselect.entry[id].entry_type = ENTRY_UDP;
+      libselect.entry[id].fd_in      = libselect.entry[id].skt.socket;
+      libselect.entry[id].fd_out     = libselect.entry[id].skt.socket;;
+    }
+  else if (strcmp(cmdline,"stdio") == 0)
+    {
+      libselect.entry[id].entry_type = ENTRY_FILE;
+      libselect.entry[id].fd_in      = 0;
+      libselect.entry[id].fd_out     = 1;
+    }
+  else if (strcmp(cmdline,"stdin") == 0)
+    {
+      libselect.entry[id].entry_type = ENTRY_FILE;
+      libselect.entry[id].fd_in      = 0;
+      libselect.entry[id].fd_out     = -1;
+    }
+  else if (strcmp(cmdline,"stdout") == 0)
+    {
+      libselect.entry[id].entry_type = ENTRY_FILE;
+      libselect.entry[id].fd_in      = -1;
+      libselect.entry[id].fd_out     = 1;
+      libselect.entry[id].fifo_size  = 0;
+    }
+  else if (strcmp(cmdline,"create") == 0)
+    {
+      int fd;
+      char f_local [MAX_FILENAME];
+      char f_remote[MAX_FILENAME];
+      if ((fd = libselect_get_system_fifo(f_local, f_remote)) == -1)
+	{
+	  ERROR("wsim:libselect: Cannot create system fifo\n");
+	  return -1;
+	}
+      libselect.entry[id].entry_type = ENTRY_FILE;
+      libselect.entry[id].fd_in      = fd;
+      libselect.entry[id].fd_out     = fd;
+    }
+  else 
+    {
+      int fd;
+      if ((fd = open(cmdline,O_RDWR)) == -1)
+	{
+	  ERROR("wsim:libselect: Cannot open file %s\n",cmdline);
+	  return -1;
+	}
+      libselect.entry[id].entry_type = ENTRY_FILE;
+      libselect.entry[id].fd_in      = fd;
+      libselect.entry[id].fd_out     = fd;
+    }
+
+  if (libselect.entry[id].fifo_size > 0)
+    {
+      libselect.entry[id].fifo_input  = libselect_fifo_create( libselect.entry[id].fifo_size );
+      libselect.entry[id].fifo_output = libselect_fifo_create( libselect.entry[id].fifo_size );
+    }
+  else
+    {
+      libselect.entry[id].fifo_input  = NULL;
+      libselect.entry[id].fifo_output = NULL;
+    }
+
+  DMSG("wsim:libselect:create: %s, id=%d, fd_in=%d\n",cmdline,id,libselect.entry[id].fd_in);
+  return id;
 }
 
 inline int libselect_id_is_valid(libselect_id_t id)
@@ -472,35 +473,28 @@ int libselect_id_close(libselect_id_t id)
     {
     case ENTRY_NONE:
       /* ERROR("wsim:libselect:close: error cannot close id %d of type NONE\n",id); */
-      break;
+      return 1;
     case ENTRY_FILE:
-      libselect_fifo_delete      (libselect.entry[id].fifo_input);
-      libselect.entry[id].entry_type = ENTRY_NONE;
-      libselect.entry[id].registered = 0;
       break;
     case ENTRY_TCP:
       libselect_skt_close_client (& libselect.entry[id].skt);
-      libselect_fifo_delete      (libselect.entry[id].fifo_input);
-      libselect.entry[id].entry_type = ENTRY_NONE;
-      libselect.entry[id].registered = 0;
       break;
     case ENTRY_TCP_SRV:
       libselect_skt_close_client (& libselect.entry[id].skt);
       libselect_skt_close        (& libselect.entry[id].skt);
-      libselect_fifo_delete      (libselect.entry[id].fifo_input);
-      libselect.entry[id].entry_type = ENTRY_NONE;
-      libselect.entry[id].registered = 0;
       break;
     case ENTRY_UDP:
       libselect_skt_close_client (& libselect.entry[id].skt);
-      libselect_fifo_delete      (libselect.entry[id].fifo_input);
-      libselect.entry[id].entry_type = ENTRY_NONE;
-      libselect.entry[id].registered = 0;
       break;
     case ENTRY_FD_ONLY:
       ERROR("wsim:libselect:close: cannot close id %d of type FD_ONLY\n",id);
-      break;
+      return 1;
     }
+
+  libselect_fifo_delete(libselect.entry[id].fifo_input);
+  libselect_fifo_delete(libselect.entry[id].fifo_output);
+  libselect.entry[id].entry_type = ENTRY_NONE;
+  libselect.entry[id].registered = 0;
   return 0;
 }
 
@@ -612,11 +606,19 @@ uint32_t libselect_id_write(libselect_id_t id, uint8_t *data, uint32_t size)
   uint32_t ret = -1;
   if (libselect.entry[id].fd_out != -1)
     {
-      DMSG("wsim:libselect: write [%c]\n",isprint(data[0])?data[0]:'.');
-      ret = write(libselect.entry[id].fd_out, data, size);
-      if (ret != size)
+      if (libselect.entry[id].backtrack)
 	{
-	  ERROR("libselect want to write %d, but %d written\n", size, ret);
+	  ret = libselect_fifo_putblock (libselect.entry[id].fifo_output, data, size);
+	  DMSG_BK("wsim:libselect:bk: WRITE %d bytes to id=%d, fd=%d, fifo=%04d\n",
+		  size, id, libselect.entry[id].fd_out,
+		  libselect_fifo_size ( libselect.entry[id].fifo_output ) );
+	}
+      else
+	{
+	  ret = write(libselect.entry[id].fd_out, data, size);
+	  DMSG("wsim:libselect: WRITE %d bytes to id=%d, fd=%d, val=%c\n",
+		  size, id, libselect.entry[id].fd_out,
+		  isprint(data[0]) ? data[0] : '.');
 	}
     }
   return ret;

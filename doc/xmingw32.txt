@@ -1,0 +1,31 @@
+
+export SDL_MINGW32=${HOME}/projets/worldsens/build/mingw32/SDL-1.2.12
+
+export CC=i586-mingw32msvc-gcc
+export CXX=i586-mingw32msvc-g++
+export AR=i586-mingw32msvc-ar
+export RANLIB=i586-mingw32msvc-ranlib
+export CROSS_COMPILE=i586-mingw32msvc
+export ARGSBASE="--host=${CROSS_COMPILE} --with-sdl-prefix=${SDL_MINGW32} --disable-ptty"
+
+
+../../../wsim/configure $ARGSBASE --enable-debug --enable-xdebug --enable-platforms-all --enable-wsnet1 
+
+## --enable-ui
+
+
+
+Configuration summary:
+
+        host         : i586-pc-mingw32msvc
+        host type    : Mingw32
+        target(s)    : all
+        wsim debug   : yes
+        target debug : yes
+        Etrace       : no
+        Elf loader   : internal
+        SDL gui      : no
+        zlib         : system
+        Ptty         : yes
+        WorldSens    : wsnet1
+

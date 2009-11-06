@@ -698,13 +698,24 @@ void libselect_state_save(void)
 	  size = libselect_fifo_size ( libselect.entry[id].fifo_output );
 	  libselect_fifo_getblock    ( libselect.entry[id].fifo_output, data, size );
 	  libselect_fifo_flush       ( libselect.entry[id].fifo_output) ;
-	  if (write(libselect.entry[id].fd_out, data, size) != size)
+	  if (size > 0)
 	    {
-	      ERROR("wsim:libselect:bk: error on write id=%d, fd=%d\n",
-		    id,libselect.entry[id].fd_out);
+	      if (write(libselect.entry[id].fd_out, data, size) != size)
+		{
+		  ERROR("wsim:libselect:bk: error on write id=%d, fd=%d\n",
+			id,libselect.entry[id].fd_out);
+		}
+	      else
+		{
+		  DMSG_BK("wsim:libselect:bk: SAVE+WRITE id=%d, fd=%d, write %d bytes\n",
+			  id,libselect.entry[id].fd_out,size);
+		}
 	    }
-	  DMSG_BK("wsim:libselect:bk: SAVE id=%d, fd=%d, write %d bytes\n",
-		  id,libselect.entry[id].fd_out,size);
+	  else
+	    {
+	      DMSG_BK("wsim:libselect:bk: SAVE id=%d, fd=%d, size %d bytes\n",
+		      id,libselect.entry[id].fd_out,size);
+	    }
 	}      
     }
 }

@@ -21,8 +21,10 @@
 #include <stdio.h>
 #include <errno.h>
 
-#if defined(__MINGW32__)
+#if defined(WIN32) || defined(WINDOWS)
   #include <winsock2.h>
+  #include <ws2tcpip.h>
+  #undef ERROR
 #else
   #include <sys/socket.h>
   #include <arpa/inet.h>

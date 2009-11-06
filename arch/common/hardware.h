@@ -10,12 +10,7 @@
 #define HW_HARDWARE_H
 
 #include "config.h"
-
-#if defined(HAVE_STDINT_H)
-#include <stdint.h>
-#else
-#include "arch/common/wsim_stdint.h"
-#endif
+#include "missing.h"
 
 typedef uint64_t wsimtime_t;
 

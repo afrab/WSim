@@ -10,7 +10,7 @@ COMMON_HEADER=          \
 	hardware.h	\
 	wsim_stdint.h
 
-COMMON_SRC=debug.c ihex.c
+COMMON_SRC=debug.c ihex.c missing.c
 
 libmcucommon_a_SOURCES=${COMMON_HEADER} ${COMMON_SRC}
 

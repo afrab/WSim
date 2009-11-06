@@ -5,7 +5,7 @@ dnl configure.ac for Worldsens architecture simulator
 dnl works only for automake 1.10 and above 
 dnl lower versions will have problem with bzero prototype replacement
 dnl --------------------------------------------------------------
-AC_INIT([wsim],[0.99.5ssvn])
+AC_INIT([wsim],[0.99.6svn])
 AC_CONFIG_SRCDIR(src/main.c)
 AC_CANONICAL_TARGET
 AM_INIT_AUTOMAKE
@@ -410,6 +410,16 @@ if test "$ac_cv_func_strcasestr" = yes; then
    AC_DEFINE(FUNC_STRCASESTR_DEFINED, [1], [Check if strcasestr() is available])
 fi
 
+AC_CHECK_FUNC(strtok_r)
+if test "$ac_cv_func_strtok_r" = yes; then
+   AC_DEFINE(FUNC_STRTOK_R_DEFINED, [1], [Check if strtok_r() is available])
+fi
+
+dnl AC_CHECK_FUNC(nothl)
+dnl if test "$ac_cv_func_ntohl" = yes; then
+dnl    AC_DEFINE(FUNC_NTOHL_DEFINED, [1], [Check if ntohl() is available])
+dnl fi
+
 
 dnl --------------------------------------------------------------
 dnl Checks for libraries.
@@ -488,12 +498,12 @@ case "${host}" in
 	*-*-cygwin )
 	# xp i686-pc-cygwin
 	HOSTTYPE="Cygwin"
-	CFLAGS="$CFLAGS -DCYGWIN"
+	CFLAGS="$CFLAGS -DCYGWIN -DWINDOWS"
 	NEEDLARGEFILES="yes"
 	#if test "${worldsens_sum}" != "no" ; then
 	#   EXTRALIBS="-lsocket -lnsl"
         #fi
-	EXTRALIBS="$EXTRALIBS -lwsock32"
+	EXTRALIBS="$EXTRALIBS -lwsock32 -mwindows"
 	if test "${enable_gui}" != "no" ; then
 	   EXTRALIBS="$EXTRALIBS -lSDL" 
 	fi
@@ -502,9 +512,9 @@ case "${host}" in
 	*-*-mingw32msvc )
 	# i586-pc-mingw32msvc
 	HOSTTYPE="Mingw32"
-	CFLAGS="$CFLAGS -DMINGW32"
+	CFLAGS="$CFLAGS -DMINGW32 -DWINDOWS"
 	NEEDLARGEFILES="yes"
-	EXTRALIBS="$EXTRALIBS -lwsock32"
+	EXTRALIBS="$EXTRALIBS -lwsock32 -mwindows -lmingw32"
 	if test "${enable_gui}" != "no" ; then
 	   EXTRALIBS="$EXTRALIBS -lSDL" 
 	fi

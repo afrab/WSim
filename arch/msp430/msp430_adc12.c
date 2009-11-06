@@ -6,6 +6,7 @@
  **/
 
 #include <stdlib.h>
+#include <string.h>
 #include "arch/common/hardware.h"
 #include "msp430.h"
 #include "src/options.h"
@@ -102,8 +103,8 @@ int msp430_adc12_option_add (void)
 
 int msp430_adc12_find_inputs()
 {
-  char delim1[] = ",";
-  char delim2[] = ":";
+  const char delim1[] = ",";
+  const char delim2[] = ":";
   char *str1,*str2;
   char *token,*subtoken;
   char *saveptr1,*saveptr2;
@@ -254,7 +255,11 @@ uint16_t msp430_adc12_sample_input(int hw_channel_x)
 
     case ADC12_RND:
       HW_DMSG_ADC12("msp430:adc12:     random sample for input channel %d\n", hw_channel_x);
+#if !defined(WIN32)
       sample = random();
+#else
+      sample = 0xdead;
+#endif
       break;
 
     case ADC12_WSNET:

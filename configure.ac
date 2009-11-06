@@ -27,6 +27,7 @@ dnl --------------------------------------------------------------
 dnl Install directories
 dnl --------------------------------------------------------------
 
+EXTRAOBJS=""
 EXTRALIBS="-lm"
 
 dnl --------------------------------------------------------------
@@ -99,7 +100,7 @@ AM_CONDITIONAL([BUILD_ETRACE], [test "${etrace_sum}" = "yes"])
 AC_ARG_WITH([etracelib-prefix], AS_HELP_STRING([--with-etracelib-prefix=DIR],[etracelib path]),
 	    [CFLAGS="-I$withval $CFLAGS" 
 	     LDFLAGS="-L$withval $LDFLAGS"
-	     EXTRALIBS="$withval/libetrace.a $EXTRALIBS"
+	     EXTRAOBJS="$withval/libetrace.a $EXTRAOBJS"
 
 	     etracelib_prefix=$withval],
 	    [etracelib_prefix=""])
@@ -577,8 +578,12 @@ dnl Output
 dnl --------------------------------------------------------------
 dnl 
 
+LIBS=${EXTRALIBS}
 echo "EXTRALIBS ${EXTRALIBS}"
+echo "EXTRAOBJS ${EXTRAOBJS}"
+
 AC_SUBST(EXTRALIBS)
+AC_SUBST(EXTRAOBJS)
 
 AC_CONFIG_FILES(
 dnl 

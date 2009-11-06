@@ -12,7 +12,7 @@ WSIM_BASE= \
         ../../libselect/libselect.a        \
 	../../liblogger/liblogger.a        \
 	../../arch/common/libmcucommon.a   \
-	@EXTRALIBS@
+	@EXTRAOBJS@
 
 WORLDSENSLIB=
 

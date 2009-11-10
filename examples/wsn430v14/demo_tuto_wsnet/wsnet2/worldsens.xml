@@ -1,0 +1,89 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<worldsens xmlns="http://worldsens.citi.insa-lyon.fr">
+
+<!-- == Worldsens ===================================================== -->
+<simulation nodes="4" x="16" y="16" z="16"/>
+
+
+<!-- == Entities ===================================================== -->
+<entity name="interf" library="interferences_none">
+</entity>
+
+<entity name="range" library="propagation_range" >
+  <init  range="6"/>
+</entity>
+
+<!-- available modulations (better to put all modulations) -->
+<entity name="none" library="modulation_none">
+</entity>
+<entity name="fsk" library="modulation_fsk">
+</entity>
+<entity name="oqpsk" library="modulation_oqpsk">
+</entity>
+
+<!-- Node0 position entity -->
+<entity name="static0" library="mobility_static" >
+<default x="4" y="8" z="8"/>
+</entity>
+<!-- Node1 position entity -->
+<entity name="static1" library="mobility_static" >
+<default x="8" y="12" z="8"/>
+</entity>
+<!-- Node2 position entity -->
+<entity name="static2" library="mobility_static" >
+<default x="12" y="8" z="8"/>
+</entity>
+<!-- Node3 position entity -->
+<entity name="static3" library="mobility_static" >
+<default x="8" y="4" z="8"/>
+</entity>
+
+<!-- Type of antenna -->
+<entity name="omnidirectionnal" library="antenna_omnidirectionnal" >
+</entity>
+
+<!-- Fire event -->
+<entity name="fire" library="environment_fire" >
+<init  start="1000000000" refresh="100000000" speed="0" x="4" y="8" z="8" heat="1"/>
+</entity>
+
+<!-- == Environment ===================================================== -->
+<environment>
+  <propagation entity="range" range="6"/>
+  <interferences entity="interf"/>
+  <modulation entity="none"/>
+  <modulation entity="fsk"/>
+  <modulation entity="oqpsk"/>
+  <with entity="fire"/>
+</environment>
+
+
+<!-- == Bundle ===================================================== -->
+<bundle name="node0" worldsens="true" default="true" birth="0">
+  <mobility entity="static0"/>
+  <antenna entity="omnidirectionnal"/>
+</bundle>
+
+<bundle name="node1" worldsens="true" default="false" birth="0">
+  <mobility entity="static1"/>
+  <antenna entity="omnidirectionnal"/>
+</bundle>
+
+<bundle name="node2" worldsens="true" default="false" birth="0">
+  <mobility entity="static2"/>
+  <antenna entity="omnidirectionnal"/>
+</bundle>
+
+<bundle name="node3" worldsens="true" default="false" birth="0">
+  <mobility entity="static3"/>
+  <antenna entity="omnidirectionnal"/>
+</bundle>
+
+
+<!-- == Nodes ===================================================== -->
+<node id="0" as="node0"/>
+<node id="1" as="node1"/>
+<node id="2" as="node2"/>
+<node id="3" as="node3"/>
+
+</worldsens>

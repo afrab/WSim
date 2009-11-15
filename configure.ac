@@ -476,6 +476,7 @@ case "${host}" in
 	HOSTTYPE="Linux"
 	CFLAGS="$CFLAGS -DLINUX"
 	NEEDLARGEFILES="yes"
+	EXTRALIBS="$EXTRALIBS -lz"
 	;;
    
 	*-*-solaris* )

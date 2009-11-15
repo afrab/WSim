@@ -220,7 +220,8 @@ static inline uint32_t machine_run(void)
 	if ((sig & MAC_TO_SIG(MAC_WATCH_READ)) != 0)
 	  {
 	    mcu_signal_remove(SIG_MAC | MAC_TO_SIG(MAC_WATCH_READ));
-	    machine_monitor_add_trace();
+	    /* trace (VCD) are working on writes */
+	    /* machine_monitor_add_trace();      */
 	    sig = mcu_signal_get();
 	  }
 
@@ -432,6 +433,8 @@ void machine_monitor_add_trace(void)
 	      break;
 	    }
 
+	  tracer_event_record(watchpoint[i].trc_id,value);
+
 	  /*
 	   * insert code for special purpose symbol here 
 	   */
@@ -441,7 +444,40 @@ void machine_monitor_add_trace(void)
 		  watchpoint[i].name, watchpoint[i].addr, value);
  	  */	  
 
-	  tracer_event_record(watchpoint[i].trc_id,value);
+
+	  if (strcmp(watchpoint[i].name,"__WSIMLOGBUFFER") == 0)
+	    {
+	      int iter;
+	      uint16_t int16;
+	      char *logString = (char*)calloc( watchpoint[i].size, sizeof(char));
+	      for(iter=0 ; iter<watchpoint[i].size ; iter++) 
+		{
+		  logString[iter] = (char)mcu_jtag_read_byte(addr+iter); 
+		  if (logString[iter]=='\0') 
+		    break;
+		}
+
+	      switch (logString[0])
+		{
+		case '1': // char
+		  VERBOSE(6,"machine:monitor(0): Variable:%s at:0x%04x has become (char) '%c'\n",watchpoint[i].name,watchpoint[i].addr,logString[1]);
+		  break;
+		case '2': // Byte (int8)
+		  VERBOSE(6,"machine:monitor(0): Variable:%s at:0x%04x has become (int8) '%d'\n",watchpoint[i].name,watchpoint[i].addr,logString[1]);
+		  break;
+		case '3': // Int (int16)
+		  int16 = ((logString[2] & 0xff) << 8) | (logString[1] & 0xff);
+		  VERBOSE(6,"machine:monitor(0): Variable:%s at:0x%04x has become (int16) '%d'\n",watchpoint[i].name,watchpoint[i].addr,int16);
+		  break;
+		case '4': // string
+		  VERBOSE(6,"machine:monitor(0): Variable:%s at:0x%04x has become (str) '%s'\n",watchpoint[i].name,watchpoint[i].addr,&logString[1]);
+		  break;
+		default:
+		  VERBOSE(6,"machine:monitor(0): Variable:%s at:0x%04x has become (Unknown type) '%s'\n",watchpoint[i].name,watchpoint[i].addr,iter,logString);
+		  break;
+		}
+	      free(logString);
+	    }
 
 	  found = 1;
 	}

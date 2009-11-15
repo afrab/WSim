@@ -1,7 +1,6 @@
-
 bin_PROGRAMS=wsnet1
 
-INCLUDES=-I$(top_srcdir)/include -I$(top_srcdir)/../.. 
+AM_CPPFLAGS=-I$(top_srcdir)/include -I$(top_srcdir)/../.. 
 
 TRACER=$(top_srcdir)/../../libtracer/tracer.c
 LOGGER=$(top_srcdir)/../../liblogger/logger.c
@@ -19,8 +18,3 @@ wsnet1_SOURCES=			\
 	$(TRACER) $(LOGGER)
 
 wsnet1_CFLAGS=-DWSNET1
-
-
-
-
-

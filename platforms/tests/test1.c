@@ -58,7 +58,7 @@
 #define LED8            8
 #define SERIAL0         9
 
-#if #defined(__msp430_have_usart1)
+#if defined(__msp430_have_usart1)
 #  define SERIAL1           10
 #  define FREE_DEVICE_MAX   11
 #else

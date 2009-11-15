@@ -517,7 +517,7 @@ void machine_monitor_start(char* args)
       if (subtoken[0] == '0')
 	{
 	  /* hexa */
-	  sscanf(subtoken, "0x%x",& watchpoint[watchpoint_max].addr);
+	  sscanf(subtoken, "0x%"SCNx32,& watchpoint[watchpoint_max].addr);
 	}
       else
 	{

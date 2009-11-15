@@ -21,7 +21,7 @@
 #include <stdio.h>
 #include <errno.h>
 
-#if defined(WIN32) || defined(WINDOWS)
+#if defined(_WIN32)
   #include <winsock2.h>
   #include <ws2tcpip.h>
   #undef ERROR

@@ -7,7 +7,7 @@ AC_INIT([wsnet1],[0.5])
 AC_CONFIG_SRCDIR(src/worldsens_wsnet.c)
 AC_CANONICAL_TARGET
 AM_INIT_AUTOMAKE
-AM_CONFIG_HEADER([config.h])
+AC_CONFIG_HEADERS([config.h])
 
 dnl --------------------------------------------------------------
 dnl Checks for programs.
@@ -16,6 +16,7 @@ AC_PROG_INSTALL
 AC_PROG_CC
 AC_PROG_MAKE_SET
 AC_PROG_RANLIB
+AM_PROG_CC_C_O
 
 dnl -------------------------------------------------------------- 
 dnl Host specific workarounds
@@ -57,7 +58,7 @@ case "${host}" in
 	#if test "${worldsens_sum}" != "no" ; then
 	#   EXTRALIBS="-lsocket -lnsl"
         #fi
-	EXTRALIBS="$EXTRALIBS -lwsock32"
+	EXTRALIBS="$EXTRALIBS -lws2_32"
 	if test "${enable_gui}" != "no" ; then
 	   EXTRALIBS="$EXTRALIBS -lSDL" 
 	fi
@@ -68,7 +69,7 @@ case "${host}" in
 	HOSTTYPE="Mingw32"
 	CFLAGS="$CFLAGS -DMINGW32"
 	NEEDLARGEFILES="yes"
-	EXTRALIBS="$EXTRALIBS -lwsock32"
+	EXTRALIBS="$EXTRALIBS -lws2_32"
 	if test "${enable_gui}" != "no" ; then
 	   EXTRALIBS="$EXTRALIBS -lSDL" 
 	fi
@@ -112,7 +113,7 @@ fi
 dnl Debug mode
 dnl ==========
 CFLAGS_save="${CFLAGS}"
-AC_ARG_ENABLE([debug],AC_HELP_STRING([--enable-debug],[debug mode (default disabled)]))
+AC_ARG_ENABLE([debug],AS_HELP_STRING([--enable-debug],[debug mode (default disabled)]))
 if test "${enable_debug}" = "yes"; then
     CFLAGS="$CFLAGS -g -DDEBUG"
     AC_DEFINE([DEBUG],[1],[WSNet internals debug tools])
@@ -183,7 +184,7 @@ AM_CONDITIONAL([BUILD_CYGWIN],  [test "$HOSTTYPE" = "Cygwin"])
 dnl Wextra && Werror
 dnl ================
 CFLAGS_save="${CFLAGS}"
-AC_ARG_ENABLE([waou],AC_HELP_STRING([--enable-waou],[Wextra Werror mode (default disabled)]))
+AC_ARG_ENABLE([waou],AS_HELP_STRING([--enable-waou],[Wextra Werror mode (default disabled)]))
 if test "${enable_waou}" = "yes"; then
     if test "${HOSTTYPE}" != "Cygwin" ; then
        CFLAGS="$CFLAGS -Wextra -Werror"

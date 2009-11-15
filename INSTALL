@@ -1,36 +1,43 @@
+INSTALLATION PROCEDURE
+======================
 
-WSim dependencies and platform requirements are minimal.
-Building the GUI requires libSDL-1.2 installed.
+WSim dependencies and platform requirements are minimal.  Building the GUI
+requires libSDL-1.2 and -dev installed.
 
-You can choose to install WSim using le GNU libbfd or the native
+You can choose to install WSim using either the GNU libbfd or the native
 library included in WSim.
 
 
-Linux (Un*x)
-------------
-* From the CVS archive : 
+Linux/Unix
+----------
+* From the CVS archive: 
 
-  ./bootstrap
+  # add -I/usr/local/share/aclocal to the next line if SDL is in /usr/local but
+  # autotools aren't.
+  autoreconf -i
   ./configure --prefix=/your/preferred/path --enable-platform-XXX
   make
   make install
 
-* From the tar archive :
+* From the tar archive:
 
   ./configure --prefix=/your/preferred/path --enable-platform-XXX
   make
   make install
 
 WSim tools (tracer, console, ...) are located in the utils/ directory.
-Eauch of the tools can be compiled and installed used autoconf scripts (./configure && make)
+Each of the tools can be compiled and installed using autoconf scripts
+(./configure && make)
 
 
 Installation for Windows
 ------------------------
 
-There are two ways to compile this software for windows
-* Native compile for Windows using the Cygwin tools suite (http://www.cygwin.com/).
-* Using the Mingw32 Win32 cross compiler from GNU/Linux
+There are several ways to compile this software for windows:
+
+1 Cygwin compile for Windows using Cygwin <http://www.cygwin.com/>
+2 Windows native compile using the MinGW tools (doesn't provide networking)
+3 Using the Mingw32 cross compiler from GNU/Linux (doesn't provide networking)
 
 
 
@@ -38,14 +45,12 @@ There are two ways to compile this software for windows
 
 * Building Wsim 
 
-    - Cygwin :
-            CC="gcc -mno-cygwin" CXX="g++ -mno-cygwin" \
+    - 1/2, Cygwin and MinGW:
             ./configure 
-
 	    make
             make install
 
-    - Mingw32 cross compiler : 
+    - Mingw32 cross compiler: 
             CC=i586-mingw32msvc-gcc CXX=i586-mingw32msvc-g++ \
             ./configure --host=i586-mingw32msvc --build=i386-linux 
 
@@ -57,8 +62,8 @@ Solaris install
 ---------------
 
 the solaris install using GNU libbfd needs the libiberty to compile wsim. This
-library is available as part of the binutils distribution and 
-must be compiled and installed using the same options as the libbfd. 
+library is available as part of the binutils distribution and must be compiled
+and installed using the same options as the libbfd. 
 
 
 
@@ -85,6 +90,4 @@ This script will install
   msp430-libc
   msp430-gdb
 
-msp430-insight is supported on some platforms (Linux, Solaris)
-
-
+msp430-insight is supported on some platforms (Linux, Solaris).

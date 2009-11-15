@@ -7,8 +7,8 @@ dnl lower versions will have problem with bzero prototype replacement
 dnl --------------------------------------------------------------
 AC_INIT([wsim],[0.99.6svn])
 AC_CONFIG_SRCDIR(src/main.c)
-AC_CANONICAL_TARGET
-AM_INIT_AUTOMAKE
+AC_CANONICAL_HOST
+AM_INIT_AUTOMAKE(foreign) dnl foreign = NEWS/TODO not required
 AC_CONFIG_HEADERS([config.h])
 
 AC_DEFINE(WSIM_BUILD_ID,          88  , [build id]   )
@@ -423,16 +423,6 @@ dnl fi
 
 
 dnl --------------------------------------------------------------
-dnl Checks for libraries.
-dnl --------------------------------------------------------------
-if test "${enable_gui}" = "yes" ; then
-	SDL_VERSION=1.2.5
-	AM_PATH_SDL($SDL_VERSION,   :,  AC_MSG_ERROR([*** SDL version $SDL_VERSION not found!])	)
-	CFLAGS="$CFLAGS $SDL_CFLAGS"
-	LDFLAGS="$LDFLAGS $SDL_LIBS"
-fi
-
-dnl --------------------------------------------------------------
 dnl Checks for binutils (bfd) for msp430
 dnl --------------------------------------------------------------
 dnl should change to remove bfd option
@@ -499,25 +489,19 @@ case "${host}" in
 	*-*-cygwin )
 	# xp i686-pc-cygwin
 	HOSTTYPE="Cygwin"
-	CFLAGS="$CFLAGS -DCYGWIN -DWINDOWS"
 	NEEDLARGEFILES="yes"
-	#if test "${worldsens_sum}" != "no" ; then
-	#   EXTRALIBS="-lsocket -lnsl"
-        #fi
-	EXTRALIBS="$EXTRALIBS -lwsock32 -mwindows"
-	if test "${enable_gui}" != "no" ; then
-	   EXTRALIBS="$EXTRALIBS -lSDL" 
-	fi
+	EXTRALIBS="$EXTRALIBS -mwindows"
 	;;
 
-	*-*-mingw32msvc )
+	*-*-mingw32* )
 	# i586-pc-mingw32msvc
+	# i686-pc-mingw32
 	HOSTTYPE="Mingw32"
-	CFLAGS="$CFLAGS -DMINGW32 -DWINDOWS"
 	NEEDLARGEFILES="yes"
-	EXTRALIBS="$EXTRALIBS -lwsock32 -mwindows -lmingw32"
-	if test "${enable_gui}" != "no" ; then
-	   EXTRALIBS="$EXTRALIBS -lSDL" 
+	EXTRALIBS="$EXTRALIBS -lws2_32 -mwindows -lmingw32"
+	if test "${enable_gui}" = "yes" ; then
+		# hack to avoid missing SDL_main linker complaint
+		LDFLAGS="$LDFLAGS -u_SDL_main"
 	fi
 	;;
 
@@ -525,7 +509,7 @@ case "${host}" in
         # powerpc-apple-darwin8.6.0 
 	# i686-apple-darwin8.9.1
 	HOSTTYPE="MacOSX"
-	CFLAGS="$CFLAGS -DDARWIN -DMACOSX"
+	CFLAGS="$CFLAGS -DMACOSX"
 	NEEDLARGEFILES="yes"
 	;;
 esac
@@ -558,10 +542,25 @@ AM_CONDITIONAL([BUILD_MACOSX],  [test "$HOSTTYPE" = "MacOSX"])
 AM_CONDITIONAL([BUILD_MINGW32], [test "$HOSTTYPE" = "Mingw32"])
 AM_CONDITIONAL([BUILD_CYGWIN],  [test "$HOSTTYPE" = "Cygwin"])
 
+dnl --------------------------------------------------------------
+dnl Checks for libraries.
+dnl --------------------------------------------------------------
+if test "${enable_gui}" = "yes" ; then
+	SDL_VERSION=1.2.5
+	AM_PATH_SDL($SDL_VERSION,   :,  AC_MSG_ERROR([*** SDL version $SDL_VERSION not found!])	)
+	if test "$HOSTTYPE" = "Cygwin" -a "${worldsens_sum}" != no ; then
+		AC_MSG_NOTICE([stripping MinGW cruft from SDL_CFLAGS/_LIBS for Worldsens on Cygwin])
+		SDL_CFLAGS="$(echo "$SDL_CFLAGS" | sed -e 's,-I/usr/include/mingw,,;s,-mno-cygwin,,;s,-Dmain=SDL_main,,' )"
+		SDL_LIBS="$(echo "$SDL_LIBS" | sed -e 's,-lmingw32,,;s,-mno-cygwin,,;s,-mwindows,,;s,-lSDLmain,,' )"
+	fi
+	CFLAGS="$CFLAGS $SDL_CFLAGS"
+	EXTRALIBS="$EXTRALIBS $SDL_LIBS"
+fi
+
 dnl Wextra && Werror
 dnl ================
 CFLAGS_save="${CFLAGS}"
-AC_ARG_ENABLE([waou],AC_HELP_STRING([--enable-waou],[Wextra Werror mode (default disabled)]))
+AC_ARG_ENABLE([waou],AS_HELP_STRING([--enable-waou],[Wextra Werror mode (default disabled)]))
 if test "${enable_waou}" = "yes"; then
     if test "${HOSTTYPE}" != "Cygwin" ; then
        CFLAGS="$CFLAGS -Wextra -Werror"
@@ -579,8 +578,9 @@ dnl --------------------------------------------------------------
 dnl 
 
 LIBS=${EXTRALIBS}
-echo "EXTRALIBS ${EXTRALIBS}"
-echo "EXTRAOBJS ${EXTRAOBJS}"
+
+AC_MSG_NOTICE(EXTRALIBS=${EXTRALIBS})
+AC_MSG_NOTICE(EXTRAOBJS=${EXTRAOBJS})
 
 AC_SUBST(EXTRALIBS)
 AC_SUBST(EXTRAOBJS)
@@ -652,18 +652,20 @@ if test ${NPLATFORM} -eq 0 ; then
 	AC_MSG_NOTICE([== --------------------------------------------------- ==])
 fi
 
-echo ""
-echo "Configuration summary:"
-echo ""
-echo "        host         : ${host}"
-echo "        host type    : $HOSTTYPE"
-echo "        target(s)    : $PLATFORMNAMES"
-echo "        wsim debug   : ${debug_sum}"
-echo "        target debug : ${xdebug_sum}"
-echo "        Etrace       : ${etrace_sum}"
-echo "        Elf loader   : ${elf_sum}"
-echo "        SDL gui      : ${sdl_sum}"
-echo "        zlib         : ${zlib_sum}"
-echo "        Ptty         : ${ptty_sum}"
-echo "        WorldSens    : ${worldsens_sum}"
-echo ""
+AC_MSG_NOTICE([
+
+
+Configuration summary:
+
+        host         : ${host}
+        host type    : $HOSTTYPE
+        target(s)    : $PLATFORMNAMES
+        wsim debug   : ${debug_sum}
+        target debug : ${xdebug_sum}
+        Etrace       : ${etrace_sum}
+        Elf loader   : ${elf_sum}
+        SDL gui      : ${sdl_sum}
+        zlib         : ${zlib_sum}
+        Ptty         : ${ptty_sum}
+        WorldSens    : ${worldsens_sum}
+])

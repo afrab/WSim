@@ -258,7 +258,7 @@ uint16_t msp430_adc12_sample_input(int hw_channel_x)
 #if !defined(WIN32)
       sample = random();
 #else
-      sample = 0xdead;
+      sample = rand();
 #endif
       break;
 

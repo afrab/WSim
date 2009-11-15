@@ -365,7 +365,7 @@ int worldsens_c_connect(void)
       return -1;
     }
 	
-#if !defined(LINUX) && !defined(WIN32) && !defined(WINDOWS)
+#if !defined(LINUX) && !defined(__CYGWIN__) && !defined(_WIN32)
   /* Allow several bindings */
   if (setsockopt(WSENS_MULTICAST, SOL_SOCKET, SO_REUSEPORT, &on, sizeof(on)) != 0 ) 
     {
@@ -390,7 +390,7 @@ int worldsens_c_connect(void)
     }
 	
   /* Join */
-#if defined(WIN32)
+#if defined(_WIN32)
   if ((mreq.imr_multiaddr.s_addr = inet_addr(mul_addr)) == INADDR_NONE )
 #else
   if (inet_aton(mul_addr, &mreq.imr_multiaddr) == 0) 
@@ -443,7 +443,7 @@ int worldsens_c_connect(void)
 	
   /* Connect */	
   addr.sin_port = htons(srv_port);
-#if defined(WIN32)
+#if defined(_WIN32)
   if ((addr.sin_addr.s_addr = inet_addr(srv_addr)) == INADDR_NONE )
 #else
   if (inet_aton(srv_addr, &addr.sin_addr) == 0) 
@@ -873,8 +873,8 @@ static ssize_t worldsens_packet_send(int fd, char* msg, size_t len, int flags, i
     {
       ERROR("===================================================\n");
       ERROR("= worldsens:send error - %s\n", strerror(errno));
-      ERROR("= fd=%d, msg=0x%"PRIx64", len=%ld, slen=%ld, flags=%d, dump=%d\n", 
-	    fd, (long unsigned int)msg, len, slen, flags, dump); 
+      ERROR("= fd=%d, msg=0x%"PRIxPTR", len=%lu, slen=%ld, flags=%d, dump=%d\n", 
+	    fd, (uintptr_t)msg, (long unsigned)len, (long)slen, flags, dump); 
       ERROR("= current time = %"PRIu64" ns\n",MACHINE_TIME_GET_NANO());
       ERROR("===================================================\n");
       perror("worldsens_packet_send");
@@ -901,8 +901,8 @@ static ssize_t worldsens_packet_recv(int fd, char* msg, size_t len, int flags, i
     {
       ERROR("===================================================\n");
       ERROR("= worldsens:recv error - %s\n", strerror(errno));
-      ERROR("= fd=%d, msg=0x%"PRIx64", len=%ld, srec=%ld, flags=%d, dump=%d\n", 
-	    fd, (long unsigned int)msg, len, srec, flags, dump); 
+      ERROR("= fd=%d, msg=0x%"PRIxPTR", len=%lu, srec=%ld, flags=%d, dump=%d\n", 
+	    fd, (uintptr_t)msg, (unsigned long)len, (long)srec, flags, dump); 
       ERROR("= current time = %"PRIu64" ns\n",MACHINE_TIME_GET_NANO());
       ERROR("===================================================\n");
       perror("worldsens_packet_recv");

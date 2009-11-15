@@ -277,7 +277,7 @@ worldsens_s_connect (struct _worldsens_s *worldsens, struct sockaddr_in *addr,
   struct _worldsens_s_connect_pkt s_pkt;
   int pktlength = sizeof (struct _worldsens_s_connect_pkt);
 
-  WSNET_S_DBG_DBG ("WSNET:: <-- CONNECT (ip: %d)\n", ntohl (c_pkt->node));
+  WSNET_S_DBG_DBG ("WSNET:: <-- CONNECT (ip: %"PRIu32")\n", ntohl (c_pkt->node));
 
   if (node_create (ntohl (c_pkt->node)))
     {
@@ -308,7 +308,7 @@ worldsens_s_connect (struct _worldsens_s *worldsens, struct sockaddr_in *addr,
       return -1;
     }
 
-  WSNET_S_DBG_DBG ("WSNET:: --> ATTRADDR (seq: %d, ip: %d) global time %"PRId64"\n",
+  WSNET_S_DBG_DBG ("WSNET:: --> ATTRADDR (seq: %"PRIu32", ip: %"PRIu32") global time %"PRId64"\n",
 		   ntohl (s_pkt.pkt_seq), ntohl (c_pkt->node), ntohll(s_pkt.cnx_time));
   WSNET_S_DBG_DBG ("WSNET:: --> RP (seq: %d, rp_seq: %d, period: %"PRId64 ")\n", 
 		   pkt_seq, worldsens->rp_seq, worldsens->rp - get_global_time());
@@ -326,7 +326,7 @@ worldsens_s_disconnect (struct _worldsens_s UNUSED * worldsens,
 {
   struct _worldsens_c_disconnect_pkt *pkt =
     (struct _worldsens_c_disconnect_pkt *) msg;
-  WSNET_S_DBG_DBG ("WSNET:: <-- DISCONNECT (ip: %d)\n", ntohl (pkt->node));
+  WSNET_S_DBG_DBG ("WSNET:: <-- DISCONNECT (ip: %"PRIu32")\n", ntohl (pkt->node));
   return node_delete (ntohl (pkt->node));
 }
 
@@ -441,7 +441,7 @@ worldsens_s_listen_to_next_rp (struct _worldsens_s *worldsens)
 		      && (p_loop->seq == ntohl (pkt->pkt_seq)))
 		    {
 		      /* Retransmission */
-		      WSNET_S_DBG_EXC ("WSNET:: <--  Retransmit tx (ip: %d, seq: %d)\n",
+		      WSNET_S_DBG_EXC ("WSNET:: <--  Retransmit tx (ip: %d, seq: %"PRIu32")\n",
 				       node->addr, ntohl (pkt->pkt_seq));
 		      drop = 1;
 		      break;

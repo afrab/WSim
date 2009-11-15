@@ -99,9 +99,6 @@ char* host_signal_str(int sig)
   static char buff[SIG_NAME_MAX];
 
 #if defined(FUNC_STRSIGNAL_DEFINED)
-#     if !defined(strsignal)
-      char *strsignal (int sig);
-#     endif
   strcpy(buff,strsignal(sig));
 #else
   // sprintf(buff,"%d",sig);
@@ -141,7 +138,7 @@ static char* mcu_single_signal_str(uint32_t sig)
     case SIG_HOST           : return "SIG_HOST";
     case SIG_MAC            : return "SIG_MAC";
     default                 : 
-      sprintf(sig_unknown,"unknown %x",sig);
+      snprintf(sig_unknown, sizeof(sig_unknown), "unknown %"PRIx32, sig);
       return sig_unknown;
     }
 }

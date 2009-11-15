@@ -61,6 +61,17 @@
 	      </TD>
 	    </TR>
 
+	    <TR align="middle" bgcolor="#ffffff">
+	      <TD> <b>Using WSim and WSnet full featured</b> </TD>
+	      <TD> How to use WSim with the full featured WSNet simulator.</TD>
+	      <TD> 
+		<a href="./tutorials/wsim-wsnet/index.html" > <!-- target="_new"> -->
+		  <img style="border: 0px solid ; width: 44px; height: 48px;" 
+		    src="./figures/html.png" alt="" />
+		</a> 
+	      </TD>
+	    </TR>
+
 	  </TABLE> 
 	  
   </div>

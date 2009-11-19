@@ -113,7 +113,7 @@ int cc1100_rx_filter(struct _cc1100_t *cc1100, double frequency, int modulation,
       if      (MACHINE_TIME_GET_NANO() <  /* too early */
 	       (cc1100->rx_io_timer - CC1100_SYNCHRO_DELAY_THRESHOLD))
 	{
-	  CC1100_DBG_RX("cc1100:rx:filter:node %d: dropping received data [0x%02x,%c], early synchro io_timer:%lld > time:%lld (diff=%lld, dur=%lld)\n", 
+	  CC1100_DBG_RX("cc1100:rx:filter:node %d: dropping received data [0x%02x,%c], early synchro io_timer:%"PRIu64" > time:%"PRIu64" (diff=%"PRId64", dur=%"PRIu64")\n", 
 			machine_get_node_id(), data & 0xff, isprint(data) ? data:'.',
 			cc1100->rx_io_timer,  MACHINE_TIME_GET_NANO(), 
 			cc1100->rx_io_timer - MACHINE_TIME_GET_NANO(), 
@@ -123,7 +123,7 @@ int cc1100_rx_filter(struct _cc1100_t *cc1100, double frequency, int modulation,
       else if (MACHINE_TIME_GET_NANO() > /* too late */
 	       (cc1100->rx_io_timer + CC1100_SYNCHRO_DELAY_THRESHOLD))
 	{
-	  CC1100_DBG_RX("cc1100:rx:filter:node %d: dropping received data [0x%02x,%c], late synchro io_timer:%lld < time:%lld (diff=%lld, dur=%lld)\n", 
+	  CC1100_DBG_RX("cc1100:rx:filter:node %d: dropping received data [0x%02x,%c], late synchro io_timer:%"PRIu64" < time:%"PRIu64" (diff=%"PRId64", dur=%"PRIu64")\n", 
 			machine_get_node_id(), data & 0xff, isprint(data) ? data:'.',
 			cc1100->rx_io_timer,  MACHINE_TIME_GET_NANO(), 
 			MACHINE_TIME_GET_NANO() - cc1100->rx_io_timer,

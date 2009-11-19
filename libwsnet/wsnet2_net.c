@@ -74,7 +74,7 @@ int wsnet_mod_id_map[WSNET_MAX_MODULATIONS] =     {-1,                  /* WSNET
     wsens.l_rp  = MACHINE_TIME_GET_NANO();  \
     wsens.state = WORLDSENS_CLT_STATE_IDLE; \
     machine_state_save();                   \
-    WSNET2_DBG("Libwsnet2:WORLDSENS_SAVE_STATE: Last restoration point sets at %lld\n",wsens.l_rp);	\
+    WSNET2_DBG("Libwsnet2:WORLDSENS_SAVE_STATE: Last restoration point sets at %"PRIu64"\n",wsens.l_rp);	\
 }   
 
 /* ************************************************** */
@@ -499,13 +499,13 @@ int wsnet2_tx(char data, double freq, int mod, double txdB, uint64_t delay, int 
         goto error;
     }
 
-    WSNET2_TX("Libwsnet2:wsnet2_tx: machine time=%lld\n", MACHINE_TIME_GET_NANO());
-    WSNET2_TX("Libwsnet2:wsnet2_tx: wsens last rp=%lld\n", wsens.l_rp);
+    WSNET2_TX("Libwsnet2:wsnet2_tx: machine time=%"PRIu64"\n", MACHINE_TIME_GET_NANO());
+    WSNET2_TX("Libwsnet2:wsnet2_tx: wsens last rp=%"PRIu64"\n", wsens.l_rp);
     WSNET2_TX("Libwsnet2:wsnet2_tx: packet 0x%02x sent\n", data);
     
     /* wait either for backtrack or for new rp */
     wsens.state = WORLDSENS_CLT_STATE_TXING;
-    WSNET2_TX("Libwsnet2:wsnet2_tx: MACHINE_TIME_GET_NANO() + delay < wsens.n_rp? : delay = %lld, wsens.n_rp = %lld\n", delay, wsens.n_rp);
+    WSNET2_TX("Libwsnet2:wsnet2_tx: MACHINE_TIME_GET_NANO() + delay < wsens.n_rp? : delay = %"PRIu64", wsens.n_rp = %"PRIu64"\n", delay, wsens.n_rp);
     while (wsens.state != WORLDSENS_CLT_STATE_IDLE) {
 		
         /* receive */
@@ -662,15 +662,15 @@ static int wsnet2_seq(char *msg) {
     struct _worldsens_s_header *header = (struct _worldsens_s_header *) msg;
 
     if (header->seq > wsens.seq) {
-       ERROR("Libwsnet2:wsnet2_seq: Lost wsens packet (received: %lld while expecting %lld)\n", header->seq, wsens.seq);
+       ERROR("Libwsnet2:wsnet2_seq: Lost wsens packet (received: %"PRIu64" while expecting %"PRIu64")\n", header->seq, wsens.seq);
        return -1;
     }  
     else if (header->seq < wsens.seq) {
-       ERROR("Libwsnet2:wsnet2_seq: Deprecated wsens packet (received: %lld while expecting %lld)\n", header->seq, wsens.seq);
+       ERROR("Libwsnet2:wsnet2_seq: Deprecated wsens packet (received: %"PRIu64" while expecting %"PRIu64")\n", header->seq, wsens.seq);
        return -2;
    }
    wsens.seq++;
-   WSNET2_DBG("Libwsnet2:wsnet2_seq: Packet sequence incremented (seq=%lld)\n", wsens.seq);
+   WSNET2_DBG("Libwsnet2:wsnet2_seq: Packet sequence incremented (seq=%"PRIu64")\n", wsens.seq);
    return 0;
 }
 
@@ -696,7 +696,7 @@ static int wsnet2_published(char *msg) {
    wsens.rpseq = pkt->cnx_rsp_ok.rp_next;
    WORLDSENS_SAVE_STATE();
 
-   WSNET2_BKTRK("Libwsnet2:wsnet2_published: Connect forces a state save at (time:%lld, seq:%d)\n",
+   WSNET2_BKTRK("Libwsnet2:wsnet2_published: Connect forces a state save at (time:%"PRIu64", seq:%d)\n",
 		MACHINE_TIME_GET_NANO(), wsens.seq - 1);
 
    nb_models = pkt->cnx_rsp_ok.n_antenna_id + pkt->cnx_rsp_ok.n_modulation_id + pkt->cnx_rsp_ok.n_measure_id;
@@ -795,7 +795,7 @@ static int wsnet2_backtrack(char *msg) {
        return 0;
    
    if (MACHINE_TIME_GET_NANO() > (wsens.l_rp + pkt->rp_duration)) {
-       WSNET2_BKTRK("Libwsnet2:wsnet2_backtrack: Backtracking to time %lld\n", wsens.l_rp);
+       WSNET2_BKTRK("Libwsnet2:wsnet2_backtrack: Backtracking to time %"PRIu64"\n", wsens.l_rp);
        machine_state_restore();   
    } else {
        WSNET2_BKTRK("Libwsnet2:wsnet2_backtrack: No need to backtrack\n");
@@ -863,7 +863,7 @@ static int wsnet2_rx(char *msg) {
 	       info.modulation = pkt->wsim_mod_id;
 	       info.power_dbm  = ntohdbl(pkt->power_dbm);
 	       info.SiNR       = pkt->sinr;
-	       WSNET2_DBG("Libwsnet2:wsnet2_sr_rx: rxing at time %lld data 0x%02x on antenna %s with power %g dbm\n", MACHINE_TIME_GET_NANO(), pkt->data, wsens.radio[i].antenna, info.power_dbm);
+	       WSNET2_DBG("Libwsnet2:wsnet2_sr_rx: rxing at time %"PRIu64" data 0x%02x on antenna %s with power %g dbm\n", MACHINE_TIME_GET_NANO(), pkt->data, wsens.radio[i].antenna, info.power_dbm);
 	       wsens.radio[i].callback(wsens.radio[i].arg, &info);
 	   }
 	   else {
@@ -902,7 +902,7 @@ static int wsnet2_sr_rx(char *msg) {
 	       info.modulation = pkt->wsim_mod_id;
 	       info.power_dbm  = ntohdbl(pkt->power_dbm);
 	       info.SiNR       = pkt->sinr;
-	       WSNET2_DBG("Libwsnet2:wsnet2_sr_rx: rxing at time %lld data 0x%02x on antenna %s with power %g dbm\n", MACHINE_TIME_GET_NANO(), pkt->data, wsens.radio[i].antenna, info.power_dbm);
+	       WSNET2_DBG("Libwsnet2:wsnet2_sr_rx: rxing at time %"PRIu64" data 0x%02x on antenna %s with power %g dbm\n", MACHINE_TIME_GET_NANO(), pkt->data, wsens.radio[i].antenna, info.power_dbm);
 	       wsens.radio[i].callback(wsens.radio[i].arg, &info);
 	   }
 	   else {
@@ -940,7 +940,7 @@ static int wsnet2_measure_rsp(char *msg) {
     if (pkt->node_id == wsens.id) {
         while ((wsens.measure[i].callback != NULL) && (i < MAX_CALLBACKS)) {
 	    if (pkt->measure_id == wsens.measure[i].id) {
-	        WSNET2_DBG("Libwsnet2:wsnet2_measure_rsp: Measure rsp at time %lld, measure '%s', measure value %g\n", MACHINE_TIME_GET_NANO(), wsens.measure[i].name, pkt->measure_val);
+	        WSNET2_DBG("Libwsnet2:wsnet2_measure_rsp: Measure rsp at time %"PRIu64", measure '%s', measure value %g\n", MACHINE_TIME_GET_NANO(), wsens.measure[i].name, pkt->measure_val);
 		wsens.measure[i].callback(wsens.measure[i].arg, pkt->measure_val);
 	    }
 	    i++;
@@ -967,7 +967,7 @@ static int wsnet2_measure_sr_rsp(char *msg) {
     if (pkt->node_id == wsens.id) {
         while ((wsens.measure[i].callback != NULL) && (i < MAX_CALLBACKS)) {
 	    if (pkt->measure_id == wsens.measure[i].id) {
-	      WSNET2_DBG("Libwsnet2:wsnet2_measure_sr_rsp: Measure rsp at time %lld, measure '%s', measure value %g\n", MACHINE_TIME_GET_NANO(), wsens.measure[i].name, pkt->measure_val);
+	      WSNET2_DBG("Libwsnet2:wsnet2_measure_sr_rsp: Measure rsp at time %"PRIu64", measure '%s', measure value %g\n", MACHINE_TIME_GET_NANO(), wsens.measure[i].name, pkt->measure_val);
 		wsens.measure[i].callback(wsens.measure[i].arg, pkt->measure_val);
 	    }
 	    i++;

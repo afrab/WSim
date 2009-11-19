@@ -70,6 +70,8 @@
 #define SIG_HOST_SIGNAL    0x000000ff
 
 /* signal source identifier */
+#define SIG_WORLDSENS_KILL 0x00008000
+
 #define SIG_MCU            0x00010000 /* mcu internal signal     */
 #define SIG_RUN_INSN       0x00020000 /* insn mode               */
 #define SIG_RUN_TIME       0x00040000 /* time mode               */

@@ -609,11 +609,11 @@ static int opcode_cpi(uint16_t opcode, uint16_t insn)
   Rd = MCU_REGS[dd];
   R  = Rd - K;
   
-  WRITE_H((BIT3n(Rd) & BIT3_(K))  |  (BIT3_(K) & BIT3_(R))  |  (BIT3_(R) & BIT3n(Rd)));
-  WRITE_V((BIT7_(Rd) & BIT7n(K) & BIT7n(R)) | (BIT7n(Rd) & BIT7_(K) & BIT7_(R)));
+  WRITE_H(((BIT3n(Rd)) & (BIT3_(K)))  |  ((BIT3_(K)) & (BIT3_(R)))  |  ((BIT3_(R)) & (BIT3n(Rd))));
+  WRITE_V(((BIT7_(Rd)) & (BIT7n(K)) & (BIT7n(R))) | ((BIT7n(Rd)) & (BIT7_(K)) & (BIT7_(R))));
   WRITE_N(BIT7_(R));
   WRITE_Z(R == 0);
-  WRITE_C((BIT7n(Rd) & BIT7_(K)) | (BIT7_(K) & BIT7_(R)) | (BIT7_(R) & BIT7n(Rd)));
+  WRITE_C(((BIT7n(Rd)) & (BIT7_(K))) | ((BIT7_(K)) & (BIT7_(R))) | ((BIT7_(R)) & (BIT7n(Rd))));
   WRITE_S(READ_N ^ READ_V);
 
   atmega128_print_SR();
@@ -638,11 +638,11 @@ static int opcode_cpc(uint16_t opcode, uint16_t insn)
   C  = READ_C;
   R  = Rd - Rr - C;
   // same tests as CP
-  WRITE_H((BIT3n(Rd) & BIT3_(Rr)) | (BIT3_(Rr) & BIT3_(R)) | (BIT3_(R) & BIT3n(Rd)));
-  WRITE_V((BIT7_(Rd) & BIT7n(Rr) & BIT7n(R)) | (BIT7n(Rd) & BIT7_(Rr) & BIT7_(R)));
+  WRITE_H(((BIT3n(Rd)) & (BIT3_(Rr))) | ((BIT3_(Rr)) & (BIT3_(R))) | ((BIT3_(R)) & (BIT3n(Rd))));
+  WRITE_V(((BIT7_(Rd)) & (BIT7n(Rr)) & (BIT7n(R))) | ((BIT7n(Rd)) & (BIT7_(Rr)) & (BIT7_(R))));
   WRITE_N(BIT7_(R));
   WRITE_Z(R == 0);
-  WRITE_C((BIT7n(Rd) & BIT7_(Rr)) | (BIT7_(Rr) & BIT7_(R)) | (BIT7_(R) & BIT7n(Rd)));
+  WRITE_C(((BIT7n(Rd)) & (BIT7_(Rr))) | ((BIT7_(Rr)) & (BIT7_(R))) | ((BIT7_(R)) & (BIT7n(Rd))));
   WRITE_S(READ_N ^ READ_V);
 
   atmega128_print_SR();
@@ -979,11 +979,11 @@ static int opcode_cp(uint16_t opcode, uint16_t insn)
   Rr = MCU_REGS[rr];
   R  = Rd - Rr;
   // same tests as CPC
-  WRITE_H((BIT3n(Rd) & BIT3_(Rr)) | (BIT3_(Rr) & BIT3_(R)) | (BIT3_(R) & BIT3n(Rd)));
-  WRITE_V((BIT7_(Rd) & BIT7n(Rr) & BIT7n(R)) | (BIT7n(Rd) & BIT7_(Rr) & BIT7_(R)));
+  WRITE_H(((BIT3n(Rd)) & (BIT3_(Rr))) | ((BIT3_(Rr)) & (BIT3_(R))) | ((BIT3_(R)) & (BIT3n(Rd))));
+  WRITE_V(((BIT7_(Rd)) & (BIT7n(Rr)) & (BIT7n(R))) | ((BIT7n(Rd)) & (BIT7_(Rr)) & (BIT7_(R))));
   WRITE_N(BIT7_(R));
   WRITE_Z(R == 0);
-  WRITE_C((BIT7n(Rd) & BIT7_(Rr)) | (BIT7_(Rr) & BIT7_(R)) | (BIT7_(R) & BIT7n(Rd)));
+  WRITE_C(((BIT7n(Rd)) & (BIT7_(Rr))) | ((BIT7_(Rr)) & (BIT7_(R))) | ((BIT7_(R)) & (BIT7n(Rd))));
   WRITE_S(READ_N ^ READ_V);
   
   atmega128_print_SR();
@@ -1007,11 +1007,11 @@ static int opcode_subi(uint16_t opcode, uint16_t insn)
   R  = Rd - K;
   MCU_REGS[dd] = R;
 
-  WRITE_H((BIT3n(Rd) & BIT3_(K))  |  (BIT3_(K) & BIT3_(R))  |  (BIT3_(R) & BIT3n(Rd)));
-  WRITE_V((BIT7_(Rd) & BIT7n(K) & BIT7n(R)) | (BIT7n(Rd) & BIT7_(K) & BIT7_(R)));
+  WRITE_H(((BIT3n(Rd)) & (BIT3_(K)))  |  ((BIT3_(K)) & (BIT3_(R)))  |  ((BIT3_(R)) & (BIT3n(Rd))));
+  WRITE_V(((BIT7_(Rd)) & (BIT7n(K)) & (BIT7n(R))) | ((BIT7n(Rd)) & (BIT7_(K)) & (BIT7_(R))));
   WRITE_N(BIT7_(R));
   WRITE_Z(R == 0);
-  WRITE_C((BIT7n(Rd) & BIT7_(K)) | (BIT7_(K) & BIT7_(R)) | (BIT7_(R) & BIT7n(Rd)));
+  WRITE_C(((BIT7n(Rd)) & (BIT7_(K))) | ((BIT7_(K)) & (BIT7_(R))) | ((BIT7_(R)) & (BIT7n(Rd))));
   WRITE_S(READ_N ^ READ_V);
 
   atmega128_print_SR();

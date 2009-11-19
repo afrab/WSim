@@ -261,6 +261,7 @@ inline void machine_run_free(void)
 
 #define TEST_SIGNAL_EXIT(sig)						\
   ((sig & SIG_CON_IO)                           )  ||			\
+  ((sig & SIG_WORLDSENS_KILL)                   )  ||			\
   ((sig & SIG_MCU)    && (sig & SIG_MCU_ILL)    )  ||			\
   ((sig & SIG_HOST)   && (sig & SIG_HOST_SIGNAL))
 

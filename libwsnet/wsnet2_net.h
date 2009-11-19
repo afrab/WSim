@@ -24,6 +24,7 @@
 #define WORLDSENS_CLT_STATE_PENDING       3
 #define WORLDSENS_CLT_STATE_TXING         4
 #define WORLDSENS_CLT_STATE_RXING         5
+#define WORLDSENS_CLT_STATE_KILLED        6
 
 /**************************************************************************/
 /**************************************************************************/

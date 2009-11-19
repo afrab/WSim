@@ -401,7 +401,7 @@ int worldsens_packet_dump(union _worldsens_pkt *msg)
 	VERBOSE(VLVL,"%s:%s:pkt:    node id %d\n",              SOFT, DIRECTION2, pkt->node_id);
 	VERBOSE(VLVL,"%s:%s:pkt:    antenna %lld\n",            SOFT, DIRECTION2, pkt->antenna_id);
 	VERBOSE(VLVL,"%s:%s:pkt:    wsim modulation %lld\n",    SOFT, DIRECTION2, pkt->wsim_mod_id);
-	VERBOSE(VLVL,"%s:%s:pkt:    frequence %f\n",            SOFT, DIRECTION2, pkt->freq);
+	VERBOSE(VLVL,"%s:%s:pkt:    frequence %g\n",            SOFT, DIRECTION2, pkt->freq);
 	VERBOSE(VLVL,"%s:%s:pkt:    power %g dbm\n",            SOFT, DIRECTION2, pkt->power_dbm);
 	VERBOSE(VLVL,"%s:%s:pkt:    sinr %g\n",                 SOFT, DIRECTION2, pkt->sinr);
 	VERBOSE(VLVL,"%s:%s:pkt:    data 0x%02x\n",             SOFT, DIRECTION2, pkt->data);

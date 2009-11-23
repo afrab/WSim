@@ -9,6 +9,7 @@
 #define WORLDSENS_PKT_H
 
 #include <stdint.h>
+#include <inttypes.h>
 
 #define __PACKED__  __attribute__((packed))
 

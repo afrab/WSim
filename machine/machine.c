@@ -282,6 +282,10 @@ uint64_t machine_run_insn(uint64_t insn)
   uint32_t sig;
   uint64_t i;
   HW_DMSG_MACH("machine: will run for %" PRIu64 " instructions\n",insn);
+
+  mcu_signal_add(SIG_RUN_INSN);
+  machine_state_save();
+
   for(i=0; i < insn; i++)
     {
       mcu_signal_add(SIG_RUN_INSN);
@@ -309,6 +313,10 @@ wsimtime_t machine_run_time(wsimtime_t nanotime)
 {
   uint32_t sig;
   HW_DMSG_MACH("machine: will run for %" PRIu64 " nano seconds\n",nanotime);
+
+  mcu_signal_add(SIG_RUN_TIME);
+  machine_state_save();
+
   while (MACHINE_TIME_GET_NANO() < nanotime)
     {
       mcu_signal_add(SIG_RUN_TIME);

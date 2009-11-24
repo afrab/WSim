@@ -35,11 +35,11 @@ int gdbremote_getcmd(struct gdbremote_t *gdb);
 /* ************************************************** */
 
 /* Serial remote protocol commands / replies  */
-#define NO_DEBUG_SRP_PROTO 1
+#define DEBUG_SRP_PROTO 1
 /* GDB detailed debug of commands and actions */
-#define NO_DEBUG_GDB_CMD   1
+#define DEBUG_GDB_CMD   1
 /* verbose levels                             */
-#define GDB_VERB_LEVEL  4
+#define GDB_VERB_LEVEL  9
 
 
 #if defined(DEBUG_SRP_PROTO)

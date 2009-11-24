@@ -25,7 +25,7 @@
 /* ************************************************** */
 
 #define GDB_CMD_BUFFER_SIZE     2048
-#define HW_BREAKPOINT_SUPPORT      1
+//#define HW_BREAKPOINT_SUPPORT      1
 
 /* ************************************************** */
 /* ************************************************** */
@@ -247,25 +247,28 @@ static void gdbremote_getsectionoffsets(struct gdbremote_t *gdb)
   char tmp_buffer[GDB_CMD_BUFFER_SIZE] = "";
   char ret_buffer[GDB_CMD_BUFFER_SIZE] = "";
 
+  strcpy(ret_buffer,"");
+
   if ((i = libelf_get_section_offset("text")) >= 0)
     {
       sprintf(tmp_buffer,"Text=%08x",i);
+      strcat(ret_buffer,tmp_buffer);
     }
-  strcat(ret_buffer,tmp_buffer);
 
   if ((i = libelf_get_section_offset("data")) >= 0)
     {
       sprintf(tmp_buffer,";Data=%08x",i);
+      strcat(ret_buffer,tmp_buffer);
     }
-  strcat(ret_buffer,tmp_buffer);
 
   if ((i = libelf_get_section_offset("bss")) >= 0)
     {
       sprintf(tmp_buffer,";Bss=%08x",i);
+      strcat(ret_buffer,tmp_buffer);
     }
-  strcat(ret_buffer,tmp_buffer);
 
-  gdbremote_putpacket(gdb,ret_buffer);
+  // gdbremote_putpacket(gdb,ret_buffer);
+  DONT_SUPPORT;
 }
 
 /* ************************************************** */
@@ -749,7 +752,9 @@ gdbremote_continue(struct gdbremote_t *gdb, char UNUSED *buffer, int UNUSED size
     {
       machine_run_free();
     }
-  while ((mcu_signal_get() & GDB_STOP_BITMASK) == 0);  /* we stop on anything but WORLDSENS_IO */ 
+  while ((mcu_signal_get() & GDB_STOP_BITMASK) == 0);  
+  /* we stop on anything but WORLDSENS_IO */ 
+
   assert(libselect_fd_unregister(gdb->skt.socket) != -1);
 
   DMSG_GDB("gdbremote: exit continue at 0x%04x with signal = 0x%x (%s)\n",

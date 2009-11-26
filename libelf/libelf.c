@@ -95,7 +95,7 @@ void libelf_dump_section(uint8_t* data, uint32_t addr, uint32_t size, int maxlin
 /***************************************************/
 /***************************************************/
 
-#define SECTION_NUMBER  20
+#define SECTION_NUMBER  30
 #define SECTION_MAXNAME 100
 
 struct section_info_t {

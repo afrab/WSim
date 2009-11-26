@@ -28,9 +28,10 @@
 	    </TR>
 	
 	    <TR align="middle" bgcolor="#ffffff">
-	      <TD> <b>WSim tutorial</b> </TD>
-	      <TD> ICL BSN2 nodes <br><a href="http://www.wasp-project.org/">Wasp project</a>
-		<img style="border: 0px solid ; width: 100px;" src="./figures/logo-wasp-150.png" alt="" />   </TD>
+	      <TD> <b>EU-Wasp WSim tutorial</b> </TD>
+	      <TD> ICL BSN2 nodes for the <a href="http://www.wasp-project.org/">Wasp project</a>
+		<!-- <img style="border: 0px solid ;" src="./figures/logo-wasp-150.png" alt="" /> -->
+	      </TD>
 	      <TD> 
 		<a href="./tutorials/wasp/index.html" > <!-- target="_new"> -->
 		  <img style="border: 0px solid ; width: 44px; height: 48px;" 
@@ -40,7 +41,7 @@
 	    </TR>
 
 	    <TR align="middle" bgcolor="#ffffff">
-	      <TD> <b>msp430 adc12</b> </TD>
+	      <TD> <b>Msp430 ADC12</b> </TD>
 	      <TD> How to use the Ti-MSP430 adc12 in simulation.</TD>
 	      <TD> 
 		<a href="./tutorials/msp430-adc/index.html" > <!-- target="_new"> -->
@@ -51,7 +52,7 @@
 	    </TR>
 
 	    <TR align="middle" bgcolor="#ffffff">
-	      <TD> <b>TinyOS 2.1 and TelosB</b> </TD>
+	      <TD> <b>TinyOS 2.1 on TelosB nodes</b> </TD>
 	      <TD> How to use WSim with TinyOS and TelosB nodes.</TD>
 	      <TD> 
 		<a href="./tutorials/telosb-tinyos/index.html" > <!-- target="_new"> -->

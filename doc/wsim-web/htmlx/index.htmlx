@@ -5,8 +5,9 @@
 
   <div id="main-body">
     <br />
-<!--      <div align="center"><img src="./figures/wsim-logo.jpg" alt="" width="660" height="159" /></div>  -->
-      <div align="center"><img src="./figures/dist_simul.png" alt="" width="80%" /></div> 
+      <div align="center"><img src="./figures/wsim-logo2.jpg" alt="[WSim]"/></div>  
+      <br />
+      <div align="center"><img src="./figures/dist_simul2.jpg" alt="[Simulation Tools]"/></div> 
       
       <b><i>Features:</i></b>
       <ul>

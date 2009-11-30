@@ -39,5 +39,7 @@ int mcugen_mcu_create(int freq);
 #define MCU_MODEL_NAME  "mv3"
 #define MCU_ARCH_ID     0 /* libelf arch ID */
 #define MCU_MACH_ID     0
+#define MCU_INSN_CPT    0
+#define MCU_CYCLE_CPT   0
 
 #endif

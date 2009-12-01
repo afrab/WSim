@@ -6,7 +6,7 @@ dnl --------------------------------------------------------------
 AC_INIT([worldsens-tracer],[0.8svn])
 AC_CONFIG_SRCDIR(src/main.c)
 AC_CANONICAL_TARGET
-AM_INIT_AUTOMAKE
+AM_INIT_AUTOMAKE([foreign])
 AM_CONFIG_HEADER([config.h])
 
 dnl --------------------------------------------------------------

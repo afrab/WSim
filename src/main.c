@@ -190,12 +190,25 @@ static void main_end(enum wsim_end_mode_t mode)
 /* ************************************************** */
 /* ************************************************** */
 
+#ifdef _WIN32
+#include <windows.h>
+#include <winsock.h>
+#endif
+
 /**
  * main : program entry point
  **/
 int main(int argc, char* argv[])
 {
 
+#ifdef _WIN32
+	{
+		WSADATA data;
+		WSAStartup(MAKEWORD(2,0), &data);
+	}
+#endif
+#undef ERROR
+	
   /* options */
   options_start();
   ui_options_add();

@@ -279,7 +279,7 @@ struct PACKED _worldsens_data
 /**************************************************************************/
 
 int worldsens_c_initialize (struct _worldsens_c *worldsens, 
-			    char *s_addr, uint16_t s_port, 		 
+			    char *_s_addr, uint16_t s_port, 		 
 			    char *m_addr, uint16_t m_port,
 			    int my_addr,
 			    callback_rx_t callback_rx, 

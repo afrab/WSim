@@ -39,11 +39,19 @@ int sim_config(void)
     {
       struct timeval tp;
       gettimeofday(&tp, NULL);
+#ifdef _WIN32
+      srand(tp.tv_sec + tp.tv_usec);
+#else
       srand48(tp.tv_sec + tp.tv_usec);
+#endif
     } 
   else 
     {
+#ifdef _WIN32
+      srand(g_seed);
+#else
       srand48(g_seed);
+#endif
     }
 	
 	

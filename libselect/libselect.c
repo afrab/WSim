@@ -17,6 +17,10 @@
 #include <inttypes.h>
 #include <fcntl.h>
 
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
 #if defined(__MINGW32__)
   #include <winsock2.h>
 #else
@@ -82,7 +86,8 @@ enum entry_type_t {
   ENTRY_TCP        = 2,
   ENTRY_TCP_SRV    = 3,
   ENTRY_UDP        = 4,
-  ENTRY_FD_ONLY    = 5
+  ENTRY_FD_ONLY    = 5,
+  ENTRY_WIN32_PIPE,
 };
 
 struct libselect_entry_t {
@@ -206,6 +211,7 @@ int libselect_update_registered()
 	case ENTRY_TCP_SRV:
 	case ENTRY_UDP:
 	case ENTRY_FD_ONLY:
+	case ENTRY_WIN32_PIPE:
 	  if (libselect.entry[id].registered)
 	    {
 	      /* *DMSG("wsim:libselect:update: add id=%d fd=%d\n",id,libselect.entry[id].fd_in); */
@@ -245,6 +251,7 @@ int libselect_update_registered()
 	    case ENTRY_FILE:
 	    case ENTRY_UDP:
 	    case ENTRY_TCP:
+	    case ENTRY_WIN32_PIPE:
 	      switch (n = read(fd_in,buffer,BUFFER_MAX)) 
 		{
 		case -1:
@@ -399,6 +406,24 @@ libselect_id_t libselect_id_create(char *argname, int UNUSED flags)
       libselect.entry[id].fd_in      = libselect.entry[id].skt.socket;
       libselect.entry[id].fd_out     = libselect.entry[id].skt.socket;;
     }
+#ifdef _WIN32
+  else if (strstr(cmdline,"pipe:") == cmdline)
+    {
+      char szPipe[MAX_PATH] = {0,};
+      _snprintf(szPipe, sizeof(szPipe), "\\\\.\\pipe\\%s", cmdline + 5);
+      HANDLE hPipe = CreateNamedPipe(szPipe, PIPE_ACCESS_DUPLEX, PIPE_TYPE_BYTE, 1, 32768, 32768, INFINITE, NULL);
+      if (hPipe == INVALID_HANDLE_VALUE)
+	{
+	  ERROR("wsim:libselect: Cannot create named pipe %s\n", szPipe);
+	  return -1;
+	}
+      ConnectNamedPipe(hPipe, NULL);
+      
+      libselect.entry[id].entry_type = ENTRY_WIN32_PIPE;
+      //libselect.entry[id].fd_in      = (int)hPipe;
+      libselect.entry[id].fd_out     = (int)hPipe;
+    }
+#endif
   else if (strcmp(cmdline,"stdio") == 0)
     {
       libselect.entry[id].entry_type = ENTRY_FILE;
@@ -488,6 +513,8 @@ int libselect_id_close(libselect_id_t id)
       break;
     case ENTRY_FD_ONLY:
       ERROR("wsim:libselect:close: cannot close id %d of type FD_ONLY\n",id);
+      return 1;
+    case ENTRY_WIN32_PIPE:
       return 1;
     }
 
@@ -615,7 +642,12 @@ uint32_t libselect_id_write(libselect_id_t id, uint8_t *data, uint32_t size)
 	}
       else
 	{
-	  ret = write(libselect.entry[id].fd_out, data, size);
+#ifdef _WIN32
+	  if (libselect.entry[id].entry_type == ENTRY_WIN32_PIPE)
+	    WriteFile((HANDLE)libselect.entry[id].fd_out, data, size, (DWORD *)&ret, NULL);
+	  else
+#endif
+	    ret = write(libselect.entry[id].fd_out, data, size);
 	  DMSG("wsim:libselect: WRITE %d bytes to id=%d, fd=%d, val=%c\n",
 		  size, id, libselect.entry[id].fd_out,
 		  isprint(data[0]) ? data[0] : '.');

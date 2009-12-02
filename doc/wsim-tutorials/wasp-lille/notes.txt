@@ -1,0 +1,83 @@
+%% -*-outline-*-
+
+* ==================================================
+* Config
+* ==================================================
+
+  ~/.config/go
+
+  go_wasp
+
+* ==================================================
+* Installer la chaine de Compil
+* ==================================================
+dans /comb/trunk/firmware/toolchain/scripts
+sh buildgcc.sh
+export PATH=$PATH:/opt/(path to mspgcc reported by buildgcc)
+cd (svn root)/comb/trunk/firmware/apps/samples/01_blink_led
+make && make program
+
+
+récupérer GDB (linux)
+récupérer Insight
+donner le script déjà préparé pour avoir insight.
+
+faire un tar pour linux. 
+
+Pour windows les gens se démerdent.
+Pour MacOSX les gens se démerdent.
+
+* ==================================================
+* Compiler MantisOS
+* ==================================================
+
+build bsn2 before bsn so that the former script will run autogen.sh
+
+dans /comb/trunk/systems/MANTIS_OS/trunk/build/bsn2
+   chmod 755 configure 
+   ./configure --optimize 
+   make
+  
+dans /comb/trunk/systems/MANTIS_OS/trunk/build/bsn
+   ./configure --optimize
+   make
+
+Ecrire le script de simulation.
+
+first run dans build/bsn2.
+  simul.sh src/apps/blink_led/blink.elf
+
+
+* ==================================================
+* Compiler WaspOS
+* ==================================================
+
+racine du système:
+==================
+  /comb/trunk/firmware/lib/core/
+
+applications d'exemple:
+=======================
+exemples dans /comb/trunk/firmware/apps/samples/01_blink_led/
+compile l'exemple pour les BSN
+
+pour changer de plateforme :
+
+  dans /comb/trunk/firmware/makesystem/mantis/compiler.inc
+changer
+  
+  MSP430_MCU_TYPE=msp430x149
+  MOS_BIN=$(MOS_ROOT)/build/bsn
+
+  to:
+
+  MSP430_MCU_TYPE=msp430x1611
+  MOS_BIN=$(MOS_ROOT)/build/bsn2
+
+
+
+* ==================================================
+* Debug 
+* ==================================================
+
+mentionner le bug dans gdb sur le next/step dans le debug.

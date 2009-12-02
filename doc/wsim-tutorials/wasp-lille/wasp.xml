@@ -1,0 +1,1048 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" 
+    "/usr/share/xml/docbook/schema/dtd/4.5/docbookx.dtd">
+
+<book lang="en">
+  <bookinfo>
+    <title>WSim Wasp tutorial, Lille Meeting</title>
+    <subtitle>
+      <inlinemediaobject>
+	<imageobject>
+	  <imagedata align="center" width="20%" fileref="figures/logo-wasp.png"/>
+	</imageobject>
+      </inlinemediaobject>
+      MantisOS and WaspOS on ICL BSN2 nodes
+    </subtitle>
+    <date>
+      2009-03-12
+    </date>
+    
+    <authorgroup>
+      <author>
+	<firstname>Antoine</firstname>
+	<surname>Fraboulet</surname>
+	<affiliation>
+	  <orgname>INRIA Rhône Alpes</orgname>
+	  <orgdiv>A4RES Project</orgdiv>
+	  <address>
+	    CITI Laboratory
+	    Domaine Scientifique de la Doua, INSA de Lyon
+	    Bâtiment Claude Chappe 
+	    <street>6, avenue des Arts</street>
+	    <postcode>69621</postcode> <city>Villeurbanne</city> Cedex
+	    <country>France</country>
+	  </address>
+	</affiliation>
+      </author>
+    </authorgroup>
+    <revhistory>
+      <revision>
+	<revnumber>0.0</revnumber><date>2009-03-02</date>
+      </revision>
+      <revision>
+	<revnumber>0.5</revnumber><date>2009-03-08</date>
+      </revision>
+      <revision>
+	<revnumber>0.8</revnumber><date>2009-03-11</date>
+      </revision>
+    </revhistory>
+  </bookinfo>
+
+<!-- ========================================================= -->
+<!-- ========================================================= -->
+<!-- ========================================================= -->
+<!-- ========================================================= -->
+<!-- ========================================================= -->
+<!-- ========================================================= -->
+<!-- ========================================================= -->
+<!-- ========================================================= -->
+  
+  <chapter id="introduction">
+    <title>Introduction</title>
+    <para>This tutorial demonstrates the
+    use of WSim using ICL BSN nodes and the WaspOS.</para>
+
+    <para>
+      <itemizedlist mark="bullet" spacing="normal">
+	<listitem>
+	  <simpara>
+	    WSim <ulink url="http://wsim.gforge.inria.fr/">WSim website</ulink>.
+	  </simpara>
+	</listitem>
+      </itemizedlist>
+    </para>
+
+      <para>
+	To compile WSim please use the following configuration line:
+	<programlisting><computeroutput>configure --enable-ptty --enable-wsnet1 --enable-gui --enable-debug
+make</computeroutput></programlisting>
+      </para>
+
+      <note>
+	<title> Executables</title>
+      <para>
+	The simulators will be located in /platforms/iclbsn/. wsim-[platform] is a simulator
+	for the platform without the network turned on while worldsens-[platform] will require
+	a valid WSNet1 process to connect to.
+	The event tracer (wtracer) and WSNet1 sources are located in the /utils 
+	directory.
+      </para>
+      </note>
+
+    <para>
+      <itemizedlist mark="bullet" spacing="normal">
+	<listitem>
+	  <simpara>
+	    Tutorial  <ulink url="files/wsim-tutorial.pdf">Slides</ulink>.
+	  </simpara>
+	</listitem>
+      </itemizedlist>
+    </para>
+
+<!--     <figure id="logo_wasp"> -->
+<!--        <title>The place of WSim in the development process</title>  -->
+<!--       <mediaobject> -->
+<!-- 	<imageobject> -->
+<!-- 	  <imagedata align="center" fileref="figures/logo-wasp.jpg"/> -->
+<!-- 	</imageobject> -->
+<!--       </mediaobject> -->
+<!--     </figure> -->
+
+  </chapter>
+
+<!-- ========================================================= -->
+<!-- ========================================================= -->
+<!-- ========================================================= -->
+<!-- ========================================================= -->
+<!-- ========================================================= -->
+<!-- ========================================================= -->
+<!-- ========================================================= -->
+<!-- ========================================================= -->
+
+  <chapter id="basics">
+    <title>Simulation basics</title>
+    <sect1>
+
+      <title>Simple example</title>
+      <para>This very short example can test if the toolchain and the simulator 
+      are installed.</para>
+      
+      <figure id="compile">
+	<title>Compile / Test Loop</title>
+	<mediaobject>
+	  <imageobject>
+	    <imagedata align="center" width="90%" fileref="figures/compile.png"/>
+	  </imageobject>
+	</mediaobject>
+      </figure>
+      
+      <para>
+	<programlisting>
+<computeroutput>#include &lt;io.h&gt;
+void wait(unsigned int n)
+{
+  __asm__ __volatile__ (
+                        "1: \n"
+			" dec   %[n] \n"      /* 2 cycles */
+			" jne   1b \n"        /* 2 cycles */
+			: [n] "+r"(n));
+}
+
+int main(void)
+{
+  unsigned char b;
+
+  P5SEL  = 0x00;  // Selector         = 0:GPIO     1:peripheral
+  P5DIR  = 0x70;  // Direction        = 0:input    1:output
+  P5OUT  = 0x00;
+
+  b = 0x10;
+  while (1)
+    {
+      wait(50000);
+      wait(50000);
+      wait(50000);
+      wait(50000);
+
+      P5OUT = b;
+      b &lt;&lt;= 1;
+      if (b == 0x80) b = 0x10;
+    }
+  return 0;
+}</computeroutput></programlisting>
+</para>
+
+<para>The program can be compiled using the following line ...</para>
+  <para>
+    <programlisting><computeroutput>msp430-gcc -mmcu=msp430x1611 main.c -o test.elf</computeroutput></programlisting>
+  </para>
+
+<para>... and used in the simulator using the next one.</para>
+  <para>
+    <programlisting><computeroutput>wsim-iclbsn2 --mode=time --modearg=10s --ui test.elf</computeroutput></programlisting>
+  </para>
+    </sect1>
+
+
+  </chapter>
+
+<!-- ========================================================= -->
+<!-- ========================================================= -->
+<!-- MantisOS ================================================ -->
+<!-- MantisOS ================================================ -->
+<!-- MantisOS ================================================ -->
+<!-- ========================================================= -->
+<!-- ========================================================= -->
+<!-- ========================================================= -->
+
+  <chapter id="mantios">
+    <title>MantisOS</title>
+    <para>MantisOS source code is available in
+    <userinput>/comb/trunk/systems/MANTIS_OS/trunk/</userinput>. A configure
+    script is available in each platform subdirectory to build the system</para>
+    <para> To build a system for BSN2 nodes you have to go to 
+    <userinput>/comb/trunk/systems/MANTIS_OS/trunk/build/bsn2</userinput> and do 
+    <programlisting>
+<computeroutput>chmod 755 configure
+./configure --optimize
+make</computeroutput></programlisting>
+    </para>
+
+    <para>To build a sample application go to
+    <userinput>comb/trunk/systems/MANTIS_OS/trunk/build/bsn2/src/apps</userinput>
+    and <userinput>blink_led</userinput>.
+
+    
+    <programlisting>
+<computeroutput>#! /bin/sh
+WSIM=~/wasp/build/wsim/platforms/iclbsn/wsim-iclbsn2
+
+MODE="--mode=time --modearg=10s"
+
+${WSIM} ${MODE} --ui $1</computeroutput></programlisting>
+    </para>
+
+  </chapter>
+
+<!-- ========================================================= -->
+<!-- ========================================================= -->
+<!-- WaspOS ================================================== -->
+<!-- WaspOS ================================================== -->
+<!-- WaspOS ================================================== -->
+<!-- ========================================================= -->
+<!-- ========================================================= -->
+
+  <chapter id="waspos">
+    <title>WaspOS</title>
+    <para>The repository contains several examples already using the WaspOS API. They can 
+    be found in <userinput>/comb/trunk/firmware/apps/samples/</userinput>
+    </para>
+    <para>examples:
+    <itemizedlist mark="bullet" spacing="normal">
+      <listitem><simpara>01_blink_led</simpara></listitem>
+      <listitem><simpara>02_trace_demo</simpara></listitem>
+      <listitem><simpara>03_mem_demo</simpara></listitem>
+      <listitem><simpara>04_mutex_demo</simpara></listitem>
+      <listitem><simpara>05_sleep_demo</simpara></listitem>
+      <listitem><simpara>06_mq_demo</simpara></listitem>
+      <listitem><simpara>07_mq_demo_cpp</simpara></listitem>
+      <listitem><simpara>08_timer_demo</simpara></listitem>
+    </itemizedlist>
+    </para>
+
+<sect1><title>Blink examples and Wsim main options</title>
+<!-- ========================================================= -->
+<!-- ========================================================= -->
+
+  <para>
+    <programlisting>
+<computeroutput>#! /bin/sh
+WSIM=~/wasp/build/wsim/platforms/iclbsn/wsim-iclbsn2
+
+MODE="--mode=time --modearg=10s"
+
+${WSIM} ${MODE} --ui $1</computeroutput></programlisting>
+  </para>
+
+
+    <figure id="sc01">
+      <title>Sample application Screenshot : 01_blink_led</title>
+      <mediaobject>
+	<imageobject>
+	  <imagedata align="center" fileref="figures/sc_waspos_01.png"/>
+	</imageobject>
+      </mediaobject>
+    </figure>
+
+</sect1>
+
+<sect1><title>WSim logging options and simulation informations</title>
+<!-- ========================================================= -->
+<!-- ========================================================= -->
+
+  <para>
+    <programlisting>
+<computeroutput>#! /bin/sh
+WSIM=~/wasp/build/wsim/platforms/iclbsn/wsim-iclbsn2
+
+LOG="--logfile=wsim.log --verbose=2"
+MODE="--mode=time --modearg=10s"
+
+${WSIM} ${MODE} --ui ${LOG} $1</computeroutput></programlisting>
+  </para>
+
+
+  <para>
+    <programlisting>
+<computeroutput>WSim 0.99.1svn, copyright 2005, 2006, 2007, 2008, 2009
+Laboratoire Citi, INRIA, INSA de Lyon
+A. Fraboulet, G. Chelius, E. Fleury
+wsim:pid:27823
+wsim: 64 bits edition
+mcu   : msp430
+model : msp430f1611
+  xin : 32768
+  xt2 : 0
+wsim:libselect_socket:init: udp:localhost:6000:localhost:7000
+libselect:skt: localhost
+libselect:skt: 6000
+libselect:skt: localhost
+libselect:skt: 7000
+wsim:libselect_socket:init: udp link creation for localhost:6000 to localhost:7000
+wsim:libselect_socket:init: done
+wsim:libselect:create: udp:localhost:6000:localhost:7000, id=0, fd_in=5
+wsim:libselect:register: id=0, fd_in=5
+libelf: file size 212466
+libelf: memory allocation ok
+libelf: opening elf file 01_blink_led/mantis_trace/01_blink_led.elf
+
+libelf:hdr: Elf file header
+libelf:hdr: ident 7f 45 4c 46 01 01 01 ff 00 00 00 00 00 00 00 00 
+libelf:hdr:id: class         1 ELF32
+libelf:hdr:id: data          1 2's LSB
+libelf:hdr:id: version       1
+libelf:hdr:id: abi type    255 Standalone
+libelf:hdr:id: abi version   0
+libelf:hdr:id: pad           0
+libelf:hdr: type    2 Executable
+
+[...]</computeroutput></programlisting>
+  </para>
+
+  <para>
+    <programlisting>
+<computeroutput>[...]
+
+== Machine description
+mcu   : msp430
+model : msp430f1611
+  xin : 32768
+  xt2 : 0
+device list:
+  dev 00 : System Platform
+  dev 01 : Led display
+  dev 02 : Led display
+  dev 03 : Led display
+  dev 04 : at45db flash memory
+  dev 05 : cc2420 radio device
+  dev 06 : ptty serial I/O
+==
+gui:Pixel format 0xfafafa
+gui:Display 212x134x24 
+gui:   3 bytes per pixel, pitch 636
+gui:   mask R 0x00ff0000 G 0x0000ff00 B 0x000000ff A 0x00000000
+gui:   colorkey 0x00000000
+wsim: starting tracer
+msp430:basic_clock: speed tracer start
+cc2420:state: ENTERING VREG_OFF
+machine: will run for 50000000000 nano seconds
+msp430:intr: Interrupt 5 received but GIE = 0 (current PC = 0x435c [29872300])
+iclbsn: writing on port 3 byte 0x0a at PC 0x4c88
+iclbsn: cc2420 CS set to 1
+cc2420:pins:write: from mcu CSn = 1
+iclbsn: writing on port 2 byte 0x10 at PC 0x4ad6
+iclbsn: writing on port 2 byte 0x10 at PC 0x4b04
+iclbsn: writing on port 2 byte 0x00 at PC 0x4b6a
+iclbsn: writing on port 2 byte 0x10 at PC 0x4b7a
+iclbsn: writing on port 2 byte 0x00 at PC 0x4c3a
+iclbsn: writing on port 2 byte 0x10 at PC 0x4c46
+iclbsn: writing on port 2 byte 0x00 at PC 0x4c3a
+iclbsn: writing on port 2 byte 0x10 at PC 0x4c46
+iclbsn: writing on port 2 byte 0x00 at PC 0x4c5e
+
+[...]</computeroutput></programlisting>
+  </para>
+
+  <para>
+    <programlisting><computeroutput>[...]
+
+================
+WSim stats:
+-----------
+  simulation user time          : 18.18401 s (18401150000 ns)
+  simulation backtracks         : 0
+
+Machine stats:
+--------------
+  simulated time                : 50000000266 ns (50.000 s)
+  simulation speedup            : 2.72
+  machine exit with signal      : none
+
+MCU:
+----
+  simulated mcu instructions    : 7932566
+  simulated mcu cycles          : 22287486
+  simulated mcu mean freq       : 445749.72 c/s (0.45 MHz)
+  simulation mean freq          : 1211200.62 c/s (1.21 MHz)
+     - does not take into account sleep modes
+  mcu exit at PC                : 0x5386
+  mcu exit in LPM mode          : LPM0
+  mcu exit with IV              : 0x0000
+
+DEVICES:
+--------
+  - System Platform             :
+  - Led display                 :
+  - Led display                 :
+  - Led display                 :
+  - at45db flash memory         :
+  - cc2420 radio device         :
+  - ptty serial I/O             :
+
+================</computeroutput></programlisting>
+</para>
+
+</sect1>
+
+<sect1><title>WSim execution traces and events</title>
+<!-- ========================================================= -->
+<!-- ========================================================= -->
+
+  <para>
+    <programlisting><computeroutput>#! /bin/sh
+WSIM=~/wasp/build/wsim/platforms/iclbsn/wsim-iclbsn2
+WTRC=~/wasp/build/wtracer/src/wtracer 
+
+LOG="--logfile=wsim.log --verbose=2"
+TRC="--trace=wsim.trc"
+MODE="--mode=time --modearg=10s"
+
+${WSIM} ${MODE} --ui ${LOG} ${TRC} $1
+${WTRC} --in=wsim.trc --out=wsim.vcd --format=vcd</computeroutput></programlisting>
+  </para>
+
+<!--   ScreenShot + Image GTKWave + Explications VCD -->
+
+    <para>
+      <programlisting><computeroutput>gtkwave wsim.vcd</computeroutput></programlisting>
+    </para>
+
+    <figure id="sc01trc">
+      <title>Sample application Screenshot : 01_blink_led, led traces</title>
+      <mediaobject>
+	<imageobject>
+	  <imagedata align="center" width="90%" fileref="figures/sc_gtkwave_01_1.png"/>
+	</imageobject>
+      </mediaobject>
+    </figure>
+
+    <figure id="sc01trc2">
+      <title>Sample application Screenshot : 01_blink_led, traces</title>
+      <mediaobject>
+	<imageobject>
+	  <imagedata align="center" width="90%" fileref="figures/sc_gtkwave_01_2.png"/>
+	</imageobject>
+      </mediaobject>
+    </figure>
+
+    <figure id="sc01trc3">
+      <title>Sample application Screenshot : 01_blink_led, traces (zoom)</title>
+      <mediaobject>
+	<imageobject>
+	  <imagedata align="center" width="90%" fileref="figures/sc_gtkwave_01_3.png"/>
+	</imageobject>
+      </mediaobject>
+    </figure>
+
+    <para>Traces from WSim can also be used to draw plots using
+    <computeroutput>Gnuplot</computeroutput>.
+    The following figure is obtained from the simulation 
+    </para>
+
+  <para>
+    <programlisting><computeroutput>wtracer --in=wsim.trc --format=gplot --out=wsim.gp
+gnuplot &lt; wsim.gp</computeroutput></programlisting>
+  </para>
+
+    <figure id="sc01gplot3">
+      <title>Sample application Screenshot : 01_blink_led, traces (zoom)</title>
+      <mediaobject>
+	<imageobject>
+	  <imagedata align="center" width="90%" fileref="figures/wsim.gp.clk_mclk.png"/>
+	</imageobject>
+      </mediaobject>
+    </figure>
+    
+</sect1>
+
+<sect1><title>Serial port communications and external programs</title>
+<!-- ========================================================= -->
+<!-- ========================================================= -->
+
+    <figure id="sc02">
+      <title>Sample application Screenshot : 02_trace_demo</title>
+      <mediaobject>
+	<imageobject>
+	  <imagedata align="center" width="90%" fileref="figures/sc_waspos_02.png"/>
+	</imageobject>
+      </mediaobject>
+    </figure>
+
+  <para>
+    <programlisting><computeroutput>#! /bin/sh
+WSIM=~/wasp/build/wsim/platforms/iclbsn/wsim-iclbsn2
+WTRC=~/wasp/build/wtracer/src/wtracer 
+
+LOG="--logfile=wsim.log --verbose=2"
+TRC="--trace=wsim.trc"
+SERIAL="--serial1_io=stdout"
+MODE="--mode=time --modearg=10s"
+
+${WSIM} ${MODE} --ui ${LOG} ${TRC} ${SERIAL} $1
+${WTRC} --in=wsim.trc --out=wsim.vcd --format=vcd</computeroutput></programlisting>
+  </para>
+
+  <para>
+    <programlisting><computeroutput>nc -u -p 7000 localhost 6000</computeroutput></programlisting>
+  </para>
+
+    <figure id="sc02stdout">
+      <title>Sample application Screenshot : 02_trace_demo, serial through UDP</title>
+      <mediaobject>
+	<imageobject>
+	  <imagedata align="center" width="90%" fileref="figures/sc_waspos_02_2.png"/>
+	</imageobject>
+      </mediaobject>
+    </figure>
+
+  <para>
+    <programlisting><computeroutput>#! /bin/sh
+WSIM=~/wasp/build/wsim/platforms/iclbsn/wsim-iclbsn2
+WTRC=~/wasp/build/wtracer/src/wtracer 
+
+LOG="--logfile=wsim.log --verbose=2"
+TRC="--trace=wsim.trc"
+#SERIAL="--serial1_io=stdout"
+SERIAL="--serial1_io=udp:localhost:6000:localhost:7000"
+MODE="--mode=time --modearg=10s"
+
+${WSIM} ${MODE} --ui ${LOG} ${TRC} ${SERIAL} $1
+${WTRC} --in=wsim.trc --out=wsim.vcd --format=vcd</computeroutput></programlisting>
+  </para>
+  <para>
+    <programlisting><computeroutput>./bsnmon udp:localhost:7000:localhost:6000</computeroutput></programlisting>
+  </para>
+
+    <figure id="sc02bsnmon">
+      <title>Sample application Screenshot : 02_trace_demo, serial through bsnmon</title>
+      <mediaobject>
+	<imageobject>
+	  <imagedata align="center" width="90%" fileref="figures/sc_waspos_02_3.png"/>
+	</imageobject>
+      </mediaobject>
+    </figure>
+</sect1>
+
+<sect1><title>Step by Step debugging using GDB</title>
+<!-- ========================================================= -->
+<!-- ========================================================= -->
+
+  <para>
+    <programlisting><computeroutput>#! /bin/sh
+WSIM=~/wasp/build/wsim/platforms/iclbsn/wsim-iclbsn2
+WTRC=~/wasp/build/wtracer/src/wtracer 
+
+LOG="--logfile=wsim.log --verbose=2"
+TRC="--trace=wsim.trc"
+SERIAL="--serial1_io=udp:localhost:6000:localhost:7000"
+#MODE="--mode=time --modearg=10s"
+MODE="--mode=gdb"
+
+${WSIM} ${MODE} --ui ${LOG} ${TRC} ${SERIAL} $1
+${WTRC} --in=wsim.trc --out=wsim.vcd --format=vcd</computeroutput></programlisting>
+  </para>
+
+    <figure id="sc01gdb">
+      <title>Sample application Screenshot : 02_trace_demo, step by step mode</title>
+      <mediaobject>
+	<imageobject>
+	  <imagedata align="center" width="90%" fileref="figures/sc_waspos_01_4.png"/>
+	</imageobject>
+      </mediaobject>
+    </figure>
+
+    <para>The debugger can be used to go through the code and find out why and how the
+    leds are toggled on and off in the blink_example</para>
+  <para>
+    <programlisting><computeroutput>target remote localhost:2159
+break main
+continue
+break mos_led_on
+continue</computeroutput></programlisting>
+  </para>
+
+  <para>The blinking program uses macros in mos_led_on(). Steping through the code
+  will go over macros and hide their internals. To see the correct behavior in the
+  code you have to go through assembly step by step by using the <userinput>stepi</userinput>
+  command.</para>
+
+  <note><title>GDB step and next behavior</title>
+  <para>The current msp430 GDB version (6.8) has a problem using the next command and
+  the behavior of a step command is executed. In order to debug msp430 without going 
+  through all instructions you have to place breakpoints and exec a continue command.
+  GDB 5.1 does next and step commands with
+  a correct behavior.</para></note>
+
+</sect1> 
+ <!--  /src/mos/sys/include/led.h:86 -->
+
+<sect1><title>WSim and eSimu performance estimation</title>
+<!-- ========================================================= -->
+<!-- ========================================================= -->
+
+<note><title>Including eSimu tracer</title>
+<para>WSim must be compiled with eSimu trace output. The
+<computeroutput>--enable-etrace</computeroutput> switch must be set on
+the <computeroutput>configure</computeroutput> command line when
+building WSim.</para></note>
+
+<para>An eSimu enabled version of WSim provides two new command line options.</para>
+
+<para>
+<programlisting><computeroutput>--esimu[=arg]          : enable energy trace
+--esimu-start          : enable energy trace from simulation start</computeroutput></programlisting>
+</para>
+
+<para>The first option is used to specify the name of the trace file. The second option
+is used to start eSimu trace recording right from the beginning of the simulation. Without
+this option a special macro must be used to in the msp430 code to trap the simulator and
+start and stop simulation traces.</para>
+
+<para>Be aware that the trace file might get very large if you use it for a complete
+simulation. The start/stop mode is used to monitor specific portions of a complete
+application and can be used within a loop or within a function. Results are cummulative
+and will represent all calls to the function or parts of a loop</para>
+
+
+  <para> 
+    <programlisting><computeroutput>#! /bin/sh
+#WSIM=~/wasp/build/wsim/platforms/iclbsn/wsim-iclbsn2
+WSIM=~/wasp/build-esimu/wsim/platforms/iclbsn/wsim-iclbsn2
+WTRC=~/wasp/build/wtracer/src/wtracer 
+ESIM=~/wasp/build/esimu/src/eSimu
+
+LOG="--logfile=wsim.log --verbose=2"
+TRC="--trace=wsim.trc"
+SERIAL="--serial1_io=udp:localhost:6000:localhost:7000"
+MODE="--mode=time --modearg=10s"
+ETRC="--esimu=wsim.etr --esimu-start"
+
+${WSIM} ${MODE} --ui ${LOG} ${TRC} ${ETRC} ${SERIAL} $1
+${WTRC} --in=wsim.trc --out=wsim.vcd --format=vcd
+${ESIM} 
+</computeroutput></programlisting>
+  </para>
+
+  <para>
+    <programlisting><computeroutput>esimu -i wsim.etr -p -e 01_blink_led/mantis_trace/01_blink_led.elf</computeroutput></programlisting>
+  </para>
+
+<para><programlisting><computeroutput>----------------------------------
+Generating the energygrind file :
+         ./energygrind.out
+(II) First == 0x00004000
+----------------------------------
+Summary 
+Cycles  :          10000000540
+Energy  :       11968683449310 fJ (1.196868e-02 J)
+IC_miss :                    0
+DC_miss :                    0
+</computeroutput></programlisting></para>
+
+<para> 
+  <programlisting><computeroutput>kcachegrind energygrind.out</computeroutput></programlisting>
+</para>
+
+<figure id="sc01kcache">
+  <title>Sample application Screenshot : 01_blink_led, performance estimation</title>
+  <mediaobject>
+    <imageobject>
+      <imagedata align="center" width="90%" fileref="figures/sc_waspos_01_5.png"/>
+    </imageobject>
+  </mediaobject>
+</figure>
+
+<figure id="linear">
+  <title>Sample application Screenshot : linear energy consumption</title>
+  <mediaobject>
+    <imageobject>
+      <imagedata align="center" width="90%" fileref="figures/linear_refilling.png"/>
+    </imageobject>
+  </mediaobject>
+</figure>
+
+</sect1>
+
+</chapter>
+
+<!-- ========================================================= -->
+<!-- ========================================================= -->
+<!-- ========================================================= -->
+<!-- ========================================================= -->
+<!-- ========================================================= -->
+<!-- ========================================================= -->
+<!-- ========================================================= -->
+<!-- ========================================================= -->
+  
+
+<chapter id="gateways">
+  <title>Gateways setup on serial links</title>
+  <para>WSim can interact with an external application using
+  several ways of communication.  The serial port simulation model
+      within WSim can handle multiple ways to connect to the outside</para>
+
+    <figure id="gatewayfig">
+	<title>Using WSim with gateways</title>
+      <mediaobject>
+	<imageobject>
+	  <imagedata align="center"  fileref="figures/dist_gateway.png"/>
+	</imageobject>
+      </mediaobject>
+    </figure>
+
+    <para>
+      <itemizedlist mark="bullet" spacing="normal">
+	<listitem>
+	  <simpara>
+	    <userinput>Pseudo devices (ptmx/pts)</userinput>: this
+	    type of communication is best used on Unix platforms. A
+	    pseudo-terminal (master or slave) can be used to connect
+	    WSim to an external process.
+	  </simpara>
+	</listitem>
+	<listitem>
+	  <simpara>
+	    <userinput>Named pipes (FIFOs)</userinput>: Named pipes
+	    can be created using mkfifo(1) on Unix platforms. Their
+	    usage is similar to pseudo devices.
+	  </simpara>
+	</listitem>
+	<listitem>
+	  <simpara>
+	    <userinput>UDP/IP</userinput>: UDP link. 
+	  </simpara>
+	</listitem>
+	<listitem>
+	  <simpara>
+	    <userinput>TCP/IP</userinput>: TCP link. WSim can be set to 
+	    listen on a socket or to connect to an already launched serial
+	    console over TCP/IP.
+	  </simpara>
+	</listitem>
+      </itemizedlist>
+    </para>
+
+<!-- ScreenShot + netcat + bsnmon (donc arriver jusqu'à WaspOS 04 -->
+  
+  </chapter>
+
+<!-- ========================================================= -->
+<!-- ========================================================= -->
+<!-- ========================================================= -->
+<!-- ========================================================= -->
+<!-- ========================================================= -->
+<!-- ========================================================= -->
+<!-- ========================================================= -->
+<!-- ========================================================= -->
+
+<chapter id="distributed">
+  <title>Distributed simulation</title>
+  <para>WSim can be attached to the WSNet simulator through radio
+  interfaces such as the Chipcon CC1100 or CC2420. This allows to build a
+  complete simulation framework that is able to debug and analyse a
+  complete wireless sensor network. Thus WSim and WSNet allow to
+  design and test full distributed applications from the top level
+  specifications to the application binary within the same framework and
+  application description.</para>
+  
+  <figure id="dist_simul">
+    <title>Distributed Simulation Setup</title>
+    <mediaobject>
+      <imageobject>
+	<imagedata align="center" width="90%" fileref="figures/dist_simul.png"/>
+      </imageobject>
+    </mediaobject>
+  </figure>
+
+
+  <sect1>
+    <title>Starting wsnet1</title>
+    <para>
+      WSim currently uses the previous version of WSNet which is
+      available in the /utils directory of WSim sources. A much more
+      recent versio of WSNet is available here: <ulink
+      url="http://wsnet.gforge.inria.fr/">WSNet2 website</ulink>.  The
+      WSim update to WSNet is in progress and should be available to
+      bring more communication channels and capabilities between WSim
+      and WSNet (multi antenna devices, physical world information
+      ...)
+    </para>
+    <para>
+      <programlisting><computeroutput>wsnet1 -F config/</computeroutput></programlisting>
+
+
+    <note>
+      <title>WSNet configuration</title>
+      <para>
+	This tutorial assumes that we use the default configuration which is 
+	flat open space without fading containing up to 128 static nodes. Transmissions
+	are performed without fading and only collisions are taken into account.	
+      </para>
+    </note>
+
+    </para>
+  </sect1>
+
+  <sect1>
+    <title>Running applications with the network</title>
+    <para>
+      For simple simulations we only need to add a new parameter that adds a node id to 
+      a WSim simulation. This node id represents the node configuration within the WSNet
+      simulation. This configuration will be used to instanciate the nodes parameters such
+      as location, mobility, etc.
+    </para>
+
+    <para>
+     The next demo application is taken from the MANTIS OS source tree compiled for BSN2 nodes in
+     <computeroutput>/comb/trunk/systems/MANTIS_OS/trunk/build/bsn2/src/apps/sense_and_forward/</computeroutput>.
+    </para>
+    <para>
+      <note>
+	<title>Multicast network configuration</title>
+	<para>You computer must have multicast enable interface cards. If WSNet stops 
+	right after the nodes are connected to it and stay stalled then it means that
+	the multicast UDP trafic is filtered on your computer.</para>
+      </note>
+    </para>
+    <para>
+    <programlisting><computeroutput>#! /bin/sh
+WSIM=~/projets/worldsens/build/wsim-debug/platforms/iclbsn/wsim-iclbsn2
+WNET=~/projets/worldsens/build/wsim-debug/platforms/iclbsn/worldsens-iclbsn2
+
+SERIAL="--serial1_io=udp:localhost:6000:localhost:7000"
+LOG="--logfile=wsim.log --verbose=9"
+TRC="--trace=wsim.trc"
+
+MODE="--mode=time --modearg=10s"
+#MODE="--mode=gdb"
+
+if [ x"$1" == x"-n" ] ; then
+    ${WNET} ${MODE} --ui ${LOG} ${TRC} ${SERIAL} --node-id=$2 $3
+else
+    ${WSIM} ${MODE} --ui ${LOG} ${TRC} ${SERIAL} $1
+fi
+
+${WTRC} --in=wsim.trc --out=wsim.vcd --format=vcd</computeroutput></programlisting></para>
+
+
+  <figure id="scdemo">
+    <title>MantisOS: sense and forward demo application</title>
+    <mediaobject>
+      <imageobject>
+	<imagedata align="center" width="90%" fileref="figures/sc_mantis_rxtx.png"/>
+      </imageobject>
+    </mediaobject>
+  </figure>
+  </sect1>
+
+  <sect1>
+    <title>Debuging distributed applications</title>
+    <para>
+      One of the node can be set to debug mode. That way the whole set of nodes 
+      is synchronized on communications through WSNet1 and step by step debuging on 
+      1 node stops and drives all the other nodes. Network protocols and MAC layers
+      can be debuged this way.
+    </para>
+
+
+    <note>
+      <title>Serial communications with a distributed application</title>
+      <para>
+      WSNet and WSim are distributed parallel applications. An optimistic synchronization
+      model is used among all the processes. Event coherency is checked within the simulation
+      and backtracks can occur to ensure correct events ordering. An external application 
+      connected to a WSim serial port may see duplicate messages if the node is sent back in 
+      time while transmitting over its serial port. In order to ensure correct communication
+      with the outside world we need to design external applications to take care of backtracks
+      either by connecting to WSNet or by implementing robust communication protocols.
+      </para>
+    </note>
+
+<para>
+  <figure id="scdemo2">
+    <title>MantisOS: sense and forward demo application, debug mode</title>
+    <mediaobject>
+      <imageobject>
+	<imagedata align="center" width="90%" fileref="figures/sc_mantis_rxtx2.png"/>
+      </imageobject>
+    </mediaobject>
+  </figure>
+</para>
+
+
+  </sect1>
+
+  <sect1>
+    <title>Wireless performance estimation and code source annotation</title>
+    <para>
+      Performance reporting tools and traces are still available in distributed
+      simulation modes. Traces will have to be collected according to the nodes
+      that have to be monitored. Loging and traces need to be manipulated with 
+      care as the WSim nodes are using local time. Each node has a time that 
+      starts at 0 and they must be shifted according to the information available
+      in WSNet1 to have correct offsets.
+    </para>
+
+    <note>
+      <title>Traces with a distributed application</title>
+      <para>
+	Traces from WSim do not contain backtracked events, the correct order
+	 of events is outputed in trace files with duplicated events removed.
+      </para>
+    </note>
+  </sect1>
+</chapter>
+
+
+<!-- Screenshot + debug mode + step by step  -->
+
+<!-- ========================================================= -->
+<!-- ========================================================= -->
+<!-- ========================================================= -->
+<!-- ========================================================= -->
+<!-- ========================================================= -->
+<!-- ========================================================= -->
+<!-- ========================================================= -->
+<!-- ========================================================= -->
+  
+  <chapter id="links">
+    <title>Useful links and resources</title>
+
+    <para>Cross compilers</para>
+    <para>
+      <itemizedlist mark="bullet" spacing="normal">
+	<listitem>
+	  <simpara>
+	    Gcc for MSP430: 
+	    <ulink url="http://mspgcc.sf.net/">mspgcc</ulink>.
+	  </simpara>
+	</listitem>
+
+	<listitem>
+	  <simpara>
+	    WOS build system: 
+	    <ulink url="http://rts-wiki.eit.uni-kl.de/tiki-index.php?page=WOS+build+system">
+	      Wos webpage at uni-kl.de</ulink>.
+	  </simpara>
+	</listitem>
+      </itemizedlist>
+    </para>
+
+    <para>Operating Systems</para>
+    <para>
+      <itemizedlist mark="bullet" spacing="normal">
+	<listitem>
+	  <simpara>
+	    WaspOS Framework: 
+	    <ulink url="http://rts-wiki.eit.uni-kl.de/tiki-index.php?page=WOS+Framework">
+	      Wos webpage at uni-kl.de</ulink>.
+	  </simpara>
+	</listitem>
+	<listitem>
+	  <simpara>
+	    MantisOS website: 
+	    <ulink url="http://mantis.cs.colorado.edu/index.php/tiki-index.php">
+	      Mantis web page</ulink>.
+	  </simpara>
+	</listitem>
+      </itemizedlist>
+    </para>
+
+    <para>Simulation tools</para>
+    <para>
+      <itemizedlist mark="bullet" spacing="normal">
+	<listitem>
+	  <simpara>
+	    WSim
+	    <ulink url="http://wsim.gforge.inria.fr/">WSim website</ulink>.
+	  </simpara>
+	</listitem>
+	<listitem>
+	  <simpara>
+	    WSNet2 
+	    <ulink url="http://wsnet.gforge.inria.fr/">WSNet2 website</ulink>.
+	  </simpara>
+	</listitem>
+	<listitem>
+	  <simpara>
+	    eSimu <ulink url="http://esimu.gforge.inria.fr/">eSimu website</ulink>.
+	  </simpara>
+	</listitem>
+      </itemizedlist>
+    </para>
+
+    <para>External tools</para>
+    <para>
+      <itemizedlist mark="bullet" spacing="normal">
+	<listitem>
+	  <simpara>
+	    Gtkwave homepage 
+	    <ulink url="http://gtkwave.sourceforge.net/">Gtkwave</ulink>.
+	  </simpara>
+	</listitem>
+	<listitem>
+	  <simpara>
+	    GtkWave for windows 
+	    <ulink url="http://www.dspia.com/gtkwave.html">Gtkwave</ulink>.
+	  </simpara>
+	</listitem>
+	<listitem>
+	  <simpara>
+	    kCacheGrind 
+	    <ulink url="http://kcachegrind.sourceforge.net/html/Home.html">kCachegrind</ulink>.
+	  </simpara>
+	</listitem>
+	<listitem>
+	  <simpara>
+	    Gnuplot 
+	    <ulink url="http://www.gnuplot.info/">Gnuplot</ulink>.
+	  </simpara>
+	</listitem>
+      </itemizedlist>
+    </para>
+
+
+
+  </chapter>
+
+
+<!-- ========================================================= -->
+<!-- ========================================================= -->
+<!-- ========================================================= -->
+<!-- ========================================================= -->
+<!-- ========================================================= -->
+<!-- ========================================================= -->
+<!-- ========================================================= -->
+<!-- ========================================================= -->
+
+</book>

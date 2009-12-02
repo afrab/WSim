@@ -1,0 +1,48 @@
+    <sect1>
+      <title>WConsole: the Worldsens serial console</title>
+      <para>The WorldSens serial console (WConsole) is a standalone application that can 
+      be used to drive the communication with the pseudo tty model. Its main use is to provide 
+      a full duplex interface that can output the octet stream from the simulator and use the 
+      host keyboard to communicate with the simulated application. The source code of the 
+      serial console can also be used to derive and test applications that will communicate 
+      through the serial port of the node in production use such as base station monitoring 
+      applications.</para>
+      <figure id="wconsole">
+	<title>WConsole example</title>
+	<mediaobject>
+	  <imageobject>
+	    <imagedata align="center" fileref="figures/serial.png"/>
+	  </imageobject>
+	</mediaobject>
+      </figure>
+      <para>The screenshot of the WSim serial console shown in <xref linkend="wconsole"/> 
+      presents a simple application that produces an echo for every character sent to its serial 
+      port. The top half of the user interface window presents the simulation output with 
+      grayed letters and bottom half is the local keyboard input for the host machine.</para>
+    </sect1>
+    <sect1>
+      <title>WTracer: the Worldsens trace reading tool</title>
+      <para>WSim traces are output in binary format. The WTracer tool transforms the traces
+      in the Gnuplot format.</para>
+    </sect1>
+    <sect1>
+      <title>WSNet: the Worldsens wireless network simulator</title>
+      <para>WSNet is part of the Worldsens development environment. WSNet is a modular 
+      event-driven wireless network simulator. Its architecture consists in dint blocks that 
+      implement functionnalities of the nodes and the radio medium. As an example, separate 
+      blocks are de for the radio propagation, the interference computation or the radio 
+      modulation. Similarly, a node is itself composed by several blocks: one for the mobility, 
+      one for the application, one for the system queue, one for the mac layer, one for the 
+      radio and one for the antenna.</para>
+      <para>During one simulation, the behaviour of a block is speciusing a model. A 
+      model is one particular implementation of the block functionnalities. If we consider the 
+      radio propagation block, one model implements the free space propagation model; another 
+      one implements a radio range model, etc. Considering the radio modulation block, one 
+      model implements the BPSK modulation, another one the FSK modulation, etc.</para>
+      <para>Models are either provided with the simulator or developped by users. A user can 
+      develop models for any of the blocks and use it for its own simulations. A model must 
+      implement a given API as well as characteristics that are de by its associated block. 
+      WSNet should be able to compile on any Unix-like platform and has been tested on 
+      Linux/x86, Linux/x86 64, Linux/ppc32, Linux/Alpha, Solaris9/sparc, Solaris10/sparc, 
+      MacOSX/ppc32, Windows XP (using cygwin).</para>
+    </sect1>

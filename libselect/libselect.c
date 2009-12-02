@@ -206,12 +206,13 @@ int libselect_update_registered()
 	{
 	case ENTRY_NONE:
 	  break;
+	case ENTRY_WIN32_PIPE:
+	  break;
 	case ENTRY_FILE:
 	case ENTRY_TCP:
 	case ENTRY_TCP_SRV:
 	case ENTRY_UDP:
 	case ENTRY_FD_ONLY:
-	case ENTRY_WIN32_PIPE:
 	  if (libselect.entry[id].registered)
 	    {
 	      /* *DMSG("wsim:libselect:update: add id=%d fd=%d\n",id,libselect.entry[id].fd_in); */
@@ -251,7 +252,6 @@ int libselect_update_registered()
 	    case ENTRY_FILE:
 	    case ENTRY_UDP:
 	    case ENTRY_TCP:
-	    case ENTRY_WIN32_PIPE:
 	      switch (n = read(fd_in,buffer,BUFFER_MAX)) 
 		{
 		case -1:
@@ -313,6 +313,9 @@ int libselect_update_registered()
 			}
 		    }
 		}
+	      break;
+
+	    case ENTRY_WIN32_PIPE:
 	      break;
 
 	    case ENTRY_FD_ONLY:
@@ -515,6 +518,9 @@ int libselect_id_close(libselect_id_t id)
       ERROR("wsim:libselect:close: cannot close id %d of type FD_ONLY\n",id);
       return 1;
     case ENTRY_WIN32_PIPE:
+#if defined(_WIN32)
+      CloseHandle((HANDLE)libselect.entry[id].fd_out);
+#endif
       return 1;
     }
 

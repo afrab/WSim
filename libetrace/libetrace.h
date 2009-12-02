@@ -123,7 +123,7 @@
 /**
  * etracer creation
  */
-void etracer_init          (char* filename);
+void etracer_init          (char* filename, int ws_mode);
 void etracer_close         (void);
 
 /**
@@ -223,7 +223,7 @@ void etracer_state_restore (void);
 #else
 #define NOOP do { } while (0)
 
-#define etracer_init(x)           NOOP
+#define etracer_init(x...)        NOOP
 #define etracer_close()           NOOP
 
 #define etracer_slot_insn(x...)   NOOP

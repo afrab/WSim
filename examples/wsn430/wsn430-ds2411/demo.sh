@@ -1,6 +1,13 @@
-#! /bin/bash
+#! /bin/sh
 
-## set -x
+## ==================================
+
+# set WSNET_MODE to "wsnet1", "wsnet2", or "" if you are using wsim alone
+export WSNET_MODE=""
+export WSNET2_CONF_PATH=""
+
+## ==================================
+
 . ../config.soft
 
 ## ==================================
@@ -20,7 +27,7 @@ WS1="`run_wsim $DS1 wsn430-ds2411.elf $TIME $C1`"
 echo "${WS1}"
 xterm -T wsim-1 -e "$WS1" &
 
-read
+read dummyval
 
 ## ==================================
 ## ==================================

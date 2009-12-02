@@ -534,9 +534,15 @@ wsim:log:wsim.log</computeroutput></programlisting>
 			<title>Introduction</title> 
                         <!--<para>This example is Supercalifragilisticexpialidocious!!!</para>-->
 			<para>This example shows how to start a mixed simulation using WSim for node 
-			simulation and WSNet for radio propagation and interferences. It consists of three sensor
-			nodes (again, simulating the WSN430 hardware platform). The nodes are communicating
-			with one another by passing a token around the network.</para>
+			simulation and WSNet1. It consists of three sensor nodes (again, simulating 
+			the WSN430 hardware platform). The nodes are communicating with one another 
+			by passing a token around the network.</para>
+			<para>For more information on WSNet1 and WSNet2 installation, configuration and usage, 
+			please have a look to WSNet Tutorial. By default the script <userinput>demo.sh</userinput> 
+			provided with this example uses WSNet1, but you can modify it to use WSNet2 (by 
+			setting <userinput>WSNET_MODE</userinput> variable to <userinput>wsnet2</userinput>).	
+			</para>
+
 		</sect1>
 		<sect1>
 			<title>Example description and execution</title>
@@ -546,27 +552,17 @@ wsim:log:wsim.log</computeroutput></programlisting>
 			given with the right CRC value (a valid CRC is calculated at simulation startup). 
 			The <userinput>--node-id</userinput> parameter is used by WSim for packet exchanges
 			with WSNet. This node Id cannot be used by the embedded software running on the 
-			node hardware.
-			The demo application is a single token passing application. Each node listens the
+			node hardware. The <userinput>--wsnet1</userinput> option allows to use the WSNet1 
+			interface of WSim (if not specified and if the <userinput>--node-id</userinput> 
+			parameter is present, WSim use WSNet1 by default).
+			</para>
+			<para>The demo application is a single token passing application. Each node listens the
 			radio medium and waits for a packet that contains its node-Id. Once a packet is 
 			received with the correct id number, the corresponding node <emphasis>bla bla bla</emphasis>.</para>
 			<para>To compile this example, simply run the <userinput>make</userinput> command. 
-			To execute it, the following procedure must be followed:</para>
-			<procedure>
-				<step><para>Launch three WConsole instances (each node will print its feedback 
-				in these serial consoles) in separate shells.</para></step>
-				<step><para>Launch WSNet the network simulator. You must either launch it
-				from the directory containing the example or provide the path of this directory to it
-				as an option (see WSNet Tutorial for more details). This is needed for the configuration
-				of the network simulator (environment, physical layer, MAC layer etc).</para>
-				<programlisting><prompt>[wsn430-leds]$</prompt><userinput>wsnet1</userinput></programlisting>
-				</step>
-				<step><para>Launch the three WSim nodes. To do so, use the script provided with 
-				the example: <userinput>demo.sh</userinput>. For regular execution (time mode, 
-				10 seconds), use the script:</para>
-				<programlisting>
-<prompt>[wsn430-token]$</prompt> <userinput>./demo.sh</userinput></programlisting></step>
-			</procedure>
+			To execute it, launch the script provided with the example <userinput>demo.sh</userinput>:</para>
+<para><programlisting><prompt>[wsn430-token]$</prompt> <userinput>./demo.sh</userinput></programlisting></para>
+
 			<para><xref linkend="token-petit"/> shows the console output of the 3 nodes. Console 
 			duplicated messages are one of the effects of the distributed simulation mechanims. WSNet 
 			keeps track of global simulation time but does not impose a tight synchronisation with WSim 

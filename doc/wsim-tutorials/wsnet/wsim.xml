@@ -141,14 +141,7 @@ $./sudo make install
       <title>Installation of WSim</title>
 
       <para>
-	In order to choose between WSNet1 and WSNet2 WSim interface, you must use the configure option <emphasis role="bold"><computeroutput>--enable-[wsnet1 or wsnet2]</computeroutput></emphasis>. For instance a typical installation of WSim:
-	<programlisting>
-	  $./bootstrap
-	  $./configure --enable-wsnet2 --enable-gui
-	  $./make
-	  $./sudo make install
-	</programlisting>
-	If you don't specify <emphasis role="bold"><computeroutput>--enable-[wsnet1 or wsnet2]</computeroutput></emphasis> option, WSim is installed with <emphasis role="bold"><computeroutput>--enable-wsnet1</computeroutput></emphasis> default option.
+	To use WSim with WSNet, no special configuration is required during the compilation of WSim. WSNet1 and WSNet2 interfaces are installed by default.
       </para>
       
     </section>
@@ -365,7 +358,24 @@ $wsnet -c worldsens.xml
 	  </programlisting>
     </section>
 
-	    
+    </section>
+
+    <section id="starting_wsim">
+      <title>Starting WSim</title>
+
+      <para>
+	To launch WSim for WSNet, you have to specify the <emphasis role="bold"><computeroutput>--node-id=[id]</computeroutput></emphasis> option.
+      </para>
+      <para>
+	To choose between WSNet1 and WSNet2, use the <emphasis role="bold"><computeroutput>--wsnet1</computeroutput></emphasis> option or the <emphasis role="bold"><computeroutput>--wsnet2</computeroutput></emphasis> option. If this option is not entered, WSim will choose WSNet1 by default (only if <emphasis role="bold"><computeroutput>--node-id</computeroutput></emphasis> option is specified, otherwise WSim will run standalone).
+      </para>
+      <para>
+	If your <emphasis role="bold"><computeroutput>PATH</computeroutput></emphasis> is correctly set, enter for instance:
+      </para>
+      <programlisting>
+$wsim-senslabv14 --wsnet2 --node-id=1 myprog.elf
+      </programlisting>
+
     </section>
   
   </chapter>
@@ -461,14 +471,6 @@ $./demo.sh
     <section id="remarks">
       <title>Remarks</title>
       <para>
-	<itemizedlist mark="bullet" spacing="normal">
-	  <listitem>
-	    <para>
-	      Don't forget to use the worldsens version of wsim binaries when using WSim with WSNet. For example with senslab nodes, use <emphasis role="bold"><computeroutput>worldsens-senslabv14</computeroutput></emphasis> instead of <emphasis role="bold"><computeroutput>wsim-senslabv14</computeroutput></emphasis>.
-	    </para>
-	  </listitem>
-	</itemizedlist>
-
 	<itemizedlist mark="bullet" spacing="normal">
 	  <listitem>
 	    <para>

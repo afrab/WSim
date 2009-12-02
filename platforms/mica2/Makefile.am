@@ -1,9 +1,6 @@
 if BUILD_MICA2
 
 bin_PROGRAMS=wsim-mica2
-## if BUILD_WORLDSENS
-## bin_PROGRAMS+=worldsens-mica2
-## endif
 
 if BUILD_PTTY
 EXTRADEV= ../../devices/ptty/libptty.a
@@ -25,9 +22,5 @@ wsim_mica2_LDADD=${MICA2MCU} ${MICA2DEV} ${WSIMADD}  ../../machine/libmachine.a 
 
 ## WMICA2DEV=../../devices/cc1000/libcc1000.a 	\
 ##	../../devices/worldsens/libworldsens.a
-
-## worldsens_mica2_CFLAGS=-DATMEGA128L -DWORLDSENS
-## worldsens_mica2_SOURCES=mica2.c
-## worldsens_mica2_LDADD=${MICA2MCU} ${MICA2DEV} ${WMICA2DEV} ${WSIMADD}
 
 endif

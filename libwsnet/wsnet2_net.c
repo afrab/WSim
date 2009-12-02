@@ -2,6 +2,7 @@
  *  \file   wsnet2_net.c
  *  \brief  WorldSens client v2, network layer
  *  \author Guillaume Chelius, Antoine Fraboulet
+
  *  \date   2007
  **/
 
@@ -15,12 +16,19 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <errno.h>
-#include <sys/socket.h>
-#include <arpa/inet.h>
 #include <stdarg.h>
-#include <sched.h>
-#include <sys/signal.h>
 #include <time.h>
+
+#if defined(_WIN32)
+  #include <winsock2.h>
+  #include <ws2tcpip.h>
+  #undef ERROR
+#else
+  #include <sys/socket.h>
+  #include <arpa/inet.h>
+  #include <sys/signal.h>
+  #include <sched.h>
+#endif
 
 #include "arch/common/hardware.h"
 #include "devices/devices.h"

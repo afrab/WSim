@@ -212,7 +212,6 @@ int main(int argc, char* argv[])
   /* options */
   options_start();
   ui_options_add();
-  worldsens_c_options_add();
   machine_options_add();
   options_read_cmdline(&o,&argc,argv);
 
@@ -245,16 +244,16 @@ int main(int argc, char* argv[])
 
 
   /* event tracer */
-  tracer_init(o.tracefile,machine_get_nanotime);
+  tracer_init(o.tracefile, machine_get_nanotime, o.wsens_mode);
 
   /* libselect init  */
   libselect_init();
 
   /* etrace */
-  etracer_init(o.etracefile);
+  etracer_init(o.etracefile, o.wsens_mode);
 
   /* worldsens initialize */
-  worldsens_c_initialize();
+  worldsens_c_initialize(o.wsens_mode);
 
   /* machine creation */
   if (machine_create())
@@ -266,7 +265,7 @@ int main(int argc, char* argv[])
     }
 
   /* worldsens connect to wsnet server */
-  worldsens_c_connect();
+  worldsens_c_connect(o.server_ip, o.server_port, o.multicast_ip, o.multicast_port, o.node_id);
 
   /* preload flash with file */
   if (o.do_preload)

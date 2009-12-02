@@ -163,46 +163,6 @@ else
 fi
 AM_CONDITIONAL([BUILD_PTTY], [test "${ptty_sum}" = "yes"])
 
-dnl worldsens mode 
-dnl ==============
-worldsens_sum="no"
-wsnet1_sum="no"
-wsnet2_sum="no"
-
-AC_ARG_ENABLE([wsnet1],AS_HELP_STRING([--enable-wsnet1],[WorldSens WSNet1 simulator (default enabled)]))
-if test "${enable_wsnet1}" != "no" ; then
-   worldsens_sum="wsnet1"
-   wsnet1_sum="yes"
-fi 
-
-AC_ARG_ENABLE([wsnet2],AS_HELP_STRING([--enable-wsnet2],[WorldSens WSNet2 simulator (default disabled)]))
-if test "${enable_wsnet2}" = "yes" ; then
-   worldsens_sum="wsnet2"
-   wsnet2_sum="yes"
-fi 
-
-if test "${enable_wsnet1}" = "yes" -a "${enable_wsnet2}" = "yes" ; then 
-   AC_MSG_NOTICE([== ------------------------------------------- ==])
-   AC_MSG_NOTICE([== You need to select either wsnet1 or wsnet2, ==])
-   AC_MSG_NOTICE([==    switching to WSNet2 mode                 ==])
-   AC_MSG_NOTICE([== ------------------------------------------- ==])
-   worldsens_sum="wsnet2"
-   wsnet1_sum="no"
-   wsnet2_sum="yes"
-fi
-
-AM_CONDITIONAL([BUILD_WORLDSENS],  [test "${worldsens_sum}" != "no"])
-AM_CONDITIONAL([BUILD_WSNET1],     [test "${worldsens_sum}" = "wsnet1"])
-AM_CONDITIONAL([BUILD_WSNET2],     [test "${worldsens_sum}" = "wsnet2"])
-
-if test "$wsnet1_sum" = yes; then
-AC_DEFINE(WSNET1, [1], [Worldsens WSNet1 protocol])
-fi
-
-if test "$wsnet2_sum" = yes; then
-AC_DEFINE(WSNET2, [1], [Worldsens WSNet2 protocol])
-fi
-
 dnl --------------------------------------------------------------
 dnl Platform models
 dnl --------------------------------------------------------------

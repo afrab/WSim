@@ -178,11 +178,11 @@
 	</programlisting>
 
 	<programlisting>
-	  $worldsens-telosb --ui --mode=time --modearg=5s --node-id=0 --trace=trace0.trc radiocounttoleds.elf
+	  $wsim-telosb --ui --mode=time --modearg=5s --wsnet1 --node-id=0 --trace=trace0.trc radiocounttoleds.elf
 	</programlisting>
 
 	<programlisting>
-	  $worldsens-telosb --ui --mode=time --modearg=5s --node-id=1 --trace=trace1.trc radiocounttoleds.elf
+	  $wsim-telosb --ui --mode=time --modearg=5s --wsnet1 --node-id=1 --trace=trace1.trc radiocounttoleds.elf
 	</programlisting>
 	The <emphasis role="bold"><computeroutput>--trace</computeroutput></emphasis> option enables to gather traces during the WSim simulation.
       </para>

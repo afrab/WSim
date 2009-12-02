@@ -68,25 +68,71 @@ struct wsnet_tx_info {
 typedef uint64_t (*wsnet_callback_rx_t)      (void*, struct wsnet_rx_info *);
 typedef uint64_t (*wsnet_callback_measure_t) (void*, double);
 
-int  worldsens_c_tx             (struct wsnet_tx_info *);
-int  worldsens_c_rx_register    (void*, wsnet_callback_rx_t, char*);
-
 /**************************************************************************/
 /**************************************************************************/
 /**************************************************************************/
 
-int  worldsens_c_options_add    (void);
-int  worldsens_c_initialize     (void);
-int  worldsens_c_connect        (void);
-int  worldsens_c_close          (void);
+/* libwsnet public encapsulation functions */
+int    worldsens_c_initialize     (int);
 
-int  worldsens_c_update         (void);
-int  worldsens_c_get_node_id    (void);
-
-void worldsens_c_state_save     (void);
-void worldsens_c_state_restore  (void);
+void (*worldsens_c_state_save)    (void);
+void (*worldsens_c_state_restore) (void);
+int  (*worldsens_c_get_node_id)   (void);
+int  (*worldsens_c_rx_register)   (void*, wsnet_callback_rx_t, char*);
+int  (*worldsens_c_connect)       (char*, uint16_t, char*, uint16_t, uint32_t);
+int  (*worldsens_c_close)         (void);
+int  (*worldsens_c_tx)            (struct wsnet_tx_info *);
+int  (*worldsens_c_update)        (void);
 
 #define LIBWSNET_UPDATE()  worldsens_c_update()
+
+/**************************************************************************/
+/**************************************************************************/
+/**************************************************************************/
+
+/* libwsnet0 public functions */
+int  worldsens0_c_initialize    (void);
+
+void worldsens0_c_state_save    (void);
+void worldsens0_c_state_restore (void);
+int  worldsens0_c_get_node_id   (void);
+int  worldsens0_c_rx_register   (void*, wsnet_callback_rx_t, char*);
+int  worldsens0_c_connect       (char*, uint16_t, char*, uint16_t, uint32_t);
+int  worldsens0_c_close         (void);
+int  worldsens0_c_tx            (struct wsnet_tx_info *);
+int  worldsens0_c_update        (void);
+
+/**************************************************************************/
+/**************************************************************************/
+/**************************************************************************/
+
+/* libwsnet1 public functions */
+int  worldsens1_c_initialize    (void);
+
+void worldsens1_c_state_save    (void);
+void worldsens1_c_state_restore (void);
+int  worldsens1_c_get_node_id   (void);
+int  worldsens1_c_rx_register   (void*, wsnet_callback_rx_t, char*);
+int  worldsens1_c_connect       (char*, uint16_t, char*, uint16_t, uint32_t);
+int  worldsens1_c_close         (void);
+int  worldsens1_c_tx            (struct wsnet_tx_info *);
+int  worldsens1_c_update        (void);
+
+/**************************************************************************/
+/**************************************************************************/
+/**************************************************************************/
+
+/* libwsnet2 public functions */
+int  worldsens2_c_initialize    (void);
+
+void worldsens2_c_state_save    (void);
+void worldsens2_c_state_restore (void);
+int  worldsens2_c_get_node_id   (void);
+int  worldsens2_c_rx_register   (void*, wsnet_callback_rx_t, char*);
+int  worldsens2_c_connect       (char*, uint16_t, char*, uint16_t, uint32_t);
+int  worldsens2_c_close         (void);
+int  worldsens2_c_tx            (struct wsnet_tx_info *);
+int  worldsens2_c_update        (void);
 
 /**************************************************************************/
 /**************************************************************************/

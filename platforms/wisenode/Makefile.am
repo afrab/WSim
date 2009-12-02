@@ -1,10 +1,6 @@
 if BUILD_WISENODE
 
 bin_PROGRAMS=wsim-wisenode
-if BUILD_WORLDSENS
-bin_PROGRAMS+=worldsens-wisenode
-endif
-
 
 INCLUDES=-I$(top_srcdir)
 
@@ -18,10 +14,5 @@ WISENODE_DEV= ../../devices/led/libled.a		\
 wsim_wisenode_CFLAGS=-DMSP430f1611 -DCC1100
 wsim_wisenode_SOURCES=wisenode.c
 wsim_wisenode_LDADD=${WISENODE_DEV} ${WSIMADD} ${WISENODE_MCU}
-
-
-worldsens_wisenode_CFLAGS=-DMSP430f1611 -DCC1100
-worldsens_wisenode_SOURCES=wisenode.c
-worldsens_wisenode_LDADD=${WISENODE_DEV} ${WSIMADD_WORLDSENS} ${WISENODE_MCU}
 
 endif

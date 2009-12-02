@@ -30,6 +30,13 @@
 #define DEFAULT_DO_TRACE           0
 #define DEFAULT_DO_ETRACE          0
 #define DEFAULT_DO_ETRACE_AT_BEGIN 0
+#define DEFAULT_WSENS_MODE         WS_MODE_WSNET0
+#define DEFAULT_SERVER_IP          "127.0.0.1"
+#define DEFAULT_SERVER_PORT        9998
+#define DEFAULT_MULTICAST_IP       "224.0.0.1"
+#define DEFAULT_MULTICAST_PORT     9999
+#define DEFAULT_NODE_ID            1
+
 
 /* ************************************************** */
 /* ************************************************** */
@@ -151,6 +158,55 @@ static struct moption_t noelf_opt = {
   .value       = NULL
 };
 
+static struct moption_t node_id_opt = {
+  .longname    = "node-id",
+  .type        = required_argument,
+  .helpstring  = "worldsens node id",
+  .value       = NULL
+};
+
+static struct moption_t server_ip_opt = {
+  .longname    = "server-ip",
+  .type        = required_argument,
+  .helpstring  = "server ip address",
+  .value       = NULL
+};
+
+static struct moption_t server_port_opt = {
+  .longname    = "server-port",
+  .type        = required_argument,
+  .helpstring  = "server udp port",
+  .value       = NULL
+};
+
+static struct moption_t multicast_ip_opt = {
+  .longname    = "multicast-ip",
+  .type        = required_argument,
+  .helpstring  = "multicast ip address",
+  .value       = NULL
+};
+
+static struct moption_t multicast_port_opt = {
+  .longname    = "multicast-port",
+  .type        = required_argument,
+  .helpstring  = "multicast udp port",
+  .value       = NULL
+};
+
+static struct moption_t wsnet1_mode_opt = {
+  .longname    = "wsnet1",
+  .type        = no_argument,
+  .helpstring  = "enable wsnet1 connection",
+  .value       = NULL
+};
+
+static struct moption_t wsnet2_mode_opt = {
+  .longname    = "wsnet2",
+  .type        = no_argument,
+  .helpstring  = "enable wsnet2 connection",
+  .value       = NULL
+};
+
 /* ************************************************** */
 /* ************************************************** */
 /* ************************************************** */
@@ -194,6 +250,13 @@ void options_start()
   options_add_base(& mem_monitor_opt    );
 #endif
   options_add_base(& verbose_opt        );
+  options_add_base(& node_id_opt        );
+  options_add_base(& server_ip_opt      );
+  options_add_base(& server_port_opt    );
+  options_add_base(& multicast_ip_opt   );
+  options_add_base(& multicast_port_opt );
+  options_add_base(& wsnet1_mode_opt    );
+  options_add_base(& wsnet2_mode_opt    );
 }
 
 /* ************************************************** */
@@ -290,7 +353,10 @@ void options_read_cmdline(struct options_t *s, int *argc, char *argv[])
 
   s->verbose     = DEFAULT_VERBOSE;
 
-  strcpy (s->progname,  DEFAULT_PROGNAME);
+  strcpy (s->progname,    DEFAULT_PROGNAME);
+  strcpy (s->server_ip,   DEFAULT_SERVER_IP);
+  strcpy (s->multicast_ip,DEFAULT_MULTICAST_IP);
+
 #if defined(PID_IN_FILENAMES)
   sprintf(s->logfilename,"wsim-%d.log",getpid());
   sprintf(s->dumpfile,   "wsim-%d.dmp",getpid());
@@ -315,6 +381,10 @@ void options_read_cmdline(struct options_t *s, int *argc, char *argv[])
   s->do_preload         = 0;
   s->do_elfload         = 1;
   s->do_etrace_at_begin = DEFAULT_DO_ETRACE_AT_BEGIN;
+  s->wsens_mode         = DEFAULT_WSENS_MODE; 
+  s->server_port        = DEFAULT_SERVER_PORT;
+  s->multicast_port     = DEFAULT_MULTICAST_PORT;
+  s->node_id            = DEFAULT_NODE_ID;
 
   /* parse all options */
   switch (mgetopt_long(&parseindex,*argc,argv, &wsim_options, &optindex))
@@ -488,6 +558,49 @@ void options_read_cmdline(struct options_t *s, int *argc, char *argv[])
   if (noelf_opt.isset)
     {
       s->do_elfload = 0;
+    }
+
+  if (server_ip_opt.isset)
+    {
+      strcpy(s->server_ip, server_ip_opt.value);
+    }
+
+  if (server_port_opt.isset)
+    {
+      s->server_port = atoi(server_port_opt.value);
+    }
+
+  if (multicast_ip_opt.isset)
+    {
+      strcpy(s->multicast_ip, multicast_ip_opt.value);
+    }
+
+  if (multicast_port_opt.isset)
+    {
+      s->multicast_port = atoi(multicast_port_opt.value);
+    }
+
+  if (node_id_opt.isset)
+    {
+      s->node_id = atoi(node_id_opt.value);
+      if (wsnet1_mode_opt.isset)
+	{
+	  s->wsens_mode = WS_MODE_WSNET1;
+	}
+      else if (wsnet2_mode_opt.isset)
+	{
+	  s->wsens_mode = WS_MODE_WSNET2;
+	}
+      else
+	{
+	  s->wsens_mode = WS_MODE_WSNET1;
+	}
+    }
+  else if (wsnet1_mode_opt.isset || wsnet2_mode_opt.isset)
+    {
+      OPT_ERROR("\n ** missing node_id option ** \n\n");
+      options_usage(argv[0]);
+      exit(1);
     }
 
   OPT_DMSG("parseindex = %d, argc = %d\n",parseindex,*argc);

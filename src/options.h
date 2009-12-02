@@ -19,9 +19,15 @@ enum sim_mode_t {
   SIM_MODE_TIME  = 4
 };
 
+enum wsens_mode_t {
+  WS_MODE_WSNET0 = 0,
+  WS_MODE_WSNET1 = 1,
+  WS_MODE_WSNET2 = 2
+};
+
 #include "mgetopt.h"
 
-#define MAX_FILENAME 256
+#define MAX_FILENAME  256
 
 /**
  * WSim command line options
@@ -46,10 +52,17 @@ struct options_t {
   int                do_monitor;
   char              *monitor;
 
+  uint32_t           node_id;
+  char               server_ip   [MAX_FILENAME];
+  uint16_t           server_port;
+  char               multicast_ip[MAX_FILENAME];
+  uint16_t           multicast_port;
+
   /**
    * bool
    */
   enum sim_mode_t    sim_mode;
+  enum wsens_mode_t  wsens_mode;
   unsigned short     gdb_port;
   uint64_t           sim_insn;
   uint64_t           sim_time;

@@ -12,30 +12,11 @@
 
 #include "liblogger/logger.h"
 #include "libetrace.h"
+#include "src/options.h"
 
 #if defined(ETRACE)
 
 #include "etrace.h"
-
-/****************************************
- * TRACER_USE_BACKTRACK is used to select
- * data log file dump behavior
- *
- * if defined(TRACER_USE_BACKTRACK) 
- *   we can save at each backtrack
- *   this is minimized by recording to memory 
- *   and save only when threshold is reached and
- *   a backtrack occurs
- * else
- *   we can save whenever the threshold is reached
- * 
- ****************************************/
-
-#if defined(WORLDSENS)
-#  define ETRACER_USE_BACKTRACK
-#else
-#  undef  ETRACER_USE_BACKTRACK
-#endif
 
 #define ETRACER_FILE_MODE   ETRACE_MODE_ZBINARY
 #define ETRACER_WORD_SIZE                     2
@@ -100,6 +81,8 @@ static trace_slot_t               *libetracer_slot_bkp;
 static struct libetracer_data_t    libetracer_current;
 static struct libetracer_data_t    libetracer_backup;
 
+static enum wsens_mode_t           libtracer_ws_mode;
+
 /* ************************************************** */
 /* ************************************************** */
 /* ************************************************** */
@@ -126,7 +109,7 @@ static void etracer_slot_end_internal   (int timing);
 /* ************************************************** */
 /* ************************************************** */
 
-void etracer_init(char *filename)
+void etracer_init(char *filename, int ws_mode)
 {
   libetracer_conf.mode                = ETRACER_FILE_MODE;
   libetracer_conf.word_size           = ETRACER_WORD_SIZE;
@@ -144,6 +127,8 @@ void etracer_init(char *filename)
   libetracer_current.stopped          = 1;
   libetracer_current.next_must_be_NS  = 0;
   libetracer_init                     = 1;
+
+  libtracer_ws_mode                   = ws_mode;
 
   DMSG_ETRACER("etracer: init ok\n");
 }

@@ -1,0 +1,38 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<worldsens xmlns="http://worldsens.citi.insa-lyon.fr">
+
+<!-- == Worldsens ===================================================== -->
+<simulation nodes="3" x="100" y="100" z="100"/>
+
+<!-- == Entities ===================================================== -->
+<entity name="interf_none" library="interferences_none">
+</entity>
+
+<entity name="prop_range" library="propagation_range" >
+  <init  range="30"/>
+</entity>
+
+<entity name="modulation_none" library="modulation_none">
+</entity>
+
+<entity name="mobility_none" library="mobility_static" >
+<default x="random" y="random" z="random"/>
+</entity>
+
+<entity name="omnidirectionnal" library="antenna_omnidirectionnal" >
+</entity>
+
+<!-- == Environment ===================================================== -->
+<environment>
+<propagation entity="prop_range"/>
+<interferences entity="interf_none"/>
+<modulation entity="modulation_none"/>
+</environment>
+
+<!-- == Bundle ===================================================== -->
+<bundle name="billiard" worldsens="true" default="true" birth="0">
+  <mobility entity="mobility_none"/>
+  <antenna entity="omnidirectionnal"/>
+</bundle>
+
+</worldsens>

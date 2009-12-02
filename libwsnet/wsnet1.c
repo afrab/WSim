@@ -7,7 +7,7 @@
  **/
 
 /*
- *  wsnet1_clt.c
+ *  wsnet1.c
  *
  *  Copyright 2005 __WorldSens__. All rights reserved.
  *  Created by Guillaume Chelius on 20/11/05.
@@ -145,93 +145,44 @@ SWAP8( htondbl, double   )
 /**************************************************************************/
 /**************************************************************************/
 
-/* public */
-int             worldsens_c_options_add           (void);
-void            worldsens_c_state_save            (void);
-void            worldsens_c_state_restore         (void);
-int             worldsens_c_get_node_id           (void);
-int             worldsens_c_rx_register           (void* arg, wsnet_callback_rx_t cbrx, char UNUSED *antenna);
-
-int             worldsens_c_initialize            (void);
-int             worldsens_c_connect               (void);
-int             worldsens_c_close                 (void);
-int             worldsens_c_tx                    (struct wsnet_tx_info *info);
-int             worldsens_c_update                (void);
-
 /* private */
-static int      worldsens_option_validate         (void);   /* validate options                       */
-static int      worldsens_close_fds               (void);   /* close socket fds                       */
-static int      worldsens_connect_server          (void);   /* snd connect pkt,    called by c_init.  */
-static int      worldsens_connect_parse_reply     (char *msg, int UNUSED len);
-static int      worldsens_disconnect              (void);   /* snd disconnect pkt, called by c_close  */
-static ssize_t  worldsens_packet_send             (int fd, char* msg, size_t len, int flags, int dump);
-static ssize_t  worldsens_packet_recv             (int fd, char* msg, size_t len, int flags, int dump);
-static int      worldsens_packet_waiting_in_queue (int fd); /* pkt waiting in fd,  called by c_update */
+static int      worldsens1_close_fds               (void);   /* close socket fds                       */
+static int      worldsens1_connect_server          (void);   /* snd connect pkt,    called by c_init.  */
+static int      worldsens1_connect_parse_reply     (char *msg, int UNUSED len);
+static int      worldsens1_disconnect              (void);   /* snd disconnect pkt, called by c_close  */
+static ssize_t  worldsens1_packet_send             (int fd, char* msg, size_t len, int flags, int dump);
+static ssize_t  worldsens1_packet_recv             (int fd, char* msg, size_t len, int flags, int dump);
+static int      worldsens1_packet_waiting_in_queue (int fd); /* pkt waiting in fd,  called by c_update */
 
-static int64_t  worldsens_packet_parse_data_rx    (char *msg, int pkt_seq, int line);
+static int64_t  worldsens1_packet_parse_data_rx    (char *msg, int pkt_seq, int line);
                                                             /* called by packet_parse (for rx packet) */
-static int64_t  worldsens_packet_parse_data_srrx  (char *msg, int pkt_seq, int line);
+static int64_t  worldsens1_packet_parse_data_srrx  (char *msg, int pkt_seq, int line);
                                                             /* called by packet_parse (for rx+rp packets) */
-static int64_t  worldsens_packet_parse_rp         (char *msg, int pkt_seq, int line);
+static int64_t  worldsens1_packet_parse_rp         (char *msg, int pkt_seq, int line);
                                                             /* called by packet_parse                */
-static int64_t  worldsens_packet_parse            (char *msg, int UNUSED len);
+static int64_t  worldsens1_packet_parse            (char *msg, int UNUSED len);
                                                             /* called by 
 							     *    - c_update
 							     *    - synched_parse_reply              
                                                              *    - tx_parse_reply 
 							     */
 
-static int64_t  worldsens_tx_parse_reply          (char *msg, int UNUSED len);
+static int64_t  worldsens1_tx_parse_reply          (char *msg, int UNUSED len);
                                                             /* called by c_tx                         */
-static int      worldsens_synched                 (int dmp);/* blocking synch,     called by c_update */
+static int      worldsens1_synched                 (int dmp);/* blocking synch,     called by c_update */
 
 #if defined(DEBUG_PROTOCOL)
-static void     worldsens_packet_dump_recv        (char *msg, int len);
-static void     worldsens_packet_dump_send        (char *msg, int len);
+static void     worldsens1_packet_dump_recv        (char *msg, int len);
+static void     worldsens1_packet_dump_send        (char *msg, int len);
 #define WPDBG(x...) 
 #else
-#define worldsens_packet_dump_recv(x...) do { } while (0)
-#define worldsens_packet_dump_send(x...) do { } while (0)
+#define worldsens1_packet_dump_recv(x...) do { } while (0)
+#define worldsens1_packet_dump_send(x...) do { } while (0)
 #endif
 
 /**************************************************************************/
 /**************************************************************************/
 /**************************************************************************/
-
-static struct moption_t node_id_opt = {
-  .longname    = "node-id",
-  .type        = required_argument,
-  .helpstring  = "worldsens node id",
-  .value       = NULL
-};
-
-static struct moption_t server_ip_opt = {
-  .longname    = "server-ip",
-  .type        = required_argument,
-  .helpstring  = "server ip address",
-  .value       = NULL
-};
-
-static struct moption_t server_port_opt = {
-  .longname    = "server-port",
-  .type        = required_argument,
-  .helpstring  = "server udp port",
-  .value       = NULL
-};
-
-static struct moption_t multicast_ip_opt = {
-  .longname    = "multicast-ip",
-  .type        = required_argument,
-  .helpstring  = "multicast ip address",
-  .value       = NULL
-};
-
-static struct moption_t multicast_port_opt = {
-  .longname    = "multicast-port",
-  .type        = required_argument,
-  .helpstring  = "multicast udp port",
-  .value       = NULL
-};
 
 static struct _worldsens_c_nobacktrack  worldsens_nobacktrack;
 static struct _worldsens_c_backtrack    worldsens_backtracked;
@@ -261,32 +212,22 @@ static struct _worldsens_c_backtrack    worldsens_backup;
 /**************************************************************************/
 /**************************************************************************/
 
-int worldsens_c_options_add(void)
-{
-  options_add(& server_ip_opt      );
-  options_add(& server_port_opt    );
-  options_add(& multicast_ip_opt   );
-  options_add(& multicast_port_opt );
-  options_add(& node_id_opt        );
-  return 0;
-}
-
-void worldsens_c_state_save     (void)
+void worldsens1_c_state_save     (void)
 {
   memcpy(&worldsens_backup, &worldsens_backtracked, sizeof(struct _worldsens_c_backtrack));
 }
 
-void worldsens_c_state_restore  (void)
+void worldsens1_c_state_restore  (void)
 {
   memcpy(&worldsens_backtracked, &worldsens_backup, sizeof(struct _worldsens_c_backtrack));
 }
 
-int worldsens_c_get_node_id(void)
+int worldsens1_c_get_node_id(void)
 {
   return WSENS_MYADDR;
 }
 
-int worldsens_c_rx_register(void* arg, wsnet_callback_rx_t cbrx, char UNUSED *antenna)
+int worldsens1_c_rx_register(void* arg, wsnet_callback_rx_t cbrx, char UNUSED *antenna)
 {
   WSENS_CBRX_ARG  = arg;	
   WSENS_CBRX_FUNC = cbrx;
@@ -298,7 +239,7 @@ int worldsens_c_rx_register(void* arg, wsnet_callback_rx_t cbrx, char UNUSED *an
 /**************************************************************************/
 /**************************************************************************/
 
-int worldsens_c_initialize(void)
+int worldsens1_c_initialize(void)
 {
  /* Initialize */
   memset(&worldsens_nobacktrack, 0, sizeof(struct _worldsens_c_nobacktrack));
@@ -312,29 +253,12 @@ int worldsens_c_initialize(void)
 /**************************************************************************/
 /**************************************************************************/
 
-int worldsens_c_connect(void)
+int worldsens1_c_connect(char *srv_addr, uint16_t srv_port, char *mul_addr, uint16_t mul_port, uint32_t node_id)
 {	
   int ret_connect;
   int on = 1;
   struct sockaddr_in addr;
   struct ip_mreq mreq;
-
-  char *srv_addr;
-  uint16_t srv_port;
-  char *mul_addr;
-  uint16_t mul_port;
-  int node_id;
-
-  /* parse options */
-  worldsens_option_validate();
-
-  srv_addr = server_ip_opt.value;
-  srv_port = atoi(server_port_opt.value);
-  mul_addr = multicast_ip_opt.value;
-  mul_port = atoi(multicast_port_opt.value);
-  node_id  = atoi(node_id_opt.value);
-
- 
 
   WSENS_MYADDR = node_id;
 	
@@ -437,7 +361,7 @@ int worldsens_c_connect(void)
       ERROR("* worldsens:init:unicast:bind error\n");
       ERROR("* =================================================\n");
       perror("worldsens_c_intialize (bind):");
-      worldsens_close_fds();
+      worldsens1_close_fds();
       return -1;
     }
 	
@@ -453,7 +377,7 @@ int worldsens_c_connect(void)
       ERROR("* worldsens:init:unicast:address error on %s\n",srv_addr);
       ERROR("* =================================================\n");
       perror("worldsens_c_intialize (inet_aton):");
-      worldsens_close_fds();
+      worldsens1_close_fds();
       return -1;
     }
   if (connect(WSENS_UNICAST, (struct sockaddr *) (&addr), sizeof(addr)) != 0) 
@@ -461,15 +385,15 @@ int worldsens_c_connect(void)
       ERROR("* =================================================\n");
       ERROR("* worldsens:init:unicast:connect error\n");
       ERROR("* =================================================\n");
-      perror("worldsens_c_intialize (connect):");
-      worldsens_close_fds();
+      perror("worldsens1_c_intialize (connect):");
+      worldsens1_close_fds();
       return -1;
     }
   
   /* ************************************************** */
   /* Worldsens Connect                                  */
   /* ************************************************** */
-  ret_connect = worldsens_connect_server();
+  ret_connect = worldsens1_connect_server();
   if (ret_connect == 0)
     {
       WSNET_DBG("WSNet:connect:ok, registering fd %d\n",WSENS_MULTICAST);
@@ -483,10 +407,10 @@ int worldsens_c_connect(void)
 /**************************************************************************/
 /**************************************************************************/
 
-int worldsens_c_close(void) 
+int worldsens1_c_close(void) 
 {
-  worldsens_disconnect();
-  worldsens_close_fds();
+  worldsens1_disconnect();
+  worldsens1_close_fds();
   return 0;
 }
 
@@ -494,7 +418,7 @@ int worldsens_c_close(void)
 /**************************************************************************/
 /**************************************************************************/
 
-int worldsens_c_tx(struct wsnet_tx_info *info) 
+int worldsens1_c_tx(struct wsnet_tx_info *info) 
 {
   char data           = info->data;
   uint32_t frequency  = info->freq_mhz * 1000000;
@@ -518,7 +442,7 @@ int worldsens_c_tx(struct wsnet_tx_info *info)
   pkt.duration        = htonll(duration);
 
   /* Send */
-  if (worldsens_packet_send(WSENS_UNICAST,(char*)(&pkt), len, 0, PKT_DMP_TX) <= 0)
+  if (worldsens1_packet_send(WSENS_UNICAST,(char*)(&pkt), len, 0, PKT_DMP_TX) <= 0)
     {
       ERROR("WSNet:tx: error during packet send\n");
       return -1;
@@ -534,14 +458,14 @@ int worldsens_c_tx(struct wsnet_tx_info *info)
       char msg[WORLDSENS_MAX_PKTLENGTH];
 
       /* Receive */
-      if ((len = worldsens_packet_recv(WSENS_MULTICAST, msg, WORLDSENS_MAX_PKTLENGTH, 0, PKT_DMP_TX)) <= 0) 
+      if ((len = worldsens1_packet_recv(WSENS_MULTICAST, msg, WORLDSENS_MAX_PKTLENGTH, 0, PKT_DMP_TX)) <= 0) 
 	{
 	  ERROR("WSNet:tx: error during packet recv\n");
 	  return -1;
 	}
 		
       /* Parse */
-      if (worldsens_tx_parse_reply(msg, len) == -1 ) 
+      if (worldsens1_tx_parse_reply(msg, len) == -1 ) 
 	{
 	  ERROR("WSNet:tx: error during packet parse\n");
 	  return -1;      
@@ -555,7 +479,7 @@ int worldsens_c_tx(struct wsnet_tx_info *info)
 /**************************************************************************/
 /**************************************************************************/
 
-static int worldsens_packet_waiting_in_queue(int fd)
+static int worldsens1_packet_waiting_in_queue(int fd)
 {
   int            res;
   fd_set         readfds;
@@ -569,7 +493,7 @@ static int worldsens_packet_waiting_in_queue(int fd)
   if ((res = select(fd+1, &readfds, NULL, NULL, &timeout)) < 0) 
     {
       ERROR("WSNet:update: (%"PRIu64") error during select() - %s\n",MACHINE_TIME_GET_NANO(),strerror(errno));
-      worldsens_close_fds();
+      worldsens1_close_fds();
       return -1;
     }
   return (res != 0) && FD_ISSET(fd, &readfds);
@@ -579,7 +503,7 @@ static int worldsens_packet_waiting_in_queue(int fd)
 /**************************************************************************/
 /**************************************************************************/
 
-int worldsens_c_update(void) 
+int worldsens1_c_update(void) 
 {
   int64_t duration;
 
@@ -604,7 +528,7 @@ int worldsens_c_update(void)
 
       mcu_signal_remove(SIG_WORLDSENS_IO);
       do {
-	if ((len = worldsens_packet_recv(WSENS_MULTICAST, msg, WORLDSENS_MAX_PKTLENGTH, 0, PKT_DMP_RX)) <= 0)  
+	if ((len = worldsens1_packet_recv(WSENS_MULTICAST, msg, WORLDSENS_MAX_PKTLENGTH, 0, PKT_DMP_RX)) <= 0)  
 	  {
 	    ERROR("WSNet:update: error during packet receive\n");
 	    return -1;
@@ -618,7 +542,7 @@ int worldsens_c_update(void)
 		return -1;
 	      }
 	  }
-      } while (worldsens_packet_waiting_in_queue(WSENS_MULTICAST));
+      } while (worldsens1_packet_waiting_in_queue(WSENS_MULTICAST));
     }
 
   /* **** 
@@ -652,7 +576,7 @@ int worldsens_c_update(void)
       /* get packet from the list */
       len = pktlist_dequeue(& WSENS_PKT_LIST, msg);
 
-      if ((duration = worldsens_packet_parse(msg, len)) == -1) 
+      if ((duration = worldsens1_packet_parse(msg, len)) == -1) 
 	{
 	  ERROR("WSNet:update: error during packet parse\n");
 	  return -1;
@@ -678,7 +602,7 @@ int worldsens_c_update(void)
   if (MACHINE_TIME_GET_NANO() >= WSENS_RDV_NEXT_TIME) 
     {
       WSNET_DBG("WSNet:update:%"PRIu64": ==== update synched start ======\n",MACHINE_TIME_GET_NANO());
-      if (worldsens_synched(PKT_DMP_SYNCH) < 0)
+      if (worldsens1_synched(PKT_DMP_SYNCH) < 0)
 	{
 	  WSNET_DBG("WSNET (%"PRIu64"): update synched error sigpipe\n",MACHINE_TIME_GET_NANO());
 	  mcu_signal_add(SIG_HOST | SIGPIPE);
@@ -697,46 +621,7 @@ int worldsens_c_update(void)
 /***********************************************************************************************/
 /***********************************************************************************************/
 
-static int worldsens_option_validate(void)
-{
-  if (node_id_opt.value != NULL) {
-    HW_DMSG_DEV(" - node id option value %s\n",node_id_opt.value);
-  } else {
-    node_id_opt.value = "1";
-  }
-
-  if (server_ip_opt.value != NULL) {
-    HW_DMSG_DEV(" - server ip option value %s\n",server_ip_opt.value);
-  } else {
-    server_ip_opt.value = "127.0.0.1";
-  }
-
-  if (server_port_opt.value != NULL) {
-    HW_DMSG_DEV(" - server port option value %d\n",atoi(server_port_opt.value));
-  } else {
-    server_port_opt.value = "9998";
-  }
-
-  if (multicast_ip_opt.value != NULL) {
-    HW_DMSG_DEV(" - multicast ip option value %s\n",multicast_ip_opt.value);
-  } else {
-    multicast_ip_opt.value = "224.0.0.1";
-  }
-
-  if (multicast_port_opt.value != NULL) {
-    HW_DMSG_DEV(" - multicast port option value %d\n",atoi(multicast_port_opt.value));
-  } else {
-    multicast_port_opt.value = "9999";
-  }
-
-  return 0;
-}
-
-/**************************************************************************/
-/**************************************************************************/
-/**************************************************************************/
-
-static int worldsens_close_fds(void)
+static int worldsens1_close_fds(void)
 {
   if (WSENS_MULTICAST != -1)
     {
@@ -756,7 +641,7 @@ static int worldsens_close_fds(void)
 /**************************************************************************/
 /**************************************************************************/
 
-static int worldsens_connect_server(void)
+static int worldsens1_connect_server(void)
 {
   int                              len,snd_len,rcv_len;
   struct _worldsens_c_connect_pkt  pkt;
@@ -770,28 +655,28 @@ static int worldsens_connect_server(void)
   len = sizeof(struct _worldsens_c_connect_pkt);
 
   /* Send */
-  if ((snd_len = worldsens_packet_send(WSENS_UNICAST,(char*)(&pkt), len, 0, PKT_DMP_CNX)) <= 0)
+  if ((snd_len = worldsens1_packet_send(WSENS_UNICAST,(char*)(&pkt), len, 0, PKT_DMP_CNX)) <= 0)
     {
       ERROR("WSNet:connect:pkt: send connect request error (len=%d)\n", snd_len);
       return -1;
     }
   	
   /* Receive */
-  if ((rcv_len = worldsens_packet_recv(WSENS_UNICAST, msg, WORLDSENS_MAX_PKTLENGTH, 0, PKT_DMP_CNX)) <= 0)
+  if ((rcv_len = worldsens1_packet_recv(WSENS_UNICAST, msg, WORLDSENS_MAX_PKTLENGTH, 0, PKT_DMP_CNX)) <= 0)
     {
       ERROR("WSNet:connect:pkt: receive connect response error (len=%d)\n", rcv_len);
       return -1;
     }
 
   /* Parse */
-  return worldsens_connect_parse_reply(msg, rcv_len);
+  return worldsens1_connect_parse_reply(msg, rcv_len);
 }
 
 /**************************************************************************/
 /**************************************************************************/
 /**************************************************************************/
 
-static int worldsens_connect_parse_reply(char *msg, int UNUSED len)
+static int worldsens1_connect_parse_reply(char *msg, int UNUSED len)
 {
   struct _worldsens_s_header *s_header  = (struct _worldsens_s_header *) msg;
   int                          pkt_type = s_header->type;
@@ -802,7 +687,7 @@ static int worldsens_connect_parse_reply(char *msg, int UNUSED len)
     case WORLDSENS_S_NOATTRADDR: /* Connection refused */
       {
 	WSNET_EXC("WSNet:connect: refused\n");
-	worldsens_close_fds();
+	worldsens1_close_fds();
 	return -1;
       }
     
@@ -825,7 +710,7 @@ static int worldsens_connect_parse_reply(char *msg, int UNUSED len)
 
     default:
       ERROR("WSNet:connect: reply packet parse error\n");
-      worldsens_close_fds();
+      worldsens1_close_fds();
       return -1;
     }
   return 0;
@@ -835,7 +720,7 @@ static int worldsens_connect_parse_reply(char *msg, int UNUSED len)
 /**************************************************************************/
 /**************************************************************************/
 
-static int worldsens_disconnect() 
+static int worldsens1_disconnect() 
 {
   int ret = 0;
   int len, slen;
@@ -845,7 +730,7 @@ static int worldsens_disconnect()
   pkt.type = WORLDSENS_C_DISCONNECT;
   pkt.node = htonl(WSENS_MYADDR);
   len = sizeof(struct _worldsens_c_connect_pkt);
-  if ((slen = worldsens_packet_send(WSENS_UNICAST,(char*)(&pkt), len, 0, PKT_DMP_DISCO)) <= 0)
+  if ((slen = worldsens1_packet_send(WSENS_UNICAST,(char*)(&pkt), len, 0, PKT_DMP_DISCO)) <= 0)
     {
       ERROR("WSNet:pkt: disconnect send error (len=%d)\n",slen);
       ret = -1;
@@ -863,7 +748,7 @@ static int worldsens_disconnect()
 /**************************************************************************/
 /**************************************************************************/
 
-static ssize_t worldsens_packet_send(int fd, char* msg, size_t len, int flags, int dump)
+static ssize_t worldsens1_packet_send(int fd, char* msg, size_t len, int flags, int dump)
 {
   ssize_t slen = 0;
 
@@ -877,12 +762,12 @@ static ssize_t worldsens_packet_send(int fd, char* msg, size_t len, int flags, i
 	    fd, (uintptr_t)msg, (long unsigned)len, (long)slen, flags, dump); 
       ERROR("= current time = %"PRIu64" ns\n",MACHINE_TIME_GET_NANO());
       ERROR("===================================================\n");
-      perror("worldsens_packet_send");
-      worldsens_close_fds();
+      perror("worldsens1_packet_send");
+      worldsens1_close_fds();
     }
   if (dump)
     {
-      worldsens_packet_dump_send(msg,slen);
+      worldsens1_packet_dump_send(msg,slen);
     }
   return slen;
 }
@@ -891,7 +776,7 @@ static ssize_t worldsens_packet_send(int fd, char* msg, size_t len, int flags, i
 /**************************************************************************/
 /**************************************************************************/
 
-static ssize_t worldsens_packet_recv(int fd, char* msg, size_t len, int flags, int dump)
+static ssize_t worldsens1_packet_recv(int fd, char* msg, size_t len, int flags, int dump)
 {
   ssize_t srec = 0;
   
@@ -905,12 +790,12 @@ static ssize_t worldsens_packet_recv(int fd, char* msg, size_t len, int flags, i
 	    fd, (uintptr_t)msg, (unsigned long)len, (long)srec, flags, dump); 
       ERROR("= current time = %"PRIu64" ns\n",MACHINE_TIME_GET_NANO());
       ERROR("===================================================\n");
-      perror("worldsens_packet_recv");
-      worldsens_close_fds();
+      perror("worldsens1_packet_recv");
+      worldsens1_close_fds();
     }
   if (dump)
     {
-      worldsens_packet_dump_recv(msg,srec);
+      worldsens1_packet_dump_recv(msg,srec);
     }
   return srec;
 }
@@ -920,7 +805,7 @@ static ssize_t worldsens_packet_recv(int fd, char* msg, size_t len, int flags, i
 /**************************************************************************/
 
 /* parse rx data: extract data related to this node */
-static int64_t worldsens_packet_parse_data_rx(char *msg, int UNUSED pkt_seq, int UNUSED line)
+static int64_t worldsens1_packet_parse_data_rx(char *msg, int UNUSED pkt_seq, int UNUSED line)
 {
 
   struct _worldsens_s_rx_pkt *pkt  = (struct _worldsens_s_rx_pkt *) msg;
@@ -963,7 +848,7 @@ static int64_t worldsens_packet_parse_data_rx(char *msg, int UNUSED pkt_seq, int
 
 /* same function as the previous one, excepted pkt structure type (struct _worldsens_s_srrx_pkt instead of
 struct _worldsens_s_rx_pkt) */
-static int64_t worldsens_packet_parse_data_srrx(char *msg, int UNUSED pkt_seq, int UNUSED line)
+static int64_t worldsens1_packet_parse_data_srrx(char *msg, int UNUSED pkt_seq, int UNUSED line)
 {
 
   struct _worldsens_s_srrx_pkt *pkt  = (struct _worldsens_s_srrx_pkt *) msg;
@@ -1008,7 +893,7 @@ static int64_t worldsens_packet_parse_data_srrx(char *msg, int UNUSED pkt_seq, i
 /**************************************************************************/
 /**************************************************************************/
 
-static int64_t worldsens_packet_parse_rp(char *msg, int UNUSED pkt_seq, int UNUSED line)
+static int64_t worldsens1_packet_parse_rp(char *msg, int UNUSED pkt_seq, int UNUSED line)
 {
   struct _worldsens_s_saverel_pkt *pkt = (struct _worldsens_s_saverel_pkt *) msg;
 
@@ -1047,7 +932,7 @@ static int64_t worldsens_packet_parse_rp(char *msg, int UNUSED pkt_seq, int UNUS
 /**************************************************************************/
 /**************************************************************************/
 
-static int64_t worldsens_packet_parse(char *msg, int UNUSED len) 
+static int64_t worldsens1_packet_parse(char *msg, int UNUSED len) 
 {
   struct _worldsens_s_header *s_header  = (struct _worldsens_s_header *) msg;
   int                          pkt_type = s_header->type;
@@ -1118,16 +1003,16 @@ static int64_t worldsens_packet_parse(char *msg, int UNUSED len)
       }
 	
     case WORLDSENS_S_RX:                           /* Rx data */
-      duration = worldsens_packet_parse_data_rx(msg,pkt_seq,1);
+      duration = worldsens1_packet_parse_data_rx(msg,pkt_seq,1);
       break;
   
     case WORLDSENS_S_SYNCH_REQ:                    /* RP point */
-      worldsens_packet_parse_rp(msg,pkt_seq,1);
+      worldsens1_packet_parse_rp(msg,pkt_seq,1);
       return 0;
 
     case (WORLDSENS_S_SYNCH_REQ | WORLDSENS_S_RX): /* RP Point and Rx data */
-      duration = worldsens_packet_parse_data_srrx(msg,pkt_seq,2);
-      worldsens_packet_parse_rp(msg,pkt_seq,2);
+      duration = worldsens1_packet_parse_data_srrx(msg,pkt_seq,2);
+      worldsens1_packet_parse_rp(msg,pkt_seq,2);
       break;
 
     default:
@@ -1142,16 +1027,16 @@ static int64_t worldsens_packet_parse(char *msg, int UNUSED len)
 /**************************************************************************/
 /**************************************************************************/
 
-static int64_t worldsens_tx_parse_reply(char* msg, int UNUSED len)
+static int64_t worldsens1_tx_parse_reply(char* msg, int UNUSED len)
 {
-  return worldsens_packet_parse(msg,len);
+  return worldsens1_packet_parse(msg,len);
 }
 
 /**************************************************************************/
 /**************************************************************************/
 /**************************************************************************/
 
-static int worldsens_synched(int dmp) 
+static int worldsens1_synched(int dmp) 
 {
   struct _worldsens_c_synched_pkt pkt;
   int len = sizeof(pkt);
@@ -1159,7 +1044,7 @@ static int worldsens_synched(int dmp)
   /* Send */
   pkt.type   = WORLDSENS_C_SYNCHED;
   pkt.rp_seq = htonl(WSENS_SEQ_RDV);
-  if (worldsens_packet_send(WSENS_UNICAST,(char*)(&pkt), len, 0, dmp) <= 0)
+  if (worldsens1_packet_send(WSENS_UNICAST,(char*)(&pkt), len, 0, dmp) <= 0)
     {
       ERROR("WSNet:synched: error during packet send\n");
       return -1;
@@ -1171,15 +1056,15 @@ static int worldsens_synched(int dmp)
     {
       char msg[WORLDSENS_MAX_PKTLENGTH];
       /* Receive */
-      if ((len = worldsens_packet_recv(WSENS_MULTICAST, msg, WORLDSENS_MAX_PKTLENGTH, 0, dmp)) <= 0) 
+      if ((len = worldsens1_packet_recv(WSENS_MULTICAST, msg, WORLDSENS_MAX_PKTLENGTH, 0, dmp)) <= 0) 
 	{
 	  ERROR("WSNet:synched: error during packet receive\n");
 	  return -1;
 	}
       
       /* Parse */
-      //      if (worldsens_synched_parse_reply(msg, len) == -1 ) 
-      if (worldsens_packet_parse(msg, len) == -1 ) 
+      //      if (worldsens1_synched_parse_reply(msg, len) == -1 ) 
+      if (worldsens1_packet_parse(msg, len) == -1 ) 
 	{
 	  ERROR("WSNet:synched: error during packet parse\n");
 	  return -1;      
@@ -1192,8 +1077,8 @@ static int worldsens_synched(int dmp)
 /**************************************************************************/
 /**************************************************************************/
 
-/* static int      worldsens_synched_parse_reply     (char *msg, int UNUSED len);  */
-/* static int worldsens_synched_parse_reply(char *msg, int UNUSED len) */
+/* static int      worldsens1_synched_parse_reply     (char *msg, int UNUSED len);  */
+/* static int worldsens1_synched_parse_reply(char *msg, int UNUSED len) */
 /* { */
 /*   struct _worldsens_c_connect_pkt *sh = (struct _worldsens_c_connect_pkt *)msg; */
 /*   if ((sh->type & WORLDSENS_S_SYNCH_REQ) == 0) */
@@ -1201,7 +1086,7 @@ static int worldsens_synched(int dmp)
 /*       ERROR("WSNet:pkt: wrong packet type during synched_parse_reply (%d,0x%02x)\n", */
 /* 	    sh->type, sh->type); */
 /*     } */
-/*   return worldsens_packet_parse(msg,len); */
+/*   return worldsens1_packet_parse(msg,len); */
 /* } */
 
 
@@ -1264,7 +1149,7 @@ static void wsnet_packet_dump(char *msg, int len, char *prfx)
 /***************************************************/
 /***************************************************/
 
-static void worldsens_packet_dump_send(char *msg, int len)
+static void worldsens1_packet_dump_send(char *msg, int len)
 {
   char prfx[] = SNDSTR;
   struct _worldsens_c_connect_pkt *sh = (struct _worldsens_c_connect_pkt *)msg;
@@ -1325,7 +1210,7 @@ static void worldsens_packet_dump_send(char *msg, int len)
 /***************************************************/
 /***************************************************/
 
-static void worldsens_packet_dump_recv(char *msg, int len)
+static void worldsens1_packet_dump_recv(char *msg, int len)
 {
   char prfx[] = RCVSTR;
   struct _worldsens_s_connect_pkt *sh = (struct _worldsens_s_connect_pkt *)msg;

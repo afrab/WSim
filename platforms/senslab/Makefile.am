@@ -1,9 +1,6 @@
 if BUILD_SENSLAB
 
 bin_PROGRAMS=wsim-senslabv13b wsim-senslabv14
-if BUILD_WORLDSENS
-bin_PROGRAMS+=worldsens-senslabv13b worldsens-senslabv14
-endif
 
 INCLUDES=-I$(top_srcdir)
 
@@ -22,17 +19,9 @@ wsim_senslabv13b_CFLAGS=-DMSP430f1611 -DSLABV13B -DCC1100
 wsim_senslabv13b_SOURCES=senslab.c
 wsim_senslabv13b_LDADD=${V13B_DEV} ${WSIMADD} ${SENSLAB_MCU}
 
-worldsens_senslabv13b_CFLAGS=-DMSP430f1611 -DSLABV13B -DCC1100
-worldsens_senslabv13b_SOURCES=senslab.c
-worldsens_senslabv13b_LDADD=${V13B_DEV} ${WSIMADD_WORLDSENS} ${SENSLAB_MCU}
-
 ## v1.4: senslab model
 wsim_senslabv14_CFLAGS=-DMSP430f1611 -DSLABV14
 wsim_senslabv14_SOURCES=senslab.c
 wsim_senslabv14_LDADD=${V14_DEV} ${WSIMADD} ${SENSLAB_MCU}
-
-worldsens_senslabv14_CFLAGS=-DMSP430f1611 -DSLABV14
-worldsens_senslabv14_SOURCES=senslab.c
-worldsens_senslabv14_LDADD=${V14_DEV} ${WSIMADD_WORLDSENS} ${SENSLAB_MCU}
 
 endif

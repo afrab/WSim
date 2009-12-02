@@ -1,9 +1,6 @@
 if BUILD_MOSAR
 
 bin_PROGRAMS=wsim-mosar
-if BUILD_WORLDSENS
-bin_PROGRAMS+=worldsens-mosar
-endif
 
 INCLUDES=-I$(top_srcdir)
 
@@ -18,9 +15,5 @@ MOSAR_DEV= ../../devices/led/libled.a			\
 wsim_mosar_CFLAGS=-DMSP430f2274 -DCC1100
 wsim_mosar_SOURCES=mosar.c
 wsim_mosar_LDADD=${MOSAR_DEV} ${WSIMADD} ${MOSAR_MCU}
-
-worldsens_mosar_CFLAGS=-DMSP430f2274 -DCC1100
-worldsens_mosar_SOURCES=mosar.c
-worldsens_mosar_LDADD=${MOSAR_DEV} ${WSIMADD_WORLDSENS} ${MOSAR_MCU}
 
 endif

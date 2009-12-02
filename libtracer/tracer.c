@@ -15,32 +15,12 @@
 #include <errno.h>
 #include <inttypes.h>
 
+#include "arch/common/hardware.h"
 #include "liblogger/logger.h"
 #include "tracer.h"
+#include "src/options.h"
 
-/****************************************
- * TRACER_USE_BACKTRACK is used to select
- * data log file dump behavior
- *
- * if defined(TRACER_USE_BACKTRACK) 
- *   we can save at each backtrack
- *   this is minimized by recording to memory 
- *   and save only when threshold is reached and
- *   a backtrack occurs
- * else
- *   we can save whenever the threshold is reached
- * 
- ****************************************/
-#if defined(WORLDSENS)
-#define TRACER_USE_BACKTRACK
-#endif
-
-#if defined(WSNET1)
 #define APP_EXIT(i) exit(i)
-#else
-#include "arch/common/hardware.h"
-#define APP_EXIT(i) machine_exit(i)
-#endif
 
 /****************************************
  * DEBUG
@@ -158,6 +138,8 @@ static int                     tracer_init_done     = 0;
 static FILE*                   tracer_datafile      = NULL;
 static tracer_sample_t         tracer_buffer[TRACER_BLOCK_EV];
 
+static enum wsens_mode_t       tracer_ws_mode;
+
 /* block access macro */
 #define tracer_end_of_block(e)   ((e & TRACER_BLOCK_EV) == TRACER_BLOCK_EV)
 
@@ -168,6 +150,7 @@ static tracer_sample_t         tracer_buffer[TRACER_BLOCK_EV];
 /* start/stop recording event */
 void  (*tracer_event_record_ptr) (tracer_id_t id, tracer_val_t val);
 static void tracer_event_record_active(tracer_id_t id, tracer_val_t val);
+static void tracer_event_record_active_ws(tracer_id_t id, tracer_val_t val);
 static void tracer_event_record_time_nocheck(tracer_id_t id, tracer_val_t val, tracer_time_t time);
 
 static void tracer_dump_data(void);
@@ -200,17 +183,20 @@ tracer_dump_header()
 #endif
 
 
-#if defined(WSNET1)
-  cycles     = 0;
-  insn       = 0;
-  time       = tracer_get_nanotime();
-  backtracks = 0;
-#else
-  cycles     = mcu_get_cycles();
-  insn       = mcu_get_insn();
-  time       = tracer_get_nanotime();
-  backtracks = machine.backtrack;
-#endif
+  if (tracer_ws_mode != WS_MODE_WSNET0)
+    {
+      cycles     = 0;
+      insn       = 0;
+      time       = tracer_get_nanotime();
+      backtracks = 0;
+    }
+  else
+    {
+      cycles     = mcu_get_cycles();
+      insn       = mcu_get_insn();
+      time       = tracer_get_nanotime();
+      backtracks = machine.backtrack;
+    }
 
 
   /* magic */
@@ -311,10 +297,12 @@ tracer_dump_header()
 /* ************************************************** */
 
 void
-tracer_init(char *filename, get_nanotime_function_t f)
+tracer_init(char *filename, get_nanotime_function_t f, int ws_mode)
 {
   int id;
   uint32_t size;
+
+  tracer_ws_mode = ws_mode;
 
   if (filename == NULL)
     return ;
@@ -380,8 +368,11 @@ void
 tracer_start(void)
 {
   if (tracer_init_done == 1)
-    {
-      tracer_event_record_ptr = tracer_event_record_active;
+    { 
+      if (tracer_ws_mode == WS_MODE_WSNET0)
+	tracer_event_record_ptr = tracer_event_record_active;
+      else
+	tracer_event_record_ptr = tracer_event_record_active_ws;
     }
   else
     {
@@ -513,6 +504,20 @@ tracer_event_record_time_nocheck(tracer_id_t id, tracer_val_t val, tracer_time_t
 /* ************************************************** */
 /* ************************************************** */
 
+/****************************************
+ * 2 functions to select data log file
+ * dump behavior depending on worldsens mode
+ *
+ * if wsnet1 or wsnet2 (_ws function)
+ *   we can save at each backtrack
+ *   this is minimized by recording to memory 
+ *   and save only when threshold is reached and
+ *   a backtrack occurs
+ * else
+ *   we can save whenever the threshold is reached
+ * 
+ ****************************************/
+
 static void 
 tracer_event_record_active(tracer_id_t id, tracer_val_t val)
 {
@@ -522,12 +527,21 @@ tracer_event_record_active(tracer_id_t id, tracer_val_t val)
       uint64_t time = tracer_get_nanotime();
       tracer_event_record_time_nocheck(id,val,time);
     }
-#if !defined(TRACER_USE_BACKTRACK)
   if (EVENT_TRACER.ev_count > TRACER_BLOCK_THRESHOLD)
     {
       tracer_dump_data();
     }
-#endif
+}
+
+static void 
+tracer_event_record_active_ws(tracer_id_t id, tracer_val_t val)
+{
+  /* we record only value change to limit trace size */
+  if (val != EVENT_TRACER.id_val[id])
+    {
+      uint64_t time = tracer_get_nanotime();
+      tracer_event_record_time_nocheck(id,val,time);
+    }
 }
 
 /* ************************************************** */

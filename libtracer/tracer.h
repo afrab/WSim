@@ -28,7 +28,7 @@ typedef uint64_t (*get_nanotime_function_t)();
  * an EVENT_TRACER macro must be defined externally to point
  * to a static tracer_t variable
  */
-void        tracer_init         (char *filename, get_nanotime_function_t f);
+void        tracer_init         (char *filename, get_nanotime_function_t f, int ws_mode);
 tracer_id_t tracer_event_add_id (int width, char* label, char* module);
 void        tracer_close        (void);
 
@@ -65,7 +65,7 @@ void  tracer_state_restore      (void);
 #if 0
 #define NOOP  do { } while (0)
 #define tracer_close()                NOOP
-#define tracer_init(f1,f2)            NOOP
+#define tracer_init(f1,f2,f3)         NOOP
 #define tracer_start()                NOOP
 #define tracer_stop()                 NOOP
 #define tracer_event_add_id(j,k,l)    0

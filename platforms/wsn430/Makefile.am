@@ -1,9 +1,6 @@
 if BUILD_WSN430
 
 bin_PROGRAMS=wsim-wsn430
-if BUILD_WORLDSENS
-bin_PROGRAMS+=worldsens-wsn430
-endif
 
 INCLUDES=-I$(top_srcdir)
 
@@ -19,9 +16,5 @@ WSN430_DEV= ../../devices/led/libled.a			\
 wsim_wsn430_CFLAGS=-DMSP430f1611 -DCC1100
 wsim_wsn430_SOURCES=wsn430.c
 wsim_wsn430_LDADD=${WSN430_DEV} ${WSIMADD} ${WSN430_MCU}
-
-worldsens_wsn430_CFLAGS=-DMSP430f1611 -DCC1100
-worldsens_wsn430_SOURCES=wsn430.c
-worldsens_wsn430_LDADD=${WSN430_DEV} ${WSIMADD_WORLDSENS} ${WSN430_MCU}
 
 endif

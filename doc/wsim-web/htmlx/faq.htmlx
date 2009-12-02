@@ -18,13 +18,20 @@
 
       <li><b>For users</b></a><br>
 	  <ol>
-	    <li><a href="#2-3"> ?</a></li>
+	    <li><a href="#2-3">Can I use WSim for TinyOS applications ?</a></li>
 	  </ol>
       </li>
 
       <li><b>Tools</b></a><br>
 	  <ol>
-	    <li><a href="#3-1"> ?</a></li>
+	    <li><a href="#3-1">How can I compare easily two or more
+      traces coming from different nodes ?</a></li>
+	  </ol>
+      </li>
+
+      <li><b>Troubles</b></a><br>
+	  <ol>
+	    <li><a href="#4-1">I get a multicast error when trying to use WSim + WSNet, what goes wrong ?</a></li>
 	  </ol>
       </li>
     </ul>
@@ -88,6 +95,16 @@
 	The <code>--merge</code> option can be
 	seen <a href="http://wsim.gforge.inria.fr/tutorials/telosb-tinyos/debugging.html#traces">here</a>
 	on TinyOS traces.
+      </p>
+    </ol>
+      
+    [ <a href="#top"><b>Back to Top</b></a> ]
+      
+    <h2 id="intro">Troubles</h2>
+    <ol>
+      <li><a name="4-1"></a><b> I get a multicast error when trying to use WSim + WSNet, what goes wrong?</b></ br></li>
+      <p>
+	 <code>route add -net 224.0.0.0 netmask 255.0.0.0 lo</code>
       </p>
     </ol>
       

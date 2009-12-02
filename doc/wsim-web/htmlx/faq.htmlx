@@ -18,7 +18,7 @@
 
       <li><b>For users</b></a><br>
 	  <ol>
-	    <li><a href="#2-3">Can I use WSim for TinyOS applications ?</a></li>
+	    <li><a href="#2-1">Can I use WSim for TinyOS applications ?</a></li>
 	  </ol>
       </li>
 
@@ -32,6 +32,7 @@
       <li><b>Troubles</b></a><br>
 	  <ol>
 	    <li><a href="#4-1">I get a multicast error when trying to use WSim + WSNet, what goes wrong ?</a></li>
+	    <li><a href="#4-2">When using WSim + WSNet, WConsole output displays sereval times the same data, why ?</a></li>
 	  </ol>
       </li>
     </ul>
@@ -57,7 +58,7 @@
 	Nothing. WSim is under the Cecill free software license agreement.
       </p> 
 
-      <li><a name="1-4"></a><b>Who/Why to contact ?</b></ br></li>
+      <li><a name="1-3"></a><b>Who/Why to contact ?</b></ br></li>
       <p>
 	If you have any remark, question or contribution to this simulator,  
 	do not hesitate to contact one of the developpers. Inputs and  
@@ -102,9 +103,22 @@
       
     <h2 id="intro">Troubles</h2>
     <ol>
-      <li><a name="4-1"></a><b> I get a multicast error when trying to use WSim + WSNet, what goes wrong?</b></ br></li>
+      <li><a name="4-1"></a><b> I get a multicast error when trying to use WSim + WSNet, what goes wrong ?</b></ br></li>
       <p>
-	 <code>route add -net 224.0.0.0 netmask 255.0.0.0 lo</code>
+	If you are not connected to internet you may need to add a route as following :
+      </p>
+      <p>
+	 <code>$route add -net 224.0.0.0 netmask 255.0.0.0 lo</code>
+      </p>
+      <li><a name="4-2"></a><b> When using WSim + WSNet, WConsole output displays sereval times the same data, why ?</b></ br></li>
+      <p>
+	It is a normal behaviour due to backtrack mechanism : nodes synchronization is performed by rendez-vous. If an event happen before next rendez-vous, a new appointment will be set and nodes will backtrack to last synchronisation point. The program after the synchronisation point is going to be rexecuted, resulting in a double (or more) display on WConsole.
+      </p>
+      <p>
+	Nevertheless an option has been added to fix this trouble. The serial output is buffered and sent only when reaching a synchronisation point. This patch introduces a small lag in serial output, but same data is sent only once.
+      </p>
+      <p>
+	You can change the behavior by using a command line argument <code>--serial1_io=bk:[arg]</code> instead of <code>--serial1_io=[arg]</code>
       </p>
     </ol>
       

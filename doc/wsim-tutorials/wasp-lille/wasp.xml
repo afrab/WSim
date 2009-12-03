@@ -74,7 +74,7 @@
 
       <para>
 	To compile WSim please use the following configuration line:
-	<programlisting><computeroutput>configure --enable-ptty --enable-wsnet1 --enable-gui --enable-debug
+	<programlisting><computeroutput>configure --enable-ptty --enable-gui --enable-debug
 make</computeroutput></programlisting>
       </para>
 
@@ -505,7 +505,7 @@ WTRC=~/wasp/build/wtracer/src/wtracer
 
 LOG="--logfile=wsim.log --verbose=2"
 TRC="--trace=wsim.trc"
-SERIAL="--serial1_io=stdout"
+SERIAL="--serial1_io=udp:localhost:6000:localhost:7000"
 MODE="--mode=time --modearg=10s"
 
 ${WSIM} ${MODE} --ui ${LOG} ${TRC} ${SERIAL} $1
@@ -789,24 +789,28 @@ DC_miss :                    0
     <title>Starting wsnet1</title>
     <para>
       WSim currently uses the previous version of WSNet which is
-      available in the /utils directory of WSim sources. A much more
-      recent versio of WSNet is available here: <ulink
-      url="http://wsnet.gforge.inria.fr/">WSNet2 website</ulink>.  The
-      WSim update to WSNet is in progress and should be available to
-      bring more communication channels and capabilities between WSim
-      and WSNet (multi antenna devices, physical world information
-      ...)
+      available in the <computeroutput>/utils</computeroutput>
+      directory of WSim sources. A much more recent version of WSNet is available here: 
+      <ulink url="http://wsnet.gforge.inria.fr/">WSNet2 website</ulink>. The
+      WSim update to WSNet2 is now available and brings more communication 
+      channels and capabilities between WSim and WSNet (multi antenna 
+      devices, physical world information...). Please see 
+      <ulink url="http://wsim.gforge.inria.fr/tutorials/wsim-wsnet/index.html">WSNet tutorial</ulink>
+      for more informations.
     </para>
     <para>
-      <programlisting><computeroutput>wsnet1 -F config/</computeroutput></programlisting>
+      Use the following command to run WSNet1 :
+    </para>
+    <para>
+      <programlisting><computeroutput>wsnet1</computeroutput></programlisting>
 
 
     <note>
-      <title>WSNet configuration</title>
+      <title>WSNet1 configuration</title>
       <para>
-	This tutorial assumes that we use the default configuration which is 
-	flat open space without fading containing up to 128 static nodes. Transmissions
-	are performed without fading and only collisions are taken into account.	
+	WSNet1 version included in WSim sources has a configuration set to a perfect 
+	radio physical layer containing up to 128 static nodes. Transmissions are 
+	performed without fading and only collisions are taken into account.	
       </para>
     </note>
 
@@ -821,6 +825,15 @@ DC_miss :                    0
       simulation. This configuration will be used to instanciate the nodes parameters such
       as location, mobility, etc.
     </para>
+
+    <note>
+      <title>WSim network configuration</title>
+      <para>
+	To ask to WSim to use WSNet2 interface, you just have to add <computeroutput>--wsnet2</computeroutput>
+	parameter. <computeroutput>--wsnet1</computeroutput> option also exists but is
+	facultative.
+      </para>
+    </note>
 
     <para>
      The next demo application is taken from the MANTIS OS source tree compiled for BSN2 nodes in
@@ -837,20 +850,16 @@ DC_miss :                    0
     <para>
     <programlisting><computeroutput>#! /bin/sh
 WSIM=~/projets/worldsens/build/wsim-debug/platforms/iclbsn/wsim-iclbsn2
-WNET=~/projets/worldsens/build/wsim-debug/platforms/iclbsn/worldsens-iclbsn2
 
 SERIAL="--serial1_io=udp:localhost:6000:localhost:7000"
 LOG="--logfile=wsim.log --verbose=9"
 TRC="--trace=wsim.trc"
+WS_MODE="--wsnet1"
 
 MODE="--mode=time --modearg=10s"
 #MODE="--mode=gdb"
 
-if [ x"$1" == x"-n" ] ; then
-    ${WNET} ${MODE} --ui ${LOG} ${TRC} ${SERIAL} --node-id=$2 $3
-else
-    ${WSIM} ${MODE} --ui ${LOG} ${TRC} ${SERIAL} $1
-fi
+${WSIM} ${MODE} --ui ${LOG} ${TRC} ${SERIAL} ${WS_MODE}$1
 
 ${WTRC} --in=wsim.trc --out=wsim.vcd --format=vcd</computeroutput></programlisting></para>
 

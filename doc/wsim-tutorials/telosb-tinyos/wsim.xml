@@ -111,12 +111,12 @@
       components behavior and gives back information at the TinyOS
       programming. WSim, in contrast, uses assembly instruction and
       provides feedback at C source level
-      (the <emphasis role="bold"><computeroutput>app.c</computeroutput></emphasis> file generated
-      by <emphasis role="bold"><computeroutput>nesc</computeroutput></emphasis>). Although TinyOS includes 
-      compiler helpers to go back from the <emphasis role="bold"><computeroutput>app.c</computeroutput></emphasis>
+      (the <userinput>app.c</userinput> file generated
+      by <userinput>nesc</userinput>). Although TinyOS includes 
+      compiler helpers to go back from the <userinput>app.c</userinput>
       to TinyOS components we do not use this feature in this tutorial
       and we will present how to debug TinyOS application starting from
-      <emphasis role="bold"><computeroutput>app.c</computeroutput></emphasis> file.
+      <userinput>app.c</userinput> file.
     </para>
 
   </chapter>
@@ -138,14 +138,12 @@
 
     <para>
       Go to the RadioCountToLeds folder and compile it for TelosB platform:
-      <programlisting>
-	$cd ./apps/RadioCountToLeds/
-	$make telosb
-      </programlisting>
+      <programlisting><computeroutput>$cd ./apps/RadioCountToLeds/
+$make telosb</computeroutput></programlisting>
     </para>
 
     <para>
-      The <emphasis role="bold"><computeroutput>main.exe</computeroutput></emphasis> binary program is generated into the <emphasis role="bold"><computeroutput>.apps/RadioCountToLeds/build/telosb</computeroutput></emphasis> folder. You can use it with WSim by renaming it into a <emphasis role="bold"><computeroutput>*.elf</computeroutput></emphasis> file.
+      The <userinput>main.exe</userinput> binary program is generated into the <userinput>.apps/RadioCountToLeds/build/telosb</userinput> folder. You can use it with WSim by renaming it into a <userinput>*.elf</userinput> file.
     </para>
 
     <para>
@@ -153,10 +151,8 @@
     </para>
 
     <para>
-      To avoid this drawback, you just have to compile manually with <emphasis role="bold"><computeroutput>mspgcc</computeroutput></emphasis> the Nesc generated <emphasis role="bold"><computeroutput>app.c</computeroutput></emphasis> file, which has been created in the <emphasis role="bold"><computeroutput>./apps/RadioCountToLeds/build/telosb/</computeroutput></emphasis> folder :
-      <programlisting>
-	$msp430-gcc app.c -mmcu=msp430x1611 -g -o radiocounttoleds.elf
-      </programlisting>
+      To avoid this drawback, you just have to compile manually with <userinput>mspgcc</userinput> the Nesc generated <userinput>app.c</userinput> file, which has been created in the <userinput>./apps/RadioCountToLeds/build/telosb/</userinput> folder :
+      <programlisting><computeroutput>$msp430-gcc app.c -mmcu=msp430x1611 -g -o radiocounttoleds.elf</computeroutput></programlisting>
     </para>
 
   </chapter>
@@ -173,18 +169,12 @@
 
       <para>
 	In this section, we will show you how to start a simulation involving two nodes executing RadioCountToLeds program. To achieve that, we need to launch two WSim instances (one per node), and WSNet. Here are the commands to execute in three terminals :
-	<programlisting>
-	  $wsnet1
-	</programlisting>
+	<programlisting><computeroutput>$wsnet1</computeroutput></programlisting>
 
-	<programlisting>
-	  $wsim-telosb --ui --mode=time --modearg=5s --wsnet1 --node-id=0 --trace=trace0.trc radiocounttoleds.elf
-	</programlisting>
+	<programlisting><computeroutput>$wsim-telosb --ui --mode=time --modearg=5s --wsnet1 --node-id=0 --trace=trace0.trc radiocounttoleds.elf</computeroutput></programlisting>
 
-	<programlisting>
-	  $wsim-telosb --ui --mode=time --modearg=5s --wsnet1 --node-id=1 --trace=trace1.trc radiocounttoleds.elf
-	</programlisting>
-	The <emphasis role="bold"><computeroutput>--trace</computeroutput></emphasis> option enables to gather traces during the WSim simulation.
+	<programlisting><computeroutput>$wsim-telosb --ui --mode=time --modearg=5s --wsnet1 --node-id=1 --trace=trace1.trc radiocounttoleds.elf</computeroutput></programlisting>
+	The <userinput>--trace</userinput> option enables to gather traces during the WSim simulation.
       </para>
 
       <figure id="radiocounttoleds_simulation">
@@ -202,19 +192,20 @@
       <title>WSim output traces</title>
 
       <para>
-	In order to interprete WSim traces, you may use <ulink url="http://gtkwave.sourceforge.net/">GtkWave software</ulink>. You need first to convert <emphasis role="bold"><computeroutput>*.trc</computeroutput></emphasis> files into <emphasis role="bold"><computeroutput>*.vcd</computeroutput></emphasis> files by using WTracer tool (available in WSim  <emphasis role="bold"><computeroutput>./utils/wtracer/</computeroutput></emphasis> sources) :
-	<programlisting>
-	  $wtracer --in=trace0.trc --out=trace0.vcd --format=vcd
-	  $wtracer --in=trace1.trc --out=trace1.vcd --format=vcd
-	</programlisting>
-	Note that you may find further informations on <emphasis role="bold"><computeroutput>VCD</computeroutput></emphasis> format in the <ulink url="http://wsim.gforge.inria.fr/tutorials/msp430-adc/ch03.html#id522665">ADC tutorial</ulink>.
+	In order to interprete WSim traces, you may use <ulink url="http://gtkwave.sourceforge.net/">GtkWave software</ulink>. You need first to convert <userinput>*.trc</userinput> files into <userinput>*.vcd</userinput> files by using WTracer tool (available in WSim  <userinput>./utils/wtracer/</userinput> sources) :
+	<programlisting><computeroutput>$wtracer --in=trace0.trc --out=trace0.vcd --format=vcd
+$wtracer --in=trace1.trc --out=trace1.vcd --format=vcd</computeroutput></programlisting>
+	<note>
+	  <title>VCD format</title>
+	  <para>
+	    You will find further informations on <userinput>VCD</userinput> format in the <ulink url="http://wsim.gforge.inria.fr/tutorials/msp430-adc/ch03.html#id522665">ADC tutorial</ulink>.
+	  </para>
+	</note>
       </para>
 
       <para>
 	Then you just have to run GtkWave with the appropriate file, for example to see node 0 traces :
-	<programlisting>
-	  $gtkwave trace0.vcd
-	</programlisting>
+	<programlisting><computeroutput>$gtkwave trace0.vcd</computeroutput></programlisting>
       </para>
 
       <figure id="radiocounttoleds_gtkwave1">
@@ -227,11 +218,9 @@
       </figure>
 
       <para>
-	In order to compare easily several nodes traces, WTracer allows to merge several <emphasis role="bold"><computeroutput>*.trc</computeroutput></emphasis> files into only one <emphasis role="bold"><computeroutput>*.vcd</computeroutput></emphasis> file. For instance with our example :
-	<programlisting>
-	  $wtracer --out=multi.vcd --format=vcd --merge --multi trace*.trc
- 	  $gtkwave multi.vcd
-	</programlisting>
+	In order to compare easily several nodes traces, WTracer allows to merge several <userinput>*.trc</userinput> files into only one <userinput>*.vcd</userinput> file. For instance with our example :
+	<programlisting><computeroutput>$wtracer --out=multi.vcd --format=vcd --merge --multi trace*.trc
+$gtkwave multi.vcd</computeroutput></programlisting>
       </para>
 
 

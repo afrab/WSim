@@ -112,18 +112,16 @@
       <section id="wsnet1_installation">
 	<title>WSNet1</title>
 	<para>
-	  Since WSNet1 is not supported anymore, this version is available in the WSim sources, in <emphasis role="bold"><computeroutput>/utils/wsnet1/</computeroutput></emphasis>.
+	  Since WSNet1 is not supported anymore, this version is available in the WSim sources, in <userinput>/utils/wsnet1/</userinput>.
 	</para>
 	
 	<para>
 	  Use the following commands to install WSNet1:
-	  <programlisting>
-$./bootstrap
+	  <programlisting><computeroutput>$./bootstrap
 $./configure
 $./make
-$./sudo make install
-	  </programlisting>
-	  You may get more configuration options by entering <emphasis role="bold"><computeroutput>$./configure -h</computeroutput></emphasis>.
+$./sudo make install</computeroutput></programlisting>
+	  You may get more configuration options by entering <userinput>$./configure -h</userinput>.
 	</para>
       </section>
 
@@ -177,10 +175,10 @@ $./sudo make install
         <section id="wsnet2_sim">
 	  <title>Simulation part</title>
 	  <para>
-	    In the <emphasis role="bold"><computeroutput>simulation</computeroutput></emphasis> xml tag, <emphasis role="bold"><computeroutput>node</computeroutput></emphasis> variable must be set to the exact number of wsim nodes.
+	    In the <userinput>simulation</userinput> xml tag, <userinput>node</userinput> variable must be set to the exact number of wsim nodes.
 	  </para>	  
 	  <para>
-	    Still in the <emphasis role="bold"><computeroutput>simulation</computeroutput></emphasis> xml tag, <emphasis role="bold"><computeroutput>duration</computeroutput></emphasis> variable may be ommited if you need an infinite simulation time.
+	    Still in the <userinput>simulation</userinput> xml tag, <userinput>duration</userinput> variable may be ommited if you need an infinite simulation time.
 	  </para>	  
 	</section>
 		
@@ -188,7 +186,7 @@ $./sudo make install
         <section id="wsnet2_wsens">
 	  <title>Worldsens</title>
 	  <para>
-	  The <emphasis role="bold"><computeroutput>worldsens</computeroutput></emphasis> option of the <emphasis role="bold"><computeroutput>bundle</computeroutput></emphasis> tag is very important. It must be set to <emphasis role="bold"><computeroutput>true</computeroutput></emphasis> for WSNet2 to register a node as a WSim node.
+	  The <userinput>worldsens</userinput> option of the <userinput>bundle</userinput> tag is very important. It must be set to <userinput>true</userinput> for WSNet2 to register a node as a WSim node.
 	  </para>
 	</section> 
 
@@ -196,38 +194,32 @@ $./sudo make install
 	<section id="wsnet2_mod">
 	  <title>Modulations</title>
 	  <para>
-	  In the <emphasis role="bold"><computeroutput>Entities</computeroutput></emphasis> part, you have to specify witch modulations nodes are going to use. The simpliest way to proceed, is to put all modulation implemented in WSNet2. For instance :
+	  In the <userinput>Entities</userinput> part, you have to specify witch modulations nodes are going to use. The simpliest way to proceed, is to put all modulation implemented in WSNet2. For instance :
 	  </para>
 
-	  <programlisting>
-<![CDATA[
-<entity name="none" library="modulation_none">
+	  <programlisting><computeroutput><![CDATA[<entity name="none" library="modulation_none">
 </entity>
 <entity name="fsk" library="modulation_fsk">
 </entity>
 <entity name="oqpsk" library="modulation_oqpsk">
 </entity>
-]]>
-	  </programlisting>
+]]></computeroutput></programlisting>
 
-	  <programlisting>
-<![CDATA[
-<!-- == Environment ===================================================== -->
+	  <programlisting><computeroutput><![CDATA[<!-- == Environment ===================================================== -->
 <environment>
   <modulation entity="none"/>
   <modulation entity="fsk"/>
   <modulation entity="oqpsk"/>
   ...
 </environment>
-]]>
-	  </programlisting>
+]]></computeroutput></programlisting>
 
 	  <para> 
 	  WSim has a matching table of modulations that is compared to WSNet modulations declared in the configuration file, to find the right modulation.
 	  </para>
 	  
 	  <para>
-	  However the modulation requested by WSim (in fact by the WSim radio model) may not be available in WSNet2. In that case WSim will choose <emphasis role="bold"><computeroutput>modulation_none</computeroutput></emphasis> library in priority, and if it is also not available, the first modulation entered in the WSNet2 configuration file.
+	  However the modulation requested by WSim (in fact by the WSim radio model) may not be available in WSNet2. In that case WSim will choose <userinput>modulation_none</userinput> library in priority, and if it is also not available, the first modulation entered in the WSNet2 configuration file.
 	  </para>
        
 	  <para>
@@ -242,9 +234,7 @@ $./sudo make install
 	    It may be interesting to set each node position in order to make the simulation more accurate. To do so, you have to declare as many mobility entities as nodes. For example :
 	  </para>
 
-	  <programlisting>
-<![CDATA[
-<!-- Node0 position entity -->
+	  <programlisting><computeroutput><![CDATA[<!-- Node0 position entity -->
 <entity name="static0" library="mobility_static" >
 <default x="4" y="8" z="8"/>
 </entity>
@@ -260,15 +250,12 @@ $./sudo make install
 <entity name="static3" library="mobility_static" >
 <default x="8" y="4" z="8"/>
 </entity>
-]]>
-	  </programlisting>
+]]></computeroutput></programlisting>
 	  <para>
-	    Each mobility <emphasis role="bold"><computeroutput>entity</computeroutput></emphasis> tag is going to match one <emphasis role="bold"><computeroutput>bundle</computeroutput></emphasis> tag. And finally you enter as many <emphasis role="bold"><computeroutput>node</computeroutput></emphasis> tags as nodes. For example :  
+	    Each mobility <userinput>entity</userinput> tag is going to match one <userinput>bundle</userinput> tag. And finally you enter as many <userinput>node</userinput> tags as nodes. For example :  
 	  </para>
 	  
-	  <programlisting>
-<![CDATA[
-<!-- == Bundle ===================================================== -->
+	  <programlisting><computeroutput><![CDATA[<!-- == Bundle ===================================================== -->
 <bundle name="node0" worldsens="true" default="true" birth="0">
   <mobility entity="static0"/>
   ...
@@ -295,8 +282,7 @@ $./sudo make install
 <node id="1" as="node1"/>
 <node id="2" as="node2"/>
 <node id="3" as="node3"/>
-]]>
-	  </programlisting>
+]]></computeroutput></programlisting>
 
 	</section>
 
@@ -305,29 +291,23 @@ $./sudo make install
 	  <title>Signal propagation</title>
 
 	  <para> 
-	    Once you have set nodes positions you can modified signal properties to limit signal range. You do that with the propagation <emphasis role="bold"><computeroutput>entity</computeroutput></emphasis> as shown :
+	    Once you have set nodes positions you can modified signal properties to limit signal range. You do that with the propagation <userinput>entity</userinput> as shown :
 	  </para> 
 
-	  <programlisting>
-<![CDATA[
-<entity name="range" library="propagation_range" >
+	  <programlisting><computeroutput><![CDATA[<entity name="range" library="propagation_range" >
   <init  range="6"/>
 </entity>
-]]>
-	  </programlisting>
+]]></computeroutput></programlisting>
 
 	  <para> 
-	    Here with <emphasis role="bold"><computeroutput>propagation_range</computeroutput></emphasis> library, a signal node forms a 6 meters disk : a node receives packets from another node, only if they are less than 6 meters far.
+	    Here with <userinput>propagation_range</userinput> library, a signal node forms a 6 meters disk : a node receives packets from another node, only if they are less than 6 meters far.
 	  </para> 
 
-	  <programlisting>
-<![CDATA[
-<environment>
+	  <programlisting><computeroutput><![CDATA[<environment>
   <propagation entity="range" range="6"/>
   ...
 </environment>
-]]>
-	  </programlisting>
+]]></computeroutput></programlisting>
 	</section>
 
       </section>
@@ -340,22 +320,17 @@ $./sudo make install
     <section id="starting_wsnet1">
       <title>WSNet1</title>
 	  <para> 
-	    If your <emphasis role="bold"><computeroutput>PATH</computeroutput></emphasis> is correctly set, just enter :
+	    If your <userinput>PATH</userinput> is correctly set, just enter :
 	  </para>
-	  <programlisting>
-$wsnet1
-	  </programlisting>
-
+	  <programlisting><computeroutput>$wsnet1</computeroutput></programlisting>
     </section>
 
     <section id="starting_wsnet2">
       <title>WSNet2</title>
 	  <para> 
-	    If your <emphasis role="bold"><computeroutput>PATH</computeroutput></emphasis> is correctly set and if your xml configuration file is <emphasis role="bold"><computeroutput>worldsens.xml</computeroutput></emphasis>, enter :
+	    If your <userinput>PATH</userinput> is correctly set and if your xml configuration file is <userinput>worldsens.xml</userinput>, enter :
 	  </para>
-	  <programlisting>
-$wsnet -c worldsens.xml
-	  </programlisting>
+	  <programlisting><computeroutput>$wsnet -c worldsens.xml</computeroutput></programlisting>
     </section>
 
     </section>
@@ -364,17 +339,15 @@ $wsnet -c worldsens.xml
       <title>Starting WSim</title>
 
       <para>
-	To launch WSim for WSNet, you have to specify the <emphasis role="bold"><computeroutput>--node-id=[id]</computeroutput></emphasis> option.
+	To launch WSim for WSNet, you have to specify the <userinput>--node-id=[id]</userinput> option.
       </para>
       <para>
-	To choose between WSNet1 and WSNet2, use the <emphasis role="bold"><computeroutput>--wsnet1</computeroutput></emphasis> option or the <emphasis role="bold"><computeroutput>--wsnet2</computeroutput></emphasis> option. If this option is not entered, WSim will choose WSNet1 by default (only if <emphasis role="bold"><computeroutput>--node-id</computeroutput></emphasis> option is specified, otherwise WSim will run standalone).
+	To choose between WSNet1 and WSNet2, use the <userinput>--wsnet1</userinput> option or the <userinput>--wsnet2</userinput> option. If this option is not entered, WSim will choose WSNet1 by default (only if <userinput>--node-id</userinput> option is specified, otherwise WSim will run standalone).
       </para>
       <para>
-	If your <emphasis role="bold"><computeroutput>PATH</computeroutput></emphasis> is correctly set, enter for instance:
+	If your <userinput>PATH</userinput> is correctly set, enter for instance:
       </para>
-      <programlisting>
-$wsim-senslabv14 --wsnet2 --node-id=1 myprog.elf
-      </programlisting>
+      <programlisting><computeroutput>$wsim-senslabv14 --wsnet2 --node-id=1 myprog.elf</computeroutput></programlisting>
 
     </section>
   
@@ -409,11 +382,9 @@ $wsim-senslabv14 --wsnet2 --node-id=1 myprog.elf
 	As explained previouly, in a simulation using WSNet1, each node will see all the other nodes.
       </para>
       <para>
-	To launch the simulation, go in the <emphasis role="bold"><computeroutput>/examples/wsn430v14/demo_tuto_wsnet/wsnet1</computeroutput></emphasis> folder of WSim sources, and enter:
+	To launch the simulation, go in the <userinput>/examples/wsn430v14/demo_tuto_wsnet/wsnet1</userinput> folder of WSim sources, and enter:
       </para>
-      <programlisting>
-$./demo.sh
-      </programlisting>
+      <programlisting><computeroutput>$./demo.sh</computeroutput></programlisting>
 
       <figure id="example_wsnet1">
 	<title>WSNet1 example execution</title>
@@ -430,7 +401,7 @@ $./demo.sh
     <section id="wsnet2_example">
       <title>Example with WSNet2</title>
       <para>
-	To show some WSNet2 features, we are going to make a more advanced simulation. In the WSNet2 configuration file (<emphasis role="bold"><computeroutput>/examples/wsn430v14/wsnet2/worldsens.xml</computeroutput></emphasis>), we have defined nodes positions over an area of 16*16*16 meters, as represented on the following diagram:
+	To show some WSNet2 features, we are going to make a more advanced simulation. In the WSNet2 configuration file (<userinput>/examples/wsn430v14/wsnet2/worldsens.xml</userinput>), we have defined nodes positions over an area of 16*16*16 meters, as represented on the following diagram:
       </para>
 
       <figure id="example_nodes_pos">
@@ -451,11 +422,9 @@ $./demo.sh
       </para>
 
       <para>
-	To launch the simulation, go in the <emphasis role="bold"><computeroutput>/examples/wsn430v14/demo_tuto_wsnet/wsnet2</computeroutput></emphasis> folder of WSim sources, and enter:
+	To launch the simulation, go in the <userinput>/examples/wsn430v14/demo_tuto_wsnet/wsnet2</userinput> folder of WSim sources, and enter:
       </para>
-      <programlisting>
-$./demo.sh
-      </programlisting>
+      <programlisting><computeroutput>$./demo.sh</computeroutput></programlisting>
 
       <figure id="example_wsnet2">
 	<title>WSNet2 example execution : node 0 has been killed by fire</title>
@@ -474,7 +443,7 @@ $./demo.sh
 	<itemizedlist mark="bullet" spacing="normal">
 	  <listitem>
 	    <para>
-	      When performing a WSim + WSNet simulation, you always must set WSim <emphasis role="bold"><computeroutput>node-id</computeroutput></emphasis> option, for WSim nodes to be registered by WSNet. You have to be particularly carefull, if you have defined sereral nodes configurations in WSNet2 : node 0 (in the xml configuration file of WSNet2) matches first WSim connected node in WSNet2, node 1 the second one, and so on...
+	      When performing a WSim + WSNet simulation, you always must set WSim <userinput>node-id</userinput> option, for WSim nodes to be registered by WSNet. You have to be particularly carefull, if you have defined sereral nodes configurations in WSNet2 : node 0 (in the xml configuration file of WSNet2) matches first WSim connected node in WSNet2, node 1 the second one, and so on...
 	    </para>
 	  </listitem>
 	</itemizedlist>
@@ -482,7 +451,7 @@ $./demo.sh
 	<itemizedlist mark="bullet" spacing="normal">
 	  <listitem>
 	    <para>
-	      As WSim is cycle precise, if you run several nodes by using a script, they may be exactly synchronized. If all  nodes have the same program, you might obtain unexpected results : for instance all nodes sending and receiving exactly at the same time. A solution is to use <emphasis role="bold"><computeroutput>sleep</computeroutput></emphasis> sh command (or equivalent), to introduce a small lag between nodes starting.
+	      As WSim is cycle precise, if you run several nodes by using a script, they may be exactly synchronized. If all  nodes have the same program, you might obtain unexpected results : for instance all nodes sending and receiving exactly at the same time. A solution is to use <userinput>sleep</userinput> sh command (or equivalent), to introduce a small lag between nodes starting.
 	    </para>
 	  </listitem>
 	</itemizedlist>

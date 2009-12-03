@@ -51,7 +51,7 @@ void set_global_time(uint64_t time)
 int simulation_start(int argc, char* argv[]) 
 {
   logger_init("stdout",4);
-  tracer_init("wsnet1.trc", get_global_time);
+  tracer_init("wsnet1.trc", get_global_time, 0);
   tracer_start();
 
   if (command_line (argc, argv)) 

@@ -148,6 +148,11 @@ dnl Checks for library functions.
 dnl --------------------------------------------------------------
 AC_FUNC_MEMCMP
 
+AC_CHECK_FUNC(strtok_r)
+if test "$ac_cv_func_strtok_r" = yes; then
+   AC_DEFINE(FUNC_STRTOK_R_DEFINED, [1], [Check if strtok_r() is available])
+fi
+
 dnl -------------------------------------------------------------- 
 dnl Host specific workarounds
 dnl --------------------------------------------------------------

@@ -182,7 +182,7 @@ tracer_dump_header()
   e = 1;
 #endif
 
-
+#if defined(WSNET1)
   if (tracer_ws_mode != WS_MODE_WSNET0)
     {
       cycles     = 0;
@@ -190,13 +190,14 @@ tracer_dump_header()
       time       = tracer_get_nanotime();
       backtracks = 0;
     }
-  else
+#else
     {
       cycles     = mcu_get_cycles();
       insn       = mcu_get_insn();
       time       = tracer_get_nanotime();
       backtracks = machine.backtrack;
     }
+#endif
 
 
   /* magic */

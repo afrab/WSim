@@ -24,8 +24,7 @@ html: wsim.html
 
 upload: html 
 	rsync -ruz -e ssh --delete  htdocs/ \
-	afraboul@scm.gforge.inria.fr:/home/groups/wsim/htdocs/tutorials/msp430-adc
-#	scp wsim.pdf afraboul@scm.gforge.inria.fr:/home/groups/wsim/htdocs/tutorials/
+	afraboul@scm.gforge.inria.fr:/home/groups/wsim/htdocs/tutorials/wsn430-esimu
 
 pdf: wsim.pdf
 

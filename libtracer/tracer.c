@@ -183,20 +183,15 @@ tracer_dump_header()
 #endif
 
 #if defined(WSNET1)
-  if (tracer_ws_mode != WS_MODE_WSNET0)
-    {
       cycles     = 0;
       insn       = 0;
       time       = tracer_get_nanotime();
       backtracks = 0;
-    }
 #else
-    {
       cycles     = mcu_get_cycles();
       insn       = mcu_get_insn();
       time       = tracer_get_nanotime();
       backtracks = machine.backtrack;
-    }
 #endif
 
 

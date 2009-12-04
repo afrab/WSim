@@ -8,7 +8,7 @@
     <subtitle>
       <inlinemediaobject>
 	<imageobject>
-	  <imagedata align="center" width="20%" fileref="figures/logo-wasp.png"/>
+	  <imagedata align="center" fileref="figures/logo-wasp.png"/>
 	</imageobject>
       </inlinemediaobject>
       MantisOS and WaspOS on ICL BSN2 nodes

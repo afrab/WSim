@@ -628,5 +628,4 @@ Configuration summary:
         SDL gui      : ${sdl_sum}
         zlib         : ${zlib_sum}
         Ptty         : ${ptty_sum}
-        WorldSens    : ${worldsens_sum}
 ])

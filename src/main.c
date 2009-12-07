@@ -324,10 +324,10 @@ int main(int argc, char* argv[])
       etracer_start(); 
     }
 
-  if (o.do_monitor)
+  if (o.do_monitor || o.do_modify)
     {
       VERBOSE(2,"wsim: starting memory monitor\n");
-      machine_monitor_start(o.monitor);
+      machine_monitor(o.monitor, o.modify);
     }
 
   /* go */

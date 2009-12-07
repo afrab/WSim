@@ -51,6 +51,8 @@ struct options_t {
 
   int                do_monitor;
   char              *monitor;
+  int                do_modify;
+  char              *modify;
 
   uint32_t           node_id;
   char               server_ip   [MAX_FILENAME];

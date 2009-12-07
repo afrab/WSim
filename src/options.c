@@ -136,6 +136,14 @@ static struct moption_t mem_monitor_opt = {
   .value       = NULL
 };
 
+/* modify is used in machine.c */
+static struct moption_t mem_modify_opt = {
+  .longname    = "modify",
+  .type        = required_argument,
+  .helpstring  = "variables and address to modify",
+  .value       = NULL
+};
+
 /* dump */
 static struct moption_t dump_opt = {
   .longname    = "dump",
@@ -248,6 +256,7 @@ void options_start()
 #endif
 #if defined(ENABLE_RAM_CONTROL)
   options_add_base(& mem_monitor_opt    );
+  options_add_base(& mem_modify_opt     );
 #endif
   options_add_base(& verbose_opt        );
   options_add_base(& node_id_opt        );
@@ -378,6 +387,7 @@ void options_read_cmdline(struct options_t *s, int *argc, char *argv[])
   s->do_trace           = DEFAULT_DO_TRACE;
   s->do_etrace          = DEFAULT_DO_ETRACE;
   s->do_monitor         = 0;
+  s->do_modify          = 0;
   s->do_preload         = 0;
   s->do_elfload         = 1;
   s->do_etrace_at_begin = DEFAULT_DO_ETRACE_AT_BEGIN;
@@ -541,6 +551,12 @@ void options_read_cmdline(struct options_t *s, int *argc, char *argv[])
     {
       s->do_monitor = 1;
       s->monitor = mem_monitor_opt.value;
+    }
+
+  if (mem_modify_opt.isset)
+    {
+      s->do_modify = 1;
+      s->modify = mem_modify_opt.value;
     }
 
   if (version_opt.isset)

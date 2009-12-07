@@ -149,6 +149,7 @@ uint64_t mcu_get_insn           (void);
 uint8_t  mcu_jtag_read_byte     (uint16_t addr);
 void     mcu_jtag_write_byte    (uint16_t addr, uint8_t val);
 uint16_t mcu_jtag_read_word     (uint16_t addr);
+void     mcu_jtag_write_word    (uint16_t addr, uint16_t val);
 int      mcu_jtag_read_section  (uint8_t *mem, uint16_t start, uint16_t size);
 void     mcu_jtag_write_section (uint8_t *mem, uint16_t start, uint16_t size);
 void     mcu_jtag_write_zero    (uint16_t start, uint16_t size);

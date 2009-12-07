@@ -468,6 +468,18 @@ void mcu_jtag_write_byte(uint16_t addr, uint8_t val)
 /* ************************************************** */
 /* ************************************************** */
 
+void mcu_jtag_write_word(uint16_t addr, uint16_t val)
+{
+  MCU_RAM[addr    ] = (val & 0xff);
+  MCU_RAM[addr + 1] = (val >> 8) & 0xff;
+  mcu_ramctl_write(addr);
+  mcu_ramctl_write(addr+1);
+}
+
+/* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
+
 int mcu_jtag_read_section(uint8_t *mem, uint16_t start, uint16_t size)
 {
   long max_size;

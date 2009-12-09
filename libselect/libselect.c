@@ -456,23 +456,26 @@ libselect_id_t libselect_id_create(char *argname, int UNUSED flags)
 	  ERROR("wsim:libselect: Cannot create system fifo\n");
 	  return -1;
 	}
+      WARNING("wsim:libselect: opening fifo in write only mode\n");
       libselect.entry[id].entry_type = ENTRY_FILE;
-      libselect.entry[id].fd_in      = fd;
+      libselect.entry[id].fd_in      = -1;
       libselect.entry[id].fd_out     = fd;
     }
   else 
     {
       int fd;
-      if ((fd = open(cmdline,O_RDWR)) == -1)
+      if ((fd = open(cmdline,O_WRONLY)) == -1)
 	{
 	  ERROR("wsim:libselect: Cannot open file %s\n",cmdline);
 	  return -1;
 	}
+      WARNING("wsim:libselect: opening fifo in write only mode\n");
       libselect.entry[id].entry_type = ENTRY_FILE;
-      libselect.entry[id].fd_in      = fd;
+      libselect.entry[id].fd_in      = -1;
       libselect.entry[id].fd_out     = fd;
     }
 
+  /* allocate fifo memory if needed */
   if (libselect.entry[id].fifo_size > 0)
     {
       libselect.entry[id].fifo_input  = libselect_fifo_create( libselect.entry[id].fifo_size );

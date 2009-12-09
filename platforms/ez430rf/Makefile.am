@@ -14,5 +14,5 @@ EZ430RF_DEV= ../../devices/led/libled.a			\
 wsim_ez430rf_CFLAGS=-DMSP430f2274 -DCC2500
 wsim_ez430rf_SOURCES=ez430rf.c
 wsim_ez430rf_LDADD=${EZ430RF_DEV} ${WSIMADD} ${EZ430RF_MCU}
-
+wsim_ez430rf_DEPENDENCIES=${wsim_ez430rf_LDADD}
 endif

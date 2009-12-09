@@ -12,5 +12,6 @@ DEV=../../devices/led/libled.a   		\
 wsim_mcugen_CFLAGS=-DMCUGEN
 wsim_mcugen_SOURCES=mcugenp.c
 wsim_mcugen_LDADD=${DEV} ${WSIMADD} ${MCU} 
+wsim_pcugen_DEPENDENCIES=${wsim_mcugen_LDADD}
 
 endif

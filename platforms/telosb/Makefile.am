@@ -15,5 +15,6 @@ TELOSB_DEV= ../../devices/led/libled.a			\
 wsim_telosb_CFLAGS=-DMSP430f1611
 wsim_telosb_SOURCES=telosb.c
 wsim_telosb_LDADD=${TELOSB_DEV} ${WSIMADD} ${TELOSB_MCU} 
+wsim_telosb_DEPENDENCIES=${wsim_telosb_LDADD}
 
 endif

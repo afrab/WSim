@@ -15,5 +15,6 @@ MOSAR_DEV= ../../devices/led/libled.a			\
 wsim_mosar_CFLAGS=-DMSP430f2274 -DCC1100
 wsim_mosar_SOURCES=mosar.c
 wsim_mosar_LDADD=${MOSAR_DEV} ${WSIMADD} ${MOSAR_MCU}
+wsim_mosar_DEPENDENCIES=${wsim_mosar_LDADD}
 
 endif

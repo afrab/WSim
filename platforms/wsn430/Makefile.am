@@ -16,5 +16,6 @@ WSN430_DEV= ../../devices/led/libled.a			\
 wsim_wsn430_CFLAGS=-DMSP430f1611 -DCC1100
 wsim_wsn430_SOURCES=wsn430.c
 wsim_wsn430_LDADD=${WSN430_DEV} ${WSIMADD} ${WSN430_MCU}
+wsim_wsn430_DEPENDENCIES=${wsim_wsn430_LDADD}
 
 endif

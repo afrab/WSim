@@ -14,5 +14,5 @@ WISENODE_DEV= ../../devices/led/libled.a		\
 wsim_wisenode_CFLAGS=-DMSP430f1611 -DCC1100
 wsim_wisenode_SOURCES=wisenode.c
 wsim_wisenode_LDADD=${WISENODE_DEV} ${WSIMADD} ${WISENODE_MCU}
-
+wsim_wisenode_DEPENDENCIES=${wsim_wisenode_LDADD}
 endif

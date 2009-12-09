@@ -15,5 +15,6 @@ OTSETREDEV= ../../devices/led/libled.a      	\
 wsim_otsetre_CFLAGS=-DMSP430f149
 wsim_otsetre_SOURCES=otsetre.c
 wsim_otsetre_LDADD=${OTSETREDEV} ${WSIMADD} ${OTSETREMCU}
+wsim_otsetre_DEPENDENCIES=${wsim_otsetre_LDADD}
 
 endif

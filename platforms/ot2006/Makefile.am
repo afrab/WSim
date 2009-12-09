@@ -13,5 +13,6 @@ OT2006DEV= ../../devices/led/libled.a		\
 wsim_ot2006_CFLAGS=-DMSP430f449
 wsim_ot2006_SOURCES=ot2006.c
 wsim_ot2006_LDADD=${OT2006DEV} ${WSIMADD} ${OT2006MCU}
+wsim_ot2006_DEPENDENCIES=${wsim_ot2006_LDADD}
 
 endif

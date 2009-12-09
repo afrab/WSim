@@ -16,7 +16,9 @@ MICAZDEV= ../../devices/led/libled.a			\
 
 wsim_micaz_CFLAGS=-DATMEGA128L
 wsim_micaz_SOURCES=micaz.c
-wsim_micaz_LDADD=${MICAZMCU} ${MICAZDEV} ${WSIMADD}  ../../machine/libmachine.a ${MICAZMCU} ../../devices/libdevices.a ../../libelf/libelf.a
+wsim_micaz_LDADD=${MICAZMCU} ${MICAZDEV} ${WSIMADD}  	\
+	../../machine/libmachine.a ${MICAZMCU} ../../devices/libdevices.a ../../libelf/libelf.a
+wsim_micaz_DEPENDENCIES=${wsim_micaz_LDADD}
 
 ## WMICAZDEV=../../devices/cc2420/libcc2420.a 	\
 ##	../../devices/worldsens/libworldsens.a

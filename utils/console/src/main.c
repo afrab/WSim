@@ -21,7 +21,7 @@
 
 #define CONSOLE_DEFAULT_WIDTH  70
 #define CONSOLE_DEFAULT_HEIGHT 8
-#define CONSOLE_DEFAULT_IOMODE UI_MODE_IO
+#define CONSOLE_DEFAULT_IOMODE UI_MODE_OUTPUT
 #define CONSOLE_DEFAULT_REOPEN 0
 #define CONSOLE_DEFAULT_LOG    "wconsole.log"
 #define CONSOLE_DEFAULT_FIFO   NULL
@@ -67,20 +67,31 @@ typedef struct s_console_t console_t;
 
 void usage(char* name)
 {
-  fprintf(stdout,"usage: %s            \n\
-  --help      -h : this message          \n\
-  --output    -o : output mode only      \n\
-  --fifo=name -f : open an existing fifo \n\
-  --reopen    -r : reopen on exit        \n\
-  --log=name  -l : logfile name          \n\
-  --width=n   -W : window width          \n\
-  --height=n  -H : window height         \n",name);
+  fprintf(stdout,"usage: %s               \n\
+  --help      -h : this message           \n\
+  --mode      -m : mode i/o/d (default o) \n\
+  --fifo=name -f : open an existing fifo  \n\
+  --reopen    -r : reopen on exit         \n\
+  --log=name  -l : logfile name           \n\
+  --width=n   -W : window width           \n\
+  --height=n  -H : window height          \n",name);
   exit(1);
 }
 
 /* ************************************************** */     
 /* ************************************************** */     
 /* ************************************************** */     
+
+char* io_mode_name(int mode)
+{
+  switch (mode)
+    {
+    case UI_MODE_IO     : return "duplex";
+    case UI_MODE_INPUT  : return "input from keyboard";
+    case UI_MODE_OUTPUT : return "output from fifo";
+    }
+    return "unknown";
+}
 
 int options_parse(console_t *console, int argc, char* argv[])
 {
@@ -108,7 +119,7 @@ int options_parse(console_t *console, int argc, char* argv[])
 	  {0, 0, 0, 0}
 	};
 
-      c = getopt_long (argc, argv, "horf:l:W:H:",long_options, &option_index);
+      c = getopt_long (argc, argv, "hm:rf:l:W:H:",long_options, &option_index);
 
       if (c == -1)
 	break;
@@ -124,8 +135,22 @@ int options_parse(console_t *console, int argc, char* argv[])
 	case 'h':
 	  usage(argv[0]);
 	  break;
-	case 'o':
-	  console->io_mode = UI_MODE_OUTPUT;
+	case 'm':
+	  if (optarg)
+	    {
+	      switch (optarg[0])
+		{
+		case 'i':
+		  console->io_mode = UI_MODE_INPUT;
+		  break;
+		case 'o':
+		  console->io_mode = UI_MODE_OUTPUT;
+		  break;
+		case 'd':
+		  console->io_mode = UI_MODE_IO;
+		  break;
+		}
+	    }
 	  break;
 	case 'r':
 	  console->reopen = 1;
@@ -173,90 +198,6 @@ void options_print(console_t *c)
 
 #define CONSOLE_AGAIN 0
 #define CONSOLE_QUIT  1
-
-#if defined(NO_SDL_THREADS)
-int console_loop(console_t *console)
-{
-  int c;
-  int stop = 0;
-  int ret = CONSOLE_AGAIN;
-
-  /* SDL  in : sdl_event -> echo + send fifo */
-  /* FIFO in : select -> echo */
-
-  while (!stop)
-    {
-      /* SDL UI input */
-      if (console->io_mode == UI_MODE_IO)
-	{
-	  c = ui_kbd_event(console->ui,KBD_NONBLOCKING);
-	  switch (c)
-	    {
-	    case UI_ERROR:
-	    case UI_QUIT:
-	      stop = 1;
-	      ret = CONSOLE_QUIT;
-	      break;
-	    case UI_NOEVENT:
-	      break;
-	    default:
-	      ui_putchar(console->ui,UI_KBD,c & 0xffu);
-	      fifo_putchar(console->fifo,c & 0xffu);
-	      /* DMSG("= end of kbd event =\n"); */
-	      break;
-	    }
-	}
-
-      /* Serial Fifo input */
-      if (console->io_mode == UI_MODE_OUTPUT)
-	{
-	  c = fifo_event(console->fifo, FIFO_BLOCKING); 
-	}
-      else
-	{
-	  c = fifo_event(console->fifo, FIFO_NONBLOCKING);
-	}
-
-      /* Event loop handler */
-      switch (c)
-	{
-	case FIFO_SELECT_ERROR:
-	  DMSG("wconsole:console_loop: fifo select error, quit\n");
-	  stop = 1;
-	  ret = CONSOLE_QUIT;
-	  break;
-
-	case FIFO_IO_ERROR:
-	  DMSG("wconsole:console_loop: fifo IO error\n");
-	  stop = 1;
-	  ret = CONSOLE_AGAIN; 
-	  break;
-
-	case FIFO_QUIT:
-	  DMSG("wconsole:console_loop: fifo quit\n");
-	  stop = 1;
-	  ret = CONSOLE_AGAIN; 
-	  break;
-
-	case FIFO_NOEVENT:
-	  /* timeout on nonblocking mode, should not happen on in blocking mode */
-	  break;
-
-	default:
-	  log_putchar(console->log,c & 0xffu);
-	  ui_putchar(console->ui,UI_FIFO,c & 0xffu);
-	  break;
-	}
-    }
-
-  return ret;
-}
-
-/* ************************************************** */     
-/* ************************************************** */     
-/* ************************************************** */     
-
-#else /* NO_SDL_THREADS, next part is threaded */
 
 /* ************************************************** */     
 /* ************************************************** */     
@@ -356,24 +297,39 @@ int console_loop(console_t *console)
   SDL_Thread *input_kbd = NULL;
   SDL_Thread *input_fifo = NULL;
 
-
   /* Create the synchronization lock */
   console->stop = 0;
   console->ui->lock = SDL_CreateMutex();
 
   /* Create threads */
-  if (console->io_mode == UI_MODE_IO)
+  switch (console->io_mode)
     {
+    case UI_MODE_IO:
       input_kbd  = SDL_CreateThread(thread_func_input_kbd,  console);
+      input_fifo = SDL_CreateThread(thread_func_input_fifo, console);
+      break;
+    case UI_MODE_INPUT:
+      input_kbd  = SDL_CreateThread(thread_func_input_kbd,  console);
+      break;
+    case UI_MODE_OUTPUT:
+      input_fifo = SDL_CreateThread(thread_func_input_fifo, console);
+      break;
     }
-  input_fifo = SDL_CreateThread(thread_func_input_fifo, console);
-
+  
   /* Waiting for threads */
-  if (console->io_mode == UI_MODE_IO)
+  switch (console->io_mode)
     {
+    case UI_MODE_IO:
       SDL_WaitThread(input_kbd,  &ret_kbd);
+      SDL_WaitThread(input_fifo, &ret_fifo);
+      break;
+    case UI_MODE_INPUT:
+      SDL_WaitThread(input_kbd,  &ret_kbd);
+      break;
+    case UI_MODE_OUTPUT:
+      SDL_WaitThread(input_fifo, &ret_fifo);
+      break;
     }
-  SDL_WaitThread(input_fifo, &ret_fifo);
 
   /* Leave */
   SDL_DestroyMutex(console->ui->lock);
@@ -384,8 +340,6 @@ int console_loop(console_t *console)
 
   return ret;
 }
-
-#endif /* NO_SDL_THREADS */
 
 /* ************************************************** */     
 /* ************************************************** */     
@@ -450,6 +404,7 @@ main(int argc, char *argv[])
 
       fprintf(stdout,"Local fifo is %s\n",console.fifo->local_name);
       fprintf(stdout,"Remote fifo is %s\n",console.fifo->remote_name);
+      fprintf(stdout,"I/O mode is %s\n",io_mode_name(console.io_mode));
       fflush(stdout);
       ui_setname(console.fifo->remote_name,console.fifo->remote_name);
 

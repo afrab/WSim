@@ -1293,27 +1293,30 @@ static void msp430_mcu_run_insn()
 		  {
 		  case 0x4404: /* mov r4,r4 */
 		    etracer_start();
+		    TRACER_TRACE_BKP(4);
 		    WARNING("msp430: PC:0x%04x software internal mov 4 : etracer_start()\n",MCU_ALU.curr_pc & 0xffff); 
 		    break;
 		  case 0x4505: /* mov r5,r5 */
 		    etracer_stop();
+		    TRACER_TRACE_BKP(5);
 		    WARNING("msp430: PC:0x%04x software internal mov 5 : etracer_stop()\n",MCU_ALU.curr_pc & 0xffff); 
 		    break;
 		  case 0x4606: /* mov r6,r6 */
+		    TRACER_TRACE_BKP(6);
 		    WARNING("msp430: PC:0x%04x software internal mov 6 : MCU TRAP\n",MCU_ALU.curr_pc & 0xffff); 
 		    mcu_signal_add(SIG_MCU | SIG_MCU_TRAP);
 		    SET_CYCLES(0);
 		    return;
 
-		  case 0x4707: WARNING("msp430: PC:0x%04x software internal mov 7\n",MCU_ALU.curr_pc & 0xffff); break;
-		  case 0x4808: WARNING("msp430: PC:0x%04x software internal mov 8\n",MCU_ALU.curr_pc & 0xffff); break;
-		  case 0x4909: WARNING("msp430: PC:0x%04x software internal mov 9\n",MCU_ALU.curr_pc & 0xffff); break;
-		  case 0x4a0a: WARNING("msp430: PC:0x%04x software internal mov A\n",MCU_ALU.curr_pc & 0xffff); break;
-		  case 0x4b0b: WARNING("msp430: PC:0x%04x software internal mov B\n",MCU_ALU.curr_pc & 0xffff); break;
-		  case 0x4c0c: WARNING("msp430: PC:0x%04x software internal mov C\n",MCU_ALU.curr_pc & 0xffff); break;
-		  case 0x4d0d: WARNING("msp430: PC:0x%04x software internal mov D\n",MCU_ALU.curr_pc & 0xffff); break;
-		  case 0x4e0e: WARNING("msp430: PC:0x%04x software internal mov E\n",MCU_ALU.curr_pc & 0xffff); break;
-		  case 0x4f0f: WARNING("msp430: PC:0x%04x software internal mov F\n",MCU_ALU.curr_pc & 0xffff); break;
+		  case 0x4707: WARNING("msp430: PC:0x%04x software internal mov 7\n",MCU_ALU.curr_pc & 0xffff); TRACER_TRACE_BKP( 7); break;
+		  case 0x4808: WARNING("msp430: PC:0x%04x software internal mov 8\n",MCU_ALU.curr_pc & 0xffff); TRACER_TRACE_BKP( 8); break;
+		  case 0x4909: WARNING("msp430: PC:0x%04x software internal mov 9\n",MCU_ALU.curr_pc & 0xffff); TRACER_TRACE_BKP( 9); break;
+		  case 0x4a0a: WARNING("msp430: PC:0x%04x software internal mov A\n",MCU_ALU.curr_pc & 0xffff); TRACER_TRACE_BKP(10); break;
+		  case 0x4b0b: WARNING("msp430: PC:0x%04x software internal mov B\n",MCU_ALU.curr_pc & 0xffff); TRACER_TRACE_BKP(11); break;
+		  case 0x4c0c: WARNING("msp430: PC:0x%04x software internal mov C\n",MCU_ALU.curr_pc & 0xffff); TRACER_TRACE_BKP(12); break;
+		  case 0x4d0d: WARNING("msp430: PC:0x%04x software internal mov D\n",MCU_ALU.curr_pc & 0xffff); TRACER_TRACE_BKP(13); break;
+		  case 0x4e0e: WARNING("msp430: PC:0x%04x software internal mov E\n",MCU_ALU.curr_pc & 0xffff); TRACER_TRACE_BKP(14); break;
+		  case 0x4f0f: WARNING("msp430: PC:0x%04x software internal mov F\n",MCU_ALU.curr_pc & 0xffff); TRACER_TRACE_BKP(15); break;
 		  }
 	      }
 	  }

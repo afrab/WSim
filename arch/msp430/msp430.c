@@ -43,6 +43,7 @@ tracer_id_t MSP430_TRACER_PC;
 tracer_id_t MSP430_TRACER_SP;
 tracer_id_t MSP430_TRACER_INTR;
 tracer_id_t MSP430_TRACER_LPM;
+tracer_id_t MSP430_TRACER_BKP;
 tracer_id_t MSP430_TRACER_PORT1;
 tracer_id_t MSP430_TRACER_PORT2;
 tracer_id_t MSP430_TRACER_PORT3;
@@ -194,6 +195,7 @@ int msp430_mcu_create(int xt1)
   MSP430_TRACER_SMCLK  = tracer_event_add_id(32, "clk_smclk",  "msp430");
   MSP430_TRACER_ACLK   = tracer_event_add_id(32, "clk_aclk",   "msp430");
   MSP430_TRACER_LPM    = tracer_event_add_id(8,  "LPM",        "msp430");
+  MSP430_TRACER_BKP    = tracer_event_add_id(8,  "breakpoint", "msp430");
   MSP430_TRACER_PORT1  = tracer_event_add_id(8,  "port_out1",  "msp430");
   MSP430_TRACER_PORT2  = tracer_event_add_id(8,  "port_out2",  "msp430");
   MSP430_TRACER_PORT3  = tracer_event_add_id(8,  "port_out3",  "msp430");

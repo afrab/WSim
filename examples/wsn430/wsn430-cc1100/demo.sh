@@ -3,7 +3,7 @@
 ## ==================================
 
 # set WSNET_MODE to "wsnet1", "wsnet2", or "" if you are using wsim alone
-export WSNET_MODE="wsnet1"
+export WSNET_MODE="wsnet2"
 export WSNET2_CONF_PATH="worldsens.xml"
 
 ## ==================================

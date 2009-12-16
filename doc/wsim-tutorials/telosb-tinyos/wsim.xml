@@ -48,7 +48,7 @@
     <title>Introduction</title>
     
     <para>
-      This tutorial is intended to get you started with WSim and TinyOS development. It shows you the basics of  executing, debugging and interpreting results of applications written for the target microcontrollers.
+      This tutorial is intended to get you started with WSim and TinyOS development. It shows you the basics of executing, debugging and interpreting results of applications written for the target microcontrollers.
     </para>
     
     <para>

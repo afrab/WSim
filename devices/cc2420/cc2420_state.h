@@ -73,6 +73,7 @@ enum {
 #define CC2420_VREG_OFF_ENTER(cc2420)					\
     do {								\
         cc2420->fsm_state   = CC2420_STATE_VREG_OFF;			\
+	cc2420->registers[CC2420_REG_FSMSTATE] = CC2420_STATE_VREG_OFF;	\
 	cc2420->mem_access  = CC2420_ACCESS_NONE;			\
 	cc2420->xosc_stable = 0;					\
 	cc2420->tx_active   = 0;					\
@@ -92,6 +93,7 @@ enum {
 #define CC2420_VREG_STARTING_ENTER(cc2420)				\
     do {								\
         cc2420->fsm_state = CC2420_STATE_VREG_STARTING;			\
+	cc2420->registers[CC2420_REG_FSMSTATE] = CC2420_STATE_VREG_STARTING; \
         cc2420->mem_access = CC2420_ACCESS_REGISTERS_ONLY;		\
         cc2420->fsm_timer = MACHINE_TIME_GET_NANO() + CC2420_VREG_STARTUP_TIME; \
 	CC2420_DBG_STATE("cc2420:state: ENTERING VREG_STARTING\n");	\
@@ -106,6 +108,7 @@ enum {
 #define CC2420_XOSC_STARTING_ENTER(cc2420)				\
     do {								\
 	cc2420->fsm_state = CC2420_STATE_XOSC_STARTING;			\
+	cc2420->registers[CC2420_REG_FSMSTATE] = CC2420_STATE_XOSC_STARTING; \
 	cc2420->mem_access = CC2420_ACCESS_REGISTERS_ONLY;		\
 	cc2420->fsm_timer = MACHINE_TIME_GET_NANO() + CC2420_XOSC_STARTUP_TIME; \
 	CC2420_DBG_STATE("cc2420:state: ENTERING XOSC_STARTING\n");	\
@@ -121,6 +124,7 @@ enum {
 #define CC2420_RESET_ENTER(cc2420)					\
   do {									\
         cc2420->fsm_state  = CC2420_STATE_RESET;			\
+	cc2420->registers[CC2420_REG_FSMSTATE] = CC2420_STATE_RESET;	\
         cc2420->mem_access = CC2420_ACCESS_REGISTERS_ONLY;		\
 	cc2420->tx_active  = 0;						\
 	cc2420->rx_rssi_valid = 0;					\
@@ -138,6 +142,7 @@ enum {
 #define CC2420_POWER_DOWN_ENTER(cc2420)					\
     do {								\
 	cc2420->fsm_state   = CC2420_STATE_POWER_DOWN;			\
+	cc2420->registers[CC2420_REG_FSMSTATE] = CC2420_STATE_POWER_DOWN; \
         cc2420->mem_access  = CC2420_ACCESS_REGISTERS_ONLY;		\
 	cc2420->xosc_stable = 0;					\
 	cc2420->tx_active   = 0;					\
@@ -157,6 +162,7 @@ enum {
 #define CC2420_IDLE_ENTER(cc2420)					\
   do {									\
         cc2420->fsm_state     = CC2420_STATE_IDLE;			\
+	cc2420->registers[CC2420_REG_FSMSTATE] = CC2420_STATE_IDLE;	\
         cc2420->mem_access    = CC2420_ACCESS_ALL;			\
 	cc2420->rx_fifo_read  = 0;					\
 	cc2420->rx_fifo_write = 0;					\
@@ -178,6 +184,7 @@ enum {
 #define CC2420_TX_CALIBRATE_ENTER(cc2420)				\
     do {								\
 	cc2420->fsm_state  = CC2420_STATE_TX_CALIBRATE;			\
+	cc2420->registers[CC2420_REG_FSMSTATE] = CC2420_STATE_TX_CALIBRATE; \
 	cc2420->fsm_timer  = MACHINE_TIME_GET_NANO() + 12 * CC2420_SYMBOL_PERIOD; \
 	/* PLL lock time set */						\
 	if ( CC2420_REG_FSTST1_VCO_ARRAY_CAL_LONG(cc2420->registers[CC2420_REG_FSTST1]) >> 14 ) { \
@@ -204,6 +211,7 @@ enum {
 #define CC2420_RX_CALIBRATE_ENTER(cc2420)				\
     do {								\
 	cc2420->fsm_state = CC2420_STATE_RX_CALIBRATE;			\
+	cc2420->registers[CC2420_REG_FSMSTATE] = CC2420_STATE_RX_CALIBRATE; \
 	cc2420->fsm_timer = MACHINE_TIME_GET_NANO() + 12 * CC2420_SYMBOL_PERIOD; \
 	cc2420->tx_active = 0;						\
 	cc2420->rx_rssi_valid = 0;					\
@@ -234,6 +242,7 @@ enum {
 #define CC2420_TX_PREAMBLE_ENTER(cc2420)				\
     do {								\
 	cc2420->fsm_state = CC2420_STATE_TX_PREAMBLE;			\
+	cc2420->registers[CC2420_REG_FSMSTATE] = CC2420_STATE_TX_PREAMBLE; \
 	cc2420->tx_start_time = MACHINE_TIME_GET_NANO();		\
 	CC2420_DBG_STATE("cc2420:state: ENTERING TX_PREAMBLE\n");	\
 	tracer_event_record(TRACER_CC2420_STATE,			\
@@ -247,6 +256,7 @@ enum {
 #define CC2420_TX_FRAME_ENTER(cc2420)					\
   do {									\
         cc2420->fsm_state  = CC2420_STATE_TX_FRAME;			\
+	cc2420->registers[CC2420_REG_FSMSTATE] = CC2420_STATE_TX_FRAME; \
 	cc2420->fsm_timer  = MACHINE_TIME_GET_NANO() + 2 * CC2420_SYMBOL_PERIOD; \
 	cc2420->tx_bytes   = 0;						\
 	cc2420->fsm_ustate = CC2420_USTATE_TX_FRAME_DATA;		\
@@ -263,6 +273,8 @@ enum {
 
 #define CC2420_TX_UNDERFLOW_ENTER(cc2420)				\
     do {								\
+        cc2420->fsm_state = CC2420_STATE_TX_UNDERFLOW;			\
+	cc2420->registers[CC2420_REG_FSMSTATE] = CC2420_STATE_TX_UNDERFLOW; \
 	cc2420->tx_underflow = 1;					\
 	CC2420_DBG_STATE("cc2420:state: ENTERING TX_UNDERFLOW\n");	\
 	/* transition to RX_CALIBRATE is automatic */			\
@@ -278,6 +290,7 @@ enum {
 #define CC2420_RX_SFD_SEARCH_ENTER(cc2420)				\
     do {								\
 	cc2420->fsm_state       = CC2420_STATE_RX_SFD_SEARCH;		\
+	cc2420->registers[CC2420_REG_FSMSTATE] = CC2420_STATE_RX_SFD_SEARCH; \
 	cc2420->rx_sync_timer   = MACHINE_TIME_GET_NANO() + 2 * CC2420_SYMBOL_PERIOD;\
 	cc2420->rx_rssi_value   = 0;					\
 	cc2420->rx_rssi_values  = 0;					\
@@ -301,6 +314,7 @@ enum {
 #define CC2420_RX_FRAME_ENTER(cc2420)					\
     do {								\
 	cc2420->fsm_state      = CC2420_STATE_RX_FRAME;			\
+	cc2420->registers[CC2420_REG_FSMSTATE] = CC2420_STATE_RX_FRAME; \
 	cc2420->rx_data_bytes  = 0;					\
 	cc2420->rx_frame_start = cc2420->rx_fifo_write;			\
 	cc2420->rx_sync_timer  = MACHINE_TIME_GET_NANO() + 2 * CC2420_SYMBOL_PERIOD; \
@@ -317,6 +331,7 @@ enum {
 #define CC2420_RX_WAIT_ENTER(cc2420)					\
     do {								\
 	cc2420->fsm_state = CC2420_STATE_RX_WAIT;			\
+	cc2420->registers[CC2420_REG_FSMSTATE] = CC2420_STATE_RX_WAIT;	\
 	CC2420_DBG_STATE("cc2420:state: ENTERING RX_WAIT\n");		\
 	tracer_event_record(TRACER_CC2420_STATE,			\
                             CC2420_STATE_RX_WAIT);			\
@@ -329,6 +344,7 @@ enum {
 #define CC2420_RX_OVERFLOW_ENTER(cc2420)				\
     do {								\
 	cc2420->fsm_state       = CC2420_STATE_RX_OVERFLOW;		\
+	cc2420->registers[CC2420_REG_FSMSTATE] = CC2420_STATE_RX_OVERFLOW; \
 	cc2420->rx_overflow     = 1;					\
 	CC2420_DBG_STATE("cc2420:state: ENTERING RX_OVERFLOW\n");	\
 	tracer_event_record(TRACER_CC2420_STATE,			\
@@ -342,6 +358,7 @@ enum {
 #define CC2420_TX_ACK_CALIBRATE_ENTER(cc2420)				\
     do {								\
 	cc2420->fsm_state       = CC2420_STATE_TX_ACK_CALIBRATE;	\
+	cc2420->registers[CC2420_REG_FSMSTATE] = CC2420_STATE_TX_ACK_CALIBRATE; \
 	cc2420->fsm_timer       = MACHINE_TIME_GET_NANO() + 12 * CC2420_SYMBOL_PERIOD; \
 	/* PLL lock time set */						\
 	if ( CC2420_REG_FSTST1_VCO_ARRAY_CAL_LONG(cc2420->registers[CC2420_REG_FSTST1]) >> 14 ) { \
@@ -368,6 +385,7 @@ enum {
 #define CC2420_TX_ACK_PREAMBLE_ENTER(cc2420)				\
     do {								\
 	cc2420->fsm_state       = CC2420_STATE_TX_ACK_PREAMBLE;		\
+	cc2420->registers[CC2420_REG_FSMSTATE] = CC2420_STATE_TX_ACK_PREAMBLE; \
 	CC2420_DBG_STATE("cc2420:state: ENTERING TX_ACK_PREAMBLE\n");	\
 	tracer_event_record(TRACER_CC2420_STATE,			\
 			    CC2420_STATE_TX_ACK_PREAMBLE);		\
@@ -380,6 +398,7 @@ enum {
 #define CC2420_TX_ACK_ENTER(cc2420)                                     \
     do {                                                                \
 	cc2420->fsm_state       = CC2420_STATE_TX_ACK;                  \
+	cc2420->registers[CC2420_REG_FSMSTATE] = CC2420_STATE_TX_ACK; \
 	CC2420_DBG_STATE("cc2420:state: ENTERING TX_ACK\n");		\
 	cc2420->fsm_timer  = MACHINE_TIME_GET_NANO() + 2 * CC2420_SYMBOL_PERIOD; \
 	cc2420->tx_bytes   = 0;                                         \

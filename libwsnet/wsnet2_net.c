@@ -227,7 +227,7 @@ int wsnet2_connect(char *s_addr, uint16_t s_port, char *m_addr, uint16_t m_port,
         goto error;
     }
 	
-#if !defined(LINUX)
+#if !defined(LINUX) && !defined(__CYGWIN__) && !defined(_WIN32)
     /* allow several bindings */
     if (setsockopt(wsens.m_fd, SOL_SOCKET, SO_REUSEPORT, &on, sizeof(on)) != 0 ) { 
         perror("(setsockopt):");

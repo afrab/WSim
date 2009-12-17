@@ -41,6 +41,8 @@ extern tracer_id_t TRACER_CC2420_FIFOP;
 extern tracer_id_t TRACER_CC2420_FIFO;
 extern tracer_id_t TRACER_CC2420_CCA;
 extern tracer_id_t TRACER_CC2420_SFD;
+extern tracer_id_t TRACER_CC2420_VREG_EN;
+extern tracer_id_t TRACER_CC2420_RESET;
 
 /***************************************************/
 /***************************************************/

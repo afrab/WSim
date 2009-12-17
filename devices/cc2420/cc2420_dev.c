@@ -49,6 +49,8 @@ tracer_id_t TRACER_CC2420_FIFOP;
 tracer_id_t TRACER_CC2420_FIFO;
 tracer_id_t TRACER_CC2420_CCA;
 tracer_id_t TRACER_CC2420_SFD;
+tracer_id_t TRACER_CC2420_VREG_EN;
+tracer_id_t TRACER_CC2420_RESET;
 
 /***************************************************/
 /***************************************************/
@@ -110,13 +112,15 @@ int cc2420_device_create (int dev_num, int fxosc_mhz, char *antenna)
 
   cc2420->fsm_state = CC2420_STATE_POWER_DOWN;
 
-  TRACER_CC2420_STATE  = tracer_event_add_id(8, "cc2420_state",  "cc2420");
-  TRACER_CC2420_STROBE = tracer_event_add_id(8, "cc2420_strobe", "cc2420");
-  TRACER_CC2420_CS     = tracer_event_add_id(1, "cc2420_cs",     "cc2420");
-  TRACER_CC2420_FIFOP  = tracer_event_add_id(1, "cc2420_fifop",  "cc2420");
-  TRACER_CC2420_FIFO   = tracer_event_add_id(1, "cc2420_fifo",   "cc2420");
-  TRACER_CC2420_CCA    = tracer_event_add_id(1, "cc2420_cca",    "cc2420");
-  TRACER_CC2420_SFD    = tracer_event_add_id(1, "cc2420_sfd",    "cc2420"); 
+  TRACER_CC2420_STATE   = tracer_event_add_id(8, "cc2420_state",   "cc2420");
+  TRACER_CC2420_STROBE  = tracer_event_add_id(8, "cc2420_strobe",  "cc2420");
+  TRACER_CC2420_CS      = tracer_event_add_id(1, "cc2420_cs",      "cc2420");
+  TRACER_CC2420_FIFOP   = tracer_event_add_id(1, "cc2420_fifop",   "cc2420");
+  TRACER_CC2420_FIFO    = tracer_event_add_id(1, "cc2420_fifo",    "cc2420");
+  TRACER_CC2420_CCA     = tracer_event_add_id(1, "cc2420_cca",     "cc2420");
+  TRACER_CC2420_SFD     = tracer_event_add_id(1, "cc2420_sfd",     "cc2420"); 
+  TRACER_CC2420_VREG_EN = tracer_event_add_id(1, "cc2420_vreg_en", "cc2420"); 
+  TRACER_CC2420_RESET   = tracer_event_add_id(1, "cc2420_reset",   "cc2420"); 
 
   return 0;
 }
@@ -617,10 +621,10 @@ void cc2420_write(int dev_num, uint32_t mask, uint32_t value)
 	{
 	  if (cc2420->CSn_pin)
 	    {
+	      tracer_event_record(TRACER_CC2420_CS, 0);
 	      CC2420_DBG_PINS("cc2420:pins:write: from mcu CSn = 0\n");
 	    }
 	  cc2420->CSn_pin = 0x00;
-	  tracer_event_record(TRACER_CC2420_CS, 0);
 	}
     }
 
@@ -642,13 +646,15 @@ void cc2420_write(int dev_num, uint32_t mask, uint32_t value)
       if (value & CC2420_VREG_EN_MASK)
 	{
 	  cc2420->VREG_EN_pin = 0xFF;
+	  tracer_event_record(TRACER_CC2420_VREG_EN, 1);
 	  CC2420_DBG_PINS("cc2420:pins:write: from mcu VREG_EN = 1\n");
 	}
       else 
 	{
 	  if (cc2420->VREG_EN_pin)
 	    {
-	      CC2420_DBG_PINS("cc2420:pins:write: from mcu VREG_EN = 1\n");
+	      tracer_event_record(TRACER_CC2420_VREG_EN, 0);
+	      CC2420_DBG_PINS("cc2420:pins:write: from mcu VREG_EN = 0\n");
 	    }
 	  cc2420->VREG_EN_pin = 0x00;
 	}
@@ -661,12 +667,14 @@ void cc2420_write(int dev_num, uint32_t mask, uint32_t value)
 	if (value & CC2420_RESET_MASK)
 	  {
 	    cc2420->RESET_pin = 0xFF;
+	    tracer_event_record(TRACER_CC2420_RESET, 1);
 	    CC2420_DBG_PINS("cc2420:pins:write: from mcu RESET = 1\n");
 	  }
 	else 
 	  {
 	    if (cc2420->RESET_pin)
 	      {
+		tracer_event_record(TRACER_CC2420_RESET, 0);
 		CC2420_DBG_PINS("cc2420:pins:write: from mcu RESET = 0\n");
 	      }
 	    cc2420->RESET_pin = 0x00;

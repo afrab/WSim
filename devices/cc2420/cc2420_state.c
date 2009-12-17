@@ -256,6 +256,20 @@ void cc2420_update_state_rx_sfd_search(struct _cc2420_t * cc2420) {
 
     int prev_read = cc2420->rx_fifo_read;
 
+    /* if VREG_EN is low, go back to VREG_OFF state */
+    if (cc2420->VREG_EN_set) {
+	if (cc2420_read_pin(cc2420, CC2420_INTERNAL_VREG_EN_PIN) == 0x00) {
+	    CC2420_VREG_OFF_ENTER(cc2420);
+	    return;
+	}
+    }
+
+    /* if reset required, go back to RESET state */
+    if (cc2420_reset_required(cc2420)) {
+	CC2420_RESET_ENTER(cc2420);
+	return;
+    }
+
     /* if no bytes were received, update RSSI each symbol period */
     if (cc2420->rx_data_bytes != 0) {
 	return;
@@ -285,6 +299,20 @@ void cc2420_update_state_rx_sfd_search(struct _cc2420_t * cc2420) {
  */
 
 void cc2420_update_state_rx_frame(struct _cc2420_t * cc2420 UNUSED) {
+
+    /* if VREG_EN is low, go back to VREG_OFF state */
+    if (cc2420->VREG_EN_set) {
+	if (cc2420_read_pin(cc2420, CC2420_INTERNAL_VREG_EN_PIN) == 0x00) {
+	    CC2420_VREG_OFF_ENTER(cc2420);
+	    return;
+	}
+    }
+
+    /* if reset required, go back to RESET state */
+    if (cc2420_reset_required(cc2420)) {
+	CC2420_RESET_ENTER(cc2420);
+	return;
+    }
 
     return;
 }
@@ -515,6 +543,20 @@ void cc2420_update_state_tx_ack(struct _cc2420_t * cc2420) {
 
 void cc2420_update_state_rx_overflow(struct _cc2420_t * cc2420 UNUSED) {
 
+    /* if VREG_EN is low, go back to VREG_OFF state */
+    if (cc2420->VREG_EN_set) {
+	if (cc2420_read_pin(cc2420, CC2420_INTERNAL_VREG_EN_PIN) == 0x00) {
+	    CC2420_VREG_OFF_ENTER(cc2420);
+	    return;
+	}
+    }
+
+    /* if reset required, go back to RESET state */
+    if (cc2420_reset_required(cc2420)) {
+	CC2420_RESET_ENTER(cc2420);
+	return;
+    }
+
     return;
 }
 
@@ -524,6 +566,20 @@ void cc2420_update_state_rx_overflow(struct _cc2420_t * cc2420 UNUSED) {
  */
 
 void cc2420_update_state_rx_wait(struct _cc2420_t * cc2420 UNUSED) {
+
+    /* if VREG_EN is low, go back to VREG_OFF state */
+    if (cc2420->VREG_EN_set) {
+	if (cc2420_read_pin(cc2420, CC2420_INTERNAL_VREG_EN_PIN) == 0x00) {
+	    CC2420_VREG_OFF_ENTER(cc2420);
+	    return;
+	}
+    }
+
+    /* if reset required, go back to RESET state */
+    if (cc2420_reset_required(cc2420)) {
+	CC2420_RESET_ENTER(cc2420);
+	return;
+    }
 
     return;
 }
@@ -725,6 +781,20 @@ void cc2420_update_state_tx_frame(struct _cc2420_t * cc2420) {
 
 void cc2420_update_state_tx_underflow(struct _cc2420_t * cc2420 UNUSED) {
     
+    /* if VREG_EN is low, go back to VREG_OFF state */
+    if (cc2420->VREG_EN_set) {
+	if (cc2420_read_pin(cc2420, CC2420_INTERNAL_VREG_EN_PIN) == 0x00) {
+	    CC2420_VREG_OFF_ENTER(cc2420);
+	    return;
+	}
+    }
+
+    /* if reset required, go back to RESET state */
+    if (cc2420_reset_required(cc2420)) {
+	CC2420_RESET_ENTER(cc2420);
+	return;
+    }
+
     return;
 }
 

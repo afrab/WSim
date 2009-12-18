@@ -36,6 +36,15 @@ void cc2420_tx_fifo_write(struct _cc2420_t * cc2420, uint8_t val) {
 
     uint16_t autocrc = CC2420_REG_MDMCTRL0_AUTOCRC(cc2420->registers[CC2420_REG_MDMCTRL0]);
 
+    /* if this is the first byte written in tx fifo after a successful send, flush FIFO first. 
+       FIFO is refilled automatically with the last transmitted frame indeed (see 17.1 p39) */
+    if (cc2420->tx_frame_completed) {
+        cc2420->tx_fifo_len = 0;
+	cc2420->tx_available_bytes = 0;
+	cc2420->tx_frame_completed = 0;
+	CC2420_DEBUG("cc2420_tx_fifo_write : first byte to be written in TX FIFO, flushed it before\n");
+    }
+
     if (cc2420->tx_fifo_len >= CC2420_RAM_TXFIFO_LEN) {
 	CC2420_DEBUG("cc2420_tx_fifo_write : TX FIFO is FULL\n");
 	return;

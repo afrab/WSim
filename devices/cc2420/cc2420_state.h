@@ -196,7 +196,6 @@ enum {
 	CC2420_DBG_STATE("cc2420:state: ENTERING TX_CALIBRATE\n");	\
 	cc2420->tx_active = 1;						\
 	cc2420->tx_bytes  = 0;						\
-	cc2420->tx_available_bytes = 0;					\
 	cc2420->rx_rssi_valid = 0;					\
 	cc2420->pll_locked = 0;						\
 	cc2420_pll_register_update(cc2420);				\
@@ -370,7 +369,6 @@ enum {
 	CC2420_DBG_STATE("cc2420:state: ENTERING TX_ACK_CALIBRATE\n");	\
 	cc2420->tx_active = 1;						\
 	cc2420->tx_bytes  = 0;						\
-	cc2420->tx_available_bytes = 0;					\
 	cc2420->rx_rssi_valid = 0;					\
 	cc2420->pll_locked = 0;						\
 	cc2420_pll_register_update(cc2420);				\
@@ -405,7 +403,6 @@ enum {
 	cc2420->fsm_ustate = CC2420_USTATE_TX_FRAME_DATA;               \
 	/* update SFD pin (cf [1] p.34) */                              \
 	cc2420_assert_sfdmux(cc2420, 0x00, CC2420_PIN_ASSERT);		\
-	CC2420_DBG_STATE("cc2420:state: ENTERING TX_FRAME\n");		\
 	tracer_event_record(TRACER_CC2420_STATE,			\
 			    CC2420_STATE_TX_ACK);			\
 	etracer_slot_event(ETRACER_PER_ID_CC2420,			\

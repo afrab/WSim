@@ -766,8 +766,8 @@ void cc2420_update_state_tx_frame(struct _cc2420_t * cc2420) {
       CC2420_DEBUG("cc2420:update_state_tx_frame: val [0x%02x] pop from tx fifo\n", CC2420_HIBYTE(cc2420->tx_fcs));
     }
     
-    /* all tx fifo must have been sent, so reset tx fifo offset and go to RX_CALIBRATE state */
-    cc2420->tx_fifo_len = 0;
+    /* all tx fifo must have been sent, go to RX_CALIBRATE state */
+    cc2420->tx_frame_completed = 1;
     CC2420_RX_CALIBRATE_ENTER(cc2420);
 
     return;

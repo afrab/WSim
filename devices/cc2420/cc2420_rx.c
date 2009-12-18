@@ -336,7 +336,7 @@ uint8_t swapbits(uint8_t c,int count) {
 
 int cc2420_rx_process_fcf(struct _cc2420_t * cc2420) {
 
-    CC2420_DEBUG("got fcf %.2x\n", cc2420->rx_fcf);
+    CC2420_DEBUG("cc2420_process_fcf: got fcf %.2x\n", cc2420->rx_fcf);
 
     cc2420->rx_frame_type    = swapbits( CC2420_FCF_FRAME_TYPE   (cc2420->rx_fcf), CC2420_FCF_FRAME_TYPE_LENGTH );
     cc2420->rx_sec_enabled   = swapbits( CC2420_FCF_SEC_ENABLED  (cc2420->rx_fcf), CC2420_FCF_SEC_ENABLED_LENGTH );
@@ -346,8 +346,8 @@ int cc2420_rx_process_fcf(struct _cc2420_t * cc2420) {
     cc2420->rx_dst_addr_mode = swapbits( CC2420_FCF_DST_ADDR_MODE(cc2420->rx_fcf), CC2420_FCF_DST_ADDR_MODE_LENGTH );
     cc2420->rx_src_addr_mode = swapbits( CC2420_FCF_SRC_ADDR_MODE(cc2420->rx_fcf), CC2420_FCF_SRC_ADDR_MODE_LENGTH );
 
-    CC2420_DEBUG("ack_req is %d\n", cc2420->rx_ack_req);
-    CC2420_DEBUG("frame_type is %d\n", cc2420->rx_frame_type);
+    CC2420_DEBUG("cc2420_process_fcf: ack_req is %d\n", cc2420->rx_ack_req);
+    CC2420_DEBUG("cc2420_process_fcf: frame_type is %d\n", cc2420->rx_frame_type);
 
     /* process addressing modes to determine addresses lengths and positions */
 
@@ -359,7 +359,7 @@ int cc2420_rx_process_fcf(struct _cc2420_t * cc2420) {
     case CC2420_ADDR_MODE_RESERVED :
 	cc2420->rx_dst_pan_len     = 0;
 	cc2420->rx_dst_addr_len    = 0;
-	CC2420_DEBUG("cc2420_process_fcf : using reserved addressing mode !\n");
+	CC2420_DEBUG("cc2420_process_fcf: using reserved addressing mode !\n");
 	break;
     case CC2420_ADDR_MODE_16_BITS :
 	cc2420->rx_dst_pan_len     = 2;
@@ -379,7 +379,7 @@ int cc2420_rx_process_fcf(struct _cc2420_t * cc2420) {
     case CC2420_ADDR_MODE_RESERVED :
 	cc2420->rx_src_pan_len     = 0;
 	cc2420->rx_src_addr_len    = 0;
-	CC2420_DEBUG("cc2420_process_fcf : using reserved addressing mode !\n");
+	CC2420_DEBUG("cc2420_process_fcf: using reserved addressing mode !\n");
 	break;
     case CC2420_ADDR_MODE_16_BITS :
 	cc2420->rx_src_pan_len     = 2;
@@ -400,7 +400,7 @@ int cc2420_rx_process_fcf(struct _cc2420_t * cc2420) {
     cc2420->rx_src_pan_offset  = cc2420->rx_dst_addr_offset + cc2420->rx_dst_addr_len;
     cc2420->rx_src_addr_offset = cc2420->rx_src_pan_offset  + cc2420->rx_src_pan_len;
     
-    CC2420_DEBUG("in process_fcf, dst addr len is %d/%d, src addr len is %d/%d\n",
+    CC2420_DEBUG("cc2420_process_fcf: dst addr len is %d/%d, src addr len is %d/%d\n",
 		 cc2420->rx_src_addr_len, cc2420->rx_src_pan_len, cc2420->rx_dst_addr_len, cc2420->rx_dst_pan_len);
 
     return 0;

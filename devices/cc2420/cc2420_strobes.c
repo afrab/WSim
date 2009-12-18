@@ -103,6 +103,7 @@ void cc2420_strobe_state_idle(struct _cc2420_t * cc2420)
 	cc2420->tx_underflow = 0;
 	cc2420->tx_fifo_len = 0;
 	cc2420->tx_available_bytes = 0;
+	cc2420->tx_frame_completed = 0;
 	break;
       case CC2420_STROBE_SFLUSHRX :
 	CC2420_DBG_STROBE("cc2420:strobe:idle: SFLUSHRX\n");
@@ -156,6 +157,7 @@ void cc2420_strobe_state_tx_calibrate(struct _cc2420_t * cc2420)
       cc2420->tx_underflow = 0;
       cc2420->tx_fifo_len = 0;
       cc2420->tx_available_bytes = 0;
+      cc2420->tx_frame_completed = 0;
       break;
     case CC2420_STROBE_SFLUSHRX :
       CC2420_DBG_STROBE("cc2420:strobe:calibrate: SFLUSHRX\n");
@@ -205,6 +207,7 @@ void cc2420_strobe_state_tx_preamble(struct _cc2420_t * cc2420)
       cc2420->tx_underflow = 0;
       cc2420->tx_fifo_len = 0;
       cc2420->tx_available_bytes = 0;
+      cc2420->tx_frame_completed = 0;
       break;
     case CC2420_STROBE_SFLUSHRX :
       CC2420_DBG_STROBE("cc2420:strobe:tx_preamble: SFLUSHRX\n");
@@ -254,6 +257,7 @@ void cc2420_strobe_state_tx_frame(struct _cc2420_t * cc2420)
       cc2420->tx_underflow = 0;
       cc2420->tx_fifo_len = 0;
       cc2420->tx_available_bytes = 0;
+      cc2420->tx_frame_completed = 0;
       break;
     case CC2420_STROBE_SFLUSHRX :
       CC2420_DBG_STROBE("cc2420:strobe:tx_frame: SRFORX\n");
@@ -302,6 +306,7 @@ void cc2420_strobe_state_tx_underflow(struct _cc2420_t * cc2420)
       cc2420->tx_underflow = 0;
       cc2420->tx_fifo_len = 0;
       cc2420->tx_available_bytes = 0;
+      cc2420->tx_frame_completed = 0;
       break;
     case CC2420_STROBE_SFLUSHRX :
       CC2420_DBG_STROBE("cc2420:strobe:tx_underflow: SFLUSHRX\n");
@@ -360,6 +365,7 @@ void cc2420_strobe_state_rx_calibrate(struct _cc2420_t * cc2420)
       cc2420->tx_underflow = 0;
       cc2420->tx_fifo_len = 0;
       cc2420->tx_available_bytes = 0;
+      cc2420->tx_frame_completed = 0;
       break;
     case CC2420_STROBE_SFLUSHRX :
       CC2420_DBG_STROBE("cc2420:strobe:rx_calibrate: STFLUSHRX\n");
@@ -408,6 +414,7 @@ void cc2420_strobe_state_rx_sfd_search(struct _cc2420_t * cc2420)
       cc2420->tx_underflow = 0;
       cc2420->tx_fifo_len = 0;
       cc2420->tx_available_bytes = 0;
+      cc2420->tx_frame_completed = 0;
       break;
     case CC2420_STROBE_SFLUSHRX :
       CC2420_DBG_STROBE("cc2420:strobe:rx_sfd_search: SFLUSHRX\n");
@@ -479,6 +486,7 @@ void cc2420_strobe_state_rx_frame(struct _cc2420_t * cc2420)
       cc2420->tx_underflow = 0;
       cc2420->tx_fifo_len = 0;
       cc2420->tx_available_bytes = 0;
+      cc2420->tx_frame_completed = 0;
       break;
     case CC2420_STROBE_SFLUSHRX :
       CC2420_DBG_STROBE("cc2420:strobe:rx_frame: SFLUSHRX\n");
@@ -536,6 +544,7 @@ void cc2420_strobe_state_tx_ack_calibrate(struct _cc2420_t * cc2420)
       cc2420->tx_underflow = 0;
       cc2420->tx_fifo_len = 0;
       cc2420->tx_available_bytes = 0;
+      cc2420->tx_frame_completed = 0;
       break;
     case CC2420_STROBE_SFLUSHRX :
       CC2420_DBG_STROBE("cc2420:strobe:tx_ack_calibrate: SFLUSHRX\n");
@@ -593,6 +602,7 @@ void cc2420_strobe_state_tx_ack_preamble(struct _cc2420_t * cc2420)
       cc2420->tx_underflow = 0;
       cc2420->tx_fifo_len = 0;
       cc2420->tx_available_bytes = 0;
+      cc2420->tx_frame_completed = 0;
       break;
     case CC2420_STROBE_SFLUSHRX :
       CC2420_DBG_STROBE("cc2420:strobe:tx_ack_preamble: SFLUSHRX\n");
@@ -639,6 +649,7 @@ void cc2420_strobe_state_tx_ack(struct _cc2420_t * cc2420)
       cc2420->tx_underflow = 0;
       cc2420->tx_fifo_len = 0;
       cc2420->tx_available_bytes = 0;
+      cc2420->tx_frame_completed = 0;
       break;
     case CC2420_STROBE_SFLUSHRX :
       CC2420_DBG_STROBE("cc2420:strobe:tx_ack: SFLUSHRX\n");
@@ -687,6 +698,7 @@ void cc2420_strobe_state_rx_wait(struct _cc2420_t * cc2420)
       cc2420->tx_underflow = 0;
       cc2420->tx_fifo_len = 0;
       cc2420->tx_available_bytes = 0;
+      cc2420->tx_frame_completed = 0;
       break;
     case CC2420_STROBE_SFLUSHRX :
       CC2420_DBG_STROBE("cc2420:strobe:rx_wait: SFLUSHRX\n");
@@ -735,6 +747,7 @@ void cc2420_strobe_state_rx_overflow(struct _cc2420_t * cc2420)
       cc2420->tx_underflow = 0;
       cc2420->tx_fifo_len = 0;
       cc2420->tx_available_bytes = 0;
+      cc2420->tx_frame_completed = 0;
       break;
     case CC2420_STROBE_SFLUSHRX :
       CC2420_DBG_STROBE("cc2420:strobe:rx_overflow: SFLUSHRX\n");

@@ -216,6 +216,9 @@ struct _cc2420_t {
     /* tx frame pending */
     uint8_t tx_frame_pending;
 
+    /* tx frame completed */
+    uint8_t tx_frame_completed;
+
     /* store the time when we began to transmit a frame, including preamble */
     uint64_t tx_start_time;
 

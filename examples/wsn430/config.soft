@@ -145,7 +145,6 @@ run_wsim_gdb()
     else
         ARGS="${ARGS} --logfile=wsim.log --trace=wsim.trc"
     fi
-    ARGS="${ARGS} --trace=wsim.trc --logfile=wsim.log"
     ARGS="${ARGS} --verbose=4 --ds2411=$1 --mode=gdb $SERIAL"
     echo "${PROG} ${ARGS} $2"
 }

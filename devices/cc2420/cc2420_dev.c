@@ -202,6 +202,7 @@ void cc2420_reset_internal(struct _cc2420_t * cc2420)
   cc2420->tx_underflow        = 0;
   cc2420->tx_needed_bytes     = 0;
   cc2420->tx_available_bytes  = 0;
+  cc2420->tx_frame_completed  = 0;
   cc2420->rx_first_data_byte  = -1;
   cc2420->nb_rx_frames        = 0;
 }

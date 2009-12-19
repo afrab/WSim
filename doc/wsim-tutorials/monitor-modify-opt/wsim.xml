@@ -11,6 +11,10 @@
       <author>
 	<firstname>Loïc</firstname>
 	<surname>Lemaître</surname>
+      </author>
+      <author>
+	<firstname>Antoine</firstname>
+	<surname>Fraboulet</surname>
 	<affiliation>
 	  <orgname>INRIA Rhône Alpes</orgname>
 	  <orgdiv>Amazones Project</orgdiv>
@@ -44,19 +48,36 @@
     <title>Introduction</title>
     
     <para>
-      This tutorial is intended to teach you how to use the WSim's <userinput>--monitor</userinput> and <userinput>--modify</userinput> options. 
+      This tutorial is intended to teach you how to use 
+      WSim <userinput>--monitor</userinput>
+      and <userinput>--modify</userinput> options that can grant
+      access to application variables and memory.
     </para>
-    <para>    
-      These options are designed to help you to debug your <userinput>*.elf</userinput> program. The <userinput>--monitor</userinput> tool enables you to trace your own program global variables during an entire simulation, and the <userinput>--modify</userinput> one allows you to initialize a global variable of your <userinput>*.elf</userinput> file.
+
+    <para> 
+      These options are designed to help you to debug
+      your <userinput>*.elf</userinput>
+      program. The <userinput>--monitor</userinput> tool enables you
+      to trace your own program global variables during an entire
+      simulation, and the <userinput>--modify</userinput> one allows
+      you to initialize a global variable of
+      your <userinput>*.elf</userinput> file.
    </para>
+
     <para>
       The tutorial is based on the simple leds examples on wsn430 platform.
     </para>
-
+    <para>
+      In order to use WSim <userinput>--monitor</userinput>
+      parameter, WSim must have been compiled
+      with <userinput>--enable-xdebug</userinput> (that is the case
+      by default).
+    </para>
+    
     <para>
       This tutorial assumes that you are familiar with the basics of WSim and its associated tools. If not please first visit the WSim main tutorial.
     </para>
-    
+
     <para>
       <itemizedlist mark="bullet" spacing="normal">
 	<listitem>
@@ -79,86 +100,186 @@
 
   <chapter id="monitor">
     <title>Monitor option</title>
+    <section id="monitor_introduction">
+      <title>Introduction</title>
+      <para>
+	The <userinput>--monitor</userinput> option enables you to
+	monitor the value of a global variable or a memory space when
+	reading or writing it.
+      </para>
 
-    <section id="mon_wsim_conf">
-      <title>WSim configuration</title>
       <para>
-	In order to use WSim <userinput>--monitor</userinput> parameter, WSim must have been compiled with <userinput>--enable-xdebug</userinput> (that is the case by default).
+	You can record the trace of a set of variables separated by
+	commas. The number of variables you can monitor is quite
+	high and you can verify in the WSim log file that your
+	variables are found in wsim by looking at the
+	section <userinput>Memory</userinput>.
       </para>
+      <important>
+	<itemizedlist mark="bullet" spacing="normal">
+	    <listitem>
+	      <simpara>
+		You can use any C global variable from your program, but
+		hardware registers cannot be monitored by this way. 
+	      </simpara>
+	    </listitem>
+	    <listitem>
+	      <simpara>
+		Compiler optimization can allocate a variable to a
+		register. In case the generated trace does not contain
+		modifications for you monitored variable you have to
+		make sure the the writes to memory are actually
+		done. This can be used by looking at the assembly
+		code. To force a variable to be written in memory you
+		can use the C keyword <userinput>volatile</userinput>
+		that will take care of the register allocation optimization
+		by forcing real writes to memory.
+	      </simpara>
+	    </listitem>
+	    <listitem>
+	      <simpara>
+		Local variables cannot be traced using this scheme as their
+		address is not constant accross function calls and more than
+		one instance of a variable can exist at the same time during
+		the application lifetime.
+	      </simpara>
+	    </listitem>
+	  </itemizedlist>
+      </important>
+
       <para>
-	Here is one example of configuration :
+	A trace is recorded each time the concerning memory address
+	(variable or hex. address) is read, written, or both. Traces
+	are stored in the <userinput>*.trc</userinput> file generated
+	by WSim in a section called <userinput>monitor</userinput>.
       </para>
-      <programlisting><computeroutput>./configure --enable-xdebug --enable-gui</computeroutput></programlisting>
+
+      <note>
+	<title>The <userinput>--trace</userinput> option</title>
+	<para>
+	  To make the monitor option active, you must use at the same
+	  time the <userinput>--trace</userinput> parameter on the
+	  command line. Otherwise the trace file will be empty!
+	</para>
+      </note>
     </section>
+  <section id="monitor_syntax">
+    <title>Syntax</title>
+    <para>
+      <userinput>--monitor=[symbol1]:[options1],[addr2]:[size2]:[options2], ...,[argN]:[optionsN]</userinput>
+    </para>
 
-      <section id="monitor_usage">
-	<title>Usage</title>
-
-	<section id="monitor_descrip">
-	  <title>Full description</title>
-	  <para>
-	    <userinput>--monitor</userinput> option enables you to monitor the value of a global variable or a memory space when reading or writing it.
-	  </para>
-	  <para>
-	  You can record the trace of a set of variables separated by commas. The number of variables you can monitor is quite high and you can verify in the WSim log file that your variables are found in wsim by looking at the section <userinput>Memory</userinput>.
-	  <note>
-	    <title>Traceable variables</title>
-	    <para>
-	      You can use any C global variable from your program, but hardware registers cannot be monitored by this way.
-	    </para>
-	  </note>
-	  </para>
-	  <para>
-	  A trace is recorded each time the concerning memory address is read, written, or both. Traces are stored in the <userinput>*.trc</userinput> file generated by WSim in a section called <userinput>monitor</userinput>.
-	  </para>
-	  <note>
-	    <title>The <userinput>--trace</userinput> option</title>
-	    <para>
-	      To make the monitor option active, you must use at the same time the <userinput>--trace</userinput>  parameter on the command line. Otherwise the trace file will be empty!
-	    </para>
-	  </note>
-	</section>
-
-	<section id="monitor_syntax">
-	  <title>Syntax</title>
-	  <para>
-	    <userinput>--monitor=[symbol1]:[options1],[addr2]:[size2]:[options2], ...,[argN]:[optionsN]</userinput>
-	  </para>
-	  <para>
-	    <itemizedlist mark="bullet" spacing="normal">
-	      <listitem>
-		<simpara>
-		  <userinput>symbol</userinput> is a global variable name.
-		</simpara>
-	      </listitem>
-	      <listitem>
-		<simpara>
-		  <userinput>addr</userinput> is a memory address. In that case you have to specify with its <userinput>size</userinput> in byte (for instance <userinput>0xabcd:2</userinput>).
-		</simpara>
-	      </listitem>
-	      <listitem>
-		<simpara>
-		  <userinput>options</userinput> are <userinput>r</userinput> for "read" or/and <userinput>w</userinput> for "write". <userinput>options</userinput> are mandatory.
-		</simpara>
-	      </listitem>
-	    </itemizedlist>
-	    <note>
-	      <title>Variables names</title>
-	      <para>
-		Case is sensitive for variable names.
-	      </para>
-	    </note>
-	    <note>
-	      <title>Memory space</title>
-	      <para>
-		 Adresses are in hexadecimal, so they must be prefixed with <userinput>0x</userinput>. Size may be ommited, in this case, the default size is 1 byte.
-	      </para>
-	    </note>
-	  </para>
-	</section>
-
-      </section>
-
+    <para>
+      <itemizedlist mark="bullet" spacing="normal">
+	<listitem>
+	  <simpara>
+	    <userinput>symbol</userinput> is a global variable name.
+	  </simpara>
+	</listitem>
+	<listitem>
+	  <simpara>
+	    <userinput>addr</userinput> is a memory address. In that
+	    case you have to specify with
+	    its <userinput>size</userinput> in byte (for
+	    instance <userinput>0xabcd:2</userinput>).
+	  </simpara>
+	</listitem>
+	<listitem>
+	  <simpara>
+	    <userinput>options</userinput>
+	    are <userinput>r</userinput> for "read"
+	    or/and <userinput>w</userinput> for
+	    "write". <userinput>options</userinput> are mandatory.
+	  </simpara>
+	</listitem>
+      </itemizedlist>
+      <note>
+	<title>Variables names</title>
+	<para>
+	  Case is sensitive for variable names and corresponds to the
+	  name used in your program. If the names is misspelled a
+	  warning will be issued at run time stated that your variable
+	  is reported to have a size 0 and won't be traced.
+	</para>
+      </note>
+      <note>
+	<title>Memory space</title>
+	<para>
+	  Adresses are in hexadecimal, so they must be prefixed
+	  with <userinput>0x</userinput>. Size may be ommited, in this
+	  case, the default size is 1 byte.
+	</para>
+      </note>
+    </para>
+  </section>
+  
+  <section id="monitor_example">
+    <title>Example use of the monitor option</title>
+    <para>
+      The following simple example is a run of the following program:
+    </para>
+    <programlisting>
+      <computeroutput>
+        volatile int my_global_variable;
+        
+        int main(void)
+        {  
+          WDTCTL = WDTPW | WDTHOLD;
+          int i;
+          for(i=0; i&lt;1000; i++)
+            {
+              my_global_variable = i;
+            }
+          return 0;
+        }
+         </computeroutput>
+    </programlisting>
+    
+    <para>
+      The simulation is then run using the command
+    <programlisting>
+      <computeroutput>
+	wsim-wsn430 --verbose=6 --mode=time --modearg=1s --logfile=wsim.log --trace=wsim.trc --monitor=my_global_variable:w example.elf
+      </computeroutput>
+    </programlisting>
+    </para>
+    <para>
+      If the variable name is mistyped (with a capital G in that case), the following warning message is written in WSim output logs
+    </para>
+    <para>
+      <computeroutput>monitor: cannot find symbol "my_Global_variable"</computeroutput>
+    </para>
+    <para>
+      The trace generated by Wsim can be converted using <userinput>wtracer</userinput> in a VCD file format or to a raw timeline. The
+      following screenshot show the <userinput>GtkWave</userinput> software showing the generated trace along with the timeline.
+    </para>
+    <figure id="monitor_screenshot">
+      <title>Trace view of the <userinput>my_global_variable</userinput> changes</title>
+	<mediaobject>
+	  <imageobject>
+	    <imagedata align="center" width="90%" fileref="figures/monitor.png"/>
+	  </imageobject>
+	</mediaobject>
+    </figure>
+      
+  </section>
+  <section id="monitor_tips">
+    <title>On the use of the monitor option</title>
+    <para>
+      The <userinput>--monitor</userinput> can be used to trace
+      variables values in a program. This first method allows to 
+      easily find errors on complex algorithms ported to micro-controllers
+      withou using a tedious GDB step by step process. The way to use the
+      monitor output is to have reference test vectors from a version that
+      works on a desktop computer such that the iteration that differs 
+      on the controller can be easily pinpointed.
+    </para>
+    <para>
+      Another use of the monitor variable is to track buffer overflows and
+      stack overflow using monitor address set at the end of arrays or 
+      on top of the heap. 
+    </para>
+  </section>
   </chapter>
 
   <!-- ============================================================ -->
@@ -168,12 +289,9 @@
   <chapter id="modify">
     <title>Modify option</title>
 
-    <section id="mod_wsim_conf">
-      <title>WSim configuration</title>
       <para>
 	In order to use WSim <userinput>--modify</userinput> parameter, WSim must have been compiled with <userinput>--enable-xdebug</userinput> (that is the case by default).
       </para>
-    </section>
 
       <section id="modify_usage">
 	<title>Usage</title>

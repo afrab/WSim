@@ -49,7 +49,7 @@ void cc2420_assert_ccamux(struct _cc2420_t *cc2420, int event, int assert) {
 
 
 void cc2420_assert_sfdmux(struct _cc2420_t *cc2420, int event, int assert) {	
-    uint8_t old_SFD_pin = cc2420->SFD_pin;
+  /* UNUSED: uint8_t old_SFD_pin = cc2420->SFD_pin; */
 
     if (event == (cc2420->registers[CC2420_REG_IOCFG1] & (0x1F << 5))) {
         if (assert == CC2420_PIN_ASSERT && cc2420->SFD_pin == 0x00) {

@@ -1102,7 +1102,7 @@ ds2411_device_create(int dev, char *serial)
 
   DS2411_ID = ds2411_str_to_id(serial);
 
-  TRACER_DS2411 = tracer_event_add_id(1, "ds2411", "");
+  TRACER_DS2411 = tracer_event_add_id(1, "pin", "ds2411");
 
   return 0;
 }

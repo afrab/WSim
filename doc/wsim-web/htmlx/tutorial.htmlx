@@ -73,6 +73,17 @@
 	      </TD>
 	    </TR>
 
+	    <TR align="middle" bgcolor="#ffffff">
+	      <TD> <b>Using the --monitor and --modify options</b> </TD>
+	      <TD> How to interact with your program.</TD>
+	      <TD> 
+		<a href="./tutorials/monitor-option/index.html" > <!-- target="_new"> -->
+		  <img style="border: 0px solid ; width: 44px; height: 48px;" 
+		    src="./figures/html.png" alt="" />
+		</a> 
+	      </TD>
+	    </TR>
+
 	  </TABLE> 
 	  
   </div>

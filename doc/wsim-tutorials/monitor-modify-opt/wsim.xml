@@ -4,7 +4,7 @@
 
 <book lang="en">
   <bookinfo>
-    <title>WSim Hardware Platform Simulator: interact with your program variables</title>
+    <title>WSim Hardware Platform Simulator: interacting with your program variables</title>
     <copyright><year>2005</year><holder>Worldsens</holder></copyright>
     <subtitle>Tutorial</subtitle>
     <authorgroup>
@@ -163,10 +163,14 @@
 	</para>
       </note>
     </section>
+
   <section id="monitor_syntax">
     <title>Syntax</title>
     <para>
-      <userinput>--monitor=[symbol1]:[options1],[addr2]:[size2]:[options2], ...,[argN]:[optionsN]</userinput>
+	<programlisting>
+	  <computeroutput>     
+        --monitor=[symbol1]:[options1],[addr2]:[size2]:[options2], ...,[argN]:[optionsN] </computeroutput>
+	</programlisting>
     </para>
 
     <para>
@@ -289,49 +293,61 @@
   <chapter id="modify">
     <title>Modify option</title>
 
+    <section id="modify_intro">
+      <title>Introduction</title>
       <para>
-	In order to use WSim <userinput>--modify</userinput> parameter, WSim must have been compiled with <userinput>--enable-xdebug</userinput> (that is the case by default).
+	The <userinput>--modify</userinput> option can be used to modify initialisation values for global variables.
+	These variables are the ones that are declared as
+	<programlisting>
+	  <computeroutput>     
+        int my_global = 2; </computeroutput>
+	</programlisting>
       </para>
+      <para>
+	During the initialization phase, on boot, the GCC runtime
+	copies values from the <userinput>.text</userinput> segment to
+	the <userinput>.data</userinput> segment. The modification
+	proposed here is to change the value upon the first write to
+	the memory variable address in the program data section.
+      </para>
+      <para>
+	This modification scheme is a modification on first write on a 
+	memory address. If the variable is used as a global node ID or
+	for application parameters.
+      </para>
+    </section>
 
-      <section id="modify_usage">
-	<title>Usage</title>
-
-	<section id="modify_descrip">
-	  <title>Full description</title>
+    <section id="modify_syntax">
+      <title>Syntax</title>
+      <para>
+	<programlisting>
+	  <computeroutput>     
+	  --modify=0xAAAA:size:value,symbol1:value1,... </computeroutput>
+	</programlisting>
+      </para>
+      <para>
+	<itemizedlist mark="bullet" spacing="normal">
+	  <listitem>
+	    <simpara>
+	      <userinput>arg1</userinput> is a variable name or a memory address (0xabcd for instance)
+	      If the argument is an address then a second argument must be given to determine the size of
+	      the memory region to modify on the first write.
+	    </simpara>
+	  </listitem>
+	  <listitem>
+	    <simpara>
+	      <userinput>value</userinput> is the value that will be writen by the memory monitor in WSim.
+	    </simpara>
+	  </listitem>
+	</itemizedlist>
+	<note>
+	  <title>Variable names</title>
 	  <para>
-	    <userinput>--modify</userinput> option enables to change the value of a global variable just after initialization.
+	    Variable names are case sensitive.
 	  </para>
-	</section>
-
-	<section id="modify_syntax">
-	  <title>Syntax</title>
-	  <para>
-	    <userinput>--modify=[arg1]:[val1], ...,[argN]:[valN]</userinput>
-	  </para>
-	  <para>
-	    <itemizedlist mark="bullet" spacing="normal">
-	      <listitem>
-		<simpara>
-		  <userinput>arg</userinput> is a variable name or a memory address (0xabcd for instance)
-		</simpara>
-	      </listitem>
-	      <listitem>
-		<simpara>
-		  <userinput>option</userinput> is <userinput>r</userinput> for "read" or/and <userinput>w</userinput> for "write". 
-		</simpara>
-	      </listitem>
-	    </itemizedlist>
-	    <note>
-	      <title>Variable names</title>
-	      <para>
-		Case is sensitive for variable names.
-	      </para>
-	    </note>
-	  </para>
-	</section>
-
-      </section>
-
+	</note>
+      </para>
+    </section>
 
   </chapter>
 
@@ -339,6 +355,113 @@
   <!-- ============================================================ -->
   <!-- ============================================================ -->
 
+  <chapter id="brktrace_and_logs">
+    <title>Generating trace points and messages within the code</title>
+    <section id="brktrace">
+      <title>Generating code traces</title>
+
+      <para>
+	Special instruction inserted in the code can be used to report code behavior in 
+	WSim traces. A set of instruction can be inserted using the following macros on
+	the MSP430:
+      <programlisting>
+	<computeroutput>     
+	  #define MOV_R7R7()   __asm__ __volatile__ ("mov r7,r7")
+	  #define TRACE1  MOV_R7R7
+	  
+	  #define MOV_R8R8()   __asm__ __volatile__ ("mov r8,r8")
+	  #define TRACE2  MOV_R8R8
+	  
+	  [ ... ]
+	  
+	  #define MOV_R15R15()   __asm__ __volatile__ ("mov r15,r15")
+	  #define TRACE15  MOV_R15R15
+	</computeroutput>
+      </programlisting>
+      </para>
+
+      <para>
+	These instructions have no effect on the application code except that they
+	consume 2 CPU cycles. The presence of a <userinput>MOV_RxRx</userinput>
+	will be reported in the traces. 
+      </para>
+      <para>
+	Since traces will report only changes in the trace point ID you have to use
+	at least two tracepoints in a loop to observe the changes. If the same 
+	tracepoint is used several times in a row then only the first one will
+	be reported.
+      </para>
+      
+      <para>
+	The following program illustrates the use of two breakpoints within a loop. Traces are
+	reported in the <userinput>msp430.breakpoints</userinput> trace and is shown on 
+	the next figure using the GtkWave VCD viewer.
+      </para>
+
+    <programlisting>
+      <computeroutput>
+          volatile int my_global_variable;
+          
+          int main(void)
+          {  
+            WDTCTL = WDTPW | WDTHOLD;
+            int i;
+            for(i=0; i&lt;1000; i++)
+              {
+  	      TRACE7();
+                my_global_variable = i;
+  	      TRACE8();
+              }
+            return 0;
+          }
+           </computeroutput>
+    </programlisting>
+    <figure id="breakpoint_screenshot">
+      <title>Trace view of the <userinput>msp430.breakpoints</userinput> changes</title>
+	<mediaobject>
+	  <imageobject>
+	    <imagedata align="center" width="90%" fileref="figures/breakpoint.png"/>
+	  </imageobject>
+	</mediaobject>
+    </figure>
+
+    </section>
+
+
+    <section id="messages">
+      <title>Using the modify option for loging messages</title>
+      <para>
+	The <userinput>--monitor</userinput> option has been extended
+	in WSim to be able to output strings and decimal values from
+	the simulation. The <userinput>WSimLog.h</userinput> file
+	included int the SVN repository can be used to insert special
+	function calls.
+      <programlisting>
+	<computeroutput>     
+          $WSIM/utils/wsimlog/WSimLog.h </computeroutput>
+      </programlisting>
+      </para>
+      <para>
+	This mechanism uses a preallocated buffer that will be
+	included in your application. Three functions are defined in
+	order to log strings, chars, bytes and words out of the
+	simulation. Messages are stored in the wsim.log file.
+      </para>
+    <programlisting>
+      <computeroutput>
+	void logChar   (char   ch);
+	void logByte   (char   bt);
+	void logInt    (int    it);
+	void logString (char* str);
+           </computeroutput>
+    </programlisting>
+    </section>
+
+  </chapter>
+
+  <!-- ============================================================ -->
+  <!-- ============================================================ -->
+  <!-- ============================================================ -->
 
 </book>
 

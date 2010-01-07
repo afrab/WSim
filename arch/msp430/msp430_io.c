@@ -355,6 +355,11 @@ static void P16_ADDR(uint16_t i, uint16_t ADDR,
 static void P16(uint16_t i, uint16_t start, uint16_t stop, 
 		addr_map_read16_t read16, addr_map_write16_t write16)
 {
+  if ((i & 1) != 0)
+    {
+      return;
+    }
+
   if ((i>=start) && (i<=stop))
     {
       msp430_set_readptr16(read16,i);
@@ -440,6 +445,19 @@ int msp430_io_init(void)
 #endif
 
 
+#if defined(__msp430_have_timera3)
+	  P8_ADDR(i,TAIV,msp430_timerA3_read8,msp430_timerA3_write8);
+	  P8     (i,TIMER_A3_START,TIMER_A3_END+1,msp430_timerA3_read8,msp430_timerA3_write8);
+#endif
+#if defined(__msp430_have_adc12)
+	  P8 (i,ADC12MCTL0,ADC12MCTL15,msp430_adc12_read8 ,msp430_adc12_write8);
+#endif
+#if defined(__msp430_have_adc10)
+	  P8_ADDR (i,ADC10AE  ,msp430_adc10_read8 ,msp430_adc10_write8);
+	  P8_ADDR (i,ADC10DTC0,msp430_adc10_read8 ,msp430_adc10_write8);
+	  P8_ADDR (i,ADC10DTC1,msp430_adc10_read8 ,msp430_adc10_write8);
+#endif
+
       // ////////
       // 16 bits
       // ////////
@@ -451,9 +469,6 @@ int msp430_io_init(void)
 #if defined(__msp430_have_timera3)
 	  P16_ADDR(i,TAIV,msp430_timerA3_read,msp430_timerA3_write);
 	  P16(i,TIMER_A3_START,TIMER_A3_END,msp430_timerA3_read,msp430_timerA3_write);
-
-	  P8_ADDR(i,TAIV,msp430_timerA3_read8,msp430_timerA3_write8);
-	  P8     (i,TIMER_A3_START,TIMER_A3_END+1,msp430_timerA3_read8,msp430_timerA3_write8);
 #endif
 #if defined(__msp430_have_timera5) 
 	  P16_ADDR(i,TA1IV,msp430_timerA5_read,msp430_timerA5_write);
@@ -474,16 +489,12 @@ int msp430_io_init(void)
 #if defined(__msp430_have_adc12)
 	  P16(i,ADC12CTL0 ,ADC12IV    ,msp430_adc12_read16,msp430_adc12_write16);
 	  P16(i,ADC12MEM0 ,ADC12MEM15 ,msp430_adc12_read16,msp430_adc12_write16);
-	  P8 (i,ADC12MCTL0,ADC12MCTL15,msp430_adc12_read8 ,msp430_adc12_write8);
 #endif
 #if defined(__msp430_have_adc10)
 	  P16_ADDR(i,ADC10CTL0,msp430_adc10_read16,msp430_adc10_write16);
 	  P16_ADDR(i,ADC10CTL1,msp430_adc10_read16,msp430_adc10_write16);
 	  P16_ADDR(i,ADC10MEM ,msp430_adc10_read16,msp430_adc10_write16);
 	  P16_ADDR(i,ADC10SA  ,msp430_adc10_read16,msp430_adc10_write16);
-	  P8_ADDR (i,ADC10AE  ,msp430_adc10_read8 ,msp430_adc10_write8);
-	  P8_ADDR (i,ADC10DTC0,msp430_adc10_read8 ,msp430_adc10_write8);
-	  P8_ADDR (i,ADC10DTC1,msp430_adc10_read8 ,msp430_adc10_write8);
 #endif
 #if defined(__msp430_have_dac12)
 	  P16_ADDR(i,DAC12_0CTL,msp430_dac12_read,msp430_dac12_write);

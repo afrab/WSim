@@ -244,7 +244,7 @@ int main(int argc, char* argv[])
 
 
   /* event tracer */
-  tracer_init(o.tracefile, machine_get_nanotime, o.wsens_mode);
+  tracer_init(o.tracefile, o.wsens_mode);
 
   /* libselect init  */
   libselect_init();
@@ -263,6 +263,9 @@ int main(int argc, char* argv[])
       ERROR("\n");
       return 1;
     }
+
+  /* set timeref once the machine is created */
+  tracer_set_timeref(machine_get_nanotime);
 
   /* worldsens connect to wsnet server */
   worldsens_c_connect(o.server_ip, o.server_port, o.multicast_ip, o.multicast_port, o.node_id);

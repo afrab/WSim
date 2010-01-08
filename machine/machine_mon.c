@@ -20,24 +20,6 @@
 #include "machine.h"
 #include "machine_mon.h"
 
-/* ************************************************** */
-/* ************************************************** */
-/* ************************************************** */
-
-#define MONITOR_DEFAULT_SIZE        1
-#define MONITOR_MAX_VARIABLE_NAME  50
-#define MONITOR_MAX_WATCHPOINT     20
-
-struct watchpoint_t {
-  char        name[MONITOR_MAX_VARIABLE_NAME];
-  uint32_t    addr;
-  int         size; /* bytes */
-  int         mode; /* MAC_WATCH_WRITE | MAC_WATCH_READ */
-  int         modify_on_first_write;
-  int         modify_value; 
-  tracer_id_t trc_id;
-};
-
 static struct watchpoint_t watchpoint[MONITOR_MAX_WATCHPOINT];
 static int watchpoint_max;
 
@@ -58,7 +40,7 @@ void machine_monitor_print()
 	     watchpoint[i].size,
 	     (watchpoint[i].mode & MAC_WATCH_READ ) ? 'r':' ',
 	     (watchpoint[i].mode & MAC_WATCH_WRITE) ? 'w':' ',
-	     watchpoint[i].modify_on_first_write,
+	     machine.state->watchpoint_modify_on_first_write[i],
 	     watchpoint[i].modify_value
 	     );
     }
@@ -173,14 +155,14 @@ void machine_monitor_add_trace(void)
 	addr, mcu_get_pc(), value);
   */
   tracer_event_record(watchpoint[ index ].trc_id,value);
-  if (watchpoint[ index ].modify_on_first_write)
+  if (machine.state->watchpoint_modify_on_first_write[ index ])
 
     {
       int v_addr  = watchpoint[index].addr;
       int v_size  = watchpoint[index].size;
       int v_value = watchpoint[index].modify_value;
 
-      watchpoint[ index ].modify_on_first_write = 0;
+      machine.state->watchpoint_modify_on_first_write[ index ] = 0;
       switch (v_size) {
       case 0:
 	ERROR("  modify: variable \"%s\" [0x%04x] has size 0\n", 
@@ -394,8 +376,8 @@ void machine_modify_set(char* args, elf32_t elf)
 	{
 	  OUTPUT("Memory modify = %s, index %d\n",watchpoint[ index ].name,index);
 	}
-      watchpoint[index].modify_on_first_write = 1;
-      watchpoint[index].modify_value          = v_value;
+      machine.state->watchpoint_modify_on_first_write[index] = 1;
+      watchpoint[index].modify_value                         = v_value;
     }
   //  OUTPUT("==\n");
 }

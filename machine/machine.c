@@ -65,10 +65,10 @@ int machine_create()
 #endif
 
   /* zero memory */
-  machine.nanotime        = 0;
-  machine.nanotime_incr   = 0;
-  machine.nanotime_backup = 0;
-  machine.device_max      = 0;
+  machine.state                 = NULL;
+  machine.state_backup          = NULL;
+  machine.nanotime_incr         = 0;
+  machine.device_max            = 0;
   memset(machine.device,      '\0',sizeof(struct device_t)*DEVICE_MAX);
   memset(machine.device_size, '\0',sizeof(int)*DEVICE_MAX);
 
@@ -77,10 +77,7 @@ int machine_create()
 
   /* create devices = mcu + peripherals */
   res += devices_create();
-  
   machine_framebuffer_allocate();
-
-  /* machine_reset(); */
 
   tracer_set_node_id(machine_get_node_id());
   return res;
@@ -95,6 +92,7 @@ int machine_delete()
   int ret = 0;
 
   ret +=  devices_delete();
+  machine_state_free();
   machine_framebuffer_free();
   libelf_close(machine_elf);
 
@@ -396,13 +394,63 @@ inline wsimtime_t machine_get_nanotime()
 /* ************************************************** */
 /* ************************************************** */
 
+uint8_t* machine_state_allocate(int devices_size)
+{
+  uint8_t *ptr;
+  int machine_size = sizeof(struct machine_state_t);
+
+  /* machine.state_size_devices must be assigned */
+  machine.state_size = machine_size + devices_size;
+
+  printf("allocating %d bytes = %d + %d\n",machine.state_size, machine_size, devices_size);
+  if ((machine.state        = (struct machine_state_t*)malloc(machine.state_size)) == NULL)
+    {
+      ERROR("** Could not allocate memory for devices states storage\n");
+      return NULL;
+    }
+
+  if ((machine.state_backup = (struct machine_state_t*)malloc(machine.state_size)) == NULL)
+    {
+      machine_state_free();
+      ERROR("** Could not allocate memory for devices states storage backup\n");
+      return NULL;
+    }
+
+  memset(machine.state,        0, machine.state_size);
+  memset(machine.state_backup, 0, machine.state_size);
+
+  ptr = (uint8_t*)machine.state;
+  return ptr + machine_size;
+}
+
+/* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
+
+void machine_state_free(void)
+{
+  if (machine.state != NULL)
+    {
+      free(machine.state);
+      machine.state = NULL;
+    }
+  if (machine.state_backup != NULL)
+    {
+      free(machine.state_backup);
+      machine.state_backup = NULL;
+    }
+}
+
+/* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
+
 void machine_state_save()
 {
   /* mcu              */
   mcu_state_save();
-  machine.nanotime_backup = machine.nanotime;
   /* devices          */
-  memcpy(machine.devices_state_backup, machine.devices_state, machine.devices_state_size);
+  memcpy(machine.state_backup, machine.state, machine.state_size);
   /* libselect        */
   libselect_state_save();
   /* event tracer     */
@@ -421,9 +469,8 @@ void machine_state_restore()
 {
   /* mcu              */
   mcu_state_restore();
-  machine.nanotime = machine.nanotime_backup;
   /* devices          */
-  memcpy(machine.devices_state, machine.devices_state_backup, machine.devices_state_size);
+  memcpy(machine.state, machine.state_backup, machine.state_size);
   /* libselect        */
   libselect_state_restore();
   /* event tracer     */

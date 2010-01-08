@@ -156,6 +156,23 @@ static void tracer_event_record_time_nocheck(tracer_id_t id, tracer_val_t val, t
 static void tracer_dump_data(void);
 static void tracer_dump_header(void);
 
+
+/* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
+
+static inline tracer_time_t TRACER_GET_NANOTIME()
+{
+  if (tracer_get_nanotime != NULL)
+    {
+      return tracer_get_nanotime();
+    }
+  else
+    {
+      return 0;
+    }
+}
+
 /* ************************************************** */
 /* ************************************************** */
 /* ************************************************** */
@@ -185,12 +202,12 @@ tracer_dump_header()
 #if defined(WSNET1)
       cycles     = 0;
       insn       = 0;
-      time       = tracer_get_nanotime();
+      time       = TRACER_GET_NANOTIME();
       backtracks = 0;
 #else
       cycles     = mcu_get_cycles();
       insn       = mcu_get_insn();
-      time       = tracer_get_nanotime();
+      time       = TRACER_GET_NANOTIME();
       backtracks = machine.backtrack;
 #endif
 
@@ -249,15 +266,7 @@ tracer_dump_header()
   DMSG_TRACER("tracer:hdr:number   : %d (%d)\n",EVENT_TRACER.ev_count_total,size);
 
   /* end simulation time */
-  if (tracer_get_nanotime != NULL)
-    {
-      t = tracer_get_nanotime();
-    }
-  else
-    {
-      t = 0;
-    }
-
+  t    = TRACER_GET_NANOTIME();
   size = sizeof(tracer_time_t);
   i   += fwrite(&t,1,size,tracer_datafile);
   DMSG_TRACER("tracer:hdr:nano     : %" PRId64 " (%d)\n",t,size);
@@ -293,7 +302,7 @@ tracer_dump_header()
 /* ************************************************** */
 
 void
-tracer_init(char *filename, get_nanotime_function_t f, int ws_mode)
+tracer_init(char *filename, int ws_mode)
 {
   int id;
   uint32_t size;
@@ -303,13 +312,7 @@ tracer_init(char *filename, get_nanotime_function_t f, int ws_mode)
   if (filename == NULL)
     return ;
 
-  if (f == NULL)
-    {
-      ERROR("tracer: must define a valid function to get time\n");
-      return ;
-    }
-
-  tracer_get_nanotime = f;
+  tracer_get_nanotime = NULL;
   tracer_filename     = strdup(filename);
   for(id=0; id < TRACER_MAX_ID; id++)
     {
@@ -336,6 +339,15 @@ tracer_init(char *filename, get_nanotime_function_t f, int ws_mode)
   tracer_init_done = 1;
   size = sizeof(tracer_sample_t);
   DMSG_TRACER("tracer: init ok, sample size = %d\n",size);
+}
+
+/* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
+
+void tracer_set_timeref(get_nanotime_function_t fun)
+{
+  tracer_get_nanotime = fun;
 }
 
 /* ************************************************** */
@@ -520,7 +532,7 @@ tracer_event_record_active(tracer_id_t id, tracer_val_t val)
   /* we record only value change to limit trace size */
   if (val != EVENT_TRACER.id_val[id])
     {
-      uint64_t time = tracer_get_nanotime();
+      uint64_t time = TRACER_GET_NANOTIME();
       tracer_event_record_time_nocheck(id,val,time);
     }
   if (EVENT_TRACER.ev_count > TRACER_BLOCK_THRESHOLD)
@@ -535,7 +547,7 @@ tracer_event_record_active_ws(tracer_id_t id, tracer_val_t val)
   /* we record only value change to limit trace size */
   if (val != EVENT_TRACER.id_val[id])
     {
-      uint64_t time = tracer_get_nanotime();
+      uint64_t time = TRACER_GET_NANOTIME();
       tracer_event_record_time_nocheck(id,val,time);
     }
 }

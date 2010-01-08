@@ -74,6 +74,12 @@ uint64_t   machine_run_insn  (uint64_t insn);
 wsimtime_t machine_run_time  (wsimtime_t nanotime);
 
 /**
+ * machine state allocate
+ **/
+uint8_t*   machine_state_allocate(int devsize);
+void       machine_state_free(void);
+
+/**
  * save machine state in a backup place
  **/
 void machine_state_save(void);

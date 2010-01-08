@@ -11,6 +11,7 @@
 #include <string.h>
 
 #include "arch/common/hardware.h"
+#include "machine/machine.h"
 #include "devices/devices.h"
 
 /* ************************************************** */
@@ -21,8 +22,6 @@ int devices_delete(void)
 {
   int res = 0;
   MAP_OVER_DEVICES(delete);
-  free(machine.devices_state);
-  free(machine.devices_state_backup);  
   return res;
 }
 
@@ -33,38 +32,27 @@ int devices_delete(void)
 int devices_memory_allocate(void)
 {
   int i;
+  int size;
+  uint8_t *devzone;
   /* state memory allocation */
-  machine.devices_state_size = 0;
+  size = 0;
   for(i=0; i<machine.device_max; i++)
     {
-      machine.devices_state_size += machine.device_size[i];
-#if defined(DEBUG_MEMFOOTPRINT)
-      HW_DMSG_DEV("Devices: allocating %d bytes for device %d state\n",machine.device_size[i],i); 
-#endif
+      size += machine.device_size[i];
     }
 
-  if ((machine.devices_state        = (unsigned char*)malloc(machine.devices_state_size)) == NULL)
-    {
-      ERROR("** Could not allocate memory for devices states storage\n");
-      return 1;
-    }
+  devzone = machine_state_allocate(size);
 
-  if ((machine.devices_state_backup = (unsigned char*)malloc(machine.devices_state_size)) == NULL)
-    {
-      free(machine.devices_state);
-      ERROR("** Could not allocate memory for devices states storage backup\n");
-      return 1;
-    }
-
-  memset(machine.devices_state,        0, machine.devices_state_size);
-  memset(machine.devices_state_backup, 0, machine.devices_state_size);
+  if (devzone == NULL)
+    return 1;
 
   /* state memory distribution */
-  machine.device[0].data = machine.devices_state;
+  machine.device[0].data = devzone;
   for(i=1; i<machine.device_max; i++)
     {
       machine.device[i].data = ((char*) machine.device[i-1].data) +  machine.device_size[i-1];
     }
+
   return 0;
 }
 

@@ -26,38 +26,65 @@
 /* ************************************************** */
 /* ************************************************** */
 
+#define MONITOR_DEFAULT_SIZE         1
+#define MONITOR_MAX_VARIABLE_NAME  100
+#define MONITOR_MAX_WATCHPOINT      50
+
+struct watchpoint_t {
+  char        name[MONITOR_MAX_VARIABLE_NAME];
+  uint32_t    addr;
+  int         size;                      /* bytes                            */
+  int         mode;                      /* MAC_WATCH_WRITE | MAC_WATCH_READ */
+  /*int       modify_on_first_write;*/   /* backtracked */ 
+  int         modify_value; 
+  tracer_id_t trc_id;
+};
+
+struct machine_state_t {
+  uint64_t    nanotime;
+  uint64_t    nanotime_incr;
+  char        watchpoint_modify_on_first_write[MONITOR_MAX_WATCHPOINT];
+  /* devices_state must be last */
+  uint8_t     devices_state[0];
+};
+
+/* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
+
 /**
  * machine description
  **/
 struct machine_t
 {
-  uint64_t        nanotime;
-  int             nanotime_incr;
-  uint64_t        nanotime_backup;
-
   /**
-   * devices state with backup
+   * machine+devices state with backup
    **/
-  uint8_t*        devices_state;
-  uint8_t*        devices_state_backup;
-  int             devices_state_size;
-  
+  struct machine_state_t*  state;
+  struct machine_state_t*  state_backup;
+  int                      state_size;
+
   /**
    * peripherals connected to the mcu
    **/
-  struct device_t device     [DEVICE_MAX];
-  int             device_size[DEVICE_MAX];
-  int             device_max;
+  struct device_t          device     [DEVICE_MAX];
+  int                      device_size[DEVICE_MAX];
+  int                      device_max;
+
+  /**
+   *
+   **/
+  int                      nanotime_incr;
 
   /**
    * trace log
    **/
-  uint32_t        backtrack;
+  uint32_t                 backtrack;
 
   /**
    * ui
    **/
-  struct ui_t   ui;
+  struct ui_t              ui;
 };
 
 /* ************************************************** */
@@ -75,12 +102,12 @@ extern struct machine_t machine;
 
 void     machine_exit      (int arg);
 
-#define MACHINE_TIME_GET_NANO()  machine.nanotime
+#define MACHINE_TIME_GET_NANO()  machine.state->nanotime
 #define MACHINE_TIME_GET_INCR()  machine.nanotime_incr
-#define MACHINE_TIME_SET_INCR(n)                                \
-  do {                                                          \
-    machine.nanotime_incr = n;                                  \
-    machine.nanotime     += n;                                  \
+#define MACHINE_TIME_SET_INCR(n)				       \
+  do {								       \
+    machine.nanotime_incr        = n;                                  \
+    machine.state->nanotime     += n;                                  \
   } while (0)
 
 #define MACHINE_TIME_CLR_INCR()  do { machine.nanotime_incr = 0; } while (0)

@@ -294,8 +294,7 @@ options:\n";
 
 void options_print_version(struct options_t UNUSED *s)
 {
-  OPT_PRINT("%s: version %s, build %d, date %s\n",PACKAGE,PACKAGE_VERSION,
-	    WSIM_BUILD_ID, WSIM_BUILD_DATE);
+  OPT_PRINT("%s: version %s, date \"%s\"\n", PACKAGE, PACKAGE_VERSION, __DATE__);
 }
 
 /* ************************************************** */

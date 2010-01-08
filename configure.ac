@@ -5,14 +5,11 @@ dnl configure.ac for Worldsens architecture simulator
 dnl works only for automake 1.10 and above 
 dnl lower versions will have problem with bzero prototype replacement
 dnl --------------------------------------------------------------
-AC_INIT([wsim],[0.99.6svn])
+AC_INIT([wsim],[0.99.7svn])
 AC_CONFIG_SRCDIR(src/main.c)
 AC_CANONICAL_HOST
 AM_INIT_AUTOMAKE(foreign) dnl foreign = NEWS/TODO not required
 AC_CONFIG_HEADERS([config.h])
-
-AC_DEFINE(WSIM_BUILD_ID,          88  , [build id]   )
-AC_DEFINE(WSIM_BUILD_DATE, "30102009" , [build date] )
  
 dnl --------------------------------------------------------------
 dnl Checks for programs.
@@ -59,8 +56,8 @@ fi
 dnl Debug mode : enable debug code for wsim internals
 dnl ============ 
 CFLAGS_save="${CFLAGS}"
-AC_ARG_ENABLE([debug],AS_HELP_STRING([--enable-debug],[debug mode (default disabled)]))
-if test "${enable_debug}" = "yes"; then
+AC_ARG_ENABLE([debug],AS_HELP_STRING([--enable-debug],[wsim debug mode (default enabled)]))
+if test "${enable_debug}" != "no"; then
     CFLAGS="$CFLAGS -g"
     AC_DEFINE([DEBUG],[1],[WSim internals debug tools])
     debug_sum="yes"
@@ -77,8 +74,6 @@ if test "${enable_xdebug}" != "no"; then
     xdebug_sum="yes"
     AC_DEFINE([XCODE_DEBUG],       [1],[WSim target code debug tools  ])
     AC_DEFINE([ENABLE_RAM_CONTROL],[1],[WSim target ram access control])
-#endif
-
 else
     xdebug_sum="no"
 fi

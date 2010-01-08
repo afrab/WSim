@@ -33,7 +33,7 @@
 
 #define LISTENQ 2 // socket listen fifo size (backlog)
 
-#define DMSG_SKT(x...) VERBOSE(4,x)
+#define DMSG_SKT(x...) VERBOSE(11,x)
 
 /* ************************************************** */
 /* ************************************************** */

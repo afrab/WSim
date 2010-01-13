@@ -676,49 +676,58 @@ uint64_t cc2420_callback_rx(void *arg, struct wsnet_rx_info *wrx)
 	    return 0;
 	}
 
-	/* if address recognition is set, and addressing fields were received, deal with address recognition */
-	if (addr_decode) {
 
-	  /* first byte of FCF */
-	  if (cc2420->rx_data_bytes == 2) {
+	/* Warning! cc2420 chipset is compliant with 802.15.4, but doesn't check if it is the case for user frames.
+	   Thus if address decoding isn't enabled, user can choose to send data instead fcf for instance, cc2420 
+	   doesn't care about that, frame will be sent all the same. */
+
+	/* first byte of FCF */
+	if (cc2420->rx_data_bytes == 2) {
 	    CC2420_DEBUG("1st byte of fcf is %.1x, swapped %.1x\n", rx, swapbits(rx,8));
 	    CC2420_DEBUG("swapping byte, todo : check that it's not a bug in cc2420 in cc2420.c/com_send driver\n");
 	    cc2420->rx_fcf = swapbits(rx,8);
-	  }
+	}
 
-	  /* second byte of FCF */
-	  if (cc2420->rx_data_bytes == 3) {
+	/* second byte of FCF */
+	if (cc2420->rx_data_bytes == 3) {
 	    CC2420_DEBUG("2nd byte of fcf is %.1x, swapped %.1x\n", rx, swapbits(rx,8));
 	    cc2420->rx_fcf = (cc2420->rx_fcf << 8) | (swapbits(rx,8)) ; //cc2420->rx_fcf |= swapbits(rx,8) << 8;
-	    /* the FCF was fully received, process it */
-	    cc2420_rx_process_fcf(cc2420);
-	  }
+	}
 
-	  /* sequence field */
-	  if (cc2420->rx_data_bytes == 4) {
+	/* sequence field */
+	if (cc2420->rx_data_bytes == 4) {
 	    cc2420->rx_sequence = rx;
 	    CC2420_DEBUG("seq is %d\n", rx);
-	  }
+	}
 
-	  /* if addressing fields were received, deal with address recognition */
-	  if (cc2420->rx_data_bytes == cc2420->rx_src_addr_offset + cc2420->rx_src_addr_len) {
-	    CC2420_DEBUG("got last addressing byte, data bytes is %d\n", cc2420->rx_data_bytes);
-	    /* if address checking recognition fails, set flag to indicate that frame has to be flushed */
-	    if (cc2420_rx_check_address(cc2420)) {
-	      CC2420_DEBUG("address recognition failed, will flush received frame when complete\n");
-	      cc2420->rx_addr_decode_failed = 1;
-	      return 0;
+
+	/* if address recognition is set, and addressing fields were received, deal with address recognition */
+	if (addr_decode) {
+
+	    if (cc2420->rx_data_bytes == 3) {
+	        /* the FCF was fully received, process it */
+	        cc2420_rx_process_fcf(cc2420);
 	    }
-	    else {
-	      uint8_t rx_threshold = CC2420_REG_IOCFG0_FIFOP_THR(cc2420->registers[CC2420_REG_MDMCTRL0]);
-	      CC2420_DEBUG("address recognition OK, checking threshold (%d)\n", rx_threshold);
-	      if (cc2420->rx_data_bytes >= rx_threshold) {
-		CC2420_DEBUG("rx_threshold reached, setting up FIFOP\n");
-		cc2420->FIFOP_pin = 0xFF;
-		cc2420->FIFOP_set =    1;
-	      }
+
+	    /* if addressing fields were received, deal with address recognition */
+	    if (cc2420->rx_data_bytes == cc2420->rx_src_addr_offset + cc2420->rx_src_addr_len) {
+	        CC2420_DEBUG("got last addressing byte, data bytes is %d\n", cc2420->rx_data_bytes);
+		/* if address checking recognition fails, set flag to indicate that frame has to be flushed */
+		if (cc2420_rx_check_address(cc2420)) {
+		    CC2420_DEBUG("address recognition failed, will flush received frame when complete\n");
+		    cc2420->rx_addr_decode_failed = 1;
+		    return 0;
+		}
+		else {
+		    uint8_t rx_threshold = CC2420_REG_IOCFG0_FIFOP_THR(cc2420->registers[CC2420_REG_MDMCTRL0]);
+		    CC2420_DEBUG("address recognition OK, checking threshold (%d)\n", rx_threshold);
+		    if (cc2420->rx_data_bytes >= rx_threshold) {
+		        CC2420_DEBUG("rx_threshold reached, setting up FIFOP\n");
+			cc2420->FIFOP_pin = 0xFF;
+			cc2420->FIFOP_set =    1;
+		    }
+		}
 	    }
-	  }
 	} /* End of addressing recognition part */
 
 

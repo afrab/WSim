@@ -1178,8 +1178,8 @@ static void msp430_mcu_run_insn()
         case OP_CALL:
 	  {
 	    uint16_t next_pc;
-	    msp430_type2_single_operand( insn );
 	    SP -= 2;
+	    msp430_type2_single_operand( insn );
 	    msp430_write_short(SP,mcu_get_pc_next());
 	    next_pc = opt2.val;
 	    mcu_set_pc_next(next_pc);

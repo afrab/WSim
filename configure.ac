@@ -245,6 +245,14 @@ if test "${enable_platform_telosb}" = "yes" ; then
 	PLATFORMNAMES="telosb $PLATFORMNAMES"
 fi
 
+dnl WASP project
+AC_ARG_ENABLE([platform-wasp],AS_HELP_STRING([--enable-platform-wasp],[wasp platforms]))
+if test "${enable_platform_wasp}" = "yes" ; then
+	enable_mcu_msp430=yes
+	NPLATFORM=$(($NPLATFORM + 1))
+	PLATFORMNAMES="wasp $PLATFORMNAMES"
+fi
+
 dnl CSEM WiseNodes
 AC_ARG_ENABLE([platform-wisenode],AS_HELP_STRING([--enable-platform-wisenode],[wisenode platform]))
 if test "${enable_platform_wisenode}" = "yes" ; then
@@ -300,6 +308,7 @@ AM_CONDITIONAL([BUILD_OTSETRE],   [test "${enable_platform_otsetre}"     = "yes"
 AM_CONDITIONAL([BUILD_EZ430],     [test "${enable_platform_ez430}"       = "yes" -o "$ALL" = "yes" ])
 AM_CONDITIONAL([BUILD_TESTS],     [test "${enable_platform_tests}"       = "yes" -o "$ALL" = "yes" ])
 AM_CONDITIONAL([BUILD_TELOSB],    [test "${enable_platform_telosb}"      = "yes" -o "$ALL" = "yes" ])
+AM_CONDITIONAL([BUILD_WASP],      [test "${enable_platform_wasp}"        = "yes" -o "$ALL" = "yes" ])
 AM_CONDITIONAL([BUILD_WISENODE],  [test "${enable_platform_wisenode}"    = "yes" -o "$ALL" = "yes" ])
 AM_CONDITIONAL([BUILD_ICLBSN],    [test "${enable_platform_iclbsn}"      = "yes" -o "$ALL" = "yes" ])
 AM_CONDITIONAL([BUILD_EZ430RF],   [test "${enable_platform_ez430rf}"     = "yes" -o "$ALL" = "yes" ])
@@ -574,11 +583,12 @@ platforms/ot2006/Makefile
 platforms/otsetre/Makefile
 platforms/tests/Makefile
 platforms/telosb/Makefile
-platforms/wisenode/Makefile
 platforms/mica2/Makefile
 platforms/micaz/Makefile
 platforms/iclbsn/Makefile
 platforms/mcugen/Makefile
+platforms/wasp/Makefile
+platforms/wisenode/Makefile
 dnl
 libelf/Makefile
 libgdb/Makefile

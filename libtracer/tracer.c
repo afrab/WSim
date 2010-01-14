@@ -437,7 +437,7 @@ tracer_event_add_id(int width, char* name, char* module)
 
   if ((width < 1) || (width > 64))
     {
-      ERROR("tracer: event id %d must have 0 < width < 65\n",id);
+      ERROR("tracer: event id %d \"%s\" must have 0 < width < 65\n",id,name);
     }
   
   strncpy(tracer_id_name   [id], name,   TRACER_MAX_NAME_LENGTH);

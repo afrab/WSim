@@ -199,29 +199,30 @@ void machine_monitor_add_trace(void)
       
       switch (logString[0])
 	{
+	case 0  :
 	case '0': // init (silent)
 	  break;
 
 	case '1': // char
-	  VERBOSE(6,"machine:monitor(0): Variable:%s at:0x%04x (char) = '%c'\n",
-		  watchpoint[ index ].name,watchpoint[ index ].addr,logString[1]);
+	  VERBOSE(6,"machine:monitor(%d): Variable:%s at:0x%04x (char) = '%c'\n",
+		  logString[0], watchpoint[ index ].name,watchpoint[ index ].addr,logString[1]);
 	  break;
 	case '2': // Byte (int8)
-	  VERBOSE(6,"machine:monitor(0): Variable:%s at:0x%04x (int8) = '%d'\n",
-		  watchpoint[ index ].name,watchpoint[ index ].addr,logString[1]);
+	  VERBOSE(6,"machine:monitor(%d): Variable:%s at:0x%04x (int8) = '%d'\n",
+		  logString[0], watchpoint[ index ].name,watchpoint[ index ].addr,logString[1]);
 	  break;
 	case '3': // Int (int16)
 	  int16 = ((logString[2] & 0xff) << 8) | (logString[1] & 0xff);
-	  VERBOSE(6,"machine:monitor(0): Variable:%s at:0x%04x (int16) = '%d'\n",
-		  watchpoint[ index ].name,watchpoint[ index ].addr,int16);
+	  VERBOSE(6,"machine:monitor(%d): Variable:%s at:0x%04x (int16) = '%d'\n",
+		  logString[0], watchpoint[ index ].name,watchpoint[ index ].addr,int16);
 	  break;
 	case '4': // string
-	  VERBOSE(6,"machine:monitor(0): Variable:%s at:0x%04x (str) = '%s'\n",
-		  watchpoint[ index ].name,watchpoint[ index ].addr,&logString[1]);
+	  VERBOSE(6,"machine:monitor(%d): Variable:%s at:0x%04x (str) = '%s'\n",
+		  logString[0], watchpoint[ index ].name,watchpoint[ index ].addr,&logString[1]);
 	  break;
 	default:
-	  VERBOSE(6,"machine:monitor(0): Variable:%s at:0x%04x (Unknown type) = '%s'\n",
-		  watchpoint[ index ].name,watchpoint[ index ].addr,iter,logString);
+	  VERBOSE(6,"machine:monitor(%d): Variable:%s at:0x%04x (Unknown type) = '%s'\n",
+		  logString[0], watchpoint[ index ].name,watchpoint[ index ].addr,iter,logString);
 	  break;
 	}
       free(logString);

@@ -1163,8 +1163,8 @@ static void msp430_mcu_run_insn()
         case OP_PUSH:
 	  {
 	    int16_t result;
-	    msp430_type2_single_operand( insn );
 	    SP -= 2;
+	    msp430_type2_single_operand( insn );
 	    result = opt2.val;
 	    msp430_write_short(SP,result);
 	    /* flags : ---- */

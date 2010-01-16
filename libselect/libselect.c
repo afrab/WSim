@@ -16,6 +16,7 @@
 #include <sys/stat.h>
 #include <inttypes.h>
 #include <fcntl.h>
+#include <ctype.h>
 
 #ifdef _WIN32
 #include <windows.h>

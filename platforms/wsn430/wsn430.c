@@ -303,10 +303,10 @@ int devices_reset_post(void)
   SYSTEM_FLASH_CS = 0;
   SYSTEM_RADIO_CS = 0;
 
+  REFRESH(LOGO1);
   REFRESH(LED1);
   REFRESH(LED2);
   REFRESH(LED3);
-  REFRESH(LOGO1);
 #if defined(GUI)
   if (refresh) 
     {
@@ -578,8 +578,10 @@ int devices_update(void)
 
 
   /* input on UI is disabled */
+  //#define INPUT_GUI
 #if defined(GUI) && defined(INPUT_GUI)
   {
+#define UI_EVENT_SKIP 50
     /* poll event every */
     static int loop_count = UI_EVENT_SKIP;
     if ((loop_count--) == 0)
@@ -588,13 +590,19 @@ int devices_update(void)
 	loop_count = UI_EVENT_SKIP;
 	switch ((ev = ui_getevent()))
 	  {
+	  case UI_EVENT_USER:
+	    HW_DMSG_UI("wsn430:devices: UI event %04x %04x\n",machine.ui.b_up,machine.ui.b_down);
+	    //printf("wsn430:devices: UI event %04x %04x\n",machine.ui.b_up,machine.ui.b_down);	    
+	    break;
+
 	  case UI_EVENT_QUIT:
 	    HW_DMSG_UI("wsn430:devices: UI event QUIT\n");
-	    MCU_SIGNAL = MCU_SIGINT;
+	    mcu_signal_add(SIG_HOST | SIGQUIT);
 	    break;
-	  case UI_EVENT_CMD:
+
 	  case UI_EVENT_NONE:
 	    break;
+
 	  default:
 	    ERROR("wsn430:devices: unknown ui event\n");
 	    break;

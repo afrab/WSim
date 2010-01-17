@@ -118,8 +118,8 @@ int system_create(int dev_num)
 
   STDOUT("%s:\n", NAME);
   STDOUT("%s: =========================\n", NAME);
-  STDOUT("%s: boutton 1 = 'a'\n", NAME);
-  STDOUT("%s: boutton 2 = 'z'\n", NAME);
+  STDOUT("%s: boutton 1 = '1'\n", NAME);
+  STDOUT("%s: boutton 2 = '2'\n", NAME);
   STDOUT("%s: =========================\n", NAME);
   STDOUT("%s:\n", NAME);
 
@@ -256,11 +256,17 @@ int devices_reset_post(void)
   SYSTEM_FLASH_CS = 0;
   SYSTEM_RADIO_CS = 0;
 
+#if defined(LOGO1)
+  REFRESH(LOGO1);
+#endif
   REFRESH(LED1);
   REFRESH(LED2);
   REFRESH(LED3);
-#if defined(LOGO1)
-  REFRESH(LOGO1);
+#if defined(GUI)
+  if (refresh) 
+    {
+      ui_refresh();
+    }
 #endif
   return 0;
 }

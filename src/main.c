@@ -23,7 +23,18 @@
 #include "libwsnet/libwsnet.h"
 #include "src/options.h"
 
-/* this needs to appear after ui.h which include SDL.h */
+
+/*
+ * we must include SDL.h to define the SDL_main symbol in the main.c source file
+ * This is needed at least for MacOSX builds
+ */
+
+#if defined(GUI_SDL)
+#include "SDL.h"
+#endif
+
+/* this needs to appear after SDL.h */
+
 #if defined(FUNC_GETRUSAGE_DEFINED)
 #include <sys/resource.h>
 #endif
@@ -310,7 +321,7 @@ int main(int argc, char* argv[])
   /* GUI */
   if (ui_create(machine.ui.width,machine.ui.height,machine_get_node_id()) != UI_OK)
     {
-      ERROR("Cannot create displayi\n");
+      ERROR("Cannot create display\n");
       return 3;
     }
 

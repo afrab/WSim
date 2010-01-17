@@ -320,12 +320,12 @@ int devices_reset_post()
   SYSTEM_FLASH_CS = 0;
   SYSTEM_RADIO_CS = 0;
 
-  REFRESH(LED1);
-  REFRESH(LED2);
-  REFRESH(LED3);
 #if defined(LOGO1)
   REFRESH(LOGO1);
 #endif
+  REFRESH(LED1);
+  REFRESH(LED2);
+  REFRESH(LED3);
 #if defined(GUI)
   if (refresh) 
     {

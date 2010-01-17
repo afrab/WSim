@@ -246,12 +246,12 @@ int devices_reset_post()
   /* p4 boutons */
   msp430_digiIO_dev_write(PORT4, 0xf0, 0xf0);
   
+  REFRESH(LOGO1);
   REFRESH(BAGR);
   REFRESH(LEDstatus);
   REFRESH(BLED9);
   REFRESH(BLED10);
   REFRESH(LCD);
-  REFRESH(LOGO1);
 
   if (refresh)
     {

@@ -307,6 +307,12 @@ int devices_reset_post(void)
   REFRESH(LED2);
   REFRESH(LED3);
   REFRESH(LOGO1);
+#if defined(GUI)
+  if (refresh) 
+    {
+      ui_refresh();
+    }
+#endif
   return 0;
 }
 

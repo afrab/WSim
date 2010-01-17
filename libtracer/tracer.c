@@ -435,9 +435,9 @@ tracer_event_add_id(int width, char* name, char* module)
       APP_EXIT(1);
     }
 
-  if ((width < 1) || (width > 64))
+  if (((width < 1) || (width > 64)) && (strcmp(name,"__WSIMLOGBUFFER") != 0))
     {
-      ERROR("tracer: event id %d \"%s\" must have 0 < width < 65\n",id,name);
+      ERROR("tracer: event id %d \"%s\" must have 0 < width < 65 bits\n",id,name);
     }
   
   strncpy(tracer_id_name   [id], name,   TRACER_MAX_NAME_LENGTH);

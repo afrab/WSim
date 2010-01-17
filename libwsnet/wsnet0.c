@@ -38,7 +38,7 @@ int worldsens0_c_close(void)
 
 int worldsens0_c_get_node_id(void)
 {
-  return 0;
+  return -1;
 }
 
 int worldsens0_c_rx_register(void UNUSED *arg, wsnet_callback_rx_t UNUSED cbrx, char UNUSED *antenna)

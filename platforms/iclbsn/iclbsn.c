@@ -326,6 +326,12 @@ int devices_reset_post()
 #if defined(LOGO1)
   REFRESH(LOGO1);
 #endif
+#if defined(GUI)
+  if (refresh) 
+    {
+      ui_refresh();
+    }
+#endif
   return 0;
 }
 

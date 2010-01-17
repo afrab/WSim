@@ -108,16 +108,26 @@ AC_ARG_WITH([zlib-prefix], AS_HELP_STRING([--with-zlib-prefix=DIR],[zlib path]),
 	     zlib_prefix=$withval],
 	    [zlib_prefix=""])
 
-dnl SDL ui mode
+dnl UI mode
 dnl ===========
-AC_ARG_ENABLE([gui],AS_HELP_STRING([--enable-gui],[GUI for devices (default disabled)]))
-if test "${enable_gui}" = "yes" ; then
-    sdl_sum="yes"
+gui_type="none"
+AC_ARG_ENABLE([gui],AS_HELP_STRING([--enable-gui],[GUI (default enabled)]))
+if test "${enable_gui}" != "no" ; then
+    gui_sum="yes"
     AC_DEFINE([GUI],[1],[Defines wether a GUI is available])
 else
-    sdl_sum="no"
+    gui_sum="no"
 fi
-AM_CONDITIONAL([BUILD_GUI], [test "${sdl_sum}" = "yes"])
+AM_CONDITIONAL([BUILD_GUI], [test "${gui_sum}" = "yes"])
+
+dnl SDL ui mode
+dnl ===========
+AC_ARG_ENABLE([sdl],AS_HELP_STRING([--enable-sdl],[SDL GUI for devices (default disabled)]))
+if test "${enable_sdl}" = "yes" ; then
+    gui_type="SDL"
+    AC_DEFINE([GUI_SDL],[1],[Defines wether a SDL GUI is available])
+fi
+AM_CONDITIONAL([BUILD_GUI_SDL], [test "${gui_type}" = "SDL"])
 
 dnl Gprof mode
 dnl ==========
@@ -441,6 +451,10 @@ case "${host}" in
 	CFLAGS="$CFLAGS -DLINUX"
 	NEEDLARGEFILES="yes"
 	EXTRALIBS="$EXTRALIBS -lz"
+	# backup GUI for unix machines
+	if test "${gui_sum}" = "yes" -a "${gui_type}" = "none" ; then 
+	    gui_type="X11"
+	fi
 	;;
    
 	*-*-solaris* )
@@ -449,6 +463,10 @@ case "${host}" in
 	HOSTTYPE="Solaris"
 	CFLAGS="$CFLAGS -DSOLARIS"
 	EXTRALIBS="$EXTRALIBS -lsocket -lnsl"
+	# backup GUI for unix machines
+	if test "${gui_sum}" = "yes" -a "${gui_type}" = "none" ; then 
+	    gui_type="X11"
+	fi
 	;;
 
 	*-*-cygwin )
@@ -456,6 +474,9 @@ case "${host}" in
 	HOSTTYPE="Cygwin"
 	NEEDLARGEFILES="yes"
 	EXTRALIBS="$EXTRALIBS -mwindows"
+	if test "${gui_sum}" = "yes" -a "${gui_type}" = "none" ; then 
+	    gui_type="WIN"
+	fi
 	;;
 
 	*-*-mingw32* )
@@ -464,9 +485,12 @@ case "${host}" in
 	HOSTTYPE="Mingw32"
 	NEEDLARGEFILES="yes"
 	EXTRALIBS="$EXTRALIBS -lws2_32 -mwindows -lmingw32"
-	if test "${enable_gui}" = "yes" ; then
-		# hack to avoid missing SDL_main linker complaint
-		LDFLAGS="$LDFLAGS -u_SDL_main"
+	if test "${gui_sum}" = "yes" -a "${gui_type}" = "none" ; then 
+	    gui_type="WIN"
+	fi
+	if test "${gui_sum}" = "yes" -a "${gui_type}" = "SDL" ; then
+	   # hack to avoid missing SDL_main linker complaint
+	   LDFLAGS="$LDFLAGS -u_SDL_main"
 	fi
 	;;
 
@@ -507,17 +531,36 @@ AM_CONDITIONAL([BUILD_MACOSX],  [test "$HOSTTYPE" = "MacOSX"])
 AM_CONDITIONAL([BUILD_MINGW32], [test "$HOSTTYPE" = "Mingw32"])
 AM_CONDITIONAL([BUILD_CYGWIN],  [test "$HOSTTYPE" = "Cygwin"])
 
+AM_CONDITIONAL([BUILD_GUI_X11], [test "${gui_type}" = "X11"])
+if test "${gui_type}" = "X11" ; then
+   AC_DEFINE([GUI_X11], [1], [Defines wether a X11 GUI is available])
+   EXTRALIBS="$EXTRALIBS -lX11"
+fi
+
+AM_CONDITIONAL([BUILD_GUI_WIN], [test "${gui_type}" = "WIN"])
+if test "${gui_type}" = "WIN" ; then
+   AC_DEFINE([GUI_WIN], [1], [Defines wether a Windows native GUI is available])
+   EXTRALIBS="$EXTRALIBS"
+fi
+
+AM_CONDITIONAL([BUILD_GUI_NONE], [test "${gui_type}" = "none"])
+if test "${gui_type}" = "none" ; then
+   AC_DEFINE([GUI_NONE], [1], [Defines wether No-GUI is selected])
+fi
+
 dnl --------------------------------------------------------------
 dnl Checks for libraries.
 dnl --------------------------------------------------------------
-if test "${enable_gui}" = "yes" ; then
+if test "${enable_sdl}" = "yes" ; then
 	SDL_VERSION=1.2.5
 	AM_PATH_SDL($SDL_VERSION,   :,  AC_MSG_ERROR([*** SDL version $SDL_VERSION not found!])	)
-	if test "$HOSTTYPE" = "Cygwin" -a "${worldsens_sum}" != no ; then
+
+	if test "$HOSTTYPE" = "Cygwin" ; then 
 		AC_MSG_NOTICE([stripping MinGW cruft from SDL_CFLAGS/_LIBS for Worldsens on Cygwin])
 		SDL_CFLAGS="$(echo "$SDL_CFLAGS" | sed -e 's,-I/usr/include/mingw,,;s,-mno-cygwin,,;s,-Dmain=SDL_main,,' )"
 		SDL_LIBS="$(echo "$SDL_LIBS" | sed -e 's,-lmingw32,,;s,-mno-cygwin,,;s,-mwindows,,;s,-lSDLmain,,' )"
 	fi
+
 	CFLAGS="$CFLAGS $SDL_CFLAGS"
 	EXTRALIBS="$EXTRALIBS $SDL_LIBS"
 fi
@@ -630,7 +673,7 @@ Configuration summary:
         target debug : ${xdebug_sum}
         Etrace       : ${etrace_sum}
         Elf loader   : ${elf_sum}
-        SDL gui      : ${sdl_sum}
+	GUI          : ${gui_sum} ${gui_type}
         zlib         : ${zlib_sum}
         Ptty         : ${ptty_sum}
 ])

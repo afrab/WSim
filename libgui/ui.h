@@ -10,15 +10,6 @@
 #define HW_GUI_H
 
 /*
- * we must include SDL.h to define the SDL_main symbol in the main.c source file
- * This is needed at least for MacOSX builds
- */
-
-#if defined(GUI)
-#include "SDL.h"
-#endif
-
-/*
  *
  */
 
@@ -48,6 +39,7 @@
  * User button codes
  *
  */
+#define NB_BUTTONS 8
 
 #define UI_BUTTON_1               (1 << 0)
 #define UI_BUTTON_2               (1 << 1)
@@ -91,6 +83,10 @@ struct ui_t
   } while (0)      
 #endif
 
+/* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
+
 #if defined(GUI)
 
 int  ui_options_add (void);
@@ -99,8 +95,13 @@ void ui_delete      (void);
 int  ui_refresh     (void);
 int  ui_getevent    (void);
 
+/* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
+
 #else
 
+/* we define static inline dummy functions */
 #define UNUSED __attribute__((unused))
 
 static inline int  ui_options_add (void) { return 0;             }
@@ -108,6 +109,10 @@ static inline int  ui_create      (int UNUSED w, int UNUSED h, int UNUSED id) { 
 static inline void ui_delete      (void) { return ;              }
 static inline int  ui_refresh     (void) { return UI_OK;         }
 static inline int  ui_getevent    (void) { return UI_EVENT_NONE; }
+
+/* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
 
 #endif
 #endif

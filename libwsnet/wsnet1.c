@@ -279,7 +279,7 @@ int worldsens1_c_connect(char *srv_addr, uint16_t srv_port, char *mul_addr, uint
   addr.sin_addr.s_addr = INADDR_ANY;
 	
   /* Allow several bindings */
-  if (setsockopt(WSENS_MULTICAST, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on)) != 0 ) 
+  if (setsockopt(WSENS_MULTICAST, SOL_SOCKET, SO_REUSEADDR, (void*)&on, sizeof(on)) != 0 ) 
     {
       ERROR("* =================================================\n");
       ERROR("* worldsens:init:multicast:setsockopt REUSEADDR error\n");
@@ -328,7 +328,7 @@ int worldsens1_c_connect(char *srv_addr, uint16_t srv_port, char *mul_addr, uint
       return -1;
     }
   mreq.imr_interface.s_addr = INADDR_ANY;
-  if (setsockopt(WSENS_MULTICAST, SOL_IP, IP_ADD_MEMBERSHIP, &mreq, sizeof(mreq)) != 0 ) 
+  if (setsockopt(WSENS_MULTICAST, SOL_IP, IP_ADD_MEMBERSHIP, (void*)&mreq, sizeof(mreq)) != 0 ) 
     {
       ERROR("* =================================================\n");
       ERROR("* worldsens:init:setsockopt IP_ADD_MEMBERSHIP error\n");

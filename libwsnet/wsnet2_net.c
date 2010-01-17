@@ -200,7 +200,8 @@ int wsnet2_register_measure(char *name, wsnet_callback_measure_t callback, void 
 
 /* ************************************************** */
 /* ************************************************** */
-int wsnet2_connect(char *s_addr, uint16_t s_port, char *m_addr, uint16_t m_port, uint32_t id) {
+
+int wsnet2_connect(char *srv_addr, uint16_t s_port, char *m_addr, uint16_t m_port, uint32_t id) {
     int on = 1, ret;
     struct sockaddr_in addr;
     struct ip_mreq     mreq;
@@ -221,7 +222,7 @@ int wsnet2_connect(char *s_addr, uint16_t s_port, char *m_addr, uint16_t m_port,
     addr.sin_addr.s_addr = INADDR_ANY;
 	
     /* allow several bindings */
-    if (setsockopt(wsens.m_fd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on)) != 0 ) {
+    if (setsockopt(wsens.m_fd, SOL_SOCKET, SO_REUSEADDR, (void*)&on, sizeof(on)) != 0 ) {
         perror("(setsockopt):");
 	WSNET2_EXC("Libwsnet2:wsnet2_connect: Error during multicast socket configuration\n");
         goto error;
@@ -244,13 +245,18 @@ int wsnet2_connect(char *s_addr, uint16_t s_port, char *m_addr, uint16_t m_port,
     }
 	
     /* join */
-    if (inet_aton(m_addr, &mreq.imr_multiaddr) == 0) {
+#if defined(_WIN32)
+    if ((mreq.imr_multiaddr.s_addr = inet_addr(m_addr)) == INADDR_NONE )
+#else
+    if (inet_aton(m_addr, &mreq.imr_multiaddr) == 0) 
+#endif
+    {
         perror("(inet_aton):");
 	WSNET2_EXC("Error during multicast socket joining\n");
         goto error;
     }
     mreq.imr_interface.s_addr = INADDR_ANY;
-    if (setsockopt(wsens.m_fd, SOL_IP, IP_ADD_MEMBERSHIP, &mreq, sizeof(mreq)) != 0 ) {
+    if (setsockopt(wsens.m_fd, SOL_IP, IP_ADD_MEMBERSHIP, (void*)&mreq, sizeof(mreq)) != 0 ) {
         perror("(setsockopt):");
 	WSNET2_EXC("Libwsnet2:wsnet2_connect: Error during multicast socket configuration\n");
         goto error;
@@ -275,7 +281,12 @@ int wsnet2_connect(char *s_addr, uint16_t s_port, char *m_addr, uint16_t m_port,
 	
     /* connect */	
     addr.sin_port = htons(s_port);
-    if (inet_aton(s_addr, &addr.sin_addr) == 0) {
+#if defined(_WIN32)
+    if ((addr.sin_addr.s_addr = inet_addr(srv_addr)) == INADDR_NONE )
+#else
+    if (inet_aton(srv_addr, &addr.sin_addr) == 0) 
+#endif
+    {
         perror("(inet_aton):");
 	WSNET2_EXC("Libwsnet2:wsnet2_connect: Error during unicast socket joining\n");
         goto error;

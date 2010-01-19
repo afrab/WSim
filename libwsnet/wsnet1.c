@@ -263,83 +263,6 @@ int worldsens1_c_connect(char *srv_addr, uint16_t srv_port, char *mul_addr, uint
   WSENS_MYADDR = node_id;
 	
   /* ************************************************** */
-  /* Multicast socket                                   */
-  /* ************************************************** */
-  if ((WSENS_MULTICAST = socket(AF_INET, SOCK_DGRAM, 0)) < 0) 
-    {
-      ERROR("* =================================================\n");
-      ERROR("* worldsens:ini:multicast:socket creation error\n");
-      ERROR("* =================================================\n");
-      perror("worldsens_c_intialize (socket):");
-      return -1;
-    }
-  memset(&addr, 0, sizeof(addr));
-  addr.sin_family      = AF_INET;
-  addr.sin_port        = htons(mul_port);
-  addr.sin_addr.s_addr = INADDR_ANY;
-	
-  /* Allow several bindings */
-  if (setsockopt(WSENS_MULTICAST, SOL_SOCKET, SO_REUSEADDR, (void*)&on, sizeof(on)) != 0 ) 
-    {
-      ERROR("* =================================================\n");
-      ERROR("* worldsens:init:multicast:setsockopt REUSEADDR error\n");
-      ERROR("* =================================================\n");
-      perror("worldsens_c_initialize (setsockopt REUSEADDR):");
-      close(WSENS_MULTICAST);
-      return -1;
-    }
-	
-#if !defined(LINUX) && !defined(__CYGWIN__) && !defined(_WIN32)
-  /* Allow several bindings */
-  if (setsockopt(WSENS_MULTICAST, SOL_SOCKET, SO_REUSEPORT, &on, sizeof(on)) != 0 ) 
-    {
-      ERROR("* =================================================\n");
-      ERROR("* worldsens:init:multicast:setsockopt REUSEPORT error\n");
-      ERROR("* =================================================\n");
-      perror("worldsens_c_initialize (setsockopt):"); 
-      close(WSENS_MULTICAST); 
-      return -1; 
-    } 
-#endif
-	
-  /* Bind */
-  if (bind(WSENS_MULTICAST, (struct sockaddr *) (&addr), sizeof(addr)) != 0) 
-    {
-      ERROR("* =================================================\n");
-      ERROR("* worldsens:init:multicast:bind error\n");
-      ERROR("* =================================================\n");
-      perror("worldsens_c_intialize (bind):");
-      close(WSENS_MULTICAST);
-      return -1;
-    }
-	
-  /* Join */
-#if defined(_WIN32)
-  if ((mreq.imr_multiaddr.s_addr = inet_addr(mul_addr)) == INADDR_NONE )
-#else
-  if (inet_aton(mul_addr, &mreq.imr_multiaddr) == 0) 
-#endif
-    {
-      ERROR("* =================================================\n");
-      ERROR("* worldsens:init:multicast:join address error on %s\n",mul_addr);
-      ERROR("* =================================================\n");
-      perror("worldsens_c_intialize (inet_aton):");
-      close(WSENS_MULTICAST);
-      return -1;
-    }
-  mreq.imr_interface.s_addr = INADDR_ANY;
-  if (setsockopt(WSENS_MULTICAST, SOL_IP, IP_ADD_MEMBERSHIP, (void*)&mreq, sizeof(mreq)) != 0 ) 
-    {
-      ERROR("* =================================================\n");
-      ERROR("* worldsens:init:setsockopt IP_ADD_MEMBERSHIP error\n");
-      ERROR("*   multicast configuration problem                \n");
-      ERROR("* =================================================\n");
-      perror("worldsens_c_intialize (setsockopt):");
-      close(WSENS_MULTICAST);
-      return -1;
-    }
-	
-  /* ************************************************** */
   /* Unicast UDP socket                                 */
   /* ************************************************** */
   if ((WSENS_UNICAST = socket(AF_INET, SOCK_DGRAM, 0)) < 0) 
@@ -392,10 +315,93 @@ int worldsens1_c_connect(char *srv_addr, uint16_t srv_port, char *mul_addr, uint
   
   /* ************************************************** */
   /* Worldsens Connect                                  */
+  /*                                                    */
+  /* (before requesting multicast connection to server, */
+  /* in order not to receive multicast packet before    */
+  /* being connected)                                   */
   /* ************************************************** */
   ret_connect = worldsens1_connect_server();
+
   if (ret_connect == 0)
     {
+
+      /* ************************************************** */
+      /* Multicast socket                                   */
+      /* ************************************************** */
+      if ((WSENS_MULTICAST = socket(AF_INET, SOCK_DGRAM, 0)) < 0) 
+	{
+	  ERROR("* =================================================\n");
+	  ERROR("* worldsens:ini:multicast:socket creation error\n");
+	  ERROR("* =================================================\n");
+	  perror("worldsens_c_intialize (socket):");
+	  return -1;
+	}
+      memset(&addr, 0, sizeof(addr));
+      addr.sin_family      = AF_INET;
+      addr.sin_port        = htons(mul_port);
+      addr.sin_addr.s_addr = INADDR_ANY;
+	
+      /* Allow several bindings */
+      if (setsockopt(WSENS_MULTICAST, SOL_SOCKET, SO_REUSEADDR, (void*)&on, sizeof(on)) != 0 ) 
+	{
+	  ERROR("* =================================================\n");
+	  ERROR("* worldsens:init:multicast:setsockopt REUSEADDR error\n");
+	  ERROR("* =================================================\n");
+	  perror("worldsens_c_initialize (setsockopt REUSEADDR):");
+	  close(WSENS_MULTICAST);
+	  return -1;
+	}
+	
+#if !defined(LINUX) && !defined(__CYGWIN__) && !defined(_WIN32)
+      /* Allow several bindings */
+      if (setsockopt(WSENS_MULTICAST, SOL_SOCKET, SO_REUSEPORT, &on, sizeof(on)) != 0 ) 
+	{
+	  ERROR("* =================================================\n");
+	  ERROR("* worldsens:init:multicast:setsockopt REUSEPORT error\n");
+	  ERROR("* =================================================\n");
+	  perror("worldsens_c_initialize (setsockopt):"); 
+	  close(WSENS_MULTICAST); 
+	  return -1; 
+	} 
+#endif
+	
+      /* Bind */
+      if (bind(WSENS_MULTICAST, (struct sockaddr *) (&addr), sizeof(addr)) != 0) 
+	{
+	  ERROR("* =================================================\n");
+	  ERROR("* worldsens:init:multicast:bind error\n");
+	  ERROR("* =================================================\n");
+	  perror("worldsens_c_intialize (bind):");
+	  close(WSENS_MULTICAST);
+	  return -1;
+	}
+	
+      /* Join */
+#if defined(_WIN32)
+      if ((mreq.imr_multiaddr.s_addr = inet_addr(mul_addr)) == INADDR_NONE )
+#else
+	if (inet_aton(mul_addr, &mreq.imr_multiaddr) == 0) 
+#endif
+	  {
+	    ERROR("* =================================================\n");
+	    ERROR("* worldsens:init:multicast:join address error on %s\n",mul_addr);
+	    ERROR("* =================================================\n");
+	    perror("worldsens_c_intialize (inet_aton):");
+	    close(WSENS_MULTICAST);
+	    return -1;
+	  }
+      mreq.imr_interface.s_addr = INADDR_ANY;
+      if (setsockopt(WSENS_MULTICAST, SOL_IP, IP_ADD_MEMBERSHIP, (void*)&mreq, sizeof(mreq)) != 0 ) 
+	{
+	  ERROR("* =================================================\n");
+	  ERROR("* worldsens:init:setsockopt IP_ADD_MEMBERSHIP error\n");
+	  ERROR("*   multicast configuration problem                \n");
+	  ERROR("* =================================================\n");
+	  perror("worldsens_c_intialize (setsockopt):");
+	  close(WSENS_MULTICAST);
+	  return -1;
+	}
+
       WSNET_DBG("WSNet:connect:ok, registering fd %d\n",WSENS_MULTICAST);
       assert(libselect_fd_register(WSENS_MULTICAST, SIG_WORLDSENS_IO) != -1);
     }

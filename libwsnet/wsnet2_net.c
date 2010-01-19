@@ -210,59 +210,7 @@ int wsnet2_connect(char *srv_addr, uint16_t s_port, char *m_addr, uint16_t m_por
     /* my id */
     wsens.id = id;
 	
-    /* multicast socket */
-    if ((wsens.m_fd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
-        perror("(socket):");
-	WSNET2_EXC("Libwsnet2:wsnet2_connect: Error during multicast socket creation\n");
-        goto error;
-    }
-    memset(&addr, 0, sizeof(addr));
-    addr.sin_family      = AF_INET;
-    addr.sin_port        = htons(m_port);
-    addr.sin_addr.s_addr = INADDR_ANY;
-	
-    /* allow several bindings */
-    if (setsockopt(wsens.m_fd, SOL_SOCKET, SO_REUSEADDR, (void*)&on, sizeof(on)) != 0 ) {
-        perror("(setsockopt):");
-	WSNET2_EXC("Libwsnet2:wsnet2_connect: Error during multicast socket configuration\n");
-        goto error;
-    }
-	
-#if !defined(LINUX) && !defined(__CYGWIN__) && !defined(_WIN32)
-    /* allow several bindings */
-    if (setsockopt(wsens.m_fd, SOL_SOCKET, SO_REUSEPORT, &on, sizeof(on)) != 0 ) { 
-        perror("(setsockopt):");
-	WSNET2_EXC("Libwsnet2:wsnet2_connect: Error during multicast socket configuration for Linux\n"); 
-        goto error;
-    } 
-#endif
-	
-    /* bind */
-    if (bind(wsens.m_fd, (struct sockaddr *) (&addr), sizeof(addr)) != 0) {
-        perror("(bind):");
-	WSNET2_EXC("Libwsnet2:wsnet2_connect: Error during multicast socket binding\n");
-        goto error;
-    }
-	
-    /* join */
-#if defined(_WIN32)
-    if ((mreq.imr_multiaddr.s_addr = inet_addr(m_addr)) == INADDR_NONE )
-#else
-    if (inet_aton(m_addr, &mreq.imr_multiaddr) == 0) 
-#endif
-    {
-        perror("(inet_aton):");
-	WSNET2_EXC("Error during multicast socket joining\n");
-        goto error;
-    }
-    mreq.imr_interface.s_addr = INADDR_ANY;
-    if (setsockopt(wsens.m_fd, SOL_IP, IP_ADD_MEMBERSHIP, (void*)&mreq, sizeof(mreq)) != 0 ) {
-        perror("(setsockopt):");
-	WSNET2_EXC("Libwsnet2:wsnet2_connect: Error during multicast socket configuration\n");
-        goto error;
-    }
-	
-    /* unicast socket */
+    /************************************* UNICAST SOCKET ***********************************/
     if ((wsens.u_fd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
         perror("(socket):");
 	WSNET2_EXC("Libwsnet2:wsnet2_connect: Error during unicast socket creation\n");
@@ -296,13 +244,71 @@ int wsnet2_connect(char *srv_addr, uint16_t s_port, char *m_addr, uint16_t m_por
 	WSNET2_EXC("Libwsnet2:wsnet2_connect: Error during unicast socket connection\n");
         goto error;
     }
-	
+    /*****************************************************************************************/	
+
     /* subscribe to server */
+    /* (before requesting multicast connection to server, in order not to receive multicast */
+    /*   packet before being connected)                                                     */
     ret = wsnet2_subscribe();
-    if (!ret)
-        libselect_fd_register(wsens.m_fd, SIG_WORLDSENS_IO);
+
+    if (!ret) {
  
-    return ret;
+        /************************************* MULTICAST SOCKET ********************************/
+	if ((wsens.m_fd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
+	    perror("(socket):");
+	    WSNET2_EXC("Libwsnet2:wsnet2_connect: Error during multicast socket creation\n");
+	    goto error;
+	}
+	memset(&addr, 0, sizeof(addr));
+	addr.sin_family      = AF_INET;
+	addr.sin_port        = htons(m_port);
+	addr.sin_addr.s_addr = INADDR_ANY;
+	
+	/* allow several bindings */
+	if (setsockopt(wsens.m_fd, SOL_SOCKET, SO_REUSEADDR, (void*)&on, sizeof(on)) != 0 ) {
+	    perror("(setsockopt):");
+	    WSNET2_EXC("Libwsnet2:wsnet2_connect: Error during multicast socket configuration\n");
+	    goto error;
+	}
+	
+#if !defined(LINUX) && !defined(__CYGWIN__) && !defined(_WIN32)
+	/* allow several bindings */
+	if (setsockopt(wsens.m_fd, SOL_SOCKET, SO_REUSEPORT, &on, sizeof(on)) != 0 ) { 
+	    perror("(setsockopt):");
+	    WSNET2_EXC("Libwsnet2:wsnet2_connect: Error during multicast socket configuration for Linux\n"); 
+	    goto error;
+	} 
+#endif
+	
+	/* bind */
+	if (bind(wsens.m_fd, (struct sockaddr *) (&addr), sizeof(addr)) != 0) {
+	    perror("(bind):");
+	    WSNET2_EXC("Libwsnet2:wsnet2_connect: Error during multicast socket binding\n");
+	    goto error;
+	}
+	
+	/* join */
+#if defined(_WIN32)
+	if ((mreq.imr_multiaddr.s_addr = inet_addr(m_addr)) == INADDR_NONE )
+#else
+	if (inet_aton(m_addr, &mreq.imr_multiaddr) == 0) 
+#endif
+	  {
+	    perror("(inet_aton):");
+	    WSNET2_EXC("Error during multicast socket joining\n");
+	    goto error;
+	  }
+	mreq.imr_interface.s_addr = INADDR_ANY;
+	if (setsockopt(wsens.m_fd, SOL_IP, IP_ADD_MEMBERSHIP, (void*)&mreq, sizeof(mreq)) != 0 ) {
+	    perror("(setsockopt):");
+	    WSNET2_EXC("Libwsnet2:wsnet2_connect: Error during multicast socket configuration\n");
+	    goto error;
+	}
+	/***************************************************************************************/
+	libselect_fd_register(wsens.m_fd, SIG_WORLDSENS_IO);
+
+	return ret;
+    }
 
  error:
     wsnet2_finalize();

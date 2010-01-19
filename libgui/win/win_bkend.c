@@ -240,15 +240,78 @@ int ui_backend_update(void *ptr)
 /**************************************************/
 /**************************************************/
 
-int ui_backend_getevent(void UNUSED *ptr, uint32_t *b_up, uint32_t* b_down)
+int ui_backend_getevent(void *ptr, uint32_t *b_up, uint32_t* b_down)
 {
-  *b_up   = 0;
-  *b_down = 0;
+  int ret = UI_EVENT_NONE;
+  MSG  Msg;
 
-  /* PeekMessage() */
+  struct win_display_t *win = (struct win_display_t*)ptr;
+
+  UINT filter_min = WM_KEYFIRST;
+  UINT filter_max = WM_KEYLAST;
+
+  if (PeekMessage(&Msg, win->hWnd, filter_min, filter_max, PM_REMOVE))
+    {
+      switch (Msg.message)
+	{
+	case WM_KEYDOWN:
+	  {
+	    ret |= UI_EVENT_USER;
+	    *b_up   = 0;
+	    *b_down = 0;
+	    
+	    // printf("key down %d %x %c\n", Msg.wParam, Msg.wParam, Msg.wParam);
+	    switch (Msg.wParam)
+	      {
+	      case '1': *b_down |= UI_BUTTON_1; break;
+	      case '2': *b_down |= UI_BUTTON_2; break;
+	      case '3': *b_down |= UI_BUTTON_3; break;
+	      case '4': *b_down |= UI_BUTTON_4; break;
+	      case '5': *b_down |= UI_BUTTON_5; break;
+	      case '6': *b_down |= UI_BUTTON_6; break;
+	      case '7': *b_down |= UI_BUTTON_7; break;
+	      case '8': *b_down |= UI_BUTTON_8; break;
+	      case 'Q': ret = UI_EVENT_QUIT;    break;
+	      default:
+		ret = UI_EVENT_NONE;
+		break;
+	      }
+	  }
+	  break;
+
+	case WM_KEYUP:
+	  {
+	    ret |= UI_EVENT_USER;
+	    *b_up   = 0;
+	    *b_down = 0;
+
+	    // printf("key up %d %x %c\n", Msg.wParam, Msg.wParam, Msg.wParam);
+	    switch (Msg.wParam)
+	      {
+	      case '1': *b_up |= UI_BUTTON_1; break;
+	      case '2': *b_up |= UI_BUTTON_2; break;
+	      case '3': *b_up |= UI_BUTTON_3; break;
+	      case '4': *b_up |= UI_BUTTON_4; break;
+	      case '5': *b_up |= UI_BUTTON_5; break;
+	      case '6': *b_up |= UI_BUTTON_6; break;
+	      case '7': *b_up |= UI_BUTTON_7; break;
+	      case '8': *b_up |= UI_BUTTON_8; break;
+	      case 'Q': ret = UI_EVENT_QUIT;  break;
+	      default:
+		ret = UI_EVENT_NONE;
+		break;
+	      }
+	  }
+	  break;
+
+	default:
+	  TranslateMessage(&Msg);
+	  DispatchMessage(&Msg);
+	  break;
+	}
+    }
 
   /*  
-      MSG  Msg;
       do {
       GetMessage(&Msg, NULL, 0, 0);
       TranslateMessage(&Msg);
@@ -257,7 +320,7 @@ int ui_backend_getevent(void UNUSED *ptr, uint32_t *b_up, uint32_t* b_down)
       return 0;
   */
 
-  return UI_EVENT_NONE;
+  return ret;
 }
 
 /**************************************************/

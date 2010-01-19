@@ -580,6 +580,8 @@ int devices_update(void)
   /* input on UI is disabled */
 
   //#define INPUT_GUI
+  //#define DEBUG_INPUT
+
 #if defined(GUI) && defined(INPUT_GUI)
   {
 #define UI_EVENT_SKIP 50
@@ -596,8 +598,12 @@ int devices_update(void)
 	switch ((ev = ui_getevent()))
 	  {
 	  case UI_EVENT_USER:
-	    HW_DMSG_UI("wsn430:devices: UI event %04x %04x\n",machine.ui.b_up,machine.ui.b_down);
-	    //printf("wsn430:devices: UI event %04x %04x\n",machine.ui.b_up,machine.ui.b_down);	    
+	    HW_DMSG_UI("wsn430:devices: UI event %04x %04x\n",
+		       machine.ui.b_up,machine.ui.b_down);
+#if DEBUG_INPUT
+	      printf("wsn430:devices: UI event %04x %04x\n",
+	      machine.ui.b_up,machine.ui.b_down);
+#endif
 	    break;
 
 	  case UI_EVENT_QUIT:

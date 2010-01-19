@@ -234,6 +234,7 @@ int ui_backend_update(void *ptr)
 
   InvalidateRect (win->hWnd,0,0);
   UpdateWindow   (win->hWnd    );
+  return 0;
 }
 
 /**************************************************/
@@ -363,7 +364,7 @@ INT WINAPI WinMain(HINSTANCE UNUSED hInstance, HINSTANCE UNUSED hPrevInstance,
   
   MessageBox(NULL,
 	     "Although This program has a graphical interface,\n\r"
-	     "it can only be stared using a console command line.",
+	     "it can only be started using a console command line.",
 	     "WSim: error",
 	     MB_APPLMODAL | MB_OK
 	     );

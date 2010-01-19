@@ -473,9 +473,15 @@ case "${host}" in
 	# xp i686-pc-cygwin
 	HOSTTYPE="Cygwin"
 	NEEDLARGEFILES="yes"
-	EXTRALIBS="$EXTRALIBS -mconsole"
 	if test "${gui_sum}" = "yes" -a "${gui_type}" = "none" ; then 
 	    gui_type="WIN"
+	    # the contradictory setting of subsystems below is needed because
+	    # we need a console application, yet we need the GUI libraries that
+	    # -mwindows adds to the link command.  (We could probably also get
+	    # away with -mconsole -lgdi32 -lcomdlg32 for now - this is with
+	    # Cygwin 1.7's gcc 4.3; but let's rather have the compiler sort
+	    # that out for us.)
+	    EXTRALIBS="$EXTRALIBS -mwindows -mconsole"
 	fi
 	;;
 

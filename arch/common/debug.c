@@ -277,7 +277,7 @@ void debug_dump_section(uint8_t* data, uint32_t addr, uint32_t size, int maxline
       for(col = 0; col < 2*DUMP_COLS; col ++)
 	{
 	  char c = data[addr + line * 2 * DUMP_COLS + col];
-	  OUTPUT("%c",(isprint(c) ? c : '.'));
+	  OUTPUT("%c",(isprint((unsigned char)c) ? c : '.'));
 	}
       OUTPUT("|\n");
     }  

@@ -758,8 +758,8 @@ static ssize_t worldsens1_packet_send(int fd, char* msg, size_t len, int flags, 
     {
       ERROR("===================================================\n");
       ERROR("= worldsens:send error - %s\n", strerror(errno));
-      ERROR("= fd=%d, msg=0x%"PRIxPTR", len=%lu, slen=%ld, flags=%d, dump=%d\n", 
-	    fd, (uintptr_t)msg, (long unsigned)len, (long)slen, flags, dump); 
+      ERROR("= fd=%d, msg=0x%lx, len=%lu, slen=%ld, flags=%d, dump=%d\n", 
+	    fd, (unsigned long)msg, (unsigned long)len, (long)slen, flags, dump); 
       ERROR("= current time = %"PRIu64" ns\n",MACHINE_TIME_GET_NANO());
       ERROR("===================================================\n");
       perror("worldsens1_packet_send");
@@ -786,8 +786,8 @@ static ssize_t worldsens1_packet_recv(int fd, char* msg, size_t len, int flags, 
     {
       ERROR("===================================================\n");
       ERROR("= worldsens:recv error - %s\n", strerror(errno));
-      ERROR("= fd=%d, msg=0x%"PRIxPTR", len=%lu, srec=%ld, flags=%d, dump=%d\n", 
-	    fd, (uintptr_t)msg, (unsigned long)len, (long)srec, flags, dump); 
+      ERROR("= fd=%d, msg=0x%lx, len=%lu, srec=%ld, flags=%d, dump=%d\n", 
+	    fd, (unsigned long)msg, (long unsigned)len, (long)srec, flags, dump); 
       ERROR("= current time = %"PRIu64" ns\n",MACHINE_TIME_GET_NANO());
       ERROR("===================================================\n");
       perror("worldsens1_packet_recv");

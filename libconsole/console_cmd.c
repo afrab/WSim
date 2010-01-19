@@ -108,7 +108,7 @@ void console_dump_section(console_cmd_params p, uint8_t *mbuf, long addr, long s
       for(col = 0; col < 2*DUMP_COLS; col ++)
 	{
 	  char c = mbuf[line * 2 * DUMP_COLS + col];
-	  COUT("%c",(isprint(c) ? c : '.'));
+	  COUT("%c",(isprint((unsigned char)c) ? c : '.'));
 	}
       COUT("|\n");
     }  
@@ -130,7 +130,7 @@ con_cmd_val console_cmd_show(console_cmd_params p)
     {
       if (strcmp(p->options[0],"verbose") == 0)
 	{
-	  console_write(p->cs,"verbode level %d\n",logger_verbose_level);
+	  console_write(p->cs,"verbose level %d\n",logger_verbose_level);
 	}
       else if (strcmp(p->options[0],"machine") == 0)
 	{

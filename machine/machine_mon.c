@@ -289,8 +289,8 @@ void machine_monitor_set(char* args, elf32_t elf)
 	  continue;
 	}
 
-      char c0 = tolower(subtoken[0]);
-      char c1 = tolower(subtoken[1]);
+      char c0 = tolower((unsigned char)subtoken[0]);
+      char c1 = tolower((unsigned char)subtoken[1]);
   
       if (c0 == 'r' || c1 == 'r')
 	watchpoint[watchpoint_max].mode |= MAC_WATCH_READ;

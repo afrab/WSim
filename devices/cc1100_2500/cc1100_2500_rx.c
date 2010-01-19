@@ -63,7 +63,7 @@ int cc1100_rx_filter(struct _cc1100_t *cc1100, double frequency, int modulation,
   if (cc1100->fsm_state !=  CC1100_STATE_RX) 
     {
       CC1100_DBG_RX("cc1100:rx:filter:node %d: dropping received data [0x%02x,%c], not in rx state\n",
-		    machine_get_node_id(), data & 0xff, isprint(data) ? data:'.');
+		    machine_get_node_id(), data & 0xff, isprint((unsigned char)data) ? data:'.');
       return -1;
     }
 
@@ -71,7 +71,7 @@ int cc1100_rx_filter(struct _cc1100_t *cc1100, double frequency, int modulation,
   if (dBm < -90) 
     {
       CC1100_DBG_RX("cc1100:rx:filter:node %d: dropping received data [0x%02x,%c], below sensibility\n",
-		    machine_get_node_id(), data & 0xff, isprint(data) ? data:'.');
+		    machine_get_node_id(), data & 0xff, isprint((unsigned char)data) ? data:'.');
       return -1;
     }
 	
@@ -83,7 +83,7 @@ int cc1100_rx_filter(struct _cc1100_t *cc1100, double frequency, int modulation,
       (frequency - freq_cc > FREQ_FILTER_THRESHOLD)) /* fabs */
     {
       CC1100_DBG_RX("cc1100:rx:filter:node %d: dropping received data [0x%02x,%c], frequency mismatch (device:%lf,pkt:%lf)\n",
-		    machine_get_node_id(), data & 0xff, isprint(data) ? data:'.', freq_cc, frequency);
+		    machine_get_node_id(), data & 0xff, isprint((unsigned char)data) ? data:'.', freq_cc, frequency);
       return -1;
     }
 	
@@ -94,7 +94,7 @@ int cc1100_rx_filter(struct _cc1100_t *cc1100, double frequency, int modulation,
   if (cc1100_get_modulation(cc1100) != modulation) 
     {
       CC1100_DBG_RX("cc1100:rx:filter:node %d: dropping received data [0x%02x,%c], modulation mismatch (dev:%d,pkt:%d)\n", 
-		    machine_get_node_id(), data & 0xff, isprint(data) ? data:'.', cc1100_get_modulation(cc1100),modulation);
+		    machine_get_node_id(), data & 0xff, isprint((unsigned char)data) ? data:'.', cc1100_get_modulation(cc1100),modulation);
       return -1;
     }
 	
@@ -114,7 +114,7 @@ int cc1100_rx_filter(struct _cc1100_t *cc1100, double frequency, int modulation,
 	       (cc1100->rx_io_timer - CC1100_SYNCHRO_DELAY_THRESHOLD))
 	{
 	  CC1100_DBG_RX("cc1100:rx:filter:node %d: dropping received data [0x%02x,%c], early synchro io_timer:%"PRIu64" > time:%"PRIu64" (diff=%"PRId64", dur=%"PRIu64")\n", 
-			machine_get_node_id(), data & 0xff, isprint(data) ? data:'.',
+			machine_get_node_id(), data & 0xff, isprint((unsigned char)data) ? data:'.',
 			cc1100->rx_io_timer,  MACHINE_TIME_GET_NANO(), 
 			cc1100->rx_io_timer - MACHINE_TIME_GET_NANO(), 
 			cc1100_get_tx_byte_duration(cc1100));
@@ -124,7 +124,7 @@ int cc1100_rx_filter(struct _cc1100_t *cc1100, double frequency, int modulation,
 	       (cc1100->rx_io_timer + CC1100_SYNCHRO_DELAY_THRESHOLD))
 	{
 	  CC1100_DBG_RX("cc1100:rx:filter:node %d: dropping received data [0x%02x,%c], late synchro io_timer:%"PRIu64" < time:%"PRIu64" (diff=%"PRId64", dur=%"PRIu64")\n", 
-			machine_get_node_id(), data & 0xff, isprint(data) ? data:'.',
+			machine_get_node_id(), data & 0xff, isprint((unsigned char)data) ? data:'.',
 			cc1100->rx_io_timer,  MACHINE_TIME_GET_NANO(), 
 			MACHINE_TIME_GET_NANO() - cc1100->rx_io_timer,
 			cc1100_get_tx_byte_duration(cc1100));

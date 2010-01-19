@@ -84,7 +84,7 @@ void libelf_dump_section(uint8_t* data, uint32_t addr, uint32_t size, int maxlin
       for(col = 0; col < 2*DUMP_COLS; col ++)
 	{
 	  char c = data[addr + line * 2 * DUMP_COLS + col];
-	  OUTPUT("%c",(isprint(c) ? c : '.'));
+	  OUTPUT("%c",(isprint((unsigned char)c) ? c : '.'));
 	}
       OUTPUT("|\n");
     }
@@ -133,7 +133,7 @@ static void strtolower(char *dst, const char *src, int max)
   int l = strlen(src);
   for(i=0; i<l && i<max; i++)
     {
-      dst[i] = tolower(src[i]);
+      dst[i] = tolower((unsigned char)src[i]);
     }
   dst[l] = 0;
 }

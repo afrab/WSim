@@ -473,7 +473,7 @@ case "${host}" in
 	# xp i686-pc-cygwin
 	HOSTTYPE="Cygwin"
 	NEEDLARGEFILES="yes"
-	EXTRALIBS="$EXTRALIBS -mwindows"
+	EXTRALIBS="$EXTRALIBS -mconsole"
 	if test "${gui_sum}" = "yes" -a "${gui_type}" = "none" ; then 
 	    gui_type="WIN"
 	fi

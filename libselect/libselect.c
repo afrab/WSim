@@ -18,8 +18,18 @@
 #include <fcntl.h>
 #include <ctype.h>
 
-#ifdef _WIN32
+#if defined(_WIN32)
+#define ORIG_WIN32 1
+#endif
+
+#if defined(_WIN32) || defined(__CYGWIN__)
 #include <windows.h>
+#define WINPIPES 1 /* convenience macro to enable these features
+		      and keep the decision logic in one place */
+#endif
+
+#if defined(ORIG_WIN32)
+#define snprintf _snprintf
 #endif
 
 #if defined(__MINGW32__)
@@ -397,7 +407,7 @@ libselect_id_t libselect_id_create(char *argname, int UNUSED flags)
 	}
       libselect.entry[id].entry_type = ENTRY_TCP;
       libselect.entry[id].fd_in      = libselect.entry[id].skt.socket;
-      libselect.entry[id].fd_out     = libselect.entry[id].skt.socket;;
+      libselect.entry[id].fd_out     = libselect.entry[id].skt.socket;
     }
   else if (strstr(cmdline,"udp:") == cmdline)
     {
@@ -408,13 +418,13 @@ libselect_id_t libselect_id_create(char *argname, int UNUSED flags)
 	}
       libselect.entry[id].entry_type = ENTRY_UDP;
       libselect.entry[id].fd_in      = libselect.entry[id].skt.socket;
-      libselect.entry[id].fd_out     = libselect.entry[id].skt.socket;;
+      libselect.entry[id].fd_out     = libselect.entry[id].skt.socket;
     }
-#ifdef _WIN32
+#ifdef WINPIPES
   else if (strstr(cmdline,"pipe:") == cmdline)
     {
       char szPipe[MAX_PATH] = {0,};
-      _snprintf(szPipe, sizeof(szPipe), "\\\\.\\pipe\\%s", cmdline + 5);
+      snprintf(szPipe, sizeof(szPipe), "\\\\.\\pipe\\%s", cmdline + 5);
       HANDLE hPipe = CreateNamedPipe(szPipe, PIPE_ACCESS_DUPLEX, PIPE_TYPE_BYTE, 1, 32768, 32768, INFINITE, NULL);
       if (hPipe == INVALID_HANDLE_VALUE)
 	{
@@ -522,7 +532,7 @@ int libselect_id_close(libselect_id_t id)
       ERROR("wsim:libselect:close: cannot close id %d of type FD_ONLY\n",id);
       return 1;
     case ENTRY_WIN32_PIPE:
-#if defined(_WIN32)
+#ifdef WINPIPES
       CloseHandle((HANDLE)libselect.entry[id].fd_out);
 #endif
       return 1;
@@ -652,10 +662,14 @@ uint32_t libselect_id_write(libselect_id_t id, uint8_t *data, uint32_t size)
 	}
       else
 	{
-#ifdef _WIN32
-	  if (libselect.entry[id].entry_type == ENTRY_WIN32_PIPE)
-	    WriteFile((HANDLE)libselect.entry[id].fd_out, data, size, (DWORD *)&ret, NULL);
+#ifdef WINPIPES
+	  if (libselect.entry[id].entry_type == ENTRY_WIN32_PIPE) {
+		  DWORD r;
+		  if (WriteFile((HANDLE)(libselect.entry[id].fd_out), data, size > UINT32_MAX - 1 ? UINT32_MAX - 1 : size, &r, NULL))
+			  ret = r; /* safe as we limit the number of bytes */
 	  else
+			  ret = -1;
+	  } else
 #endif
 	    ret = write(libselect.entry[id].fd_out, data, size);
 	  DMSG("wsim:libselect: WRITE %d bytes to id=%d, fd=%d, val=%c\n",

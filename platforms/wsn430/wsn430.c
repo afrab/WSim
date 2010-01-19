@@ -578,10 +578,15 @@ int devices_update(void)
 
 
   /* input on UI is disabled */
+
   //#define INPUT_GUI
 #if defined(GUI) && defined(INPUT_GUI)
   {
 #define UI_EVENT_SKIP 50
+#if !defined(SIGQUIT)
+#define SIGQUIT 3
+#endif
+
     /* poll event every */
     static int loop_count = UI_EVENT_SKIP;
     if ((loop_count--) == 0)

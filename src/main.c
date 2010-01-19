@@ -190,11 +190,11 @@ static void main_end(enum wsim_end_mode_t mode)
       etracer_close();
     }
 
-  ui_delete();
   machine_delete();
   worldsens_c_close();
   libselect_close();
   logger_close();
+  ui_delete();
 }
 
 /* ************************************************** */
@@ -219,7 +219,6 @@ int main(int argc, char* argv[])
 	}
 #endif
 #undef ERROR
-	
   /* options */
   options_start();
   ui_options_add();

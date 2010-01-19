@@ -443,7 +443,7 @@ int devices_update()
 	    break;
 	  case UI_EVENT_QUIT:
 	    HW_DMSG_UI("%s: UI event QUIT\n",NAME);
-	    MCU_SIGNAL = SIG_UI;
+	    mcu_signal_add(SIG_UI);
 	    break;
 	  case UI_EVENT_NONE:
 	    break;

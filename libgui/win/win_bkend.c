@@ -248,10 +248,7 @@ int ui_backend_getevent(void *ptr, uint32_t *b_up, uint32_t* b_down)
 
   struct win_display_t *win = (struct win_display_t*)ptr;
 
-  UINT filter_min = WM_KEYFIRST;
-  UINT filter_max = WM_KEYLAST;
-
-  if (PeekMessage(&Msg, win->hWnd, filter_min, filter_max, PM_REMOVE))
+  while (PeekMessage(&Msg, win->hWnd, 0, 0, PM_REMOVE))
     {
       switch (Msg.message)
 	{
@@ -278,7 +275,7 @@ int ui_backend_getevent(void *ptr, uint32_t *b_up, uint32_t* b_down)
 		break;
 	      }
 	  }
-	  break;
+	  return ret;
 
 	case WM_KEYUP:
 	  {
@@ -303,7 +300,7 @@ int ui_backend_getevent(void *ptr, uint32_t *b_up, uint32_t* b_down)
 		break;
 	      }
 	  }
-	  break;
+	  return ret;
 
 	default:
 	  TranslateMessage(&Msg);
@@ -311,15 +308,6 @@ int ui_backend_getevent(void *ptr, uint32_t *b_up, uint32_t* b_down)
 	  break;
 	}
     }
-
-  /*  
-      do {
-      GetMessage(&Msg, NULL, 0, 0);
-      TranslateMessage(&Msg);
-      DispatchMessage(&Msg);
-      } while (Msg.message != WM_PAINT);
-      return 0;
-  */
 
   return ret;
 }

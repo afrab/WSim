@@ -290,10 +290,7 @@ int devices_update()
   UPDATE(SERIAL1);
 #endif
 
-  if (refresh) 
-    {
-      ui_refresh();
-    }
+  ui_refresh(refresh);
 
   return res;
 }

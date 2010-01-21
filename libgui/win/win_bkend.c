@@ -120,9 +120,6 @@ void* ui_backend_create(int w, int h, char *title, int *mustlock)
   ClientResize(win->hWnd, w, h);
 
   // Display the window to the user
-  InvalidateRect (win->hWnd,0,0);
-  UpdateWindow(win->hWnd);
-
   ShowWindow(win->hWnd, SW_SHOWNORMAL);
   UpdateWindow(win->hWnd);
 
@@ -180,7 +177,7 @@ void ui_backend_delete(void *ptr)
 /**************************************************/
 /**************************************************/
  
-int ui_backend_framebuffer_blit(void *ptr, uint8_t UNUSED *fb)
+int ui_backend_framebuffer_blit(void *ptr, uint8_t *fb)
 {
   int w,h;
   int idx_buff;

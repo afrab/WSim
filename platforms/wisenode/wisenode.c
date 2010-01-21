@@ -249,9 +249,7 @@ int devices_create(void)
 /* devices init conditions should be written here */
 int devices_reset_post(void)
 {
-#if defined(GUI)
   int refresh = 0;
-#endif
 
   SYSTEM_FLASH_CS = 0;
   SYSTEM_RADIO_CS = 0;
@@ -262,12 +260,7 @@ int devices_reset_post(void)
   REFRESH(LED1);
   REFRESH(LED2);
   REFRESH(LED3);
-#if defined(GUI)
-  if (refresh) 
-    {
-      ui_refresh();
-    }
-#endif
+  ui_refresh(refresh);
   return 0;
 }
 
@@ -587,10 +580,7 @@ int devices_update(void)
   UPDATE(FLASH);
   UPDATE(SERIAL);
 
-  if (refresh) 
-    {
-      ui_refresh();
-    }
+  ui_refresh(refresh);
 
   return res;
 }

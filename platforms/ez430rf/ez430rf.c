@@ -239,15 +239,14 @@ int devices_create(void)
 /* devices init conditions should be written here */
 int devices_reset_post(void)
 {
-#if defined(GUI)
   int refresh = 0;
-#endif
 
   SYSTEM_RADIO_CS = 0;
 
   REFRESH(LED_RED);
   REFRESH(LED_GREEN);
   REFRESH(LOGO1);
+  ui_refresh(refresh);
   return 0;
 }
 
@@ -258,9 +257,7 @@ int devices_reset_post(void)
 int devices_update(void)
 {
   int res = 0;
-#if defined(GUI)
   int refresh = 0;
-#endif
   int CC2500_CSn = 0;
   uint8_t  val8;
 
@@ -441,12 +438,7 @@ int devices_update(void)
   UPDATE(RADIO);
   UPDATE(SERIAL);
 
-#if defined(GUI)
-  if (refresh) 
-    {
-      ui_refresh();
-    }
-#endif
+  ui_refresh(refresh);
 
   return res;
 }

@@ -266,7 +266,7 @@ int devices_create(void)
   res += system_create          (SYSTEM);
   res += led_device_create      (LED1,   0xee0000, OFF, BKG, "red"  );
   res += led_device_create      (LED2,   0x00ee00, OFF, BKG, "green");
-  res += led_device_create      (LED3,   0x0000ee, OFF, BKG, "blue" );
+  res += led_device_create      (LED3,   0x3030ff, OFF, BKG, "blue" );
   res += at45db_device_create   (FLASH,  0);
   res += cc2420_device_create   (RADIO, 16, cc2420_antenna); /* 16MHz */
   res += ptty_device_create     (SERIAL, 1);
@@ -312,9 +312,7 @@ int devices_create(void)
 /* devices init conditions should be written here */
 int devices_reset_post()
 {
-#if defined(GUI)
   int refresh = 0;
-#endif
   /* flash W~ is set to Vcc */
   machine.device[FLASH].write(FLASH, AT45DB_W, AT45DB_W);
   SYSTEM_FLASH_CS = 0;
@@ -326,12 +324,7 @@ int devices_reset_post()
   REFRESH(LED1);
   REFRESH(LED2);
   REFRESH(LED3);
-#if defined(GUI)
-  if (refresh) 
-    {
-      ui_refresh();
-    }
-#endif
+  ui_refresh(refresh);
   return 0;
 }
 
@@ -615,7 +608,7 @@ int devices_update()
 
   /* input on UI is disabled */
 #if defined(GUI) // && defined(INPUT_GUI)
-#define UI_EVENT_SKIP 1000
+#define UI_EVENT_SKIP 100
   {
     /* poll event every */
     static int loop_count = UI_EVENT_SKIP;
@@ -649,10 +642,7 @@ int devices_update()
   UPDATE(FLASH);
   UPDATE(SERIAL);
 
-  if (refresh) 
-    {
-      ui_refresh();
-    }
+  ui_refresh(refresh);
 
   return res;
 }

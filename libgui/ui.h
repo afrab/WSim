@@ -92,7 +92,7 @@ struct ui_t
 int  ui_options_add (void);
 int  ui_create      (int w, int h, int id);
 void ui_delete      (void);
-int  ui_refresh     (void);
+int  ui_refresh     (int modified);
 int  ui_getevent    (void);
 
 /* ************************************************** */
@@ -107,7 +107,7 @@ int  ui_getevent    (void);
 static inline int  ui_options_add (void) { return 0;             }
 static inline int  ui_create      (int UNUSED w, int UNUSED h, int UNUSED id) { return UI_OK; }
 static inline void ui_delete      (void) { return ;              }
-static inline int  ui_refresh     (void) { return UI_OK;         }
+static inline int  ui_refresh     (int UNUSED r) { return UI_OK;         }
 static inline int  ui_getevent    (void) { return UI_EVENT_NONE; }
 
 /* ************************************************** */

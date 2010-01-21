@@ -321,10 +321,7 @@ int devices_update()
   LIBSELECT_UPDATE();
   LIBWSNET_UPDATE();
 
-  if (refresh)
-    {
-      ui_refresh();
-    }
+  ui_refresh(refresh);
   
   return res;
 }

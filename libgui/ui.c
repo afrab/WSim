@@ -140,7 +140,7 @@ int ui_create(int w, int h, int id)
 /**************************************************/
 /**************************************************/
 
-void ui_delete()
+void ui_delete(void)
 {
   if (GUI_DATA_INTERNAL.backend != NULL)
     {
@@ -152,7 +152,7 @@ void ui_delete()
 /**************************************************/
 /**************************************************/
  
-int ui_refresh()
+int ui_refresh(int modified)
 {
   uint8_t *fb;
 
@@ -161,25 +161,30 @@ int ui_refresh()
       return UI_OK;
     }
 
+  /*
   if (GUI_DATA_INTERNAL.backend == NULL)
     {
       return UI_ERROR;
     }
+  */
 
-  if (GUI_DATA_INTERNAL.mustlock &&  ui_backend_lock(GUI_DATA_INTERNAL.backend) < 0)
+  if (modified)
     {
-      return UI_ERROR;
+      if (GUI_DATA_INTERNAL.mustlock &&  ui_backend_lock(GUI_DATA_INTERNAL.backend) < 0)
+	{
+	  return UI_ERROR;
+	}
+      
+      fb = GUI_DATA_MACHINE.framebuffer;
+      ui_backend_framebuffer_blit(GUI_DATA_INTERNAL.backend, fb);
+
+      if (GUI_DATA_INTERNAL.mustlock)
+	{
+	  ui_backend_unlock(GUI_DATA_INTERNAL.backend);
+	}
+
+      ui_backend_update(GUI_DATA_INTERNAL.backend);
     }
-
-  fb = GUI_DATA_MACHINE.framebuffer;
-  ui_backend_framebuffer_blit(GUI_DATA_INTERNAL.backend, fb);
-
-  if (GUI_DATA_INTERNAL.mustlock)
-    {
-      ui_backend_unlock(GUI_DATA_INTERNAL.backend);
-    }
-
-  ui_backend_update(GUI_DATA_INTERNAL.backend);
 
   return UI_OK;
 }

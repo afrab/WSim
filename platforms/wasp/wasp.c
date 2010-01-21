@@ -312,9 +312,7 @@ int devices_create(void)
 /* devices init conditions should be written here */
 int devices_reset_post()
 {
-#if defined(GUI)
   int refresh = 0;
-#endif
   /* flash W~ is set to Vcc */
   machine.device[FLASH].write(FLASH, AT45DB_W, AT45DB_W);
   SYSTEM_FLASH_CS = 0;
@@ -326,12 +324,7 @@ int devices_reset_post()
   REFRESH(LED1);
   REFRESH(LED2);
   REFRESH(LED3);
-#if defined(GUI)
-  if (refresh) 
-    {
-      ui_refresh();
-    }
-#endif
+  ui_refresh(refresh);
   return 0;
 }
 
@@ -649,10 +642,7 @@ int devices_update()
   UPDATE(FLASH);
   UPDATE(SERIAL);
 
-  if (refresh) 
-    {
-      ui_refresh();
-    }
+  ui_refresh(refresh);
 
   return res;
 }

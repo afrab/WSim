@@ -295,9 +295,7 @@ int devices_create(void)
 /* devices init conditions should be written here */
 int devices_reset_post(void)
 {
-#if defined(GUI)
   int refresh = 0;
-#endif
 
   machine.device[FLASH].write(FLASH, M25P_W, M25P_W);
   SYSTEM_FLASH_CS = 0;
@@ -307,12 +305,7 @@ int devices_reset_post(void)
   REFRESH(LED1);
   REFRESH(LED2);
   REFRESH(LED3);
-#if defined(GUI)
-  if (refresh) 
-    {
-      ui_refresh();
-    }
-#endif
+  ui_refresh(refresh);
   return 0;
 }
 
@@ -322,10 +315,8 @@ int devices_reset_post(void)
 
 int devices_update(void)
 {
-  int res = 0;
-#if defined(GUI)
-  int refresh = 0;
-#endif
+  int res        = 0;
+  int refresh    = 0;
   int CC1100_CSn = 0;
   uint8_t  val8;
 
@@ -633,12 +624,7 @@ int devices_update(void)
   UPDATE(DS24);
   UPDATE(SERIAL);
 
-#if defined(GUI)
-  if (refresh) 
-    {
-      ui_refresh();
-    }
-#endif
+  ui_refresh(refresh);
 
   return res;
 }

@@ -51,7 +51,7 @@
 
     <p>You can add the WSim install directory in the search path by adding the following entries in ~/.bashrc:</p>
 
-    <p><span class="hilite">PATH=$PATH:/usr/local/wsnet-2.0/bin</span><br>
+    <p><span class="hilite">PATH=$PATH:/usr/local/bin</span><br>
     <span class="hilite">export PATH</span>
     </p>
 

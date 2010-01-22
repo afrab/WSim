@@ -248,9 +248,7 @@ int devices_create(void)
 /* devices init conditions should be written here */
 int devices_reset_post(void)
 {
-#if defined(GUI)
   int refresh = 0;
-#endif
 
   machine.device[FLASH].write(FLASH, M25P_W, M25P_W);
   SYSTEM_FLASH_CS = 0;
@@ -260,6 +258,7 @@ int devices_reset_post(void)
   REFRESH(LED1);
   REFRESH(LED2);
   REFRESH(LOGO1);
+  ui_refresh(refresh);
   return 0;
 }
 
@@ -270,9 +269,7 @@ int devices_reset_post(void)
 int devices_update(void)
 {
   int res = 0;
-#if defined(GUI)
   int refresh = 0;
-#endif
   int CC1100_CSn = 0;
   uint8_t  val8;
 
@@ -437,31 +434,8 @@ int devices_update(void)
     }
 
 
-  /* input on UI is disabled */
-#if defined(GUI) && defined(INPUT_GUI)
-  {
-    /* poll event every */
-    static int loop_count = UI_EVENT_SKIP;
-    if ((loop_count--) == 0)
-      {
-	int ev;
-	loop_count = UI_EVENT_SKIP;
-	switch ((ev = ui_getevent()))
-	  {
-	  case UI_EVENT_QUIT:
-	    HW_DMSG_UI("wsn430:devices: UI event QUIT\n");
-	    MCU_SIGNAL = MCU_SIGINT;
-	    break;
-	  case UI_EVENT_CMD:
-	  case UI_EVENT_NONE:
-	    break;
-	  default:
-	    ERROR("wsn430:devices: unknown ui event\n");
-	    break;
-	  }
-      }
-  }
-#endif
+  /* input on UI */
+  ui_default_input("mosar:");
 
   /* *************************************************************************** */
   /* update                                                                      */
@@ -473,12 +447,7 @@ int devices_update(void)
   UPDATE(FLASH);
   UPDATE(SERIAL);
 
-#if defined(GUI)
-  if (refresh) 
-    {
-      ui_refresh();
-    }
-#endif
+  ui_refresh(refresh);
 
   return res;
 }

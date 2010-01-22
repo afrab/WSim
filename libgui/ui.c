@@ -34,11 +34,18 @@
 /**
  * global variables
  **/
+#define EVENT_FIFO_SIZE    0xff
+#define LOOP_SKIP_COUNTER 50000
 
 struct ui_internal_t {
   void *        backend;
   int           mustlock;
   int           display_on;
+
+  int           e_fifo[EVENT_FIFO_SIZE];
+  int           e_rptr;
+  int           e_wptr;
+  int           e_state;
 };
 
 static struct ui_internal_t ui;
@@ -132,6 +139,10 @@ int ui_create(int w, int h, int id)
       return UI_ERROR;
     }
 
+  GUI_DATA_INTERNAL.e_rptr  = 0;
+  GUI_DATA_INTERNAL.e_wptr  = 0;
+  GUI_DATA_INTERNAL.e_state = 0;
+
   return UI_OK;
 }
 
@@ -155,18 +166,12 @@ void ui_delete(void)
 int ui_refresh(int modified)
 {
   uint8_t *fb;
+  static int loop = 0;
 
   if (GUI_DATA_INTERNAL.display_on == 0)
     {
       return UI_OK;
     }
-
-  /*
-  if (GUI_DATA_INTERNAL.backend == NULL)
-    {
-      return UI_ERROR;
-    }
-  */
 
   if (modified)
     {
@@ -186,6 +191,37 @@ int ui_refresh(int modified)
       ui_backend_update(GUI_DATA_INTERNAL.backend);
     }
 
+  if (loop == LOOP_SKIP_COUNTER)
+    {
+      ui_event_process();
+      loop = 0;
+    }
+  loop ++;
+
+  return UI_OK;
+}
+
+/**************************************************/
+/**************************************************/
+/**************************************************/
+
+int ui_event_process(void)
+{
+  int evt;
+  evt = ui_backend_getevent(GUI_DATA_INTERNAL.backend,
+			    &GUI_DATA_MACHINE.b_up,
+			    &GUI_DATA_MACHINE.b_down);
+
+  if (evt != UI_EVENT_NONE)
+    {
+      if (GUI_DATA_INTERNAL.e_wptr != EVENT_FIFO_SIZE)
+	{
+	  GUI_DATA_INTERNAL.e_fifo[ GUI_DATA_INTERNAL.e_wptr ] = evt;
+	  GUI_DATA_INTERNAL.e_state =  GUI_DATA_INTERNAL.e_state + 1;
+	  GUI_DATA_INTERNAL.e_wptr  = (GUI_DATA_INTERNAL.e_wptr  + 1) % EVENT_FIFO_SIZE;
+	}
+    }
+
   return UI_OK;
 }
 
@@ -202,9 +238,12 @@ int ui_getevent(void)
       return UI_EVENT_NONE;
     }
 
-  ret = ui_backend_getevent(GUI_DATA_INTERNAL.backend,
-			    &GUI_DATA_MACHINE.b_up,
-			    &GUI_DATA_MACHINE.b_down);
+  if (GUI_DATA_INTERNAL.e_state)
+    {
+      ret = GUI_DATA_INTERNAL.e_fifo[ GUI_DATA_INTERNAL.e_rptr ];
+      GUI_DATA_INTERNAL.e_state =  GUI_DATA_INTERNAL.e_state - 1;
+      GUI_DATA_INTERNAL.e_rptr  = (GUI_DATA_INTERNAL.e_rptr  + 1) % EVENT_FIFO_SIZE;
+    }
 
   return ret;
 }
@@ -212,4 +251,27 @@ int ui_getevent(void)
 /**************************************************/
 /**************************************************/
 /**************************************************/
+
+void ui_default_input (char *name)
+{
+  int ev;
+  switch ((ev = ui_getevent()))
+    {
+    case UI_EVENT_USER:
+      HW_DMSG_UI("%s: UI event %04x %04x\n", name, machine.ui.b_up,machine.ui.b_down);
+      break;
+
+    case UI_EVENT_QUIT:
+      HW_DMSG_UI("%s: UI event QUIT\n",name);
+      mcu_signal_add(SIG_HOST | SIGTERM);
+      break;
+
+    case UI_EVENT_NONE:
+      break;
+	
+    default:
+      ERROR("%s: unknown ui event\n",name);
+      break;
+    }
+}
 

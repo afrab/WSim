@@ -266,10 +266,10 @@ inline void machine_run_free(void)
 
 void TEST_SIGNAL_PRINT(char *name)
 {
-  OUTPUT("wsim:run:%s: exit at 0x%04x with signal 0x%x (%s)\n", 
+  OUTPUT("wsim:run:%s: exit at 0x%04x with signal 0x%x -- %s\n", 
 	 name,mcu_get_pc(), mcu_signal_get(), mcu_signal_str());
-  REAL_STDOUT("wsim:run:%s: exit at 0x%04x with signal 0x%x (%s)\n", 
-	 name,mcu_get_pc(), mcu_signal_get(), mcu_signal_str());
+  REAL_STDOUT("wsim:run:%s: exit at 0x%04x with signal %s\n", 
+	 name,mcu_get_pc(), mcu_signal_str());
 }
 
 /* ************************************************** */

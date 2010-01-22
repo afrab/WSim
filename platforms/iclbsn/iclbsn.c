@@ -590,9 +590,11 @@ int devices_update()
 	  }
 	HW_DMSG("iclbsn: read data from AT45DB SPI = 0x%02x\n",value & AT45DB_D);
 	msp430_usart0_dev_write_spi(value & AT45DB_D);
-	etracer_slot_access(0x0, 1, ETRACER_ACCESS_READ, ETRACER_ACCESS_BYTE, ETRACER_ACCESS_LVL_SPI0, 0);
+	etracer_slot_access(0x0, 1, ETRACER_ACCESS_READ, 
+			    ETRACER_ACCESS_BYTE, ETRACER_ACCESS_LVL_SPI0, 0);
       }
   }
+
 
   /* input on UART serial */
   if (msp430_usart1_dev_write_uart_ok())
@@ -602,35 +604,14 @@ int devices_update()
       if ((mask & PTTY_D) != 0)
 	{
 	  msp430_usart1_dev_write_uart(value & PTTY_D);
-	  /* etracer_slot_access(0x0, 1, ETRACER_ACCESS_READ, ETRACER_ACCESS_BYTE, ETRACER_ACCESS_LVL_OUT, 0); */
+	  /* etracer_slot_access(0x0, 1, ETRACER_ACCESS_READ, 
+	     ETRACER_ACCESS_BYTE, ETRACER_ACCESS_LVL_OUT, 0); */
 	}
     }
 
-  /* input on UI is disabled */
-#if defined(GUI) // && defined(INPUT_GUI)
-#define UI_EVENT_SKIP 100
-  {
-    /* poll event every */
-    static int loop_count = UI_EVENT_SKIP;
-    if ((loop_count--) == 0)
-      {
-	int ev;
-	loop_count = UI_EVENT_SKIP;
-	switch ((ev = ui_getevent()))
-	  {
-	  case UI_EVENT_QUIT:
-	    HW_DMSG_UI("iclbsn: UI event QUIT\n");
-	    mcu_signal_add(SIG_UI);
-	    break;
-	  case UI_EVENT_NONE:
-	    break;
-	  default:
-	    ERROR("iclbsn: unknown ui event\n");
-	    break;
-	  }
-      }
-  }
-#endif
+
+  /* input on UI */
+  ui_default_input("iclbsn:");
 
   /* *************************************************************************** */
   /* update                                                                      */

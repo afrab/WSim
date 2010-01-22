@@ -403,31 +403,10 @@ int devices_update(void)
     }
 #endif
 
-  /* input on UI is disabled */
-#if defined(GUI) && defined(INPUT_GUI)
-  {
-    /* poll event every */
-    static int loop_count = UI_EVENT_SKIP;
-    if ((loop_count--) == 0)
-      {
-	int ev;
-	loop_count = UI_EVENT_SKIP;
-	switch ((ev = ui_getevent()))
-	  {
-	  case UI_EVENT_QUIT:
-	    HW_DMSG_UI("wsn430:devices: UI event QUIT\n");
-	    MCU_SIGNAL = MCU_SIGINT;
-	    break;
-	  case UI_EVENT_CMD:
-	  case UI_EVENT_NONE:
-	    break;
-	  default:
-	    ERROR("wsn430:devices: unknown ui event\n");
-	    break;
-	  }
-      }
-  }
-#endif
+
+
+  /* input on UI */
+  ui_default_input("ez430rf:");
 
   /* *************************************************************************** */
   /* update                                                                      */

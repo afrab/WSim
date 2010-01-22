@@ -170,6 +170,12 @@ void ui_backend_delete(void *ptr)
       DeleteDC(win->MemDC);
       win->MemDC = 0;
     }
+  /*
+  if (win->hWnd)
+    {
+      DestroyWindow(win->hwnd);
+    }
+  */
   PostQuitMessage(WM_QUIT);
 }
 
@@ -327,11 +333,15 @@ LRESULT CALLBACK WndProcedure(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
       EndPaint(hWnd, &Ps);
       break;
 
-      
-    case WM_DESTROY:
-      /* PostQuitMessage(WM_QUIT); */
-      mcu_signal_add(SIG_HOST | 3);
+    case WM_CLOSE:
+      DestroyWindow(hWnd);
+      mcu_signal_add(SIG_HOST | SIGTERM);
       break;
+
+    case WM_DESTROY:
+      mcu_signal_add(SIG_HOST | SIGTERM);
+      break;
+
     default:
       return DefWindowProc(hWnd, Msg, wParam, lParam);
     }

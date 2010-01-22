@@ -89,11 +89,13 @@ struct ui_t
 
 #if defined(GUI)
 
-int  ui_options_add (void);
-int  ui_create      (int w, int h, int id);
-void ui_delete      (void);
-int  ui_refresh     (int modified);
-int  ui_getevent    (void);
+int  ui_options_add   (void);
+int  ui_create        (int w, int h, int id);
+void ui_delete        (void);
+int  ui_refresh       (int modified);
+int  ui_event_process (void);
+int  ui_getevent      (void);
+void ui_default_input (char* name);
 
 /* ************************************************** */
 /* ************************************************** */
@@ -108,7 +110,9 @@ static inline int  ui_options_add (void) { return 0;             }
 static inline int  ui_create      (int UNUSED w, int UNUSED h, int UNUSED id) { return UI_OK; }
 static inline void ui_delete      (void) { return ;              }
 static inline int  ui_refresh     (int UNUSED r) { return UI_OK;         }
+static inline int  ui_event_process (void) { }
 static inline int  ui_getevent    (void) { return UI_EVENT_NONE; }
+static inline void ui_default_input (char UNUSED *s);
 
 /* ************************************************** */
 /* ************************************************** */

@@ -88,19 +88,16 @@ struct wisenode_struct_t {
   int flash_cs;
   int radio_cs;
   int buttons_lastvalue;
-  int ui_loop_count;
 };
 
 #define SYSTEM_DATA      ((struct wisenode_struct_t*)(machine.device[SYSTEM].data))
 #define SYSTEM_FLASH_CS  SYSTEM_DATA->flash_cs
 #define SYSTEM_RADIO_CS  SYSTEM_DATA->radio_cs
 #define BUTTONS_LAST     SYSTEM_DATA->buttons_lastvalue
-#define UI_LOOP_COUNT    SYSTEM_DATA->ui_loop_count
 
 int system_reset (int UNUSED dev) 
 { 
   BUTTONS_LAST  = 0xC0;
-  UI_LOOP_COUNT = 0;
   return 0; 
 }
 
@@ -526,46 +523,41 @@ int devices_update(void)
     }
 
 
-#if defined(GUI) // && defined(INPUT_GUI)
+#if defined(GUI)
   {
-#define UI_EVENT_SKIP 100
-    if ((UI_LOOP_COUNT--) == 0)
+    int ev;
+    switch ((ev = ui_getevent()))
       {
-	int ev;
-	UI_LOOP_COUNT = UI_EVENT_SKIP;
-	switch ((ev = ui_getevent()))
-	  {
-	  case UI_EVENT_USER:
-	      {
-		uint8_t b = 0xc0; /* 1 when released  */
-		/*    2.6 : button2 'z'               */
-		/*    2.7 : button1 'a'               */
-		if ((machine.ui.b_down & UI_BUTTON_1) != 0)
-		  {
-		    b &= ~0x80;
-		    VERBOSE(3,"%s: button 1 pressed\n",NAME);
-		  }
-		if ((machine.ui.b_down & UI_BUTTON_2) != 0)
-		  {
-		    b &= ~0x40;
-		    VERBOSE(3,"%s: button 2 pressed\n",NAME);
-		  }
+      case UI_EVENT_USER:
+	{
+	  uint8_t b = 0xc0; /* 1 when released  */
+	  /*    2.6 : button2 'z'               */
+	  /*    2.7 : button1 'a'               */
+	  if ((machine.ui.b_down & UI_BUTTON_1) != 0)
+	    {
+	      b &= ~0x80;
+	      VERBOSE(3,"%s: button 1 pressed\n",NAME);
+	    }
+	  if ((machine.ui.b_down & UI_BUTTON_2) != 0)
+	    {
+	      b &= ~0x40;
+	      VERBOSE(3,"%s: button 2 pressed\n",NAME);
+	    }
 
-		msp430_digiIO_dev_write(PORT2, b, 0xC0);
-		BUTTONS_LAST = b;
-	      }
-	    break; /* UI_EVENT_USER */
+	  msp430_digiIO_dev_write(PORT2, b, 0xC0);
+	  BUTTONS_LAST = b;
+	}
+	break; /* UI_EVENT_USER */
 
-	  case UI_EVENT_QUIT:
-	    HW_DMSG_UI("%s: UI event QUIT\n",NAME);
-	    mcu_signal_add(SIG_UI);
-	    break;
-	  case UI_EVENT_NONE:
-	    break;
-	  default:
-	    ERROR("%s: unknown ui event\n",NAME);
-	    break;
-	  }
+      case UI_EVENT_QUIT:
+	HW_DMSG_UI("%s: UI event QUIT\n",NAME);
+	mcu_signal_add(SIG_HOST | SIGTERM);
+	break;
+      case UI_EVENT_NONE:
+	break;
+      default:
+	ERROR("%s: unknown ui event\n",NAME);
+	break;
       }
   }
 #endif

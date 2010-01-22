@@ -246,32 +246,11 @@ int devices_update()
 	 msp430_usart0_dev_write_uart(value & PTTY_D);
      }
   */
+
+
   /* input on UI */
-  /*
-#if defined(GUI)
-  {
-    static int loop_count = UI_EVENT_SKIP;
-    if ((loop_count--) == 0)
-      {
-	int ev;
-	loop_count = UI_EVENT_SKIP;
-	switch ((ev = ui_getevent()))
-	  {
-	  case UI_EVENT_QUIT:
-	    HW_DMSG_UI("  devices UI event QUIT\n");
-	    mcu_signal_set(SIG_UI);
-	    break;
-	  case UI_EVENT_USER:
-	  case UI_EVENT_NONE:
-	    break;
-	  default:
-	    ERROR("devices: unknown ui event\n");
-	    break;
-	  }
-      }
-  }
-#endif
-  */
+  ui_default_input("mcugen:");
+
   /* *************************************************************************** */
   /* update                                                                      */
   /* *************************************************************************** */

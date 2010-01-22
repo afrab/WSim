@@ -533,7 +533,8 @@ int devices_update(void)
     if (mask & CC1100_GDO0_MASK) // GDO0 -> P1.3
       { 
 	msp430_digiIO_dev_write(PORT1, (CC1100_GDO0_MASK & value) ? 0x08 : 0x00, 0x08);
-	etracer_slot_access(0x0, 1, ETRACER_ACCESS_READ, ETRACER_ACCESS_BIT, ETRACER_ACCESS_LVL_GPIO, 0);
+	etracer_slot_access(0x0, 1, ETRACER_ACCESS_READ, 
+			    ETRACER_ACCESS_BIT, ETRACER_ACCESS_LVL_GPIO, 0);
       }
   }
 
@@ -550,7 +551,8 @@ int devices_update(void)
 	    ERROR("wsn430:devices: read data on flash while not in SPI mode ?\n");
 	  }
 	msp430_usart1_dev_write_spi(value & 0x00FF);
-	etracer_slot_access(0x0, 1, ETRACER_ACCESS_READ, ETRACER_ACCESS_BYTE, ETRACER_ACCESS_LVL_SPI1, 0);
+	etracer_slot_access(0x0, 1, ETRACER_ACCESS_READ, 
+			    ETRACER_ACCESS_BYTE, ETRACER_ACCESS_LVL_SPI1, 0);
       }
   }
 
@@ -563,55 +565,14 @@ int devices_update(void)
       if ((mask & PTTY_D) != 0)
 	{
 	  msp430_usart1_dev_write_uart(value & PTTY_D);
-	  /* etracer_slot_access(0x0, 1, ETRACER_ACCESS_READ, ETRACER_ACCESS_BYTE, ETRACER_ACCESS_LVL_OUT, 0); */
+	  /* etracer_slot_access(0x0, 1, ETRACER_ACCESS_READ, 
+	     ETRACER_ACCESS_BYTE, ETRACER_ACCESS_LVL_OUT, 0); */
 	}
     }
 
 
-  /* input on UI is disabled */
-
-  //#define INPUT_GUI
-  //#define DEBUG_INPUT
-
-#if defined(GUI) && defined(INPUT_GUI)
-  {
-#define UI_EVENT_SKIP 50
-#if !defined(SIGQUIT)
-#define SIGQUIT 3
-#endif
-
-    /* poll event every */
-    static int loop_count = UI_EVENT_SKIP;
-    if ((loop_count--) == 0)
-      {
-	int ev;
-	loop_count = UI_EVENT_SKIP;
-	switch ((ev = ui_getevent()))
-	  {
-	  case UI_EVENT_USER:
-	    HW_DMSG_UI("wsn430:devices: UI event %04x %04x\n",
-		       machine.ui.b_up,machine.ui.b_down);
-#if DEBUG_INPUT
-	      printf("wsn430:devices: UI event %04x %04x\n",
-	      machine.ui.b_up,machine.ui.b_down);
-#endif
-	    break;
-
-	  case UI_EVENT_QUIT:
-	    HW_DMSG_UI("wsn430:devices: UI event QUIT\n");
-	    mcu_signal_add(SIG_HOST | SIGQUIT);
-	    break;
-
-	  case UI_EVENT_NONE:
-	    break;
-
-	  default:
-	    ERROR("wsn430:devices: unknown ui event\n");
-	    break;
-	  }
-      }
-  }
-#endif
+  /* input on GUI */
+  ui_default_input("wsn430:devices");
 
   /* *************************************************************************** */
   /* update                                                                      */

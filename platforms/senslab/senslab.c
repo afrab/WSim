@@ -645,31 +645,8 @@ int devices_update(void)
     }
 
 
-  /* input on UI is disabled */
-#if defined(GUI) && defined(INPUT_GUI)
-  {
-    /* poll event every */
-    static int loop_count = UI_EVENT_SKIP;
-    if ((loop_count--) == 0)
-      {
-	int ev;
-	loop_count = UI_EVENT_SKIP;
-	switch ((ev = ui_getevent()))
-	  {
-	  case UI_EVENT_QUIT:
-	    HW_DMSG_UI("senslab:devices: UI event QUIT\n");
-	    MCU_SIGNAL = MCU_SIGINT;
-	    break;
-	  case UI_EVENT_CMD:
-	  case UI_EVENT_NONE:
-	    break;
-	  default:
-	    ERROR("senslab:devices: unknown ui event\n");
-	    break;
-	  }
-      }
-  }
-#endif
+  /* input on UI */
+  ui_default_input("senslab:");
 
   /* *************************************************************************** */
   /* update                                                                      */

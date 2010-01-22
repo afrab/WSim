@@ -606,31 +606,8 @@ int devices_update()
 	}
     }
 
-  /* input on UI is disabled */
-#if defined(GUI) // && defined(INPUT_GUI)
-#define UI_EVENT_SKIP 1000
-  {
-    /* poll event every */
-    static int loop_count = UI_EVENT_SKIP;
-    if ((loop_count--) == 0)
-      {
-	int ev;
-	loop_count = UI_EVENT_SKIP;
-	switch ((ev = ui_getevent()))
-	  {
-	  case UI_EVENT_QUIT:
-	    HW_DMSG_UI("wasp: UI event QUIT\n");
-	    mcu_signal_add(SIG_UI);
-	    break;
-	  case UI_EVENT_NONE:
-	    break;
-	  default:
-	    ERROR("wasp: unknown ui event\n");
-	    break;
-	  }
-      }
-  }
-#endif
+  /* input on UI */
+  ui_default_input("wasp:");
 
   /* *************************************************************************** */
   /* update                                                                      */

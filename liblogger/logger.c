@@ -54,7 +54,7 @@ void logger_init(const char* filename, int verbose)
 {
   if (logger_open_logfile(filename))
     {
-      ERROR(" ** Cannot open logfile, defaulting to %s\n", DEFAULT_LOGFILENAME);
+      fprintf(stderr," ** Cannot open logfile, defaulting to %s\n", DEFAULT_LOGFILENAME);
       logger_logfile = DEFAULT_LOGFILE;
       strcpy(logger_filename, DEFAULT_LOGFILENAME);
     }

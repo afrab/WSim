@@ -402,7 +402,6 @@ uint8_t* machine_state_allocate(int devices_size)
   /* machine.state_size_devices must be assigned */
   machine.state_size = machine_size + devices_size;
 
-  printf("allocating %d bytes = %d + %d\n",machine.state_size, machine_size, devices_size);
   if ((machine.state        = (struct machine_state_t*)malloc(machine.state_size)) == NULL)
     {
       ERROR("** Could not allocate memory for devices states storage\n");

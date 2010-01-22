@@ -315,12 +315,14 @@ int ui_backend_getevent(void *ptr, uint32_t *b_up, uint32_t* b_down)
 	    }
 	  break;
 
+	  /*
 	case ButtonPress:
 	  HW_DMSG_UI("==============\n");
 	  HW_DMSG_UI("== UI  quit ==\n");
 	  HW_DMSG_UI("==============\n");
 	  ret = UI_EVENT_QUIT;
 	  break;
+	  */
 
 	default:
 	  break;

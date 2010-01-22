@@ -117,12 +117,12 @@ int system_create(int dev_num)
 
   STDOUT("%s:\n", NAME);
   STDOUT("%s: =========================\n", NAME);
-  STDOUT("%s: boutton 1 = 'a'\n", NAME);
-  STDOUT("%s: boutton 2 = 'z'\n", NAME);
-  STDOUT("%s: boutton 3 = 'e'\n", NAME);
-  STDOUT("%s: boutton 4 = 'r'\n", NAME);
+  STDOUT("%s: boutton 1 = '1'\n", NAME);
+  STDOUT("%s: boutton 2 = '2'\n", NAME);
+  STDOUT("%s: boutton 3 = '3'\n", NAME);
+  STDOUT("%s: boutton 4 = '4'\n", NAME);
   STDOUT("%s:\n", NAME);
-  STDOUT("%s: 'q' pour quitter\n", NAME);
+  STDOUT("%s: 'q' pour quitter (hors mode gdb)\n", NAME);
   STDOUT("%s: =========================\n", NAME);
   STDOUT("%s:\n", NAME);
 

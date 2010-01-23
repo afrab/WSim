@@ -72,11 +72,6 @@ void* ui_backend_create(int w, int h, char *title, int *mustlock)
 
   *mustlock = 0;
 
-  /* Sam:
-     We still need to pass in the application handle so that
-     DirectInput will initialize properly when SDL_RegisterApp()
-     is called later in the video initialization.
-  */
   win->handle  = GetModuleHandle(NULL);
   win->hWnd    = 0;
   win->hbitmap = 0;
@@ -170,12 +165,11 @@ void ui_backend_delete(void *ptr)
       DeleteDC(win->MemDC);
       win->MemDC = 0;
     }
-  /*
   if (win->hWnd)
     {
-      DestroyWindow(win->hwnd);
+      DestroyWindow(win->hWnd);
+      win->hWnd = 0;
     }
-  */
   PostQuitMessage(WM_QUIT);
 }
 
@@ -261,7 +255,6 @@ int ui_backend_getevent(void *ptr, uint32_t *b_up, uint32_t* b_down)
 	    *b_up   = 0;
 	    *b_down = 0;
 	    
-	    // printf("key down %d %x %c\n", Msg.wParam, Msg.wParam, Msg.wParam);
 	    switch (Msg.wParam)
 	      {
 	      case '1': *b_down |= UI_BUTTON_1; break;
@@ -286,7 +279,6 @@ int ui_backend_getevent(void *ptr, uint32_t *b_up, uint32_t* b_down)
 	    *b_up   = 0;
 	    *b_down = 0;
 
-	    // printf("key up %d %x %c\n", Msg.wParam, Msg.wParam, Msg.wParam);
 	    switch (Msg.wParam)
 	      {
 	      case '1': *b_up |= UI_BUTTON_1; break;
@@ -334,7 +326,6 @@ LRESULT CALLBACK WndProcedure(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
       break;
 
     case WM_CLOSE:
-      DestroyWindow(hWnd);
       mcu_signal_add(SIG_HOST | SIGTERM);
       break;
 

@@ -370,7 +370,7 @@ libselect_skt_getchar(struct libselect_socket_t *skt, unsigned char *c)
       return LIBSELECT_SOCKET_GETCHAR_ERROR;
     }
 
-  ret = recv(skt->socket, c, 1, 0);
+  ret = recv(skt->socket, (void*)c, 1, 0);
   switch (ret)
     {
     case -1:
@@ -404,7 +404,7 @@ libselect_skt_putchar(struct libselect_socket_t *skt, unsigned char c)
       return LIBSELECT_SOCKET_PUTCHAR_ERROR;
     }
 
-  if (send(skt->socket, &c, 1, 0) < 1)
+  if (send(skt->socket, (void*)&c, 1, 0) < 1)
     {
       ERROR("wsim:libselect_socket:putchar: write failed - %s\n",strerror(errno));
       close(skt->socket);

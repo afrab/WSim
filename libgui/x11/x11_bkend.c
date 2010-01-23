@@ -320,7 +320,7 @@ int ui_backend_getevent(void *ptr, uint32_t *b_up, uint32_t* b_down)
       break;
 
     case ClientMessage:
-      if (event.xclient.data.l[0] == (unsigned)x11->wmDeleteMessage) 
+      if ((unsigned)(event.xclient.data.l[0]) == x11->wmDeleteMessage)
 	{
 	  mcu_signal_add(SIG_HOST | SIGTERM);
 	  ret = UI_EVENT_QUIT;

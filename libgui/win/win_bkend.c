@@ -319,10 +319,12 @@ LRESULT CALLBACK WndProcedure(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
   switch(Msg)
     {
     case WM_PAINT:
-      hDC = BeginPaint(hWnd, &Ps);
-      BitBlt(hDC, 0, 0, win_display.width, win_display.height, 
-	     win_display.MemDC, 0, 0, SRCCOPY);
-      EndPaint(hWnd, &Ps);
+      {
+	hDC = BeginPaint(hWnd, &Ps);
+	BitBlt(hDC, 0, 0, win_display.width, win_display.height, 
+	       win_display.MemDC, 0, 0, SRCCOPY);
+	EndPaint(hWnd, &Ps);
+      }
       break;
 
     case WM_CLOSE:

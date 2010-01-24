@@ -319,6 +319,19 @@ int ui_backend_getevent(void *ptr, uint32_t *b_up, uint32_t* b_down)
 	}
       break;
 
+    case Expose:
+      {
+	XExposeEvent *xexpose_event = (XExposeEvent *) &event;
+	if (xexpose_event->count == 0)
+	  {
+	    XPutImage(x11->display, x11->window, x11->gc, x11->ximage, 
+		      xexpose_event->x,     xexpose_event->y,
+		      xexpose_event->x,     xexpose_event->y,
+		      xexpose_event->width, xexpose_event->height);
+	  }
+      }
+      break;
+
     case ClientMessage:
       if ((unsigned)(event.xclient.data.l[0]) == x11->wmDeleteMessage)
 	{

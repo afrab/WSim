@@ -506,6 +506,11 @@ case "${host}" in
 	HOSTTYPE="MacOSX"
 	CFLAGS="$CFLAGS -DMACOSX"
 	NEEDLARGEFILES="yes"
+	if test "${gui_sum}" = "yes" -a "${gui_type}" = "none" ; then 
+	   # use X11 version until someone builds a Cocoa interface
+	   gui_type="X11"
+	   LDFLAGS="$LDFLAGS -L/usr/X11/lib"
+	fi
 	;;
 esac
 

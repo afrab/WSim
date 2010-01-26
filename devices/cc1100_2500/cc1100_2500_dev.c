@@ -344,9 +344,10 @@ void cc1100_reset_internal (struct _cc1100_t *cc1100)
   cc1100->tx_io_timer		= 0;
   cc1100->rx_io_timer		= 0;
 	
-  cc1100_write_pin(cc1100, CC1100_INTERNAL_GO2_PIN, 0x00);
-  cc1100_write_pin(cc1100, CC1100_INTERNAL_GO1_PIN, 0x00);
-  cc1100_write_pin(cc1100, CC1100_INTERNAL_GO0_PIN, 0x00);
+  cc1100->GO0_pin               = 0;
+  cc1100->GO1_pin               = 0;
+  cc1100->GO2_pin               = 0;
+
   cc1100->SI_set		= 0;
 	
   cc1100->SIType                = CC1100_INTERNAL_NEXT_ACCESS_TYPE_ADDR;

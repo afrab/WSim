@@ -402,7 +402,7 @@ while(0)
 
 #if defined(GUI)
   if (refresh) {
-    ui_refresh();
+    ui_refresh(refresh);
   }
 #endif
 

@@ -12,7 +12,8 @@ SUBDIRS = 		\
 	m25p80 		\
 	ptty            \
 	uigfx		\
-	spidev
+	spidev          \
+	spidev_master
 
 
 noinst_LIBRARIES= libdevices.a

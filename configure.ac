@@ -626,6 +626,7 @@ devices/cc1100_2500/Makefile
 devices/cc2420/Makefile
 devices/uigfx/Makefile
 devices/spidev/Makefile
+devices/spidev_master/Makefile
 dnl
 platforms/Makefile
 platforms/wsn430/Makefile

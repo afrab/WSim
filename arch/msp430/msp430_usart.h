@@ -205,6 +205,7 @@ struct msp430_usart_t
   uint8_t   uxrx_shift_empty;
   uint8_t   uxrx_shift_ready;
   int32_t   uxrx_shift_delay;
+  uint8_t   uxrx_slave_rx_done;
 
   uint8_t   uxtxbuf;
   uint8_t   uxtxbuf_full;

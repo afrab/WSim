@@ -31,8 +31,7 @@
 
 /* defined in msp430_debug.h */
 #if defined(DEBUG_USART)  
-static char *str_ssel[] = 
-  { "external UCLK", "ACLK", "SMCLK", "SMCLK" };
+char *str_ssel[] = { "external UCLK", "ACLK", "SMCLK", "SMCLK" };
 #endif
 
 /*****************************************************/
@@ -108,21 +107,22 @@ static char *str_ssel[] =
 /* ************************************************** */
 
 #define USART_RESET(USART)                                                    \
-  MCU.USART.uxrxbuf          = 0;                                             \
-  MCU.USART.uxrxbuf_full     = 0;                                             \
-  MCU.USART.uxrx_shift_buf   = 0;                                             \
-  MCU.USART.uxrx_shift_empty = 1;                                             \
-  MCU.USART.uxrx_shift_ready = 0;                                             \
-  MCU.USART.uxrx_shift_delay = 0;                                             \
+  MCU.USART.uxrxbuf            = 0;					      \
+  MCU.USART.uxrxbuf_full       = 0;                                           \
+  MCU.USART.uxrx_shift_buf     = 0;                                           \
+  MCU.USART.uxrx_shift_empty   = 1;                                           \
+  MCU.USART.uxrx_shift_ready   = 0;                                           \
+  MCU.USART.uxrx_shift_delay   = 0;                                           \
+  MCU.USART.uxrx_slave_rx_done = 0;					      \
                                                                               \
-  MCU.USART.uxtxbuf          = 0;                                             \
-  MCU.USART.uxtxbuf_full     = 0;                                             \
-  MCU.USART.uxtx_full_delay  = 0;                                             \
-  MCU.USART.uxtctl.b.txept   = 1;                                             \
-  MCU.USART.uxtx_shift_buf   = 0;                                             \
-  MCU.USART.uxtx_shift_empty = 1;                                             \
-  MCU.USART.uxtx_shift_ready = 0;                                             \
-  MCU.USART.uxtx_shift_delay = 0;                                             \
+  MCU.USART.uxtxbuf            = 0;                                           \
+  MCU.USART.uxtxbuf_full       = 0;                                           \
+  MCU.USART.uxtx_full_delay    = 0;                                           \
+  MCU.USART.uxtctl.b.txept     = 1;                                           \
+  MCU.USART.uxtx_shift_buf     = 0;                                           \
+  MCU.USART.uxtx_shift_empty   = 1;                                           \
+  MCU.USART.uxtx_shift_ready   = 0;                                           \
+  MCU.USART.uxtx_shift_delay   = 0;                                           \
                                                                               \
   MCU.USART.mode             = USART_MODE_UART;
 
@@ -159,14 +159,25 @@ do {                                                                          \
     {                                                                         \
       if (MCU.USART.uxtxbuf_full == 1)                                        \
         {                                                                     \
-          if (MCU.USART.uxtx_shift_empty == 1)                                \
+	  if (MCU.USART.uxtx_shift_empty == 1 &&			      \
+	      (MCU.USART.uxctl.b.mm ==1 || MCU.USART.uxrx_slave_rx_done == 1))\
+	    /* if SPI in slave mode, tx is done immediately as delay has  */  \
+	    /* been taken into account by the SPI master device on rx */      \
             {                                                                 \
                MCU.USART.uxtx_shift_buf   = MCU.USART.uxtxbuf;                \
                MCU.USART.uxtxbuf_full     = 0;                                \
                MCU.USART.uxtx_full_delay  = 0;                                \
                MCU.USART.uxtx_shift_empty = 0;                                \
                MCU.USART.uxtx_shift_ready = 0;                                \
-               MCU.USART.uxtx_shift_delay = 7+MCU.USART.uxctl.b.charb;        \
+	       if (MCU.USART.uxctl.b.mm == 1)				      \
+		 {							      \
+		   MCU.USART.uxtx_shift_delay = 7+MCU.USART.uxctl.b.charb;    \
+		 }							      \
+	       else							      \
+		 {							      \
+		   MCU.USART.uxtx_shift_delay = 0;			      \
+		   MCU.USART.uxrx_slave_rx_done = 0;			      \
+		 }							      \
                MCU.sfr.IFG.b.utxifg##NUM  = 1;                                \
                if (MCU.sfr.IE.b.utxie##NUM)                                   \
                  {                                                            \
@@ -256,9 +267,9 @@ do {                                                                          \
           MCU.USART.uxrx_shift_ready = 0;                                     \
           MCU.USART.uxrx_shift_empty = 1;                                     \
           HW_DMSG_USART("msp430:usart%d: SPI rx shifter -> rx buf\n",NUM);    \
-	  VERBOSE(VUART,"msp430:usart%d: SPI receive (0x%x,%c)\n",NUM,        \
-                  MCU.USART.uxrxbuf, isgraph(MCU.USART.uxrxbuf) ?             \
-                  MCU.USART.uxrxbuf : '.');                                   \
+	  VERBOSE(VUART,"msp430:usart%d: SPI receive (0x%x,%c)\n",NUM,	      \
+                  MCU.USART.uxrxbuf, isgraph(MCU.USART.uxrxbuf) ?	      \
+                  MCU.USART.uxrxbuf : '.');	                              \
           MCU.sfr.IFG.b.urxifg##NUM  = 1;                                     \
           if (MCU.sfr.IE.b.urxie##NUM)                                        \
             {                                                                 \
@@ -765,12 +776,15 @@ do {                                                                          \
 	  TRACER_TRACE_USART##NUM(TRACER_SPI_RX_RECV);			      \
           MCU.USART.uxrx_shift_buf   = val;                                   \
           MCU.USART.uxrx_shift_empty = 0;                                     \
-          MCU.USART.uxrx_shift_ready = 0;                                     \
-          MCU.USART.uxrx_shift_delay = 7;                                     \
+          MCU.USART.uxrx_shift_ready = 0;				      \
+	  /* no delay, as delay has been taken into account during tx*/	      \
+          MCU.USART.uxrx_shift_delay = 0;				      \
+	  if (MCU.USART.uxctl.b.mm == 0)				      \
+	    MCU.USART.uxrx_slave_rx_done = 1;  				      \
           etracer_slot_event(ETRACER_PER_ID_MCU_SPI + NUM,                    \
                              ETRACER_PER_EVT_WRITE_COMMAND,                   \
                             (ETRACER_PER_ARG_WR_DST_FIFO | (ETRACER_ACCESS_LVL_SPI + NUM)), 0); \
-          HW_DMSG_USART("msp430:usart%d: SPI rx value 0x%02x (delay 7)\n",NUM,val);  \
+          HW_DMSG_USART("msp430:usart%d: SPI rx value 0x%02x\n",NUM,val);  \
         }                                                                     \
     }                                                                         \
   else                                                                        \

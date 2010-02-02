@@ -204,9 +204,7 @@ int devices_create()
 /* devices init conditions should be written here */
 int devices_reset_post()
 {
-#if defined(GUI)
   int refresh = 0;
-#endif
 
   SPIDEV_CSn = 0;
   SPIDEV_Wn  = 0;
@@ -220,7 +218,7 @@ int devices_reset_post()
   REFRESH(LED7);
   REFRESH(LED8);
   REFRESH(LOGO1);
-
+  ui_refresh(refresh);
   return 0;
 }
 
@@ -231,9 +229,7 @@ int devices_reset_post()
 int devices_update()
 {
   int res = 0;
-#if defined(GUI)
   int refresh = 0;
-#endif
   uint8_t  val8;
 
   /* *************************************************************************** */
@@ -365,30 +361,7 @@ while(0)
 
 
   /* input on UI */
-#if defined(GUI)
-  {
-    /* poll event every */
-    static int loop_count = UI_EVENT_SKIP;
-    if ((loop_count--) == 0)
-      {
-	int ev;
-	loop_count = UI_EVENT_SKIP;
-	switch ((ev = ui_getevent()))
-	  {
-	  case UI_EVENT_QUIT:
-	    HW_DMSG_UI("  devices UI event QUIT\n");
-	    mcu_signal_set(SIG_UI);
-	    break;
-	  case UI_EVENT_USER:
-	  case UI_EVENT_NONE:
-	    break;
-	  default:
-	    ERROR("devices: unknown ui event\n");
-	    break;
-	  }
-      }
-  }
-#endif
+  ui_default_input("test3:");
 
   /* *************************************************************************** */
   /* update                                                                      */
@@ -400,11 +373,7 @@ while(0)
   UPDATE(SERIAL1);
   UPDATE(SPIDEV1);
 
-#if defined(GUI)
-  if (refresh) {
-    ui_refresh(refresh);
-  }
-#endif
+  ui_refresh(refresh);
 
   return res;
 }

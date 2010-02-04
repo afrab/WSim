@@ -34,7 +34,7 @@
 	
     <p>The main configure options are (type <span class="hilite-code"> ./configure --help </span> for a more complete list): </p>
     <ul style="margin-top: 0pt;">
-      <li><span class="hilite">--prefix=PREFIX</span>: to specify an install directory other than /usr/local/wsim/</li> 
+      <li><span class="hilite">--prefix=PREFIX</span>: to specify an install directory other than /usr/local/bin/</li> 
       <li><span class="hilite">--enable-debug</span>: enable debugging symbols</li>
       <li><span class="hilite">--enable-platform-xxx</span>: compiles only platform xxx</li>
     </ul>

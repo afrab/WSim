@@ -79,8 +79,8 @@
 				<listitem><simpara><userinput>wtracer</userinput>: The Worlsens trace reading tool.</simpara></listitem>
 				<listitem><simpara><userinput>wsnet</userinput>: The Worldsens wireless network simulator.</simpara></listitem>
 			</itemizedlist>
-		Before starting the tutorial, make sure you are using the Worldsens Live CD or that you have 
-		installed all the necessary tools listed above. The Worldsens suite will be described in the following. 
+		Before starting the tutorial, make sure you have installed all the necessary tools listed above. 
+                The Worldsens suite will be described in the following. 
 		For information on the first couple of tools, please refer to their respective manuals. Please find below 
 		some useful links.
 			<itemizedlist mark="bullet" spacing="normal">

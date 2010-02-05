@@ -22,6 +22,7 @@
 #include "libgui/ui.h"
 #include "libwsnet/libwsnet.h"
 #include "src/options.h"
+#include "src/revision.h"
 
 
 /*
@@ -229,8 +230,9 @@ int main(int argc, char* argv[])
   /* do not use logger functions before that line */
   logger_init(o.logfilename,o.verbose);
 
-  OUTPUT("WSim %s, copyright 2005, 2006, 2007, 2008, 2009\n",PACKAGE_VERSION);
-  OUTPUT("Laboratoire Citi, INRIA, INSA de Lyon\n");
+  OUTPUT("WSim %s, rev %s\n", PACKAGE_VERSION, extract_revision_number());
+  OUTPUT("copyright 2005, 2006, 2007, 2008, 2009, 2010\n");
+  OUTPUT("Citi Lab, INRIA, INSA de Lyon\n");
   VERBOSE(2,"A. Fraboulet, G. Chelius, E. Fleury\n");
   VERBOSE(2,"wsim:pid:%d\n",getpid());
 

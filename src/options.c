@@ -19,6 +19,7 @@
 #include "config.h"
 #include "options.h"
 #include "mgetopt.h"
+#include "revision.h"
 
 #define DEFAULT_VERBOSE            0
 #define DEFAULT_PROGNAME           "none"
@@ -294,7 +295,8 @@ options:\n";
 
 void options_print_version(struct options_t UNUSED *s)
 {
-  OPT_PRINT("%s: version %s, date \"%s\"\n", PACKAGE, PACKAGE_VERSION, __DATE__);
+  OPT_PRINT("%s: version %s, rev %s, %s.\n", 
+	    PACKAGE, PACKAGE_VERSION, extract_revision_number(), __DATE__);
 }
 
 /* ************************************************** */

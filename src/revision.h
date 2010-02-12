@@ -18,12 +18,12 @@ static char* extract_revision_number()
 #define REV_LIMIT 6
   int    i = 0;
   char  *p = SVN_REVISION;
-  static char rev[REV_LIMIT];
+  static char rev[REV_LIMIT+1];
 
-  while (! isdigit(*p))
+  while (! isdigit((unsigned char)*p))
     p++; 
 
-  while ((i<REV_LIMIT) && isdigit(*p))
+  while ((i<REV_LIMIT) && isdigit((unsigned char)*p))
     rev[i++] = *p++;
 
   rev[i] = 0;

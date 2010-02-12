@@ -90,6 +90,11 @@
 				<listitem><simpara><ulink url="http://sources.redhat.com/insight/faq.php">The GDB GUI FAQ</ulink></simpara></listitem>
 			</itemizedlist>
 		</para>
+		<note><title><userinput>insight</userinput> and <userinput>mspgcc</userinput></title>
+			<para><userinput>insight</userinput> isn't available in the official <userinput>mspgcc</userinput> package based on <userinput>gcc 3.2.3</userinput> anymore. However to follow the whole tutorial you will need it, that's why we advice you to install the <userinput>mspgcc4</userinput> port of <userinput>mspgcc</userinput> based on <userinput>gcc 4.x</userinput>. You will find it here : <ulink url="http://mspgcc4.sourceforge.net/">mspgcc4 website</ulink>.</para>
+		</note>
+
+
 		<sect1>
 			<title>WSim: the Worldsens hardware platform simulator</title>
 			<para>WSim is part of the Worldsens development environment. WSim is a 

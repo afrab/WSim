@@ -99,6 +99,7 @@ static int      wsnet2_sr_rx          (char *);
 static int      wsnet2_measure_rsp    (char *);
 static int      wsnet2_measure_sr_rsp (char *);
 static int      wsnet2_subscribe      (void);
+static int      wsnet2_unsubscribe    (void);
 static int      wsnet2_kill_node      (char *);
 
 /* ************************************************** */
@@ -128,6 +129,10 @@ void wsnet2_init(void) {
 
 
 void wsnet2_finalize(void) {
+
+    if (wsnet2_unsubscribe()) {
+        WSNET2_EXC("Libwsnet2:wsnet2_finalize: error when unsubscribing to wsnet server\n");
+    }
 
     if (wsens.u_fd > 0)
         close(wsens.u_fd);
@@ -371,6 +376,7 @@ int wsnet2_unsubscribe(void) {
     /* format */
     pkt.disconnect.type    = WORLDSENS_C_DISCONNECT;
     pkt.disconnect.node_id = wsens.id;
+    worldsens_packet_dump(&pkt);
     worldsens_packet_hton(&pkt);
 
     /* send */

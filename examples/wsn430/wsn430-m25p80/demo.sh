@@ -1,37 +1,36 @@
 #! /bin/sh
 
-## ==================================
+## =============Conf=====================
+WSIM=wsim-wsn430
+WTRC=wtracer
 
-# set WSNET_MODE to "wsnet1", "wsnet2", or "" if you are using wsim alone
-export WSNET_MODE=""
-export WSNET2_CONF_PATH=""
+LOG="--logfile=wsim.log --verbose=2"
+TRC="--trace=wsim.trc"
+SERIAL="--serial1_io=stdout"
+MODE="--mode=time --modearg=30s"
+#MODE="--mode=gdb"
+UI="--ui"
+## ======================================
 
-## ==================================
 
-. ../config.soft
-
-## ================================
-
-export SETUI=true
-#C1=`run_console -l c1.log`
-C1=stdout
-
-sync
-echo "consoles $C1"
-
-## ==================================
-
-TIME=$(( 7 * $FACTOR ))
-
-WS1="`run_wsim $DS1 wsn430-m25p80.elf $TIME $C1`" 
-
+## =============WSIM=====================
+WS1="${WSIM} ${UI} ${MODE} ${SERIAL} ${LOG} ${TRC} ./wsn430-m25p80.elf"
+xterm -T wsim-1 -e "${WS1}" &
 echo "${WS1}"
-xterm -T wsim-1 -e "$WS1" &
+## ======================================
 
+
+## =============Wait=====================
 read dummyval
+## ======================================
 
-## ==================================
-## ==================================
 
-kill_demo
+## =============Traces===================
+${WTRC} --in=wsim.trc --out=wsim.vcd --format=vcd
+## ======================================
+
+
+## =============End======================
+killall -SIGUSR1 ${WSIM}   > /dev/null 2>&1
+## ======================================
 

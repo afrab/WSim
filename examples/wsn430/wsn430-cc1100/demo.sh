@@ -1,53 +1,82 @@
 #! /bin/sh
 
-## ==================================
+## =============Conf=====================
+WSIM=wsim-wsn430
+WTRC=wtracer
+WSNET1=wsnet1
+WSNET2=wsnet
 
-# set WSNET_MODE to "wsnet1", "wsnet2", or "" if you are using wsim alone
-export WSNET_MODE="wsnet2"
-export WSNET2_CONF_PATH="worldsens.xml"
+# set WSNET to "--wsnet1", "--wsnet2", or "" if you are using wsim alone
+WSNET_MODE=--wsnet1
+WSNET2_CONF="./worldsens.xml"
+NB_NODE=3
 
-## ==================================
+LOG="--verbose=2"
+MODE="--mode=time --modearg=10s"
+#MODE="--mode=gdb"
+UI="--ui"
+## ======================================
 
-. ../config.soft
 
-## ==================================
+## =============WSNET=====================
+if [ "$WSNET_MODE" = "--wsnet1" ]
+then
+    xterm -T ${WSNET1} -e "${WSNET1}" &
+    echo "${WSNET1}"
+else
+    if [ "$WSNET_MODE" = "--wsnet2" ]
+    then
+        xterm -T ${WSNET2} -e "${WSNET2} -c ${WSNET2_CONF}" &
+        echo "${WSNET2} -c ${WSNET2_CONF}"
+    fi
+fi
+## ======================================
 
-xterm -T wsnet -e "${WSNET} ${WSNET_CONF}"   &
 
-echo "${WSNET} ${WSNET_CONF}"
+## =============NETCAT====================
+iter=0
+while [ ${iter} -lt ${NB_NODE} ]
+do
+    NC="nc -u -p 700${iter} localhost 600${iter}"
+    xterm -T netcat-${iter} -e "${NC}" &
+    echo "${NC}"
+    iter=`expr ${iter} + 1`
+done
+sync
+## ======================================
 
-C1=`run_console -l c1.log`
-C2=`run_console -l c2.log`
-C3=`run_console -l c3.log`
 
-echo "consoles $C1 $C2 $C3"
+## =============WSIM=====================
+iter=0
+while [ ${iter} -lt ${NB_NODE} ]
+do
+    WS="${WSIM} ${MODE} ${WSNET_MODE} ${LOG} ${TRC} --logfile=n${iter}.log --trace=n${iter}.trc --serial1_io=bk:udp:localhost:600${iter}:localhost:700${iter} --node-id=${iter} --ds2411=0a:00:00:00:0${iter}:0${iter}:0${iter}:01 ./cc1100-26MHz.elf"
+    xterm -T wsim-${iter} -e "${WS}" &
+    echo "${WS}"
+    iter=`expr ${iter} + 1`
+done
+## ======================================
 
-## ==================================
 
-TIME=$(( 5 * $FACTOR ))
+## =============Wait=====================
+read dummyval
+## ======================================
 
-WS1="`run_wsim $DS1 cc1100-26MHz.elf $TIME $C1 1`" 
-WS2="`run_wsim $DS2 cc1100-26MHz.elf $TIME $C2 2`"
-WS3="`run_wsim $DS3 cc1100-26MHz.elf $TIME $C3 3`"
 
-echo "${WS1}"
-echo "${WS2}"
-echo "${WS3}"
-xterm -T wsim-1 -e "$WS1" &
-xterm -T wsim-2 -e "$WS2" &
-xterm -T wsim-3 -e "$WS3" &
+## =============Traces===================
+iter=0
+while [ ${iter} -lt ${NB_NODE} ]
+do
+    ${WTRC} --in=n${iter}.trc --out=n${iter}.vcd --format=vcd
+    echo "${WTRC} --in=n${iter}.trc --out=n${iter}.vcd --format=vcd"
+    iter=`expr ${iter} + 1` 
+done
+## ======================================
 
-read dummy_val
 
-dump_trace n1
-dump_trace n2
-dump_trace n3
+## =============End======================
+killall -SIGUSR1 ${WSIM}   > /dev/null 2>&1
+killall -SIGQUIT ${WSNET}  > /dev/null 2>&1
+killall -SIGUSR1 nc        > /dev/null 2>&1
+## ======================================
 
-#gnuplot < n1.gp
-#${WTRC} --in=n1.trc --out=n1.vcd --format=vcd
-#dump_esimu_trace n1 -p wsn430-demo.elf > esimu.log 2>&1
-
-## ==================================
-## ==================================
-
-kill_demo

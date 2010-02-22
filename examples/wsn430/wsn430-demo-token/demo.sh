@@ -1,76 +1,92 @@
 #! /bin/sh
 
-## ==================================
+## =============Conf=====================
+WSIM=wsim-wsn430
+WTRC=wtracer
+WSNET1=wsnet1
+WSNET2=wsnet
 
-# set WSNET_MODE to "wsnet1", "wsnet2", or "" if you are using wsim alone
-export WSNET_MODE="wsnet1"
-export WSNET2_CONF_PATH="worldsens.xml"
+# set WSNET to "--wsnet1", "--wsnet2", or "" if you are using wsim alone
+WSNET_MODE=--wsnet1
+WSNET2_CONF="./worldsens.xml"
+NB_NODE=3
 
-## ==================================
+LOG="--verbose=2"
+MODE="--mode=time --modearg=10s"
+UI=""
+#UI="--ui"
+## ======================================
 
-. ../config.soft
 
-## ==================================
-
-xterm -T wsnet -e "${WSNET} ${WSNET_CONF}"   &
-
-echo "${WSNET} ${WSNET_CONF}"
-
-C1=`run_console -l c1.log`
-C2=`run_console -l c2.log`
-C3=`run_console -l c3.log`
-
-echo "consoles $C1 $C2 $C3"
-
-## ==================================
-
-export SETUI=yes
-export SETESIMU=yes
-
-TIME=$(( 20 * $FACTOR ))
-
-if [ "$1" != "dbg" ] ; then
-	WS1="`run_wsim $DS1 wsn430-demo.elf $TIME $C1 1`" 
-	WS2="`run_wsim $DS2 wsn430-demo.elf $TIME $C2 2`"
-	WS3="`run_wsim $DS3 wsn430-demo.elf $TIME $C3 3`"
+## =============WSNET=====================
+if [ "$WSNET_MODE" = "--wsnet1" ]
+then
+    xterm -T ${WSNET1} -e "${WSNET1}" &
+    echo "${WSNET1}"
 else
-	case $2 in
-		1)
-		WS1="`run_wsim_gdb $DS1 wsn430-demo.elf $TIME $C1 1`"
-		WS2="`run_wsim $DS2 wsn430-demo.elf $TIME $C2 2`"
-		WS3="`run_wsim $DS3 wsn430-demo.elf $TIME $C3 3`"
-		;;
-		2)
-		WS2="`run_wsim_gdb $DS2 wsn430-demo.elf $TIME $C2 2`"
-		WS1="`run_wsim $DS1 wsn430-demo.elf $TIME $C1 1`"
-		WS3="`run_wsim $DS3 wsn430-demo.elf $TIME $C3 3`"
-		;;
-		3)
-		WS3="`run_wsim_gdb $DS3 wsn430-demo.elf $TIME $C3 3`"
-		WS1="`run_wsim $DS1 wsn430-demo.elf $TIME $C1 1`"
-		WS2="`run_wsim $DS2 wsn430-demo.elf $TIME $C2 2`"
-		;;
-	esac
+    if [ "$WSNET_MODE" = "--wsnet2" ]
+    then
+        xterm -T ${WSNET2} -e "${WSNET2} -c ${WSNET2_CONF}" &
+        echo "${WSNET2} -c ${WSNET2_CONF}"
+    fi
 fi
+## ======================================
 
-echo "${WS1}"
-echo "${WS2}"
-echo "${WS3}"
-xterm -T wsim-1 -e "$WS1" &
-xterm -T wsim-2 -e "$WS2" &
-xterm -T wsim-3 -e "$WS3" &
 
-read dummy_val
+## =============NETCAT====================
+iter=0
+while [ ${iter} -lt ${NB_NODE} ]
+do
+    NC="nc -u -p 700${iter} localhost 600${iter}"
+    xterm -T netcat-${iter} -e "${NC}" &
+    echo "${NC}"
+    iter=`expr ${iter} + 1`
+done
+sync
+## ======================================
 
-dump_trace n1
-dump_trace n2
-dump_trace n3
 
-#gnuplot < n1.gp
-#${WTRC} --in=n1.trc --out=n1.vcd --format=vcd
-#dump_esimu_trace n1 -p wsn430-demo.elf > esimu.log 2>&1
+## =============WSIM=====================
+iter=0
+while [ ${iter} -lt ${NB_NODE} ]
+do
+MODE1=${MODE}
+    if [ "$1" = "dbg" ]
+    then
+        if [ "$2" = "`expr ${iter} + 1`" ]
+        then
+        MODE1="--mode=gdb"
+        fi
+    fi
+    WS="${WSIM} ${MODE1} ${WSNET_MODE} ${LOG} ${TRC} ${UI} --logfile=n${iter}.log --trace=n${iter}.trc --serial1_io=bk:udp:localhost:600${iter}:localhost:700${iter} --node-id=${iter} --ds2411=0a:00:00:00:0${iter}:0${iter}:0${iter}:01 ./wsn430-demo.elf"
+    xterm -T wsim-${iter} -e "${WS}" &
+    echo "${WS}"
+    iter=`expr ${iter} + 1`
+    sleep 0.5
+done
+## ======================================
 
-## ==================================
-## ==================================
 
-kill_demo
+## =============Wait=====================
+read dummyval
+## ======================================
+
+
+## =============Traces===================
+iter=0
+while [ ${iter} -lt ${NB_NODE} ]
+do
+    ${WTRC} --in=n${iter}.trc --out=n${iter}.vcd --format=vcd
+    echo "${WTRC} --in=n${iter}.trc --out=n${iter}.vcd --format=vcd"
+    iter=`expr ${iter} + 1` 
+done
+## ======================================
+
+
+## =============End======================
+killall -SIGUSR1 ${WSIM}   > /dev/null 2>&1
+killall -SIGQUIT ${WSNET1} > /dev/null 2>&1
+killall -SIGQUIT ${WSNET2} > /dev/null 2>&1
+killall -SIGUSR1 nc        > /dev/null 2>&1
+## ======================================
+

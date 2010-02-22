@@ -382,7 +382,7 @@ $./sudo make install</computeroutput></programlisting>
 	As explained previouly, in a simulation using WSNet1, each node will see all the other nodes.
       </para>
       <para>
-	To launch the simulation, go in the <userinput>/examples/wsn430v14/demo_tuto_wsnet/wsnet1</userinput> folder of WSim sources, and enter:
+	To launch the simulation, go in the <userinput>/examples/wsn430v14/demo_tuto_wsnet/</userinput> folder of WSim sources, and enter:
       </para>
       <programlisting><computeroutput>$./demo.sh</computeroutput></programlisting>
 
@@ -422,8 +422,16 @@ $./sudo make install</computeroutput></programlisting>
       </para>
 
       <para>
-	To launch the simulation, go in the <userinput>/examples/wsn430v14/demo_tuto_wsnet/wsnet2</userinput> folder of WSim sources, and enter:
+	Before running the simulation, still in the <userinput>/examples/wsn430v14/demo_tuto_wsnet/</userinput> folder of WSim sources, edit <userinput>demo.sh</userinput> file and replace this line:
       </para>
+      <programlisting><computeroutput>WSNET_MODE=--wsnet1</computeroutput></programlisting>
+      <para>
+	by this one :
+      </para>
+      <programlisting><computeroutput>WSNET_MODE=--wsnet2</computeroutput></programlisting>
+      <para>
+	Then to launch the simulation enter on your command line :
+      </para>  
       <programlisting><computeroutput>$./demo.sh</computeroutput></programlisting>
 
       <figure id="example_wsnet2">

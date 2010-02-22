@@ -1,52 +1,84 @@
-#! /bin/bash
+#! /bin/sh
 
-## ==================================
+## =============Conf=====================
+WSIM=wsim-senslabv14
+WTRC=wtracer
+WSNET1=wsnet1
+WSNET2=wsnet
 
-# set WSNET_MODE to "wsnet1", "wsnet2", or "" if you are using wsim alone
-export WSNET_MODE="wsnet1"
-export WSNET2_CONF_PATH="worldsens.xml"
+# set WSNET to "--wsnet1", "--wsnet2", or "" if you are using wsim alone
+WSNET_MODE=--wsnet1
+WSNET2_CONF="./worldsens.xml"
+NB_NODE=4
 
-NBNODES=4
+LOG="--verbose=2"
+MODE="--mode=time --modearg=10s"
+#MODE="--mode=gdb"
+UI="--ui"
+## ======================================
 
-## ==================================
 
-. ../config.soft
+## =============WSNET=====================
+if [ "$WSNET_MODE" = "--wsnet1" ]
+then
+    xterm -T ${WSNET1} -e "${WSNET1}" &
+    echo "${WSNET1}"
+else
+    if [ "$WSNET_MODE" = "--wsnet2" ]
+    then
+        xterm -T ${WSNET2} -e "${WSNET2} -c ${WSNET2_CONF}" &
+        echo "${WSNET2} -c ${WSNET2_CONF}"
+    fi
+fi
+## ======================================
 
-## ==================================
 
-xterm -T wsnet -e "${WSNET} ${WSNET_CONF}"   &
-echo "${WSNET} ${WSNET_CONF}"
-
-## ==================================
-
-for ((i=0 ; i<NBNODES; i++))
-  do 
-    C[$i]=`run_console -l c$i.log`
-    echo "Console: ${C[$i]}"
-  done
-
+## =============NETCAT====================
+iter=0
+while [ ${iter} -lt ${NB_NODE} ]
+do
+    NC="nc -u -p 700${iter} localhost 600${iter}"
+    xterm -T netcat-${iter} -e "${NC}" &
+    echo "${NC}"
+    iter=`expr ${iter} + 1`
+done
 sync
+## ======================================
 
-## ==================================
 
-TIME=$(( 10 * $FACTOR ))
-SETUI="OK"
-
-for ((i=0 ; i<NBNODES; i++))
-  do
-    DSi=`eval echo \"$\DS$i\"`
-    WS[$i]="`run_wsim $DSi ./senslabv14-demo-token$i.elf $TIME ${C[i]} $i`"
-    echo "${WS[i]}"
-  done
-
-for ((i=0 ; i<NBNODES; i++))
-  do
-    xterm -T wsim-$i -e "${WS[i]}" &
+## =============WSIM=====================
+iter=0
+while [ ${iter} -lt ${NB_NODE} ]
+do
+    WS="${WSIM} ${MODE} ${WSNET_MODE} ${LOG} ${TRC} ${UI} --logfile=n${iter}.log --trace=n${iter}.trc --serial0_io=bk:udp:localhost:600${iter}:localhost:700${iter} --node-id=${iter} --ds2411=0a:00:00:00:0${iter}:0${iter}:0${iter}:01 ./senslabv14-demo-token${iter}.elf"
+    xterm -T wsim-${iter} -e "${WS}" &
+    echo "${WS}"
+    iter=`expr ${iter} + 1`
     sleep 0.5
-  done
+done
+## ======================================
 
-## ==================================
 
-read
+## =============Wait=====================
+read dummyval
+## ======================================
 
-kill_demo
+
+## =============Traces===================
+iter=0
+while [ ${iter} -lt ${NB_NODE} ]
+do
+    ${WTRC} --in=n${iter}.trc --out=n${iter}.vcd --format=vcd
+    echo "${WTRC} --in=n${iter}.trc --out=n${iter}.vcd --format=vcd"
+    iter=`expr ${iter} + 1` 
+done
+## ======================================
+
+
+## =============End======================
+killall -SIGUSR1 ${WSIM}   > /dev/null 2>&1
+killall -SIGQUIT ${WSNET1} > /dev/null 2>&1
+killall -SIGQUIT ${WSNET2} > /dev/null 2>&1
+killall -SIGUSR1 nc        > /dev/null 2>&1
+## ======================================
+

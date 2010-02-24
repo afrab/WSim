@@ -58,7 +58,7 @@ MODE1=${MODE}
         MODE1="--mode=gdb"
         fi
     fi
-    WS="${WSIM} ${MODE1} ${WSNET_MODE} ${LOG} ${TRC} ${UI} --logfile=n${iter}.log --trace=n${iter}.trc --serial1_io=bk:udp:localhost:600${iter}:localhost:700${iter} --node-id=${iter} --ds2411=0a:00:00:00:0${iter}:0${iter}:0${iter}:01 ./wsn430-demo.elf"
+    WS="${WSIM} ${MODE1} ${WSNET_MODE} ${LOG} ${TRC} ${UI} --logfile=n${iter}.log --trace=n${iter}.trc --serial1_io=bk:udp:localhost:600${iter}:localhost:700${iter} --node-id=${iter} --ds2411=0a:00:00:00:00:00:0${iter}:01 ./wsn430-demo.elf"
     xterm -T wsim-${iter} -e "${WS}" &
     echo "${WS}"
     iter=`expr ${iter} + 1`

@@ -34,8 +34,8 @@ fi
 
 
 ## =============NETCAT====================
-iter=0
-while [ ${iter} -lt ${NB_NODE} ]
+iter=1
+while [ ${iter} -le ${NB_NODE} ]
 do
     NC="nc -u -p 700${iter} localhost 600${iter}"
     xterm -T netcat-${iter} -e "${NC}" &
@@ -47,13 +47,13 @@ sync
 
 
 ## =============WSIM=====================
-iter=0
-while [ ${iter} -lt ${NB_NODE} ]
+iter=1
+while [ ${iter} -le ${NB_NODE} ]
 do
 MODE1=${MODE}
     if [ "$1" = "dbg" ]
     then
-        if [ "$2" = "`expr ${iter} + 1`" ]
+        if [ "$2" = "${iter}" ]
         then
         MODE1="--mode=gdb"
         fi
@@ -73,8 +73,8 @@ read dummyval
 
 
 ## =============Traces===================
-iter=0
-while [ ${iter} -lt ${NB_NODE} ]
+iter=1
+while [ ${iter} -le ${NB_NODE} ]
 do
     ${WTRC} --in=n${iter}.trc --out=n${iter}.vcd --format=vcd
     echo "${WTRC} --in=n${iter}.trc --out=n${iter}.vcd --format=vcd"

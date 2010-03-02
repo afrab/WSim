@@ -152,7 +152,7 @@ $make telosb</computeroutput></programlisting>
 
     <para>
       To avoid this drawback, you just have to compile manually with <userinput>mspgcc</userinput> the Nesc generated <userinput>app.c</userinput> file, which has been created in the <userinput>./apps/RadioCountToLeds/build/telosb/</userinput> folder :
-      <programlisting><computeroutput>$msp430-gcc app.c -mmcu=msp430x1611 -g -o radiocounttoleds.elf</computeroutput></programlisting>
+      <programlisting><computeroutput>$msp430-gcc app.c -mmcu=msp430x1611 -g -Os -mdisable-hwmul -o radiocounttoleds.elf</computeroutput></programlisting>
     </para>
 
   </chapter>

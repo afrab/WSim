@@ -37,7 +37,8 @@
       <li><a href="http://mspgcc.sf.net/" target="_new" title="mspgcc website">MspGCC</a>
 	website: GCC for MSP430 micro-controllers.</li>
 
-      <li><a href="http://mspgcc4.sourceforge.net/" target="_new" title="mspgcc website">MspGCC 4.x</a>GCC 4.x toolchain for Texas Instruments MSP430 MCUs</li>
+      <li><a href="http://mspgcc4.sourceforge.net/" target="_new" title="mspgcc website">MspGCC 4.x</a>
+	GCC 4.x toolchain for Texas Instruments MSP430 MCUs</li>
 
       <li><a href="http://gtkwave.sourceforge.net/" target="_new" title="Gtkwave website">Gtkwave</a> 
 	website: VCD file viewer.</li>

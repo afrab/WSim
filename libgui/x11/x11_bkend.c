@@ -147,7 +147,7 @@ void* ui_backend_create(int w, int h, char *title, int *mustlock)
   XSetWMProtocols(x11->display, x11->window, &x11->wmDeleteMessage, 1);
 
 
-  eventMask = ExposureMask | KeyPressMask | ButtonPressMask | StructureNotifyMask;
+  eventMask = ExposureMask | KeyPressMask | KeyReleaseMask | ButtonPressMask | ButtonReleaseMask | StructureNotifyMask;
   XSelectInput(x11->display, x11->window, eventMask); 
   XMapWindow(x11->display, x11->window);
     

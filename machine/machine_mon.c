@@ -184,7 +184,17 @@ void machine_monitor_add_trace(void)
 	break;
       }
     }
-  
+
+  /*
+  if (strcmp(watchpoint[ index ].name,"mywatchmoint") == 0)
+    {
+      if (value == 5)
+	{
+	  mcu_signal_add(SIG_MAC | MAC_TO_SIG(MAC_WATCH_WRITE));
+	}
+    }
+  */
+
   if (strcmp(watchpoint[ index ].name,"__WSIMLOGBUFFER") == 0)
     {
       int iter;

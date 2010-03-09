@@ -281,23 +281,28 @@ void machine_monitor_set(char* args, elf32_t elf)
 	  (watchpoint[watchpoint_max].size == -1))
 	{
 	  ERROR("monitor: cannot find symbol \"%s\"\n",subtoken);
-	}
-
-      /* RW */
-      if ((subtoken = strtok_r(NULL, delim2, &saveptr2)) == NULL)
-	{
 	  continue;
 	}
-
-      char c0 = tolower((unsigned char)subtoken[0]);
-      char c1 = tolower((unsigned char)subtoken[1]);
-  
-      if (c0 == 'r' || c1 == 'r')
-	watchpoint[watchpoint_max].mode |= MAC_WATCH_READ;
-      if (c0 == 'w' || c1 == 'w')
-	watchpoint[watchpoint_max].mode |= MAC_WATCH_WRITE;
-
-      watchpoint_max ++;
+      else
+	{
+	  /* RW */
+	  if ((subtoken = strtok_r(NULL, delim2, &saveptr2)) == NULL)
+	    {
+	      //continue;
+	    }
+	  else
+	    {
+	      char c0 = tolower((unsigned char)subtoken[0]);
+	      char c1 = tolower((unsigned char)subtoken[1]);
+	      
+	      if (c0 == 'r' || c1 == 'r')
+		watchpoint[watchpoint_max].mode |= MAC_WATCH_READ;
+	      if (c0 == 'w' || c1 == 'w')
+		watchpoint[watchpoint_max].mode |= MAC_WATCH_WRITE;
+	      
+	      watchpoint_max ++;
+	    }
+	}
     }
 
   //  OUTPUT("==\n");

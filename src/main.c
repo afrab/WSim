@@ -343,6 +343,7 @@ int main(int argc, char* argv[])
     {
       VERBOSE(2,"wsim: starting memory monitor\n");
       machine_monitor(o.monitor, o.modify);
+      VERBOSE(2,"wsim: end of memory monitor settings\n");
     }
 
   /* go */

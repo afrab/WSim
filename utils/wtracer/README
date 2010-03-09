@@ -3,3 +3,11 @@ WTracer: WSim trace parser and analyser
 
 For more information please visit 
   http://wsim.gforge.inria.fr/
+
+
+
+#define MOV_R7R7()   __asm__ __volatile__ ("mov r7,r7")
+#define START_TRACER MOV_R7R7
+
+#define MOV_R8R8()   __asm__ __volatile__ ("mov r8,r8")
+#define STOP_TRACER  MOV_R8R8

@@ -1308,8 +1308,17 @@ static void msp430_mcu_run_insn()
 		    SET_CYCLES(0);
 		    return;
 
-		  case 0x4707: WARNING("msp430: PC:0x%04x software internal mov 7\n",MCU_ALU.curr_pc & 0xffff); TRACER_TRACE_BKP( 7); break;
-		  case 0x4808: WARNING("msp430: PC:0x%04x software internal mov 8\n",MCU_ALU.curr_pc & 0xffff); TRACER_TRACE_BKP( 8); break;
+		  case 0x4707: 
+		    tracer_start();
+		    TRACER_TRACE_BKP(7);
+		    WARNING("msp430: PC:0x%04x software internal mov 7\n",MCU_ALU.curr_pc & 0xffff); 
+		    break;
+		  case 0x4808: 
+		    tracer_stop();
+		    TRACER_TRACE_BKP(8);
+		    WARNING("msp430: PC:0x%04x software internal mov 8\n",MCU_ALU.curr_pc & 0xffff); 
+		    break;
+
 		  case 0x4909: WARNING("msp430: PC:0x%04x software internal mov 9\n",MCU_ALU.curr_pc & 0xffff); TRACER_TRACE_BKP( 9); break;
 		  case 0x4a0a: WARNING("msp430: PC:0x%04x software internal mov A\n",MCU_ALU.curr_pc & 0xffff); TRACER_TRACE_BKP(10); break;
 		  case 0x4b0b: WARNING("msp430: PC:0x%04x software internal mov B\n",MCU_ALU.curr_pc & 0xffff); TRACER_TRACE_BKP(11); break;

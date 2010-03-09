@@ -61,7 +61,7 @@ typedef struct tracer_sample_struct_t tracer_sample_t;
 #define TRACER_VERSION           4
 
 #define TRACER_MAX_ID            255
-#define TRACER_MAX_NAME_LENGTH   30
+#define TRACER_MAX_NAME_LENGTH   200
 
 
 struct _tracer_header_t {

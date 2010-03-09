@@ -181,6 +181,23 @@ int libselect_close (void)
 /* ************************************************** */
 /* ************************************************** */
 
+char* entry_type_str(int type)
+{
+  switch (type)
+    {
+    case ENTRY_NONE:
+      return "NONE";
+    case ENTRY_FILE:
+      return "FILE";
+    case ENTRY_UDP:
+      return "UDP";
+    case ENTRY_TCP:
+      return "TCP";
+    default:
+      return "Unknown";
+    }
+}
+
 static inline int libselect_max(int a, int b) { return ((a)<(b) ? (b):(a)); }
 
 int libselect_update_registered()
@@ -266,7 +283,8 @@ int libselect_update_registered()
 	      switch (n = read(fd_in,buffer,BUFFER_MAX)) 
 		{
 		case -1:
-		  ERROR("wsim:libselect:update: error on descriptor %d:%d\n",id,fd_in);
+		  ERROR("wsim:libselect:update: error on descriptor (id=%d:%d) type %s\n",id,fd_in,
+			entry_type_str(libselect.entry[id].entry_type) );
 		case 0:
 		  if (libselect.entry[id].callback)
 		    {

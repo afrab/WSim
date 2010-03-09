@@ -52,8 +52,8 @@
  * dimensions are fixed
  ****************************************/
 
-#define TRACER_MAX_ID                100
-#define TRACER_MAX_NAME_LENGTH       30
+#define TRACER_MAX_ID                255
+#define TRACER_MAX_NAME_LENGTH       200
 
 /*
  *  64ksamples = 750kB
@@ -440,8 +440,8 @@ tracer_event_add_id(int width, char* name, char* module)
       ERROR("tracer: event id %d \"%s\" must have 0 < width < 65 bits\n",id,name);
     }
   
-  strncpy(tracer_id_name   [id], name,   TRACER_MAX_NAME_LENGTH);
-  strncpy(tracer_id_module [id], module, TRACER_MAX_NAME_LENGTH);
+  strncpy(tracer_id_name   [id], name,   TRACER_MAX_NAME_LENGTH - 1);
+  strncpy(tracer_id_module [id], module, TRACER_MAX_NAME_LENGTH - 1);
   tracer_width[id] = width;
 
   DMSG_TRACER("tracer:add:id: %02d=%-10s module=%-10s\n",id,name,module);

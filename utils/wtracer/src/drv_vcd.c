@@ -297,9 +297,10 @@ void vcd_dump_init_vars(tracer_t *t, tracer_t *trc[], int nb_trc_files)
 int drv_vcd_process_file(tracer_t *t)
 {
   tracer_ev_t     ev;
-  tracer_time_t   curr_time;
+  tracer_time_t   curr_time = 0;
   tracer_sample_t curr_smpl;
   tracer_sample_t id_last_smpl[TRACER_MAX_ID];
+  int             is_first_sample;
 
   vcd_dump_header(t);                                              /* header             */
   vcd_dump_scopes(t,&t,1);                                         /* scopes             */
@@ -315,22 +316,33 @@ int drv_vcd_process_file(tracer_t *t)
 
   if (t->hdr.ev_count_total > 0)
     {
-      tracer_read_sample(t,&curr_smpl);
-      fprintf(t->out_fd,"\n#%" PRId64 "\n", curr_smpl.time);
-      fprintf(t->out_fd,"b%s %s\n", tracer_lldbin(curr_smpl.val), t->id_var[curr_smpl.id]);
-      id_last_smpl[curr_smpl.id] = curr_smpl;
-      curr_time = curr_smpl.time;
-
+      is_first_sample = 1;
+      
       for(ev=1; ev < t->hdr.ev_count_total; ev++)
 	{
 	  tracer_read_sample(t,&curr_smpl);
-	  if (id_last_smpl[curr_smpl.id].val != curr_smpl.val)
+
+	  if ((t->start_time <= curr_smpl.time) && (curr_smpl.time <= t->stop_time))
 	    {
-	      if (curr_smpl.time != curr_time)
-		fprintf(t->out_fd,"\n#%" PRId64 "\n", curr_smpl.time);
-	      
-	      fprintf(t->out_fd,"b%s %s\n",tracer_lldbin(curr_smpl.val), t->id_var[curr_smpl.id]);
-	      id_last_smpl[curr_smpl.id] = curr_smpl;
+	      if (is_first_sample)
+		{
+		  fprintf(t->out_fd,"\n#%" PRId64 "\n", curr_smpl.time);
+		  fprintf(t->out_fd,"b%s %s\n", tracer_lldbin(curr_smpl.val), t->id_var[curr_smpl.id]);
+		  id_last_smpl[curr_smpl.id] = curr_smpl;
+		  
+		  is_first_sample = 0;
+		}
+	      else
+		{
+		  if (id_last_smpl[curr_smpl.id].val != curr_smpl.val)
+		    {
+		      if (curr_smpl.time != curr_time)
+			fprintf(t->out_fd,"\n#%" PRId64 "\n", curr_smpl.time);
+		      
+		      fprintf(t->out_fd,"b%s %s\n",tracer_lldbin(curr_smpl.val), t->id_var[curr_smpl.id]);
+		      id_last_smpl[curr_smpl.id] = curr_smpl;
+		    }
+		}
 	    }
 	  curr_time = curr_smpl.time;
 	}

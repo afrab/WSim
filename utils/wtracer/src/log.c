@@ -32,7 +32,7 @@ void ERROR(char* fmt, ...)
 
 void OUTPUT(char* fmt, ...)
 {
-  FILE* out = stdout;
+  FILE* out = stderr;
   va_list ap;
   va_start(ap, fmt);
   vfprintf(out,fmt,ap);
@@ -45,7 +45,7 @@ void OUTPUT(char* fmt, ...)
 
 void MESSAGE(char* fmt, ...)
 {
-  FILE* out = stdout;
+  FILE* out = stderr;
   va_list ap;
   va_start(ap, fmt);
   vfprintf(out,fmt,ap);

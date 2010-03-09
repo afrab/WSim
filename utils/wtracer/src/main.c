@@ -26,7 +26,7 @@
 
 void usage(char* prog)
 {
-  fprintf(stdout,"usage: %s           \n\
+  fprintf(stderr,"usage: %s           \n\
   --in=filename    default: wsim.trc  \n\
   --dir=directory  default: .         \n\
   --multi          default: wsim.trc  \n\
@@ -41,7 +41,11 @@ void usage(char* prog)
 \n\
   ex:\n\
     wtracer --in=wsim.trc --out=wsim.vcd --format=vcd\n\
-    wtracer --out=glob.vcd --format=vcd --merge --multi wsim*.trc\n", prog);
+    wtracer --out=glob.vcd --format=vcd --merge --multi wsim*.trc\n\
+    \n\
+    wtracer --in=wsim.trc --out=- --format=vcd | vcd2lxt2 -v - -l wsim.lxt \n\
+    wtracer --in=wsim.trc --out=- --format=vcd | gtkwave --vcd\n\
+    ", prog);
 
   exit(1);
 }

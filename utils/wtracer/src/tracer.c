@@ -472,6 +472,12 @@ tracer_driver_t *tracer_driver_get_by_name(char* name)
 
 int tracer_file_out_open(tracer_t *t)
 {
+  if (strcmp(t->out_filename,"-") == 0)
+    {
+      t->out_fd = stdout;
+      return 0;
+    }
+
   if ((t->out_fd = fopen(t->out_filename,"wb")) == NULL)
     {
       ERROR("tracer:file: error on open out file %s\n",t->out_filename);

@@ -342,10 +342,11 @@ void options_print_params(struct options_t* s)
       break;
     }
 
-  if (stat(s->progname, &fs) == -1)
+  if ((s->do_elfload == 1) && (stat(s->progname, &fs) == -1))
     {
       fprintf(stdout," ** Cannot stat elf file\n");
     }
+
   OPT_PRINT("== Command line summary == \n");
 }
 

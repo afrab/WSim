@@ -55,13 +55,32 @@ uint8_t hex2int(char c1, char c2)
 /* ************************************** */
 /* ************************************** */
 
+void remove_trailing_char(char *line, char c)
+{
+  int len = strlen(line);
+  if ((len > 0) && (line[len - 1] == c))
+    {
+      line[len-1] = 0;
+    }
+}
+
 int ihex_read_line(char line[MAXLINE])
 {
   char   *hexline;
+  int     length;
   uint8_t i,nbytes,checksum;
   uint8_t bytes[MAXLINE];
-
+  
   VERBOSE(H2L,"wsim:ihex:line: %s ",line);
+
+  remove_trailing_char(line,'\n');
+  remove_trailing_char(line,'\r');
+
+  length = strlen(line);
+  if (length == 0)
+    {
+      return 0; /* skip empty lines */
+    }
 
   if (line[0] != ':')
     {

@@ -326,13 +326,6 @@ int main(int argc, char* argv[])
       return 3;
     }
 
-  /* tracer creation */
-  if (o.do_trace)
-    {
-      VERBOSE(2,"wsim: starting tracer\n");
-      tracer_start();
-    }
-
   if (o.do_etrace_at_begin)
     {
       VERBOSE(2,"wsim: starting eSimu tracer at wsim start\n");
@@ -344,6 +337,13 @@ int main(int argc, char* argv[])
       VERBOSE(2,"wsim: starting memory monitor\n");
       machine_monitor(o.monitor, o.modify);
       VERBOSE(2,"wsim: end of memory monitor settings\n");
+    }
+
+  /* tracer creation */
+  if (o.do_trace)
+    {
+      VERBOSE(2,"wsim: starting tracer\n");
+      tracer_start();
     }
 
   /* go */

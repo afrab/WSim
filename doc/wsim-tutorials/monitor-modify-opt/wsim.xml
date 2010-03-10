@@ -385,6 +385,7 @@
 	consume 2 CPU cycles. The presence of a <userinput>MOV_RxRx</userinput>
 	will be reported in the traces. 
       </para>
+
       <para>
 	Since traces will report only changes in the trace point ID you have to use
 	at least two tracepoints in a loop to observe the changes. If the same 
@@ -397,6 +398,15 @@
 	reported in the <userinput>msp430.breakpoints</userinput> trace and is shown on 
 	the next figure using the GtkWave VCD viewer.
       </para>
+      
+      <note>
+	<para>
+	  <userinput>TRACE7</userinput> and <userinput>TRACE8</userinput> are mapped within the code
+	  to start and stop recording traces. Using these two macros can enable partial traces
+	  that will result in smaller output files. Other breakpoints are free of use and only
+	  generate events in the trace file.
+	</para>
+      </note>
 
     <programlisting>
       <computeroutput>
@@ -429,7 +439,7 @@
 
 
     <section id="messages">
-      <title>Using the modify option for loging messages</title>
+      <title>Using the modify option for logging embedded code messages</title>
       <para>
 	The <userinput>--monitor</userinput> option has been extended
 	in WSim to be able to output strings and decimal values from
@@ -445,7 +455,10 @@
 	This mechanism uses a preallocated buffer that will be
 	included in your application. Three functions are defined in
 	order to log strings, chars, bytes and words out of the
-	simulation. Messages are stored in the wsim.log file.
+	simulation. Messages are stored in
+	the <userinput>wsim.log</userinput> file with
+	a <computeroutput>machine:monitor</computeroutput> prefix
+	pattern that can be used to retreive the information.
       </para>
     <programlisting>
       <computeroutput>
@@ -457,6 +470,50 @@
     </programlisting>
     </section>
 
+  </chapter>
+
+  <!-- ============================================================ -->
+  <!-- ============================================================ -->
+  <!-- ============================================================ -->
+
+  <chapter id="online_gtkwave">
+    <title>Using online trace information with GTKWare</title>
+    <section id="onlinegtkwave">
+      <title>Generating interactive VCD traces</title>
+      <para> the <userinput>--trace</userinput> option can be used to generated 
+	online VCD traces at simulation time. These traces can be redirected to gtkwave
+	to gather information while the application is simulated. This feature can very 
+	very helpfull while being used in interactive debug mode with <userinput>GDB</userinput>
+      </para>
+
+      <para>
+	The followinf lines can be used to create a named pipe (FIFO) within the filesystem. This
+	pipe is then used a source of VCD traces for GTKWave (shmidcat is a tool included in GTKWare
+	distribution). The <userinput>vcd:pipe</userinput> option will force wsim to directly generate VCD
+	traces that will be written to the file names <userinput>pipe</userinput>.
+      </para>
+
+    <programlisting>
+      <computeroutput>
+	shell$ mkfifo pipe
+        shell$ cat pipe | shmidcat  | gtkwave -v -I whatever.sav 
+	shell$ wsim-platform --trace=vcd:pipe [args]
+      </computeroutput>
+    </programlisting>
+
+    <note>
+    <para>
+      Using this mode of traces generation, when coupled with GDB, can
+      save a full history of software variables while debuging. Some
+      buffering effect may appear while writing data. To decrease or increase
+      the buffer size used to output events an extra argument can be given
+      on the command line <userinput>--trace=vcd:pipe:size</userinput>. A
+      buffer size of 1 will directly output events as soon as they are produced
+      but might represent a significant performance hit depending on the
+      way the interactive information is used.
+    </para>
+    </note>
+    </section>
   </chapter>
 
   <!-- ============================================================ -->

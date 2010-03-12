@@ -71,7 +71,7 @@ int ihex_read_line(char line[MAXLINE])
   uint8_t i,nbytes,checksum;
   uint8_t bytes[MAXLINE];
   
-  VERBOSE(H2L,"wsim:ihex:line: %s ",line);
+  VERBOSE(H2L,"wsim:ihex:line: %-44s",line);
 
   remove_trailing_char(line,'\n');
   remove_trailing_char(line,'\r');
@@ -119,7 +119,7 @@ int ihex_read_line(char line[MAXLINE])
   int      count = (bytes[0]);
   uint16_t addr  = (bytes[1] << 8) | bytes[2];
   uint8_t  type  = (bytes[3]); 
-  VERBOSE(H2L,":: %d bytes, addr 0x%04x, type %02x=",count,addr,type);
+  VERBOSE(H2L,":: %02d bytes, addr 0x%04x, type %02x=",count,addr,type);
 
   switch (type)
     {

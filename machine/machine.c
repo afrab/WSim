@@ -354,19 +354,19 @@ void machine_monitor(char* monitor, char *modify)
   if (machine_elf)
     {
       machine_monitor_init(machine_elf);
-
-      if (monitor)
-	{
-	  machine_monitor_set(monitor, machine_elf);
-	}
-
-      if (modify)
-	{
-	  machine_modify_set(modify, machine_elf);
-	}
-
-      machine_monitor_start();
     }
+
+  if (monitor)
+    {
+      machine_monitor_set(monitor, machine_elf);
+    }
+
+  if (modify)
+    {
+      machine_modify_set(modify, machine_elf);
+    }
+
+  machine_monitor_start();
 }
 
 /* ************************************************** */

@@ -279,12 +279,20 @@ void machine_monitor_set(char* args, elf32_t elf)
 	    {
 	      sscanf(subtoken, "%d", & watchpoint[watchpoint_max].size );
 	    }
+	  ERROR("machine:monitor: name %s addr %x size %d\n",watchpoint[watchpoint_max].name, watchpoint[watchpoint_max].addr, watchpoint[watchpoint_max].size);
 	}
       /* NAME */
       else 
 	{
-	  watchpoint[watchpoint_max].addr = libelf_symtab_find_addr_by_name(elf, subtoken );
-	  watchpoint[watchpoint_max].size = libelf_symtab_find_size_by_name(elf, subtoken );
+	  if (elf != NULL)
+	    {
+	      watchpoint[watchpoint_max].addr = libelf_symtab_find_addr_by_name(elf, subtoken );
+	      watchpoint[watchpoint_max].size = libelf_symtab_find_size_by_name(elf, subtoken );
+	    }
+	  else
+	    {
+	      ERROR("monitor: cannot find symbol %s, no elf file given\n", subtoken);
+	    }
 	}
 
       if ((watchpoint[watchpoint_max].addr ==  0) && 
@@ -352,6 +360,9 @@ void machine_modify_set(char* args, elf32_t elf)
 	}
       strncpy( v_name, subtoken, MONITOR_MAX_VARIABLE_NAME);
 
+      v_addr = 0;
+      v_size = -1;
+
       /* HEXA:SIZE */
       if (subtoken[0] == '0')
 	{
@@ -364,8 +375,15 @@ void machine_modify_set(char* args, elf32_t elf)
       /* NAME */
       else
 	{
-	  v_addr = libelf_symtab_find_addr_by_name(elf, subtoken );
-	  v_size = libelf_symtab_find_size_by_name(elf, subtoken );
+	  if (elf)
+	    {
+	      v_addr = libelf_symtab_find_addr_by_name(elf, subtoken );
+	      v_size = libelf_symtab_find_size_by_name(elf, subtoken );
+	    }
+	  else
+	    {
+	      ERROR("monitor: cannot find symbol %s, no elf file given\n", subtoken);
+	    }
 	}
 
       if ((v_addr == 0) && 

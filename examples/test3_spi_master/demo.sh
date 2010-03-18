@@ -46,6 +46,7 @@ done
 
 
 ## =============WSIM=====================
+# --serial1_io=bk:udp:localhost:6000:localhost:7000
 WS="${WSIM} ${MODE} ${WSNET_MODE} ${LOG} ${TRC} --logfile=n0.log --trace=n0.trc --serial1_io=udp:localhost:6000:localhost:7000 ./test_spi_master.elf"
 xterm -T wsim -e "${WS}" &
 echo "${WS}"

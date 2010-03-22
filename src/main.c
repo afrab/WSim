@@ -196,6 +196,7 @@ static void main_end(enum wsim_end_mode_t mode)
   libselect_close();
   logger_close();
   ui_delete();
+  exit(0);
 }
 
 /* ************************************************** */

@@ -534,7 +534,7 @@ int cc2420_rx_check_address(struct _cc2420_t * cc2420 UNUSED) {
     /* check short dst address */
     if (cc2420->rx_dst_addr_len == 2) {
         /* if not broadcast */
-        if (!memcmp(cc2420->rx_dst_addr, broadcast_addr, 2)) {
+        if (!memcmp(dst_addr, broadcast_addr, 2)) {
             CC2420_DEBUG("dst short address is broadcast, not checking\n");
         }
         else {
@@ -548,7 +548,7 @@ int cc2420_rx_check_address(struct _cc2420_t * cc2420 UNUSED) {
     /* check extended dst address */
     else if (cc2420->rx_dst_addr_len == 8) {
         /* if not broadcast */
-        if (!memcmp(cc2420->rx_dst_addr, broadcast_addr, 8)) {
+        if (!memcmp(dst_addr, broadcast_addr, 8)) {
             CC2420_DEBUG("dst short address is broadcast, not checking\n");
         }
         else {

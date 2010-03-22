@@ -316,20 +316,16 @@ struct _cc2420_t {
     /* dest PAN id */
     uint8_t  rx_dst_pan_offset;
     uint8_t  rx_dst_pan_len;
-    uint16_t rx_dst_pan;
 
     /* src PAN id */
     uint8_t  rx_src_pan_offset;
     uint8_t  rx_src_pan_len;
-    uint16_t rx_src_pan;
 
     /* RX frame dst address */
-    char     rx_dst_addr[8];
     uint8_t  rx_dst_addr_offset;
     uint8_t  rx_dst_addr_len;
     
     /* RX frame src address */
-    char     rx_src_addr[8];
     uint8_t  rx_src_addr_offset;
     uint8_t  rx_src_addr_len;
 

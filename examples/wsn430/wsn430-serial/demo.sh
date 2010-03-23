@@ -51,14 +51,13 @@ read dummyval
 ## ======================================
 
 
-## =============Traces===================
-${WTRC} --in=wsim.trc --out=wsim.vcd --format=vcd
-## ======================================
-
-
 ## =============End======================
 killall -SIGUSR1 ${WSIM}   > /dev/null 2>&1
 killall -SIGQUIT ${WSNET}  > /dev/null 2>&1
 killall -SIGQUIT nc        > /dev/null 2>&1
 ## ======================================
 
+
+## =============Traces===================
+${WTRC} --in=wsim.trc --out=wsim.vcd --format=vcd
+## ======================================

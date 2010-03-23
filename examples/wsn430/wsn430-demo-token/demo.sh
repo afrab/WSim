@@ -7,7 +7,7 @@ WSNET1=wsnet1
 WSNET2=wsnet
 
 # set WSNET to "--wsnet1", "--wsnet2", or "" if you are using wsim alone
-WSNET_MODE=--wsnet1
+WSNET_MODE=--wsnet2
 WSNET2_CONF="./worldsens.xml"
 NB_NODE=3
 
@@ -72,6 +72,14 @@ read dummyval
 ## ======================================
 
 
+## =============End======================
+killall -SIGUSR1 ${WSIM}   > /dev/null 2>&1
+killall -SIGQUIT ${WSNET1} > /dev/null 2>&1
+killall -SIGQUIT ${WSNET2} > /dev/null 2>&1
+killall -SIGUSR1 nc        > /dev/null 2>&1
+## ======================================
+
+
 ## =============Traces===================
 iter=1
 while [ ${iter} -le ${NB_NODE} ]
@@ -81,12 +89,3 @@ do
     iter=`expr ${iter} + 1` 
 done
 ## ======================================
-
-
-## =============End======================
-killall -SIGUSR1 ${WSIM}   > /dev/null 2>&1
-killall -SIGQUIT ${WSNET1} > /dev/null 2>&1
-killall -SIGQUIT ${WSNET2} > /dev/null 2>&1
-killall -SIGUSR1 nc        > /dev/null 2>&1
-## ======================================
-

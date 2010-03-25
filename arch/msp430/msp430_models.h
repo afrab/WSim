@@ -549,8 +549,8 @@
 /* ********************************************************************** */
 #elif defined(MSP430f2274)
 
-#define MCU_BFD_MACH_ID   20
-#define MCU_VERSION       "f2274"         // "f201x"
+#define MCU_BFD_MACH_ID   22
+#define MCU_VERSION       "f2274"
 #define MCU_MODEL_NAME    "msp430f2274"
 
 #define ADDR_FLASH_STOP   0xFFFFu

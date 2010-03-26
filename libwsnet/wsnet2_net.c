@@ -892,7 +892,7 @@ static int wsnet2_rx(char *msg) {
 	       info.data       = pkt->data;
 	       info.freq_mhz   = pkt->freq / 1000000.0;
 	       info.modulation = pkt->wsim_mod_id;
-	       info.power_dbm  = ntohdbl(pkt->power_dbm);
+	       info.power_dbm  = pkt->power_dbm;
 	       info.SiNR       = pkt->sinr;
 	       WSNET2_DBG("Libwsnet2:wsnet2_sr_rx: rxing at time %"PRIu64" data 0x%02x on antenna %s with power %g dbm\n", MACHINE_TIME_GET_NANO(), pkt->data, wsens.radio[i].antenna, info.power_dbm);
 	       wsens.radio[i].callback(wsens.radio[i].arg, &info);
@@ -931,7 +931,7 @@ static int wsnet2_sr_rx(char *msg) {
 	       info.data       = pkt->data;
 	       info.freq_mhz   = pkt->freq / 1000000.0;
 	       info.modulation = pkt->wsim_mod_id;
-	       info.power_dbm  = ntohdbl(pkt->power_dbm);
+	       info.power_dbm  = pkt->power_dbm;
 	       info.SiNR       = pkt->sinr;
 	       WSNET2_DBG("Libwsnet2:wsnet2_sr_rx: rxing at time %"PRIu64" data 0x%02x on antenna %s with power %g dbm\n", MACHINE_TIME_GET_NANO(), pkt->data, wsens.radio[i].antenna, info.power_dbm);
 	       wsens.radio[i].callback(wsens.radio[i].arg, &info);

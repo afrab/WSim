@@ -257,12 +257,6 @@ int worldsens_packet_ntoh(union _worldsens_pkt *pkt);
 /* dump on stdout */
 int worldsens_packet_dump(union _worldsens_pkt *pkt);
 
-
-uint64_t ntohll  (uint64_t);
-uint64_t htonll  (uint64_t);
-double   ntohdbl (double);
-double   htondbl (double);
-
 /* ************************************************** */
 /* ************************************************** */
 /* ************************************************** */

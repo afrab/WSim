@@ -271,26 +271,6 @@ int worldsens_packet_ntoh(union _worldsens_pkt *pkt)
   return worldsens_packet_swap(pkt);
 }
 
-uint64_t ntohll  (uint64_t v)
-{
-  SWAPN(v);
-  return v;
-}
-
-uint64_t htonll  (uint64_t v)
-{
-  SWAPN(v);
-  return v;
-}
-
-double   ntohdbl (double v)
-{
-  SWAPN(v);
-  return v;
-}
-
-#define htondbl(x) ntohdbl(x)
-
 /* ************************************************** */
 /* ************************************************** */
 /* ************************************************** */

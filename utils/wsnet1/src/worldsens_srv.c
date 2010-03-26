@@ -424,7 +424,7 @@ worldsens_s_listen_to_next_rp (struct _worldsens_s *worldsens)
 	    {
 
 	      /* Unsynchronized  */
-	      WSNET_S_DBG_EXC ("WSNET:: <-- Deprecetated tx (time: %"PRId64", current rp: %"PRId64")\n", 
+	      WSNET_S_DBG_EXC ("WSNET:: <-- Deprecated tx (time: %"PRId64", current rp: %"PRId64")\n", 
 			       (get_global_time() + ntohll (pkt->period)), worldsens->rp);
 	      continue;
 
@@ -459,7 +459,7 @@ worldsens_s_listen_to_next_rp (struct _worldsens_s *worldsens)
 		}
 	      packet->data[0] = pkt->data;
 	      packet->node = node;
-	      //	      mobility_update (node);
+	      // mobility_update (node);
 	      packet->x = node->x;
 	      packet->y = node->y;
 	      packet->z = node->z;

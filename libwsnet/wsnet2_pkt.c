@@ -66,7 +66,7 @@ static inline void swap8(uint8_t UNUSED *v) { }
 #else /* SWAP_IS_NOP */
 
 
-static void swap2(uint16_t *v)
+static inline void swap2(uint16_t *v)
 {
   uint16_t r;
   uint8_t *pv = (uint8_t *) v;
@@ -76,7 +76,7 @@ static void swap2(uint16_t *v)
   *v = r;
 }
 
-static void swap4(uint32_t *v)
+static inline void swap4(uint32_t *v)
 {
   uint32_t r;
   uint8_t *pv = (uint8_t *) v;
@@ -88,7 +88,7 @@ static void swap4(uint32_t *v)
   *v = r;
 }
 
-static void swap8(uint64_t *v)
+static inline void swap8(uint64_t *v)
 {
   uint64_t r;
   uint8_t *pv = (uint8_t *) v;
@@ -101,7 +101,7 @@ static void swap8(uint64_t *v)
   pr[5] = pv[2];
   pr[6] = pv[1];
   pr[7] = pv[0];
-  *v = (uint64_t)r;
+  *v = r;
 }
 
 #define SWAPN(v)				     \
@@ -289,11 +289,7 @@ double   ntohdbl (double v)
   return v;
 }
 
-double   htondbl (double v)
-{
-  SWAPN(v);
-  return v;
-}
+#define htondbl(x) ntohdbl(x)
 
 /* ************************************************** */
 /* ************************************************** */

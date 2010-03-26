@@ -66,7 +66,7 @@ static inline void swap8(uint8_t UNUSED *v) { }
 #else /* SWAP_IS_NOP */
 
 
-static inline void swap2(uint16_t *v)
+static void swap2(uint16_t *v)
 {
   uint16_t r;
   uint8_t *pv = (uint8_t *) v;
@@ -76,7 +76,7 @@ static inline void swap2(uint16_t *v)
   *v = r;
 }
 
-static inline void swap4(uint32_t *v)
+static void swap4(uint32_t *v)
 {
   uint32_t r;
   uint8_t *pv = (uint8_t *) v;
@@ -88,7 +88,7 @@ static inline void swap4(uint32_t *v)
   *v = r;
 }
 
-static inline void swap8(uint64_t *v)
+static void swap8(uint64_t *v)
 {
   uint64_t r;
   uint8_t *pv = (uint8_t *) v;
@@ -101,16 +101,16 @@ static inline void swap8(uint64_t *v)
   pr[5] = pv[2];
   pr[6] = pv[1];
   pr[7] = pv[0];
-  *v = r;
+  *v = (uint64_t)r;
 }
 
 #define SWAPN(v)				     \
   do {						     \
     if (sizeof(v)      == 4)			     \
       swap4((uint32_t *) &v);			     \
-    else if (sizeof(&v) == 8)			     \
+    else if (sizeof(v) == 8)			     \
       swap8((uint64_t *) &v);			     \
-    else if (sizeof(&v) == 2)			     \
+    else if (sizeof(v) == 2)			     \
       swap2((uint16_t *) &v);			     \
   } while (0)			     
 

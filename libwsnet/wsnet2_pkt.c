@@ -66,32 +66,32 @@ static inline void swap8(uint8_t UNUSED *v) { }
 #else /* SWAP_IS_NOP */
 
 
-static inline uint16_t swap2(uint16_t v)
+static inline void swap2(uint16_t *v)
 {
   uint16_t r;
-  uint8_t *pv = (uint8_t *) &v;
+  uint8_t *pv = (uint8_t *) v;
   uint8_t *pr = (uint8_t *) &r;
   pr[0] = pv[1];
   pr[1] = pv[0];
-  return r;
+  *v = r;
 }
 
-static inline uint32_t swap4(uint32_t v)
+static inline void swap4(uint32_t *v)
 {
   uint32_t r;
-  uint8_t *pv = (uint8_t *) &v;
+  uint8_t *pv = (uint8_t *) v;
   uint8_t *pr = (uint8_t *) &r;
   pr[0] = pv[3];
   pr[1] = pv[2];
   pr[2] = pv[1];
   pr[3] = pv[0];
-  return r;
+  *v = r;
 }
 
-static inline uint64_t swap8(uint64_t v)
+static inline void swap8(uint64_t *v)
 {
   uint64_t r;
-  uint8_t *pv = (uint8_t *) &v;
+  uint8_t *pv = (uint8_t *) v;
   uint8_t *pr = (uint8_t *) &r;
   pr[0] = pv[7];
   pr[1] = pv[6];
@@ -101,17 +101,17 @@ static inline uint64_t swap8(uint64_t v)
   pr[5] = pv[2];
   pr[6] = pv[1];
   pr[7] = pv[0];
-  return r;
+  *v = r;
 }
 
 #define SWAPN(v)				     \
   do {						     \
     if (sizeof(v)      == 4)			     \
-      v = swap4(v);				     \
-    else if (sizeof(v) == 8)			     \
-      v = swap8(v);				     \
-    else if (sizeof(v) == 2)			     \
-      v = swap2(v);				     \
+      swap4((uint32_t *) &v);			     \
+    else if (sizeof(&v) == 8)			     \
+      swap8((uint64_t *) &v);			     \
+    else if (sizeof(&v) == 2)			     \
+      swap2((uint16_t *) &v);			     \
   } while (0)			     
 
 
@@ -330,8 +330,8 @@ int worldsens_packet_dump(union _worldsens_pkt *msg)
 	VERBOSE(VLVL,"%s:%s:pkt:    antenna %"PRId64"\n",            SOFT, DIRECTION1, pkt->antenna_id);
 	VERBOSE(VLVL,"%s:%s:pkt:    wsnet modulation id %"PRId64"\n",SOFT, DIRECTION1, pkt->wsnet_mod_id);
 	VERBOSE(VLVL,"%s:%s:pkt:    wsim modulation id %"PRId64"\n", SOFT, DIRECTION1, pkt->wsim_mod_id);
-	VERBOSE(VLVL,"%s:%s:pkt:    frequence %f\n",                 SOFT, DIRECTION1, pkt->freq);
-	VERBOSE(VLVL,"%s:%s:pkt:    power in dbm %f\n",              SOFT, DIRECTION1, pkt->power_dbm);
+	VERBOSE(VLVL,"%s:%s:pkt:    frequence %g hz\n",              SOFT, DIRECTION1, pkt->freq);
+	VERBOSE(VLVL,"%s:%s:pkt:    power %g dbm\n",                 SOFT, DIRECTION1, pkt->power_dbm);
 	VERBOSE(VLVL,"%s:%s:pkt:    duration %"PRIu64"\n",           SOFT, DIRECTION1, pkt->duration);
 	VERBOSE(VLVL,"%s:%s:pkt:    data 0x%02x\n",                  SOFT, DIRECTION1, pkt->data);
 	VERBOSE(VLVL,"%s:%s:pkt:    period %"PRIu64"\n",             SOFT, DIRECTION1, pkt->period);
@@ -401,9 +401,9 @@ int worldsens_packet_dump(union _worldsens_pkt *msg)
 	VERBOSE(VLVL,"%s:%s:pkt:    node id %d\n",                   SOFT, DIRECTION2, pkt->node_id);
 	VERBOSE(VLVL,"%s:%s:pkt:    antenna %"PRId64"\n",            SOFT, DIRECTION2, pkt->antenna_id);
 	VERBOSE(VLVL,"%s:%s:pkt:    wsim modulation %"PRId64"\n",    SOFT, DIRECTION2, pkt->wsim_mod_id);
-	VERBOSE(VLVL,"%s:%s:pkt:    frequence %g\n",                 SOFT, DIRECTION2, pkt->freq);
+	VERBOSE(VLVL,"%s:%s:pkt:    frequence %g hz\n",              SOFT, DIRECTION2, pkt->freq);
 	VERBOSE(VLVL,"%s:%s:pkt:    power %g dbm\n",                 SOFT, DIRECTION2, pkt->power_dbm);
-	VERBOSE(VLVL,"%s:%s:pkt:    sinr %g\n",                      SOFT, DIRECTION2, pkt->sinr);
+	VERBOSE(VLVL,"%s:%s:pkt:    sinr %g dbm\n",                  SOFT, DIRECTION2, pkt->sinr);
 	VERBOSE(VLVL,"%s:%s:pkt:    data 0x%02x\n",                  SOFT, DIRECTION2, pkt->data);
 	break;
       }
@@ -417,9 +417,9 @@ int worldsens_packet_dump(union _worldsens_pkt *msg)
 	VERBOSE(VLVL,"%s:%s:pkt:    node id %d\n",                   SOFT, DIRECTION2, pkt->node_id);
 	VERBOSE(VLVL,"%s:%s:pkt:    antenna %"PRId64"\n",            SOFT, DIRECTION2, pkt->antenna_id);
 	VERBOSE(VLVL,"%s:%s:pkt:    wsim modulation %"PRId64"\n",    SOFT, DIRECTION2, pkt->wsim_mod_id);
-	VERBOSE(VLVL,"%s:%s:pkt:    frequence %g\n",                 SOFT, DIRECTION2, pkt->freq);
+	VERBOSE(VLVL,"%s:%s:pkt:    frequence %g hz\n",              SOFT, DIRECTION2, pkt->freq);
 	VERBOSE(VLVL,"%s:%s:pkt:    power %g dbm\n",                 SOFT, DIRECTION2, pkt->power_dbm);
-	VERBOSE(VLVL,"%s:%s:pkt:    sinr %g\n",                      SOFT, DIRECTION2, pkt->sinr);
+	VERBOSE(VLVL,"%s:%s:pkt:    sinr %g dbm\n",                  SOFT, DIRECTION2, pkt->sinr);
 	VERBOSE(VLVL,"%s:%s:pkt:    data 0x%02x\n",                  SOFT, DIRECTION2, pkt->data);
 	break;
       }

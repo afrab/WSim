@@ -529,7 +529,7 @@ int wsnet2_tx(char data, double freq, int mod, double txdB, uint64_t delay, int 
         perror("(send)");
         goto error;
     }
-
+ 
     WSNET2_TX("Libwsnet2:wsnet2_tx: machine time=%"PRIu64"\n", MACHINE_TIME_GET_NANO());
     WSNET2_TX("Libwsnet2:wsnet2_tx: wsens last rp=%"PRIu64"\n", wsens.l_rp);
     WSNET2_TX("Libwsnet2:wsnet2_tx: packet 0x%02x sent\n", data);
@@ -625,7 +625,7 @@ static int wsnet2_parse(char *msg) {
 	  WSNET2_DBG("Libwsnet2:wsnet2_parse: Error during publishing models\n");	
           return -1;
       }
-    break;
+      break;
   case WORLDSENS_S_CONNECT_RSP_NOK:
       WSNET2_DBG("Libwsnet2:wsnet2_parse: WORLDSENS_S_CONNECT_RSP_NOK packet type\n");
       WSNET2_EXC("Libwsnet2:wsnet2_parse: Connection refused by wsnet2 server\n");

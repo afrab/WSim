@@ -743,8 +743,7 @@ static int worldsens1_disconnect()
     }
   else
     {
-      WSNET_DBG("WSNet:disconnect:%"PRIu64": --> DISCONNECT (addr: %d) \n", 
-		MACHINE_TIME_GET_NANO(), WSENS_MYADDR);
+      WSNET_DBG("WSNet:disconnect: --> DISCONNECT (addr: %d) \n", WSENS_MYADDR);
     }
   assert(libselect_fd_unregister(WSENS_MULTICAST) != -1);
   return ret;
@@ -1071,7 +1070,8 @@ static int worldsens1_synched(int dmp)
       
       /* Parse */
       //      if (worldsens1_synched_parse_reply(msg, len) == -1 ) 
-      if (worldsens1_packet_parse(msg, len) == -1 ) 
+      int ret = worldsens1_packet_parse(msg, len);
+      if (ret == -1 ) 
 	{
 	  ERROR("WSNet:synched: error during packet parse\n");
 	  return -1;      

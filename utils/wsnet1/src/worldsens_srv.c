@@ -223,13 +223,12 @@ worldsens_s_initialize (struct _worldsens_s *worldsens)
   if ((worldsens->mfd = socket (AF_INET, SOCK_DGRAM, 0)) < 0)
     {
       perror ("worldsens_s_initialize (socket):");
-      return -1;
+      goto error;
     }
   memset (&addr, 0, sizeof (addr));
   addr.sin_family = AF_INET;
   addr.sin_port = htons (g_lport);
   addr.sin_addr.s_addr = INADDR_ANY;
-
 
   /* Bind */
   if (bind (worldsens->mfd, (struct sockaddr *) (&addr), sizeof (addr)) != 0)
@@ -237,7 +236,7 @@ worldsens_s_initialize (struct _worldsens_s *worldsens)
       perror ("worldsens_s_initialize:bind:");
       close (worldsens->mfd);
       worldsens->mfd = -1;
-      return -1;
+      goto error;
     }
 
   /* Initialize multicast */
@@ -247,7 +246,7 @@ worldsens_s_initialize (struct _worldsens_s *worldsens)
       perror ("worldsens_s_initialize:inet_aton:");
       close (worldsens->mfd);
       worldsens->mfd = -1;
-      return -1;
+      goto error;
     }
   worldsens->maddr.sin_port   = htons (g_mport);
   worldsens->maddr.sin_family = AF_INET;
@@ -262,6 +261,19 @@ worldsens_s_initialize (struct _worldsens_s *worldsens)
   worldsens->trc_mcast_tx     = tracer_event_add_id(64,"mcast_tx","wsnet1");
 
   return 0;
+
+ error:
+  fprintf(stderr, "worldsens: ============================================================\n");
+  fprintf(stderr, "worldsens: ============================================================\n");
+  fprintf(stderr, "worldsens: == Unable to initialize IP network settings \n");
+  fprintf(stderr, "worldsens: == \n");
+  fprintf(stderr, "worldsens: == Please change your local port or check that  \n");
+  fprintf(stderr, "worldsens: == WSNet is not already running on your machine \n");
+  fprintf(stderr, "worldsens: == \n");
+  fprintf(stderr, "worldsens: ============================================================\n");
+  fprintf(stderr, "worldsens: ============================================================\n");
+  sleep(30);
+  return -1;
 }
 
 /**************************************************************************/

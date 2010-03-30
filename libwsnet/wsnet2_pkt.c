@@ -301,13 +301,15 @@ int worldsens_packet_dump(union _worldsens_pkt *msg)
     case WORLDSENS_C_BYTE_TX:
       {
 	struct _worldsens_c_byte_tx *pkt = (struct _worldsens_c_byte_tx *)msg;
+	double *power_dbm = (double *) &(pkt->power_dbm);
+	double *freq      = (double *) &(pkt->freq);
 	VERBOSE(VLVL,"%s:%s:pkt:    type %s\n",                      SOFT, DIRECTION1, "WORLDSENS_C_BYTE_TX");
 	VERBOSE(VLVL,"%s:%s:pkt:    node %d\n",                      SOFT, DIRECTION1, pkt->node_id);
 	VERBOSE(VLVL,"%s:%s:pkt:    antenna %"PRId64"\n",            SOFT, DIRECTION1, pkt->antenna_id);
 	VERBOSE(VLVL,"%s:%s:pkt:    wsnet modulation id %"PRId64"\n",SOFT, DIRECTION1, pkt->wsnet_mod_id);
 	VERBOSE(VLVL,"%s:%s:pkt:    wsim modulation id %"PRId64"\n", SOFT, DIRECTION1, pkt->wsim_mod_id);
-	VERBOSE(VLVL,"%s:%s:pkt:    frequence %g hz\n",              SOFT, DIRECTION1, pkt->freq);
-	VERBOSE(VLVL,"%s:%s:pkt:    power %g dbm\n",                 SOFT, DIRECTION1, pkt->power_dbm);
+	VERBOSE(VLVL,"%s:%s:pkt:    frequence %g hz\n",              SOFT, DIRECTION1, *freq);
+	VERBOSE(VLVL,"%s:%s:pkt:    power %g dbm\n",                 SOFT, DIRECTION1, *power_dbm);
 	VERBOSE(VLVL,"%s:%s:pkt:    duration %"PRIu64"\n",           SOFT, DIRECTION1, pkt->duration);
 	VERBOSE(VLVL,"%s:%s:pkt:    data 0x%02x\n",                  SOFT, DIRECTION1, pkt->data);
 	VERBOSE(VLVL,"%s:%s:pkt:    period %"PRIu64"\n",             SOFT, DIRECTION1, pkt->period);
@@ -372,20 +374,26 @@ int worldsens_packet_dump(union _worldsens_pkt *msg)
     case WORLDSENS_S_BYTE_RX:
       {
 	struct _worldsens_s_byte_rx *pkt = (struct _worldsens_s_byte_rx *)msg;
+	double *power_dbm = (double *) &(pkt->power_dbm);
+	double *freq      = (double *) &(pkt->freq);
+	double *sinr      = (double *) &(pkt->sinr);
 	VERBOSE(VLVL,"%s:%s:pkt:    type %s\n",                      SOFT, DIRECTION2, "WORLDSENS_S_BYTE_RX");
 	VERBOSE(VLVL,"%s:%s:pkt:    seq %"PRIu64"\n",                SOFT, DIRECTION2, pkt->seq);
 	VERBOSE(VLVL,"%s:%s:pkt:    node id %d\n",                   SOFT, DIRECTION2, pkt->node_id);
 	VERBOSE(VLVL,"%s:%s:pkt:    antenna %"PRId64"\n",            SOFT, DIRECTION2, pkt->antenna_id);
 	VERBOSE(VLVL,"%s:%s:pkt:    wsim modulation %"PRId64"\n",    SOFT, DIRECTION2, pkt->wsim_mod_id);
-	VERBOSE(VLVL,"%s:%s:pkt:    frequence %g hz\n",              SOFT, DIRECTION2, pkt->freq);
-	VERBOSE(VLVL,"%s:%s:pkt:    power %g dbm\n",                 SOFT, DIRECTION2, pkt->power_dbm);
-	VERBOSE(VLVL,"%s:%s:pkt:    sinr %g dbm\n",                  SOFT, DIRECTION2, pkt->sinr);
+	VERBOSE(VLVL,"%s:%s:pkt:    frequence %g hz\n",              SOFT, DIRECTION2, *freq);
+	VERBOSE(VLVL,"%s:%s:pkt:    power %g dbm\n",                 SOFT, DIRECTION2, *power_dbm);
+	VERBOSE(VLVL,"%s:%s:pkt:    sinr %g dbm\n",                  SOFT, DIRECTION2, *sinr);
 	VERBOSE(VLVL,"%s:%s:pkt:    data 0x%02x\n",                  SOFT, DIRECTION2, pkt->data);
 	break;
       }
     case WORLDSENS_S_BYTE_SR_RX:
       {
 	struct _worldsens_s_byte_sr_rx *pkt = (struct _worldsens_s_byte_sr_rx *)msg;
+	double *power_dbm = (double *) &(pkt->power_dbm);
+	double *freq      = (double *) &(pkt->freq);
+	double *sinr      = (double *) &(pkt->sinr);
 	VERBOSE(VLVL,"%s:%s:pkt:    type %s\n",                      SOFT, DIRECTION2, "WORLDSENS_S_BYTE_SR_RX");
 	VERBOSE(VLVL,"%s:%s:pkt:    seq %"PRIu64"\n",                SOFT, DIRECTION2, pkt->seq);
 	VERBOSE(VLVL,"%s:%s:pkt:    rp_next  %"PRIu64"\n",           SOFT, DIRECTION2, pkt->rp_next);
@@ -393,30 +401,32 @@ int worldsens_packet_dump(union _worldsens_pkt *msg)
 	VERBOSE(VLVL,"%s:%s:pkt:    node id %d\n",                   SOFT, DIRECTION2, pkt->node_id);
 	VERBOSE(VLVL,"%s:%s:pkt:    antenna %"PRId64"\n",            SOFT, DIRECTION2, pkt->antenna_id);
 	VERBOSE(VLVL,"%s:%s:pkt:    wsim modulation %"PRId64"\n",    SOFT, DIRECTION2, pkt->wsim_mod_id);
-	VERBOSE(VLVL,"%s:%s:pkt:    frequence %g hz\n",              SOFT, DIRECTION2, pkt->freq);
-	VERBOSE(VLVL,"%s:%s:pkt:    power %g dbm\n",                 SOFT, DIRECTION2, pkt->power_dbm);
-	VERBOSE(VLVL,"%s:%s:pkt:    sinr %g dbm\n",                  SOFT, DIRECTION2, pkt->sinr);
+	VERBOSE(VLVL,"%s:%s:pkt:    frequence %g hz\n",              SOFT, DIRECTION2, *freq);
+	VERBOSE(VLVL,"%s:%s:pkt:    power %g dbm\n",                 SOFT, DIRECTION2, *power_dbm);
+	VERBOSE(VLVL,"%s:%s:pkt:    sinr %g dbm\n",                  SOFT, DIRECTION2, *sinr);
 	VERBOSE(VLVL,"%s:%s:pkt:    data 0x%02x\n",                  SOFT, DIRECTION2, pkt->data);
 	break;
       }
     case WORLDSENS_S_MEASURE_RSP:
       {
 	struct _worldsens_s_measure_rsp *pkt = (struct _worldsens_s_measure_rsp *)msg;
+	double *measure_val = (double *) &(pkt->measure_val);
 	VERBOSE(VLVL,"%s:%s:pkt:    type %s\n",                      SOFT, DIRECTION2, "WORLDSENS_S_MEASURE_RSP");
 	VERBOSE(VLVL,"%s:%s:pkt:    seq  %"PRIu64"\n",               SOFT, DIRECTION2, pkt->seq);
 	VERBOSE(VLVL,"%s:%s:pkt:    node id %d\n",                   SOFT, DIRECTION2, pkt->node_id);
 	VERBOSE(VLVL,"%s:%s:pkt:    measure id %"PRId64"\n",         SOFT, DIRECTION2, pkt->measure_id);
-	VERBOSE(VLVL,"%s:%s:pkt:    measure value %f\n",             SOFT, DIRECTION2, pkt->measure_val);
+	VERBOSE(VLVL,"%s:%s:pkt:    measure value %f\n",             SOFT, DIRECTION2, *measure_val);
 	break;
       }
     case WORLDSENS_S_MEASURE_SR_RSP:
       {
 	struct _worldsens_s_measure_sr_rsp *pkt = (struct _worldsens_s_measure_sr_rsp *)msg;
+	double *measure_val = (double *) &(pkt->measure_val);
 	VERBOSE(VLVL,"%s:%s:pkt:    type %s\n",                      SOFT, DIRECTION2, "WORLDSENS_S_MEASURE_SR_RSP");
 	VERBOSE(VLVL,"%s:%s:pkt:    seq  %"PRIu64"\n",               SOFT, DIRECTION2, pkt->seq);
 	VERBOSE(VLVL,"%s:%s:pkt:    node id %d\n",                   SOFT, DIRECTION2, pkt->node_id);
 	VERBOSE(VLVL,"%s:%s:pkt:    measure id %"PRId64"\n",         SOFT, DIRECTION2, pkt->measure_id);
-	VERBOSE(VLVL,"%s:%s:pkt:    measure value %f\n",             SOFT, DIRECTION2, pkt->measure_val);
+	VERBOSE(VLVL,"%s:%s:pkt:    measure value %f\n",             SOFT, DIRECTION2, *measure_val);
 	VERBOSE(VLVL,"%s:%s:pkt:    rp_next  %"PRIu64"\n",           SOFT, DIRECTION2, pkt->rp_next);
 	VERBOSE(VLVL,"%s:%s:pkt:    rp_duration  %"PRIu64"\n",       SOFT, DIRECTION2, pkt->rp_duration);
 	break;

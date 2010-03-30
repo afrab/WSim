@@ -509,17 +509,21 @@ int wsnet2_tx(char data, double freq, int mod, double txdB, uint64_t delay, int 
 
     WSNET2_TX("Libwsnet2:entering in wsnet2_tx	\n");
 
+    /* put doubles into uint64_t variables for swap */
+    uint64_t *pfreq  = (uint64_t *) &freq;
+    uint64_t *ptxdB  = (uint64_t *) &txdB;
+
     /* format */
-    pkt.byte_tx.type              = WORLDSENS_C_BYTE_TX;
-    pkt.byte_tx.node_id           = wsens.id;
-    pkt.byte_tx.period            = MACHINE_TIME_GET_NANO() - wsens.l_rp;
-    pkt.byte_tx.data              = data;
-    pkt.byte_tx.freq              = freq;
-    pkt.byte_tx.antenna_id        = wsens.radio[radio_id].antenna_id;
-    pkt.byte_tx.wsnet_mod_id      = wsnet_mod_id_map[mod];
-    pkt.byte_tx.wsim_mod_id       = mod;
-    pkt.byte_tx.power_dbm         = txdB;
-    pkt.byte_tx.duration          = delay;
+    pkt.byte_tx.type              =  WORLDSENS_C_BYTE_TX;
+    pkt.byte_tx.node_id           =  wsens.id;
+    pkt.byte_tx.period            =  MACHINE_TIME_GET_NANO() - wsens.l_rp;
+    pkt.byte_tx.data              =  data;
+    pkt.byte_tx.freq              = *pfreq;
+    pkt.byte_tx.antenna_id        =  wsens.radio[radio_id].antenna_id;
+    pkt.byte_tx.wsnet_mod_id      =  wsnet_mod_id_map[mod];
+    pkt.byte_tx.wsim_mod_id       =  mod;
+    pkt.byte_tx.power_dbm         = *ptxdB;
+    pkt.byte_tx.duration          =  delay;
  
     worldsens_packet_dump(&pkt);
     worldsens_packet_hton(&pkt);
@@ -888,13 +892,18 @@ static int wsnet2_rx(char *msg) {
    if (pkt->node_id == wsens.id) {
        while ((wsens.radio[i].callback != NULL) && (i < MAX_CALLBACKS)) {
 	   if (pkt->antenna_id == wsens.radio[i].antenna_id) {
+	       /* put uint64_t into double variables after swap */
+	       double *power_dbm = (double *) &(pkt->power_dbm);
+	       double *freq      = (double *) &(pkt->freq);
+	       double *sinr      = (double *) &(pkt->sinr);
 	       struct wsnet_rx_info info;
-	       info.data       = pkt->data;
-	       info.freq_mhz   = pkt->freq / 1000000.0;
-	       info.modulation = pkt->wsim_mod_id;
-	       info.power_dbm  = pkt->power_dbm;
-	       info.SiNR       = pkt->sinr;
-	       WSNET2_DBG("Libwsnet2:wsnet2_sr_rx: rxing at time %"PRIu64" data 0x%02x on antenna %s with power %g dbm\n", MACHINE_TIME_GET_NANO(), pkt->data, wsens.radio[i].antenna, info.power_dbm);
+	       info.data       =  pkt->data;
+	       info.freq_mhz   = *freq / 1000000.0;
+	       info.modulation =  pkt->wsim_mod_id;
+	       info.power_dbm  = *power_dbm;
+	       info.SiNR       = *sinr;
+	       WSNET2_DBG("Libwsnet2:wsnet2_sr_rx: rxing at time %"PRIu64" data 0x%02x on antenna %s with power %g dbm\n",
+			  MACHINE_TIME_GET_NANO(), pkt->data, wsens.radio[i].antenna, info.power_dbm);
 	       wsens.radio[i].callback(wsens.radio[i].arg, &info);
 	   }
 	   else {
@@ -927,13 +936,18 @@ static int wsnet2_sr_rx(char *msg) {
    if (pkt->node_id == wsens.id) {
        while ((wsens.radio[i].callback != NULL) && (i < MAX_CALLBACKS)) {
 	   if (pkt->antenna_id == wsens.radio[i].antenna_id) {
+	       /* put uint64_t into double variables after swap */
+	       double *power_dbm = (double *) &(pkt->power_dbm);
+	       double *freq      = (double *) &(pkt->freq);
+	       double *sinr      = (double *) &(pkt->sinr);
 	       struct wsnet_rx_info info;
-	       info.data       = pkt->data;
-	       info.freq_mhz   = pkt->freq / 1000000.0;
-	       info.modulation = pkt->wsim_mod_id;
-	       info.power_dbm  = pkt->power_dbm;
-	       info.SiNR       = pkt->sinr;
-	       WSNET2_DBG("Libwsnet2:wsnet2_sr_rx: rxing at time %"PRIu64" data 0x%02x on antenna %s with power %g dbm\n", MACHINE_TIME_GET_NANO(), pkt->data, wsens.radio[i].antenna, info.power_dbm);
+	       info.data       =  pkt->data;
+	       info.freq_mhz   = *freq / 1000000.0;
+	       info.modulation =  pkt->wsim_mod_id;
+	       info.power_dbm  = *power_dbm;
+	       info.SiNR       = *sinr;
+	       WSNET2_DBG("Libwsnet2:wsnet2_sr_rx: rxing at time %"PRIu64" data 0x%02x on antenna %s with power %g dbm\n",
+			  MACHINE_TIME_GET_NANO(), pkt->data, wsens.radio[i].antenna, info.power_dbm);
 	       wsens.radio[i].callback(wsens.radio[i].arg, &info);
 	   }
 	   else {
@@ -971,8 +985,11 @@ static int wsnet2_measure_rsp(char *msg) {
     if (pkt->node_id == wsens.id) {
         while ((wsens.measure[i].callback != NULL) && (i < MAX_CALLBACKS)) {
 	    if (pkt->measure_id == wsens.measure[i].id) {
-	        WSNET2_DBG("Libwsnet2:wsnet2_measure_rsp: Measure rsp at time %"PRIu64", measure '%s', measure value %g\n", MACHINE_TIME_GET_NANO(), wsens.measure[i].name, pkt->measure_val);
-		wsens.measure[i].callback(wsens.measure[i].arg, pkt->measure_val);
+	        /* put uint64_t into double to retrieve double value after swap */
+	        double *measure_val = (double *) &(pkt->measure_val);
+	        WSNET2_DBG("Libwsnet2:wsnet2_measure_rsp: Measure rsp at time %"PRIu64", measure '%s', measure value %g\n",
+			   MACHINE_TIME_GET_NANO(), wsens.measure[i].name, measure_val);
+		wsens.measure[i].callback(wsens.measure[i].arg, *measure_val);
 	    }
 	    i++;
 	}
@@ -998,8 +1015,10 @@ static int wsnet2_measure_sr_rsp(char *msg) {
     if (pkt->node_id == wsens.id) {
         while ((wsens.measure[i].callback != NULL) && (i < MAX_CALLBACKS)) {
 	    if (pkt->measure_id == wsens.measure[i].id) {
-	      WSNET2_DBG("Libwsnet2:wsnet2_measure_sr_rsp: Measure rsp at time %"PRIu64", measure '%s', measure value %g\n", MACHINE_TIME_GET_NANO(), wsens.measure[i].name, pkt->measure_val);
-		wsens.measure[i].callback(wsens.measure[i].arg, pkt->measure_val);
+	        /* put uint64_t into double to retrieve double value after swap */
+	        double *measure_val = (double *) &(pkt->measure_val);
+	        WSNET2_DBG("Libwsnet2:wsnet2_measure_sr_rsp: Measure rsp at time %"PRIu64", measure '%s', measure value %g\n", MACHINE_TIME_GET_NANO(), wsens.measure[i].name, measure_val);
+		wsens.measure[i].callback(wsens.measure[i].arg, *measure_val);
 	    }
 	    i++;
 	}

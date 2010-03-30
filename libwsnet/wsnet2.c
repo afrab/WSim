@@ -84,7 +84,7 @@ int worldsens2_c_tx(struct wsnet_tx_info *info)
   uint64_t duration   = info->duration;
   int radio_id        = info->radio_id;
 
-  if( wsnet2_tx(data, frequency, modulation,tx_dbm, duration, radio_id) == -1 )
+  if( wsnet2_tx(data, frequency, modulation, tx_dbm, duration, radio_id) == -1 )
     {
       ERROR("wsnet2:tx: error during packet send\n");
       return -1;

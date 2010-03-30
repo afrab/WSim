@@ -44,7 +44,7 @@
 /**************************************************************************/
 
 #define DEBUG_PROTOCOL 1
-#define VLVL 5
+#define VLVL 0
 #define SNDSTR "snd --> "
 #define RCVSTR "rcv <-- "
 
@@ -541,6 +541,7 @@ int worldsens1_c_update(void)
 	  }
 	else 
 	  {
+	    ERROR("WSNet:update: on est la!!!\n");
 	    WSNET_DBG("WSNet:update:read: msg size %d\n",len);
 	    if (pktlist_enqueue(& WSENS_PKT_LIST, msg, len) == -1)
 	      {
@@ -799,6 +800,7 @@ static ssize_t worldsens1_packet_recv(int fd, char* msg, size_t len, int flags, 
       perror("worldsens1_packet_recv");
       worldsens1_close_fds();
     }
+  dump = 1;
   if (dump)
     {
       worldsens1_packet_dump_recv(msg,srec);
@@ -952,11 +954,15 @@ static int64_t worldsens1_packet_parse(char *msg, int UNUSED len)
 	{
 	  WSNET_EXC("WSNET (%"PRIu64", %d): <-- Lost packet (expected: %d)\n", 
 		    MACHINE_TIME_GET_NANO(), pkt_seq, WSENS_SEQ_PKT_RX);
+	  ERROR("WSNET (%"PRIu64", %d): <-- Lost packet (expected: %d)\n", 
+		    MACHINE_TIME_GET_NANO(), pkt_seq, WSENS_SEQ_PKT_RX);
 	  return -1;
 	}  
       else if (pkt_seq < WSENS_SEQ_PKT_RX)
 	{
 	  WSNET_EXC("WSNET (%"PRIu64", %d): <-- Deprecated packet (expected: %d)\n", 
+		    MACHINE_TIME_GET_NANO(), pkt_seq, WSENS_SEQ_PKT_RX);
+	  ERROR("WSNET (%"PRIu64", %d): <-- Deprecated packet (expected: %d)\n", 
 		    MACHINE_TIME_GET_NANO(), pkt_seq, WSENS_SEQ_PKT_RX);
 	  return 0;
 	} 
@@ -978,11 +984,11 @@ static int64_t worldsens1_packet_parse(char *msg, int UNUSED len)
       {
 	struct _worldsens_s_backtrack_pkt *pkt = (struct _worldsens_s_backtrack_pkt *) msg;
 
-	/*
-	WSNET_DBG("WSNET (%"PRIu64", %d): <-- BACKTRACK (period: %"PRIu64"; time: %"PRIu64", seq: %d)\n", 
+	
+	fprintf(stderr,"WSNET (%"PRIu64", %d): <-- BACKTRACK (period: %"PRIu64"; time: %"PRIu64", seq: %d)\n", 
 		  MACHINE_TIME_GET_NANO(), pkt_seq, 
-		  ntohll(pkt->period), worldsens.last_rp + ntohll(pkt->period), pkt->rp_seq);
-	*/
+		  ntohll(pkt->period), WSENS_RDV_LAST_TIME + ntohll(pkt->period), pkt->rp_seq);
+	
 
 	if (MACHINE_TIME_GET_NANO() > (WSENS_RDV_LAST_TIME + ntohll(pkt->period))) 
 	  {
@@ -999,11 +1005,11 @@ static int64_t worldsens1_packet_parse(char *msg, int UNUSED len)
 	WSENS_SEQ_PKT_RX           = pkt_seq + 1;
 	WSENS_TX_BACKTRACKED       = 0;
 	
-	/*
-	WSNET_DBG("WSNET (%"PRIu64", %d): <-- RP (seq: %d, period: %"PRIu64", time: %"PRIu64")\n", 
-		MACHINE_TIME_GET_NANO(), pkt_seq, worldsens.rp_seq, 
-		ntohll(pkt->period), WSENS_NEXT_RDV_TIME);
-	*/
+	
+	fprintf(stderr,"WSNET (%"PRIu64", %d): <-- RP (seq: %d, period: %"PRIu64", time: %"PRIu64")\n", 
+		MACHINE_TIME_GET_NANO(), pkt_seq, WSENS_SEQ_RDV, 
+		ntohll(pkt->period), WSENS_RDV_NEXT_TIME);
+	
 
 	return 0;
       }

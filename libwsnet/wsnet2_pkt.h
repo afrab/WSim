@@ -56,10 +56,12 @@ typedef int64_t                 ws_id_resource;
 typedef uint64_t                ws_id_rp;
 typedef uint64_t                ws_id_seq;
 
-typedef double                  ws_frequency;
-typedef double                  ws_power;
-typedef double                  ws_measure;
-typedef double                  ws_sinr;
+/* To be more portable double value are stored into uint64_t variables to be swap and unswap */
+/* To get their floating values, a cast pointer must be used : (double *) xxx */
+typedef uint64_t                ws_frequency;  /* double */
+typedef uint64_t                ws_power;      /* double */
+typedef uint64_t                ws_measure;    /* double */
+typedef uint64_t                ws_sinr;       /* double */
 
 typedef uint64_t                ws_time;
 typedef uint8_t                 ws_data;

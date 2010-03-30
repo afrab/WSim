@@ -311,14 +311,22 @@ struct msp430_op_type1
 #if defined(DEBUG_DISASSEMBLE)
 #define ASM_LENGTH      50
 #define ASM_VAR()       char asm_str[ASM_LENGTH];
-#define ASM_START(insn) sprintf(asm_str,"msp430: PC:0x%04x ins:0x%04x  ",mcu_get_pc() & 0xffff,insn & 0xffff)
+#define ASM_START(insn)				\
+  do {						\
+    sprintf(asm_str,				\
+	 "msp430: PC:0x%04x ins:0x%04x  ",	\
+         mcu_get_pc() & 0xffff,insn & 0xffff);	\
+  } while (0)
 #define ASM_ADD(s...)				\
   do {						\
     char asm_buff[ASM_LENGTH];			\
     sprintf(asm_buff,s);			\
     strncat(asm_str,asm_buff,ASM_LENGTH);	\
   } while (0)
-#define ASM_END()      HW_DMSG_DIS(asm_str);
+#define ASM_END()				\
+  do {						\
+    HW_DMSG_DIS(asm_str);			\
+  } while (0)
 #else
 #define ASM_VAR()       do { } while (0)
 #define ASM_START(insn) do { } while (0)
@@ -1660,7 +1668,7 @@ static void msp430_mcu_run_insn()
       MCU_ALU.regs[PC_REG_IDX] = MCU_ALU.next_pc;
 
 #if defined(DEBUG) && defined(DEBUG_REGISTERS)
-      msp430_print_registers(1);
+      msp430_print_registers(4);
 #endif
       HW_DMSG_FD("msp430: -- Fetch end --------------------------------------------\n");
 

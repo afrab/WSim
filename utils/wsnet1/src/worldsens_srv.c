@@ -404,12 +404,13 @@ worldsens_s_listen_to_next_rp (struct _worldsens_s *worldsens)
 	  struct _worldsens_c_synched_pkt *c_pkt =
 	    (struct _worldsens_c_synched_pkt *) msg;
 
-	  if (ntohl (c_pkt->rp_seq) == (unsigned) worldsens->rp_seq)
+	  if (ntohl(c_pkt->rp_seq) == (unsigned) worldsens->rp_seq)
 	    {
 	      worldsens->synched++;
 	    }
 	  else
 	    {
+	      WSNET_S_DBG_DBG ("WSNET:: Wrong sync packet: rp seq %d)\n", ntohl(c_pkt->rp_seq));
 	      continue;
 	    }
 
@@ -469,6 +470,11 @@ worldsens_s_listen_to_next_rp (struct _worldsens_s *worldsens)
 		{
 		  return -1;
 		}
+
+	      /* put uint64_t into double variables after swap */
+	      uint64_t tx_mW  = ntohdbl(pkt->tx_mW);
+	      double  *ptx_mW = (double *) &tx_mW;
+
 	      packet->data[0] = pkt->data;
 	      packet->node = node;
 	      // mobility_update (node);
@@ -477,7 +483,7 @@ worldsens_s_listen_to_next_rp (struct _worldsens_s *worldsens)
 	      packet->z = node->z;
 	      packet->freq = ntohl (pkt->frequency);
 	      packet->modulation = ntohl (pkt->modulation);
-	      packet->tx_mW = ntohdbl (pkt->tx_mW);
+	      packet->tx_mW = *ptx_mW;
 	      packet->seq = ntohl (pkt->pkt_seq);
 	      packet->tx_start = get_global_time() + ntohll (pkt->period);
 	      packet->tx_end = packet->tx_start + ntohll (pkt->duration);
@@ -485,7 +491,7 @@ worldsens_s_listen_to_next_rp (struct _worldsens_s *worldsens)
 	      {
 		int iii;
 		WSNET_S_DBG_DBG ("WSNET:: <-- TX (%"PRId64",%d) (ip:%d,size:%d,data:",
-				 packet->tx_start, packet->seq, node->addr,packet->size);
+				 packet->tx_start, packet->seq, node->addr, packet->size);
 		for(iii=0; iii<packet->size; iii++)
 		  {
 		    WSNET_S_DBG_DBG("%02x:", packet->data[ iii ] & 0xff);

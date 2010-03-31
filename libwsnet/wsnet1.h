@@ -90,7 +90,9 @@ struct PACKED _worldsens_c_tx_pkt
   uint64_t        duration;
   uint32_t        frequency;
   int             modulation;
-  double          tx_mW;
+  /* To be more portable double value are stored into uint64_t variables to be swap and unswap */
+  /* To get their floating values, a cast pointer must be used : (double *) xxx */
+  uint64_t tx_mW;       /* double */
   int	          pkt_seq;
   char	          data;
 };
@@ -162,6 +164,7 @@ struct _worldsens_c_nobacktrack {
   int	                  my_addr;         /* my address                      */
   wsnet_callback_rx_t     callback_rx;     /* backtrack from radio            */
   void                   *arg;             /* argument to backtracks          */
+  struct _pktlist_t       pktlist;
 };
 
 
@@ -176,8 +179,6 @@ struct _worldsens_c_backtrack {
   char                    pending;
   char                    tx_backtracked;
   int64_t                 min_duration;    /* minimal duration after callback */
-
-  struct _pktlist_t       pktlist;
 };
 
 /**************************************************************************/
@@ -190,8 +191,10 @@ struct _worldsens_c_backtrack {
 struct PACKED _worldsens_data {
   int             node;
   char		  data;
-  double	  rx_mW;
-  double	  SiNR;
+  /* To be more portable double value are stored into uint64_t variables to be swap and unswap */
+  /* To get their floating values, a cast pointer must be used : (double *) xxx */
+  uint64_t        rx_mW; /* double */
+  uint64_t	  SiNR;  /* double */
 };
 
 /**************************************************************************/

@@ -187,10 +187,11 @@ core_start (struct _worldsens_s *worldsens)
 		      //propagation_compute_BER (&g_nodes[i], rx_pkt);
 
 		      /* Record reception and destroy packet */
-		      worldsens_data[c_node].node = htonl (i);
-		      worldsens_data[c_node].data = packet->data[0];
-		      worldsens_data[c_node].SiNR = htonll (0.0);  /* perfect radio layer: no noise */
-		      worldsens_data[c_node].rx_mW = htondbl (rx_pkt->tx_mW);  /* perfect radio layer: no energy dissipation... */
+		      uint64_t *tx_mW = (uint64_t *) &(rx_pkt->tx_mW);  /* put double into uint64_t variable for swap */
+		      worldsens_data[c_node].node  = htonl (i);
+		      worldsens_data[c_node].data  = packet->data[0];
+		      worldsens_data[c_node].SiNR  = htonll (0.0);  /* perfect radio layer: no noise */
+		      worldsens_data[c_node].rx_mW = htonll (*tx_mW);  /* perfect radio layer: no energy dissipation... */
 		      packet_destroy (rx_pkt);	//TODO: optimize.... no need to creat and destroy packet...
 
 		      /* Update considered node */

@@ -195,6 +195,8 @@ static struct _worldsens_c_backtrack    worldsens_backup;
 #define WSENS_CBRX_FUNC         worldsens_nobacktrack.callback_rx
 #define WSENS_CBRX_ARG          worldsens_nobacktrack.arg
 
+#define WSENS_PKT_LIST          worldsens_nobacktrack.pktlist
+
 #define WSENS_SEQ_PKT_TX        worldsens_backtracked.tx_pkt_seq
 #define WSENS_SEQ_PKT_RX        worldsens_backtracked.rx_pkt_seq
 #define WSENS_SEQ_RDV           worldsens_backtracked.rp_seq     /* next RDV */
@@ -206,7 +208,6 @@ static struct _worldsens_c_backtrack    worldsens_backup;
 #define WSENS_TX_BACKTRACKED    worldsens_backtracked.tx_backtracked
 #define WSENS_TIME_TO_WAIT      worldsens_backtracked.min_duration
 
-#define WSENS_PKT_LIST          worldsens_backtracked.pktlist
 
 /**************************************************************************/
 /**************************************************************************/
@@ -430,8 +431,11 @@ int worldsens1_c_tx(struct wsnet_tx_info *info)
   uint32_t frequency  = info->freq_mhz * 1000000;
   int modulation      = info->modulation;
 
-  double tx_dbm       = info->power_dbm;
-  uint64_t duration   = info->duration;
+  double    tx_mW     = dBm2mW(info->power_dbm); /* conversion from dBm to mW */
+  /* put double into uint64_t variable for swap */
+  uint64_t *ptx_mW    = (uint64_t *) &tx_mW;
+
+  uint64_t  duration  = info->duration;
 
   struct _worldsens_c_tx_pkt pkt;
   int len = sizeof(pkt);
@@ -443,7 +447,7 @@ int worldsens1_c_tx(struct wsnet_tx_info *info)
   pkt.data            = data;
   pkt.frequency       = htonl(frequency);
   pkt.modulation      = htonl(modulation);
-  pkt.tx_mW           = htondbl(dBm2mW(tx_dbm)); /* conversion from dBm to mW! */
+  pkt.tx_mW           = htonll(*ptx_mW); 
   pkt.pkt_seq         = htonl(WSENS_SEQ_PKT_TX);
   pkt.duration        = htonll(duration);
 
@@ -827,6 +831,11 @@ static int64_t worldsens1_packet_parse_data_rx(char *msg, int UNUSED pkt_seq, in
       
       if (ntohl(data->node) == (unsigned)WSENS_MYADDR) 
 	{
+	  /* put uint64_t into double variables after swap */
+	  uint64_t SiNR   = ntohll(data->SiNR);
+	  double  *pSiNR  = (double *) &(SiNR);
+	  uint64_t rx_mW  = ntohll(data->rx_mW);
+	  double  *prx_mW = (double *) &(rx_mW);
 	  struct wsnet_rx_info info;
 	  WSNET_RX("WSNET (%"PRIu64", %d): <-- RX src=%d[%d] (data: [0x%02x,%c], freq: %gMHz, mod: %d, rx: %gmW, SiNR: %lg)\n",
 		   MACHINE_TIME_GET_NANO(), pkt_seq, 
@@ -834,14 +843,14 @@ static int64_t worldsens1_packet_parse_data_rx(char *msg, int UNUSED pkt_seq, in
 		   data->data & 0xff, isprint(data->data & 0xff ) ? data->data & 0xff : '.',
 		   ntohl(pkt->frequency) / 1000000.0f, 
 		   ntohl(pkt->modulation), 
-		   ntohdbl(data->rx_mW), 
-		   ntohdbl(data->SiNR));
+		   *prx_mW, 
+		   *pSiNR);
 	  
 	  info.data       = data->data;
 	  info.freq_mhz   = (double)ntohl(pkt->frequency) / 1000000.0;
 	  info.modulation = ntohl(pkt->modulation);
-	  info.power_dbm  = mW2dBm(ntohdbl(data->rx_mW)); /* conversion from mW to dBm! */
-	  info.SiNR       = ntohdbl(data->SiNR);
+	  info.power_dbm  = mW2dBm(*prx_mW); /* conversion from mW to dBm! */
+	  info.SiNR       = *pSiNR;
 
 	  duration += WSENS_CBRX_FUNC(WSENS_CBRX_ARG, &info);
 	}
@@ -870,6 +879,11 @@ static int64_t worldsens1_packet_parse_data_srrx(char *msg, int UNUSED pkt_seq, 
       
       if (ntohl(data->node) == (unsigned)WSENS_MYADDR) 
 	{
+	  /* put uint64_t into double variables after swap */
+	  uint64_t SiNR   = ntohll(data->SiNR);
+	  double  *pSiNR  = (double *) &(SiNR);
+	  uint64_t rx_mW  = ntohll(data->rx_mW);
+	  double  *prx_mW = (double *) &(rx_mW);
 	  struct wsnet_rx_info info;
 	  WSNET_RX("WSNET (%"PRIu64", %d): <-- RX src=%d[%d] (data: [0x%02x,%c], freq: %gMHz, mod: %d, rx: %gmW, SiNR: %lg)\n",
 		   MACHINE_TIME_GET_NANO(), pkt_seq, 
@@ -877,14 +891,14 @@ static int64_t worldsens1_packet_parse_data_srrx(char *msg, int UNUSED pkt_seq, 
 		   data->data & 0xff, isprint(data->data & 0xff ) ? data->data & 0xff : '.',
 		   ntohl(pkt->frequency) / 1000000.0f, 
 		   ntohl(pkt->modulation), 
-		   ntohdbl(data->rx_mW), 
-		   ntohdbl(data->SiNR));
+		   *prx_mW, 
+		   *pSiNR);
 	  
 	  info.data       = data->data;
 	  info.freq_mhz   = (double)ntohl(pkt->frequency) / 1000000.0;
 	  info.modulation = ntohl(pkt->modulation);
-	  info.power_dbm  = mW2dBm(ntohdbl(data->rx_mW)); /* conversion from mW to dBm! */
-	  info.SiNR       = ntohdbl(data->SiNR);
+	  info.power_dbm  = mW2dBm(*prx_mW); /* conversion from mW to dBm! */
+	  info.SiNR       = *pSiNR;
 
 	  duration += WSENS_CBRX_FUNC(WSENS_CBRX_ARG, &info);
 	}
@@ -917,9 +931,14 @@ static int64_t worldsens1_packet_parse_rp(char *msg, int UNUSED pkt_seq, int UNU
       WSENS_RDV_NEXT_TIME = MACHINE_TIME_GET_NANO() + ntohll(pkt->period);
       WSENS_SEQ_RDV       = ntohl(pkt->n_rp_seq); /* next RP */
 
+      if (WSENS_PKT_LIST.size != 0)
+	{
+	  ERROR("WSNet: Saving state while all packets haven't been treated!\n");
+	}
+
       machine_state_save();
       WSNET_BKTRK("WSNet:backtrack: next RP forces a save state at (time:%"PRIu64", seq:%d)\n",
-		  MACHINE_TIME_GET_NANO(), pkt_seq); 
+		  MACHINE_TIME_GET_NANO(), pkt_seq);
 
       /* WSNET_DBG ("WSNET (%"PRIu64", %d): <-- RP%d (seq: %d, period:
 	 %"PRIu64", next_rp: %"PRIu64")\n", MACHINE_TIME_GET_NANO(),
@@ -979,9 +998,9 @@ static int64_t worldsens1_packet_parse(char *msg, int UNUSED len)
 	struct _worldsens_s_backtrack_pkt *pkt = (struct _worldsens_s_backtrack_pkt *) msg;
 
 	
-/* 	fprintf(stderr,"WSNET (%"PRIu64", %d): <-- BACKTRACK (period: %"PRIu64"; time: %"PRIu64", seq: %d)\n",  */
-/* 		  MACHINE_TIME_GET_NANO(), pkt_seq,  */
-/* 		  ntohll(pkt->period), WSENS_RDV_LAST_TIME + ntohll(pkt->period), pkt->rp_seq); */
+	fprintf(stderr,"WSNET (%"PRIu64", %d): <-- BACKTRACK (period: %"PRIu64"; time: %"PRIu64", seq: %d)\n", 
+		  MACHINE_TIME_GET_NANO(), pkt_seq, 
+		  ntohll(pkt->period), WSENS_RDV_LAST_TIME + ntohll(pkt->period), pkt->rp_seq);
 	
 
 	if (MACHINE_TIME_GET_NANO() > (WSENS_RDV_LAST_TIME + ntohll(pkt->period))) 
@@ -1000,9 +1019,9 @@ static int64_t worldsens1_packet_parse(char *msg, int UNUSED len)
 	WSENS_TX_BACKTRACKED       = 0;
 	
 	
-/* 	fprintf(stderr,"WSNET (%"PRIu64", %d): <-- RP (seq: %d, period: %"PRIu64", time: %"PRIu64")\n",  */
-/* 		MACHINE_TIME_GET_NANO(), pkt_seq, WSENS_SEQ_RDV,  */
-/* 		ntohll(pkt->period), WSENS_RDV_NEXT_TIME); */
+	fprintf(stderr,"WSNET (%"PRIu64", %d): <-- RP (seq: %d, period: %"PRIu64", time: %"PRIu64")\n", 
+		MACHINE_TIME_GET_NANO(), pkt_seq, WSENS_SEQ_RDV, 
+		ntohll(pkt->period), WSENS_RDV_NEXT_TIME);
 	
 
 	return 0;
@@ -1181,17 +1200,19 @@ static void worldsens1_packet_dump_send(char *msg, int len)
     case WORLDSENS_C_TX:
       {
 	struct _worldsens_c_tx_pkt *pkt = (struct _worldsens_c_tx_pkt *)msg;
+	uint64_t tx_mW  = ntohll(pkt->tx_mW);
+	double  *ptx_mW = (double *) &tx_mW;
 	VERBOSE(VLVL,"WSNet:pkt:%s:   type       %s\n",          prfx, "WORLDSENS_C_TX");
-	VERBOSE(VLVL,"WSNet:pkt:%s:   node       %d\n",          prfx, ntohl (pkt->node)     );
-	VERBOSE(VLVL,"WSNet:pkt:%s:   period     %"PRIu64"ns\n", prfx, ntohll(pkt->period)   );
-	VERBOSE(VLVL,"WSNet:pkt:%s:   duration   %"PRIu64"ns\n", prfx, ntohll(pkt->duration) );
-	VERBOSE(VLVL,"WSNet:pkt:%s:   freq       %g MHz\n",      prfx, ntohl (pkt->frequency) / 1000000.0);
+	VERBOSE(VLVL,"WSNet:pkt:%s:   node       %d\n",          prfx,  ntohl (pkt->node)     );
+	VERBOSE(VLVL,"WSNet:pkt:%s:   period     %"PRIu64"ns\n", prfx,  ntohll(pkt->period)   );
+	VERBOSE(VLVL,"WSNet:pkt:%s:   duration   %"PRIu64"ns\n", prfx,  ntohll(pkt->duration) );
+	VERBOSE(VLVL,"WSNet:pkt:%s:   freq       %g MHz\n",      prfx,  ntohl (pkt->frequency) / 1000000.0);
 	VERBOSE(VLVL,"WSNet:pkt:%s:   modulation %s (%d)\n",     prfx, 
 		wsnet_modulation_name(ntohl(pkt->modulation)), 
 		ntohl(pkt->modulation));
-	VERBOSE(VLVL,"WSNet:pkt:%s:   tx_mW      %g\n",          prfx, ntohdbl(pkt->tx_mW)  );
-	VERBOSE(VLVL,"WSNet:pkt:%s:   pkt_seq    %d\n",          prfx, ntohl (pkt->pkt_seq)  );
-	VERBOSE(VLVL,"WSNet:pkt:%s:   data       0x%02x (%c)\n", prfx, pkt->data & 0xff,
+	VERBOSE(VLVL,"WSNet:pkt:%s:   tx_mW      %g\n",          prfx, *ptx_mW);
+	VERBOSE(VLVL,"WSNet:pkt:%s:   pkt_seq    %d\n",          prfx,  ntohl (pkt->pkt_seq)  );
+	VERBOSE(VLVL,"WSNet:pkt:%s:   data       0x%02x (%c)\n", prfx,  pkt->data & 0xff,
 		isprint( pkt->data & 0xff) ? pkt->data & 0xff : '.');
       }
       break;

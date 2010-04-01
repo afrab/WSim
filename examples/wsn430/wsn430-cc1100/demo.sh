@@ -65,7 +65,8 @@ read dummyval
 
 ## =============End======================
 killall -SIGUSR1 ${WSIM}   > /dev/null 2>&1
-killall -SIGQUIT ${WSNET}  > /dev/null 2>&1
+killall -SIGQUIT ${WSNET1} > /dev/null 2>&1
+killall -SIGQUIT ${WSNET2} > /dev/null 2>&1
 killall -SIGUSR1 nc        > /dev/null 2>&1
 ## ======================================
 

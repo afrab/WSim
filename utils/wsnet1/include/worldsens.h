@@ -232,7 +232,7 @@ struct _worldsens_c
   int		 my_addr;
   int		 pkt_seq;
   int		 my_pkt_seq;
-  callback_rx_t	callback_rx;
+  callback_rx_t	 callback_rx;
   void *	 arg;
   int		 rp_seq;
   uint64_t	 next_rp;

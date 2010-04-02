@@ -472,7 +472,7 @@ worldsens_s_listen_to_next_rp (struct _worldsens_s *worldsens)
 		}
 
 	      /* put uint64_t into double variables after swap */
-	      uint64_t tx_mW  = ntohdbl(pkt->tx_mW);
+	      uint64_t tx_mW  = ntohll(pkt->tx_mW);
 	      double  *ptx_mW = (double *) &tx_mW;
 
 	      packet->data[0] = pkt->data;

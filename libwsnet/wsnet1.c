@@ -998,9 +998,9 @@ static int64_t worldsens1_packet_parse(char *msg, int UNUSED len)
 	struct _worldsens_s_backtrack_pkt *pkt = (struct _worldsens_s_backtrack_pkt *) msg;
 
 	
-	fprintf(stderr,"WSNET (%"PRIu64", %d): <-- BACKTRACK (period: %"PRIu64"; time: %"PRIu64", seq: %d)\n", 
-		  MACHINE_TIME_GET_NANO(), pkt_seq, 
-		  ntohll(pkt->period), WSENS_RDV_LAST_TIME + ntohll(pkt->period), pkt->rp_seq);
+/* 	fprintf(stderr,"WSNET (%"PRIu64", %d): <-- BACKTRACK (period: %"PRIu64"; time: %"PRIu64", seq: %d)\n",  */
+/* 		  MACHINE_TIME_GET_NANO(), pkt_seq,  */
+/* 		  ntohll(pkt->period), WSENS_RDV_LAST_TIME + ntohll(pkt->period), pkt->rp_seq); */
 	
 
 	if (MACHINE_TIME_GET_NANO() > (WSENS_RDV_LAST_TIME + ntohll(pkt->period))) 
@@ -1019,9 +1019,9 @@ static int64_t worldsens1_packet_parse(char *msg, int UNUSED len)
 	WSENS_TX_BACKTRACKED       = 0;
 	
 	
-	fprintf(stderr,"WSNET (%"PRIu64", %d): <-- RP (seq: %d, period: %"PRIu64", time: %"PRIu64")\n", 
-		MACHINE_TIME_GET_NANO(), pkt_seq, WSENS_SEQ_RDV, 
-		ntohll(pkt->period), WSENS_RDV_NEXT_TIME);
+/* 	fprintf(stderr,"WSNET (%"PRIu64", %d): <-- RP (seq: %d, period: %"PRIu64", time: %"PRIu64")\n",  */
+/* 		MACHINE_TIME_GET_NANO(), pkt_seq, WSENS_SEQ_RDV,  */
+/* 		ntohll(pkt->period), WSENS_RDV_NEXT_TIME); */
 	
 
 	return 0;

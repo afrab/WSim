@@ -94,6 +94,7 @@ static int      wsnet2_seq            (char *);
 static int      wsnet2_published      (char *);
 static int      wsnet2_backtrack      (char *);
 static int      wsnet2_sync_release   (char *);
+static int      wsnet2_sync_reminder  (char *);
 static int      wsnet2_rx             (char *);
 static int      wsnet2_sr_rx          (char *);
 static int      wsnet2_measure_rsp    (char *);
@@ -538,22 +539,22 @@ int wsnet2_tx(char data, double freq, int mod, double txdB, uint64_t delay, int 
     WSNET2_TX("Libwsnet2:wsnet2_tx: wsens last rp=%"PRIu64"\n", wsens.l_rp);
     WSNET2_TX("Libwsnet2:wsnet2_tx: packet 0x%02x sent\n", data);
     
-    /* wait either for backtrack or for new rp */
+    /* wait either for backtrack or rp reminder */
     wsens.state = WORLDSENS_CLT_STATE_TXING;
-    WSNET2_TX("Libwsnet2:wsnet2_tx: MACHINE_TIME_GET_NANO() + delay < wsens.n_rp? : delay = %"PRIu64", wsens.n_rp = %"PRIu64"\n", delay, wsens.n_rp);
+
     while (wsens.state != WORLDSENS_CLT_STATE_IDLE) {
 		
         /* receive */
         if ((len = recv(wsens.m_fd, msg, WORLDSENS_MAX_PKTLENGTH, 0)) <= 0) {
-            perror("(recv)");
-            goto error;
-        }
+	    perror("(recv)");
+	    goto error;
+	}
 		
-        /* parse */
-        if (wsnet2_parse(msg))
-            return -1;
+	/* parse */
+	if (wsnet2_parse(msg))
+	    return -1;
     }
-	
+    
     return 0;
 
  error:
@@ -643,6 +644,11 @@ static int wsnet2_parse(char *msg) {
   case WORLDSENS_S_SYNC_RELEASE:
       WSNET2_DBG("Libwsnet2:wsnet2_parse: WORLDSENS_S_SYNC_RELEASE packet type\n");
       if (wsnet2_sync_release((char *)pkt))
+          goto error;
+      break;
+  case WORLDSENS_S_SYNC_REMINDER:
+      WSNET2_DBG("Libwsnet2:wsnet2_parse: WORLDSENS_S_SYNC_REMINDER packet type\n");
+      if (wsnet2_sync_reminder((char *)pkt))
           goto error;
       break;
   case WORLDSENS_S_BYTE_RX:
@@ -868,6 +874,35 @@ static int wsnet2_sync_release(char *msg) {
    wsens.rpseq = pkt->rp_next;
    wsens.n_rp  = MACHINE_TIME_GET_NANO() + pkt->rp_duration;
    WORLDSENS_SAVE_STATE();
+   
+   return 0;
+}
+
+/* ************************************************** */
+/* ************************************************** */
+/**
+ * RP reminder from WSNet. Enable to force WSim wait for WSNet.
+ **/
+static int wsnet2_sync_reminder(char *msg) {
+   struct _worldsens_s_sync_reminder *pkt = (struct _worldsens_s_sync_reminder *) msg;
+   int ret = wsnet2_seq(msg);
+
+   if (ret == -1)
+       return -1;
+   else if (ret == -2)
+       return 0;
+   
+   /* check rdv sequence */
+   if (pkt->rp_next != wsens.rpseq) {
+       ERROR("Libwsnet2:wsnet2_sync_reminder: rdv reminder (rp seq %"PRIu64") not equal to next known rdv (rp seq %"PRIu64")\n", pkt->rp_next, wsens.rpseq);
+     return -1;
+   }
+
+   if (wsens.state == WORLDSENS_CLT_STATE_TXING) {
+       wsens.state = WORLDSENS_CLT_STATE_IDLE;
+   }
+
+   WSNET2_DBG("Libwsnet2:wsnet2_sync_remind: RP seq %"PRIu64" reminded\n", pkt->rp_next);
    
    return 0;
 }

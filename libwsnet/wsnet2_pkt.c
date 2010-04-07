@@ -187,6 +187,12 @@ static inline int worldsens_packet_swap(union _worldsens_pkt *pkt)
       SWAPN (pkt->sync_release.rp_duration);
       break;
 
+    case WORLDSENS_S_SYNC_REMINDER:
+      SWAPN (pkt->sync_reminder.type);
+      SWAPN (pkt->sync_reminder.seq);
+      SWAPN (pkt->sync_reminder.rp_next);
+      break;
+
     case WORLDSENS_S_BACKTRACK:
       SWAPN (pkt->sync_release.type);
       SWAPN (pkt->sync_release.seq);
@@ -359,6 +365,14 @@ int worldsens_packet_dump(union _worldsens_pkt *msg)
 	VERBOSE(VLVL,"%s:%s:pkt:    seq  %"PRIu64"\n",               SOFT, DIRECTION2, pkt->seq);
 	VERBOSE(VLVL,"%s:%s:pkt:    rp_next  %"PRIu64"\n",           SOFT, DIRECTION2, pkt->rp_next);
 	VERBOSE(VLVL,"%s:%s:pkt:    rp_duration  %"PRIu64"\n",       SOFT, DIRECTION2, pkt->rp_duration);
+	break;
+      }
+    case WORLDSENS_S_SYNC_REMINDER:
+      {
+	struct _worldsens_s_sync_reminder *pkt = (struct _worldsens_s_sync_reminder *)msg;
+	VERBOSE(VLVL,"%s:%s:pkt:    type %s\n",                      SOFT, DIRECTION2, "WORLDSENS_S_REMINDER");
+	VERBOSE(VLVL,"%s:%s:pkt:    seq  %"PRIu64"\n",               SOFT, DIRECTION2, pkt->seq);
+	VERBOSE(VLVL,"%s:%s:pkt:    rp_next  %"PRIu64"\n",           SOFT, DIRECTION2, pkt->rp_next);
 	break;
       }
     case WORLDSENS_S_BACKTRACK:

@@ -1,7 +1,7 @@
 /**
  *  \file   wsnet2_pkt.h
  *  \brief  Worldsens client v2, packet format
- *  \author Guillaume Chelius, Antoine Fraboulet
+ *  \author Guillaume Chelius, Antoine Fraboulet, Loic Lemaitre
  *  \date   2007
  **/
 
@@ -33,6 +33,7 @@ enum woldsens_pkt_type {
   WORLDSENS_S_CONNECT_RSP_OK,  /* connection granted          */
   WORLDSENS_S_CONNECT_RSP_NOK, /* connection refused          */
   WORLDSENS_S_SYNC_RELEASE,    /* RP save and release         */
+  WORLDSENS_S_SYNC_REMINDER,   /* remind next RP              */
   WORLDSENS_S_BACKTRACK,       /* backtrack request           */
   WORLDSENS_S_BYTE_RX,         /* Rx                          */
   WORLDSENS_S_BYTE_SR_RX,      /* RP req and rx               */
@@ -161,6 +162,12 @@ struct __PACKED__ _worldsens_s_backtrack {
   ws_time                rp_duration;
 };
 
+struct __PACKED__ _worldsens_s_sync_reminder {
+  ws_pkt_type            type;
+  ws_id_seq              seq;
+  ws_id_rp               rp_next;
+};
+
 struct __PACKED__ _worldsens_s_byte_rx {
   ws_pkt_type            type;                        
   ws_id_seq              seq;
@@ -234,6 +241,7 @@ union _worldsens_pkt {
 
   struct _worldsens_c_sync_ack           sync_ack;
   struct _worldsens_s_sync_release       sync_release;
+  struct _worldsens_s_sync_reminder      sync_reminder;
 
   struct _worldsens_s_backtrack          bktrk;
 

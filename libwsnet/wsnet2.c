@@ -77,13 +77,12 @@ int worldsens2_c_close(void)
 int worldsens2_c_tx(struct wsnet_tx_info *info) 
 {
   char data           = info->data;
-  double frequency    = info->freq_mhz * 1000000; //TODO : to check 1000000 factor
+  double frequency    = info->freq_mhz * 1000000;
   int modulation      = info->modulation;
-
   double tx_dbm       = info->power_dbm;
   uint64_t duration   = info->duration;
   int radio_id        = info->radio_id;
-
+    
   if( wsnet2_tx(data, frequency, modulation, tx_dbm, duration, radio_id) == -1 )
     {
       ERROR("wsnet2:tx: error during packet send\n");

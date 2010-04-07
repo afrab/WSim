@@ -12,7 +12,7 @@
 /***************************************************/
 /***************************************************/
 #define PKTLIST_MAX 0x7F /* 7F == 127 keep simple for modulos */
-#define PKTSIZE_MAX 200
+#define PKTSIZE_MAX 1000
 
 struct _pktlist_t 
 {

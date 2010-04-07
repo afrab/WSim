@@ -151,8 +151,9 @@ static int      worldsens1_connect_server          (void);   /* snd connect pkt,
 static int      worldsens1_connect_parse_reply     (char *msg, int UNUSED len);
 static int      worldsens1_disconnect              (void);   /* snd disconnect pkt, called by c_close  */
 static ssize_t  worldsens1_packet_send             (int fd, char* msg, size_t len, int flags, int dump);
-static ssize_t  worldsens1_packet_recv             (int fd, char* msg, size_t len, int flags, int dump);
-static int      worldsens1_packet_waiting_in_queue (int fd); /* pkt waiting in fd,  called by c_update */
+static ssize_t  worldsens1_packet_recv_fifo        (int fd, char* msg, size_t len, int flags, int dump);
+static void     worldsens1_fill_fifo_from_socket   (int fd, size_t len, int flags, int dump);
+static int      worldsens1_packet_waiting_in_socket(int fd); /* pkt waiting in fd,  called by c_update */
 
 static int64_t  worldsens1_packet_parse_data_rx    (char *msg, int pkt_seq, int line);
                                                             /* called by packet_parse (for rx packet) */
@@ -207,7 +208,6 @@ static struct _worldsens_c_backtrack    worldsens_backup;
 
 #define WSENS_TX_BACKTRACKED    worldsens_backtracked.tx_backtracked
 #define WSENS_TIME_TO_WAIT      worldsens_backtracked.min_duration
-
 
 /**************************************************************************/
 /**************************************************************************/
@@ -435,7 +435,7 @@ int worldsens1_c_tx(struct wsnet_tx_info *info)
   /* put double into uint64_t variable for swap */
   uint64_t *ptx_mW    = (uint64_t *) &tx_mW;
 
-  uint64_t  duration  = info->duration;
+  uint64_t duration   = info->duration;
 
   struct _worldsens_c_tx_pkt pkt;
   int len = sizeof(pkt);
@@ -447,7 +447,7 @@ int worldsens1_c_tx(struct wsnet_tx_info *info)
   pkt.data            = data;
   pkt.frequency       = htonl(frequency);
   pkt.modulation      = htonl(modulation);
-  pkt.tx_mW           = htonll(*ptx_mW); 
+  pkt.tx_mW           = htonll(*ptx_mW);
   pkt.pkt_seq         = htonl(WSENS_SEQ_PKT_TX);
   pkt.duration        = htonll(duration);
 
@@ -462,18 +462,18 @@ int worldsens1_c_tx(struct wsnet_tx_info *info)
 				
   /* Wait */
   WSENS_TX_BACKTRACKED = 1;
-  while (((MACHINE_TIME_GET_NANO() + duration) < WSENS_RDV_NEXT_TIME) && (WSENS_TX_BACKTRACKED == 1)) 
+  while (((MACHINE_TIME_GET_NANO() + duration) <= WSENS_RDV_NEXT_TIME) && (WSENS_TX_BACKTRACKED == 1)) 
     {    	
       int  len;
       char msg[WORLDSENS_MAX_PKTLENGTH];
 
       /* Receive */
-      if ((len = worldsens1_packet_recv(WSENS_MULTICAST, msg, WORLDSENS_MAX_PKTLENGTH, 0, PKT_DMP_TX)) <= 0) 
+      if ((len = worldsens1_packet_recv_fifo(WSENS_MULTICAST, msg, WORLDSENS_MAX_PKTLENGTH, 0, PKT_DMP_TX)) <= 0) 
 	{
 	  ERROR("WSNet:tx: error during packet recv\n");
 	  return -1;
 	}
-		
+
       /* Parse */
       if (worldsens1_tx_parse_reply(msg, len) == -1 ) 
 	{
@@ -489,7 +489,7 @@ int worldsens1_c_tx(struct wsnet_tx_info *info)
 /**************************************************************************/
 /**************************************************************************/
 
-static int worldsens1_packet_waiting_in_queue(int fd)
+static int worldsens1_packet_waiting_in_socket(int fd)
 {
   int            res;
   fd_set         readfds;
@@ -533,26 +533,8 @@ int worldsens1_c_update(void)
 
   if ((mcu_signal_get() & SIG_WORLDSENS_IO) != 0)
     {
-      int  len;
-      char msg[WORLDSENS_MAX_PKTLENGTH];
-
       mcu_signal_remove(SIG_WORLDSENS_IO);
-      do {
-	if ((len = worldsens1_packet_recv(WSENS_MULTICAST, msg, WORLDSENS_MAX_PKTLENGTH, 0, PKT_DMP_RX)) <= 0)  
-	  {
-	    ERROR("WSNet:update: error during packet receive\n");
-	    return -1;
-	  }
-	else 
-	  {
-	    WSNET_DBG("WSNet:update:read: msg size %d\n",len);
-	    if (pktlist_enqueue(& WSENS_PKT_LIST, msg, len) == -1)
-	      {
-		ERROR("WSNet:update:pktlist: error during enqueue\n");
-		return -1;
-	      }
-	  }
-      } while (worldsens1_packet_waiting_in_queue(WSENS_MULTICAST));
+      worldsens1_fill_fifo_from_socket(WSENS_MULTICAST, WORLDSENS_MAX_PKTLENGTH, 0, 1);
     }
 
   /* **** 
@@ -672,7 +654,7 @@ static int worldsens1_connect_server(void)
     }
   	
   /* Receive */
-  if ((rcv_len = worldsens1_packet_recv(WSENS_UNICAST, msg, WORLDSENS_MAX_PKTLENGTH, 0, PKT_DMP_CNX)) <= 0)
+  if ((rcv_len = worldsens1_packet_recv_fifo(WSENS_UNICAST, msg, WORLDSENS_MAX_PKTLENGTH, 0, PKT_DMP_CNX)) <= 0)
     {
       ERROR("WSNet:connect:pkt: receive connect response error (len=%d)\n", rcv_len);
       return -1;
@@ -784,11 +766,10 @@ static ssize_t worldsens1_packet_send(int fd, char* msg, size_t len, int flags, 
 /**************************************************************************/
 /**************************************************************************/
 /**************************************************************************/
-
-static ssize_t worldsens1_packet_recv(int fd, char* msg, size_t len, int flags, int dump)
+static ssize_t worldsens1_packet_recv_internal(int fd, char* msg, size_t len, int flags, int dump)
 {
   ssize_t srec = 0;
-  
+
   srec = recv(fd,msg,len,flags);
 
   if (srec <= 0)
@@ -807,6 +788,38 @@ static ssize_t worldsens1_packet_recv(int fd, char* msg, size_t len, int flags, 
     {
       worldsens1_packet_dump_recv(msg,srec);
     }
+  return srec;
+}
+
+static void worldsens1_fill_fifo_from_socket(int fd, size_t len, int flags, int dump)
+{
+  char msg[WORLDSENS_MAX_PKTLENGTH];
+
+  do {
+    if ((len = worldsens1_packet_recv_internal(fd, msg, len, flags, dump)) > 0)
+      {
+	if (pktlist_enqueue(& WSENS_PKT_LIST, msg, len) == -1)
+	  {
+	    ERROR("WSNet:update:pktlist: error during enqueue\n");
+	    return ;
+	  }
+      }
+    else 
+      {
+	return ;
+      }
+  } while (worldsens1_packet_waiting_in_socket(WSENS_MULTICAST));
+}
+
+static ssize_t worldsens1_packet_recv_fifo(int fd, char* msg, size_t len, int flags, int dump)
+{
+  ssize_t srec = 0;
+
+  if (pktlist_empty(& WSENS_PKT_LIST))
+    {
+      worldsens1_fill_fifo_from_socket(fd, len, flags, dump);
+    }
+  srec = pktlist_dequeue(& WSENS_PKT_LIST, msg);
   return srec;
 }
 
@@ -842,17 +855,18 @@ static int64_t worldsens1_packet_parse_data_rx(char *msg, int UNUSED pkt_seq, in
 		   /* RX_line[c_node] */ line, c_node,
 		   data->data & 0xff, isprint(data->data & 0xff ) ? data->data & 0xff : '.',
 		   ntohl(pkt->frequency) / 1000000.0f, 
-		   ntohl(pkt->modulation), 
+		   ntohl(pkt->modulation),
 		   *prx_mW, 
 		   *pSiNR);
-	  
-	  info.data       = data->data;
+
+  	  info.data       = data->data;
 	  info.freq_mhz   = (double)ntohl(pkt->frequency) / 1000000.0;
 	  info.modulation = ntohl(pkt->modulation);
 	  info.power_dbm  = mW2dBm(*prx_mW); /* conversion from mW to dBm! */
 	  info.SiNR       = *pSiNR;
 
 	  duration += WSENS_CBRX_FUNC(WSENS_CBRX_ARG, &info);
+	  
 	}
       
       c_node++;
@@ -938,7 +952,7 @@ static int64_t worldsens1_packet_parse_rp(char *msg, int UNUSED pkt_seq, int UNU
 
       machine_state_save();
       WSNET_BKTRK("WSNet:backtrack: next RP forces a save state at (time:%"PRIu64", seq:%d)\n",
-		  MACHINE_TIME_GET_NANO(), pkt_seq);
+		  MACHINE_TIME_GET_NANO(), pkt_seq); 
 
       /* WSNET_DBG ("WSNET (%"PRIu64", %d): <-- RP%d (seq: %d, period:
 	 %"PRIu64", next_rp: %"PRIu64")\n", MACHINE_TIME_GET_NANO(),
@@ -996,13 +1010,9 @@ static int64_t worldsens1_packet_parse(char *msg, int UNUSED len)
     case WORLDSENS_S_BACKTRACK:  /* RP point with backtrack */
       {
 	struct _worldsens_s_backtrack_pkt *pkt = (struct _worldsens_s_backtrack_pkt *) msg;
-
-	
 /* 	fprintf(stderr,"WSNET (%"PRIu64", %d): <-- BACKTRACK (period: %"PRIu64"; time: %"PRIu64", seq: %d)\n",  */
 /* 		  MACHINE_TIME_GET_NANO(), pkt_seq,  */
 /* 		  ntohll(pkt->period), WSENS_RDV_LAST_TIME + ntohll(pkt->period), pkt->rp_seq); */
-	
-
 	if (MACHINE_TIME_GET_NANO() > (WSENS_RDV_LAST_TIME + ntohll(pkt->period))) 
 	  {
 	    WSNET_BKTRK("WSNet:backtrack: ");
@@ -1017,13 +1027,9 @@ static int64_t worldsens1_packet_parse(char *msg, int UNUSED len)
 	WSENS_SEQ_RDV              = ntohl(pkt->rp_seq);
 	WSENS_SEQ_PKT_RX           = pkt_seq + 1;
 	WSENS_TX_BACKTRACKED       = 0;
-	
-	
 /* 	fprintf(stderr,"WSNET (%"PRIu64", %d): <-- RP (seq: %d, period: %"PRIu64", time: %"PRIu64")\n",  */
 /* 		MACHINE_TIME_GET_NANO(), pkt_seq, WSENS_SEQ_RDV,  */
 /* 		ntohll(pkt->period), WSENS_RDV_NEXT_TIME); */
-	
-
 	return 0;
       }
 	
@@ -1075,18 +1081,20 @@ static int worldsens1_synched(int dmp)
       return -1;
     }
 
+  
+
   /* Wait */
   WSENS_RDV_PENDING = 1;
   while (WSENS_RDV_PENDING)
     {
       char msg[WORLDSENS_MAX_PKTLENGTH];
       /* Receive */
-      if ((len = worldsens1_packet_recv(WSENS_MULTICAST, msg, WORLDSENS_MAX_PKTLENGTH, 0, dmp)) <= 0) 
+      if ((len = worldsens1_packet_recv_fifo(WSENS_MULTICAST, msg, WORLDSENS_MAX_PKTLENGTH, 0, dmp)) <= 0) 
 	{
 	  ERROR("WSNet:synched: error during packet receive\n");
 	  return -1;
 	}
-      
+
       /* Parse */
       //      if (worldsens1_synched_parse_reply(msg, len) == -1 ) 
       int ret = worldsens1_packet_parse(msg, len);
@@ -1203,16 +1211,16 @@ static void worldsens1_packet_dump_send(char *msg, int len)
 	uint64_t tx_mW  = ntohll(pkt->tx_mW);
 	double  *ptx_mW = (double *) &tx_mW;
 	VERBOSE(VLVL,"WSNet:pkt:%s:   type       %s\n",          prfx, "WORLDSENS_C_TX");
-	VERBOSE(VLVL,"WSNet:pkt:%s:   node       %d\n",          prfx,  ntohl (pkt->node)     );
-	VERBOSE(VLVL,"WSNet:pkt:%s:   period     %"PRIu64"ns\n", prfx,  ntohll(pkt->period)   );
-	VERBOSE(VLVL,"WSNet:pkt:%s:   duration   %"PRIu64"ns\n", prfx,  ntohll(pkt->duration) );
-	VERBOSE(VLVL,"WSNet:pkt:%s:   freq       %g MHz\n",      prfx,  ntohl (pkt->frequency) / 1000000.0);
+	VERBOSE(VLVL,"WSNet:pkt:%s:   node       %d\n",          prfx, ntohl (pkt->node)     );
+	VERBOSE(VLVL,"WSNet:pkt:%s:   period     %"PRIu64"ns\n", prfx, ntohll(pkt->period)   );
+	VERBOSE(VLVL,"WSNet:pkt:%s:   duration   %"PRIu64"ns\n", prfx, ntohll(pkt->duration) );
+	VERBOSE(VLVL,"WSNet:pkt:%s:   freq       %g MHz\n",      prfx, ntohl (pkt->frequency) / 1000000.0);
 	VERBOSE(VLVL,"WSNet:pkt:%s:   modulation %s (%d)\n",     prfx, 
 		wsnet_modulation_name(ntohl(pkt->modulation)), 
 		ntohl(pkt->modulation));
 	VERBOSE(VLVL,"WSNet:pkt:%s:   tx_mW      %g\n",          prfx, *ptx_mW);
-	VERBOSE(VLVL,"WSNet:pkt:%s:   pkt_seq    %d\n",          prfx,  ntohl (pkt->pkt_seq)  );
-	VERBOSE(VLVL,"WSNet:pkt:%s:   data       0x%02x (%c)\n", prfx,  pkt->data & 0xff,
+	VERBOSE(VLVL,"WSNet:pkt:%s:   pkt_seq    %d\n",          prfx, ntohl (pkt->pkt_seq)  );
+	VERBOSE(VLVL,"WSNet:pkt:%s:   data       0x%02x (%c)\n", prfx, pkt->data & 0xff,
 		isprint( pkt->data & 0xff) ? pkt->data & 0xff : '.');
       }
       break;

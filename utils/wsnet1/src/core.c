@@ -63,7 +63,7 @@ htonll (uint64_t v)
   return v;
 }
 
-static double
+/* static */ double
 htondbl (double v)
 {
   return v;
@@ -91,7 +91,7 @@ htonll (uint64_t v)
   return r;
 }
 
-static double
+/* static */ double
 htondbl (double v)
 {
   double r;
@@ -110,9 +110,7 @@ htondbl (double v)
   pr[7] = pv[0];
   return r;
 }
-
 #endif
-
 
 /**************************************************************************/
 /**************************************************************************/
@@ -190,7 +188,7 @@ core_start (struct _worldsens_s *worldsens)
 		      uint64_t *tx_mW = (uint64_t *) &(rx_pkt->tx_mW);  /* put double into uint64_t variable for swap */
 		      worldsens_data[c_node].node  = htonl (i);
 		      worldsens_data[c_node].data  = packet->data[0];
-		      worldsens_data[c_node].SiNR  = htonll (0.0);  /* perfect radio layer: no noise */
+		      worldsens_data[c_node].SiNR  = htonll (0.0);     /* perfect radio layer: no noise */
 		      worldsens_data[c_node].rx_mW = htonll (*tx_mW);  /* perfect radio layer: no energy dissipation... */
 		      packet_destroy (rx_pkt);	//TODO: optimize.... no need to creat and destroy packet...
 

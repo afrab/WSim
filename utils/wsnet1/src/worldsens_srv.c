@@ -46,12 +46,13 @@ htonll (uint64_t v)
   return v;
 }
 
+/*
 static double
 ntohdbl (double v)
 {
   return v;
 }
-
+*/
 /*
 static double
 htondbl (double v)
@@ -101,6 +102,7 @@ htonll (uint64_t v)
   return r;
 }
 
+/*
 static double
 ntohdbl (double v)
 {
@@ -120,6 +122,7 @@ ntohdbl (double v)
   pr[7] = pv[0];
   return r;
 }
+*/
 /*
 static double
 htondbl (double v)
@@ -410,7 +413,7 @@ worldsens_s_listen_to_next_rp (struct _worldsens_s *worldsens)
 	    }
 	  else
 	    {
-	      WSNET_S_DBG_DBG ("WSNET:: Wrong sync packet: rp seq %d)\n", ntohl(c_pkt->rp_seq));
+	      WSNET_S_DBG_DBG ("WSNET:: skipping old sync packet: rp seq %d)\n", ntohl(c_pkt->rp_seq));
 	      continue;
 	    }
 
@@ -435,10 +438,9 @@ worldsens_s_listen_to_next_rp (struct _worldsens_s *worldsens)
 
 	  if ((get_global_time() + ntohll (pkt->period)) > worldsens->rp)
 	    {
-
 	      /* Unsynchronized  */
-	      WSNET_S_DBG_EXC ("WSNET:: <-- Deprecated tx (time: %"PRId64", current rp: %"PRId64")\n", 
-			       (get_global_time() + ntohll (pkt->period)), worldsens->rp);
+	      WSNET_S_DBG_EXC ("WSNET:: <-- Deprecated tx (ip: %d, time: %"PRId64", current rp: %"PRId64")\n", 
+			       node->addr, (get_global_time() + ntohll (pkt->period)), worldsens->rp);
 	      continue;
 
 	    }

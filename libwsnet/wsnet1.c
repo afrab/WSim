@@ -462,7 +462,7 @@ int worldsens1_c_tx(struct wsnet_tx_info *info)
 				
   /* Wait */
   WSENS_TX_BACKTRACKED = 1;
-  while (((MACHINE_TIME_GET_NANO() + duration) <= WSENS_RDV_NEXT_TIME) && (WSENS_TX_BACKTRACKED == 1)) 
+  while (((MACHINE_TIME_GET_NANO() + duration) < WSENS_RDV_NEXT_TIME) && (WSENS_TX_BACKTRACKED == 1)) 
     {    	
       int  len;
       char msg[WORLDSENS_MAX_PKTLENGTH];

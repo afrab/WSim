@@ -945,14 +945,14 @@ static int64_t worldsens1_packet_parse_rp(char *msg, int UNUSED pkt_seq, int UNU
       WSENS_RDV_NEXT_TIME = MACHINE_TIME_GET_NANO() + ntohll(pkt->period);
       WSENS_SEQ_RDV       = ntohl(pkt->n_rp_seq); /* next RP */
 
-      if (WSENS_PKT_LIST.size != 0)
-	{
-	  ERROR("WSNet: Saving state while all packets haven't been treated!\n");
-	}
-
       machine_state_save();
       WSNET_BKTRK("WSNet:backtrack: next RP forces a save state at (time:%"PRIu64", seq:%d)\n",
 		  MACHINE_TIME_GET_NANO(), pkt_seq); 
+
+      if (WSENS_PKT_LIST.size != 0)
+	{
+	  WSNET_BKTRK("WSNet: %d remaining packets in the list when saving state\n", WSENS_PKT_LIST.size);
+	}
 
       /* WSNET_DBG ("WSNET (%"PRIu64", %d): <-- RP%d (seq: %d, period:
 	 %"PRIu64", next_rp: %"PRIu64")\n", MACHINE_TIME_GET_NANO(),

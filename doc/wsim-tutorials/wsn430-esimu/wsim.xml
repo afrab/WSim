@@ -117,7 +117,11 @@
 <chapter>
   <title>Sources and examples</title>
   <para>
-    sources
+#define MOV_R4R4()   __asm__ __volatile__ ("mov r4,r4")
+#define ESIMU_START MOV_R4R4
+
+#define MOV_R5R5()   __asm__ __volatile__ ("mov r5,r5")
+#define ESIMU_STOP  MOV_R5R5
   </para>
 </chapter>
 

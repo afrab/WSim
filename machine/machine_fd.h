@@ -28,7 +28,7 @@
 
 #define MONITOR_DEFAULT_SIZE         1
 #define MONITOR_MAX_VARIABLE_NAME  100
-#define MONITOR_MAX_WATCHPOINT      50
+#define MONITOR_MAX_WATCHPOINT     512
 
 struct watchpoint_t {
   char        name[MONITOR_MAX_VARIABLE_NAME];

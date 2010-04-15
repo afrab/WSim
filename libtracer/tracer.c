@@ -57,10 +57,15 @@ static enum wsens_mode_t   tracer_ws_mode;
 /* ************************************************** */
 
 /* start/stop recording event */
-void  (*tracer_event_record_ptr) (tracer_id_t id, tracer_val_t val);
+void  (*tracer_event_record_ptr)       (tracer_id_t id, tracer_val_t val);
+void  (*tracer_event_record_force_ptr) (tracer_id_t id, tracer_val_t val);
+
 static void tracer_event_record_active(tracer_id_t id, tracer_val_t val);
 static void tracer_event_record_active_ws(tracer_id_t id, tracer_val_t val);
 static void tracer_event_record_time_nocheck(tracer_id_t id, tracer_val_t val, tracer_time_t time);
+
+static void tracer_event_record_active_force(tracer_id_t id, tracer_val_t val);
+static void tracer_event_record_active_force_ws(tracer_id_t id, tracer_val_t val);
 
 /* ************************************************** */
 /* ************************************************** */
@@ -186,11 +191,13 @@ tracer_start(void)
 
       if (tracer_ws_mode == WS_MODE_WSNET0)
 	{
-	  tracer_event_record_ptr = tracer_event_record_active;
+	  tracer_event_record_ptr       = tracer_event_record_active;
+	  tracer_event_record_force_ptr = tracer_event_record_active_force;
 	}
       else
 	{
-	  tracer_event_record_ptr = tracer_event_record_active_ws;
+	  tracer_event_record_ptr       = tracer_event_record_active_ws;
+	  tracer_event_record_force_ptr = tracer_event_record_active_force_ws;
 	}
     }
   else
@@ -343,6 +350,34 @@ tracer_event_record_active_ws(tracer_id_t id, tracer_val_t val)
     {
       uint64_t time = TRACER_GET_NANOTIME();
       tracer_event_record_time_nocheck(id,val,time);
+    }
+}
+
+
+/* force:: we write a zero to make VCD will change */
+static void 
+tracer_event_record_active_force(tracer_id_t id, tracer_val_t val)
+{
+  if (val != EVENT_TRACER.id_val[id])
+    {
+      uint64_t time = TRACER_GET_NANOTIME();
+      tracer_event_record_time_nocheck(id,val - 1, (time > 0) ? time-1: time);
+      tracer_event_record_time_nocheck(id,val    , time);
+    }
+  if (EVENT_TRACER.ev_count > TRACER_BLOCK_THRESHOLD)
+    {
+      tracer_dump_data();
+    }
+}
+
+static void 
+tracer_event_record_active_force_ws(tracer_id_t id, tracer_val_t val)
+{
+  if (val != EVENT_TRACER.id_val[id])
+    {
+      uint64_t time = TRACER_GET_NANOTIME();
+      tracer_event_record_time_nocheck(id,val - 1, (time > 0) ? time-1: time);
+      tracer_event_record_time_nocheck(id,val    , time);
     }
 }
 

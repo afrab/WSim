@@ -49,12 +49,19 @@ void  tracer_set_initial_time   (tracer_time_t time);
 /*
  * Record a value change for id
  */
-extern void  (*tracer_event_record_ptr) (tracer_id_t id, tracer_val_t val);
+extern void  (*tracer_event_record_ptr)       (tracer_id_t id, tracer_val_t val);
+extern void  (*tracer_event_record_force_ptr) (tracer_id_t id, tracer_val_t val);
 
 #define tracer_event_record(id,val)          \
 do {                                         \
   if (tracer_event_record_ptr != NULL)       \
     tracer_event_record_ptr(id,val);         \
+} while(0)
+
+#define tracer_event_record_force(id,val)    \
+do {                                         \
+  if (tracer_event_record_force_ptr != NULL) \
+    tracer_event_record_force_ptr(id,val);   \
 } while(0)
 
 void  tracer_state_save         (void);

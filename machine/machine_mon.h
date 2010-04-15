@@ -19,6 +19,6 @@ void machine_monitor_stop      (void);
 
 void machine_monitor_set       (char* args, elf32_t elf);
 void machine_modify_set        (char* args, elf32_t elf);
-void machine_monitor_add_trace (void);
+void machine_monitor_add_trace (int access_type);
 
 #endif

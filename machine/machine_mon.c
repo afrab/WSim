@@ -123,7 +123,7 @@ int machine_monitor_find_by_addr(uint32_t addr)
   return -1;
 }
 
-void machine_monitor_add_trace(void)
+void machine_monitor_add_trace(int access_type)
 {
   int      index = -1;
   uint32_t addr  = MCU_RAMCTL_ADDR;
@@ -150,13 +150,55 @@ void machine_monitor_add_trace(void)
       value = mcu_jtag_read_word(addr & ~1); /* align read */
       break;
     }
-  /*  
-    VERBOSE(6,"machine:monitor: watchpoint trace for addr 0x%04x pc=0x%04x val=0x%04x\n",
-	addr, mcu_get_pc(), value);
-  */
-  tracer_event_record(watchpoint[ index ].trc_id,value);
-  if (machine.state->watchpoint_modify_on_first_write[ index ])
 
+#if 0
+  /* *******************************
+   * available information example 
+   *
+   */
+
+  VERBOSE(6,"machine:monitor: watchpoint trace for addr 0x%04x pc=0x%04x val=0x%04x type=%c%c\n",
+	  addr, mcu_get_pc(), value, 
+	  (access_type | MAC_WATCH_READ)  ? 'r':'.', 
+	  (access_type | MAC_WATCH_WRITE) ? '.':'w'
+	  );
+#endif
+
+#if 0
+  /* *******************************
+   * example on how to set a breakpoint on value write (debugger write watchpoint)
+   *
+   */
+
+  if ((strcmp(watchpoint[ index ].name,"my_watchpoint_name") == 0) ||
+      (addr == my_watchpoint_address))
+    {
+      if (value == my_breakpoint_value)
+	{
+	  mcu_signal_add(SIG_MAC | MAC_TO_SIG(MAC_WATCH_WRITE));
+	}
+    }
+#endif
+
+  switch (access_type)
+    {
+    case MAC_WATCH_READ:
+      tracer_event_record_force(watchpoint[ index ].trc_id,value);
+      break;
+    case MAC_WATCH_WRITE:
+      tracer_event_record(watchpoint[ index ].trc_id,value);
+      break;
+    case (MAC_WATCH_READ | MAC_WATCH_WRITE):
+      tracer_event_record(watchpoint[ index ].trc_id,value);
+      break;
+    default:
+      /* do nothing */
+      break;
+    }
+
+
+  if (((access_type | MAC_WATCH_WRITE) != 0) && 
+      (machine.state->watchpoint_modify_on_first_write[ index ]))
     {
       int v_addr  = watchpoint[index].addr;
       int v_size  = watchpoint[index].size;
@@ -186,16 +228,10 @@ void machine_monitor_add_trace(void)
     }
 
   /*
-  if (strcmp(watchpoint[ index ].name,"mywatchmoint") == 0)
-    {
-      if (value == 5)
-	{
-	  mcu_signal_add(SIG_MAC | MAC_TO_SIG(MAC_WATCH_WRITE));
-	}
-    }
-  */
-
-  if (strcmp(watchpoint[ index ].name,"__WSIMLOGBUFFER") == 0)
+   * Log messages from application: see svn:wsim/utils/wsimlog/WSimLog.h
+   */
+  if (((access_type | MAC_WATCH_WRITE) != 0) && 
+      (strcmp(watchpoint[ index ].name,"__WSIMLOGBUFFER") == 0))
     {
       int iter;
       uint16_t int16;
@@ -279,7 +315,6 @@ void machine_monitor_set(char* args, elf32_t elf)
 	    {
 	      sscanf(subtoken, "%d", & watchpoint[watchpoint_max].size );
 	    }
-	  ERROR("machine:monitor: name %s addr %x size %d\n",watchpoint[watchpoint_max].name, watchpoint[watchpoint_max].addr, watchpoint[watchpoint_max].size);
 	}
       /* NAME */
       else 
@@ -317,7 +352,13 @@ void machine_monitor_set(char* args, elf32_t elf)
 		watchpoint[watchpoint_max].mode |= MAC_WATCH_READ;
 	      if (c0 == 'w' || c1 == 'w')
 		watchpoint[watchpoint_max].mode |= MAC_WATCH_WRITE;
-	      
+#if 0
+	      OUTPUT("machine:monitor:add name %s addr %x size %d mode %c%c\n",
+		      watchpoint[watchpoint_max].name, 
+		      watchpoint[watchpoint_max].addr, 
+		      watchpoint[watchpoint_max].size,
+		      c0?c0:'.',c1?c1:'.');
+#endif
 	      watchpoint_max ++;
 	    }
 	}

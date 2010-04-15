@@ -62,8 +62,11 @@ msp430_watchdog_update(void)
       HW_DMSG_WD("msp430:watchdog: interval wrapping\n");
       if (MCU.watchdog.wdtctl.b.wdttmsel == WDT_MODE_WATCHDOG)
 	{
+#define NO_WATCHDOG_ONLY_WARNS
 #if defined(WATCHDOG_ONLY_WARNS)
+	  WARNING("msp430:watchdog: =======================================\n");
 	  WARNING("msp430:watchdog: set interrupt RESET\n");
+	  WARNING("msp430:watchdog: =======================================\n");
 	  MCU.watchdog.wdtcnt = 0;
 	  MCU.watchdog.wdtctl.b.wdttmsel = WDT_MODE_INTERVAL;
 #else

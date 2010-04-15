@@ -220,15 +220,14 @@ static inline uint32_t machine_run(void)
 	if ((sig & MAC_TO_SIG(MAC_WATCH_READ)) != 0)
 	  {
 	    mcu_signal_remove(SIG_MAC | MAC_TO_SIG(MAC_WATCH_READ));
-	    /* trace (VCD) are working on writes */
-	    /* machine_monitor_add_trace();      */
+	    machine_monitor_add_trace(MAC_WATCH_READ);
 	    sig = mcu_signal_get();
 	  }
 
 	if ((sig & MAC_TO_SIG(MAC_WATCH_WRITE)) != 0)
 	  {
 	    mcu_signal_remove(SIG_MAC | MAC_TO_SIG(MAC_WATCH_WRITE));
-	    machine_monitor_add_trace();
+	    machine_monitor_add_trace(MAC_WATCH_WRITE);
 	    sig = mcu_signal_get();
 	  }
       }

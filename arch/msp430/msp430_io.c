@@ -42,12 +42,12 @@ static void    msp430_write16_sigbus (uint16_t addr, int16_t val);
 
 #define STACK_DUMP_LINES 32
 
-static void SIGBUS_EXIT(void)
+static void SIGBUS_EXIT(uint32_t sig)
 {
   ERROR("msp430: SIGBUS\n");
   msp430_print_registers(4);
   msp430_print_stack(STACK_DUMP_LINES);
-  mcu_signal_add(SIG_MCU | SIG_MCU_BUS);
+  mcu_signal_add(SIG_MCU | SIG_MCU_BUS | sig);
 }
 
 
@@ -56,7 +56,7 @@ static void msp430_write8_sigbus(uint16_t addr, int8_t val)
   ERROR("msp430: =======================\n");
   ERROR("msp430:io: write byte [0x%04x] = 0x%02x at pc 0x%04x\n",addr,(uint8_t)val,mcu_get_pc());
   ERROR("msp430:io:     -- target unknown or block not implemented\n");
-  SIGBUS_EXIT();
+  SIGBUS_EXIT(0);
   ERROR("msp430: =======================\n");
 }
 
@@ -65,7 +65,7 @@ static void msp430_write16_sigbus(uint16_t addr, int16_t val)
   ERROR("msp430: =======================\n");
   ERROR("msp430:io: write short [0x%04x] = 0x%04x at pc 0x%04x\n",addr,(uint16_t)val,mcu_get_pc());
   ERROR("msp430:io:     -- target unknown or block not implemented\n");
-  SIGBUS_EXIT();
+  SIGBUS_EXIT(0);
   ERROR("msp430: =======================\n");
 }
 
@@ -74,7 +74,10 @@ static int8_t msp430_read8_sigbus(uint16_t addr)
   ERROR("msp430: =======================\n");
   ERROR("msp430:io: read byte at address 0x%04x at pc 0x%04x\n",addr,mcu_get_pc());
   ERROR("msp430:io:     -- target unknown or block not implemented\n");
-  SIGBUS_EXIT();
+  if (mcu_get_pc() == addr)
+    {
+      SIGBUS_EXIT(SIG_MCU_ILL);
+    }
   ERROR("msp430: =======================\n");
   return 0;
 }
@@ -84,6 +87,10 @@ static int16_t msp430_read16_sigbus(uint16_t addr)
   ERROR("msp430: =======================\n");
   ERROR("msp430:io: read short at address 0x%04x at pc 0x%04x\n",addr,mcu_get_pc());
   ERROR("msp430:io:     -- target unknown or block not implemented\n");
+  if (mcu_get_pc() == addr)
+    {
+      SIGBUS_EXIT(SIG_MCU_ILL);
+    }
   ERROR("msp430: =======================\n");
   return 0;
 }

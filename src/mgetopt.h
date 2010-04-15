@@ -9,7 +9,7 @@
 #ifndef WSIM_MGETOPT_H
 #define WSIM_MGETOPT_H
 
-#define MAX_OPTIONS 30
+#define MAX_OPTIONS 50
 
 enum option_type {
   no_argument        = 0,

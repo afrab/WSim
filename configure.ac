@@ -25,7 +25,7 @@ dnl Install directories
 dnl --------------------------------------------------------------
 
 EXTRAOBJS=""
-EXTRALIBS="-lm"
+EXTRALIBS="-lm -lz"
 
 dnl --------------------------------------------------------------
 dnl Checks for compilation flags
@@ -512,9 +512,6 @@ case "${host}" in
 	   gui_type="X11"
 	   LDFLAGS="$LDFLAGS -L/usr/X11/lib"
 	fi
-	if test "${zlib_sum}" = "yes" ; then 
-	   LDFLAGS="$LDFLAGS -lz"
-	fi
 	;;
 esac
 
@@ -562,6 +559,10 @@ AM_CONDITIONAL([BUILD_GUI_NONE], [test "${gui_type}" = "none"])
 if test "${gui_type}" = "none" ; then
    AC_DEFINE([GUI_NONE], [1], [Defines wether No-GUI is selected])
 fi
+
+#if test "${zlib_sum}" = "system" ; then 
+#   EXTRALIBS="$EXTRALIBS -lz"
+#fi
 
 dnl --------------------------------------------------------------
 dnl Checks for libraries.

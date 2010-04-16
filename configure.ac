@@ -503,6 +503,7 @@ case "${host}" in
 	*-apple-darwin* )
         # powerpc-apple-darwin8.6.0 
 	# i686-apple-darwin8.9.1
+	# i386-apple-darwin9.8.0
 	HOSTTYPE="MacOSX"
 	CFLAGS="$CFLAGS -DMACOSX"
 	NEEDLARGEFILES="yes"
@@ -510,6 +511,9 @@ case "${host}" in
 	   # use X11 version until someone builds a Cocoa interface
 	   gui_type="X11"
 	   LDFLAGS="$LDFLAGS -L/usr/X11/lib"
+	fi
+	if test "${zlib_sum}" = "yes" ; then 
+	   LDFLAGS="$LDFLAGS -lz"
 	fi
 	;;
 esac

@@ -14,7 +14,7 @@ wsnet1_SOURCES=			\
 	log.c			\
 	nodes.c			\
 	packets.c		\
-	sim_conf.c			\
+	sim_conf.c		\
 	simulation.c		\
 	worldsens_srv.c		\
 	worldsens_wsnet.c 	\

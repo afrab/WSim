@@ -132,7 +132,7 @@ int devices_create()
   res += led_device_create       (LED6,    0xee0000,OFF,BKG,"led6");
   res += led_device_create       (LED7,    0xee0000,OFF,BKG,"led7");
   res += led_device_create       (LED8,    0xee0000,OFF,BKG,"led8");
-  res += spidev_dsp_device_create(SPIDSP1, 0);
+  res += spidev_dsp_device_create(SPIDSP1, 0, "waspxdsp");
   res += uigfx_device_create     (LOGO1,   waspx);
 
   /*********************************/
@@ -143,22 +143,18 @@ int devices_create()
     int lw,lh;
     int LW,LH;
 
-    machine.device[LED1].ui_get_size(LED1,&lw,&lh);
-#if defined(LOGO1)
+    machine.device[LED1 ].ui_get_size(LED1,&lw,&lh);
     machine.device[LOGO1].ui_get_size(LOGO1, &LW, &LH);
-#endif
 
-    machine.device[LED1].ui_set_pos(LED1,    0,  0);
-    machine.device[LED2].ui_set_pos(LED2,   lw,  0);
-    machine.device[LED3].ui_set_pos(LED3, 2*lw,  0);
-    machine.device[LED4].ui_set_pos(LED4, 3*lw,  0);
-    machine.device[LED5].ui_set_pos(LED5, 4*lw,  0);
-    machine.device[LED6].ui_set_pos(LED6, 5*lw,  0);
-    machine.device[LED7].ui_set_pos(LED7, 6*lw,  0);
-    machine.device[LED8].ui_set_pos(LED8, 7*lw,  0);
-#if defined(LOGO1)
-    machine.device[LOGO1].ui_set_pos (LOGO1,        0,   0);
-#endif
+    machine.device[LED1 ].ui_set_pos(LED1,    0,  0);
+    machine.device[LED2 ].ui_set_pos(LED2,   lw,  0);
+    machine.device[LED3 ].ui_set_pos(LED3, 2*lw,  0);
+    machine.device[LED4 ].ui_set_pos(LED4, 3*lw,  0);
+    machine.device[LED5 ].ui_set_pos(LED5, 4*lw,  0);
+    machine.device[LED6 ].ui_set_pos(LED6, 5*lw,  0);
+    machine.device[LED7 ].ui_set_pos(LED7, 6*lw,  0);
+    machine.device[LED8 ].ui_set_pos(LED8, 7*lw,  0);
+    machine.device[LOGO1].ui_set_pos(LOGO1,        0,   0);
   }
 
   /*********************************/
@@ -209,10 +205,6 @@ int devices_update()
 
   /* port 3 :                          */
   /* ========                          */
-  /*   P3.7 urxd1 : serial             */
-  /*   P3.6 utxd1 : serial             */
-  /*   P3.5 urxd0                      */
-  /*   P3.4 utxd0                      */ 
 
   /* port 4 :                          */
   /* ========                          */
@@ -221,7 +213,7 @@ int devices_update()
   /*   P4.5 spidsp ~W                  */
   if (msp430_digiIO_dev_read(PORT4,&val8))
     {
-      HW_DMSG("platform waspx: Port4, value = %02x\n", val8);
+      HW_DMSG("waspx:write port4, value = %02x\n", val8);
       machine.device[SPIDSP1].write(SPIDSP1, 
 				    SPIDEV_DSP_S | SPIDEV_DSP_W | SPIDEV_DSP_M, 
 				    (BIT(val8,7) << SPIDEV_DSP_S_SHIFT) | 
@@ -231,12 +223,13 @@ int devices_update()
       SPIDSP_Wn  = BIT(val8,5);
     }
 
-  /* port 5 :                          */
+  /* port 6 :                          */
   /* ========                          */
-  /*   P5.x leds                       */
-  if (msp430_digiIO_dev_read(PORT5,&val8))
+  /*   P6.x leds                       */
+  if (msp430_digiIO_dev_read(PORT6,&val8))
     {
       int i;
+      printf("refresh leds 0x%02x\n",val8);
       for(i = LED1; i <= LED8 ; i++)
 	{
 	  machine.device[i].write(i,LED_DATA,BIT(val8,(i - LED1)));
@@ -254,25 +247,12 @@ int devices_update()
     case USART_MODE_SPI:
       if (msp430_usart0_dev_read_spi(&val8))
 	{
+	  HW_DMSG("waspx:write spi0, value = %02x ====================================\n", val8);
 	  machine.device[SPIDSP1].write(SPIDSP1, SPIDEV_DSP_D, val8);
 	  etracer_slot_access(0x0, 1, ETRACER_ACCESS_WRITE, ETRACER_ACCESS_BYTE, 
 			      ETRACER_ACCESS_LVL_SPI0, 0);
 	}      
       break; 
-    case USART_MODE_UART:
-      break;
-    default:
-      break;
-    }
-
-  /* Usart1  port 3                    */
-  /* ==============                    */
-  switch (MCU.usart1.mode)
-    {
-    case USART_MODE_SPI:
-      break;
-    case USART_MODE_UART:
-      break;
     default:
       break;
     }
@@ -282,63 +262,44 @@ int devices_update()
   /* devices -> MCU                                                              */
   /* *************************************************************************** */
 
-#define READ_DEV_TO_UART(DEV,USART,MASK)                    \
-do                                                          \
-  {                                                         \
-    if (MCU.USART.uxrx_shift_empty == 1)                    \
-      {                                                     \
-         machine.device[ DEV ].read( DEV ,&mask,&value);    \
-         if ((mask & MASK) != 0)                            \
-           {                                                \
-	     msp430_##USART##_dev_write_uart(value & MASK); \
-           }                                                \
-      }                                                     \
-  }                                                         \
-while(0)
-
-#define READ_DEV_TO_SPI(DEV,USART,MASK)			    \
-do                                                          \
-  {                                                         \
-    if (MCU.USART.uxrx_shift_empty == 1)                    \
-      {                                                     \
-         machine.device[ DEV ].read( DEV ,&mask,&value);    \
-         if ((mask & MASK) != 0)                            \
-           {                                                \
-	     msp430_##USART##_dev_write_spi(value & MASK);  \
-           }                                                \
-      }                                                     \
-  }                                                         \
-while(0)
-
-
-  /* input on usart0 line */
   {
     uint32_t mask, value;
-    switch (MCU.usart0.mode)
-      {
-      case USART_MODE_UART:
-	break;
-      case USART_MODE_SPI:
-	{
-	  READ_DEV_TO_SPI(SPIDSP1,usart0,SPIDEV_DSP_D);
-	  break;
-	}
-      case USART_MODE_I2C:
-	break;
-      }
-  }
+    machine.device[SPIDSP1].read(SPIDSP1, &mask, &value);
 
-  /* input on usart1 line */
-  {
-    switch (MCU.usart1.mode)
+    /* input on usart0 line :: SPI device is slave */
+    if ((mask & SPIDEV_DSP_D) != 0)
       {
-      case USART_MODE_UART:
-	break;
-      case USART_MODE_SPI:
-	break;
-      case USART_MODE_I2C:
-	break;
+	if (MCU.usart0.mode != USART_MODE_SPI)
+	  {
+	    ERROR("waspx:devices: read data for SPI0 while not in SPI mode ?\n");
+	  }
+	HW_DMSG("waspx:read spi0, value = %02x\n", (value & SPIDEV_DSP_D) >> SPIDEV_DSP_D_SHIFT);
+	msp430_usart0_dev_write_spi((value & SPIDEV_DSP_D) >> SPIDEV_DSP_D_SHIFT);
+
+	/*
+	etracer_slot_access(0x0, 1, ETRACER_ACCESS_READ, 
+			    ETRACER_ACCESS_BYTE, ETRACER_ACCESS_LVL_SPI0, 0);
+	*/
       }
+
+    /* input on usart1 line :: SPI device is master */
+    if ((mask & SPIDEV_DSP2_D) != 0)
+      {
+	if (MCU.usart1.mode != USART_MODE_SPI)
+	  {
+	    ERROR("waspx:devices: read data for SPI1 while not in SPI mode ?\n");
+	  }
+	HW_DMSG("waspx:write spi1, value = %02x\n", (value & SPIDEV_DSP2_D) >> SPIDEV_DSP2_D_SHIFT);
+	msp430_usart1_dev_write_spi((value & SPIDEV_DSP2_D) >> SPIDEV_DSP2_D_SHIFT);
+
+	etracer_slot_access(0x0, 1, ETRACER_ACCESS_WRITE, ETRACER_ACCESS_BYTE, 
+			      ETRACER_ACCESS_LVL_SPI1, 0);
+	/*
+	etracer_slot_access(0x0, 1, ETRACER_ACCESS_READ, ETRACER_ACCESS_BYTE, 
+			      ETRACER_ACCESS_LVL_SPI1, 0);
+	*/
+      }
+
   }
 
 

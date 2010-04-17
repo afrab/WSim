@@ -7,30 +7,6 @@
  **/
 
 
-/* This device is inspired from the spidev_master template to test and 
- * demonstrate how to connect an SPI device in master mode (MSP
- * in slave mode).
- * In addition to the SPI ports, this device uses a SPI mode pin.
- * It enables the device to know if the MSP is in slave or master
- * mode to ajust its own SPI mode.
- *
- * The device behaviour is very simple and only intented to test
- * the right function of the SPI in slave mode : first it saves
- * data coming from the MSP430 (MSP in master mode), and when it
- * receives a SPI master mode signal, goes in SPI master mode, 
- * and starts to send received data through SPI.
- *
- * Note that when a SPI device is in master mode, it has to
- * evaluate the time lag to send a byte through the SPI before
- * sending it, as data is send per byte and as the USART model of
- * the MSP430 implementation in WSim puts in UXRXBUF immediately.
- * 
- * Concerning data in UXTXBUF of the MSP430, a delay is computed
- * only when the SPI is in master mode (MSP430 side), but not in
- * slave mode (as it is already taken into consideration by the 
- * device).
- */
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -42,15 +18,10 @@
 /***************************************************/
 /***************************************************/
 
-#define SPIDEV_DSP_MODE_SLAVE  0
-#define SPIDEV_DSP_MODE_MASTER 1
+#define DSP_MODE_SLAVE  0
+#define DSP_MODE_MASTER 1
 
-#define SPIDEV_DSP_MASTER_BAUDRATE 38400
-
-#define NAME      "spidsp"
-
-tracer_id_t TRACER_SPIDEV_DSP_STATE;
-tracer_id_t TRACER_SPIDEV_DSP_STROBE;
+#define DSP_MASTER_BAUDRATE 1000000
 
 /***************************************************/
 /***************************************************/
@@ -66,50 +37,68 @@ tracer_id_t TRACER_SPIDEV_DSP_STROBE;
 /***************************************************/
 /***************************************************/
 /***************************************************/
-#define TAB_MAX 200
-#define SPIDEV_DSP_WAIT_FOR_TX 10
+
+#define DSP_MEM_SIZE 200
+
+#define DSP_WAIT_FOR_TX 10
 
 struct spidev_dsp_t 
 {
 
   uint8_t select_bit;           /* chip select   */
   uint8_t write_protect_bit;    /* write protect */
+  
+  /*********************/
+  /* SPI Slave port    */
+  /*********************/
 
   /* data just written */
-  uint32_t data_w_val;
-  uint32_t data_w_mask;
-  uint8_t  data_w_ready;
+  uint32_t slave_data_w_val;
+  uint32_t slave_data_w_mask;   
+  uint32_t slave_data_r_val;
+  uint32_t slave_data_r_nextval; /* becomes r_val on update */
 
-  /* data to be read */
-  uint8_t  data_r_ready;        /* boolean */
-  uint32_t data_r_mask;         /* mask    */
-  uint32_t data_r_val;          /* value   */
-
-  uint32_t data_r_val_temp;      /* temp value */
+  /*********************/
+  /* SPI Master port   */
+  /*********************/
   
-  /* busy timing */
-  uint64_t end_of_busy_time;    /* nano second */
-
-  /* table for test */
-  uint8_t  spidev_dsp_data[TAB_MAX];
-  int32_t  spidev_dsp_index;
-  int32_t  spidev_dsp_index_max;
-
-  /* current spi mode */
-  uint8_t  spidev_dsp_mode;          /* boolean     */
-
   /* spi master time handling */
   uint64_t spidev_dsp_tx_start_time; /* nano second */
   uint64_t spidev_dsp_tx_lag_time;   /* nano second */
   uint8_t  spidev_dsp_tx_processing; /* boolean     */
   int      spidev_dsp_wait_for_tx;   /* number of update call to drop before sending */
 
+  /*********************/
+  /* Internals         */
+  /*********************/
+
+  /* busy timing */
+  uint64_t end_of_busy_time;         /* nano second */
+
+  /* table for test */
+  uint8_t  dsp_data[DSP_MEM_SIZE];
+  int32_t  dsp_index;
+  int32_t  dsp_index_max;
+
+  /* current spi mode */
+  uint8_t  dsp_mode;          /* boolean     */
+
 };
 
-#define SPIDEV_DSPMAST      ((struct spidev_dsp_t*)(machine.device[dev].data))
+
+#define DSP_NAME   machine.device[dev].name
+#define DSP_DATA   ((struct spidev_dsp_t*)(machine.device[dev].data))
+#define DSP_MODE   DSP_DATA->dsp_mode
 
 /***************************************************/
-/** Flash external entry points ********************/
+/***************************************************/
+/***************************************************/
+
+tracer_id_t TRACER_SPIDEV_DSP_STATE;
+tracer_id_t TRACER_SPIDEV_DSP_STROBE;
+
+/***************************************************/
+/** DSP external entry points **********************/
 /***************************************************/
 
 int  spidev_dsp_reset       (int dev);
@@ -134,7 +123,7 @@ int spidev_dsp_add_options(int UNUSED dev_num, int dev_id, const char UNUSED *de
 {
   if (dev_id >= 1)
     {
-      ERROR("spidev_dsp: too much devices, please rewrite option handling\n");
+      ERROR("spidsp: too much devices, please rewrite option handling\n");
       return -1;
     }
 
@@ -154,7 +143,9 @@ int spidev_dsp_device_size()
 /***************************************************/
 /***************************************************/
 
-int spidev_dsp_device_create(int dev, int UNUSED id)
+#define DSP_NAME_MAX  15
+
+int spidev_dsp_device_create(int dev, int UNUSED id, const char *dev_name)
 {
   machine.device[dev].reset         = spidev_dsp_reset;
   machine.device[dev].delete        = spidev_dsp_delete;
@@ -170,30 +161,14 @@ int spidev_dsp_device_create(int dev, int UNUSED id)
   machine.device[dev].ui_set_pos    = spidev_dsp_ui_set_pos;
 
   machine.device[dev].state_size    = spidev_dsp_device_size();
-  machine.device[dev].name          = NAME " example";
+  machine.device[dev].name          = malloc(DSP_NAME_MAX);
+  strncpy(machine.device[dev].name, dev_name, DSP_NAME_MAX);
 
-#if defined(DEBUG_ME_HARDER)
-  HW_DMSG_SPI(NAME ": =================================== \n");
-  HW_DMSG_SPI(NAME ": 0000 CMSW dddd dddd == MASK         \n");
-  HW_DMSG_SPI(NAME ":      C              : Clock         \n");
-  HW_DMSG_SPI(NAME ":       M             : SPI Mode      \n");
-  HW_DMSG_SPI(NAME ":        S            : Chip Select   \n");
-  HW_DMSG_SPI(NAME ":         W           : Write Protect \n");
-  HW_DMSG_SPI(NAME ":           dddd dddd : SPI data      \n");
-  HW_DMSG_SPI(NAME ": =================================== \n");
-#endif
+  TRACER_SPIDEV_DSP_STATE  = tracer_event_add_id(8, "state"  , dev_name);
+  TRACER_SPIDEV_DSP_STROBE = tracer_event_add_id(8, "strobe" , dev_name);
 
-  TRACER_SPIDEV_DSP_STATE  = tracer_event_add_id(8, "state"  , NAME);
-  TRACER_SPIDEV_DSP_STROBE = tracer_event_add_id(8, "strobe" , NAME);
-
-  SPIDEV_DSPMAST->spidev_dsp_index         = 0;
-  SPIDEV_DSPMAST->spidev_dsp_index_max     = 0;
-  SPIDEV_DSPMAST->spidev_dsp_mode          = SPIDEV_DSP_MODE_SLAVE;
-  SPIDEV_DSPMAST->spidev_dsp_tx_processing = 0;
-  SPIDEV_DSPMAST->spidev_dsp_tx_lag_time   = 7 * (1000000000 / SPIDEV_DSP_MASTER_BAUDRATE); /* in nano second */
-  HW_DMSG_SPI(NAME ": lag time = %lld\n", SPIDEV_DSPMAST->spidev_dsp_tx_lag_time);
-  SPIDEV_DSPMAST->spidev_dsp_wait_for_tx = SPIDEV_DSP_WAIT_FOR_TX;
-
+  spidev_dsp_reset(dev);
+  HW_DMSG_SPI("%s: device create done\n", DSP_NAME);
   return 0;
 }
 
@@ -201,9 +176,18 @@ int spidev_dsp_device_create(int dev, int UNUSED id)
 /***************************************************/
 /***************************************************/
 
-int spidev_dsp_reset(int UNUSED dev)
+int spidev_dsp_reset(int dev)
 {
-  HW_DMSG_SPI(NAME ": device reset\n");
+  HW_DMSG_SPI("%s: device reset\n", DSP_NAME);
+  DSP_DATA->dsp_index                = 0;
+  DSP_DATA->dsp_index_max            = 0;
+  DSP_DATA->dsp_mode                 = DSP_MODE_SLAVE;
+  DSP_DATA->slave_data_r_val         = 0;
+  DSP_DATA->slave_data_r_nextval     = 0;
+
+  DSP_DATA->spidev_dsp_tx_processing = 0;
+  DSP_DATA->spidev_dsp_tx_lag_time   = 7 * (1000000000 / DSP_MASTER_BAUDRATE); /* in nano second */
+  DSP_DATA->spidev_dsp_wait_for_tx   = DSP_WAIT_FOR_TX;
   return 0;
 }
 
@@ -211,9 +195,10 @@ int spidev_dsp_reset(int UNUSED dev)
 /***************************************************/
 /***************************************************/
 
-int spidev_dsp_delete(int UNUSED dev)
+int spidev_dsp_delete(int dev)
 {
-  HW_DMSG_SPI(NAME ": device delete\n");
+  HW_DMSG_SPI("%s: device delete\n", DSP_NAME);
+  free(DSP_NAME);
   return 0;
 }
 
@@ -223,14 +208,13 @@ int spidev_dsp_delete(int UNUSED dev)
 
 int spidev_dsp_power_up(int UNUSED dev)
 {
-  HW_DMSG_SPI(NAME ": device power up\n");
-
+  HW_DMSG_SPI("%s: device power up\n", DSP_NAME);
   return 0;
 }
 
 int spidev_dsp_power_down(int UNUSED dev)
 {
-  HW_DMSG_SPI(NAME ": device power down\n");
+  HW_DMSG_SPI("%s: device power down\n", DSP_NAME);
   return 0;
 }
 
@@ -238,15 +222,10 @@ int spidev_dsp_power_down(int UNUSED dev)
 /***************************************************/
 /***************************************************/
 
-/*
- * read is done only on a junk write
- *
- */
-
 void spidev_dsp_read(int UNUSED dev, uint32_t *mask, uint32_t *value)
 {
   *value = 0;
-  *mask  = SPIDEV_DSPMAST->data_r_mask;
+  *mask  = DSP_DATA->slave_data_w_mask; /* do wa follow a slave write ? */
 
   /***************************
    * DATA pins.
@@ -254,94 +233,69 @@ void spidev_dsp_read(int UNUSED dev, uint32_t *mask, uint32_t *value)
 
   if (*mask && SPIDEV_DSP_D)
     {
-      *value = SPIDEV_DSPMAST->data_r_val;
+      *value = DSP_DATA->slave_data_r_val;
     }
 
   if (*mask != 0)
     {
-      HW_DMSG_SPI(NAME ": device write to mcu [val=0x%02x,mask=0x%04x] \n", *value, *mask);
+      HW_DMSG_SPI("%s: device write to mcu [val=0x%02x,mask=0x%04x] \n", DSP_NAME, *value, *mask);
     }
-
-  SPIDEV_DSPMAST->data_r_mask = 0;
 }
 
 /***************************************************/
 /***************************************************/
 /***************************************************/
-
-void spidev_dsp_fill_tab(int dev, uint8_t val)
-{
-  if (SPIDEV_DSPMAST->spidev_dsp_mode == SPIDEV_DSP_MODE_SLAVE)  
-    {
-      SPIDEV_DSPMAST->data_w_val = val;
-      SPIDEV_DSPMAST->data_r_val = val;
-      SPIDEV_DSPMAST->data_r_mask = SPIDEV_DSP_D;
-      SPIDEV_DSPMAST->spidev_dsp_data[SPIDEV_DSPMAST->spidev_dsp_index] = val;
-      HW_DMSG_SPI(NAME ": value from SOMI put in the table at index %d [0x%02x]\n", SPIDEV_DSPMAST->spidev_dsp_index, val);
-      SPIDEV_DSPMAST->spidev_dsp_index++;
-    }
-  else
-    SPIDEV_DSPMAST->data_w_val = val;
-}
-
 
 void spidev_dsp_write(int dev, uint32_t mask, uint32_t value)
 {
-  HW_DMSG_SPI(NAME ": device write from mcu value 0x%04x mask 0x%04x\n",value, mask);
-
+  HW_DMSG_SPI("%s: device write from mcu value 0x%08x mask 0x%08x\n",DSP_NAME, value, mask);
 
   /***************************
    * Control pins. WRITE PROTECT
    ***************************/
-
-  if (mask & SPIDEV_DSP_W) /* write protect netgated */
+  if (mask & SPIDEV_DSP_W) /* write protect negated */
     {
-      //SPIDEV_DSPMAST->write_protect_bit  = ! (value & SPIDEV_DSP_W);
-      //HW_DMSG_SPI(NAME ":    flash write protect W = %d\n",SPIDEV_DSPMAST->write_protect_bit);
+      DSP_DATA->write_protect_bit  = ! (value & SPIDEV_DSP_W);
+      HW_DMSG_SPI("%s:    write protect W = %d\n", DSP_NAME, DSP_DATA->write_protect_bit);
     }
-
 
   /***************************
    * Control pins. CLOCK
    ***************************/
-
   if (mask & SPIDEV_DSP_C) /* clock */
     {
-      ERROR(NAME ":    clock pin should not be used during simulation\n");
-      HW_DMSG_SPI(NAME ":    clock pin should not be used during simulation\n");
-      // SPIDEV_DSP_DATA->clock = (value >> SPIDEV_DSP_C_SHIFT) & 0x1;
+      ERROR("%s:    clock pin should not be used during simulation\n", DSP_NAME);
+      HW_DMSG_SPI("%s:    clock pin should not be used during simulation\n", DSP_NAME);
+      // DSP_DATA->clock = (value >> SPIDEV_DSP_C_SHIFT) & 0x1;
     }
 
-
   /***************************
-   * Control pins. SPI MODE
+   * Control pins. MODE
    ***************************/
-
   if (mask & SPIDEV_DSP_M)
     {
-      if (value)
+      if ((value & SPIDEV_DSP_M) == SPIDEV_DSP_M)
 	{
-	  SPIDEV_DSPMAST->spidev_dsp_mode = SPIDEV_DSP_MODE_MASTER;
-	  SPIDEV_DSPMAST->spidev_dsp_index_max = SPIDEV_DSPMAST->spidev_dsp_index;
-	  HW_DMSG_SPI(NAME ": spi mode master, index max = %d\n", SPIDEV_DSPMAST->spidev_dsp_index_max); 
+	  DSP_DATA->dsp_mode      = DSP_MODE_MASTER;
+	  DSP_DATA->dsp_index_max = DSP_DATA->dsp_index;
+	  HW_DMSG_SPI("%s: spi mode master, index max = %d\n", DSP_NAME, DSP_DATA->dsp_index_max); 
 	}
       else
 	{
-	  SPIDEV_DSPMAST->spidev_dsp_mode = SPIDEV_DSP_MODE_SLAVE;
-	  SPIDEV_DSPMAST->spidev_dsp_index_max = 0;
-	  SPIDEV_DSPMAST->spidev_dsp_index = 0;
-	  HW_DMSG_SPI(NAME ": spi mode master\n"); 
+	  DSP_DATA->dsp_mode      = DSP_MODE_SLAVE;
+	  DSP_DATA->dsp_index     = 0;
+	  DSP_DATA->dsp_index_max = 0;
+	  HW_DMSG_SPI("%s: spi mode master\n", DSP_NAME); 
 	}
     }
-
 
   /***************************
    * DATA pins.
    ***************************/
-
   if (mask & SPIDEV_DSP_D)
     { 
-      spidev_dsp_fill_tab(dev, (uint8_t)(value & SPIDEV_DSP_D));
+      DSP_DATA->slave_data_w_val  = (uint8_t)(value & SPIDEV_DSP_D);
+      DSP_DATA->slave_data_w_mask = SPIDEV_DSP_D;
     }
 }
 
@@ -351,52 +305,84 @@ void spidev_dsp_write(int dev, uint32_t mask, uint32_t value)
 
 void spidev_dsp_tx_end(int UNUSED dev)
 {
-  SPIDEV_DSPMAST->data_r_val = SPIDEV_DSPMAST->data_r_val_temp;
-  SPIDEV_DSPMAST->data_r_mask     = SPIDEV_DSP_D;
-  SPIDEV_DSPMAST->spidev_dsp_tx_processing = 0;
-  HW_DMSG_SPI(NAME ": Sending to mcu: value %d of the table [0x%02x], time=%lldns\n", 
-	      SPIDEV_DSPMAST->spidev_dsp_index_max - SPIDEV_DSPMAST->spidev_dsp_index, SPIDEV_DSPMAST->data_r_val, MACHINE_TIME_GET_NANO());
-  SPIDEV_DSPMAST->spidev_dsp_wait_for_tx = SPIDEV_DSP_WAIT_FOR_TX;
+  /*
+  DSP_DATA->data_r_val               = DSP_DATA->data_r_val_temp;
+  DSP_DATA->spidev_dsp_tx_processing = 0;
+  HW_DMSG_SPI("%s: Sending to mcu: value %d of the table [0x%02x], time=%lldns\n", 
+	      DSP_NAME,
+	      DSP_DATA->spidev_dsp_index_max - DSP_DATA->spidev_dsp_index, 
+	      DSP_DATA->data_r_val, MACHINE_TIME_GET_NANO());
+  DSP_DATA->spidev_dsp_wait_for_tx = DSP_WAIT_FOR_TX;
+  */
 }
 
 
 void spidev_dsp_tx_start(int UNUSED dev)
 {
-  SPIDEV_DSPMAST->data_r_val_temp      = SPIDEV_DSPMAST->spidev_dsp_data[SPIDEV_DSPMAST->spidev_dsp_index_max - SPIDEV_DSPMAST->spidev_dsp_index];
-  SPIDEV_DSPMAST->spidev_dsp_tx_start_time = MACHINE_TIME_GET_NANO();
-  SPIDEV_DSPMAST->spidev_dsp_tx_processing = 1;
+  /*
+  DSP_DATA->data_r_val_temp          = DSP_DATA->spidev_dsp_data[DSP_DATA->spidev_dsp_index_max - DSP_DATA->spidev_dsp_index];
+  DSP_DATA->spidev_dsp_tx_start_time = MACHINE_TIME_GET_NANO();
+  DSP_DATA->spidev_dsp_tx_processing = 1;
 
-  HW_DMSG_SPI(NAME ": start of wait before sending to mcu: value %d of the table [0x%02x], time=%lldns\n", SPIDEV_DSPMAST->spidev_dsp_index_max - SPIDEV_DSPMAST->spidev_dsp_index, SPIDEV_DSPMAST->data_r_val_temp, MACHINE_TIME_GET_NANO());
+  HW_DMSG_SPI("%s: start of wait before sending to mcu: value %d of the table [0x%02x], time=%lldns\n", 
+	      DSP_NAME,
+	      DSP_DATA->spidev_dsp_index_max - DSP_DATA->spidev_dsp_index, 
+	      DSP_DATA->data_r_val_temp, MACHINE_TIME_GET_NANO());
 
-  SPIDEV_DSPMAST->spidev_dsp_index--;
+  DSP_DATA->spidev_dsp_index--;
 
-  if (SPIDEV_DSPMAST->spidev_dsp_index < 0)
+  if (DSP_DATA->spidev_dsp_index < 0)
     {
-      SPIDEV_DSPMAST->spidev_dsp_index = 0;
+      DSP_DATA->spidev_dsp_index = 0;
     }
+  */
 }
 
 
 int spidev_dsp_update(int UNUSED dev)
 {
-  SPIDEV_DSPMAST->spidev_dsp_wait_for_tx--;
-
-  if (SPIDEV_DSPMAST->spidev_dsp_tx_processing && SPIDEV_DSPMAST->spidev_dsp_mode == SPIDEV_DSP_MODE_MASTER)
+  /* update current state */
+  switch (DSP_MODE) 
     {
-      if(SPIDEV_DSPMAST->spidev_dsp_tx_start_time + SPIDEV_DSPMAST->spidev_dsp_tx_lag_time <= MACHINE_TIME_GET_NANO())
+    case DSP_MODE_SLAVE:
+      if (DSP_DATA->slave_data_w_mask == SPIDEV_DSP_D)
 	{
-	  spidev_dsp_tx_end(dev);	  
+	  DSP_DATA->dsp_data[DSP_DATA->dsp_index] = DSP_DATA->slave_data_w_val;
+	  DSP_DATA->dsp_index++;
+
+	  HW_DMSG_SPI("%s: value put in the table at index %d [0x%02x]\n", 
+		      DSP_NAME, DSP_DATA->dsp_index - 1, DSP_DATA->slave_data_w_val);
 	}
-      return 0;
-    }
-	 
+      break;
 
-  if (SPIDEV_DSPMAST->spidev_dsp_mode == SPIDEV_DSP_MODE_MASTER && 
-      SPIDEV_DSPMAST->spidev_dsp_wait_for_tx <= 0)
+    case DSP_MODE_MASTER:
+      if (DSP_DATA->spidev_dsp_tx_processing)
+	{
+	  if (DSP_DATA->spidev_dsp_tx_start_time + 
+	      DSP_DATA->spidev_dsp_tx_lag_time <= MACHINE_TIME_GET_NANO())
+	    {
+	      spidev_dsp_tx_end(dev);	  
+	    }
+	  return 0;
+	}
+      
+      if (DSP_DATA->spidev_dsp_wait_for_tx <= 0)
+	{
+	  spidev_dsp_tx_start(dev);
+	}
+      break;
+      
+    default:
+      break;
+    }
+
+  /* prepare next data to read on SPI slave port */
+  if (DSP_DATA->slave_data_w_mask)
     {
-      spidev_dsp_tx_start(dev);
+      DSP_DATA->slave_data_r_val  = DSP_DATA->slave_data_w_val;
     }
-
+  DSP_DATA->slave_data_w_mask = 0;
+ 
   return 0;
 }
 

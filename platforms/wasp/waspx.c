@@ -21,6 +21,13 @@
 #include "libgui/ui.h"
 
 
+#define NO_UPDATE_LOOP_PRINT
+#if defined(UPDATE_LOOP_PRINT)
+#define HW_UP(x...) VERBOSE(MSG_DEVICES,x)
+#else
+#define HW_UP(x...) do {} while(0)
+#endif
+
 /* ************************************************** */
 /* ************************************************** */
 /* ************************************************** */
@@ -199,6 +206,8 @@ int devices_update()
   int refresh = 0;
   uint8_t  val8;
 
+  
+  HW_UP("......\n");
   /* *************************************************************************** */
   /* MCU -> devices                                                              */
   /* *************************************************************************** */
@@ -247,7 +256,7 @@ int devices_update()
     case USART_MODE_SPI:
       if (msp430_usart0_dev_read_spi(&val8))
 	{
-	  HW_DMSG("waspx:write spi0, value = %02x ====================================\n", val8);
+	  HW_UP("waspx:write spi0, value = %02x == slave\n", val8);
 	  machine.device[SPIDSP1].write(SPIDSP1, SPIDEV_DSP_D, val8);
 	  etracer_slot_access(0x0, 1, ETRACER_ACCESS_WRITE, ETRACER_ACCESS_BYTE, 
 			      ETRACER_ACCESS_LVL_SPI0, 0);
@@ -273,7 +282,7 @@ int devices_update()
 	  {
 	    ERROR("waspx:devices: read data for SPI0 while not in SPI mode ?\n");
 	  }
-	HW_DMSG("waspx:read spi0, value = %02x\n", (value & SPIDEV_DSP_D) >> SPIDEV_DSP_D_SHIFT);
+	HW_UP("waspx:read spi0, value = %02x == slave\n", (value & SPIDEV_DSP_D) >> SPIDEV_DSP_D_SHIFT);
 	msp430_usart0_dev_write_spi((value & SPIDEV_DSP_D) >> SPIDEV_DSP_D_SHIFT);
 
 	/*
@@ -289,7 +298,7 @@ int devices_update()
 	  {
 	    ERROR("waspx:devices: read data for SPI1 while not in SPI mode ?\n");
 	  }
-	HW_DMSG("waspx:write spi1, value = %02x\n", (value & SPIDEV_DSP2_D) >> SPIDEV_DSP2_D_SHIFT);
+	HW_UP("waspx:write spi1, value = %02x == master\n", (value & SPIDEV_DSP2_D) >> SPIDEV_DSP2_D_SHIFT);
 	msp430_usart1_dev_write_spi((value & SPIDEV_DSP2_D) >> SPIDEV_DSP2_D_SHIFT);
 
 	etracer_slot_access(0x0, 1, ETRACER_ACCESS_WRITE, ETRACER_ACCESS_BYTE, 
@@ -302,6 +311,7 @@ int devices_update()
 
   }
 
+  HW_UP(".up\n");
 
   /* input on UI */
   ui_default_input("waspx:");

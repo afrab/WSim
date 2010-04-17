@@ -171,7 +171,6 @@ int spidev_dsp_device_create(int dev, int UNUSED id, const char *dev_name)
 
 int spidev_dsp_reset(int dev)
 {
-  HW_DMSG_SPI("%s: device reset\n", DSP_NAME);
   DSP_DATA->dsp_mode                 = DSP_MODE_SLAVE;
   DSP_DATA->slave_data_r_val         = 0;
   DSP_DATA->slave_data_r_nextval     = 0;
@@ -180,6 +179,7 @@ int spidev_dsp_reset(int dev)
   DSP_DATA->master_data_tx_lag_time   = 7 * (1000000000 / DSP_MASTER_BAUDRATE); /* in nano second */
   mydsp_reset(& DSP_STATE);
   mydsp_mode(& DSP_STATE, MYDSP_PASSIVE);
+  HW_DMSG_SPI("%s: device reset lag=%d\n", DSP_NAME, DSP_DATA->master_data_tx_lag_time);
   return 0;
 }
 
@@ -323,7 +323,7 @@ int spidev_dsp_update(int dev)
       /* current tx */
       if (DSP_DATA->master_data_tx_processing)
 	{
-	  if (DSP_DATA->master_data_tx_time >= MACHINE_TIME_GET_NANO())
+	  if (MACHINE_TIME_GET_NANO() >= DSP_DATA->master_data_tx_time)
 	    {
 	      DSP_DATA->master_data_w_val         = DSP_DATA->master_data_w_nextval;
 	      DSP_DATA->master_data_w_mask        = SPIDEV_DSP2_D;
@@ -343,6 +343,7 @@ int spidev_dsp_update(int dev)
 	case 1: /* nextval is ok */
 	  DSP_DATA->master_data_tx_processing = 1;
 	  DSP_DATA->master_data_tx_time = MACHINE_TIME_GET_NANO() + DSP_DATA->master_data_tx_lag_time;
+	  HW_DMSG_SPI("%s: %"PRId64" next byte at %"PRId64"\n", DSP_NAME, MACHINE_TIME_GET_NANO(), DSP_DATA->master_data_tx_time);
 	  break;
 	default: /* no output */
 	  break;

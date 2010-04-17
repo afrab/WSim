@@ -32,8 +32,9 @@
 /***************************************************/
 /***************************************************/
 
-void mydsp_create(struct dsp_internal_state_t UNUSED *st)
+void mydsp_create(struct dsp_internal_state_t *st)
 {
+  memset(st->dsp_data,0,DSP_MEM_SIZE);
   HW_DDSP("mydsp:create\n");
 }
 
@@ -62,7 +63,7 @@ void mydsp_delete(struct dsp_internal_state_t UNUSED *st)
 /***************************************************/
 /***************************************************/
 
-void mydsp_mode(struct dsp_internal_state_t *st, int UNUSED mode)
+void mydsp_mode(struct dsp_internal_state_t *st, int mode)
 {
   if (st->dsp_mode != mode)
     {
@@ -74,6 +75,7 @@ void mydsp_mode(struct dsp_internal_state_t *st, int UNUSED mode)
 	  break;
 	case MYDSP_ACTIVE:
 	  st->dsp_index_max = st->dsp_index;
+	  st->dsp_index     = 0;
 	  HW_DDSP("mydsp:mode switch to ACTIVE max = %d\n",st->dsp_index_max);
 	  break;
 	default:
@@ -110,9 +112,19 @@ void mydsp_write(struct dsp_internal_state_t *st, uint32_t val)
 /***************************************************/
 /***************************************************/
 
-int  mydsp_update(struct dsp_internal_state_t UNUSED *st, uint32_t UNUSED *val, uint8_t UNUSED proc)
+int  mydsp_update(struct dsp_internal_state_t *st, uint32_t *val, uint8_t tx_pending)
 {
   // HW_DDSP("mydsp:write 0x%08x\n",val);
+  if (st->dsp_mode == MYDSP_ACTIVE)
+    {
+      if (tx_pending == 0)
+	{
+	  *val = st->dsp_data[st->dsp_index]; 
+	  HW_DDSP("mydsp:read 0x%08x\n",*val);
+	  st->dsp_index = (st->dsp_index + 1) % st->dsp_index_max;
+	  return 1;
+	}
+    }
   return 0;
 }
 

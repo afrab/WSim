@@ -31,6 +31,6 @@ void mydsp_delete  (struct dsp_internal_state_t *st);
 void mydsp_mode    (struct dsp_internal_state_t *st, int mode);
 
 void mydsp_write   (struct dsp_internal_state_t *st, uint32_t val);
-int  mydsp_update  (struct dsp_internal_state_t *st, uint32_t *val, uint8_t proc);
+int  mydsp_update  (struct dsp_internal_state_t *st, uint32_t *val, uint8_t tx_pending);
 
 #endif

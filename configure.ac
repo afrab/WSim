@@ -409,7 +409,7 @@ AC_ARG_WITH([bfd],
 
 AC_ARG_WITH([bfd-prefix],
 	    AS_HELP_STRING([--with-bfd-prefix=DIR],[msp430 GNU binutils path]),
-	    [CFLAGS="-I$withval/include $CFLAGS" LDFLAGS="-L$withval/lib -lz $LDFLAGS" bfd_sum="yes" bfd_prefix=$withval],
+	    [CFLAGS="-I$withval/include $CFLAGS" LDFLAGS="-L$withval/lib $LDFLAGS" bfd_sum="yes" bfd_prefix=$withval],
 	    [bfd_prefix=""])
 
 if test "${bfd_sum}" = "yes" ; then 
@@ -450,7 +450,7 @@ case "${host}" in
 	HOSTTYPE="Linux"
 	CFLAGS="$CFLAGS -DLINUX"
 	NEEDLARGEFILES="yes"
-	EXTRALIBS="$EXTRALIBS -lz"
+	EXTRALIBS="$EXTRALIBS"
 	# backup GUI for unix machines
 	if test "${gui_sum}" = "yes" -a "${gui_type}" = "none" ; then 
 	    gui_type="X11"

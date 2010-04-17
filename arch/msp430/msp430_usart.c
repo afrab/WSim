@@ -762,16 +762,20 @@ do {                                                                          \
   (MCU.USART.mode == USART_MODE_SPI && MCU.USART.uxrx_shift_empty == 1)      
 
 /* usart SPI write from peripherals */
-
-#define SPI_WRITE(USART,NUM,ME,val)                                           \
-  if (MCU.sfr.ME.b.urxe##NUM == 1)  /* verif Digi IO _SEL & _DIR */           \
-    {                                                                         \
+#if 0
+// removed from RX, a byte is received while TX
       if (MCU.USART.uxrx_shift_empty != 1)                                    \
 	{                                                                     \
 	  ERROR("msp430:usart%d: SPI rx value while rx shift not empty (%d)\n", \
 	          NUM,MCU.USART.uxrx_shift_delay);                            \
 	}                                                                     \
       else                                                                    \
+
+#endif
+
+#define SPI_WRITE(USART,NUM,ME,val)                                           \
+  if (MCU.sfr.ME.b.urxe##NUM == 1)  /* verif Digi IO _SEL & _DIR */           \
+    {                                                                         \
         {                                                                     \
 	  TRACER_TRACE_USART##NUM(TRACER_SPI_RX_RECV);			      \
           MCU.USART.uxrx_shift_buf   = val;                                   \

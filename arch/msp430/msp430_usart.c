@@ -155,8 +155,9 @@ char *str_ssel[] = { "external UCLK", "ACLK", "SMCLK", "SMCLK" };
 
 #define SPI_MODE_UPDATE(USART,NUM,ME,IE,IFG)                                  \
 do {                                                                          \
-  if (MCU.sfr.ME.b.urxe##NUM == 1)   /* b.spie */                             \
+  if (MCU.sfr.ME.b.urxe##NUM == 1)   /* b.spie device ON */                   \
     {                                                                         \
+      /* Tx buffer */							\
       if (MCU.USART.uxtxbuf_full == 1)                                        \
         {                                                                     \
 	  if (MCU.USART.uxtx_shift_empty == 1 &&			      \
@@ -169,7 +170,7 @@ do {                                                                          \
                MCU.USART.uxtx_full_delay  = 0;                                \
                MCU.USART.uxtx_shift_empty = 0;                                \
                MCU.USART.uxtx_shift_ready = 0;                                \
-	       if (MCU.USART.uxctl.b.mm == 1)				      \
+	       if (MCU.USART.uxctl.b.mm == 1) /* master */		      \
 		 {							      \
 		   MCU.USART.uxtx_shift_delay = 7+MCU.USART.uxctl.b.charb;    \
 		 }							      \
@@ -370,7 +371,7 @@ do {                                                                          \
     } /* tx_shift_empty */						      \
                                                                               \
                                                                               \
-  /* RX shft register */                                                      \
+  /* RX shift register */                                                     \
   /* finish receive even if me.uxrx is off */                                 \
   /* if (MCU.sfr.ME.b.urxe##NUM == 1) */                                      \
     {                                                                         \
@@ -683,9 +684,9 @@ do {                                                                          \
     case U##NUM##TXBUF      :                                                 \
       HW_DMSG_USART("msp430:usart%d: write uxtxbuf  = 0x%02x [PC=0x%04x]\n",NUM,val & 0xff, \
 		    mcu_get_pc());					\
-      if (MCU.USART.uxtxbuf_full == 1)                                        \
+      if ((MCU.USART.uxtxbuf_full == 1) && (MCU.USART.uxctl.b.mm == 1)) /* master */ \
         {                                                                     \
-          ERROR("msp430:usart%d:    overwriting tx buffer with [0x%02x]\n",   \
+          WARNING("msp430:usart%d:    overwriting tx buffer with [0x%02x]\n", \
                 NUM,val & 0xff);                                              \
         }                                                                     \
       MCU.USART.uxtxbuf            = val;                                     \

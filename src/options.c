@@ -485,10 +485,10 @@ void options_read_cmdline(struct options_t *s, int *argc, char *argv[])
 		case 's':
 		  mul = 1000 * 1000 * 1000;
 		  break;
-		case 'u':
+		case 'm':
 		  mul = 1000 * 1000;
 		  break;
-		case 'm':
+		case 'u':
 		  mul = 1000;
 		  break;
 		default:

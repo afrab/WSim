@@ -361,8 +361,9 @@ tracer_event_record_active_force(tracer_id_t id, tracer_val_t val)
   if (val != EVENT_TRACER.id_val[id])
     {
       uint64_t time = TRACER_GET_NANOTIME();
-      tracer_event_record_time_nocheck(id,val - 1, (time > 0) ? time-1: time);
+      tracer_event_record_time_nocheck(id,0      , time-1);
       tracer_event_record_time_nocheck(id,val    , time);
+      tracer_event_record_time_nocheck(id,0      , time+1);
     }
   if (EVENT_TRACER.ev_count > TRACER_BLOCK_THRESHOLD)
     {
@@ -376,8 +377,9 @@ tracer_event_record_active_force_ws(tracer_id_t id, tracer_val_t val)
   if (val != EVENT_TRACER.id_val[id])
     {
       uint64_t time = TRACER_GET_NANOTIME();
-      tracer_event_record_time_nocheck(id,val - 1, (time > 0) ? time-1: time);
+      tracer_event_record_time_nocheck(id,0      , time-1);
       tracer_event_record_time_nocheck(id,val    , time);
+      tracer_event_record_time_nocheck(id,0      , time+1);
     }
 }
 

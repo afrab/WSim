@@ -89,6 +89,11 @@
   <title>Simulation</title>
   <para>
     esimu
+    elfutils-libelf > 0.145
+    libelf > 0.8.13
+    zlib
+    libwarf > February 2010 http://reality.sgiweb.org/davea/dwarf.html
+    libz
   </para>
 
 </chapter>

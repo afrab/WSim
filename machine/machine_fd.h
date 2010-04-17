@@ -37,7 +37,9 @@ struct watchpoint_t {
   int         mode;                      /* MAC_WATCH_WRITE | MAC_WATCH_READ */
   /*int       modify_on_first_write;*/   /* backtracked */ 
   int         modify_value; 
-  tracer_id_t trc_id;
+  /* trace */
+  tracer_id_t trc_id_val;
+  tracer_id_t trc_id_rw;
 };
 
 struct machine_state_t {

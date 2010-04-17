@@ -27,6 +27,16 @@ static int watchpoint_max;
 /* ************************************************** */
 /* ************************************************** */
 
+static char* mode2str(int mode)
+{
+  switch (mode) {
+  case MAC_WATCH_READ:  return "r";
+  case MAC_WATCH_WRITE: return "w";
+  case (MAC_WATCH_READ | MAC_WATCH_WRITE): return "rw";
+  default: return "xx";
+  }
+}
+
 void machine_monitor_print()
 {
   int i;
@@ -34,12 +44,11 @@ void machine_monitor_print()
   OUTPUT("Memory monitor\n");
   for(i=0; i<watchpoint_max; i++)
     {
-      OUTPUT("  monitor: %s 0x%04x:%d %c%c mod %d %d\n",
+      OUTPUT("  monitor: %s 0x%04x:%d %2s mod %d %d\n",
 	     watchpoint[i].name,
 	     watchpoint[i].addr,
 	     watchpoint[i].size,
-	     (watchpoint[i].mode & MAC_WATCH_READ ) ? 'r':' ',
-	     (watchpoint[i].mode & MAC_WATCH_WRITE) ? 'w':' ',
+	     mode2str(watchpoint[i].mode),
 	     machine.state->watchpoint_modify_on_first_write[i],
 	     watchpoint[i].modify_value
 	     );
@@ -56,11 +65,16 @@ void machine_monitor_vcd_start(void)
   int i;
   for(i=0; i<watchpoint_max; i++)
     {
-      watchpoint[i].trc_id = tracer_event_add_id(
-						 watchpoint[i].size * 8,
-						 watchpoint[i].name,
-						 "monitor"
-						 );
+      char mns[MONITOR_MAX_VARIABLE_NAME+2];
+      snprintf(mns,MONITOR_MAX_VARIABLE_NAME+2,"%s,%s", 
+	       watchpoint[i].name,
+	       mode2str(watchpoint[i].mode));
+
+      watchpoint[i].trc_id_val = tracer_event_add_id(watchpoint[i].size * 8,
+						     watchpoint[i].name,
+						     "monitor" );
+
+      watchpoint[i].trc_id_rw = tracer_event_add_id(2,mns,"monitor");
 
       mcu_ramctl_set_bp(watchpoint[i].addr,watchpoint[i].mode);
     }
@@ -157,11 +171,8 @@ void machine_monitor_add_trace(int access_type)
    *
    */
 
-  VERBOSE(6,"machine:monitor: watchpoint trace for addr 0x%04x pc=0x%04x val=0x%04x type=%c%c\n",
-	  addr, mcu_get_pc(), value, 
-	  (access_type | MAC_WATCH_READ)  ? 'r':'.', 
-	  (access_type | MAC_WATCH_WRITE) ? '.':'w'
-	  );
+  VERBOSE(6,"machine:monitor: watchpoint trace for addr 0x%04x pc=0x%04x val=0x%04x type=%s\n",
+	  addr, mcu_get_pc(), value, mode2str(access_type));
 #endif
 
 #if 0
@@ -183,13 +194,12 @@ void machine_monitor_add_trace(int access_type)
   switch (access_type)
     {
     case MAC_WATCH_READ:
-      tracer_event_record_force(watchpoint[ index ].trc_id,value);
+      tracer_event_record(watchpoint[ index ].trc_id_val,value);
+      tracer_event_record_force(watchpoint[ index ].trc_id_rw,1);
       break;
     case MAC_WATCH_WRITE:
-      tracer_event_record(watchpoint[ index ].trc_id,value);
-      break;
-    case (MAC_WATCH_READ | MAC_WATCH_WRITE):
-      tracer_event_record(watchpoint[ index ].trc_id,value);
+      tracer_event_record(watchpoint[ index ].trc_id_val,value);
+      tracer_event_record_force(watchpoint[ index ].trc_id_rw,2);
       break;
     default:
       /* do nothing */

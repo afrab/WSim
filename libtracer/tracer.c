@@ -220,7 +220,7 @@ void tracer_stop(void)
 /* ************************************************** */
 
 tracer_id_t
-tracer_event_add_id(int width, char* name, char* module)
+tracer_event_add_id(int width, const char* name, const char* module)
 {
   tracer_id_t i;
   tracer_id_t id;

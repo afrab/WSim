@@ -30,7 +30,7 @@ typedef tracer_time_t (*get_nanotime_function_t)();
  */
 void        tracer_init         (char *filename, int ws_mode);
 void        tracer_set_timeref  (get_nanotime_function_t f);
-tracer_id_t tracer_event_add_id (int width, char* label, char* module);
+tracer_id_t tracer_event_add_id (int width, const char* label, const char* module);
 void        tracer_close        (void);
 
 /*

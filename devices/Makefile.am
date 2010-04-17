@@ -13,7 +13,8 @@ SUBDIRS = 		\
 	ptty            \
 	uigfx		\
 	spidev          \
-	spidev_master
+	spidev_master	\
+	spidev_dsp
 
 
 noinst_LIBRARIES= libdevices.a

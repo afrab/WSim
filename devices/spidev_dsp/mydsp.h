@@ -9,6 +9,10 @@
 #ifndef MYDSP_H
 #define MYDSP_H
 
+/***************************************************/
+/***************************************************/
+/***************************************************/
+
 #define DSP_MEM_SIZE 200
 struct dsp_internal_state_t
 {
@@ -19,7 +23,25 @@ struct dsp_internal_state_t
   uint8_t  dsp_data[DSP_MEM_SIZE];
   int32_t  dsp_index;
   int32_t  dsp_index_max;
+
+  wsimtime_t  fsm_time_start;
+  wsimtime_t  fsm_time_next_p1_start;
+  wsimtime_t  fsm_time_next_p1_end;
+  wsimtime_t  fsm_time_next_p2_start;
+  wsimtime_t  fsm_time_next_p2_end;
+  
+  int         dsp_output_n;
+
+  tracer_id_t tracer_state1;
+  tracer_id_t tracer_state2;
+  
+  uint8_t     etrace_id;
+  uint8_t     etrace_state;
 };
+
+/***************************************************/
+/***************************************************/
+/***************************************************/
 
 #define MYDSP_ACTIVE  1
 #define MYDSP_PASSIVE 2
@@ -32,5 +54,9 @@ void mydsp_mode    (struct dsp_internal_state_t *st, int mode);
 
 void mydsp_write   (struct dsp_internal_state_t *st, uint32_t val);
 int  mydsp_update  (struct dsp_internal_state_t *st, uint32_t *val, uint8_t tx_pending);
+
+/***************************************************/
+/***************************************************/
+/***************************************************/
 
 #endif

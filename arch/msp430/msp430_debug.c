@@ -218,11 +218,24 @@ char* msp430_debug_portname(uint16_t addr)
 /* ************************************************** */
 
 /*
+ * bits in SR register
+ * ===================
  *  7 : scg1    system clock generator 1 == SMCLK
  *  6 : scg0    system clock generator 0 == dco
  *  5 : oscoff  oscillator off           == lfxt1
  *  4 : cpuoff  cpu off                  == MCLK
+ *
+ * 4 bits value
+ * ============
+ *  0 -> AM
+ *  1 -> LPM0
+ *  5 -> LPM1
+ *  9 -> LPM2
+ * 13 -> LPM3
+ * 15 -> LPM4
+ *
  */
+
 char* msp430_lpm_names[] = 
   {
     "Active mode" , "LPM0", 

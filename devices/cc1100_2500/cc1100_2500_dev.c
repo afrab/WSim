@@ -11,6 +11,7 @@
  *
  *  Created by Guillaume Chelius on 16/02/06.
  *  Copyright 2006 __WorldSens__. All rights reserved.
+ *  Modified by Loic Lemaitre 2009
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -28,6 +29,8 @@
 /* Global Variables (not backtracked) */
 int  CC1100_XOSC_FREQ_MHz;
 int  CC1100_XOSC_PERIOD_NS;
+int  CC1100_RCOSC_FREQ_KHz;
+int  CC1100_RCOSC_PERIOD_NS;
 
 tracer_id_t TRACER_CC1100_STATE;
 tracer_id_t TRACER_CC1100_STROBE;
@@ -243,8 +246,10 @@ int cc1100_device_create (int dev_num, int fxosc_mhz, char *antenna)
 
   machine.device[dev_num].name          = "cc1100 radio device";
 
-  CC1100_XOSC_FREQ_MHz  = fxosc_mhz;
-  CC1100_XOSC_PERIOD_NS = 1000 / fxosc_mhz;
+  CC1100_XOSC_FREQ_MHz   = fxosc_mhz;
+  CC1100_XOSC_PERIOD_NS  = 1000 / fxosc_mhz;
+  CC1100_RCOSC_FREQ_KHz  = (fxosc_mhz * 1000) / 750;
+  CC1100_RCOSC_PERIOD_NS = (750 * 1000) / fxosc_mhz;
 
   cc1100->worldsens_radio_id = worldsens_c_rx_register((void*)cc1100, cc1100_callback_rx, antenna);
 
@@ -279,8 +284,10 @@ int cc2500_device_create (int dev_num, int fxosc_mhz, char *antenna)
 
   machine.device[dev_num].name          = "cc2500 radio device";
 
-  CC1100_XOSC_FREQ_MHz  = fxosc_mhz;
-  CC1100_XOSC_PERIOD_NS = 1000 / fxosc_mhz;
+  CC1100_XOSC_FREQ_MHz   = fxosc_mhz;
+  CC1100_XOSC_PERIOD_NS  = 1000 / fxosc_mhz;
+  CC1100_RCOSC_FREQ_KHz  = (fxosc_mhz * 1000) / 750;
+  CC1100_RCOSC_PERIOD_NS = (750 * 1000) / fxosc_mhz;
 
   cc1100->worldsens_radio_id = worldsens_c_rx_register((void*)cc1100, cc1100_callback_rx, antenna);
 
@@ -334,9 +341,11 @@ void cc1100_reset_internal (struct _cc1100_t *cc1100)
   cc1100->fsm_state		= CC1100_STATE_IDLE;
   cc1100->fsm_ustate		= 0;
   cc1100->fsm_timer		= 0;
-  cc1100->fsm_pending		= 0;
+  cc1100->fsm_pending		= CC1100_NO_STATE_PENDING;
 	
   cc1100->fs_cal		= 0;
+
+  cc1100->wor                   = 0;
 	
   cc1100->clk_timeref		= 0;
   cc1100->clk_tick		= 0;

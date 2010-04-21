@@ -165,7 +165,7 @@ uint8_t cc1100_read_register(struct _cc1100_t *cc1100, uint8_t addr)
 uint8_t cc1100_read_ro_register(struct _cc1100_t *cc1100, uint8_t addr) 
 {
   uint8_t val;
-  
+
   switch (addr) 
     {
     case CC1100_REG_PARTNUM:

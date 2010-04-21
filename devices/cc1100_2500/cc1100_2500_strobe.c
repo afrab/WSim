@@ -145,6 +145,7 @@ void cc1100_strobe_state_idle(struct _cc1100_t *cc1100)
       CC1100_XOFF_ENTER(cc1100);
       return;
     case CC1100_STROBE_SIDLE:
+      cc1100->wor = 0;
       CC1100_DBG_STROBE("cc1100:strobe:idle: SIDLE\n");
       return;
     case CC1100_STROBE_SNOP:
@@ -164,6 +165,22 @@ void cc1100_strobe_state_idle(struct _cc1100_t *cc1100)
       CC1100_DBG_STROBE("cc1100:strobe:idle: STX\n");
       cc1100->fsm_pending = CC1100_STATE_FSTXON;
       CC1100_FS_WAKEUP_ENTER(cc1100);
+      return;
+    case CC1100_STROBE_SFRX:
+      CC1100_DBG_STROBE("cc1100:strobe:idle: SFRX\n");
+      cc1100_flush_rx_fifo(cc1100);
+      return;
+    case CC1100_STROBE_SFTX:
+      CC1100_DBG_STROBE("cc1100:strobe:idle: SFTX\n");
+      cc1100_flush_tx_fifo(cc1100);
+      return;
+    case CC1100_STROBE_SWOR:
+      CC1100_DBG_STROBE("cc1100:strobe:idle: SWOR\n");
+      if (~cc1100->registers[CC1100_REG_WORCTRL] & 0x80) { /* check if RC oscillator is running */
+	  cc1100->wor = 1;
+	  CC1100_SLEEP_ENTER(cc1100);
+	  CC1100_DBG_STROBE("cc1100:strobe:idle: entering in sleep mode\n");
+      }
       return;
     default:
       CC1100_DBG_IMPL("cc1100:strobe:idle: strobe (0x%x,%s) invalid or not implemented yet\n", cc1100->addr, 
@@ -191,6 +208,7 @@ void cc1100_strobe_state_fstxon(struct _cc1100_t *cc1100)
       /* Case verified on hardware */
     case CC1100_STROBE_SIDLE:
       CC1100_DBG_STROBE("cc1100:strobe:fstxon: SIDLE\n");
+      cc1100->wor = 0;
       CC1100_IDLE_ENTER(cc1100);
       return;
     case CC1100_STROBE_STX:
@@ -216,6 +234,7 @@ void cc1100_strobe_state_fs_wakeup(struct _cc1100_t *cc1100)
       return;
     case CC1100_STROBE_SIDLE:
       CC1100_DBG_STROBE("cc1100:strobe:fs_wakeup: SIDLE\n");
+      cc1100->wor = 0;
       CC1100_IDLE_ENTER(cc1100);
       return;
     default:
@@ -237,6 +256,7 @@ void cc1100_strobe_state_calibrate(struct _cc1100_t *cc1100)
       return;
     case CC1100_STROBE_SIDLE:
       CC1100_DBG_STROBE("cc1100:strobe:calibrate: SIDLE\n");
+      cc1100->wor = 0;
       CC1100_IDLE_ENTER(cc1100);
       return;
     default:
@@ -258,6 +278,7 @@ void cc1100_strobe_state_fs_calibrate(struct _cc1100_t *cc1100)
       return;
     case CC1100_STROBE_SIDLE:
       CC1100_DBG_STROBE("cc1100:strobe:fs_calibrate: SIDLE\n");
+      cc1100->wor = 0;
       CC1100_IDLE_ENTER(cc1100);
       return;
     default:
@@ -280,6 +301,7 @@ void cc1100_strobe_state_settling(struct _cc1100_t *cc1100)
      /* Case verified on hardware */
     case CC1100_STROBE_SIDLE:
       CC1100_DBG_STROBE("cc1100:strobe:settling: SIDLE\n");
+      cc1100->wor = 0;
       CC1100_IDLE_ENTER(cc1100);
       return;
     default:
@@ -322,6 +344,7 @@ void cc1100_strobe_state_rxtx_settling(struct _cc1100_t *cc1100)
       return;
     case CC1100_STROBE_SIDLE:
       CC1100_DBG_STROBE("cc1100:strobe:rxtx_settling: SIDLE\n");
+      cc1100->wor = 0;
       CC1100_IDLE_ENTER(cc1100);
       return;
     default:
@@ -344,6 +367,7 @@ void cc1100_strobe_state_rx(struct _cc1100_t *cc1100)
 
     case CC1100_STROBE_SIDLE:
       CC1100_DBG_STROBE("cc1100:strobe:rx: SIDLE -> END_FORCED\n");
+      cc1100->wor = 0;
       CC1100_RX_END_FORCED(cc1100);
       /*
        * page 72: looking for fs_autocal

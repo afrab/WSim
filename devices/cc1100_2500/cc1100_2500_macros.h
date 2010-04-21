@@ -12,6 +12,7 @@
  *
  *  Created by Guillaume Chelius on 20/11/05.
  *  Copyright 2005 __WorldSens__. All rights reserved.
+ *  Modified by Loic Lemaitre 2010
  *
  */
 #ifndef _CC1100_MACROS_H
@@ -328,6 +329,11 @@
     CC1100_SET_CRC_FALSE(cc1100);					\
     cc1100->fsm_state   = CC1100_STATE_RX;				\
     cc1100->fsm_pending = CC1100_STATE_IDLE;				\
+    if ((~cc1100_read_register(cc1100, CC1100_REG_MCSM2)) & 0x07)	\
+      {									\
+	cc1100->rx_timeout = MACHINE_TIME_GET_NANO() + cc1100_get_rx_timeout_period(cc1100); \
+	CC1100_DBG_STATE("cc1100:state: rx timeout = %"PRIu64" [%"PRIu64"]\n", cc1100->rx_timeout, MACHINE_TIME_GET_NANO()); \
+      }									\
     tracer_event_record(TRACER_CC1100_STATE, CC1100_STATE_RX);		\
     etracer_slot_event(ETRACER_PER_ID_CC1100,				\
 		       ETRACER_PER_EVT_MODE_CHANGED,			\
@@ -471,7 +477,8 @@
   do {									\
     CC1100_DBG_STATE("cc1100:state: SLEEP (enter) at %"PRId64"\n",	\
 		     MACHINE_TIME_GET_NANO());				\
-    CC1100_UNCALIBRATE(cc1100);						\
+    /* calibration values are maintained in SLEEP mode (see p48) */	\
+    /*CC1100_UNCALIBRATE(cc1100);*/					\
     cc1100->fsm_state = CC1100_STATE_SLEEP;				\
     cc1100->fsm_pending = CC1100_STATE_IDLE;				\
     tracer_event_record(TRACER_CC1100_STATE, CC1100_STATE_SLEEP);	\
@@ -493,6 +500,12 @@
     cc1100->patable[5] = 0;						\
     cc1100->patable[6] = 0;						\
     cc1100->patable[7] = 0;						\
+    if (cc1100->wor)							\
+      {									\
+	cc1100->wor_timer_event0 = MACHINE_TIME_GET_NANO()		\
+	  + cc1100_get_wor_sleep_period(cc1100);			\
+	CC1100_DBG_STATE("cc1100:state: event0 set at %"PRIu64" [%"PRIu64"]\n", cc1100->wor_timer_event0, MACHINE_TIME_GET_NANO()); \
+      }									\
   } while (0)
 
 /***************************************************/

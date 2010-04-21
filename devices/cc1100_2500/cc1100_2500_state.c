@@ -12,6 +12,7 @@
  *
  *  Created by Guillaume Chelius on 16/02/06.
  *  Copyright 2006 __WorldSens__. All rights reserved.
+ *  Modified by Loic Lemaitre 2010
  *
  */
 
@@ -49,7 +50,28 @@
 
 int cc1100_update_state_idle (struct _cc1100_t *cc1100) 
 {
-  /* Nothing to do, except reading pins */
+  /* check if we are in wake on radio mode */
+  if (cc1100->wor)
+    {
+      /* going to rx mode or to sleep mode? */
+      if (cc1100->fsm_pending != CC1100_STATE_SLEEP)
+	{
+	  /* check if wor event1 is reached */
+	  if (MACHINE_TIME_GET_NANO() >= cc1100->wor_timer_event1)
+	    {
+	      /* wake on radio, we have reached event1 point, so start going to RX state (AN047 p7) */
+	      cc1100->fsm_pending = CC1100_STATE_RX;
+	      CC1100_FS_WAKEUP_ENTER(cc1100);
+	    }
+	}
+      else
+	{
+	  /* TODO : if (one RC calibration has been completed) */
+	  CC1100_SLEEP_REALLY_ENTER(cc1100);
+	}
+    }
+
+  /* Read pins */
   return cc1100_io_pins(cc1100);
 }
 
@@ -89,17 +111,28 @@ int cc1100_update_state_calibrate (struct _cc1100_t *cc1100)
 
 int cc1100_update_state_sleep (struct _cc1100_t *cc1100) 
 {
-  /* Check if we are waking up through CSn pin */
-  /* CSn will go low at end of the strobe      */
-  if (cc1100_read_pin(cc1100, CC1100_INTERNAL_CSn_PIN) == 0x00) 
+  /* check if we are in wake on radio mode */
+  if (cc1100->wor)
     {
-      CC1100_DBG_PINS("cc1100:pins: CSn down, going from SLEEP to Idle at %"PRId64"\n",
-		      MACHINE_TIME_GET_NANO());
-      CC1100_IDLE_ENTER(cc1100);
+      /* check if wor event0 is reached */
+      if (MACHINE_TIME_GET_NANO() >= cc1100->wor_timer_event0)
+	{
+	  cc1100->wor_timer_event1 = MACHINE_TIME_GET_NANO() + cc1100_get_event1_period(cc1100);
+	  CC1100_DBG_STATE("cc1100:state: event1 set at %"PRIu64" [%"PRIu64"]\n",
+			   cc1100->wor_timer_event1, MACHINE_TIME_GET_NANO());
+	  CC1100_IDLE_ENTER(cc1100);
+	}
     }
   else
     {
-      //
+      /* Check if we are waking up through CSn pin */
+      /* CSn will go low at end of the strobe      */
+      if (cc1100_read_pin(cc1100, CC1100_INTERNAL_CSn_PIN) == 0x00) 
+	{
+	  CC1100_DBG_PINS("cc1100:pins: CSn down, going from SLEEP to Idle at %"PRId64"\n",
+			  MACHINE_TIME_GET_NANO());
+	  CC1100_IDLE_ENTER(cc1100);
+	}
     }
   return 0;
 }
@@ -289,6 +322,21 @@ int cc1100_update_state_rx (struct _cc1100_t *cc1100)
 	  CC1100_RXTX_SETTLING_ENTER(cc1100);
 	}
       return cc1100_io_pins(cc1100);
+    }
+
+  /* check if a rx timeout is defined */
+  if ((~cc1100->registers[CC1100_REG_MCSM2]) & 0x07)
+    {
+      /* check if a rx timeout is over */
+      if (MACHINE_TIME_GET_NANO() >= cc1100->rx_timeout)
+	{
+	  /* check if no packet is starting to be received */
+	  if (cc1100->fsm_ustate <= CC1100_RX_SEND_DATA)
+	    {
+	      CC1100_IDLE_ENTER(cc1100);
+	      cc1100->fsm_pending = CC1100_STATE_SLEEP;
+	    }
+	}
     }
 
   /*  

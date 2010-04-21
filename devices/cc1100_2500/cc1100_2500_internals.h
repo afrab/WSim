@@ -105,10 +105,15 @@ struct _cc1100_t
 {
   uint8_t	  fsm_state;
   int             fsm_ustate;
-  uint8_t	  fsm_pending;
+  int    	  fsm_pending;
   uint64_t	  fsm_timer;
 
   int	          fs_cal;
+
+  int             wor;               /* is CC1100 in wake on radio mode */
+  uint64_t        wor_timer_event0;  /* time of next event0 */
+  uint64_t        wor_timer_event1;  /* time of next event1 */
+  uint64_t        rx_timeout;        /* time of rx forced end */
 	
   uint64_t	  clk_timeref;
   uint64_t	  clk_tick;
@@ -233,6 +238,34 @@ void	 cc1100_rx_state		(struct _cc1100_t *cc1100);
 * Strobe functions (cc1100_strobe.c)
 ***************************************/
 void     cc1100_strobe_command          (struct _cc1100_t *cc1100);
+
+
+/***************************************
+* wor functions (cc1100_wor.c)
+***************************************/
+/**
+ * \brief compute the event0 period duration
+ * \return event0 period duration in ns
+ **/
+uint64_t cc1100_get_event0_period       (struct _cc1100_t *cc1100);
+
+/**
+ * \brief compute the event1 period duration
+ * \return event1 period duration in ns
+ **/
+uint64_t cc1100_get_event1_period       (struct _cc1100_t *cc1100);
+
+/**
+ * \brief compute the wake on radio timeout period duration
+ * \return timeout period duration in ns
+ **/
+uint64_t cc1100_get_rx_timeout_period   (struct _cc1100_t *cc1100);
+
+/**
+ * \brief compute the wake on radio sleep period duration
+ * \return wor sleep period duration in ns
+ **/
+uint64_t cc1100_get_wor_sleep_period    (struct _cc1100_t *cc1100);
 
 
 #endif ///_CC1100_INTERNALS_H

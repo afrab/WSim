@@ -42,6 +42,7 @@ uint8_t cc1100_compare_byte(uint8_t sfd, uint8_t rx)
   return cnt;
 }
 
+
 /***************************************************/
 /***************************************************/
 /***************************************************/
@@ -51,19 +52,20 @@ int cc1100_rx_filter(struct _cc1100_t *cc1100, double frequency, int modulation,
 {
   double freq_cc;
 
+  /* Verify cc1100 state */
+  if (cc1100->fsm_state !=  CC1100_STATE_RX) 
+    {
+      CC1100_DBG_RX("cc1100:rx:filter:node %d: dropping received data [0x%02x,%c], not in rx state (%s)\n",
+		    machine_get_node_id(), data & 0xff, isprint((unsigned char)data) ? data:'.',
+		    cc1100_state_to_str(cc1100->fsm_state));
+      return -1;
+    }
+
   /* Check calibration */
   if (CC1100_IS_CALIBRATED(cc1100) == 0)
     {
       CC1100_DBG_EXC("cc1100:rx:filter:node %d: RX while fs calibration not done\n",
 		     machine_get_node_id());
-      return -1;
-    }
-	
-  /* Verify cc1100 state */
-  if (cc1100->fsm_state !=  CC1100_STATE_RX) 
-    {
-      CC1100_DBG_RX("cc1100:rx:filter:node %d: dropping received data [0x%02x,%c], not in rx state\n",
-		    machine_get_node_id(), data & 0xff, isprint((unsigned char)data) ? data:'.');
       return -1;
     }
 

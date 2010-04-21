@@ -71,6 +71,7 @@
 #define CC1100_STATE_TX_UNDERFLOW               0x16
 #define CC1100_STATE_IDLING                     0x17
 
+#define CC1100_NO_STATE_PENDING                 -1
 
 /* CC1100 RAM & register Access (cf [1] p18) */
 #define CC1100_REG_ACCESS_OP(x)                 (x & 0x80) 

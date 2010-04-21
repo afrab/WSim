@@ -14,6 +14,7 @@
  *  Created by Guillaume Chelius on 16/02/06.
  *  Copyright 2006 __WorldSens__. All rights reserved.
  *
+ *  Modified by Loic Lemaitre 2010
  */
 
 #ifndef _CC1100_DEBUG_H
@@ -37,6 +38,7 @@
 #define CC1100_TX_DEBUG
 #define CC1100_RX_DEBUG
 #define CC1100_PACKET_DEBUG
+#define CC1100_WOR_DEBUG
 
 #ifdef CC1100_STATE_DEBUG
 #    define CC1100_DBG_STATE(x...) VERBOSE(4,x)
@@ -120,6 +122,12 @@
 #    define CC1100_DBG_PKT(x...) VERBOSE(6,x)
 #else
 #    define CC1100_DBG_PKT(x...) do { } while (0)
+#endif
+
+#ifdef CC1100_WOR_DEBUG
+#    define CC1100_DBG_WOR(x...) VERBOSE(8,x)
+#else
+#    define CC1100_DBG_WOR(x...) do { } while (0)
 #endif
 
 /***************************************************/

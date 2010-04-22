@@ -182,6 +182,10 @@ void cc1100_strobe_state_idle(struct _cc1100_t *cc1100)
 	  CC1100_DBG_STROBE("cc1100:strobe:idle: entering in sleep mode\n");
       }
       return;
+    case CC1100_STROBE_SWORRST:
+      CC1100_DBG_STROBE("cc1100:strobe:idle: SWORRST\n");
+      cc1100->wor_timer_event1 = MACHINE_TIME_GET_NANO();  /* see AN047 4.2 p14 */
+      return;
     default:
       CC1100_DBG_IMPL("cc1100:strobe:idle: strobe (0x%x,%s) invalid or not implemented yet\n", cc1100->addr, 
 		      cc1100_strobe_to_str(cc1100->addr));

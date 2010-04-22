@@ -189,14 +189,10 @@ uint8_t cc1100_read_ro_register(struct _cc1100_t *cc1100, uint8_t addr)
       val = cc1100->fsm_state;
       break;
     case CC1100_REG_WORTIME1:
-      CC1100_DBG_IMPL("cc1100:register:IMPLEMENTATION: read-only register 0x%x not implemented yet\n", 
-		      cc1100_register_to_str(addr), addr);
-      val = cc1100->registers[addr];
+      val = (cc1100_get_wor_timer(cc1100) & 0xFF00) >> 8;
       break;
     case CC1100_REG_WORTIME0:
-      CC1100_DBG_IMPL("cc1100:register:IMPLEMENTATION: read-only register 0x%x not implemented yet\n", 
-		      cc1100_register_to_str(addr), addr);
-      val = cc1100->registers[addr];
+      val = cc1100_get_wor_timer(cc1100) & 0x00FF;
       break;
     case CC1100_REG_PKTSTATUS:
       val = cc1100_compute_pktstatus_register(cc1100);

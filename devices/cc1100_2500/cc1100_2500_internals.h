@@ -267,5 +267,10 @@ uint64_t cc1100_get_rx_timeout_period   (struct _cc1100_t *cc1100);
  **/
 uint64_t cc1100_get_wor_sleep_period    (struct _cc1100_t *cc1100);
 
+/**
+ * \brief compute the wake on radio timer value for WORTIME1 and WORTIME0 registers
+ * \return wor timer (2 bytes)
+ **/
+uint16_t cc1100_get_wor_timer           (struct _cc1100_t *cc1100);
 
 #endif ///_CC1100_INTERNALS_H

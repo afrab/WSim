@@ -129,7 +129,24 @@ uint64_t cc1100_get_wor_sleep_period(struct _cc1100_t *cc1100)
     {
       CC1100_DBG_EXC("cc1100:wor: tsleep (%"PRIu64"ns) should not be < tsleepmin (%"PRIu64"ns)\n", 
 		     sleep_time, cc1100_get_wor_min_sleep_period());
+      /* see AN047 p5 */
+      sleep_time -= ((uint64_t) 750 * 1000 * 128) / ((uint64_t) CC1100_XOSC_FREQ_MHz); 
     }
 
   return sleep_time;
+}
+
+
+/***************************************************/
+/***************************************************/
+uint16_t cc1100_get_wor_timer(struct _cc1100_t *cc1100)
+{
+  uint64_t wor_timer;
+  uint8_t  wor_res      = (cc1100_read_register(cc1100, CC1100_REG_WORCTRL)) & 0x03;
+  uint64_t event0_timer = cc1100->wor_timer_event0 - MACHINE_TIME_GET_NANO(); /* ns */
+
+  /* see AN047 p6 */
+  wor_timer = ( (event0_timer * CC1100_XOSC_FREQ_MHz) / (750 * 1000 * (1 << (5 * wor_res))) );
+
+  return (uint16_t) wor_timer;
 }

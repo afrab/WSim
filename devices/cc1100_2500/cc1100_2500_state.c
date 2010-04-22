@@ -56,6 +56,7 @@ int cc1100_update_state_idle (struct _cc1100_t *cc1100)
       /* going to rx mode or to sleep mode? */
       if (cc1100->fsm_pending != CC1100_STATE_SLEEP)
 	{
+	  /* IDLE -> FS_WAKEUP */
 	  /* check if wor event1 is reached */
 	  if (MACHINE_TIME_GET_NANO() >= cc1100->wor_timer_event1)
 	    {
@@ -66,8 +67,22 @@ int cc1100_update_state_idle (struct _cc1100_t *cc1100)
 	}
       else
 	{
-	  /* TODO : if (one RC calibration has been completed) */
-	  CC1100_SLEEP_REALLY_ENTER(cc1100);
+	  /* IDLE -> SLEEP */
+	  if (cc1100->CSn_pin == 0xFF)
+	    {
+	      /* cf AN047 p8 */
+	      if (cc1100->registers[CC1100_REG_WORCTRL] & 0x08)   /* RC oscillator automatically calibrated */
+		{
+		  if (cc1100->rc_cal_timer <= MACHINE_TIME_GET_NANO())   /* RC calibration over */
+		    {
+		      CC1100_SLEEP_REALLY_ENTER(cc1100);
+		    }
+		}
+	      else
+		{
+		  CC1100_SLEEP_REALLY_ENTER(cc1100);
+		}
+	    }
 	}
     }
 
@@ -121,6 +136,7 @@ int cc1100_update_state_sleep (struct _cc1100_t *cc1100)
 	  CC1100_DBG_STATE("cc1100:state: event1 set at %"PRIu64" [%"PRIu64"]\n",
 			   cc1100->wor_timer_event1, MACHINE_TIME_GET_NANO());
 	  CC1100_IDLE_ENTER(cc1100);
+	  cc1100->rc_cal_timer = MACHINE_TIME_GET_NANO() + CC1100_RC_CALIBRATE_DELAY_NS;
 	}
     }
   else

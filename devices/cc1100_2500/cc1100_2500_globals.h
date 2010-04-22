@@ -12,7 +12,7 @@
  *
  *  Created by Guillaume Chelius on 20/11/05.
  *  Copyright 2005 __WorldSens__. All rights reserved.
- *
+ *  Modified by Loic Lemaitre 2010
  */
 #ifndef _CC1100_GLOBALS_H
 #define _CC1100_GLOBALS_H
@@ -34,6 +34,12 @@
 #define CC1100_SETTLING_DELAY_US                44
 #define CC1100_CALIBRATE_DELAY_NS               720600
 #define CC1100_CALIBRATE_DELAY_US               720
+/* RC oscillator calibration time, cf AN047 p8 */
+#define CC1100_RC_CALIBRATE_DELAY_NS            2000000
+#define CC1100_RC_CALIBRATE_DELAY_US            2000
+/* IDLE->SLEEP in WOR mode when RC calibration over or no RC calibration  (cf AN047 p9) */
+#define CC1100_WOR_IDLE_SLEEP_NS                150000
+#define CC1100_WOR_IDLE_SLEEP_US                150
 #define CC1100_IDLE_NOCAL_DELAY_NS              100
 #define CC1100_IDLE_NOCAL_DELAY_US              1
 #define CC1100_TX_RX_DELAY_NS                   21500

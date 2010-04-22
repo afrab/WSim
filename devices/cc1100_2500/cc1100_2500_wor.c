@@ -107,7 +107,10 @@ uint64_t cc1100_get_rx_timeout_period(struct _cc1100_t *cc1100)
 uint64_t cc1100_get_wor_sleep_period(struct _cc1100_t *cc1100)
 {
   uint64_t idle_to_rx_time = 0;
-  uint64_t sleep_time;
+  uint64_t sleep_time = 0;
+  uint64_t idle_time = CC1100_WOR_IDLE_SLEEP_NS;
+  uint64_t rx_timeout = cc1100_get_rx_timeout_period(cc1100);
+  
 
   /* fs_wakeup timing */
   idle_to_rx_time += CC1100_FS_WAKEUP_DELAY_NS;
@@ -121,9 +124,15 @@ uint64_t cc1100_get_wor_sleep_period(struct _cc1100_t *cc1100)
   /* settling timing */
   idle_to_rx_time += CC1100_SETTLING_DELAY_NS;
 
+  /* AN047 p9 */
+  if (idle_to_rx_time + rx_timeout < CC1100_RC_CALIBRATE_DELAY_NS)
+    {
+      idle_time = CC1100_RC_CALIBRATE_DELAY_NS - idle_to_rx_time - rx_timeout;
+    }
+
   /* AN047 p6 */
   sleep_time = cc1100_get_event0_period(cc1100) - cc1100_get_event1_period(cc1100) 
-    - idle_to_rx_time - cc1100_get_rx_timeout_period(cc1100);
+    - idle_to_rx_time - rx_timeout - idle_time;
   
   if (sleep_time < cc1100_get_wor_min_sleep_period())
     {

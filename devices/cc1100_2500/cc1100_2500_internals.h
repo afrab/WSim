@@ -109,6 +109,7 @@ struct _cc1100_t
   uint64_t	  fsm_timer;
 
   int	          fs_cal;
+  uint64_t        rc_cal_timer;      /* End of RC calibration */
 
   int             wor;               /* is CC1100 in wake on radio mode */
   uint64_t        wor_timer_event0;  /* time of next event0 */

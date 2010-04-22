@@ -82,7 +82,7 @@ int wsnet_mod_id_map[WSNET_MAX_MODULATIONS] =     {-1,                  /* WSNET
     wsens.l_rp  = MACHINE_TIME_GET_NANO();  \
     wsens.state = WORLDSENS_CLT_STATE_IDLE; \
     machine_state_save();                   \
-    WSNET2_DBG("Libwsnet2:WORLDSENS_SAVE_STATE: Last restoration point sets at %"PRIu64"\n",wsens.l_rp);	\
+    WSNET2_DBG("libwsnet2:WORLDSENS_SAVE_STATE: Last restoration point sets at %"PRIu64"\n",wsens.l_rp);	\
 }   
 
 /* ************************************************** */
@@ -100,8 +100,8 @@ static int      wsnet2_sr_rx          (char *);
 static int      wsnet2_measure_rsp    (char *);
 static int      wsnet2_measure_sr_rsp (char *);
 static int      wsnet2_subscribe      (void);
-static int      wsnet2_unsubscribe    (void);
 static int      wsnet2_kill_node      (char *);
+static void     wsnet2_finalize       (void);
 
 /* ************************************************** */
 /* ************************************************** */
@@ -124,16 +124,14 @@ void wsnet2_init(void) {
         wsens.radio[i].callback   = NULL;
         wsens.measure[i].callback = NULL;
     }
-    WSNET2_DBG("Libwsnet2:wsnet2_init: WSNet2 interface initialized\n");
+    WSNET2_CNCT("libwsnet2:wsnet2_init: WSNet2 interface initialized\n");
 
 }
 
 
-void wsnet2_finalize(void) {
+void wsnet2_close(void) {
 
-    if (wsnet2_unsubscribe()) {
-        WSNET2_EXC("Libwsnet2:wsnet2_finalize: error when unsubscribing to wsnet server\n");
-    }
+    wsnet2_unsubscribe();
 
     if (wsens.u_fd > 0)
         close(wsens.u_fd);
@@ -142,7 +140,13 @@ void wsnet2_finalize(void) {
 
     wsens.u_fd = -1;
     wsens.m_fd = -1;
-    WSNET2_DBG("Libwsnet2:wsnet2_finalize: WSNet2 interface closed\n");
+    WSNET2_CNCT("libwsnet2:wsnet2_close: WSNet2 interface closed\n");
+}
+
+
+void wsnet2_finalize(void) {
+
+    WSNET2_CNCT("libwsnet2:wsnet2_finalize: WSNet2 interface finalizing...\n");
 
     mcu_signal_add(SIG_WORLDSENS_KILL);
 }
@@ -165,7 +169,7 @@ int wsnet2_register_radio(char *antenna, wsnet_callback_rx_t callback, void *arg
     while ((wsens.radio[i].callback != NULL) && (++i < MAX_CALLBACKS)) ;
 
     if (i == MAX_CALLBACKS) {
-        ERROR("Libwsnet2:wsnet2_register_radio: Too many registered radio callbacks\n");
+        WSNET2_ERROR("libwsnet2:wsnet2_register_radio: Too many registered radio callbacks\n");
         return -1;
     }
  
@@ -176,7 +180,7 @@ int wsnet2_register_radio(char *antenna, wsnet_callback_rx_t callback, void *arg
 
     wsens.nb_radios++;
 
-    WSNET2_DBG("Libwsnet2:wsnet2_register_radio: Radio with antenna '%s' registered in position %d\n", wsens.radio[i].antenna, i); 
+    WSNET2_DBG("libwsnet2:wsnet2_register_radio: Radio with antenna '%s' registered in position %d\n", wsens.radio[i].antenna, i); 
 
     return i;
 }
@@ -187,7 +191,7 @@ int wsnet2_register_measure(char *name, wsnet_callback_measure_t callback, void 
     while ((wsens.measure[i].callback != NULL) && (++i < MAX_CALLBACKS)) ;
 
     if (i == MAX_CALLBACKS)  {
-        ERROR("Libwsnet2:wsnet2_register_measure: Too many registered measure callbacks\n");
+        WSNET2_ERROR("libwsnet2:wsnet2_register_measure: Too many registered measure callbacks\n");
         return -1;
     }
         
@@ -198,7 +202,7 @@ int wsnet2_register_measure(char *name, wsnet_callback_measure_t callback, void 
 
     wsens.nb_measures++;
 
-    WSNET2_DBG("Libwsnet2:wsnet2_register_measure: Measure '%s' registered in position %d\n", wsens.measure[i].name, i); 
+    WSNET2_DBG("libwsnet2:wsnet2_register_measure: Measure '%s' registered in position %d\n", wsens.measure[i].name, i); 
 
     return i;
 }
@@ -219,7 +223,7 @@ int wsnet2_connect(char *srv_addr, uint16_t s_port, char *m_addr, uint16_t m_por
     /************************************* UNICAST SOCKET ***********************************/
     if ((wsens.u_fd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
         perror("(socket):");
-	WSNET2_EXC("Libwsnet2:wsnet2_connect: Error during unicast socket creation\n");
+	WSNET2_EXC("libwsnet2:wsnet2_connect: Error during unicast socket creation\n");
         goto error;
     }
     addr.sin_family      = AF_INET;
@@ -229,7 +233,7 @@ int wsnet2_connect(char *srv_addr, uint16_t s_port, char *m_addr, uint16_t m_por
     /* bind */
     if (bind(wsens.u_fd, (struct sockaddr *) (&addr), sizeof(addr)) != 0) {
         perror("(bind):");
-	WSNET2_EXC("Libwsnet2:wsnet2_connect: Error during unicast socket binding\n");
+	WSNET2_EXC("libwsnet2:wsnet2_connect: Error during unicast socket binding\n");
         goto error;
     }
 	
@@ -242,12 +246,12 @@ int wsnet2_connect(char *srv_addr, uint16_t s_port, char *m_addr, uint16_t m_por
 #endif
     {
         perror("(inet_aton):");
-	WSNET2_EXC("Libwsnet2:wsnet2_connect: Error during unicast socket joining\n");
+	WSNET2_EXC("libwsnet2:wsnet2_connect: Error during unicast socket joining\n");
         goto error;
     }
     if (connect(wsens.u_fd, (struct sockaddr *) (&addr), sizeof(addr)) != 0) {
         perror("(connect):");
-	WSNET2_EXC("Libwsnet2:wsnet2_connect: Error during unicast socket connection\n");
+	WSNET2_EXC("libwsnet2:wsnet2_connect: Error during unicast socket connection\n");
         goto error;
     }
     /*****************************************************************************************/	
@@ -262,7 +266,7 @@ int wsnet2_connect(char *srv_addr, uint16_t s_port, char *m_addr, uint16_t m_por
         /************************************* MULTICAST SOCKET ********************************/
 	if ((wsens.m_fd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
 	    perror("(socket):");
-	    WSNET2_EXC("Libwsnet2:wsnet2_connect: Error during multicast socket creation\n");
+	    WSNET2_EXC("libwsnet2:wsnet2_connect: Error during multicast socket creation\n");
 	    goto error;
 	}
 	memset(&addr, 0, sizeof(addr));
@@ -273,7 +277,7 @@ int wsnet2_connect(char *srv_addr, uint16_t s_port, char *m_addr, uint16_t m_por
 	/* allow several bindings */
 	if (setsockopt(wsens.m_fd, SOL_SOCKET, SO_REUSEADDR, (void*)&on, sizeof(on)) != 0 ) {
 	    perror("(setsockopt):");
-	    WSNET2_EXC("Libwsnet2:wsnet2_connect: Error during multicast socket configuration\n");
+	    WSNET2_EXC("libwsnet2:wsnet2_connect: Error during multicast socket configuration\n");
 	    goto error;
 	}
 	
@@ -281,7 +285,7 @@ int wsnet2_connect(char *srv_addr, uint16_t s_port, char *m_addr, uint16_t m_por
 	/* allow several bindings */
 	if (setsockopt(wsens.m_fd, SOL_SOCKET, SO_REUSEPORT, &on, sizeof(on)) != 0 ) { 
 	    perror("(setsockopt):");
-	    WSNET2_EXC("Libwsnet2:wsnet2_connect: Error during multicast socket configuration for Linux\n"); 
+	    WSNET2_EXC("libwsnet2:wsnet2_connect: Error during multicast socket configuration for Linux\n"); 
 	    goto error;
 	} 
 #endif
@@ -289,7 +293,7 @@ int wsnet2_connect(char *srv_addr, uint16_t s_port, char *m_addr, uint16_t m_por
 	/* bind */
 	if (bind(wsens.m_fd, (struct sockaddr *) (&addr), sizeof(addr)) != 0) {
 	    perror("(bind):");
-	    WSNET2_EXC("Libwsnet2:wsnet2_connect: Error during multicast socket binding\n");
+	    WSNET2_EXC("libwsnet2:wsnet2_connect: Error during multicast socket binding\n");
 	    goto error;
 	}
 	
@@ -301,13 +305,13 @@ int wsnet2_connect(char *srv_addr, uint16_t s_port, char *m_addr, uint16_t m_por
 #endif
 	  {
 	    perror("(inet_aton):");
-	    WSNET2_EXC("Error during multicast socket joining\n");
+	    WSNET2_EXC("libwsnet2:Error during multicast socket joining\n");
 	    goto error;
 	  }
 	mreq.imr_interface.s_addr = INADDR_ANY;
 	if (setsockopt(wsens.m_fd, SOL_IP, IP_ADD_MEMBERSHIP, (void*)&mreq, sizeof(mreq)) != 0 ) {
 	    perror("(setsockopt):");
-	    WSNET2_EXC("Libwsnet2:wsnet2_connect: Error during multicast socket configuration\n");
+	    WSNET2_EXC("libwsnet2:wsnet2_connect: Error during multicast socket configuration\n");
 	    goto error;
 	}
 	/***************************************************************************************/
@@ -318,7 +322,7 @@ int wsnet2_connect(char *srv_addr, uint16_t s_port, char *m_addr, uint16_t m_por
 
  error:
     wsnet2_finalize();
-    ERROR("Libwsnet2:wsnet2_connect: Error during connection initialization...\n");
+    WSNET2_ERROR("libwsnet2:wsnet2_connect: Error during connection initialization...\n");
     return -1;
 }
 
@@ -345,13 +349,12 @@ int wsnet2_subscribe(void) {
         perror("(send)");
         goto error;
     }
-    WSNET2_DBG("Libwsnet2:wsnet2_subscribe: Attempting to connect with id %d...\n", wsens.id);
+    WSNET2_CNCT("libwsnet2:wsnet2_subscribe: Attempting to connect with id %d...\n", wsens.id);
 
     /* wait for server response */
     wsens.state = WORLDSENS_CLT_STATE_CONNECTING;
     while (wsens.state != WORLDSENS_CLT_STATE_IDLE) {
         /* receive */
-        WSNET2_DBG("Libwsnet2:wsnet2_subscribe: Waiting for server response... \n");
         if ((len = recv(wsens.u_fd, msg, WORLDSENS_MAX_PKTLENGTH, 0)) < 0) {
             perror("(recv)");
             goto error;
@@ -360,12 +363,12 @@ int wsnet2_subscribe(void) {
 	  return -1;
     }
 
-    WSNET2_DBG("Libwsnet2:wsnet2_subscribe: Connection to server successfull \n");
+    WSNET2_CNCT("libwsnet2:wsnet2_subscribe: Connection to server successfull \n");
 
     return 0; 
 
  error:
-    ERROR("Libwsnet2:wsnet2_subscribe: Error when receiving subscribe response\n");
+    WSNET2_ERROR("libwsnet2:wsnet2_subscribe: Error when receiving subscribe response\n");
     wsnet2_finalize();
     return -1;
 }
@@ -386,13 +389,13 @@ int wsnet2_unsubscribe(void) {
 	worldsens_packet_dump(&pkt);
         goto error;
     }
-    WSNET2_DBG("Libwsnet2:wsnet2_unsubscribe: Disconnected id %d\n", wsens.id);
+    WSNET2_CNCT("libwsnet2:wsnet2_unsubscribe: Disconnected id %d\n", wsens.id);
 	
     return 0;
 
  error:
-    ERROR("Libwsnet2:wsnet2_unsubscribe: Error when sending unsubscribe request\n");
-    wsnet2_finalize();
+    WSNET2_ERROR("libwsnet2:wsnet2_unsubscribe: Error when sending unsubscribe request\n");
+
     return -1;
 }
 
@@ -441,7 +444,7 @@ int wsnet2_update(void) {
     return 0;
 
  error:
-    ERROR("Libwsnet2:wsnet2_update: Error when updating libwsnet2");
+    WSNET2_ERROR("libwsnet2:wsnet2_update: Error when updating libwsnet2");
     wsnet2_finalize();
     return -1;
 }
@@ -469,7 +472,7 @@ static int wsnet2_sync(void) {
         perror("(send)");
         goto error;
     }
-    WSNET2_DBG("Libwsnet2:wsnet2_sync: synched on rp %d\n", wsens.rpseq);
+    WSNET2_DBG("libwsnet2:wsnet2_sync: synched on rp %d\n", wsens.rpseq);
 
 	
     /* wait for new rp */
@@ -492,7 +495,7 @@ static int wsnet2_sync(void) {
     return 0;
 
  error:
-    ERROR("Libwsnet2:wsnet2_sync: Error during synchronization\n");
+    WSNET2_ERROR("libwsnet2:wsnet2_sync: Error during synchronization\n");
     wsnet2_finalize();
     return -1;
 }
@@ -507,8 +510,6 @@ int wsnet2_tx(char data, double freq, int mod, double txdB, uint64_t delay, int 
     char msg[WORLDSENS_MAX_PKTLENGTH];
     union _worldsens_pkt pkt;
     int len;
-
-    WSNET2_TX("Libwsnet2:entering in wsnet2_tx	\n");
 
     /* put doubles into uint64_t variables for swap */
     uint64_t *pfreq  = (uint64_t *) &freq;
@@ -535,9 +536,9 @@ int wsnet2_tx(char data, double freq, int mod, double txdB, uint64_t delay, int 
         goto error;
     }
  
-    WSNET2_TX("Libwsnet2:wsnet2_tx: machine time=%"PRIu64"\n", MACHINE_TIME_GET_NANO());
-    WSNET2_TX("Libwsnet2:wsnet2_tx: wsens last rp=%"PRIu64"\n", wsens.l_rp);
-    WSNET2_TX("Libwsnet2:wsnet2_tx: packet 0x%02x sent\n", data);
+    //WSNET2_DBG("libwsnet2:wsnet2_tx: machine time=%"PRIu64"\n", MACHINE_TIME_GET_NANO());
+    //WSNET2_DBG("libwsnet2:wsnet2_tx: wsens last rp=%"PRIu64"\n", wsens.l_rp);
+    WSNET2_TX("libwsnet2:wsnet2_tx: packet 0x%02x sent\n", data);
     
     /* wait either for backtrack or rp reminder */
     wsens.state = WORLDSENS_CLT_STATE_TXING;
@@ -558,7 +559,7 @@ int wsnet2_tx(char data, double freq, int mod, double txdB, uint64_t delay, int 
     return 0;
 
  error:
-    WSNET2_DBG("Libwsnet2:wsnet2_tx: error during tx\n");
+    WSNET2_ERROR("libwsnet2:wsnet2_tx: error during tx\n");
     wsnet2_finalize();
     return -1;
 }
@@ -608,7 +609,7 @@ int wsnet2_tx_measure_req(int measure_pos_id) {
     return 0;
 
  error:
-    WSNET2_DBG("Libwsnet2:wsnet2_tx_measure_req: Error during tx measure req\n");
+    WSNET2_ERROR("libwsnet2:wsnet2_tx_measure_req: Error during tx measure req\n");
     wsnet2_finalize();
     return -1;
 }
@@ -625,70 +626,70 @@ static int wsnet2_parse(char *msg) {
   switch (pkt->s_header.type) {
  
   case WORLDSENS_S_CONNECT_RSP_OK:
-      WSNET2_DBG("Libwsnet2:wsnet2_parse: WORLDSENS_S_CONNECT_RSP_OK packet type\n");
+      WSNET2_DBG("libwsnet2:wsnet2_parse: WORLDSENS_S_CONNECT_RSP_OK packet type\n");
       if(wsnet2_published((char *)pkt)){
-	  WSNET2_DBG("Libwsnet2:wsnet2_parse: Error during publishing models\n");	
+	  WSNET2_EXC("libwsnet2:wsnet2_parse: Error during publishing models\n");	
           return -1;
       }
       break;
   case WORLDSENS_S_CONNECT_RSP_NOK:
-      WSNET2_DBG("Libwsnet2:wsnet2_parse: WORLDSENS_S_CONNECT_RSP_NOK packet type\n");
-      WSNET2_EXC("Libwsnet2:wsnet2_parse: Connection refused by wsnet2 server\n");
+      WSNET2_DBG("libwsnet2:wsnet2_parse: WORLDSENS_S_CONNECT_RSP_NOK packet type\n");
+      WSNET2_EXC("libwsnet2:wsnet2_parse: Connection refused by wsnet2 server\n");
       wsnet2_finalize();
       return -1;
   case WORLDSENS_S_BACKTRACK:
-      WSNET2_DBG("Libwsnet2:wsnet2_parse: WORLDSENS_S_BACKTRACK packet type\n");
+      WSNET2_DBG("libwsnet2:wsnet2_parse: WORLDSENS_S_BACKTRACK packet type\n");
       if (wsnet2_backtrack((char *)pkt))
           goto error;
       break;
   case WORLDSENS_S_SYNC_RELEASE:
-      WSNET2_DBG("Libwsnet2:wsnet2_parse: WORLDSENS_S_SYNC_RELEASE packet type\n");
+      WSNET2_DBG("libwsnet2:wsnet2_parse: WORLDSENS_S_SYNC_RELEASE packet type\n");
       if (wsnet2_sync_release((char *)pkt))
           goto error;
       break;
   case WORLDSENS_S_SYNC_REMINDER:
-      WSNET2_DBG("Libwsnet2:wsnet2_parse: WORLDSENS_S_SYNC_REMINDER packet type\n");
+      WSNET2_DBG("libwsnet2:wsnet2_parse: WORLDSENS_S_SYNC_REMINDER packet type\n");
       if (wsnet2_sync_reminder((char *)pkt))
           goto error;
       break;
   case WORLDSENS_S_BYTE_RX:
-      WSNET2_DBG("Libwsnet2:wsnet2_parse: WORLDSENS_S_BYTE_RX packet type\n");
+      WSNET2_DBG("libwsnet2:wsnet2_parse: WORLDSENS_S_BYTE_RX packet type\n");
       if (wsnet2_rx((char *)pkt))
           goto error;
       break;
   case WORLDSENS_S_BYTE_SR_RX:
-      WSNET2_DBG("Libwsnet2:wsnet2_parse: WORLDSENS_S_BYTE_SR_RX packet type\n");
+      WSNET2_DBG("libwsnet2:wsnet2_parse: WORLDSENS_S_BYTE_SR_RX packet type\n");
       if (wsnet2_sr_rx((char *)pkt))
           goto error;
       break;
   case WORLDSENS_S_MEASURE_RSP:
-      WSNET2_DBG("Libwsnet2:wsnet2_parse: WORLDSENS_S_MEASURE_RSP packet type\n");
+      WSNET2_DBG("libwsnet2:wsnet2_parse: WORLDSENS_S_MEASURE_RSP packet type\n");
       if (wsnet2_measure_rsp((char *)pkt))
           goto error;
       break;
   case WORLDSENS_S_MEASURE_SR_RSP:
-      WSNET2_DBG("Libwsnet2:wsnet2_parse: WORLDSENS_S_MEASURE_SR_RSP packet type\n");
+      WSNET2_DBG("libwsnet2:wsnet2_parse: WORLDSENS_S_MEASURE_SR_RSP packet type\n");
       if (wsnet2_measure_sr_rsp((char *)pkt))
           goto error;
       break;
   case WORLDSENS_S_KILLSIM:
-      WSNET2_DBG("Libwsnet2:wsnet2_parse: WORLDSENS_S_KILLSIM packet type\n");
+      WSNET2_DBG("libwsnet2:wsnet2_parse: WORLDSENS_S_KILLSIM packet type\n");
       wsnet2_finalize();
       wsens.state = WORLDSENS_CLT_STATE_KILLED;
       break;
   case WORLDSENS_S_KILL:
-      WSNET2_DBG("Libwsnet2:wsnet2_parse: WORLDSENS_S_KILL packet type\n");
+      WSNET2_DBG("libwsnet2:wsnet2_parse: WORLDSENS_S_KILL packet type\n");
       wsnet2_kill_node((char *)pkt);
       break;
   default:
-      ERROR("Libwsnet2:wsnet2_parse: Unknown packet type!\n");
+      WSNET2_EXC("libwsnet2:wsnet2_parse: Unknown packet type!\n");
       goto error;
   }
 
   return 0;
 
  error:
-    ERROR("Libwsnet2:wsnet2_parse: Error during packet parse\n");
+    WSNET2_ERROR("libwsnet2:wsnet2_parse: Error during packet parse\n");
     wsnet2_finalize();
     return -1;	
 }
@@ -703,15 +704,15 @@ static int wsnet2_seq(char *msg) {
     struct _worldsens_s_header *header = (struct _worldsens_s_header *) msg;
 
     if (header->seq > wsens.seq) {
-       ERROR("Libwsnet2:wsnet2_seq: Lost wsens packet (received: %"PRIu64" while expecting %"PRIu64")\n", header->seq, wsens.seq);
+       WSNET2_ERROR("libwsnet2:wsnet2_seq: Lost wsens packet (received: %"PRIu64" while expecting %"PRIu64")\n", header->seq, wsens.seq);
        return -1;
     }  
     else if (header->seq < wsens.seq) {
-       ERROR("Libwsnet2:wsnet2_seq: Deprecated wsens packet (received: %"PRIu64" while expecting %"PRIu64")\n", header->seq, wsens.seq);
+       WSNET2_ERROR("libwsnet2:wsnet2_seq: Deprecated wsens packet (received: %"PRIu64" while expecting %"PRIu64")\n", header->seq, wsens.seq);
        return -2;
    }
    wsens.seq++;
-   WSNET2_DBG("Libwsnet2:wsnet2_seq: Packet sequence incremented (seq=%"PRIu64")\n", wsens.seq);
+   WSNET2_DBG("libwsnet2:wsnet2_seq: Packet sequence incremented (seq=%"PRIu64")\n", wsens.seq);
    return 0;
 }
 
@@ -737,7 +738,7 @@ static int wsnet2_published(char *msg) {
    wsens.rpseq = pkt->cnx_rsp_ok.rp_next;
    WORLDSENS_SAVE_STATE();
 
-   WSNET2_BKTRK("Libwsnet2:wsnet2_published: Connect forces a state save at (time:%"PRIu64", seq:%d)\n",
+   WSNET2_BKTRK("libwsnet2:wsnet2_published: Connect forces a state save at (time:%"PRIu64", seq:%d)\n",
 		MACHINE_TIME_GET_NANO(), wsens.seq - 1);
 
    nb_models = pkt->cnx_rsp_ok.n_antenna_id + pkt->cnx_rsp_ok.n_modulation_id + pkt->cnx_rsp_ok.n_measure_id;
@@ -754,13 +755,13 @@ static int wsnet2_published(char *msg) {
    counter = 0;
    i = 0;
    while (counter < pkt->cnx_rsp_ok.n_antenna_id) {
-       WSNET2_DBG("Libwsnet2:wsnet2_published: Checking antenna '%s' with id %d\n", 
+       WSNET2_DBG("libwsnet2:wsnet2_published: Checking antenna '%s' with id %d\n", 
 		  pkt->cnx_rsp_ok.names_and_ids + offset + sizeof(uint32_t), 
 		  *((uint32_t *)(pkt->cnx_rsp_ok.names_and_ids + offset)));
        while ((wsens.radio[i].callback != NULL) && (i < MAX_CALLBACKS)) {
 	   if (strcmp(wsens.radio[i].antenna, pkt->cnx_rsp_ok.names_and_ids + offset + sizeof(uint32_t)) == 0) {
 	       wsens.radio[i].antenna_id = *((uint32_t *)(pkt->cnx_rsp_ok.names_and_ids + offset));
-	       WSNET2_DBG("Libwsnet2:wsnet2_published: Antenna '%s' matches\n", wsens.radio[i].antenna);
+	       WSNET2_DBG("libwsnet2:wsnet2_published: Antenna '%s' matches\n", wsens.radio[i].antenna);
 	       match_antennas++;
 	   }
 	   i++;
@@ -771,7 +772,7 @@ static int wsnet2_published(char *msg) {
 
    /* checks if we have as many antennas as radios registered */
    if(match_antennas != wsens.nb_radios){
-       ERROR("Libwsnet2:wsnet2_published: Wrong number of antennas registered\n");
+       WSNET2_ERROR("libwsnet2:wsnet2_published: Wrong number of antennas registered\n");
        return -1;
    }
 
@@ -781,7 +782,7 @@ static int wsnet2_published(char *msg) {
    /* initialize a table of correspondance between wsnet modulation ids and wsim modulation ids */
    counter = 0;
    while (counter < pkt->cnx_rsp_ok.n_modulation_id) {
-       WSNET2_DBG("Libwsnet2:wsnet2_published: Checking modulation '%s' with id %d\n", 
+       WSNET2_DBG("libwsnet2:wsnet2_published: Checking modulation '%s' with id %d\n", 
 		  pkt->cnx_rsp_ok.names_and_ids + offset + sizeof(uint32_t), 
 		  *((uint32_t *)(pkt->cnx_rsp_ok.names_and_ids + offset)));
        for (i = 0; i < WSNET_MAX_MODULATIONS; i++) {
@@ -797,13 +798,13 @@ static int wsnet2_published(char *msg) {
    counter = 0;
    i = 0;
    while (counter < pkt->cnx_rsp_ok.n_measure_id) {
-       WSNET2_DBG("Libwsnet2:wsnet2_published: Checking measure '%s' with id %d\n", 
+       WSNET2_DBG("libwsnet2:wsnet2_published: Checking measure '%s' with id %d\n", 
 		  pkt->cnx_rsp_ok.names_and_ids + offset + sizeof(uint32_t), 
 		  *((uint32_t *)(pkt->cnx_rsp_ok.names_and_ids + offset)));
        while ((wsens.measure[i].callback != NULL) && (i < MAX_CALLBACKS)) {
 	   if (strcmp(wsens.measure[i].name, pkt->cnx_rsp_ok.names_and_ids + offset + sizeof(uint32_t)) == 0) {
 	       wsens.measure[i].id = *((uint32_t *)(pkt->cnx_rsp_ok.names_and_ids + offset));
-	       WSNET2_DBG("Libwsnet2:wsnet2_published: Measure '%s' matches\n", wsens.measure[i].name);
+	       WSNET2_DBG("libwsnet2:wsnet2_published: Measure '%s' matches\n", wsens.measure[i].name);
 	       match_measures++;
 	   }
 	   i++;
@@ -813,7 +814,7 @@ static int wsnet2_published(char *msg) {
    }
    /* checks if we have as many measures as measures registered */
    if(match_measures != wsens.nb_measures){
-       ERROR("Libwsnet2:wsnet2_published: Wrong number of measures registered\n");
+       WSNET2_EXC("libwsnet2:wsnet2_published: Wrong number of measures registered\n");
        return -1;
    }
 
@@ -836,10 +837,10 @@ static int wsnet2_backtrack(char *msg) {
        return 0;
    
    if (MACHINE_TIME_GET_NANO() > (wsens.l_rp + pkt->rp_duration)) {
-       WSNET2_BKTRK("Libwsnet2:wsnet2_backtrack: Backtracking to time %"PRIu64"\n", wsens.l_rp);
+       WSNET2_BKTRK("libwsnet2:wsnet2_backtrack: Backtracking to time %"PRIu64"\n", wsens.l_rp);
        machine_state_restore();   
    } else {
-       WSNET2_BKTRK("Libwsnet2:wsnet2_backtrack: No need to backtrack\n");
+       WSNET2_BKTRK("libwsnet2:wsnet2_backtrack: No need to backtrack\n");
    }
 
    wsens.rpseq = pkt->rp_next;
@@ -865,11 +866,11 @@ static int wsnet2_sync_release(char *msg) {
        return 0;
    
    if (wsens.state != WORLDSENS_CLT_STATE_PENDING) {
-       ERROR("Libwsnet2:wsnet2_sync_release: Received a release order while not synched (state: %d)\n", wsens.state);
+       WSNET2_EXC("libwsnet2:wsnet2_sync_release: Received a release order while not synched (state: %d)\n", wsens.state);
        return -1;
    }
 
-   WSNET2_DBG("Libwsnet2:wsnet2_sync_release: Released\n");
+   WSNET2_DBG("libwsnet2:wsnet2_sync_release: Released\n");
 
    wsens.rpseq = pkt->rp_next;
    wsens.n_rp  = MACHINE_TIME_GET_NANO() + pkt->rp_duration;
@@ -894,7 +895,7 @@ static int wsnet2_sync_reminder(char *msg) {
    
    /* check rdv sequence */
    if (pkt->rp_next != wsens.rpseq) {
-       ERROR("Libwsnet2:wsnet2_sync_reminder: rdv reminder (rp seq %"PRIu64") not equal to next known rdv (rp seq %"PRIu64")\n", pkt->rp_next, wsens.rpseq);
+       WSNET2_EXC("libwsnet2:wsnet2_sync_reminder: rdv reminder (rp seq %"PRIu64") not equal to next known rdv (rp seq %"PRIu64")\n", pkt->rp_next, wsens.rpseq);
      return -1;
    }
 
@@ -902,7 +903,7 @@ static int wsnet2_sync_reminder(char *msg) {
        wsens.state = WORLDSENS_CLT_STATE_IDLE;
    }
 
-   WSNET2_DBG("Libwsnet2:wsnet2_sync_remind: RP seq %"PRIu64" reminded\n", pkt->rp_next);
+   WSNET2_DBG("libwsnet2:wsnet2_sync_remind: RP seq %"PRIu64" reminded\n", pkt->rp_next);
    
    return 0;
 }
@@ -937,12 +938,12 @@ static int wsnet2_rx(char *msg) {
 	       info.modulation =  pkt->wsim_mod_id;
 	       info.power_dbm  = *power_dbm;
 	       info.SiNR       = *sinr;
-	       WSNET2_DBG("Libwsnet2:wsnet2_sr_rx: rxing at time %"PRIu64" data 0x%02x on antenna %s with power %g dbm\n",
+	       WSNET2_RX("libwsnet2:wsnet2_sr_rx: rxing at time %"PRIu64" data 0x%02x on antenna %s with power %g dbm\n",
 			  MACHINE_TIME_GET_NANO(), pkt->data, wsens.radio[i].antenna, info.power_dbm);
 	       wsens.radio[i].callback(wsens.radio[i].arg, &info);
 	   }
 	   else {
-	       WSNET2_DBG("Libwsnet2:wsnet2_sr_rx: Node id (%d) or antenna id (%d) don't match with pkt node id (%d) or pkt antenna id (%d) \n", wsens.id, i, wsens.radio[i].antenna_id, pkt->node_id, pkt->antenna_id);
+	       WSNET2_DBG("libwsnet2:wsnet2_sr_rx: Node id (%d) or antenna id (%d) don't match with pkt node id (%d) or pkt antenna id (%d) \n", wsens.id, i, wsens.radio[i].antenna_id, pkt->node_id, pkt->antenna_id);
 	   }
 	   i++;
        }
@@ -981,12 +982,12 @@ static int wsnet2_sr_rx(char *msg) {
 	       info.modulation =  pkt->wsim_mod_id;
 	       info.power_dbm  = *power_dbm;
 	       info.SiNR       = *sinr;
-	       WSNET2_DBG("Libwsnet2:wsnet2_sr_rx: rxing at time %"PRIu64" data 0x%02x on antenna %s with power %g dbm\n",
+	       WSNET2_RX("libwsnet2:wsnet2_sr_rx: rxing at time %"PRIu64" data 0x%02x on antenna %s with power %g dbm\n",
 			  MACHINE_TIME_GET_NANO(), pkt->data, wsens.radio[i].antenna, info.power_dbm);
 	       wsens.radio[i].callback(wsens.radio[i].arg, &info);
 	   }
 	   else {
-	       WSNET2_DBG("Libwsnet2:wsnet2_sr_rx: Node id (%d) or antenna id (%d) don't match with pkt node id (%d) or pkt antenna id (%d) \n", wsens.id, i, wsens.radio[i].antenna_id, pkt->node_id, pkt->antenna_id);
+	       WSNET2_DBG("libwsnet2:wsnet2_sr_rx: Node id (%d) or antenna id (%d) don't match with pkt node id (%d) or pkt antenna id (%d) \n", wsens.id, i, wsens.radio[i].antenna_id, pkt->node_id, pkt->antenna_id);
 	   }
 	   i++;
        }
@@ -1022,7 +1023,7 @@ static int wsnet2_measure_rsp(char *msg) {
 	    if (pkt->measure_id == wsens.measure[i].id) {
 	        /* put uint64_t into double to retrieve double value after swap */
 	        double *measure_val = (double *) &(pkt->measure_val);
-	        WSNET2_DBG("Libwsnet2:wsnet2_measure_rsp: Measure rsp at time %"PRIu64", measure '%s', measure value %g\n",
+	        WSNET2_RX("libwsnet2:wsnet2_measure_rsp: Measure rsp at time %"PRIu64", measure '%s', measure value %g\n",
 			   MACHINE_TIME_GET_NANO(), wsens.measure[i].name, measure_val);
 		wsens.measure[i].callback(wsens.measure[i].arg, *measure_val);
 	    }
@@ -1052,7 +1053,7 @@ static int wsnet2_measure_sr_rsp(char *msg) {
 	    if (pkt->measure_id == wsens.measure[i].id) {
 	        /* put uint64_t into double to retrieve double value after swap */
 	        double *measure_val = (double *) &(pkt->measure_val);
-	        WSNET2_DBG("Libwsnet2:wsnet2_measure_sr_rsp: Measure rsp at time %"PRIu64", measure '%s', measure value %g\n", MACHINE_TIME_GET_NANO(), wsens.measure[i].name, measure_val);
+	        WSNET2_RX("libwsnet2:wsnet2_measure_sr_rsp: Measure rsp at time %"PRIu64", measure '%s', measure value %g\n", MACHINE_TIME_GET_NANO(), wsens.measure[i].name, measure_val);
 		wsens.measure[i].callback(wsens.measure[i].arg, *measure_val);
 	    }
 	    i++;

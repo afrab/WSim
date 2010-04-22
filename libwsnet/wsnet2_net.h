@@ -66,7 +66,8 @@ struct _worldsens_clt {
 /**************************************************************************/
 
 void            wsnet2_init             (void);
-void            wsnet2_finalize         (void);
+int             wsnet2_unsubscribe      (void);
+void            wsnet2_close            (void);
 uint32_t        wsnet2_get_node_id      (void);
 int             wsnet2_update           (void);
 int             wsnet2_register_radio   (char *, wsnet_callback_rx_t, void *);

@@ -66,7 +66,7 @@ int worldsens2_c_connect(char *srv_addr, uint16_t srv_port, char *mul_addr, uint
 
 int worldsens2_c_close(void) 
 {
-  wsnet2_finalize();
+  wsnet2_close();
   return 0;
 }
 

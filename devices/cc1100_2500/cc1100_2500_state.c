@@ -346,11 +346,23 @@ int cc1100_update_state_rx (struct _cc1100_t *cc1100)
       /* check if a rx timeout is over */
       if (MACHINE_TIME_GET_NANO() >= cc1100->rx_timeout)
 	{
-	  /* check if no packet is starting to be received */
-	  if (cc1100->fsm_ustate <= CC1100_RX_SEND_DATA)
+	  /* check if no packet is starting to be received (cf 19.7 p46) */
+	  if (cc1100->registers[CC1100_REG_MCSM2] & 0x20)  /* RX_TIME_QUAL = 1 */
 	    {
-	      CC1100_IDLE_ENTER(cc1100);
-	      cc1100->fsm_pending = CC1100_STATE_SLEEP;
+	      if ( (cc1100->fsm_ustate < CC1100_RX_SEND_DATA) &&                    /* no sync word found and */
+		   ((~cc1100_read_register(cc1100, CC1100_REG_PKTSTATUS)) & 0x20) ) /* preamble threshold not reached */
+		{
+		  CC1100_IDLE_ENTER(cc1100);
+		  cc1100->fsm_pending = CC1100_STATE_SLEEP;
+		}
+	    }
+	  else  /* RX_TIME_QUAL = 0 */
+	    {
+	      if (cc1100->fsm_ustate < CC1100_RX_SEND_DATA)     /* no sync word found */
+		{
+		  CC1100_IDLE_ENTER(cc1100);
+		  cc1100->fsm_pending = CC1100_STATE_SLEEP;
+		}
 	    }
 	}
     }

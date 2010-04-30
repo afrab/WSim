@@ -195,14 +195,17 @@ void cc2420_strobe_state_tx_preamble(struct _cc2420_t * cc2420)
   switch (cc2420->SPI_addr) 
     {
     case CC2420_STROBE_SXOSCOFF :
+      logpkt_tx_abort_pkt(cc2420->worldsens_radio_id, "strobe SXOSCOFF");
       CC2420_DBG_STROBE("cc2420:strobe:tx_preamble: SXOSCOFF\n");
       CC2420_POWER_DOWN_ENTER(cc2420);
       break;
     case CC2420_STROBE_SRFOFF :
+      logpkt_tx_abort_pkt(cc2420->worldsens_radio_id, "strobe SRFOFF");
       CC2420_DBG_STROBE("cc2420:strobe:tx_preamble: SRFOFF\n");
       CC2420_IDLE_ENTER(cc2420);
       break;
     case CC2420_STROBE_SFLUSHTX :
+      logpkt_tx_abort_pkt(cc2420->worldsens_radio_id, "strobe SFLUSHTX");
       CC2420_DBG_STROBE("cc2420:strobe:tx_preamble: SFLUSHTX\n");
       cc2420->tx_underflow = 0;
       cc2420->tx_fifo_len = 0;
@@ -210,6 +213,7 @@ void cc2420_strobe_state_tx_preamble(struct _cc2420_t * cc2420)
       cc2420->tx_frame_completed = 0;
       break;
     case CC2420_STROBE_SFLUSHRX :
+      logpkt_tx_abort_pkt(cc2420->worldsens_radio_id, "strobe SFLUSHRX");
       CC2420_DBG_STROBE("cc2420:strobe:tx_preamble: SFLUSHRX\n");
       cc2420->rx_overflow = 0;
       cc2420->rx_data_bytes = 0;
@@ -245,14 +249,17 @@ void cc2420_strobe_state_tx_frame(struct _cc2420_t * cc2420)
   switch (cc2420->SPI_addr) 
     {
     case CC2420_STROBE_SXOSCOFF :
+      logpkt_tx_abort_pkt(cc2420->worldsens_radio_id, "strobe SXOSCOFF");
       CC2420_DBG_STROBE("cc2420:strobe:tx_frame: SXOSCOFF\n");
       CC2420_POWER_DOWN_ENTER(cc2420);
       break;
     case CC2420_STROBE_SRFOFF :
+      logpkt_tx_abort_pkt(cc2420->worldsens_radio_id, "strobe SRFOFF");
       CC2420_DBG_STROBE("cc2420:strobe:tx_frame: SRFOFF\n");
       CC2420_IDLE_ENTER(cc2420);
       break;
     case CC2420_STROBE_SFLUSHTX :
+      logpkt_tx_abort_pkt(cc2420->worldsens_radio_id, "strobe SFLUSHTX");
       CC2420_DBG_STROBE("cc2420:strobe:tx_frame: SFLUSHTX\n");
       cc2420->tx_underflow = 0;
       cc2420->tx_fifo_len = 0;
@@ -260,6 +267,7 @@ void cc2420_strobe_state_tx_frame(struct _cc2420_t * cc2420)
       cc2420->tx_frame_completed = 0;
       break;
     case CC2420_STROBE_SFLUSHRX :
+      logpkt_tx_abort_pkt(cc2420->worldsens_radio_id, "strobe SFLUSHRX");
       CC2420_DBG_STROBE("cc2420:strobe:tx_frame: SRFORX\n");
       cc2420->rx_overflow = 0;
       cc2420->rx_data_bytes = 0;
@@ -402,14 +410,17 @@ void cc2420_strobe_state_rx_sfd_search(struct _cc2420_t * cc2420)
   switch (cc2420->SPI_addr) 
     {
     case CC2420_STROBE_SXOSCOFF :
+      logpkt_rx_abort_pkt(cc2420->worldsens_radio_id, "strobe SXOSCOFF");
       CC2420_DBG_STROBE("cc2420:strobe:rx_sfd_search: SXOSCOFF\n");
       CC2420_POWER_DOWN_ENTER(cc2420);
       break;
     case CC2420_STROBE_SRFOFF :
+      logpkt_rx_abort_pkt(cc2420->worldsens_radio_id, "strobe SRFOFF");
       CC2420_DBG_STROBE("cc2420:strobe:rx_sfd_search: SRFOFF\n");
       CC2420_IDLE_ENTER(cc2420);
       break;
     case CC2420_STROBE_SFLUSHTX :
+      logpkt_rx_abort_pkt(cc2420->worldsens_radio_id, "strobe SFLUSHTX");
       CC2420_DBG_STROBE("cc2420:strobe:rx_sfd_search: SFLUSHTX\n");
       cc2420->tx_underflow = 0;
       cc2420->tx_fifo_len = 0;
@@ -417,6 +428,7 @@ void cc2420_strobe_state_rx_sfd_search(struct _cc2420_t * cc2420)
       cc2420->tx_frame_completed = 0;
       break;
     case CC2420_STROBE_SFLUSHRX :
+      logpkt_rx_abort_pkt(cc2420->worldsens_radio_id, "strobe SFLUSHRX");
       CC2420_DBG_STROBE("cc2420:strobe:rx_sfd_search: SFLUSHRX\n");
       cc2420->rx_overflow = 0;
       cc2420->rx_data_bytes = 0;
@@ -435,21 +447,26 @@ void cc2420_strobe_state_rx_sfd_search(struct _cc2420_t * cc2420)
       CC2420_DBG_STROBE("cc2420:strobe:rx_sfd_search: STXONCCA\n");
       if (!cc2420_check_cca(cc2420))
 	break;
+      logpkt_rx_abort_pkt(cc2420->worldsens_radio_id, "strobe STXONCCA");
       CC2420_TX_CALIBRATE_ENTER(cc2420);
       break;
     case CC2420_STROBE_STXON :
+      logpkt_rx_abort_pkt(cc2420->worldsens_radio_id, "strobe STXON");
       CC2420_DBG_STROBE("cc2420:strobe:rx_sfd_search: STXON\n");
       CC2420_TX_CALIBRATE_ENTER(cc2420);
       break;
     case CC2420_STROBE_SRXON :
+      logpkt_rx_abort_pkt(cc2420->worldsens_radio_id, "strobe SRXON");
       CC2420_DBG_STROBE("cc2420:strobe:rx_sfd_search: SRXON\n");
       break;
     case CC2420_STROBE_SACK :
+      logpkt_rx_abort_pkt(cc2420->worldsens_radio_id, "strobe SACK");
       CC2420_DBG_STROBE("cc2420:strobe:rx_sfd_search: SACK\n");
       cc2420->tx_frame_pending = 0;
       CC2420_TX_ACK_CALIBRATE_ENTER(cc2420);
       break;
     case CC2420_STROBE_SACKPEND :
+      logpkt_rx_abort_pkt(cc2420->worldsens_radio_id, "strobe SACKPEND");
       CC2420_DBG_STROBE("cc2420:strobe:rx_sfd_search: SACKPEND\n");
       cc2420->tx_frame_pending = 1;
       CC2420_TX_ACK_CALIBRATE_ENTER(cc2420);
@@ -474,14 +491,17 @@ void cc2420_strobe_state_rx_frame(struct _cc2420_t * cc2420)
   switch (cc2420->SPI_addr) 
     {
     case CC2420_STROBE_SXOSCOFF :
+      logpkt_rx_abort_pkt(cc2420->worldsens_radio_id, "strobe SXOSCOFF");
       CC2420_DBG_STROBE("cc2420:strobe:rx_frame: SXOSCOFF\n");
       CC2420_POWER_DOWN_ENTER(cc2420);
       break;
     case CC2420_STROBE_SRFOFF :
+      logpkt_rx_abort_pkt(cc2420->worldsens_radio_id, "strobe SRFOFF");
       CC2420_DBG_STROBE("cc2420:strobe:rx_frame: SRFOFF\n");
       CC2420_IDLE_ENTER(cc2420);
       break;
     case CC2420_STROBE_SFLUSHTX :
+      logpkt_rx_abort_pkt(cc2420->worldsens_radio_id, "strobe SFLUSHTX");
       CC2420_DBG_STROBE("cc2420:strobe:rx_frame: SFLUSHTX\n");
       cc2420->tx_underflow = 0;
       cc2420->tx_fifo_len = 0;
@@ -489,6 +509,7 @@ void cc2420_strobe_state_rx_frame(struct _cc2420_t * cc2420)
       cc2420->tx_frame_completed = 0;
       break;
     case CC2420_STROBE_SFLUSHRX :
+      logpkt_rx_abort_pkt(cc2420->worldsens_radio_id, "strobe SFLUSHRX");
       CC2420_DBG_STROBE("cc2420:strobe:rx_frame: SFLUSHRX\n");
       cc2420->rx_overflow = 0;
       cc2420->rx_data_bytes = 0;
@@ -507,8 +528,10 @@ void cc2420_strobe_state_rx_frame(struct _cc2420_t * cc2420)
       CC2420_DBG_STROBE("cc2420:strobe:rx_frame: STXONCCA\n");
       if (!cc2420_check_cca(cc2420))
 	break;
+      logpkt_rx_abort_pkt(cc2420->worldsens_radio_id, "strobe STXONCCA");
       CC2420_TX_CALIBRATE_ENTER(cc2420);
     case CC2420_STROBE_STXON :
+      logpkt_rx_abort_pkt(cc2420->worldsens_radio_id, "strobe STXON");
       CC2420_DBG_STROBE("cc2420:strobe:rx_frame: STXON\n");
       CC2420_TX_CALIBRATE_ENTER(cc2420);
       break;
@@ -590,14 +613,17 @@ void cc2420_strobe_state_tx_ack_preamble(struct _cc2420_t * cc2420)
   switch (cc2420->SPI_addr) 
     {
     case CC2420_STROBE_SXOSCOFF :
+      logpkt_tx_abort_pkt(cc2420->worldsens_radio_id, "strobe SXOSCOFF");
       CC2420_DBG_STROBE("cc2420:strobe:tx_ack_preamble: SXOSCOFF\n");
       CC2420_POWER_DOWN_ENTER(cc2420);
       break;
     case CC2420_STROBE_SRFOFF :
+      logpkt_tx_abort_pkt(cc2420->worldsens_radio_id, "strobe SRFOFF");
       CC2420_DBG_STROBE("cc2420:strobe:tx_ack_preamble: SRFOFF\n");
       CC2420_IDLE_ENTER(cc2420);
       break;
     case CC2420_STROBE_SFLUSHTX :
+      logpkt_tx_abort_pkt(cc2420->worldsens_radio_id, "strobe SFLUSHTX");
       CC2420_DBG_STROBE("cc2420:strobe:tx_ack_preamble: SFLUSHTX\n");
       cc2420->tx_underflow = 0;
       cc2420->tx_fifo_len = 0;
@@ -605,6 +631,7 @@ void cc2420_strobe_state_tx_ack_preamble(struct _cc2420_t * cc2420)
       cc2420->tx_frame_completed = 0;
       break;
     case CC2420_STROBE_SFLUSHRX :
+      logpkt_tx_abort_pkt(cc2420->worldsens_radio_id, "strobe SFLUSHRX");
       CC2420_DBG_STROBE("cc2420:strobe:tx_ack_preamble: SFLUSHRX\n");
       cc2420->rx_overflow = 0;
       cc2420->rx_data_bytes = 0;
@@ -637,14 +664,17 @@ void cc2420_strobe_state_tx_ack(struct _cc2420_t * cc2420)
   switch (cc2420->SPI_addr) 
     {
     case CC2420_STROBE_SXOSCOFF :
+      logpkt_tx_abort_pkt(cc2420->worldsens_radio_id, "strobe SXOSCOFF");
       CC2420_DBG_STROBE("cc2420:strobe:tx_ack: SXOSCOFF\n");
       CC2420_POWER_DOWN_ENTER(cc2420);
       break;
     case CC2420_STROBE_SRFOFF :
+      logpkt_tx_abort_pkt(cc2420->worldsens_radio_id, "strobe SRFOFF");
       CC2420_DBG_STROBE("cc2420:strobe:tx_ack: SRFOFF\n");
       CC2420_IDLE_ENTER(cc2420);
       break;
     case CC2420_STROBE_SFLUSHTX :
+      logpkt_tx_abort_pkt(cc2420->worldsens_radio_id, "strobe SFLUSHTX");
       CC2420_DBG_STROBE("cc2420:strobe:tx_ack: SFLUSHTX\n");
       cc2420->tx_underflow = 0;
       cc2420->tx_fifo_len = 0;
@@ -652,6 +682,7 @@ void cc2420_strobe_state_tx_ack(struct _cc2420_t * cc2420)
       cc2420->tx_frame_completed = 0;
       break;
     case CC2420_STROBE_SFLUSHRX :
+      logpkt_tx_abort_pkt(cc2420->worldsens_radio_id, "strobe SFLUSHRX");
       CC2420_DBG_STROBE("cc2420:strobe:tx_ack: SFLUSHRX\n");
       cc2420->rx_overflow = 0;
       cc2420->rx_data_bytes = 0;

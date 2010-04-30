@@ -18,6 +18,7 @@ typedef uint64_t wsimtime_t;
 
 #include "libtracer/tracer.h"
 #include "liblogger/logger.h"
+#include "liblogpkt/logpkt.h"
 #include "libselect/libselect.h"
 #include "libetrace/libetrace.h"
 #include "libwsnet/libwsnet.h"

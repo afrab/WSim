@@ -619,6 +619,9 @@ uint64_t cc2420_callback_rx(void *arg, struct wsnet_rx_info *wrx)
     uint16_t addr_decode = CC2420_REG_MDMCTRL0_ADR_DECODE(cc2420->registers[CC2420_REG_MDMCTRL0]);
     uint16_t autocrc = CC2420_REG_MDMCTRL0_AUTOCRC(cc2420->registers[CC2420_REG_MDMCTRL0]);
 
+    /* log rx byte */
+    logpkt_rx_byte(cc2420->worldsens_radio_id, rx);
+
     /* according to current state, deal with data */
     switch (cc2420->fsm_state) {
     case CC2420_STATE_RX_SFD_SEARCH :
@@ -639,6 +642,7 @@ uint64_t cc2420_callback_rx(void *arg, struct wsnet_rx_info *wrx)
 	CC2420_DEBUG("cc2420_callback_rx : non 0 byte not expected, dropping\n");
 
 	/* not a zero, not syncword -> drop and resynchronize */
+	logpkt_rx_abort_pkt(cc2420->worldsens_radio_id, "bad sync word");
 	CC2420_RX_SFD_SEARCH_ENTER(cc2420);
 	return 0;
 
@@ -667,6 +671,7 @@ uint64_t cc2420_callback_rx(void *arg, struct wsnet_rx_info *wrx)
 
 	/* write byte to RX FIFO */
 	if (cc2420_rx_fifo_push(cc2420, rx) < 0) {
+	    logpkt_rx_abort_pkt(cc2420->worldsens_radio_id, "rx overflow");
 	    CC2420_DEBUG("cc2420_callback_rx : failed in push\n");
 	    CC2420_RX_OVERFLOW_ENTER(cc2420);
 	    cc2420->FIFOP_pin = 0xFF;
@@ -739,6 +744,7 @@ uint64_t cc2420_callback_rx(void *arg, struct wsnet_rx_info *wrx)
 	        /* check that received frame is ok, ie crc and address recognition 
 	        else flush the frame */
 	        if (cc2420_rx_check_crc(cc2420)) {
+		    logpkt_rx_abort_pkt(cc2420->worldsens_radio_id, "crc check failed");
 		    CC2420_DEBUG("crc check failed, flushing received frame\n");
 		    cc2420_rx_flush_current_frame(cc2420);
 		    CC2420_RX_SFD_SEARCH_ENTER(cc2420);
@@ -751,6 +757,7 @@ uint64_t cc2420_callback_rx(void *arg, struct wsnet_rx_info *wrx)
 	    }
 
             if (cc2420->rx_addr_decode_failed) {
+	        logpkt_rx_abort_pkt(cc2420->worldsens_radio_id, "addr recognition failed");
                 CC2420_DEBUG("at end of frame, address recog was bad, flushing frame\n");
                 cc2420_rx_flush_current_frame(cc2420);
                 CC2420_RX_SFD_SEARCH_ENTER(cc2420);
@@ -761,6 +768,9 @@ uint64_t cc2420_callback_rx(void *arg, struct wsnet_rx_info *wrx)
 	    cc2420->nb_rx_frames ++;
 
 	    CC2420_DEBUG("cc2420 : got a new frame, nb_rx_frames is now %d\n", cc2420->nb_rx_frames);
+
+	    /* end of packet -> packet ready to be dump */
+	    logpkt_rx_complete_pkt(cc2420->worldsens_radio_id);
 
 	    /* if this is the only frame in fifo, calculate rx_frame_end */
 	    /* rx_frame_end will be used in rx_fifo_pop to update the state of FIFOP */

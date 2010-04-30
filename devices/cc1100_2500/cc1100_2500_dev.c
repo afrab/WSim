@@ -260,6 +260,9 @@ int cc1100_device_create (int dev_num, int fxosc_mhz, char *antenna)
   TRACER_CC1100_GDO0   = tracer_event_add_id(1, "gdo0",   "cc1100");
   TRACER_CC1100_GDO2   = tracer_event_add_id(1, "gdo2",   "cc1100");
  
+  /* init packets log */
+  logpkt_init_interface(cc1100->worldsens_radio_id, "cc1100");
+
   return 0;
 }
 
@@ -297,6 +300,9 @@ int cc2500_device_create (int dev_num, int fxosc_mhz, char *antenna)
   TRACER_CC1100_SO     = tracer_event_add_id(1, "so",     "cc2500");
   TRACER_CC1100_GDO0   = tracer_event_add_id(1, "gdo0",   "cc2500");
   TRACER_CC1100_GDO2   = tracer_event_add_id(1, "gdo2",   "cc2500");
+
+  /* init packets log */
+  logpkt_init_interface(cc1100->worldsens_radio_id, "cc2500");
 
   return 0;
 }
@@ -366,6 +372,7 @@ void cc1100_reset_internal (struct _cc1100_t *cc1100)
   cc1100->txBytes               = 0;
   cc1100->txOffset		= 0;
   cc1100->txUnderflow		= 0;
+  cc1100->txCompleted           = 0;
   
   cc1100->rxBytes               = 0;
   cc1100->rxOffset		= 0;

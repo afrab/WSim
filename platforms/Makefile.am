@@ -11,6 +11,7 @@ WSIM_BASE= \
 	../../libtracer/libtracer.a	   \
         ../../libselect/libselect.a        \
 	../../liblogger/liblogger.a        \
+	../../liblogpkt/liblogpkt.a        \
 	../../libwsnet/libwsnet.a          \
 	../../arch/common/libmcucommon.a   \
 	@EXTRAOBJS@

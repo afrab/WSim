@@ -143,8 +143,9 @@ struct _cc1100_t
   uint8_t	  txfifo[CC1100_TXFIFO_LENGTH];
   int		  txBytes;
   int		  txOffset;
-  int		  txUnderflow;
-	
+  int		  txUnderflow;	
+  int             txCompleted;
+
   uint8_t	  rxfifo[CC1100_RXFIFO_LENGTH];
   int		  rxBytes;
   int		  rxOffset;

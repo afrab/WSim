@@ -455,6 +455,8 @@ void machine_state_save()
   tracer_state_save();
   /* esimu tracer     */
   etracer_state_save();
+  /* pkt logger       */
+  logpkt_state_save();
   /* libwsnet         */
   worldsens_c_state_save();
 }
@@ -475,6 +477,8 @@ void machine_state_restore()
   tracer_state_restore();
   /* esimu tracer     */
   etracer_state_restore();
+  /* pkt logger       */
+  logpkt_state_restore();
   /* libwsnet         */
   worldsens_c_state_restore();
   /* count backtracks */

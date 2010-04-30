@@ -8,6 +8,7 @@ SUBDIRS = arch     \
 	libgui     \
 	libtracer  \
 	liblogger  \
+	liblogpkt  \
 	libselect  \
 	libwsnet   \
 	machine    \

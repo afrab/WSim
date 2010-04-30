@@ -259,6 +259,7 @@ void cc2420_update_state_rx_sfd_search(struct _cc2420_t * cc2420) {
     /* if VREG_EN is low, go back to VREG_OFF state */
     if (cc2420->VREG_EN_set) {
 	if (cc2420_read_pin(cc2420, CC2420_INTERNAL_VREG_EN_PIN) == 0x00) {
+	    logpkt_rx_abort_pkt(cc2420->worldsens_radio_id, "vreg off");
 	    CC2420_VREG_OFF_ENTER(cc2420);
 	    return;
 	}
@@ -266,6 +267,7 @@ void cc2420_update_state_rx_sfd_search(struct _cc2420_t * cc2420) {
 
     /* if reset required, go back to RESET state */
     if (cc2420_reset_required(cc2420)) {
+        logpkt_rx_abort_pkt(cc2420->worldsens_radio_id, "chip reset");
 	CC2420_RESET_ENTER(cc2420);
 	return;
     }
@@ -303,6 +305,7 @@ void cc2420_update_state_rx_frame(struct _cc2420_t * cc2420 UNUSED) {
     /* if VREG_EN is low, go back to VREG_OFF state */
     if (cc2420->VREG_EN_set) {
 	if (cc2420_read_pin(cc2420, CC2420_INTERNAL_VREG_EN_PIN) == 0x00) {
+	    logpkt_rx_abort_pkt(cc2420->worldsens_radio_id, "vreg off");
 	    CC2420_VREG_OFF_ENTER(cc2420);
 	    return;
 	}
@@ -310,6 +313,7 @@ void cc2420_update_state_rx_frame(struct _cc2420_t * cc2420 UNUSED) {
 
     /* if reset required, go back to RESET state */
     if (cc2420_reset_required(cc2420)) {
+        logpkt_rx_abort_pkt(cc2420->worldsens_radio_id, "chip reset");
 	CC2420_RESET_ENTER(cc2420);
 	return;
     }
@@ -369,6 +373,7 @@ void cc2420_update_state_tx_ack_preamble(struct _cc2420_t * cc2420 UNUSED) {
     /* if VREG_EN is low, go back to VREG_OFF state */
     if (cc2420->VREG_EN_set) {
 	if (cc2420_read_pin(cc2420, CC2420_INTERNAL_VREG_EN_PIN) == 0x00) {
+	    logpkt_tx_abort_pkt(cc2420->worldsens_radio_id, "vreg off");
 	    CC2420_VREG_OFF_ENTER(cc2420);
 	    return;
 	}
@@ -376,6 +381,7 @@ void cc2420_update_state_tx_ack_preamble(struct _cc2420_t * cc2420 UNUSED) {
 
     /* if reset required, go back to RESET state */
     if (cc2420_reset_required(cc2420)) {
+	logpkt_tx_abort_pkt(cc2420->worldsens_radio_id, "chip reset");
 	CC2420_RESET_ENTER(cc2420);
 	return;
     }
@@ -434,6 +440,7 @@ void cc2420_update_state_tx_ack(struct _cc2420_t * cc2420) {
     /* if VREG_EN is low, go back to VREG_OFF state */
     if (cc2420->VREG_EN_set) {
 	if (cc2420_read_pin(cc2420, CC2420_INTERNAL_VREG_EN_PIN) == 0x00) {
+	    logpkt_tx_abort_pkt(cc2420->worldsens_radio_id, "vreg off");
 	    CC2420_VREG_OFF_ENTER(cc2420);
 	    return;
 	}
@@ -441,6 +448,7 @@ void cc2420_update_state_tx_ack(struct _cc2420_t * cc2420) {
 
     /* if reset required, go back to RESET state */
     if (cc2420_reset_required(cc2420)) {
+	logpkt_tx_abort_pkt(cc2420->worldsens_radio_id, "chip reset");
 	CC2420_RESET_ENTER(cc2420);
 	return;
     }
@@ -526,6 +534,7 @@ void cc2420_update_state_tx_ack(struct _cc2420_t * cc2420) {
     if (cc2420->tx_bytes == 5) {
         cc2420_tx_byte(cc2420, CC2420_HIBYTE(cc2420->tx_fcs));
         cc2420->fsm_timer = MACHINE_TIME_GET_NANO() + 2 * CC2420_SYMBOL_PERIOD;
+	logpkt_tx_complete_pkt(cc2420->worldsens_radio_id); /* tx ack end -> dump tx log */
         CC2420_RX_CALIBRATE_ENTER(cc2420);
 	return;
     }
@@ -635,6 +644,7 @@ void cc2420_update_state_tx_preamble(struct _cc2420_t * cc2420 UNUSED) {
     /* if VREG_EN is low, go back to VREG_OFF state */
     if (cc2420->VREG_EN_set) {
 	if (cc2420_read_pin(cc2420, CC2420_INTERNAL_VREG_EN_PIN) == 0x00) {
+	    logpkt_tx_abort_pkt(cc2420->worldsens_radio_id, "vreg off");
 	    CC2420_VREG_OFF_ENTER(cc2420);
 	    return;
 	}
@@ -642,6 +652,7 @@ void cc2420_update_state_tx_preamble(struct _cc2420_t * cc2420 UNUSED) {
 
     /* if reset required, go back to RESET state */
     if (cc2420_reset_required(cc2420)) {
+	logpkt_tx_abort_pkt(cc2420->worldsens_radio_id, "chip reset");
 	CC2420_RESET_ENTER(cc2420);
 	return;
     }
@@ -702,6 +713,7 @@ void cc2420_update_state_tx_frame(struct _cc2420_t * cc2420) {
     /* if VREG_EN is low, go back to VREG_OFF state */
     if (cc2420->VREG_EN_set) {
 	if (cc2420_read_pin(cc2420, CC2420_INTERNAL_VREG_EN_PIN) == 0x00) {
+	    logpkt_tx_abort_pkt(cc2420->worldsens_radio_id, "vreg off");
 	    CC2420_VREG_OFF_ENTER(cc2420);
 	    return;
 	}
@@ -709,6 +721,7 @@ void cc2420_update_state_tx_frame(struct _cc2420_t * cc2420) {
 
     /* if reset required, go back to RESET state */
     if (cc2420_reset_required(cc2420)) {
+	logpkt_tx_abort_pkt(cc2420->worldsens_radio_id, "chip reset");
 	CC2420_RESET_ENTER(cc2420);
 	return;
     }
@@ -737,6 +750,7 @@ void cc2420_update_state_tx_frame(struct _cc2420_t * cc2420) {
 	/* check TX underflow */
         if (cc2420->tx_bytes >= cc2420->tx_fifo_len) {
 	    CC2420_DEBUG("cc2420_update_state_tx : TX UNDERFLOW\n");
+	    logpkt_tx_abort_pkt(cc2420->worldsens_radio_id, "tx underflow");
 	    CC2420_TX_UNDERFLOW_ENTER(cc2420);
 	    return;
 	}
@@ -768,6 +782,7 @@ void cc2420_update_state_tx_frame(struct _cc2420_t * cc2420) {
     
     /* all tx fifo must have been sent, go to RX_CALIBRATE state */
     cc2420->tx_frame_completed = 1;
+    logpkt_tx_complete_pkt(cc2420->worldsens_radio_id); /* tx end -> dump tx log */
     CC2420_RX_CALIBRATE_ENTER(cc2420);
 
     return;

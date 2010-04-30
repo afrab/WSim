@@ -195,6 +195,7 @@ static void main_end(enum wsim_end_mode_t mode)
   worldsens_c_close();
   libselect_close();
   logger_close();
+  logpkt_close();
   ui_delete();
   exit(0);
 }
@@ -230,6 +231,9 @@ int main(int argc, char* argv[])
   /* logger creation                              */
   /* do not use logger functions before that line */
   logger_init(o.logfilename,o.verbose);
+
+  /* init log radios packets*/
+  logpkt_init(o.do_logpkt, o.logpkt, o.logpktfilename);
 
   OUTPUT("WSim %s, rev %s\n", PACKAGE_VERSION, extract_revision_number());
   OUTPUT("copyright 2005, 2006, 2007, 2008, 2009, 2010\n");

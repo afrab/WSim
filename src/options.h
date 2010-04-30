@@ -35,12 +35,13 @@ enum wsens_mode_t {
 struct options_t {
   int                verbose;
 
-  char               logfilename[MAX_FILENAME];
-  char               progname   [MAX_FILENAME]; 
-  char               dumpfile   [MAX_FILENAME];
-  char               tracefile  [MAX_FILENAME];
-  char               etracefile [MAX_FILENAME];
-  char               preload    [MAX_FILENAME];
+  char               logfilename   [MAX_FILENAME];
+  char               logpktfilename[MAX_FILENAME];
+  char               progname      [MAX_FILENAME]; 
+  char               dumpfile      [MAX_FILENAME];
+  char               tracefile     [MAX_FILENAME];
+  char               etracefile    [MAX_FILENAME];
+  char               preload       [MAX_FILENAME];
 
   int                do_dump;
   int                do_trace;
@@ -48,6 +49,9 @@ struct options_t {
   int                do_preload;
   int                do_elfload;
   int                do_etrace_at_begin;
+
+  int                do_logpkt;
+  char              *logpkt;
 
   int                do_monitor;
   char              *monitor;

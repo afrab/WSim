@@ -94,6 +94,9 @@ void cc2420_tx_byte(struct _cc2420_t *cc2420, uint8_t tx_byte)
   tx.duration    = 2 * CC2420_SYMBOL_PERIOD; // duration
   tx.radio_id    = cc2420->worldsens_radio_id;
 
+  /* log tx byte */
+  logpkt_tx_byte(cc2420->worldsens_radio_id, tx_byte);
+
   worldsens_c_tx(&tx);
 
   CC2420_DBG_TX("cc2420:tx: data %02x, freq: %lgMHz, modulation: %d, "

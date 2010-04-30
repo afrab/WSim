@@ -654,7 +654,7 @@ worldsens_s_save_release_request_rx (struct _worldsens_s *worldsens, int node,
 
   WSNET_S_DBG_EXC ("WSNET:: --> (seq: %d) SAVE + RP (seq: %d, period: %"PRId64", rp: %"PRId64")\n",
 		   pkt_seq - 1, worldsens->rp_seq, period, worldsens->rp);
-  WSNET_S_DBG_EXC ("WSNET:: --> RX (ip:%d, size:%d, freq:%gMHz, modul:%d)\n", 
+  WSNET_S_DBG_EXC ("WSNET:: --> RX (src ip:%d, size:%d, freq:%gMHz, modul:%d)\n", 
 		   node, length, (unsigned)freq / 1000000.0, modulation);
   return 0;
 }
@@ -697,7 +697,7 @@ worldsens_s_rx (struct _worldsens_s *worldsens, int node, int freq,
       return -1;
     }
 
-  WSNET_S_DBG_EXC ("WSNET:: --> RX (ip:%d, size:%d, freq:%gMHz, modul:%d)\n", 
+  WSNET_S_DBG_EXC ("WSNET:: --> RX (src ip:%d, size:%d, freq:%gMHz, modul:%d)\n", 
 		   node, length, (unsigned)freq / 1000000.0, modulation);
 
   return 0;

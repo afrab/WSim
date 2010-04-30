@@ -184,6 +184,7 @@ static void     worldsens1_packet_dump_send        (char *msg, int len);
 /**************************************************************************/
 /**************************************************************************/
 /**************************************************************************/
+static int worldsens_nb_interfaces = 0; /* number of registered interfaces */
 
 static struct _worldsens_c_nobacktrack  worldsens_nobacktrack;
 static struct _worldsens_c_backtrack    worldsens_backtracked;
@@ -233,7 +234,7 @@ int worldsens1_c_rx_register(void* arg, wsnet_callback_rx_t cbrx, char UNUSED *a
   WSENS_CBRX_ARG  = arg;	
   WSENS_CBRX_FUNC = cbrx;
 
-  return 0;
+  return worldsens_nb_interfaces++;
 }
 
 /**************************************************************************/
@@ -832,10 +833,10 @@ static int64_t worldsens1_packet_parse_data_rx(char *msg, int UNUSED pkt_seq, in
 {
 
   struct _worldsens_s_rx_pkt *pkt  = (struct _worldsens_s_rx_pkt *) msg;
-  struct _worldsens_data       *data = (struct _worldsens_data *)(msg + sizeof(struct _worldsens_s_rx_pkt));
+  struct _worldsens_data     *data = (struct _worldsens_data *)(msg + sizeof(struct _worldsens_s_rx_pkt));
   unsigned int                length = ntohl(pkt->size);
   int                         c_node = 0;
-  int64_t                   duration = 0;
+  int64_t                     duration = 0;
 
 
   /* c_node = number of extra '_worldsens_data' packet sent in the same rx_pkt, must be at least 1 */
@@ -850,9 +851,10 @@ static int64_t worldsens1_packet_parse_data_rx(char *msg, int UNUSED pkt_seq, in
 	  uint64_t rx_mW  = ntohll(data->rx_mW);
 	  double  *prx_mW = (double *) &(rx_mW);
 	  struct wsnet_rx_info info;
-	  WSNET_RX("WSNET (%"PRIu64", %d): <-- RX src=%d[%d] (data: [0x%02x,%c], freq: %gMHz, mod: %d, rx: %gmW, SiNR: %lg)\n",
+	  WSNET_RX("WSNET (%"PRIu64", %d): <-- RX src=%d[%d] (dest: %d, data: [0x%02x,%c], freq: %gMHz, mod: %d, rx: %gmW, SiNR: %lg)\n",
 		   MACHINE_TIME_GET_NANO(), pkt_seq, 
-		   /* RX_line[c_node] */ line, c_node,
+		   ntohl(pkt->node), c_node,
+		   ntohl(data->node),
 		   data->data & 0xff, isprint(data->data & 0xff ) ? data->data & 0xff : '.',
 		   ntohl(pkt->frequency) / 1000000.0f, 
 		   ntohl(pkt->modulation),
@@ -882,9 +884,9 @@ static int64_t worldsens1_packet_parse_data_srrx(char *msg, int UNUSED pkt_seq, 
 
   struct _worldsens_s_srrx_pkt *pkt  = (struct _worldsens_s_srrx_pkt *) msg;
   struct _worldsens_data       *data = (struct _worldsens_data *)(msg + sizeof(struct _worldsens_s_srrx_pkt));
-  unsigned int                length = ntohl(pkt->size);
-  int                         c_node = 0;
-  int64_t                   duration = 0;
+  unsigned int                  length = ntohl(pkt->size);
+  int                           c_node = 0;
+  int64_t                       duration = 0;
 
 
   /* c_node = number of extra '_worldsens_data' packet sent in the same rx_pkt, must be at least 1 */
@@ -899,9 +901,10 @@ static int64_t worldsens1_packet_parse_data_srrx(char *msg, int UNUSED pkt_seq, 
 	  uint64_t rx_mW  = ntohll(data->rx_mW);
 	  double  *prx_mW = (double *) &(rx_mW);
 	  struct wsnet_rx_info info;
-	  WSNET_RX("WSNET (%"PRIu64", %d): <-- RX src=%d[%d] (data: [0x%02x,%c], freq: %gMHz, mod: %d, rx: %gmW, SiNR: %lg)\n",
+	  WSNET_RX("WSNET (%"PRIu64", %d): <-- RX src=%d[%d] (dest: %d, data: [0x%02x,%c], freq: %gMHz, mod: %d, rx: %gmW, SiNR: %lg)\n",
 		   MACHINE_TIME_GET_NANO(), pkt_seq, 
-		   /* RX_line[c_node] */ line, c_node,
+		   ntohl(pkt->node), c_node,
+		   ntohl(data->node),
 		   data->data & 0xff, isprint(data->data & 0xff ) ? data->data & 0xff : '.',
 		   ntohl(pkt->frequency) / 1000000.0f, 
 		   ntohl(pkt->modulation), 

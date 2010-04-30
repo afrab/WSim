@@ -94,6 +94,22 @@ static struct moption_t logfile_opt = {
   .value       = NULL
 };
 
+/* enable pkt logs and set options */
+static struct moption_t logpkt_opt = {
+  .longname    = "logpkt",
+  .type        = optional_argument,
+  .helpstring  = "enable radio packets log and set options",
+  .value       = NULL
+};
+
+/* pkt logs filename*/
+static struct moption_t logpktfile_opt = {
+  .longname    = "logpktfile",
+  .type        = required_argument,
+  .helpstring  = "set radio packets logfile",
+  .value       = NULL
+};
+
 static struct moption_t version_opt = {
   .longname    = "version",
   .type        = no_argument,
@@ -250,6 +266,8 @@ void options_start()
   options_add_base(& noelf_opt          );
   /*  options_add_base(& dump_opt      ); */
   options_add_base(& logfile_opt        );
+  options_add_base(& logpktfile_opt     );
+  options_add_base(& logpkt_opt         );
   options_add_base(& trace_opt          );
 #if defined(ETRACE)
   options_add_base(& etrace_opt         );
@@ -307,18 +325,34 @@ void options_print_params(struct options_t* s)
 {
   struct stat fs;
 
-  char msg[] = "\
+  if (s->do_logpkt)  /* logpkt option enabled? */
+    {
+      OPT_PRINT("== Command line summary == \n");
+      OPT_PRINT("\
   verbose level : %d\n\
-  logfile name  : %s\n\
+  log file      : %s\n\
+  logpkt file   : %s\n\
   trace file    : %s\n\
-  elf file      : %s\n";
-
-  OPT_PRINT("== Command line summary == \n");
-  OPT_PRINT(msg,
-	    s->verbose,
-	    s->logfilename,
-	    s->tracefile,
-	    s->progname);
+  elf file      : %s\n",
+		s->verbose,
+		s->logfilename,
+		s->logpktfilename,
+		s->tracefile,
+		s->progname);
+    }
+  else
+    {
+      OPT_PRINT("== Command line summary == \n");
+      OPT_PRINT("\
+  verbose level : %d\n\
+  log file      : %s\n\
+  trace file    : %s\n\
+  elf file      : %s\n",
+		s->verbose,
+		s->logfilename,
+		s->tracefile,
+		s->progname);
+    }
 
   switch (s->sim_mode)
     {
@@ -369,15 +403,18 @@ void options_read_cmdline(struct options_t *s, int *argc, char *argv[])
   strcpy (s->multicast_ip,DEFAULT_MULTICAST_IP);
 
 #if defined(PID_IN_FILENAMES)
-  sprintf(s->logfilename,"wsim-%d.log",getpid());
-  sprintf(s->dumpfile,   "wsim-%d.dmp",getpid());
-  sprintf(s->tracefile,  "wsim-%d.trc",getpid());
-  sprintf(s->etracefile, "wsim-%d.etr",getpid());
+  sprintf(s->logfilename,   "wsim-%d.log"    ,getpid());
+  
+  sprintf(s->logpktfilename,"wsim-pkt-%d.log",getpid());
+  sprintf(s->dumpfile,      "wsim-%d.dmp"    ,getpid());
+  sprintf(s->tracefile,     "wsim-%d.trc"    ,getpid());
+  sprintf(s->etracefile,    "wsim-%d.etr"    ,getpid());
 #else
-  sprintf(s->logfilename,"wsim.log");
-  sprintf(s->dumpfile,   "wsim.dmp");
-  sprintf(s->tracefile,  "wsim.trc");
-  sprintf(s->etracefile, "wsim.etr");
+  sprintf(s->logfilename,   "wsim.log");
+  sprintf(s->logpktfilename,"wsim-pkt.log");
+  sprintf(s->dumpfile,      "wsim.dmp");
+  sprintf(s->tracefile,     "wsim.trc");
+  sprintf(s->etracefile,    "wsim.etr");
 #endif
   sprintf(s->preload,    "none");
 
@@ -431,7 +468,6 @@ void options_read_cmdline(struct options_t *s, int *argc, char *argv[])
     {
       strncpy(s->logfilename,logfile_opt.value,MAX_FILENAME);
     }
-  
 
   /* mode */
   if (mode_opt.isset)
@@ -547,6 +583,19 @@ void options_read_cmdline(struct options_t *s, int *argc, char *argv[])
     {
       s->do_etrace = 1; /* --esimu-start implies --esimu */
       s->do_etrace_at_begin = 1;
+    }
+
+  if (logpktfile_opt.isset)
+    {
+      s->do_logpkt = 1;
+      s->logpkt = NULL;
+      strncpy(s->logpktfilename,logpktfile_opt.value,MAX_FILENAME);
+    }
+
+  if (logpkt_opt.isset)
+    {
+      s->do_logpkt = 1;
+      s->logpkt = logpkt_opt.value;
     }
 
   if (mem_monitor_opt.isset)

@@ -360,6 +360,7 @@ int cc1100_update_state_rx (struct _cc1100_t *cc1100)
 	    {
 	      if (cc1100->fsm_ustate < CC1100_RX_SEND_DATA)     /* no sync word found */
 		{
+		  logpkt_rx_abort_pkt(cc1100->worldsens_radio_id, "no sync word found");
 		  CC1100_IDLE_ENTER(cc1100);
 		  cc1100->fsm_pending = CC1100_STATE_SLEEP;
 		}
@@ -382,11 +383,13 @@ int cc1100_update_state_rx (struct _cc1100_t *cc1100)
 	  if (cc1100->fsm_ustate == CC1100_RX_SEND_END) 
 	    {
 	      /* packet is done */
+	      logpkt_rx_complete_pkt(cc1100->worldsens_radio_id);
 	      CC1100_IDLE_ENTER(cc1100); 
 	    }
 	  else
 	    {
 	      /* Interrupted reception      */
+	      logpkt_rx_abort_pkt(cc1100->worldsens_radio_id, "interrupted reception");
 	      CC1100_RX_END(cc1100);		
 	    }
 	} 

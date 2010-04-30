@@ -655,6 +655,7 @@ libelf/Makefile
 libgdb/Makefile
 libgui/Makefile
 liblogger/Makefile
+liblogpkt/Makefile
 libetrace/Makefile
 libtracer/Makefile
 libselect/Makefile

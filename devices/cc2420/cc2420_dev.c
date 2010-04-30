@@ -122,6 +122,9 @@ int cc2420_device_create (int dev_num, int fxosc_mhz, char *antenna)
   TRACER_CC2420_VREG_EN = tracer_event_add_id(1, "cc2420_vreg_en", "cc2420"); 
   TRACER_CC2420_RESET   = tracer_event_add_id(1, "cc2420_reset",   "cc2420"); 
 
+  /* init packets log */
+  logpkt_init_interface(cc2420->worldsens_radio_id, "cc2420");
+
   return 0;
 }
 

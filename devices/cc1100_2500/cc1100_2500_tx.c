@@ -11,6 +11,7 @@
  *  Created by Guillaume Chelius on 16/02/06.
  *  Copyright 2006 __WorldSens__. All rights reserved.
  *  Modified by Antoine Fraboulet, 2007
+ *  Modified by Loic Lemaitre, 2010
  */
 #include <math.h>
 #include "cc1100_2500_internals.h"
@@ -477,6 +478,7 @@ uint8_t cc1100_tx_data (struct _cc1100_t *cc1100) {
 			CC1100_TX_SEND_CRC(cc1100);
 		} else {
 			/* Change state according to registers */
+		        cc1100->txCompleted = 1;
 			CC1100_TX_END(cc1100);
 		}
 	}
@@ -501,6 +503,8 @@ uint8_t cc1100_tx_crc (struct _cc1100_t *cc1100)
   else 
     {
       data = (uint8_t) (cc1100->ioCrc & 0x00FF);
+
+      cc1100->txCompleted = 1;
       CC1100_TX_END(cc1100);
       CC1100_DBG_TX("cc1100:tx_crc: 2nd byte of crc = 0x%02x\n",data);
     }
@@ -577,6 +581,13 @@ void cc1100_tx (struct _cc1100_t *cc1100)
     tx.radio_id   = cc1100->worldsens_radio_id;
     worldsens_c_tx(&tx);
     
+    /* log tx byte */
+    logpkt_tx_byte(cc1100->worldsens_radio_id, data);
+    if (cc1100->txCompleted)
+      {
+	logpkt_tx_complete_pkt(cc1100->worldsens_radio_id);
+	cc1100->txCompleted = 0;
+      }
     CC1100_DBG_TX("cc1100:tx:node %d: data %02x, freq: %lfMHz, modulation: %d, "
 		  "Power: %lfdBm, time: %" PRId64 " + %" PRId64 " = %" PRId64 " \n", 
 		  machine_get_node_id(),

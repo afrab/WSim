@@ -168,6 +168,7 @@ int cc1100_put_rx_fifo(struct _cc1100_t *cc1100, uint8_t val) {
 		CC1100_DBG_FIFO("cc1100:fifo: RX fifo overflow\n");
 		CC1100_DBG_STATE("cc1100:state: RX_OVERFLOW\n");
 		ERROR("cc1100: RX_FIFO overflow\n");
+		logpkt_rx_abort_pkt(cc1100->worldsens_radio_id, "rx fifo overflow");
 		tracer_event_record(TRACER_CC1100_STATE, CC1100_STATE_RX_OVERFLOW);
 		etracer_slot_event(ETRACER_PER_ID_CC1100,ETRACER_PER_EVT_MODE_CHANGED,ETRACER_CC1100_STARTUP,0);
 		return -1;

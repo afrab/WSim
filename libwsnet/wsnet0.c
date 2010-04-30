@@ -19,6 +19,11 @@
 /**************************************************************************/
 /**************************************************************************/
 /**************************************************************************/
+static int worldsens_nb_interfaces = 0; /* number of registered interfaces */
+
+/**************************************************************************/
+/**************************************************************************/
+/**************************************************************************/
 
 int worldsens0_c_initialize(void)
 {
@@ -43,7 +48,7 @@ int worldsens0_c_get_node_id(void)
 
 int worldsens0_c_rx_register(void UNUSED *arg, wsnet_callback_rx_t UNUSED cbrx, char UNUSED *antenna)
 {
-  return 0;
+  return worldsens_nb_interfaces++;
 }
 
 int worldsens0_c_tx (struct wsnet_tx_info UNUSED *tx)

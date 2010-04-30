@@ -168,26 +168,38 @@ void cc1100_rx_sfd(struct _cc1100_t *cc1100, uint8_t rx) {
 			case 1:
 				if (quality >= 15)
 					CC1100_RX_EXPECT_DATA(cc1100);
-				else	
-					CC1100_RX_EXPECT_PREAMBLE(cc1100);
+				else 
+				        {
+					    CC1100_RX_EXPECT_PREAMBLE(cc1100);
+					    logpkt_rx_abort_pkt(cc1100->worldsens_radio_id, "quality < 15");
+					}
 				break;
 			case 2:
 				if (quality >= 16)
 					CC1100_RX_EXPECT_DATA(cc1100);
-				else	
-					CC1100_RX_EXPECT_PREAMBLE(cc1100);
+				else
+				        {
+					    CC1100_RX_EXPECT_PREAMBLE(cc1100);
+					    logpkt_rx_abort_pkt(cc1100->worldsens_radio_id, "quality < 16");
+					}
 				break;
 			case 5:
 				if ((quality >= 15) && (CC1100_GET_CS(cc1100)))
 					CC1100_RX_EXPECT_DATA(cc1100);
-				else	
-					CC1100_RX_EXPECT_PREAMBLE(cc1100);
+				else
+				        {
+					    CC1100_RX_EXPECT_PREAMBLE(cc1100);
+					    logpkt_rx_abort_pkt(cc1100->worldsens_radio_id, "quality < 15 or not CS");
+					}
 				break;
 			case 6:
 				if ((quality >= 16) && (CC1100_GET_CS(cc1100)))
 					CC1100_RX_EXPECT_DATA(cc1100);
 				else	
-					CC1100_RX_EXPECT_PREAMBLE(cc1100);
+				        {
+					    CC1100_RX_EXPECT_PREAMBLE(cc1100);
+					    logpkt_rx_abort_pkt(cc1100->worldsens_radio_id, "quality < 16 or not CS");
+					}
 				break;
 			default:
 				break;
@@ -199,14 +211,20 @@ void cc1100_rx_sfd(struct _cc1100_t *cc1100, uint8_t rx) {
 			case 3:
 				if (quality >= 30)
 					CC1100_RX_EXPECT_DATA(cc1100);
-				else	
-					CC1100_RX_EXPECT_PREAMBLE(cc1100);
+				else
+				        {
+					    CC1100_RX_EXPECT_PREAMBLE(cc1100);
+					    logpkt_rx_abort_pkt(cc1100->worldsens_radio_id, "quality < 30");
+					}
 				break;
 			case 7:
 				if ((quality >= 30) && (CC1100_GET_CS(cc1100)))
 					CC1100_RX_EXPECT_DATA(cc1100);
 				else	
-					CC1100_RX_EXPECT_PREAMBLE(cc1100);
+				        {
+					    CC1100_RX_EXPECT_PREAMBLE(cc1100);
+					    logpkt_rx_abort_pkt(cc1100->worldsens_radio_id, "quality < 30 or not CS");
+					}
 				break;
 			default:
 				break;
@@ -214,6 +232,9 @@ void cc1100_rx_sfd(struct _cc1100_t *cc1100, uint8_t rx) {
 		
 	}
 	
+	/* log rx byte */
+	logpkt_rx_byte(cc1100->worldsens_radio_id, rx);
+
 	return;
 }
 
@@ -383,6 +404,7 @@ void cc1100_rx_data(struct _cc1100_t *cc1100, uint8_t rx,  double snr) {
 				if ((rx != cc1100->registers[CC1100_REG_ADDR])) {
 					cc1100_assert_gdo(cc1100, 0x06, CC1100_PIN_DEASSERT);
 					CC1100_RX_EXPECT_PREAMBLE(cc1100);
+					logpkt_rx_abort_pkt(cc1100->worldsens_radio_id, "addr check failed");
 					return;
 				}
 				break;
@@ -390,6 +412,7 @@ void cc1100_rx_data(struct _cc1100_t *cc1100, uint8_t rx,  double snr) {
 				if ((rx != cc1100->registers[CC1100_REG_ADDR]) && (rx != 0x00)) {
 					cc1100_assert_gdo(cc1100, 0x06, CC1100_PIN_DEASSERT);
 					CC1100_RX_EXPECT_PREAMBLE(cc1100);
+					logpkt_rx_abort_pkt(cc1100->worldsens_radio_id, "addr check failed");
 					return;
 				}
 				break;
@@ -397,6 +420,7 @@ void cc1100_rx_data(struct _cc1100_t *cc1100, uint8_t rx,  double snr) {
 				if ((rx != cc1100->registers[CC1100_REG_ADDR]) && (rx != 0x00) && (rx != 0xFF)) {
 					cc1100_assert_gdo(cc1100, 0x06, CC1100_PIN_DEASSERT);
 					CC1100_RX_EXPECT_PREAMBLE(cc1100);
+					logpkt_rx_abort_pkt(cc1100->worldsens_radio_id, "addr check failed");
 					return;
 				}
 				break;
@@ -404,6 +428,9 @@ void cc1100_rx_data(struct _cc1100_t *cc1100, uint8_t rx,  double snr) {
 	}
 	cc1100->addressChk++;
 	
+	/* log rx byte */
+	logpkt_rx_byte(cc1100->worldsens_radio_id, rx);
+
 	if (cc1100->ioLength == cc1100->ioOffset) 
 	  {
 	    if (CC1100_COMPUTE_CRC(cc1100)) 
@@ -412,6 +439,7 @@ void cc1100_rx_data(struct _cc1100_t *cc1100, uint8_t rx,  double snr) {
 	      } 
 	    else 
 	      {
+		logpkt_rx_complete_pkt(cc1100->worldsens_radio_id);
 		CC1100_RX_END(cc1100);
 	      }
 	  }
@@ -429,7 +457,9 @@ void cc1100_rx_crc(struct _cc1100_t *cc1100, uint8_t rx) {
 	if (cc1100->ioOffset == 0) {
 		crc = rx;
 		crc = (crc << 8) & 0xFF00;
-		cc1100->ioOffset++;	
+		cc1100->ioOffset++;
+		/* log rx byte */
+		logpkt_rx_byte(cc1100->worldsens_radio_id, rx);	
 		return;
 	} else {
 		crc = crc | rx;
@@ -449,7 +479,11 @@ void cc1100_rx_crc(struct _cc1100_t *cc1100, uint8_t rx) {
 			return;
 	}
 	
-	CC1100_RX_END(cc1100);	
+	/* log rx byte */
+	logpkt_rx_byte(cc1100->worldsens_radio_id, rx);
+	logpkt_rx_complete_pkt(cc1100->worldsens_radio_id);
+	CC1100_RX_END(cc1100);
+
 	return;
 }
 
@@ -487,6 +521,9 @@ void cc1100_rx_preamble(struct _cc1100_t *cc1100, uint8_t rx,  double UNUSED dBm
       CC1100_RX_EXPECT_PREAMBLE(cc1100);
       return;
     }
+
+  /* log rx byte */
+  logpkt_rx_byte(cc1100->worldsens_radio_id, rx);
 
   CC1100_UPDATE_PQT(cc1100, rx);
   cc1100->ioOffset++;

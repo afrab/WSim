@@ -370,6 +370,7 @@ void cc1100_strobe_state_rx(struct _cc1100_t *cc1100)
       break;
 
     case CC1100_STROBE_SIDLE:
+      logpkt_rx_abort_pkt(cc1100->worldsens_radio_id, "strobe SIDLE");
       CC1100_DBG_STROBE("cc1100:strobe:rx: SIDLE -> END_FORCED\n");
       cc1100->wor = 0;
       CC1100_RX_END_FORCED(cc1100);
@@ -395,6 +396,7 @@ void cc1100_strobe_state_rx(struct _cc1100_t *cc1100)
       break;
 
     case CC1100_STROBE_STX:
+      logpkt_rx_abort_pkt(cc1100->worldsens_radio_id, "strobe STX");
       CC1100_DBG_STROBE("cc1100:strobe:rx: STX\n");
       cc1100_compute_cca(cc1100);
       cc1100->fsm_pending = CC1100_STATE_TX;
@@ -405,6 +407,7 @@ void cc1100_strobe_state_rx(struct _cc1100_t *cc1100)
       break;
 
     case CC1100_STROBE_SFSTXON:
+      logpkt_rx_abort_pkt(cc1100->worldsens_radio_id, "strobe SFSTXON");
       CC1100_DBG_STROBE("cc1100:strobe:rx: SFSTXON\n");
       cc1100_compute_cca(cc1100);
       cc1100->fsm_pending = CC1100_STATE_FSTXON;
@@ -447,10 +450,12 @@ void cc1100_strobe_state_tx(struct _cc1100_t *cc1100) {
 			  {
 			  case 0x00:
 			  case 0x10: /* Idle */
+			    logpkt_tx_abort_pkt(cc1100->worldsens_radio_id, "strobe SIDLE");
 			    CC1100_TX_END_ENTER(cc1100);
 			    break;
 			  case 0x20:
 			  case 0x30: /* Calibrating */
+			    logpkt_tx_abort_pkt(cc1100->worldsens_radio_id, "strobe SIDLE");
 			    CC1100_CALIBRATE_ENTER(cc1100);
 			    break;
 			  }

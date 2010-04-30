@@ -19,7 +19,7 @@ Overview
 
 It enables to log into a custom file (by default wsim-pkt.log) full frames received
 and sent by the platform interfaces. It takes care about backtrack, so the log
-reflect exactly real RX and TX.
+reflects exactly real RX and TX.
 
 
 Usage
@@ -27,8 +27,8 @@ Usage
 
 User 
 ----
-2 options refer to this functionnality --logpkt and --logpktfile.
-Setting once on commant line, enables packets log.
+2 options refer to this functionality, --logpkt and --logpktfile.
+Setting once on command line, enables packets log.
 
 --logpkt=[rx | tx | rxtx]
 rx: only RX are logged
@@ -53,7 +53,7 @@ frame is completed, use logpkt_rx_complete_pkt() or logpkt_tx_complete_pkt().
 
 If a rx or tx is aborted (for instance overflow or underflow), use logpkt_rx_abort_pkt()
 or logpkt_tx_abort_pkt(). The error parameter of these functions allows to write it
-at the end of the byte stream of the aborted frame.
+at the end of the byte stream of the aborted frame in the log file.
 
 ***************************************************************************************/
 

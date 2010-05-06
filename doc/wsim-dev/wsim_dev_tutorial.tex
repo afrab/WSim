@@ -38,35 +38,37 @@ WSim source code directory (\verb$/wsim$) contains the following subdirectories:
 
   \item \verb$/devices$: implementation of external peripherals;
 
-  \item \verb$/doc$: wsim website sources;
+  \item \verb$/doc$: WSim website sources;
 
   \item \verb$/examples$: example codes to demonstrate WSim main features;
 
-  \item \verb$/libconsole$: handles the WSim console mode;
+  \item \verb$/libconsole$: WSim console mode;
 
   \item \verb$/libelf$: interface with the \verb$*.elf$ program
 
-  \item \verb$/libetrace$: deals with the trace generation for eSimu;
+  \item \verb$/libetrace$: trace generation for eSimu;
 
-  \item \verb$/libgdb$: carries out the link with the gdb debugger;
+  \item \verb$/libgdb$: gdb debugger interface;
 
-  \item \verb$/libgui$: handles graphical interface;
+  \item \verb$/libgui$: graphical interface;
 
-  \item \verb$/liblogger$: deals with error and output messages (wsim.log, error message on terminal);
+  \item \verb$/liblogger$: error and output messages (wsim.log, error message on terminal);
+  
+  \item \verb$/liblogpkt$: radio packets logger;
 
-  \item \verb$/libselect$: manages inputs and outputs between WSim and external application (WConsole, WSnet);
+  \item \verb$/libselect$: inputs and outputs between WSim and external application (WConsole, WSnet);
 
-  \item \verb$/libtracer$: generates WSim traces (\verb$*.trc$);
+  \item \verb$/libtracer$: WSim traces (\verb$*.trc$);
 
-  \item \verb$/libwsnet$: carries out the link with WSnet application;
+  \item \verb$/libwsnet$: WSnet interface;
 
-  \item \verb$/machine$: make the link between platform model and simulator;
+  \item \verb$/machine$: bind platform model and simulator;
 
   \item \verb$/platforms$: implementation of the different platforms (wsn430, telosb, senslab...);
 
   \item \verb$/src$: point of entry of the program. Deal with the wsim options (arguments) too;
 
-  \item \verb$/utils$: contains compilable sources of useful tools (WTracer, WConsole, ...);
+  \item \verb$/utils$: compilable sources of useful tools (WTracer, WConsole, ...);
 \end{itemize}
 
 

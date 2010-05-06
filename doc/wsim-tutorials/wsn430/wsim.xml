@@ -617,6 +617,84 @@ wsim:log:wsim.log</computeroutput></programlisting>
 			<para><xref linkend="token-debug"/> gives an idea of how the debugging of this example 
 			should look like.</para>
 		</sect1>
+		<sect1>
+		  <title>Radio packets log</title>
+		  <para>WSim allows to write into a custom file (by default <userinput>wsim-pkt.log</userinput>) full frames received and sent by the platform interfaces. It takes care about backtrack, so the log reflects exactly real RX and TX.</para>
+		  <para>2 options refer to this functionality, <userinput>--logpkt</userinput> and <userinput>--logpktfile</userinput>. Setting one on command line, enables packets log.</para>
+		  <para><programlisting><computeroutput>--logpkt=[rx | tx | rxtx]</computeroutput></programlisting></para>
+		  <para>
+		    <itemizedlist mark="bullet" spacing="normal">
+		      <listitem>
+			<simpara>
+			  <userinput>rx</userinput>: only RX are logged.
+			</simpara>
+		      </listitem>
+		      <listitem>
+			<simpara>
+			  <userinput>tx</userinput>: only TX are logged.
+			</simpara>
+		      </listitem>
+		      <listitem>
+			<simpara>
+			  <userinput>rxtx</userinput>: both RX and TX are logged (by default).
+			</simpara>
+		      </listitem>
+		    </itemizedlist>
+		  </para>
+		  <para><programlisting><computeroutput>--logpktfile=filename</computeroutput></programlisting></para>
+		  <para>
+		    <itemizedlist mark="bullet" spacing="normal">
+		      <listitem>
+			<simpara>
+			  <userinput>filename</userinput>: Name of file where packets log will be stored..
+			</simpara>
+		      </listitem>
+		    </itemizedlist>
+		    </para>
+		  <note>
+		    <title>Options parameters</title>
+		    <para><userinput>--logpkt</userinput> option parameters are optional. <userinput>--logpktfile</userinput> option parameter is mandatory.
+		    </para>
+		  </note>
+		  <para>In the token exemple, you can see radio packets log in the <userinput>n1-pkt.log</userinput>, <userinput>n2-pkt.log</userinput> and <userinput>n3-pkt.log</userinput> files. For instance <userinput>n2-pkt.log</userinput> :</para>
+<para><programlisting><computeroutput>========================
+== Radios packets log ==
+========================
+
+Note : rx and tx packets contains preamble, sync word and data
+Note : rx packets are logged before crc replacement
+Note : time interval syntax -> [tx or rx start; tx or rx end]
+
+Log mode: RX and TX
+Interface cc1100 registered
+
+******* cc1100: RX packet (n°0) [526739197ns; 528763697ns] *******
+55:55:55:55:d3:91:d3:91:14:02:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:16
+
+******* cc1100: TX packet (n°0) [1526671947ns; 1528682197ns] *******
+55:55:55:55:d3:91:d3:91:14:03:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:17
+
+******* cc1100: RX packet (n°1) [2526724697ns; 2528749197ns] *******
+55:55:55:55:d3:91:d3:91:14:01:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:15
+
+******* cc1100: RX packet (n°2) [3526738572ns; 3528763072ns] *******
+55:55:55:55:d3:91:d3:91:14:02:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:16
+
+******* cc1100: TX packet (n°1) [4526671947ns; 4528682197ns] *******
+55:55:55:55:d3:91:d3:91:14:03:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:17
+
+******* cc1100: RX packet (n°3) [5526724197ns; 5528748697ns] *******
+55:55:55:55:d3:91:d3:91:14:01:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:15
+
+******* cc1100: RX packet (n°4) [6526738572ns; 6528763072ns] *******
+55:55:55:55:d3:91:d3:91:14:02:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:16
+
+******* cc1100: TX packet (n°2) [7526671947ns; 7528682197ns] *******
+55:55:55:55:d3:91:d3:91:14:03:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:17
+
+******* cc1100: RX packet (n°5) [8526724197ns; 8528748697ns] *******
+55:55:55:55:d3:91:d3:91:14:01:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:15</computeroutput></programlisting></para>
+		</sect1>
 	</chapter>
 	<chapter id="credits">
 		<title>Credits</title>

@@ -254,6 +254,7 @@ void logpkt_rx_byte_op(int interface_id, uint8_t val)
   logpkt_tab[interface_id].rx_end_time = MACHINE_TIME_GET_NANO();
   logpkt_tab[interface_id].current_rx_pkt[logpkt_tab[interface_id].rx_pkt_offset] = val;
   logpkt_tab[interface_id].rx_pkt_offset++;
+  logpkt_tab[interface_id].rx_pkt_completed = 0;
 }
 
 
@@ -269,6 +270,7 @@ void logpkt_tx_byte_op(int interface_id, uint8_t val)
   logpkt_tab[interface_id].tx_end_time = MACHINE_TIME_GET_NANO();
   logpkt_tab[interface_id].current_tx_pkt[logpkt_tab[interface_id].tx_pkt_offset] = val;
   logpkt_tab[interface_id].tx_pkt_offset++;
+  logpkt_tab[interface_id].tx_pkt_completed = 0;
 }
 
 

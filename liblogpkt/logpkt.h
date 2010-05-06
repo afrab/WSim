@@ -28,7 +28,7 @@ Usage
 User 
 ----
 2 options refer to this functionality, --logpkt and --logpktfile.
-Setting once on command line, enables packets log.
+Setting one on command line, enables packets log.
 
 --logpkt=[rx | tx | rxtx]
 rx: only RX are logged

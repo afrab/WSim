@@ -98,10 +98,9 @@ char* host_signal_str(int sig)
 {
   static char buff[SIG_NAME_MAX];
 
-#if defined(FUNC_STRSIGNAL_DEFINED)
+#if  0 /* defined(FUNC_STRSIGNAL_DEFINED) */
   strcpy(buff,strsignal(sig));
 #else
-  // sprintf(buff,"%d",sig);
   strcpy(buff,unix_signal_to_str(sig));
 #endif
 

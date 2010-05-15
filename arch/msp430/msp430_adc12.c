@@ -68,6 +68,12 @@ char adc12_modes[ADC12_MODES][ADC12_MODES_NAMES] = {
   "Repeat Single Channel",  "Repeat Sequence of Channels"
 };
 
+#define ADC12_STATES        6
+#define ADC12_STATES_NAMES 40
+char adc12_states[ADC12_STATES][ADC12_STATES_NAMES] = {
+  "Off", "Wait enable", "Wait trigger", "Sample", "Convert", "Store"
+};
+
 /* ************************************************** */
 /* ************************************************** */
 /* ************************************************** */
@@ -296,7 +302,7 @@ int msp430_adc12_init(void)
       msp430_adc12_read_inputs();
     }
 
-  MSP430_TRACER_ADC12STATE    = tracer_event_add_id(1,  "adc12_enable",   "msp430");
+  MSP430_TRACER_ADC12STATE    = tracer_event_add_id(1,  "adc12_state",   "msp430");
   for(i=0; i<ADC12_CHANNELS; i++)
     {
       if (msp430_adc12_channels_valid[i] != ADC12_NONE )
@@ -338,11 +344,28 @@ void msp430_adc12_reset(void)
 /* ************************************************** */
 /* ************************************************** */
 
+static inline void ADC12_SET_STATE(int state)
+{
+  int current_state = MCU.adc12.state;
+
+  MCU.adc12.state = state;
+  ADC12_TRACER_STATE(MCU.adc12.state);
+  if (current_state != state)
+    {
+      HW_DMSG_ADC12("msp430:adc12: mode \"%s\", state \"%s\" -> \"%s\"\n", 
+		    adc12_modes[MCU.adc12.ctl1.b.conseqx], 
+		    adc12_states[current_state],
+		    adc12_states[state]);
+    }
+}
+
+
+
 #define CHECK_ENC()					\
   do {							\
     if (MCU.adc12.ctl0.b.enc == 0)			\
       {							\
-	MCU.adc12.state = ADC12_STATE_WAIT_ENABLE;	\
+	ADC12_SET_STATE( ADC12_STATE_WAIT_ENABLE );	\
 	return;						\
       }							\
   } while(0)
@@ -358,8 +381,7 @@ void msp430_adc12_update(void)
 {
   if (MCU.adc12.ctl0.b.adc12on == 0)
     {
-      MCU.adc12.state = ADC12_STATE_OFF;
-      ADC12_TRACER_STATE(0);
+      ADC12_SET_STATE( ADC12_STATE_OFF );
       return;
     }
 
@@ -413,8 +435,7 @@ void msp430_adc12_update(void)
       /***************/
     case ADC12_STATE_OFF: 
       HW_DMSG_ADC12("msp430:adc12:     wait for enable\n");
-      MCU.adc12.state = ADC12_STATE_WAIT_ENABLE;
-      ADC12_TRACER_STATE(1);
+      ADC12_SET_STATE( ADC12_STATE_WAIT_ENABLE );
       /* no break */
 
       /***************/
@@ -424,13 +445,13 @@ void msp430_adc12_update(void)
       if (MCU.adc12.ctl0.b.enc)
 	{
 	  HW_DMSG_ADC12("msp430:adc12:     wait for trigger\n");
-	  MCU.adc12.state = ADC12_STATE_WAIT_TRIGGER; 
+	  ADC12_SET_STATE( ADC12_STATE_WAIT_TRIGGER ); 
 	}
       if ((MCU.adc12.ctl0.b.enc) && 
 	  (MCU.adc12.ctl0.b.adc12sc == 1) &&
 	  (MCU.adc12.ctl1.b.shsx == 0))
 	{
-	  MCU.adc12.state = ADC12_STATE_SAMPLE; 
+	  ADC12_SET_STATE( ADC12_STATE_SAMPLE );
 	}
       break;
       
@@ -442,7 +463,7 @@ void msp430_adc12_update(void)
       if (MCU.adc12.sampcon > 0)
 	{
 	  HW_DMSG_ADC12("msp430:adc12:     trigger ok\n");
-	  MCU.adc12.state = ADC12_STATE_SAMPLE;
+	  ADC12_SET_STATE( ADC12_STATE_SAMPLE );
 	  MCU.adc12.sampcon --;
 	}
       else
@@ -463,17 +484,17 @@ void msp430_adc12_update(void)
 	   *   SEL = 1  // Selector  = 0:GPIO  1:peripheral
 	   *   DIR = 0  // Direction = 0:input 1:output
 	   */
-	  HW_DMSG_ADC12("msp430:adc12:     sampling on config %d hw_channel %d (%s) [%"PRId64"]\n",
+	  MCU.adc12.sample = msp430_adc12_sample_input(MCU.adc12.mctl[MCU.adc12.current_x].b.inch);
+	  ADC12_TRACER_INPUT( MCU.adc12.mctl[MCU.adc12.current_x].b.inch, MCU.adc12.sample );
+
+	  HW_DMSG_ADC12("msp430:adc12:     sampling on config %d hw_channel %d (%s) = 0x%04x [%"PRId64"]\n",
 			MCU.adc12.current_x, 
 			MCU.adc12.mctl[MCU.adc12.current_x].b.inch,
 			trace_names[MCU.adc12.mctl[MCU.adc12.current_x].b.inch],
+			MCU.adc12.sample,
 			MACHINE_TIME_GET_NANO());
  
-	  MCU.adc12.sample = msp430_adc12_sample_input(MCU.adc12.mctl[MCU.adc12.current_x].b.inch);
-	  
-	  ADC12_TRACER_INPUT( MCU.adc12.mctl[MCU.adc12.current_x].b.inch, MCU.adc12.sample );
-
-	  MCU.adc12.state = ADC12_STATE_CONVERT;
+	  ADC12_SET_STATE( ADC12_STATE_CONVERT );
 	  MCU.adc12.adc12clk_reftime = MCU.adc12.adc12clk_counter;
 	  MCU.adc12.sampcon --;
 	  
@@ -492,7 +513,7 @@ void msp430_adc12_update(void)
       if (MCU.adc12.adc12clk_counter > (MCU.adc12.adc12clk_reftime + 12))
 	{
 	  HW_DMSG_ADC12("msp430:adc12:     convert = 0x%04x (%d) \n",MCU.adc12.sample,MCU.adc12.sample);
-	  MCU.adc12.state = ADC12_STATE_STORE;
+	  ADC12_SET_STATE( ADC12_STATE_STORE );
 	}
       else
 	{ 
@@ -524,29 +545,25 @@ void msp430_adc12_update(void)
 	{
 	case ADC12_MODE_SINGLE:
 	  ENC   = 0;
-	  STATE = ADC12_STATE_WAIT_ENABLE;
-	  HW_DMSG_ADC12("msp430:adc12: mode single, go to wait_enable\n");
+	  ADC12_SET_STATE( ADC12_STATE_WAIT_ENABLE );
 	  break;
 
 	case ADC12_MODE_SEQ_CHAN:
 	  if (MCU.adc12.mctl[ ADC12x ].b.eos == 1)
 	    {
 	      ENC   = 0;
-	      STATE = ADC12_STATE_WAIT_ENABLE;
-	      HW_DMSG_ADC12("msp430:adc12: mode sequence, go to wait_enable\n");
+	      ADC12_SET_STATE( ADC12_STATE_WAIT_ENABLE );
 	    }
 	  else
 	    {
 	      ADC12x = (ADC12x + 1) % ADC12_CHANNELS;
 	      if (MSC && SHP)
 		{
-		  STATE = ADC12_STATE_SAMPLE;
-		  HW_DMSG_ADC12("msp430:adc12: mode sequence, go to sample\n");
+		  ADC12_SET_STATE( ADC12_STATE_SAMPLE );
 		}
 	      else
 		{
-		  STATE = ADC12_STATE_WAIT_TRIGGER;
-		  HW_DMSG_ADC12("msp430:adc12: mode sequence, go to wait_trigger\n");
+		  ADC12_SET_STATE( ADC12_STATE_WAIT_TRIGGER );
 		}
 	    }
 	  break;
@@ -554,20 +571,17 @@ void msp430_adc12_update(void)
 	case ADC12_MODE_REPEAT_SINGLE:
 	  if (ENC == 0)
 	    {
-	      STATE = ADC12_STATE_WAIT_ENABLE;
-	      HW_DMSG_ADC12("msp430:adc12: mode repeat, go to wait_enable\n");
+	      ADC12_SET_STATE( ADC12_STATE_WAIT_ENABLE );
 	    }
 	  else
 	    {
 	      if (MSC && SHP)
 		{
-		  STATE = ADC12_STATE_SAMPLE;
-		  HW_DMSG_ADC12("msp430:adc12: mode repeat, go to sample\n");
+		  ADC12_SET_STATE( ADC12_STATE_SAMPLE );
 		}
 	      else
 		{
-		  STATE = ADC12_STATE_WAIT_TRIGGER;
-		  HW_DMSG_ADC12("msp430:adc12: mode repeat, go to wait_trigger\n");
+		  ADC12_SET_STATE( ADC12_STATE_WAIT_TRIGGER );
 		}
 	    }
 	  break;
@@ -575,21 +589,18 @@ void msp430_adc12_update(void)
 	case ADC12_MODE_REPEAT_SEQ:
 	  if ((ENC == 0) && (MCU.adc12.mctl[ ADC12x ].b.eos == 1))
 	    {
-	      STATE = ADC12_STATE_WAIT_ENABLE;
-	      HW_DMSG_ADC12("msp430:adc12: mode repeat sequence, go to wait_enable\n");
+	      ADC12_SET_STATE( ADC12_STATE_WAIT_ENABLE );
 	    }
 	  else
 	    {
 	      ADC12x = (ADC12x + 1) % ADC12_CHANNELS;
 	      if (MSC && SHP)
 		{
-		  STATE = ADC12_STATE_SAMPLE;
-		  HW_DMSG_ADC12("msp430:adc12: mode repeat sequence, go to sample\n");
+		  ADC12_SET_STATE( ADC12_STATE_SAMPLE );
 		}
 	      else
 		{
-		  STATE = ADC12_STATE_WAIT_TRIGGER;
-		  HW_DMSG_ADC12("msp430:adc12: mode repeat sequence, go to wait_trigger\n");
+		  ADC12_SET_STATE( ADC12_STATE_WAIT_TRIGGER );
 		}
 	    }
 	  break;

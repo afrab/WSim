@@ -357,6 +357,17 @@ static inline void ADC12_SET_STATE(int state)
 		    adc12_states[current_state],
 		    adc12_states[state]);
     }
+  switch (state)
+    {
+    case ADC12_STATE_SAMPLE:
+    case ADC12_STATE_CONVERT:
+    case ADC12_STATE_STORE:
+            MCU.adc12.ctl1.b.adc12busy = 1; /* operation done */
+	    break;
+    default:
+            MCU.adc12.ctl1.b.adc12busy = 0; /* operation done */
+	    break;
+    }
 }
 
 
@@ -530,14 +541,16 @@ void msp430_adc12_update(void)
       /***************/
     case ADC12_STATE_STORE:
       CHECK_ENC();
-      HW_DMSG_ADC12("msp430:adc12:     store sample in ADC12MEM%d\n", ADC12x);
+      HW_DMSG_ADC12("msp430:adc12:     ADC12MEM%d = 0x%04x\n", ADC12x, SAMPLE);
       MCU.adc12.mem[ ADC12x ].s = SAMPLE;
+
       if ((MCU.adc12.ifg & (1 << ADC12x)) == 0)
 	{
 	  HW_DMSG_ADC12("msp430:adc12: set interrupt for channel %d\n", ADC12x);
 	}
       MCU.adc12.ifg |= 1 << ADC12x;
       msp430_adc12_chkifg();
+
       switch (MCU.adc12.ctl1.b.conseqx)
 	{
 	case ADC12_MODE_SINGLE:
@@ -736,7 +749,7 @@ int8_t msp430_adc12_read8(uint16_t addr)
 #define WR_IF_MOD(sarg,arg)						\
   do {									\
     if (ref-> arg != val-> arg)						\
-      HW_DMSG_ADC12("msp430:adc12:%s %10s %d:%d\n",			\
+      HW_DMSG_ADC12("msp430:adc12:%s %10s %d -> %d\n",			\
 		    msg, sarg, ref-> arg, val-> arg );			\
   } while (0)
 
@@ -757,17 +770,19 @@ void msp430_adc12_ctl0details(char* msg, uint16_t *c1, int16_t *c2)
   WR_IF_MOD("adc12sc"    ,adc12sc);
 }
 
-void msp430_adc12_ctl1details(char* msg, int16_t *val)
+void msp430_adc12_ctl1details(char* msg, uint16_t *c1, int16_t *c2)
 {
-  struct adc12ctl1_t *ctl1 = (struct adc12ctl1_t*) val;
-  HW_DMSG_ADC12("msp430:adc12:%s cstartaddx %d\n",msg,ctl1->cstartaddx);
-  HW_DMSG_ADC12("msp430:adc12:%s shsx       %d\n",msg,ctl1->shsx);
-  HW_DMSG_ADC12("msp430:adc12:%s shp        %d\n",msg,ctl1->shp);
-  HW_DMSG_ADC12("msp430:adc12:%s issh       %d\n",msg,ctl1->issh);
-  HW_DMSG_ADC12("msp430:adc12:%s adc12divx  %d\n",msg,ctl1->adc12divx);
-  HW_DMSG_ADC12("msp430:adc12:%s adc12sselx %d\n",msg,ctl1->adc12sselx);
-  HW_DMSG_ADC12("msp430:adc12:%s conseqx    %d\n",msg,ctl1->conseqx);
-  HW_DMSG_ADC12("msp430:adc12:%s adc12busy  %d\n",msg,ctl1->adc12busy);
+  struct adc12ctl1_t *ref = (struct adc12ctl1_t*) c1;
+  struct adc12ctl1_t *val = (struct adc12ctl1_t*) c2;
+
+  WR_IF_MOD("cstartaddx",cstartaddx);
+  WR_IF_MOD("shsx"      ,shsx);
+  WR_IF_MOD("shp"       ,shp);
+  WR_IF_MOD("issh"      ,issh);
+  WR_IF_MOD("adc12divx" ,adc12divx);
+  WR_IF_MOD("adc12sselx",adc12sselx);
+  WR_IF_MOD("conseqx"   ,conseqx);
+  WR_IF_MOD("adc12busy" ,adc12busy);
 }
 
 /* ************************************************** */
@@ -851,8 +866,9 @@ void msp430_adc12_write16(uint16_t addr, int16_t val)
 	      {
 		if (pval.b.enc == 1) /* configuratioin is fixed */
 		  {
-		    HW_DMSG_ADC12("msp430:adc12:    ** START ENC **\n");
+		    HW_DMSG_ADC12("msp430:adc12:    *** START ENC **\n");
 		    msp430_adc12_start_enc();
+		    HW_DMSG_ADC12("msp430:adc12:    *** ********* **\n");
 		    MCU.adc12.current_x = MCU.adc12.ctl1.b.cstartaddx;
 		  }
 		MCU.adc12.ctl0.s = val;
@@ -870,7 +886,7 @@ void msp430_adc12_write16(uint16_t addr, int16_t val)
       HW_DMSG_ADC12("msp430:adc12:write16: ADC12CTL1 = 0x%04x\n",val);
       if (val != MCU.adc12.ctl1.s)
 	{
-	  msp430_adc12_ctl1details("    ctl1 set ",&val);
+	  msp430_adc12_ctl1details("    ctl1 set ",&MCU.adc12.ctl1.s, &val);
 	}
       if (MCU.adc12.ctl0.b.enc == 0)
 	{

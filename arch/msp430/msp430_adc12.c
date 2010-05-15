@@ -434,7 +434,6 @@ void msp430_adc12_update(void)
       /* OFF         */
       /***************/
     case ADC12_STATE_OFF: 
-      HW_DMSG_ADC12("msp430:adc12:     wait for enable\n");
       ADC12_SET_STATE( ADC12_STATE_WAIT_ENABLE );
       /* no break */
 
@@ -444,7 +443,6 @@ void msp430_adc12_update(void)
     case ADC12_STATE_WAIT_ENABLE:
       if (MCU.adc12.ctl0.b.enc)
 	{
-	  HW_DMSG_ADC12("msp430:adc12:     wait for trigger\n");
 	  ADC12_SET_STATE( ADC12_STATE_WAIT_TRIGGER ); 
 	}
       if ((MCU.adc12.ctl0.b.enc) && 
@@ -462,7 +460,6 @@ void msp430_adc12_update(void)
       CHECK_ENC();
       if (MCU.adc12.sampcon > 0)
 	{
-	  HW_DMSG_ADC12("msp430:adc12:     trigger ok\n");
 	  ADC12_SET_STATE( ADC12_STATE_SAMPLE );
 	  MCU.adc12.sampcon --;
 	}
@@ -736,19 +733,28 @@ int8_t msp430_adc12_read8(uint16_t addr)
 /* ************************************************** */
 /* ************************************************** */
 
-void msp430_adc12_ctl0details(char* msg, int16_t *val)
+#define WR_IF_MOD(sarg,arg)						\
+  do {									\
+    if (ref-> arg != val-> arg)						\
+      HW_DMSG_ADC12("msp430:adc12:%s %10s %d:%d\n",			\
+		    msg, sarg, ref-> arg, val-> arg );			\
+  } while (0)
+
+void msp430_adc12_ctl0details(char* msg, uint16_t *c1, int16_t *c2)
 {
-  struct adc12ctl0_t *ctl0 = (struct adc12ctl0_t*) val;
-  HW_DMSG_ADC12("msp430:adc12:%s sht1x      %d\n",msg,ctl0->sht1x);
-  HW_DMSG_ADC12("msp430:adc12:%s sht0x      %d\n",msg,ctl0->sht0x);
-  HW_DMSG_ADC12("msp430:adc12:%s msc        %d\n",msg,ctl0->msc);
-  HW_DMSG_ADC12("msp430:adc12:%s ref2_5v    %d\n",msg,ctl0->ref2_5v);
-  HW_DMSG_ADC12("msp430:adc12:%s refon      %d\n",msg,ctl0->refon);
-  HW_DMSG_ADC12("msp430:adc12:%s adc12on    %d\n",msg,ctl0->adc12on);
-  HW_DMSG_ADC12("msp430:adc12:%s adc12ovie  %d\n",msg,ctl0->adc12ovie);
-  HW_DMSG_ADC12("msp430:adc12:%s adc12tovie %d\n",msg,ctl0->adc12tovie);
-  HW_DMSG_ADC12("msp430:adc12:%s enc        %d\n",msg,ctl0->enc);
-  HW_DMSG_ADC12("msp430:adc12:%s adc12sc    %d\n",msg,ctl0->adc12sc);
+  struct adc12ctl0_t *ref = (struct adc12ctl0_t*)c1;
+  struct adc12ctl0_t *val = (struct adc12ctl0_t*)c2;
+
+  WR_IF_MOD("sht1x"      ,sht1x);
+  WR_IF_MOD("sht0x"      ,sht0x);
+  WR_IF_MOD("msc"        ,msc);
+  WR_IF_MOD("ref2_5v"    ,ref2_5v);
+  WR_IF_MOD("refon"      ,refon);
+  WR_IF_MOD("adc12on"    ,adc12on);
+  WR_IF_MOD("adc12ovie"  ,adc12ovie);
+  WR_IF_MOD("adc12tovie" ,adc12tovie);
+  WR_IF_MOD("enc"        ,enc);
+  WR_IF_MOD("adc12sc"    ,adc12sc);
 }
 
 void msp430_adc12_ctl1details(char* msg, int16_t *val)
@@ -829,31 +835,35 @@ void msp430_adc12_write16(uint16_t addr, int16_t val)
   switch (addr)
     {
     case ADC12CTL0    : /* 16 */
-      HW_DMSG_ADC12("msp430:adc12:write16: ADC12CTL0 = 0x%04x\n",val);
-      if (val != MCU.adc12.ctl0.s)
-	{
-	  msp430_adc12_ctl0details("    ctl0 set ",&val);
-	}
-      if (MCU.adc12.ctl0.b.enc == 0)
-	{
-	  union {
-	    int16_t s;
-	    struct adc12ctl0_t b;
-	  } pval;
-	  pval.s = val;
-	  if (pval.b.enc == 1)
-	    {
-	      HW_DMSG_ADC12("msp430:adc12:    ** START ENC **\n");
-	      /* configuratioin is fixed */
-	      msp430_adc12_start_enc();
-	      MCU.adc12.current_x = MCU.adc12.ctl1.b.cstartaddx;
-	    }
-	  MCU.adc12.ctl0.s = val;
-	}
-      else
-	{
-	  MCU.adc12.ctl0.s = (MCU.adc12.ctl0.s & 0xfff0) | (val & 0xf);
-	}
+      {
+	union {
+	  uint16_t s;
+	  struct adc12ctl0_t b;
+	} pval;
+	pval.s = val;
+
+	HW_DMSG_ADC12("msp430:adc12:write16: ADC12CTL0 = 0x%04x\n",val);
+
+	if (val != MCU.adc12.ctl0.s)
+	  {
+	    msp430_adc12_ctl0details("    ctl0 set ", &MCU.adc12.ctl0.s, &val);
+	    if (MCU.adc12.ctl0.b.enc == 0)
+	      {
+		if (pval.b.enc == 1) /* configuratioin is fixed */
+		  {
+		    HW_DMSG_ADC12("msp430:adc12:    ** START ENC **\n");
+		    msp430_adc12_start_enc();
+		    MCU.adc12.current_x = MCU.adc12.ctl1.b.cstartaddx;
+		  }
+		MCU.adc12.ctl0.s = val;
+	      }
+	    else /* enc == 1, change only 4 lower bits at most */
+	      {
+		HW_DMSG_ADC12("msp430:adc12:    ctl0 modified while \"enc\" == 1\n");
+		MCU.adc12.ctl0.s = (MCU.adc12.ctl0.s & 0xfff0) | (val & 0xf);
+	      }
+	  }
+      }
       break;
 
     case ADC12CTL1    : /* 16 */

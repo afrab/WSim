@@ -10,7 +10,8 @@
 #define _REVISION_H_
 
 #include <ctype.h>
- 
+
+/* */ 
 #define SVN_REVISION "$Revision$" 
 
 static char* extract_revision_number()

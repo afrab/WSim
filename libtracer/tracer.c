@@ -15,15 +15,19 @@
 #include <errno.h>
 #include <inttypes.h>
 
+#ifndef WSNET3
 #include "arch/common/hardware.h"
 #include "liblogger/logger.h"
 #include "src/options.h"
+#endif
+
 #include "tracer.h"
 #include "tracer_int.h"
 #include "tracer_bin.h"
 #include "tracer_vcd.h"
 
 #define APP_EXIT(i) exit(i)
+
 
 /* ************************************************** */
 /* ************************************************** */
@@ -112,7 +116,7 @@ tracer_output_open(char *filename)
 	tracer_binary_open(filename + 4);
       else
 	tracer_binary_open(filename);
-	
+
       tracer_dump_data       = tracer_binary_dump_data;
       tracer_output_close    = tracer_binary_close;
       tracer_start_internal  = tracer_binary_start;

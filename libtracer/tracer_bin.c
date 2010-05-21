@@ -16,10 +16,12 @@
 #include <errno.h>
 #include <inttypes.h>
 
-
+#ifndef WSNET3
 #include "arch/common/hardware.h"
 #include "liblogger/logger.h"
 #include "src/options.h"
+#endif
+
 #include "tracer.h"
 #include "tracer_int.h"
 #include "tracer_bin.h"
@@ -106,7 +108,7 @@ tracer_binary_start()
   e = 1;
 #endif
 
-#if defined(WSNET1)
+#if defined(WSNET1) || defined(WSNET3)
       cycles     = 0;
       insn       = 0;
       time       = TRACER_GET_NANOTIME();

@@ -18,9 +18,14 @@
 #include <sys/time.h>
 #include <time.h>
 
+#ifndef WSNET3
 #include "arch/common/hardware.h"
 #include "liblogger/logger.h"
 #include "src/options.h"
+#else
+#include <config.h>
+#endif
+
 #include "tracer.h"
 #include "tracer_int.h"
 #include "tracer_vcd.h"

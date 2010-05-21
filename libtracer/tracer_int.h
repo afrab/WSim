@@ -35,12 +35,49 @@
 #define DMSG_EVENT(x...) do { } while (0)
 #endif
 
+
 /* ************************************************** */
 /* ************************************************** */
 /* ************************************************** */
 
-#define TRACER_MAX_ID                255
-#define TRACER_MAX_NAME_LENGTH       200
+/****************************************
+ * WSNET3 WORKAROUNDS
+ ****************************************/ 
+#ifdef WSNET3
+
+#define _TRACER_DBG_MSG      /* tracer debug messages       */
+#define _TRACER_ERROR_MSG    /* tracer error messages       */
+
+#ifdef TRACER_DBG_MSG
+#    define TRACER_DBG(x...) fprintf(stderr, x)
+#else
+#    define TRACER_DBG(x...) do { } while (0)
+#endif
+
+#ifdef TRACER_ERROR_MSG
+#    define TRACER_ERROR(x...) fprintf(stderr, x)
+#else
+#    define TRACER_ERROR(x...) do { } while (0)
+#endif
+
+#define MAX_FILENAME 256
+#define OUTPUT(x...) TRACER_DBG(x)
+#define ERROR(x...)  TRACER_ERROR(x)
+#undef DMSG_TRACER
+#define DMSG_TRACER(x...) TRACER_DBG(x)
+#undef DMSG_EVENT
+#define DMSG_EVENT(x...) TRACER_DBG(x)
+
+
+enum wsens_mode_t {
+  WS_MODE_WSNET0 = 0
+};
+#endif
+
+
+/* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
 
 /****************************************
  * For performance purpose and because this

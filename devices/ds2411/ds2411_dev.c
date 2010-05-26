@@ -421,29 +421,37 @@ static ds2411_serial_number_t ds2411_str_to_id(char *serial)
   unsigned int i0,i1,i2,i3,i4,i5,i6,i7;
 
   if (serial == NULL)
-    serial = SERIAL_DEFAULT_ID;
+    {
+      serial = SERIAL_DEFAULT_ID;
+      ERROR("DS2411: missing argument, set by default to %s\n", serial);
+    }
 
   bzero(&id, sizeof(ds2411_serial_number_t));
 
   n = sscanf(serial,SERIAL_ID_STR, &i0,&i1,&i2,&i3,&i4,&i5,&i6,&i7);
-  if (n == DS2411_REG_NUMBER_LEN)
+  if (n != DS2411_REG_NUMBER_LEN)
     {
-      id.fields.crc     = i0;
-      id.fields.serial5 = i1;
-      id.fields.serial4 = i2;
-      id.fields.serial3 = i3;
-      id.fields.serial2 = i4;
-      id.fields.serial1 = i5;
-      id.fields.serial0 = i6; 
-      id.fields.family  = i7;
-      
-      HW_DMSG_SER("DS2411: id = %s\n", ds2411_id_to_str(&id));
-      
-      if (! ds2411_check_crc(&id))
-	{
-	  WARNING("DS2411: crc is not valid, should be 0x%x\n",ds2411_crc(&id));
-	}
+      serial = SERIAL_DEFAULT_ID;
+      ERROR("DS2411: wrong serial id format, set by default to %s\n", serial);
+      sscanf(serial,SERIAL_ID_STR, &i0,&i1,&i2,&i3,&i4,&i5,&i6,&i7);
     }
+
+  id.fields.crc     = i0;
+  id.fields.serial5 = i1;
+  id.fields.serial4 = i2;
+  id.fields.serial3 = i3;
+  id.fields.serial2 = i4;
+  id.fields.serial1 = i5;
+  id.fields.serial0 = i6; 
+  id.fields.family  = i7;
+      
+  HW_DMSG_SER("DS2411: id = %s\n", ds2411_id_to_str(&id));
+      
+  if (! ds2411_check_crc(&id))
+    {
+      WARNING("DS2411: crc is not valid, should be 0x%x\n",ds2411_crc(&id));
+    }
+  
   return id;
 }
 

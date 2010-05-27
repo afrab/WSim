@@ -120,14 +120,14 @@ else
 fi
 AM_CONDITIONAL([BUILD_GUI], [test "${gui_sum}" = "yes"])
 
-dnl SDL ui mode
-dnl ===========
-AC_ARG_ENABLE([sdl],AS_HELP_STRING([--enable-sdl],[SDL GUI for devices (default disabled)]))
-if test "${enable_sdl}" = "yes" ; then
-    gui_type="SDL"
-    AC_DEFINE([GUI_SDL],[1],[Defines wether a SDL GUI is available])
-fi
-AM_CONDITIONAL([BUILD_GUI_SDL], [test "${gui_type}" = "SDL"])
+dnl dnl SDL ui mode
+dnl dnl ===========
+dnl AC_ARG_ENABLE([sdl],AS_HELP_STRING([--enable-sdl],[SDL GUI for devices (default disabled)]))
+dnl if test "${enable_sdl}" = "yes" ; then
+dnl     gui_type="SDL"
+dnl     AC_DEFINE([GUI_SDL],[1],[Defines wether a SDL GUI is available])
+dnl fi
+AM_CONDITIONAL([BUILD_GUI_SDL], [test "${gui_type}" = "SDL_is_deprecated"])
 
 dnl Gprof mode
 dnl ==========
@@ -494,10 +494,10 @@ case "${host}" in
 	if test "${gui_sum}" = "yes" -a "${gui_type}" = "none" ; then 
 	    gui_type="WIN"
 	fi
-	if test "${gui_sum}" = "yes" -a "${gui_type}" = "SDL" ; then
-	   # hack to avoid missing SDL_main linker complaint
-	   LDFLAGS="$LDFLAGS -u_SDL_main"
-	fi
+dnl 	if test "${gui_sum}" = "yes" -a "${gui_type}" = "SDL" ; then
+dnl 	   # hack to avoid missing SDL_main linker complaint
+dnl 	   LDFLAGS="$LDFLAGS -u_SDL_main"
+dnl 	fi
 	;;
 
 	*-apple-darwin* )
@@ -567,19 +567,19 @@ fi
 dnl --------------------------------------------------------------
 dnl Checks for libraries.
 dnl --------------------------------------------------------------
-if test "${enable_sdl}" = "yes" ; then
-	SDL_VERSION=1.2.5
-	AM_PATH_SDL($SDL_VERSION,   :,  AC_MSG_ERROR([*** SDL version $SDL_VERSION not found!])	)
-
-	if test "$HOSTTYPE" = "Cygwin" ; then 
-		AC_MSG_NOTICE([stripping MinGW cruft from SDL_CFLAGS/_LIBS for Worldsens on Cygwin])
-		SDL_CFLAGS="$(echo "$SDL_CFLAGS" | sed -e 's,-I/usr/include/mingw,,;s,-mno-cygwin,,;s,-Dmain=SDL_main,,' )"
-		SDL_LIBS="$(echo "$SDL_LIBS" | sed -e 's,-lmingw32,,;s,-mno-cygwin,,;s,-mwindows,,;s,-lSDLmain,,' )"
-	fi
-
-	CFLAGS="$CFLAGS $SDL_CFLAGS"
-	EXTRALIBS="$EXTRALIBS $SDL_LIBS"
-fi
+dnl if test "${enable_sdl}" = "yes" ; then
+dnl 	SDL_VERSION=1.2.5
+dnl 	AM_PATH_SDL($SDL_VERSION,   :,  AC_MSG_ERROR([*** SDL version $SDL_VERSION not found!])	)
+dnl 
+dnl 	if test "$HOSTTYPE" = "Cygwin" ; then 
+dnl 		AC_MSG_NOTICE([stripping MinGW cruft from SDL_CFLAGS/_LIBS for Worldsens on Cygwin])
+dnl 		SDL_CFLAGS="$(echo "$SDL_CFLAGS" | sed -e 's,-I/usr/include/mingw,,;s,-mno-cygwin,,;s,-Dmain=SDL_main,,' )"
+dnl 		SDL_LIBS="$(echo "$SDL_LIBS" | sed -e 's,-lmingw32,,;s,-mno-cygwin,,;s,-mwindows,,;s,-lSDLmain,,' )"
+dnl 	fi
+dnl 
+dnl 	CFLAGS="$CFLAGS $SDL_CFLAGS"
+dnl 	EXTRALIBS="$EXTRALIBS $SDL_LIBS"
+dnl fi
 
 dnl Wextra && Werror
 dnl ================

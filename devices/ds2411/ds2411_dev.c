@@ -423,7 +423,6 @@ static ds2411_serial_number_t ds2411_str_to_id(char *serial)
   if (serial == NULL)
     {
       serial = SERIAL_DEFAULT_ID;
-      ERROR("DS2411: missing argument, set by default to %s\n", serial);
     }
 
   bzero(&id, sizeof(ds2411_serial_number_t));

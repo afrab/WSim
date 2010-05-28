@@ -658,6 +658,15 @@ uint64_t cc2420_callback_rx(void *arg, struct wsnet_rx_info *wrx)
 	    /* set FIFO pin since we have data in fifo */
 	    cc2420->FIFO_pin    = 0xFF;
 	    cc2420->FIFO_set    = 1;
+
+	    /* if this is the only frame in fifo, calculate rx_frame_end */
+	    /* rx_frame_end will be used in rx_fifo_pop to update the state of FIFOP */
+	    if (cc2420->nb_rx_frames == 0) {
+		cc2420->rx_frame_end = cc2420->rx_frame_start + cc2420->rx_len;
+		if (cc2420->rx_frame_end < 0) {
+		    cc2420->rx_frame_end += CC2420_RAM_RXFIFO_LEN;
+		}
+	    }
 	}
 
 	/* update number of received bytes */
@@ -724,9 +733,9 @@ uint64_t cc2420_callback_rx(void *arg, struct wsnet_rx_info *wrx)
 		    return 0;
 		}
 		else {
-		    uint8_t rx_threshold = CC2420_REG_IOCFG0_FIFOP_THR(cc2420->registers[CC2420_REG_MDMCTRL0]);
+		    uint8_t rx_threshold = CC2420_REG_IOCFG0_FIFOP_THR(cc2420->registers[CC2420_REG_IOCFG0]);
 		    CC2420_DEBUG("address recognition OK, checking threshold (%d)\n", rx_threshold);
-		    if (cc2420->rx_data_bytes >= rx_threshold) {
+		    if (cc2420->rx_data_bytes >= rx_threshold && cc2420->FIFOP_pin == 0x00) {
 		        CC2420_DEBUG("rx_threshold reached, setting up FIFOP\n");
 			cc2420->FIFOP_pin = 0xFF;
 			cc2420->FIFOP_set =    1;
@@ -734,6 +743,15 @@ uint64_t cc2420_callback_rx(void *arg, struct wsnet_rx_info *wrx)
 		}
 	    }
 	} /* End of addressing recognition part */
+	else
+	  {
+	    uint8_t rx_threshold = CC2420_REG_IOCFG0_FIFOP_THR(cc2420->registers[CC2420_REG_IOCFG0]);
+	    if (cc2420->rx_data_bytes >= rx_threshold && cc2420->FIFOP_pin == 0x00) {
+	      CC2420_DEBUG("rx_threshold reached, setting up FIFOP\n");
+	      cc2420->FIFOP_pin = 0xFF;
+	      cc2420->FIFOP_set =    1;
+	    }
+	  }
 
 
 	/* if we got a complete frame, (+1 for length field) */
@@ -772,17 +790,7 @@ uint64_t cc2420_callback_rx(void *arg, struct wsnet_rx_info *wrx)
 	    /* end of packet -> packet ready to be dump */
 	    logpkt_rx_complete_pkt(cc2420->worldsens_radio_id);
 
-	    /* if this is the only frame in fifo, calculate rx_frame_end */
-	    /* rx_frame_end will be used in rx_fifo_pop to update the state of FIFOP */
-	    if (cc2420->nb_rx_frames == 1) {
-		cc2420->rx_frame_end = cc2420->rx_fifo_write - 1;
-		if (cc2420->rx_frame_end < 0) {
-		    cc2420->rx_frame_end += CC2420_RAM_RXFIFO_LEN;
-		}
-	    }
-
 	    /* we are at the end of a new frame, if address recognition is disabled set FIFOP */
-
 	    cc2420->FIFOP_pin = 0xFF;
 	    cc2420->FIFOP_set = 1;
 

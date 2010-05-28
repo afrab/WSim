@@ -330,10 +330,10 @@ struct _cc2420_t {
     uint8_t  rx_src_addr_len;
 
     /* number of complete frames in RX FIFO */
-    int    nb_rx_frames;
+    int      nb_rx_frames;
 
     /* position in RX FIFO of the last byte of oldest RX frame */
-    int16_t rx_frame_end;
+    int16_t  rx_frame_end;
 
     /* radio id in libwsnet2 */
     int worldsens_radio_id;

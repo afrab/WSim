@@ -125,7 +125,8 @@ int cc2420_rx_fifo_read(struct _cc2420_t * cc2420, uint8_t * val) {
  */
 
 int cc2420_rx_fifo_pop(struct _cc2420_t * cc2420, uint8_t * val) {
-
+  CC2420_DEBUG("cc2420_rx_fifo_pop : cc2420->rx_fifo_read=%d, cc2420->rx_frame_end=%d\n",
+	       cc2420->rx_fifo_read, cc2420->rx_frame_end);
     uint8_t len_val;
     uint8_t calculate_length = 0;
     
@@ -133,13 +134,13 @@ int cc2420_rx_fifo_pop(struct _cc2420_t * cc2420, uint8_t * val) {
 	return -1;
 
     /* if this is the first data byte AND data bytes are < rx_threshold, unset FIFOP pin */
-    /* todo deal with address recog : FIFOP is not dealt the same way */
-    uint8_t rx_threshold = CC2420_REG_IOCFG0_FIFOP_THR(cc2420->registers[CC2420_REG_MDMCTRL0]);
-    if ( (cc2420->rx_fifo_read == cc2420->rx_first_data_byte) && (cc2420->rx_data_bytes < rx_threshold) ) {
-	CC2420_DEBUG("cc2420_rx_fifo_pop : reading first data byte, unsetting FIFOP !!\n");
-	cc2420->FIFOP_pin = 0x00;
-	cc2420->FIFOP_set = 1;
+    if (cc2420->rx_fifo_read == cc2420->rx_first_data_byte) {
 	cc2420->rx_first_data_byte = -1;
+	if (cc2420->FIFOP_pin == 0xFF) {
+	  CC2420_DEBUG("cc2420_rx_fifo_pop : reading first data byte, unsetting FIFOP !!\n");
+	  cc2420->FIFOP_pin = 0x00;
+	  cc2420->FIFOP_set = 1;
+	}
     }
     
     /* if this is the end of the current frame,
@@ -211,16 +212,6 @@ int cc2420_rx_fifo_push(struct _cc2420_t * cc2420, uint8_t val) {
     if (cc2420->rx_fifo_write == CC2420_RAM_RXFIFO_LEN) {
 	cc2420->rx_fifo_write = 0;
     }
-
-    
-    /* todo : implement and test threshold */
-
-    /*
-    if (cc2420->rx_data_bytes >= threshold) {
-	//cc2420->FIFOP_pin = 0xFF;
-	//cc2420->FIFOP_set = 1;
-	cc2420->nb_FIFOP ++;
-	}*/
 
     return 0;
 }

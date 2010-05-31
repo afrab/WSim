@@ -488,6 +488,7 @@ int ds2411_reset(int dev)
   DS2411_TIME_IN      = MACHINE_TIME_GET_NANO();
   DS2411_WIRE_STATE   = ONEWIRE_INPUT_HIGH;
   DS2411_READ_VALID   = 0;
+  tracer_event_record(TRACER_DS2411,1);
 
   return 0;
 } 
@@ -1117,7 +1118,6 @@ ds2411_device_create(int dev, char *serial)
   DS2411_ID = ds2411_str_to_id(serial);
 
   TRACER_DS2411 = tracer_event_add_id(1, "pin", "ds2411");
-  tracer_event_record(TRACER_DS2411,1);
 
   return 0;
 }

@@ -22,7 +22,7 @@
 #define ETRACER_WORD_SIZE                     2
 #define ETRACER_MAX_MISS                      0  /* cache+tlb miss in 1 slot */
 #define ETRACER_MAX_ACCESS                    9  /* memory access in 1 slot */
-#define ETRACER_MAX_PER_EVTS                  5  /* peripheral events in 1 slot */
+#define ETRACER_MAX_PER_EVTS                  6  /* peripheral events in 1 slot */
 #define ETRACER_WRITE_BUFFER      (5*1024*1024)  /* bytes */
 
 /****************************************
@@ -46,17 +46,18 @@
 #endif
 
 #if defined(DEBUG)
-#define DEBUG_MAX_VALUE_REACHED(val,max)                      \
+#define DEBUG_MAX_VALUE_REACHED(t,n,val,max)		      \
 do {                                                          \
   if (val >= max)                                             \
     {                                                         \
        ERROR("etracer: =================================\n"); \
        ERROR("etracer: max value reached for energy slot\n"); \
+       ERROR("etracer:  type %s:%d: %d >= %d\n",t,n,val,max); \
        ERROR("etracer: =================================\n"); \
     }                                                         \
 } while (0)
 #else
-#define DEBUG_MAX_VALUE_REACHED(val,max) do { } while (0)
+#define DEBUG_MAX_VALUE_REACHED(t,n,val,max) do { } while (0)
 #endif
 
 /* ************************************************** */
@@ -246,7 +247,7 @@ static void etracer_slot_access_internal(uint32_t addr, uint8_t burst_size, uint
   libetracer_slot->accesses[n].timing     = timing;
 
   libetracer_slot->hdr.num_accesses ++;
-  DEBUG_MAX_VALUE_REACHED(libetracer_slot->hdr.num_accesses,libetracer_conf.max_accesses);
+  DEBUG_MAX_VALUE_REACHED("access",level,libetracer_slot->hdr.num_accesses,libetracer_conf.max_accesses);
 }
 
 /* ************************************************** */
@@ -269,7 +270,7 @@ static void etracer_slot_event_internal(uint8_t periph_id, uint8_t event_id, uin
   libetracer_slot->per_evts[n].arg       = arg;
 
   libetracer_slot->hdr.num_per_evts ++;
-  DEBUG_MAX_VALUE_REACHED(libetracer_slot->hdr.num_per_evts,libetracer_conf.max_per_evts);
+  DEBUG_MAX_VALUE_REACHED("event",periph_id,libetracer_slot->hdr.num_per_evts,libetracer_conf.max_per_evts);
 }
 
 /* ************************************************** */

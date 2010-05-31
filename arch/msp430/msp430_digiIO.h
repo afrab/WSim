@@ -103,6 +103,7 @@ int8_t  msp430_digiIO_mcu_read          (uint16_t addr);
 void    msp430_digiIO_mcu_write         (uint16_t addr, int8_t val);
 
 int     msp430_digiIO_dev_read          (int port_number, uint8_t *val);
+uint8_t msp430_digiIO_dev_read_dir      (int port_number);
 void    msp430_digiIO_dev_write         (int port_number, uint8_t val, uint8_t bitmask);
 
 int     msp430_digiIO_internal_dev_read (int port_number, uint8_t *val);

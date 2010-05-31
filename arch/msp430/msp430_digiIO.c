@@ -48,6 +48,13 @@
 
 #define DIGIIO_OUT(p)    MCU.digiIO.out[p]
 
+/** 
+ * direction register 
+ * 8bit register
+ */
+
+#define DIGIIO_DIR(p)    MCU.digiIO.direction[p]
+
 /* slau056e.pdf page 9-3 */
 
 /**
@@ -271,6 +278,11 @@ int msp430_digiIO_dev_read (int port_number, uint8_t *val)
   //  HW_DMSG_DIGI_IO("   Digital IO read from devices on port %d\n",port_number);
   *val = DIGIIO_OUT(port_number);
   return MCU.digiIO.out_updated[port_number]; // port has been updated ?
+}
+
+uint8_t msp430_digiIO_dev_read_dir (int port_number)
+{
+  return DIGIIO_DIR(port_number);
 }
 
 /* ************************************************** */

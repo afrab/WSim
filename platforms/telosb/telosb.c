@@ -169,14 +169,19 @@ int devices_options_add(void)
 struct telosb_struct_t {
   int flash_cs;
   int radio_cs;
+  int p2dir;
 };
 
 #define SYSTEM_DATA      ((struct telosb_struct_t*)(machine.device[0].data))
 #define SYSTEM_FLASH_CS  (SYSTEM_DATA->flash_cs)
 #define SYSTEM_RADIO_CS  (SYSTEM_DATA->radio_cs)
+#define SYSTEM_P2DIR     (SYSTEM_DATA->p2dir)
 
 int system_reset (int UNUSED dev) 
 { 
+  SYSTEM_FLASH_CS = 0;
+  SYSTEM_RADIO_CS = 0;
+  SYSTEM_P2DIR    = msp430_digiIO_dev_read_dir(PORT2);
   return 0; 
 }
 
@@ -192,6 +197,8 @@ int system_create(int dev_num)
   machine.device[dev_num].delete        = system_delete;
   machine.device[dev_num].state_size    = sizeof(struct telosb_struct_t);
   machine.device[dev_num].name          = "System Platform";
+
+  system_reset(dev_num);
   return 0;
 }
 
@@ -309,7 +316,8 @@ int devices_reset_post()
   machine.device[FLASH].write(FLASH, M25P_W, M25P_W);
   SYSTEM_FLASH_CS = 0;
   SYSTEM_RADIO_CS = 0;
-
+  SYSTEM_P2DIR    = msp430_digiIO_dev_read_dir(PORT2);
+  
   REFRESH(LED1);
   REFRESH(LED2);
   REFRESH(LED3);
@@ -326,7 +334,8 @@ int devices_update()
   int res     = 0;
   int refresh = 0;
   uint8_t  val8;
-
+  uint8_t  dir8;
+  uint8_t  wrt;
   /* HW_DMSG_DEV("telosb: ==========================================\n"); */
 
   /* *************************************************************************** */
@@ -354,16 +363,35 @@ int devices_update()
    *   2.7 : ta0, UserInt = user switch SW2
    *   2.6 : GPIO 3, expansion connector U28
    *   2.5 : NC
-   *   2.4 : 1 wire
+   *   2.4 : 1 wire --> ds2411
    *   2.3 : CC2420, Gio2
    *   2.2 : ta0, caout,  + UART1RX loopback
    *   2.1 : GPIO 2, expansion connector U28
    *   2.0 : GPIO 1, expansion connector U28
    */
-  if (msp430_digiIO_dev_read(PORT2,&val8))
+  dir8 = msp430_digiIO_dev_read_dir(PORT2);
+  wrt  = msp430_digiIO_dev_read(PORT2,&val8);
+
+  if (BIT(SYSTEM_P2DIR,4) != BIT(dir8,4))
     {
-      machine.device[DS24].write(DS24,DS2411_D,BIT(val8,4)); 
+      if (BIT(dir8,4) != 0) // Set to output, onewire == 0 OR P2OUT
+	{
+	  machine.device[DS24].write(DS24,DS2411_D,BIT(val8,4)); 
+	}
+      else // Set to input, external resistor pulls high
+	{
+	  machine.device[DS24].write(DS24,DS2411_D,1);
+	}
     }
+  else
+    {
+      if ((BIT(dir8,4) != 0) && wrt) // output
+	{
+	  machine.device[DS24].write(DS24,DS2411_D,BIT(val8,4)); 
+	}
+    }
+
+  SYSTEM_P2DIR = dir8;
 
   /* port 3 :
    * ========

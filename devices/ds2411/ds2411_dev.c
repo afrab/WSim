@@ -52,25 +52,25 @@ do {                                                                            
 } while(0)
 
 #ifdef DEBUG_ME_HARDER
-#define HW_DMSG_DSH(x...)  fprintf(stderr, x)
+#define HW_DMSG_DSH(x...)  HW_DMSG_DS2411(x)
 #else
 #define HW_DMSG_DSH(x...)  do {} while(0)
 #endif
 
 #ifdef DEBUG_WIRE
-#define HW_DMSG_WIRE(x...)  fprintf(stderr,x)
+#define HW_DMSG_WIRE(x...)  HW_DMSG_DS2411(x)
 #else
 #define HW_DMSG_WIRE(x...)  do {} while(0)
 #endif
 
 #ifdef DEBUG_CRC
-#define HW_DMSG_CRC(x...)  fprintf(stderr,x);
+#define HW_DMSG_CRC(x...)  HW_DMSG_DS2411(x)
 #else
 #define HW_DMSG_CRC(x...)  do {} while(0)
 #endif
 
 #ifdef DEBUG_SERIAL
-#define HW_DMSG_SER(x...)  fprintf(stderr,x);
+#define HW_DMSG_SER(x...)  HW_DMSG_DS2411(x)
 #else
 #define HW_DMSG_SER(x...)  do {} while(0)
 #endif
@@ -97,7 +97,7 @@ tracer_id_t TRACER_DS2411;
 
 /* Reset Low time              */
 #define ONEWIRE_RSTL_MIN   (480 MICRO)
-#define ONEWIRE_RSTL_MAX   (640 MICRO)
+#define ONEWIRE_RSTL_MAX   (660 MICRO) /* changed from 640 to 660 for Contiki2.4 */
 /* Presence detect High time   */
 #define ONEWIRE_PDH_MIN    ( 15 MICRO)
 #define ONEWIRE_PDH_MAX    ( 60 MICRO)
@@ -122,10 +122,10 @@ tracer_id_t TRACER_DS2411;
 #define ONEWIRE_W0L_MIN    ( 60 MICRO)
 #define ONEWIRE_W0L_MAX    (120 MICRO) 
 /* Write 1 low time            */
-#define ONEWIRE_W1L_MIN    (  5 MICRO)
+#define ONEWIRE_W1L_MIN    (  4 MICRO) /* changed from 5 to 4 for contiki2.4 */
 #define ONEWIRE_W1L_MAX    ( 15 MICRO)
 /* Read Low time               */
-#define ONEWIRE_RL_MIN     (  6 MICRO) // check RL_MIN
+#define ONEWIRE_RL_MIN     (  4 MICRO) /* changed from 6 to 4 for contiki2.4 */
 #define ONEWIRE_RL_MAX     ( 15 MICRO)
 /* Read Sample time            */
 #define ONEWIRE_MSR_MIN    (  1 MICRO)
@@ -135,42 +135,42 @@ tracer_id_t TRACER_DS2411;
 /* Need to add overdrive speed settings */
 /****************************************/
 
-enum onewire_timing_enum_t {
-  /* Reset Low time              */
-  _ONEWIRE_RSTL_MIN    = 0,
-  _ONEWIRE_RSTL_MAX    = 1,
-  /* Presence detect High time   */
-  _ONEWIRE_PDH_MIN     = 2,
-  _ONEWIRE_PDH_MAX     = 3,
-  /* Presence detect Low time    */
-  _ONEWIRE_PDL_MIN     = 4,
-  _ONEWIRE_PDL_MAX     = 5,
-  /* Presence detect Fall time   */ 
-  _ONEWIRE_FPD_MIN     = 6,
-  _ONEWIRE_FPD_MAX     = 7,
-  /* Presence detect sample time */
-  _ONEWIRE_MSP_MIN     = 8,
-  _ONEWIRE_MSP_MAX     = 9,
-  /* Rising Edge HoldOff         */
-  _ONEWIRE_REH_MIN     = 10,
-  _ONEWIRE_REH_MAX     = 11,
-  /* Recovery time               */
-  _ONEWIRE_REC         = 12,
-  /* Timeslot duration           */
-  _ONEWIRE_SLOT        = 13,
-  /* Write 0 low time            */
-  _ONEWIRE_W0L_MIN     = 14,
-  _ONEWIRE_W0L_MAX     = 15,
-  /* Write 1 low time            */
-  _ONEWIRE_W1L_MIN     = 16,
-  _ONEWIRE_W1L_MAX     = 17,
-  /* Read Low time               */
-  _ONEWIRE_RL_MIN      = 18,
-  _ONEWIRE_RL_MAX      = 19,
-  /* Read Sample time            */
-  _ONEWIRE_MSR_MIN     = 20,
-  _ONEWIRE_MSR_MAX     = 21
-};    
+/* enum onewire_timing_enum_t { */
+/*   /\* Reset Low time              *\/ */
+/*   _ONEWIRE_RSTL_MIN    = 0, */
+/*   _ONEWIRE_RSTL_MAX    = 1, */
+/*   /\* Presence detect High time   *\/ */
+/*   _ONEWIRE_PDH_MIN     = 2, */
+/*   _ONEWIRE_PDH_MAX     = 3, */
+/*   /\* Presence detect Low time    *\/ */
+/*   _ONEWIRE_PDL_MIN     = 4, */
+/*   _ONEWIRE_PDL_MAX     = 5, */
+/*   /\* Presence detect Fall time   *\/  */
+/*   _ONEWIRE_FPD_MIN     = 6, */
+/*   _ONEWIRE_FPD_MAX     = 7, */
+/*   /\* Presence detect sample time *\/ */
+/*   _ONEWIRE_MSP_MIN     = 8, */
+/*   _ONEWIRE_MSP_MAX     = 9, */
+/*   /\* Rising Edge HoldOff         *\/ */
+/*   _ONEWIRE_REH_MIN     = 10, */
+/*   _ONEWIRE_REH_MAX     = 11, */
+/*   /\* Recovery time               *\/ */
+/*   _ONEWIRE_REC         = 12, */
+/*   /\* Timeslot duration           *\/ */
+/*   _ONEWIRE_SLOT        = 13, */
+/*   /\* Write 0 low time            *\/ */
+/*   _ONEWIRE_W0L_MIN     = 14, */
+/*   _ONEWIRE_W0L_MAX     = 15, */
+/*   /\* Write 1 low time            *\/ */
+/*   _ONEWIRE_W1L_MIN     = 16, */
+/*   _ONEWIRE_W1L_MAX     = 17, */
+/*   /\* Read Low time               *\/ */
+/*   _ONEWIRE_RL_MIN      = 18, */
+/*   _ONEWIRE_RL_MAX      = 19, */
+/*   /\* Read Sample time            *\/ */
+/*   _ONEWIRE_MSR_MIN     = 20, */
+/*   _ONEWIRE_MSR_MAX     = 21 */
+/* };     */
 
 
 /*
@@ -487,9 +487,7 @@ int ds2411_reset(int dev)
   DS2411_LVL0_STATE   = ONEWIRE_LVL0_RESET;
   DS2411_TIME_IN      = MACHINE_TIME_GET_NANO();
   DS2411_WIRE_STATE   = ONEWIRE_INPUT_HIGH;
-
-  DS2411_READ_VALID   = 1;
-  DS2411_WIRE_STATE   = 1;
+  DS2411_READ_VALID   = 0;
 
   return 0;
 } 
@@ -525,7 +523,7 @@ void ds2411_read(int dev, uint32_t *mask, uint32_t *val)
       *val              = DS2411_WIRE_STATE;
       tracer_event_record(TRACER_DS2411,DS2411_WIRE_STATE);
       DS2411_READ_VALID = 0;
-      HW_DMSG_WIRE("ds2411: set wire state %s [%"PRId64"]\n", 
+      HW_DMSG_WIRE("ds2411: read  from MCU %s [%"PRId64"]\n", 
 		   (*val & DS2411_D) ? "HIGH":"LOW", MACHINE_TIME_GET_NANO());  
     }
   else
@@ -551,7 +549,8 @@ void ds2411_write(int dev, uint32_t mask, uint32_t val)
 	  DS2411_WIRE_STATE  = val & DS2411_D;
 	  tracer_event_record(TRACER_DS2411,(val & DS2411_D));
 	  HW_DMSG_WIRE("ds2411: write from MCU %s [+%"PRId64"]\n", 
-		       (val & DS2411_D) ? "HIGH":"LOW", MACHINE_TIME_GET_NANO() - DS2411_TIME_IN);  
+		       (val & DS2411_D) ? "HIGH":"LOW", 
+		       MACHINE_TIME_GET_NANO() - DS2411_TIME_IN);  
 	}
     }
 }
@@ -603,17 +602,19 @@ static void update_onewire_reset_state(int dev, uint64_t current_time, uint64_t 
       break;
 
     case ONEWIRE_RESET_PULSE: /* waiting for HIGH */
-      if (DS2411_WRITE_VALID && DS2411_WRITE_TRANS == ONEWIRE_TRANS_HIGH)
+      if (DS2411_WRITE_VALID && (DS2411_WRITE_TRANS == ONEWIRE_TRANS_HIGH))
 	{
 	  if (time_in_state < ONEWIRE_RSTL_MIN)
 	    {
 	      GO_WAIT_RESET(dev);
-	      HW_DMSG_DS2411("ds2411:    reset_pulse canceled, up too early [+%"PRId64" < %"PRId64"]\n",time_in_state, ONEWIRE_RSTL_MIN);
+	      HW_DMSG_DS2411("ds2411:    reset_pulse canceled, up too early [+%"PRId64" < %"PRId64"]\n",
+			     time_in_state, ONEWIRE_RSTL_MIN);
 	    }
 	  else if (time_in_state > ONEWIRE_RSTL_MAX)
 	    {
 	      GO_WAIT_RESET(dev);
-	      HW_DMSG_DS2411("ds2411:    reset_pulse canceled, up too late [+%"PRId64" > %"PRId64"]\n",time_in_state, ONEWIRE_RSTL_MAX);
+	      HW_DMSG_DS2411("ds2411:    reset_pulse canceled, up too late [+%"PRId64" > %"PRId64"]\n",
+			     time_in_state, ONEWIRE_RSTL_MAX);
 	    }
 	  else
 	    {
@@ -692,17 +693,21 @@ void update_onewire_write_signal(int dev, uint64_t current_time, uint64_t time_i
              { /* write 1 or read */
                 DS2411_TIME_IN      = current_time;
                 DS2411_SIGNAL_STATE = ONEWIRE_WRITE_ENDSLOT;
-		DS2411_WTIME_REMAIN = ONEWIRE_SLOT_MAX - time_in_state;
+		int64_t rem = ONEWIRE_SLOT_MAX - time_in_state;
+		DS2411_WTIME_REMAIN = (rem > 0) ? rem : 0;
 		DS2411_WBIT         = 1;
-                HW_DMSG_DSH("ds2411: GO WRITE_ENDSLOT (1) [+%" PRId64 "]\n",time_in_state);
+                HW_DMSG_DSH("ds2411: GO WRITE_ENDSLOT (1) [+%" PRId64 "][remain %"PRId64"]\n",
+			    time_in_state,DS2411_WTIME_REMAIN);
               }
             else if (time_in_state >= ONEWIRE_W0L_MIN && time_in_state <= ONEWIRE_W0L_MAX)
               { /* write 0 */
                 DS2411_TIME_IN      = current_time;
                 DS2411_SIGNAL_STATE = ONEWIRE_WRITE_ENDSLOT;
-		DS2411_WTIME_REMAIN = ONEWIRE_SLOT_MAX - time_in_state;
+		int64_t rem = ONEWIRE_SLOT_MAX - time_in_state;
+		DS2411_WTIME_REMAIN = (rem > 0) ? rem : 0;
 		DS2411_WBIT         = 0;
-                HW_DMSG_DSH("ds2411: GO WRITE_ENDSLOT (0) [+%" PRId64 "]\n",time_in_state);
+                HW_DMSG_DSH("ds2411: GO WRITE_ENDSLOT (0) [+%" PRId64 "][remain %"PRId64"]\n",
+			    time_in_state,DS2411_WTIME_REMAIN);
               }
             else if (time_in_state >= ONEWIRE_RSTL_MIN && time_in_state <= ONEWIRE_RSTL_MAX)
               { /* we have reset request */
@@ -1024,8 +1029,10 @@ int ds2411_update(int dev)
       if (DS2411_WIRE_STATE == ONEWIRE_INPUT_LOW && 
 	  current_time >= (DS2411_TIME_IN + ONEWIRE_RSTL_MAX))
 	{
-	  GO_WAIT_RESET(dev);
-	  HW_DMSG_DS2411("ds2411:    ====== time out, going reset [+%"PRId64"] ======= \n",time_in_state);
+	  DS2411_LVL0_STATE  = ONEWIRE_LVL0_RESET;
+	  DS2411_RESET_STATE = ONEWIRE_RESET_WAIT;
+	  HW_DMSG_DS2411("ds2411:    ====== time out, going reset [%"PRId64"][+%"PRId64"] ======= \n",
+			 current_time, time_in_state);
 	  return 0;
 	}
     }
@@ -1110,6 +1117,7 @@ ds2411_device_create(int dev, char *serial)
   DS2411_ID = ds2411_str_to_id(serial);
 
   TRACER_DS2411 = tracer_event_add_id(1, "pin", "ds2411");
+  tracer_event_record(TRACER_DS2411,1);
 
   return 0;
 }

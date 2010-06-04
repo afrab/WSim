@@ -92,7 +92,7 @@ extern struct atmega128_mcu_t mcu_backup;
 #define MCU_FLASH          MCU.flash
 #define MCU_RAM            MCU_ALU.ram
 
-#define MCU_BOOT_ADDRESS   0x0
+#define MCU_BOOT_ADDRESS   0x0000
 
 #define CYCLE_INCREMENT    MCU_CLOCK.MCLK_increment
 

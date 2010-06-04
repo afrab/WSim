@@ -26,10 +26,10 @@ extern char* atmega128_lpm_names[];
 #define DEBUG_ATMEGA
 #define FETCH_DECODE
 #define DISASSEMBLE
-#define _DEBUG_REGISTERS
-#define _DEBUG_INTERRUPT
+#define DEBUG_REGISTERS
+#define DEBUG_INTERRUPT
 #define _DEBUG_LPM            /* low power mode */
-#define _DEBUG_SYSTEM_CLOCK   /* basic | fll    */
+#define DEBUG_SYSTEM_CLOCK   /* basic | fll    */
 #define DEBUG_IO             /* mcu bus io     */
 
 #define _DEBUG_TIMER          /* timer Ax Bx    */

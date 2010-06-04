@@ -301,6 +301,9 @@ static int opcode_ld     (uint16_t opcode, uint16_t insn);
 static int opcode_ldd    (uint16_t opcode, uint16_t insn);
 static int opcode_ldi    (uint16_t opcode, uint16_t insn);
 
+static int opcode_pop    (uint16_t opcode, uint16_t insn);
+static int opcode_push   (uint16_t opcode, uint16_t insn);
+
 struct atmega_opcode_info_t {
   opcode_fun_t   fun;
   char          *name;
@@ -405,8 +408,8 @@ struct atmega_opcode_info_t OPCODES[] = {
   { .fun = opcode_default, .name = "LPM" },
   { .fun = opcode_default, .name = "LSR" },
   { .fun = opcode_out,     .name = "OUT" },
-  { .fun = opcode_default, .name = "POP" },
-  { .fun = opcode_default, .name = "PUSH" },
+  { .fun = opcode_pop,     .name = "POP" },
+  { .fun = opcode_push,    .name = "PUSH" },
   { .fun = opcode_default, .name = "SBI" },
   { .fun = opcode_default, .name = "SEC" },
   { .fun = opcode_default, .name = "SES" },
@@ -1142,6 +1145,44 @@ static int opcode_ldd(uint16_t opcode, uint16_t insn)
   return opcode;
 }
 
+
+static int opcode_push(uint16_t opcode, uint16_t insn)
+{
+  uint8_t  rd;
+  uint32_t SP;
+  // 1001 001d dddd 1111
+  rd = ((insn >> 4) & 0x1f);
+
+  HW_DMSG_DIS("%s r%d\n",OPCODES[opcode].name, rd);
+
+  SP=SP_READ();
+  MCU_RAM[ SP ] = MCU_REGS[rd];
+  SP=SP - 1;
+  SP_WRITE(SP);
+  ADD_TO_PC(1); // PC is aligned on words
+  SET_CYCLES(2);
+  return opcode;
+}
+
+static int opcode_pop(uint16_t opcode, uint16_t insn)
+{
+  uint8_t  rd;
+  uint32_t SP;
+  // 1001 000d dddd 1111
+  rd = ((insn >> 4) & 0x1f);
+
+  HW_DMSG_DIS("%s r%d\n",OPCODES[opcode].name, rd);
+
+  SP = SP_READ();
+  MCU_REGS[rd] = MCU_RAM[ SP ] ;
+  SP = SP + 1;
+  SP_WRITE(SP);
+
+  ADD_TO_PC(1); // PC is aligned on words
+  SET_CYCLES(2);
+  return opcode;
+}
+
 /* ************************************************** */
 /* ************************************************** */
 /* ************************************************** */
@@ -1476,7 +1517,7 @@ static inline unsigned int extract_opcode(uint16_t insn)
 	    case 0xc: /* 1001 0010 C 1100 */ RETURN(OP_ST,insn);   /* v0 */
 	    case 0xd: /* 1001 0010 C 1101 */ RETURN(OP_ST,insn);   /* v0 */
 	    case 0xe: /* 1001 0010 C 1110 */ RETURN(OP_ST,insn);   /* v0 */
-	    case 0xf: /* 1001 0010 C 1111 */ RETURN(OP_PUSH,insn); 
+	    case 0xf: /* 1001 001C C 1111 */ RETURN(OP_PUSH,insn); 
 	    default:  UNKNOWN_OPCODE(insn); break;
 	    }
 	  break;
@@ -1491,7 +1532,7 @@ static inline unsigned int extract_opcode(uint16_t insn)
 	    case 0xc: /* 1001 0011 C 1100 */ RETURN(OP_ST,insn);   /* v1 */
 	    case 0xd: /* 1001 0011 C 1101 */ RETURN(OP_ST,insn);   /* v1 */
 	    case 0xe: /* 1001 0011 C 1110 */ RETURN(OP_ST,insn);   /* v1 */
-	    case 0xf: /* 1001 0011 C 1111 */ RETURN(OP_PUSH,insn);
+	    case 0xf: /* 1001 001C C 1111 */ RETURN(OP_PUSH,insn);
 	    default:  UNKNOWN_OPCODE(insn); break;
 	    }
 	  break;

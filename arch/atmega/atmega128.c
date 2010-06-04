@@ -311,7 +311,7 @@ int mcu_jtag_read_section(uint8_t *mem, uint16_t start, uint16_t size)
 
 void mcu_jtag_write_section(uint8_t *mem, uint16_t start, uint16_t size)
 {
-  memcpy(MCU_RAM + start, mem, size);
+  memcpy(MCU_FLASH + start, mem, size);
   mcu_ramctl_write_block(start,size);
 }
 

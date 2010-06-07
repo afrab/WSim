@@ -25,15 +25,8 @@ struct dsp_internal_state_t
   int32_t  dsp_index_max;
 
   wsimtime_t  fsm_time_start;
-  wsimtime_t  fsm_time_next_p1_start;
-  wsimtime_t  fsm_time_next_p1_end;
-  wsimtime_t  fsm_time_next_p2_start;
-  wsimtime_t  fsm_time_next_p2_end;
   
   int         dsp_output_n;
-
-  tracer_id_t tracer_state1;
-  tracer_id_t tracer_state2;
   
   uint8_t     etrace_id;
   uint8_t     etrace_state;

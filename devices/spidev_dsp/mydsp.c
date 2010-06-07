@@ -32,7 +32,16 @@
 #define millisecond (1000*1000)
 #define second      (1000*1000*1000)
 
-#define PERIOD0_DELTA (100*microsecond)
+#define OUTPUT_BYTES     4
+
+/***************************************************/
+/***************************************************/
+/***************************************************/
+
+#define START_DELTA (100*microsecond)
+
+#define PERIOD0_DELTA    (5050*microsecond)
+#define PERIOD0_DURATION (40*microsecond)
 
 #define PERIOD1_DELTA    (157*millisecond)
 #define PERIOD1_DURATION (139*microsecond)
@@ -40,13 +49,28 @@
 #define PERIOD2_DELTA    (2*second)
 #define PERIOD2_DURATION (41300*microsecond)
 
-#define OUTPUT_BYTES   4
-
-#define TRACER_DSP_P1 st->tracer_state1
-#define TRACER_DSP_P2 st->tracer_state2
-
 #define ETRACER_DSP_POWER_STANDBY 1
 #define ETRACER_DSP_POWER_ACTIVE  2
+
+struct ev_t {
+  wsimtime_t start;
+  wsimtime_t end;
+  wsimtime_t period;
+  wsimtime_t duration;
+  tracer_id_t tr_id;
+};
+
+struct ev_t events[] = {
+  { .period = PERIOD0_DELTA, .duration = PERIOD0_DURATION },
+  { .period = PERIOD1_DELTA, .duration = PERIOD1_DURATION },
+  { .period = PERIOD2_DELTA, .duration = PERIOD2_DURATION }
+};
+
+#define NEVENTS (sizeof(events)/sizeof(struct ev_t))
+
+/***************************************************/
+/***************************************************/
+/***************************************************/
 
 void mydsp_init_fsm(struct dsp_internal_state_t *st);
 
@@ -56,9 +80,14 @@ void mydsp_init_fsm(struct dsp_internal_state_t *st);
 
 void mydsp_create(struct dsp_internal_state_t *st)
 {
+  unsigned int i;
   memset(st->dsp_data,0,DSP_MEM_SIZE);
-  TRACER_DSP_P1  = tracer_event_add_id(8, "p1"  , "mydsp");
-  TRACER_DSP_P2  = tracer_event_add_id(8, "p2"  , "mydsp");
+  for(i=0; i<NEVENTS; i++)
+    {
+      char name[4];
+      sprintf(name,"e%d",i);
+      events[i].tr_id = tracer_event_add_id(8, name , "mydsp");
+    }
 
 #if defined(ETRACE)
   st->etrace_id  = ETRACER_PER_ID_GUEST;
@@ -149,16 +178,19 @@ void mydsp_write(struct dsp_internal_state_t *st, uint32_t val)
 
 void mydsp_init_fsm(struct dsp_internal_state_t *st)
 {
-  st->fsm_time_start         = MACHINE_TIME_GET_NANO() + PERIOD0_DELTA;
-  st->fsm_time_next_p1_start = st->fsm_time_start      + PERIOD1_DELTA;
-  st->fsm_time_next_p1_end   = st->fsm_time_start      + PERIOD1_DELTA + PERIOD1_DURATION;
-  st->fsm_time_next_p2_start = st->fsm_time_start      + PERIOD2_DELTA;
-  st->fsm_time_next_p2_end   = st->fsm_time_start      + PERIOD2_DELTA + PERIOD2_DURATION;
+  unsigned int i;
+  st->fsm_time_start         = MACHINE_TIME_GET_NANO() + START_DELTA;
   st->dsp_output_n           = 0;
+  for(i=0; i<NEVENTS; i++)
+    {
+      events[i].start = st->fsm_time_start + events[i].period;
+      events[i].end   = st->fsm_time_start + events[i].period + events[i].duration;
+    }
 }
 
-void dsp_set_etrace_active(struct dsp_internal_state_t *st);
-void dsp_set_etrace_standby(struct dsp_internal_state_t *st);
+/***************************************************/
+/***************************************************/
+/***************************************************/
 
 void dsp_set_etrace_active(struct dsp_internal_state_t *st)
 {
@@ -189,48 +221,63 @@ void dsp_set_etrace_standby(struct dsp_internal_state_t *st)
     }
 }
 
+/***************************************************/
+/***************************************************/
+/***************************************************/
 
 int  mydsp_update(struct dsp_internal_state_t *st, uint32_t *val, uint8_t tx_pending)
 {
   int ret = 0;
+  unsigned int i;
   wsimtime_t current_time;
 
   current_time = MACHINE_TIME_GET_NANO();
 
-  if ((st->dsp_mode == MYDSP_ACTIVE) &&
-      (current_time >= st->fsm_time_start))
+  if ((st->dsp_mode == MYDSP_ACTIVE) && (current_time >= st->fsm_time_start))
     {
+      
+      for(i=0; i<NEVENTS; i++)
+	{
+	  /* *** */
+	  if (current_time >= events[i].start)
+	    {
+	      events[i].start += events[i].period;
+	      tracer_event_record(events[i].tr_id,1);
+	      switch (i)
+		{
+		case 0:
+		  break;
+		case 1:
+		  dsp_set_etrace_active(st);
+		  break;
+		case 2:
+		  dsp_set_etrace_active(st);
+		  break;
+		}
+	    }
+
+	  if (current_time >= events[i].end)
+	    {
+	      events[i].end   += events[i].period;
+	      tracer_event_record(events[i].tr_id,0);
+	      switch (i)
+		{
+		case 0:
+		  break;
+		case 1:
+		  dsp_set_etrace_standby(st);
+		  break;
+		case 2:
+		  dsp_set_etrace_standby(st);
+		  st->dsp_output_n = OUTPUT_BYTES;
+		  break;
+		}
+	    }
 
       /* *** */
-      if (current_time >= st->fsm_time_next_p1_start)
-	{
-	  st->fsm_time_next_p1_start += PERIOD1_DELTA;
-	  tracer_event_record(TRACER_DSP_P1,1);
-	  dsp_set_etrace_active(st);
+
 	}
 
-      if (current_time >= st->fsm_time_next_p1_end)
-	{
-	  st->fsm_time_next_p1_end   += PERIOD1_DELTA;
-	  tracer_event_record(TRACER_DSP_P1,0);
-	  dsp_set_etrace_standby(st);
-	}
-
-      /* *** */
-      if (current_time >= st->fsm_time_next_p2_start)
-	{
-	  st->fsm_time_next_p2_start += PERIOD2_DELTA;
-	  st->dsp_output_n            = OUTPUT_BYTES;
-	  tracer_event_record(TRACER_DSP_P2,1);
-	  dsp_set_etrace_active(st);
-	}
-
-      if (current_time >= st->fsm_time_next_p2_end)
-	{
-	  st->fsm_time_next_p2_end   += PERIOD2_DELTA;
-	  tracer_event_record(TRACER_DSP_P2,0);
-	  dsp_set_etrace_standby(st);
-	}
       
       /* *** */
       if ((tx_pending == 0) && (st->dsp_output_n > 0))

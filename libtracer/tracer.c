@@ -307,7 +307,7 @@ tracer_event_record_time_nocheck(tracer_id_t id, tracer_val_t val, tracer_time_t
 
       if (tracer_end_of_block(EVENT_TRACER.ev_count))
 	{
-	  ERROR("tracer:error: max event reached\n");
+	  ERROR("tracer:error: max event reached (id %d %s.%s)\n",id,tracer_id_module[id],tracer_id_name[id]);
 	}
     }
   DMSG_EVENT("tracer:add:event: [%s] = (%" PRId64 ",%" PRId64 ")\n",tracer_id_name[id],time,val);

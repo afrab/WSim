@@ -17,6 +17,13 @@ static char *str_ssel[] = { "SMCLK", "ACLK" };
 static int wdt_intervals[] = { 32768, 8192, 512, 64 };
 
 /* ************************************************** */
+/* defined WATCHDOG_ONLY_WARNS to only get warning    */
+/* messages instead of reboots                        */
+/* ************************************************** */
+
+#define _WATCHDOG_ONLY_WARNS
+
+/* ************************************************** */
 /* ************************************************** */
 /* ************************************************** */
 
@@ -62,7 +69,6 @@ msp430_watchdog_update(void)
       HW_DMSG_WD("msp430:watchdog: interval wrapping\n");
       if (MCU.watchdog.wdtctl.b.wdttmsel == WDT_MODE_WATCHDOG)
 	{
-#define NO_WATCHDOG_ONLY_WARNS
 #if defined(WATCHDOG_ONLY_WARNS)
 	  WARNING("msp430:watchdog: =======================================\n");
 	  WARNING("msp430:watchdog: set interrupt RESET\n");

@@ -64,6 +64,7 @@ void cc2420_strobe_state_power_down(struct _cc2420_t * cc2420)
   switch (cc2420->SPI_addr) 
     {
     case CC2420_STROBE_SXOSCON :
+      CC2420_DBG_STROBE("cc2420:strobe:power_down: SXOSCON\n");
       CC2420_XOSC_STARTING_ENTER(cc2420);
       break;
 
@@ -113,6 +114,7 @@ void cc2420_strobe_state_idle(struct _cc2420_t * cc2420)
 	cc2420->rx_fifo_read = 0;	
 	cc2420->rx_fifo_write = 0;
 	cc2420->rx_frame_start = 0;
+	cc2420->rx_frame_end = 0;
 	cc2420->rx_first_data_byte = -1;
 	cc2420->nb_rx_frames = 0;
 	cc2420->FIFOP_pin = 0x00;
@@ -167,6 +169,7 @@ void cc2420_strobe_state_tx_calibrate(struct _cc2420_t * cc2420)
       cc2420->rx_fifo_read = 0;	
       cc2420->rx_fifo_write = 0;
       cc2420->rx_frame_start = 0;
+      cc2420->rx_frame_end = 0;
       cc2420->rx_first_data_byte = -1;
       cc2420->nb_rx_frames = 0;
       cc2420->FIFOP_pin = 0x00;
@@ -221,6 +224,7 @@ void cc2420_strobe_state_tx_preamble(struct _cc2420_t * cc2420)
       cc2420->rx_fifo_read = 0;	
       cc2420->rx_fifo_write = 0;
       cc2420->rx_frame_start = 0;
+      cc2420->rx_frame_end = 0;
       cc2420->rx_first_data_byte = -1;
       cc2420->nb_rx_frames = 0;
       cc2420->FIFOP_pin = 0x00;
@@ -275,6 +279,7 @@ void cc2420_strobe_state_tx_frame(struct _cc2420_t * cc2420)
       cc2420->rx_fifo_read = 0;	
       cc2420->rx_fifo_write = 0;
       cc2420->rx_frame_start = 0;
+      cc2420->rx_frame_end = 0;
       cc2420->rx_first_data_byte = -1;
       cc2420->nb_rx_frames = 0;
       cc2420->FIFOP_pin = 0x00;
@@ -324,6 +329,7 @@ void cc2420_strobe_state_tx_underflow(struct _cc2420_t * cc2420)
       cc2420->rx_fifo_read = 0;	
       cc2420->rx_fifo_write = 0;
       cc2420->rx_frame_start = 0;
+      cc2420->rx_frame_end = 0;
       cc2420->rx_first_data_byte = -1;
       cc2420->nb_rx_frames = 0;
       cc2420->FIFOP_pin = 0x00;
@@ -383,6 +389,7 @@ void cc2420_strobe_state_rx_calibrate(struct _cc2420_t * cc2420)
       cc2420->rx_fifo_read = 0;	
       cc2420->rx_fifo_write = 0;
       cc2420->rx_frame_start = 0;
+      cc2420->rx_frame_end = 0;
       cc2420->rx_first_data_byte = -1;
       cc2420->nb_rx_frames = 0;
       cc2420->FIFOP_pin = 0x00;
@@ -436,6 +443,7 @@ void cc2420_strobe_state_rx_sfd_search(struct _cc2420_t * cc2420)
       cc2420->rx_fifo_read = 0;	
       cc2420->rx_fifo_write = 0;
       cc2420->rx_frame_start = 0;
+      cc2420->rx_frame_end = 0;
       cc2420->rx_first_data_byte = -1;
       cc2420->nb_rx_frames = 0;
       cc2420->FIFOP_pin = 0x00;
@@ -517,12 +525,14 @@ void cc2420_strobe_state_rx_frame(struct _cc2420_t * cc2420)
       cc2420->rx_fifo_read = 0;	
       cc2420->rx_fifo_write = 0;
       cc2420->rx_frame_start = 0;
+      cc2420->rx_frame_end = 0;
       cc2420->rx_first_data_byte = -1;
       cc2420->nb_rx_frames = 0;
       cc2420->FIFOP_pin = 0x00;
       cc2420->FIFOP_set = 1;
       cc2420->FIFO_pin  = 0x00;
       cc2420->FIFO_set  = 1;
+      CC2420_RX_SFD_SEARCH_ENTER(cc2420);  /* noticed on hardware */
       break;
     case CC2420_STROBE_STXONCCA :
       CC2420_DBG_STROBE("cc2420:strobe:rx_frame: STXONCCA\n");
@@ -577,6 +587,7 @@ void cc2420_strobe_state_tx_ack_calibrate(struct _cc2420_t * cc2420)
       cc2420->rx_fifo_read = 0;	
       cc2420->rx_fifo_write = 0;
       cc2420->rx_frame_start = 0;
+      cc2420->rx_frame_end = 0;
       cc2420->rx_first_data_byte = -1;
       cc2420->nb_rx_frames = 0;
       cc2420->FIFOP_pin = 0x00;
@@ -639,6 +650,7 @@ void cc2420_strobe_state_tx_ack_preamble(struct _cc2420_t * cc2420)
       cc2420->rx_fifo_read = 0;	
       cc2420->rx_fifo_write = 0;
       cc2420->rx_frame_start = 0;
+      cc2420->rx_frame_end = 0;
       cc2420->rx_first_data_byte = -1;
       cc2420->nb_rx_frames = 0;
       cc2420->FIFOP_pin = 0x00;
@@ -690,6 +702,7 @@ void cc2420_strobe_state_tx_ack(struct _cc2420_t * cc2420)
       cc2420->rx_fifo_read = 0;	
       cc2420->rx_fifo_write = 0;
       cc2420->rx_frame_start = 0;
+      cc2420->rx_frame_end = 0;
       cc2420->rx_first_data_byte = -1;
       cc2420->nb_rx_frames = 0;
       cc2420->FIFOP_pin = 0x00;
@@ -739,6 +752,7 @@ void cc2420_strobe_state_rx_wait(struct _cc2420_t * cc2420)
       cc2420->rx_fifo_read = 0;	
       cc2420->rx_fifo_write = 0;
       cc2420->rx_frame_start = 0;
+      cc2420->rx_frame_end = 0;
       cc2420->rx_first_data_byte = -1;
       cc2420->nb_rx_frames = 0;
       cc2420->FIFOP_pin = 0x00;
@@ -788,6 +802,7 @@ void cc2420_strobe_state_rx_overflow(struct _cc2420_t * cc2420)
       cc2420->rx_fifo_read = 0;	
       cc2420->rx_fifo_write = 0;
       cc2420->rx_frame_start = 0;
+      cc2420->rx_frame_end = 0;
       cc2420->rx_first_data_byte = -1;
       cc2420->nb_rx_frames = 0;
       cc2420->FIFOP_pin = 0x00;

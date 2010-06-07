@@ -589,10 +589,23 @@ int cc2420_rx_check_address(struct _cc2420_t * cc2420 UNUSED) {
 
 void cc2420_rx_flush_current_frame(struct _cc2420_t * cc2420) {
     
+  int current_frame_end = (cc2420->rx_frame_start + cc2420->rx_len) % CC2420_RAM_RXFIFO_LEN;
+   
     /* reset write pointer to the first byte of the current rx frame */
     cc2420->rx_fifo_write = cc2420->rx_frame_start;
     
-    return;
+    /* check if this frame was being read */
+    if (cc2420->nb_rx_frames == 0) {
+        cc2420->rx_fifo_read = cc2420->rx_frame_start;
+	cc2420->rx_frame_end = 0;
+    }
+    else if ( ((cc2420->rx_frame_start < cc2420->rx_fifo_read) && (cc2420->rx_fifo_read< current_frame_end))   ||
+	      ((cc2420->rx_fifo_read < current_frame_end)      && (current_frame_end < cc2420->rx_frame_start))||
+	      ((current_frame_end < cc2420->rx_frame_start)    && (cc2420->rx_frame_start < cc2420->rx_fifo_read)) ) {
+        cc2420->rx_fifo_read = cc2420->rx_frame_start;
+    }
+   
+  return;
 }
 
 

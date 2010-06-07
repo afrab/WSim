@@ -125,7 +125,7 @@ int cc2420_rx_fifo_read(struct _cc2420_t * cc2420, uint8_t * val) {
  */
 
 int cc2420_rx_fifo_pop(struct _cc2420_t * cc2420, uint8_t * val) {
-  CC2420_DEBUG("cc2420_rx_fifo_pop : cc2420->rx_fifo_read=%d, cc2420->rx_frame_end=%d\n",
+    CC2420_DEBUG("cc2420_rx_fifo_pop : cc2420->rx_fifo_read=%d, cc2420->rx_frame_end=%d\n",
 	       cc2420->rx_fifo_read, cc2420->rx_frame_end);
     uint8_t len_val;
     uint8_t calculate_length = 0;

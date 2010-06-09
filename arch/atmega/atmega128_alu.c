@@ -287,12 +287,31 @@ static int opcode_asr   (uint16_t opcode, uint16_t insn);
 
 static int opcode_in     (uint16_t opcode, uint16_t insn);
 static int opcode_out    (uint16_t opcode, uint16_t insn);
+static int opcode_sbi    (uint16_t opcode, uint16_t insn);
 
 static int opcode_cp     (uint16_t opcode, uint16_t insn);
 static int opcode_cpi    (uint16_t opcode, uint16_t insn);
 static int opcode_cpc    (uint16_t opcode, uint16_t insn);
 
+static int opcode_sec    (uint16_t opcode, uint16_t insn);
+static int opcode_seh    (uint16_t opcode, uint16_t insn);
+static int opcode_set    (uint16_t opcode, uint16_t insn);
 static int opcode_sei    (uint16_t opcode, uint16_t insn);
+static int opcode_ses    (uint16_t opcode, uint16_t insn);
+static int opcode_sev    (uint16_t opcode, uint16_t insn);
+static int opcode_sez    (uint16_t opcode, uint16_t insn);
+static int opcode_sen    (uint16_t opcode, uint16_t insn);
+
+static int opcode_clc    (uint16_t opcode, uint16_t insn);
+static int opcode_clh    (uint16_t opcode, uint16_t insn);
+static int opcode_clt    (uint16_t opcode, uint16_t insn);
+static int opcode_cli    (uint16_t opcode, uint16_t insn);
+static int opcode_cls    (uint16_t opcode, uint16_t insn);
+static int opcode_clv    (uint16_t opcode, uint16_t insn);
+static int opcode_clz    (uint16_t opcode, uint16_t insn);
+static int opcode_cln    (uint16_t opcode, uint16_t insn);
+
+static int opcode_ser    (uint16_t opcode, uint16_t insn);
 
 static int opcode_jmp    (uint16_t opcode, uint16_t insn);
 static int opcode_rjmp   (uint16_t opcode, uint16_t insn);
@@ -303,14 +322,6 @@ static int opcode_ret    (uint16_t opcode, uint16_t insn);
 static int opcode_brne   (uint16_t opcode, uint16_t insn);
 static int opcode_brcc   (uint16_t opcode, uint16_t insn);
 static int opcode_breq   (uint16_t opcode, uint16_t insn);
-
-static int opcode_clc    (uint16_t opcode, uint16_t insn);
-static int opcode_clh    (uint16_t opcode, uint16_t insn);
-static int opcode_clt    (uint16_t opcode, uint16_t insn);
-static int opcode_cli    (uint16_t opcode, uint16_t insn);
-static int opcode_cls    (uint16_t opcode, uint16_t insn);
-static int opcode_clv    (uint16_t opcode, uint16_t insn);
-static int opcode_clz    (uint16_t opcode, uint16_t insn);
 
 static int opcode_mov    (uint16_t opcode, uint16_t insn);
 static int opcode_movw   (uint16_t opcode, uint16_t insn);
@@ -364,13 +375,13 @@ struct atmega_opcode_info_t OPCODES[] = {
   { .fun = opcode_default, .name = "DEC"    },
   { .fun = opcode_default, .name = "TST"    },
   { .fun = opcode_default, .name = "CLR"    }, /* == OP_EOR */
-  { .fun = opcode_default, .name = "CLN"    },
+  { .fun = opcode_cln,     .name = "CLN"    }, /* done: needs reviewing */
   { .fun = opcode_default, .name = "SPM"    },
-  { .fun = opcode_default, .name = "SEH"    },
-  { .fun = opcode_default, .name = "SEN"    },
-  { .fun = opcode_default, .name = "SER"    },
-  { .fun = opcode_default, .name = "SEV"    },
-  { .fun = opcode_default, .name = "SEZ"    },
+  { .fun = opcode_seh,     .name = "SEH"    }, /* done: needs reviewing */
+  { .fun = opcode_sen,     .name = "SEN"    }, /* done: needs reviewing */
+  { .fun = opcode_ser,     .name = "SER"    }, /* done: needs reviewing */
+  { .fun = opcode_sev,     .name = "SEV"    }, /* done: needs reviewing */
+  { .fun = opcode_sez,     .name = "SEZ"    }, /* done: needs reviewing */
   { .fun = opcode_sleep,   .name = "SLEEP"  },
   { .fun = opcode_default, .name = "MUL"    },
   { .fun = opcode_default, .name = "MULS"   },
@@ -433,10 +444,10 @@ struct atmega_opcode_info_t OPCODES[] = {
   { .fun = opcode_out,     .name = "OUT"    },
   { .fun = opcode_pop,     .name = "POP"    },
   { .fun = opcode_push,    .name = "PUSH"   },
-  { .fun = opcode_default, .name = "SBI"    },
-  { .fun = opcode_default, .name = "SEC"    },
-  { .fun = opcode_default, .name = "SES"    },
-  { .fun = opcode_default, .name = "SET"    },
+  { .fun = opcode_sbi,     .name = "SBI"    }, /* done: needs reviewing */
+  { .fun = opcode_sec,     .name = "SEC"    }, /* done: needs reviewing */
+  { .fun = opcode_ses,     .name = "SES"    }, /* done: needs reviewing */
+  { .fun = opcode_set,     .name = "SET"    }, /* done: needs reviewing */
   { .fun = opcode_sei,     .name = "SEI"    },
   { .fun = opcode_default, .name = "SR"     },
   { .fun = opcode_st,      .name = "ST"     },
@@ -572,8 +583,11 @@ static int opcode_jmp(uint16_t opcode, uint16_t insn)
   //
   // reference     1001 010k kkkk 110k kkkk kkkk kkkk kkkk
   // jmp 0xcc                                    1100 1100
+ 
   offset = atmega128_flash_read_short((mcu_get_pc()+1) << 1);
-  addr   = ((insn >> 4) & 0x1f) | (insn & 1);
+  addr   = ((insn >> 3) & 0x1f) | (insn & 1);
+  //offset = atmega128_flash_read_short(mcu_get_pc()+1);
+  //addr   = ((insn >> 3) & 0x3e) | (insn & 1);
   addr   = (addr << 16) | offset;
   HW_DMSG_DIS("%s 0x%06x [0x%08x]\n",OPCODES[opcode].name, addr << 1, insn << 16 | offset);
 
@@ -799,7 +813,21 @@ static int opcode_clz(uint16_t opcode, uint16_t UNUSED insn)
   SET_CYCLES(1);
   return opcode;
 }
+
+/* TODO: Code review */
+static int opcode_cln(uint16_t opcode, uint16_t UNUSED insn)
+{
+  // 1001 0100 1010 1000
+  HW_DMSG_DIS("%s\n",OPCODES[opcode].name);
   
+  // clear global interrupt flag
+  CLR_N;
+  
+  ADD_TO_PC(1); // PC is aligned on words
+  SET_CYCLES(1);
+  return opcode;
+}
+
 static int opcode_ori(uint16_t opcode, uint16_t insn)
 {
   uint8_t dd;
@@ -1169,6 +1197,93 @@ static int opcode_in(uint16_t opcode, uint16_t insn)
   HW_DMSG_DIS("%s r%d,0x%02x\n",OPCODES[opcode].name, dd, aa);
 
   MCU_REGS[dd] = atmega128_io_read_byte(aa);
+  ADD_TO_PC(1); // PC is aligned on words
+  SET_CYCLES(1);
+  return opcode;
+}
+
+/* TODO: Code review */
+static int opcode_set(uint16_t opcode, uint16_t insn)
+{
+  // 1001 0100 0110 1000
+  HW_DMSG_DIS("%s\n",OPCODES[opcode].name);
+  
+  // set global interrupt flag
+  SET_T;
+  
+  ADD_TO_PC(1); // PC is aligned on words
+  SET_CYCLES(1);
+  return opcode;
+}
+
+/* TODO: Code review */
+static int opcode_seh(uint16_t opcode, uint16_t insn)
+{
+  // 1001 0100 0101 1000
+  HW_DMSG_DIS("%s\n",OPCODES[opcode].name);
+  
+  // set global interrupt flag
+  SET_H;
+  
+  ADD_TO_PC(1); // PC is aligned on words
+  SET_CYCLES(1);
+  return opcode;
+}
+
+/* TODO: Code review */
+static int opcode_sen(uint16_t opcode, uint16_t insn)
+{
+  // 1001 0100 0010 1000
+  HW_DMSG_DIS("%s\n",OPCODES[opcode].name);
+  
+  // set global interrupt flag
+  SET_N;
+  
+  ADD_TO_PC(1); // PC is aligned on words
+  SET_CYCLES(1);
+  return opcode;
+}
+
+/* TODO: Code review */
+static int opcode_ser(uint16_t opcode, uint16_t insn)
+{
+  uint8_t dd;
+  
+  // 1110 1111 dddd 1111
+  dd = ((insn >> 4) & 0x0f);
+  HW_DMSG_DIS("%s r%d\n",OPCODES[opcode].name, dd);
+  
+  // set all bits in register Rd
+  MCU_REGS[dd] = 0xff;
+  
+  ADD_TO_PC(1); // PC is aligned on words
+  SET_CYCLES(1);
+  return opcode;
+}
+
+/* TODO: Code review */
+static int opcode_sev(uint16_t opcode, uint16_t insn)
+{
+  // 1001 0100 0011 1000
+  HW_DMSG_DIS("%s\n",OPCODES[opcode].name);
+  
+  // set global interrupt flag
+  SET_V;
+  
+  ADD_TO_PC(1); // PC is aligned on words
+  SET_CYCLES(1);
+  return opcode;
+}
+
+/* TODO: Code review */
+static int opcode_sez(uint16_t opcode, uint16_t insn)
+{
+  // 1001 0100 0001 1000
+  HW_DMSG_DIS("%s\n",OPCODES[opcode].name);
+  
+  // set global interrupt flag
+  SET_Z;
+  
   ADD_TO_PC(1); // PC is aligned on words
   SET_CYCLES(1);
   return opcode;
@@ -1666,6 +1781,53 @@ static int opcode_push(uint16_t opcode, uint16_t insn)
   return opcode;
 }
 
+/* TODO: Code review */
+static int opcode_sbi(uint16_t opcode, uint16_t insn)
+{
+  uint8_t  aa, bb;
+  int8_t   AA;
+  
+  // 1001 1010 AAAA Abbb
+  aa = ((insn >> 3) & 0x1f);
+  bb = (insn & 0x07);
+  HW_DMSG_DIS("%s 0x%02x,b%d\n",OPCODES[opcode].name, aa, bb);
+
+  AA = atmega128_io_read_byte(aa);
+  atmega128_io_write_byte(aa, AA | (1<<bb));
+
+  ADD_TO_PC(1); // PC is aligned on words
+  SET_CYCLES(2);
+  return opcode;
+}
+
+/* TODO: Code review */
+static int opcode_sec(uint16_t opcode, uint16_t insn)
+{
+  // 1001 0100 0000 1000
+  HW_DMSG_DIS("%s\n",OPCODES[opcode].name);
+  
+  // set global interrupt flag
+  SET_C;
+  
+  ADD_TO_PC(1); // PC is aligned on words
+  SET_CYCLES(1);
+  return opcode;
+}
+
+/* TODO: Code review */
+static int opcode_ses(uint16_t opcode, uint16_t insn)
+{
+  // 1001 0100 0100 1000
+  HW_DMSG_DIS("%s\n",OPCODES[opcode].name);
+  
+  // set global interrupt flag
+  SET_S;
+  
+  ADD_TO_PC(1); // PC is aligned on words
+  SET_CYCLES(1);
+  return opcode;
+}
+  
 static int opcode_pop(uint16_t opcode, uint16_t insn)
 {
   uint8_t  rd;

@@ -263,11 +263,27 @@ static int opcode_default(uint16_t opcode, uint16_t insn);
 
 static int opcode_sleep  (uint16_t opcode, uint16_t insn);
 
+static int opcode_or     (uint16_t opcode, uint16_t insn);
 static int opcode_eor    (uint16_t opcode, uint16_t insn);
 static int opcode_ori    (uint16_t opcode, uint16_t insn);
+static int opcode_sbr    (uint16_t opcode, uint16_t insn);
 static int opcode_and    (uint16_t opcode, uint16_t insn);
+static int opcode_andi   (uint16_t opcode, uint16_t insn);
+static int opcode_cbr    (uint16_t opcode, uint16_t insn);
+static int opcode_com    (uint16_t opcode, uint16_t insn);
+static int opcode_neg    (uint16_t opcode, uint16_t insn);
 
+static int opcode_add    (uint16_t opcode, uint16_t insn);
+static int opcode_adc    (uint16_t opcode, uint16_t insn);
+static int opcode_adiw   (uint16_t opcode, uint16_t insn);
+
+static int opcode_sub    (uint16_t opcode, uint16_t insn);
 static int opcode_subi   (uint16_t opcode, uint16_t insn);
+static int opcode_sbiw   (uint16_t opcode, uint16_t insn);
+static int opcode_sbc    (uint16_t opcode, uint16_t insn);
+static int opcode_sbci   (uint16_t opcode, uint16_t insn);
+
+static int opcode_asr   (uint16_t opcode, uint16_t insn);
 
 static int opcode_in     (uint16_t opcode, uint16_t insn);
 static int opcode_out    (uint16_t opcode, uint16_t insn);
@@ -288,7 +304,14 @@ static int opcode_brne   (uint16_t opcode, uint16_t insn);
 static int opcode_brcc   (uint16_t opcode, uint16_t insn);
 static int opcode_breq   (uint16_t opcode, uint16_t insn);
 
+static int opcode_clc    (uint16_t opcode, uint16_t insn);
+static int opcode_clh    (uint16_t opcode, uint16_t insn);
+static int opcode_clt    (uint16_t opcode, uint16_t insn);
 static int opcode_cli    (uint16_t opcode, uint16_t insn);
+static int opcode_cls    (uint16_t opcode, uint16_t insn);
+static int opcode_clv    (uint16_t opcode, uint16_t insn);
+static int opcode_clz    (uint16_t opcode, uint16_t insn);
+
 static int opcode_mov    (uint16_t opcode, uint16_t insn);
 static int opcode_movw   (uint16_t opcode, uint16_t insn);
 
@@ -310,117 +333,117 @@ struct atmega_opcode_info_t {
 };
 
 struct atmega_opcode_info_t OPCODES[] = {
-  { .fun = opcode_default, .name = "ADD" },
-  { .fun = opcode_default, .name = "ADC" },
-  { .fun = opcode_default, .name = "ADIW" },
-  { .fun = opcode_and,     .name = "AND" },
-  { .fun = opcode_default, .name = "ANDI" },
-  { .fun = opcode_default, .name = "ASR" },
-  { .fun = opcode_default, .name = "BREAK" },
-  { .fun = opcode_default, .name = "SUB" },
-  { .fun = opcode_subi,    .name = "SUBI" },
-  { .fun = opcode_default, .name = "SBC" },
-  { .fun = opcode_default, .name = "SBCI" },
-  { .fun = opcode_default, .name = "SBIW" },
-  { .fun = opcode_default, .name = "OR" },
-  { .fun = opcode_ori,     .name = "ORI" },
-  { .fun = opcode_eor,     .name = "EOR" },
-  { .fun = opcode_default, .name = "COM" },
-  { .fun = opcode_default, .name = "NEG" },
-  { .fun = opcode_default, .name = "SBR" },
-  { .fun = opcode_default, .name = "CBR" },
-  { .fun = opcode_default, .name = "CLC" },
-  { .fun = opcode_default, .name = "CLH" },
-  { .fun = opcode_default, .name = "CLT" },
-  { .fun = opcode_cli,     .name = "CLI" },
-  { .fun = opcode_default, .name = "CLS" },
-  { .fun = opcode_default, .name = "CLV" },
-  { .fun = opcode_default, .name = "CLZ" },
-  { .fun = opcode_in,      .name = "IN" },
-  { .fun = opcode_default, .name = "INC" },
-  { .fun = opcode_default, .name = "DEC" },
-  { .fun = opcode_default, .name = "TST" },
-  { .fun = opcode_default, .name = "CLR" }, /* == OP_EOR */
-  { .fun = opcode_default, .name = "CLN" },
-  { .fun = opcode_default, .name = "SPM" },
-  { .fun = opcode_default, .name = "SEH" },
-  { .fun = opcode_default, .name = "SEN" },
-  { .fun = opcode_default, .name = "SER" },
-  { .fun = opcode_default, .name = "SEV" },
-  { .fun = opcode_default, .name = "SEZ" },
-  { .fun = opcode_sleep,   .name = "SLEEP" },
-  { .fun = opcode_default, .name = "MUL" },
-  { .fun = opcode_default, .name = "MULS" },
-  { .fun = opcode_default, .name = "MULSU" },
-  { .fun = opcode_default, .name = "FMUL" },
-  { .fun = opcode_default, .name = "FMULS" },
+  { .fun = opcode_add,     .name = "ADD"    }, /* done: needs reviewing */
+  { .fun = opcode_adc,     .name = "ADC"    }, /* done: needs reviewing */
+  { .fun = opcode_adiw,    .name = "ADIW"   }, /* done: needs reviewing */
+  { .fun = opcode_and,     .name = "AND"    },
+  { .fun = opcode_andi,    .name = "ANDI"   }, /* done: needs reviewing */
+  { .fun = opcode_asr,     .name = "ASR"    }, /* done: needs reviewing */
+  { .fun = opcode_default, .name = "BREAK"  },
+  { .fun = opcode_sub,     .name = "SUB"    },  /* done: needs reviewing */
+  { .fun = opcode_subi,    .name = "SUBI"   },
+  { .fun = opcode_sbc,     .name = "SBC"    }, /* done: needs reviewing */
+  { .fun = opcode_sbci,    .name = "SBCI"   }, /* done: needs reviewing */
+  { .fun = opcode_sbiw,    .name = "SBIW"   }, /* done: needs reviewing */
+  { .fun = opcode_or,      .name = "OR"     }, /* done: needs reviewing */
+  { .fun = opcode_ori,     .name = "ORI"    },
+  { .fun = opcode_eor,     .name = "EOR"    },
+  { .fun = opcode_com,     .name = "COM"    }, /* done: needs reviewing */
+  { .fun = opcode_neg,     .name = "NEG"    }, /* done: needs reviewing + check C & V flags */
+  { .fun = opcode_sbr,     .name = "SBR"    }, /* Code review & What's the difference between SBR & ORI */
+  { .fun = opcode_cbr,     .name = "CBR"    }, /* Check opcode & code review */
+  { .fun = opcode_clc,     .name = "CLC"    }, /* done: needs reviewing */
+  { .fun = opcode_clh,     .name = "CLH"    }, /* done: needs reviewing */
+  { .fun = opcode_clt,     .name = "CLT"    }, /* done: needs reviewing */
+  { .fun = opcode_cli,     .name = "CLI"    },
+  { .fun = opcode_cls,     .name = "CLS"    }, /* done: needs reviewing */
+  { .fun = opcode_clv,     .name = "CLV"    }, /* done: needs reviewing */
+  { .fun = opcode_clz,     .name = "CLZ"    }, /* done: needs reviewing */
+  { .fun = opcode_in,      .name = "IN"     },
+  { .fun = opcode_default, .name = "INC"    },
+  { .fun = opcode_default, .name = "DEC"    },
+  { .fun = opcode_default, .name = "TST"    },
+  { .fun = opcode_default, .name = "CLR"    }, /* == OP_EOR */
+  { .fun = opcode_default, .name = "CLN"    },
+  { .fun = opcode_default, .name = "SPM"    },
+  { .fun = opcode_default, .name = "SEH"    },
+  { .fun = opcode_default, .name = "SEN"    },
+  { .fun = opcode_default, .name = "SER"    },
+  { .fun = opcode_default, .name = "SEV"    },
+  { .fun = opcode_default, .name = "SEZ"    },
+  { .fun = opcode_sleep,   .name = "SLEEP"  },
+  { .fun = opcode_default, .name = "MUL"    },
+  { .fun = opcode_default, .name = "MULS"   },
+  { .fun = opcode_default, .name = "MULSU"  },
+  { .fun = opcode_default, .name = "FMUL"   },
+  { .fun = opcode_default, .name = "FMULS"  },
   { .fun = opcode_default, .name = "FMULSU" },
-  { .fun = opcode_rjmp,    .name = "RJMP" },
-  { .fun = opcode_default, .name = "IJMP" },
-  { .fun = opcode_default, .name = "EIJMP" },
-  { .fun = opcode_elpm,    .name = "ELPM" },
-  { .fun = opcode_jmp,     .name = "JMP" },
-  { .fun = opcode_default, .name = "RCALL" },
-  { .fun = opcode_default, .name = "ICALL" },
+  { .fun = opcode_rjmp,    .name = "RJMP"   },
+  { .fun = opcode_default, .name = "IJMP"   },
+  { .fun = opcode_default, .name = "EIJMP"  },
+  { .fun = opcode_elpm,    .name = "ELPM"   },
+  { .fun = opcode_jmp,     .name = "JMP"    },
+  { .fun = opcode_default, .name = "RCALL"  },
+  { .fun = opcode_default, .name = "ICALL"  },
   { .fun = opcode_default, .name = "EICALL" },
-  { .fun = opcode_call,    .name = "CALL" },
-  { .fun = opcode_ret,     .name = "RET" },
-  { .fun = opcode_default, .name = "RETI" },
-  { .fun = opcode_default, .name = "CPSE" },
-  { .fun = opcode_default, .name = "CBI" },
-  { .fun = opcode_cp,      .name = "CP" },
-  { .fun = opcode_cpc,     .name = "CPC" },
-  { .fun = opcode_cpi,     .name = "CPI" },
-  { .fun = opcode_default, .name = "ROR" },
-  { .fun = opcode_default, .name = "SBRC" },
-  { .fun = opcode_default, .name = "SBRS" },
-  { .fun = opcode_default, .name = "SBIC" },
-  { .fun = opcode_default, .name = "SBIS" },
-  { .fun = opcode_default, .name = "BRBS" },
-  { .fun = opcode_default, .name = "BRBC" },
-  { .fun = opcode_default, .name = "BLD" },
-  { .fun = opcode_default, .name = "BST" },
-  { .fun = opcode_breq,    .name = "BREQ" },
-  { .fun = opcode_brne,    .name = "BRNE" },
-  { .fun = opcode_default, .name = "BRCS" },
-  { .fun = opcode_brcc,    .name = "BRCC" },
-  { .fun = opcode_default, .name = "BRSH" },
-  { .fun = opcode_default, .name = "BRLO" },
-  { .fun = opcode_default, .name = "BRMI" },
-  { .fun = opcode_default, .name = "BRPL" },
-  { .fun = opcode_default, .name = "BRGE" },
-  { .fun = opcode_default, .name = "BRLT" },
-  { .fun = opcode_default, .name = "BRHS" },
-  { .fun = opcode_default, .name = "BRHC" },
-  { .fun = opcode_default, .name = "BRTS" },
-  { .fun = opcode_default, .name = "BRTC" },
-  { .fun = opcode_default, .name = "BRVS" },
-  { .fun = opcode_default, .name = "BRVC" },
-  { .fun = opcode_default, .name = "BRIE" },
-  { .fun = opcode_default, .name = "BRID" },
-  { .fun = opcode_mov,     .name = "MOV" },
-  { .fun = opcode_movw,    .name = "MOVW" },
-  { .fun = opcode_default, .name = "NOP" },
-  { .fun = opcode_ldi,     .name = "LDI" },
-  { .fun = opcode_default, .name = "LDS" },
-  { .fun = opcode_ld,      .name = "LD" }, /* LD X */
-  { .fun = opcode_ldd,     .name = "LD" }, /* LD Y / Z */
-  { .fun = opcode_default, .name = "LPM" },
-  { .fun = opcode_default, .name = "LSR" },
-  { .fun = opcode_out,     .name = "OUT" },
-  { .fun = opcode_pop,     .name = "POP" },
-  { .fun = opcode_push,    .name = "PUSH" },
-  { .fun = opcode_default, .name = "SBI" },
-  { .fun = opcode_default, .name = "SEC" },
-  { .fun = opcode_default, .name = "SES" },
-  { .fun = opcode_default, .name = "SET" },
-  { .fun = opcode_sei,     .name = "SEI" },
-  { .fun = opcode_default, .name = "SR" },
-  { .fun = opcode_st,      .name = "ST" },
-  { .fun = opcode_std,     .name = "ST" },
-  { .fun = opcode_sts,     .name = "STS" },
-  { .fun = opcode_default, .name = "SWAP" },
-  { .fun = opcode_default, .name = "WDR" }
+  { .fun = opcode_call,    .name = "CALL"   },
+  { .fun = opcode_ret,     .name = "RET"    },
+  { .fun = opcode_default, .name = "RETI"   },
+  { .fun = opcode_default, .name = "CPSE"   },
+  { .fun = opcode_default, .name = "CBI"    },
+  { .fun = opcode_cp,      .name = "CP"     },
+  { .fun = opcode_cpc,     .name = "CPC"    },
+  { .fun = opcode_cpi,     .name = "CPI"    },
+  { .fun = opcode_default, .name = "ROR"    },
+  { .fun = opcode_default, .name = "SBRC"   },
+  { .fun = opcode_default, .name = "SBRS"   },
+  { .fun = opcode_default, .name = "SBIC"   },
+  { .fun = opcode_default, .name = "SBIS"   },
+  { .fun = opcode_default, .name = "BRBS"   },
+  { .fun = opcode_default, .name = "BRBC"   },
+  { .fun = opcode_default, .name = "BLD"    },
+  { .fun = opcode_default, .name = "BST"    },
+  { .fun = opcode_breq,    .name = "BREQ"   },
+  { .fun = opcode_brne,    .name = "BRNE"   },
+  { .fun = opcode_default, .name = "BRCS"   },
+  { .fun = opcode_brcc,    .name = "BRCC"   },
+  { .fun = opcode_default, .name = "BRSH"   },
+  { .fun = opcode_default, .name = "BRLO"   },
+  { .fun = opcode_default, .name = "BRMI"   },
+  { .fun = opcode_default, .name = "BRPL"   },
+  { .fun = opcode_default, .name = "BRGE"   },
+  { .fun = opcode_default, .name = "BRLT"   },
+  { .fun = opcode_default, .name = "BRHS"   },
+  { .fun = opcode_default, .name = "BRHC"   },
+  { .fun = opcode_default, .name = "BRTS"   },
+  { .fun = opcode_default, .name = "BRTC"   },
+  { .fun = opcode_default, .name = "BRVS"   },
+  { .fun = opcode_default, .name = "BRVC"   },
+  { .fun = opcode_default, .name = "BRIE"   },
+  { .fun = opcode_default, .name = "BRID"   },
+  { .fun = opcode_mov,     .name = "MOV"    },
+  { .fun = opcode_movw,    .name = "MOVW"   },
+  { .fun = opcode_default, .name = "NOP"    },
+  { .fun = opcode_ldi,     .name = "LDI"    },
+  { .fun = opcode_default, .name = "LDS"    },
+  { .fun = opcode_ld,      .name = "LD"     }, /* LD X */
+  { .fun = opcode_ldd,     .name = "LD"     }, /* LD Y / Z */
+  { .fun = opcode_default, .name = "LPM"    },
+  { .fun = opcode_default, .name = "LSR"    },
+  { .fun = opcode_out,     .name = "OUT"    },
+  { .fun = opcode_pop,     .name = "POP"    },
+  { .fun = opcode_push,    .name = "PUSH"   },
+  { .fun = opcode_default, .name = "SBI"    },
+  { .fun = opcode_default, .name = "SEC"    },
+  { .fun = opcode_default, .name = "SES"    },
+  { .fun = opcode_default, .name = "SET"    },
+  { .fun = opcode_sei,     .name = "SEI"    },
+  { .fun = opcode_default, .name = "SR"     },
+  { .fun = opcode_st,      .name = "ST"     },
+  { .fun = opcode_std,     .name = "ST"     },
+  { .fun = opcode_sts,     .name = "STS"    },
+  { .fun = opcode_default, .name = "SWAP"   },
+  { .fun = opcode_default, .name = "WDR"    }
 };
 
 
@@ -440,6 +463,74 @@ static int opcode_default(uint16_t opcode, uint16_t UNUSED insn)
   ERROR("Illegal / unknown opcode\n");
   // PC unchanged
   SET_CYCLES(0);
+  return opcode;
+}
+
+/* TODO: check flags management */
+/**
+ * \brief 
+ * \param opcode
+ * \param insn
+ * \return opcode
+ */
+static int opcode_add(uint16_t opcode, uint16_t insn)
+{
+  uint8_t  dd, rr;
+  int8_t  R, Rd, Rr;
+  
+  // 0000 11rd dddd rrrr
+  dd = ((insn >> 4) & 0x1f);
+  rr = ((insn >> 5) & 0x10) | (insn & 0x0f);
+  HW_DMSG_DIS("%s r%d,r%d\n",OPCODES[opcode].name, dd, rr);
+  
+  Rd = MCU_REGS[dd];
+  Rr = MCU_REGS[rr];
+  R = Rd + Rr;
+  MCU_REGS[dd] = R;
+
+  WRITE_H(((BIT3_(Rd)) & (BIT3_(Rr))) | ((BIT3_(Rr)) & (BIT3n(R))) | ((BIT3n(R)) & (BIT3_(Rd))));
+  WRITE_N(BIT7_(R));
+  WRITE_V(((BIT7_(Rd)) & (BIT7_(Rr)) & (BIT7n(R))) | ((BIT7n(Rd)) & (BIT7n(Rr)) & (BIT7_(R))));
+  WRITE_Z(R == 0);
+  WRITE_S(READ_N ^ READ_V);
+  WRITE_C(((BIT7_(Rd)) & (BIT7_(Rr))) | ((BIT7_(Rr)) & (BIT7n(R))) | ((BIT7n(R)) & (BIT7_(Rd))));
+  
+  ADD_TO_PC(1); // PC is aligned on words
+  SET_CYCLES(1);
+  return opcode;
+}
+
+/* TODO: check flags management */
+/**
+ * \brief 
+ * \param opcode
+ * \param insn
+ * \return opcode
+ */
+static int opcode_adc(uint16_t opcode, uint16_t insn)
+{
+  uint8_t  dd, rr;
+  int8_t  R, Rd, Rr;
+  
+  // 0001 11rd dddd rrrr
+  dd = ((insn >> 4) & 0x1f);
+  rr = ((insn >> 5) & 0x10) | (insn & 0x0f);
+  HW_DMSG_DIS("%s r%d,r%d\n",OPCODES[opcode].name, dd, rr);
+  
+  Rd = MCU_REGS[dd];
+  Rr = MCU_REGS[rr];
+  R = Rd + Rr + READ_C;
+  MCU_REGS[dd] = R;
+  
+  WRITE_H(((BIT3_(Rd)) & (BIT3_(Rr))) | ((BIT3_(Rr)) & (BIT3n(R))) | ((BIT3n(R)) & (BIT3_(Rd))));
+  WRITE_N(BIT7_(R));
+  WRITE_V((BIT7_(Rd) & BIT7_(Rr) & BIT7n(R)) | (BIT7n(Rd) & BIT7n(Rr) & BIT7_(R)));
+  WRITE_Z(R == 0);
+  WRITE_S(READ_N ^ READ_V);
+  WRITE_C(((BIT7_(Rd)) & (BIT7_(Rr))) | ((BIT7_(Rr)) & (BIT7n(R))) | ((BIT7n(R)) & (BIT7_(Rd))));
+  
+  ADD_TO_PC(1); // PC is aligned on words
+  SET_CYCLES(1);
   return opcode;
 }
 
@@ -464,17 +555,6 @@ static int opcode_sei(uint16_t opcode, uint16_t UNUSED insn)
   HW_DMSG_DIS("%s\n",OPCODES[opcode].name);
   // set global interrupt flag
   SET_I;
-  ADD_TO_PC(1); // PC is aligned on words
-  SET_CYCLES(1);
-  return opcode;
-}
-
-static int opcode_cli(uint16_t opcode, uint16_t UNUSED insn)
-{
-  // 1001 0100 1111 1000
-  HW_DMSG_DIS("%s\n",OPCODES[opcode].name);
-  // clear global interrupt flag
-  CLR_I;
   ADD_TO_PC(1); // PC is aligned on words
   SET_CYCLES(1);
   return opcode;
@@ -525,6 +605,201 @@ static int opcode_eor(uint16_t opcode, uint16_t insn)
   return opcode;
 }
 
+/* TODO: code review */
+static int opcode_com(uint16_t opcode, uint16_t insn)
+{
+  uint8_t dd;
+  int8_t R;
+
+  // 1001 010d dddd 0000
+  dd = ((insn >> 4) & 0x1f);
+  HW_DMSG_DIS("%s r%d\n",OPCODES[opcode].name, dd);
+
+  R = 0xFF - MCU_REGS[dd];
+  MCU_REGS[dd] = R;
+  
+  SET_C;
+  CLR_V;
+  WRITE_N(BIT7_(R));
+  WRITE_Z(R == 0);
+  WRITE_S(READ_N ^ READ_V);
+
+  ADD_TO_PC(1); // PC is aligned on words
+  SET_CYCLES(1);
+  return opcode;
+}
+
+/* TODO: check C, V flags & code review */
+static int opcode_neg(uint16_t opcode, uint16_t insn)
+{
+  uint8_t dd;
+  int8_t R, Rd;
+
+  // 1001 010d dddd 0001
+  dd = ((insn >> 4) & 0x1f);
+  HW_DMSG_DIS("%s r%d\n",OPCODES[opcode].name, dd);
+  
+  Rd = MCU_REGS[dd];
+  R = 0x00 - Rd;
+  MCU_REGS[dd] = R;
+  
+  WRITE_H((BIT3_(R)) | (BIT3_(Rd)));
+  if (R) SET_C;
+  if (R == 0x80) SET_V;
+  WRITE_N(BIT7_(R));
+  WRITE_Z(R == 0);
+  WRITE_S(READ_N ^ READ_V);
+
+  ADD_TO_PC(1); // PC is aligned on words
+  SET_CYCLES(1);
+  return opcode;
+}
+
+/* TODO: What's the difference sbr &S ori? */
+static int opcode_sbr(uint16_t opcode, uint16_t insn)
+{
+  uint8_t dd, kk;
+  int8_t R;
+
+  // 0110 KKKK dddd KKKK
+  kk = ((insn >> 4) & 0xf0) | ((insn >> 0) & 0xf);
+  dd = ((insn >> 4) & 0x0f) + 16;
+  HW_DMSG_DIS("%s r%d,0x%02x\n",OPCODES[opcode].name, dd, kk);
+  
+  R = MCU_REGS[dd] | kk;
+  MCU_REGS[dd] = R;
+  
+  CLR_V;
+  WRITE_N(BIT7_(R));
+  WRITE_Z(R == 0);
+  WRITE_S(READ_N ^ READ_V);
+
+  ADD_TO_PC(1); // PC is aligned on words
+  SET_CYCLES(1);
+  return opcode;
+}
+
+/* TODO: Check opcode */
+static int opcode_cbr(uint16_t opcode, uint16_t insn)
+{
+  uint8_t dd, kk;
+  int8_t R;
+
+  // 0111 KKKK dddd KKKK
+  dd = ((insn >> 4) & 0x0f) + 16;
+  kk  = ((insn >> 4) & 0xf0) | (insn & 0x0f);
+  HW_DMSG_DIS("%s r%d,0x%x\n",OPCODES[opcode].name, dd, kk);
+  
+  R = MCU_REGS[dd] & (0xff - kk);
+  MCU_REGS[dd] = R;
+  
+  CLR_V;
+  WRITE_N(BIT7_(R));
+  WRITE_Z(R == 0);
+  WRITE_S(READ_N ^ READ_V);
+
+  ADD_TO_PC(1); // PC is aligned on words
+  SET_CYCLES(1);
+  return opcode;
+}
+
+/* TODO: Code review */
+static int opcode_clc(uint16_t opcode, uint16_t insn)
+{
+  // 1001 0100 1000 1000
+  HW_DMSG_DIS("%s\n",OPCODES[opcode].name);
+  
+  // clear global interrupt flag
+  CLR_C;
+  
+  ADD_TO_PC(1); // PC is aligned on words
+  SET_CYCLES(1);
+  return opcode;
+}
+
+/* TODO: Code review */
+static int opcode_clh(uint16_t opcode, uint16_t insn)
+{
+  // 1001 0100 1101 1000
+  HW_DMSG_DIS("%s\n",OPCODES[opcode].name);
+  
+  // clear global interrupt flag
+  CLR_H;
+
+  ADD_TO_PC(1); // PC is aligned on words
+  SET_CYCLES(1);
+  return opcode;
+}
+
+/* TODO: Code review */
+static int opcode_clt(uint16_t opcode, uint16_t insn)
+{
+  // 1001 0100 1110 1000
+  HW_DMSG_DIS("%s\n",OPCODES[opcode].name);
+  
+  // clear global interrupt flag
+  CLR_T;
+  
+  ADD_TO_PC(1); // PC is aligned on words
+  SET_CYCLES(1);
+  return opcode;
+}
+
+static int opcode_cli(uint16_t opcode, uint16_t UNUSED insn)
+{
+  // 1001 0100 1111 1000
+  HW_DMSG_DIS("%s\n",OPCODES[opcode].name);
+  
+  // clear global interrupt flag
+  CLR_I;
+  
+  ADD_TO_PC(1); // PC is aligned on words
+  SET_CYCLES(1);
+  return opcode;
+}
+
+/* TODO: Code review */
+static int opcode_cls(uint16_t opcode, uint16_t UNUSED insn)
+{
+  // 1001 0100 1100 1000
+  HW_DMSG_DIS("%s\n",OPCODES[opcode].name);
+  
+  // clear global interrupt flag
+  CLR_S;
+  
+  ADD_TO_PC(1); // PC is aligned on words
+  SET_CYCLES(1);
+  return opcode;
+}
+
+/* TODO: Code review */
+static int opcode_clv(uint16_t opcode, uint16_t UNUSED insn)
+{
+  // 1001 0100 1011 1000
+  HW_DMSG_DIS("%s\n",OPCODES[opcode].name);
+  
+  // clear global interrupt flag
+  CLR_V;
+  
+  ADD_TO_PC(1); // PC is aligned on words
+  SET_CYCLES(1);
+  return opcode;
+}
+
+/* TODO: Code review */
+static int opcode_clz(uint16_t opcode, uint16_t UNUSED insn)
+{
+  // 1001 0100 1001 1000
+  HW_DMSG_DIS("%s\n",OPCODES[opcode].name);
+  
+  // clear global interrupt flag
+  CLR_Z;
+  
+  ADD_TO_PC(1); // PC is aligned on words
+  SET_CYCLES(1);
+  return opcode;
+}
+  
 static int opcode_ori(uint16_t opcode, uint16_t insn)
 {
   uint8_t dd;
@@ -547,6 +822,39 @@ static int opcode_ori(uint16_t opcode, uint16_t insn)
   return opcode;
 }
 
+/* TODO: code review */
+static int opcode_adiw(uint16_t opcode, uint16_t insn)
+{
+  uint8_t  K;
+  uint8_t  dd;
+  uint8_t  Rdh, Rdl;
+  uint16_t  R;
+ 
+  // 1001 0110 KKdd KKKK
+  /* we need to the immediate value kkkkkk from 00000000 kk00kkkk const 0-63  */
+  K = ((insn&0x00C0)>>2)|(insn&0x000F);
+  /* we need the register pair's lowest address from 00000000 00dd0000 in r24,r26,r28,r30 */
+  dd = ((insn&0x0030)>>3)+24;
+  HW_DMSG_DIS("%s r%d,0x%02x\n",OPCODES[opcode].name, dd, K);
+  
+  Rdl = MCU_REGS[dd];
+  Rdh = MCU_REGS[dd+1];
+  R = (Rdh<<8) + Rdl;
+  R+=K;
+  MCU_REGS[dd] = (uint8_t)R;
+  MCU_REGS[dd+1] = (uint8_t)(R>>8);
+  
+  WRITE_V((BIT7n(Rdh)) & (BIT15_(R)));
+  WRITE_S(READ_N ^ READ_V);
+  WRITE_C((BIT15n(R)) & (BIT7_(Rdh)));
+  WRITE_N(BIT15_(R));
+  WRITE_Z(R == 0);
+
+  ADD_TO_PC(1); // PC is aligned on words
+  SET_CYCLES(2);
+  return opcode;
+}
+
 static int opcode_and(uint16_t opcode, uint16_t insn)
 {
   uint8_t rd;
@@ -563,6 +871,57 @@ static int opcode_and(uint16_t opcode, uint16_t insn)
   WRITE_N(BIT7_(res));
   WRITE_Z(res == 0);
   WRITE_S(READ_N ^ READ_V);
+
+  ADD_TO_PC(1); // PC is aligned on words
+  SET_CYCLES(1);
+  return opcode;
+}
+
+/* TODO: code review */
+static int opcode_andi(uint16_t opcode, uint16_t insn)
+{
+  uint8_t dd;
+  uint8_t K;
+  int8_t  R;
+  
+  // 0111 KKKK dddd KKKK
+  dd = ((insn >> 4) & 0x0f) + 16;
+  K  = ((insn >> 4) & 0xf0) | (insn & 0x0f);
+  HW_DMSG_DIS("%s r%d,0x%x\n",OPCODES[opcode].name, dd, K);
+  
+  R = K & MCU_REGS[dd];
+  MCU_REGS[dd] = R;
+  
+  CLR_V;
+  WRITE_N(BIT7_(R));
+  WRITE_Z(R == 0);
+  WRITE_S(READ_N ^ READ_V);
+
+  ADD_TO_PC(1); // PC is aligned on words
+  SET_CYCLES(1);
+  return opcode;
+}
+
+/* TODO: check flag management */
+static int opcode_asr(uint16_t opcode, uint16_t insn)
+{
+  uint8_t dd;
+  int8_t R;
+  
+  // 1001 010d dddd 0101
+  dd = ((insn >> 4) & 0x1f);
+  HW_DMSG_DIS("%s r%d\n",OPCODES[opcode].name, dd);
+  
+    /* set flag C */
+  WRITE_C(MCU_REGS[dd]&0x01);
+  
+  R = MCU_REGS[dd]>>1;
+  MCU_REGS[dd] = R;
+
+  WRITE_V(READ_N ^ READ_C);
+  WRITE_S(READ_N ^ READ_V);
+  WRITE_N(BIT7_(R));
+  WRITE_Z(R == 0);
 
   ADD_TO_PC(1); // PC is aligned on words
   SET_CYCLES(1);
@@ -995,6 +1354,36 @@ static int opcode_cp(uint16_t opcode, uint16_t insn)
   return opcode;
 }
 
+/* TODO: code review */
+static int opcode_sub(uint16_t opcode, uint16_t insn)
+{
+  uint8_t dd, rr;
+  int8_t  R, Rd, Rr;
+  
+  // 0001 10rd dddd rrrr
+  dd = ((insn >> 4) & 0x1f);
+  rr = ((insn >> 5) & 0x10) | (insn & 0x0f);
+  HW_DMSG_DIS("%s r%d,r%d\n",OPCODES[opcode].name, dd, rr);
+  
+  Rd=MCU_REGS[dd];
+  Rr=MCU_REGS[rr];
+  R = Rd - Rr;
+  MCU_REGS[dd] = R;
+  
+  WRITE_H(((BIT3n(Rd)) & (BIT3_(Rr))) | ((BIT3_(Rr)) & (BIT3_(R))) | ((BIT3_(R)) & (BIT3n(Rd))));
+  WRITE_V(((BIT7_(Rd)) & (BIT7n(Rr)) & (BIT7n(R))) | ((BIT7n(Rd)) & (BIT7_(Rr)) & (BIT7_(R))));
+  WRITE_N(BIT7_(R));
+  WRITE_Z(R == 0);
+  WRITE_C(((BIT7n(Rd)) & (BIT7_(Rr))) | ((BIT7_(Rr)) & (BIT7_(R))) | ((BIT7_(R)) & (BIT7n(Rd))));
+  WRITE_S(READ_N ^ READ_V);
+
+  atmega128_print_SR();
+
+  ADD_TO_PC(1); // PC is aligned on words
+  SET_CYCLES(1);
+  return opcode;
+}
+
 static int opcode_subi(uint16_t opcode, uint16_t insn)
 {
   uint8_t dd;
@@ -1021,6 +1410,119 @@ static int opcode_subi(uint16_t opcode, uint16_t insn)
 
   ADD_TO_PC(1); // PC is aligned on words
   SET_CYCLES(1);
+  return opcode;
+}
+
+/* TODO: code review & check flag */
+static int opcode_sbc(uint16_t opcode, uint16_t insn)
+{
+  uint8_t dd, rr;
+  int8_t Rd, Rr;
+  int8_t R;
+  
+  // 0000 10rd dddd rrrr
+  dd = ((insn >> 4) & 0x1f);
+  rr = ((insn >> 5) & 0x10) | (insn & 0x0f);
+  HW_DMSG_DIS("%s r%d,r%d\n",OPCODES[opcode].name, dd, rr);
+	
+  Rd=MCU_REGS[dd];
+  Rr=MCU_REGS[rr];
+  
+  R = Rd - Rr - READ_C;
+  MCU_REGS[dd] = R;
+  
+  WRITE_H(((BIT3n(Rd)) & (BIT3_(Rr))) | ((BIT3_(Rr)) & (BIT3_(R))) | ((BIT3_(R)) & (BIT3n(Rd))));
+  WRITE_S(READ_N ^ READ_V);
+  WRITE_V(((BIT7_(Rd)) & (BIT7n(Rr)) & (BIT7n(R))) | ((BIT7n(Rd)) & (BIT7_(Rr)) & (BIT7_(R))));
+  WRITE_N(BIT7_(R));
+	WRITE_C(((BIT7n(Rd)) & (BIT7_(Rr))) | ((BIT7_(Rr)) & (BIT7_(R))) | ((BIT7_(R)) & (BIT7n(Rd))));
+  if (R) CLR_Z;
+  
+  ADD_TO_PC(1); // PC is aligned on words
+  SET_CYCLES(1);
+  return opcode;
+}
+
+/* TODO: code review & check flags */
+static int opcode_sbci(uint16_t opcode, uint16_t insn)
+{
+  uint8_t dd;
+  int8_t  R, Rd;
+  uint8_t K;
+  
+  // 0100 KKKK dddd KKKK
+  dd = ((insn >> 4) & 0x0f) + 16;
+  K  = ((insn >> 4) & 0xf0) | (insn & 0x0f);
+  HW_DMSG_DIS("%s r%d,0x%x\n",OPCODES[opcode].name, dd, K);
+  
+  Rd = MCU_REGS[dd];
+  R = Rd - K - READ_C;
+  MCU_REGS[dd] = R;
+  
+  WRITE_H(((BIT3n(Rd)) & (BIT3_(K))) | ((BIT3_(K)) & (BIT3_(R))) | ((BIT3_(R)) & (BIT3n(Rd))));
+  WRITE_S(READ_N ^ READ_V);
+  WRITE_V(((BIT7_(Rd)) & (BIT7n(K)) & (BIT7n(R))) | ((BIT7n(Rd)) & (BIT7_(K)) & (BIT7_(R))));
+  WRITE_N(BIT7_(R));
+	WRITE_C(((BIT7n(Rd)) & (BIT7_(K))) | ((BIT7_(K)) & (BIT7_(R))) | ((BIT7_(R)) & (BIT7n(Rd))));
+  if (R) CLR_Z;
+  
+  ADD_TO_PC(1); // PC is aligned on words
+  SET_CYCLES(1);
+  return opcode;
+}
+
+/* TODO: check flags management */
+static int opcode_sbiw(uint16_t opcode, uint16_t insn)
+{
+  uint8_t  K;
+  uint8_t  dd;
+  uint8_t   Rdh, Rdl;
+  uint16_t  R;
+  
+  // 1001 0111 KKdd KKKK
+  K = ((insn&0x00C0)>>2)|(insn&0x000F);
+  dd = ((insn&0x0030)>>3)+24;
+  HW_DMSG_DIS("%s r%d,0x%02x\n",OPCODES[opcode].name, dd, K);
+  
+  Rdl = MCU_REGS[dd];
+  Rdh = MCU_REGS[dd+1];
+  R = (Rdh<<8) + Rdl;
+  R-=K;
+  MCU_REGS[dd] = (uint8_t)R;
+  MCU_REGS[dd+1] = (uint8_t)(R>>8);
+  
+  WRITE_V(BIT7_(Rdh) & BIT15n(R));
+  WRITE_S(READ_N ^ READ_V);
+  WRITE_C(BIT15_(R) & BIT7n(Rdh));
+  WRITE_N(BIT15_(R));
+  WRITE_Z(R == 0);
+  
+  ADD_TO_PC(1); // PC is aligned on words
+  SET_CYCLES(2);
+  return opcode;
+}
+
+/* TODO: Code review */
+static int opcode_or(uint16_t opcode, uint16_t insn)
+{
+  uint8_t dd, rr;
+  int8_t R;
+  
+  // 0010 10rd dddd rrrr
+  dd = ((insn >> 4) & 0x1f);
+  rr = ((insn >> 5) & 0x10) | (insn & 0x0f);
+  HW_DMSG_DIS("%s r%d,r%d\n",OPCODES[opcode].name, dd, rr);
+  
+  R = MCU_REGS[dd] | MCU_REGS[rr];
+  MCU_REGS[dd] = R;
+
+  WRITE_S(READ_N ^ READ_V);
+  CLR_V;
+  WRITE_N(BIT7_(R));
+  WRITE_Z(R == 0);
+  
+  ADD_TO_PC(1); // PC is aligned on words
+  SET_CYCLES(2);
   return opcode;
 }
 

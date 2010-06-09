@@ -584,10 +584,8 @@ static int opcode_jmp(uint16_t opcode, uint16_t insn)
   // reference     1001 010k kkkk 110k kkkk kkkk kkkk kkkk
   // jmp 0xcc                                    1100 1100
  
-  offset = atmega128_flash_read_short((mcu_get_pc()+1) << 1);
-  addr   = ((insn >> 3) & 0x1f) | (insn & 1);
-  //offset = atmega128_flash_read_short(mcu_get_pc()+1);
-  //addr   = ((insn >> 3) & 0x3e) | (insn & 1);
+  offset = atmega128_flash_read_short((mcu_get_pc() + 1) << 1);
+  addr   = ((insn >> 3) & 0x3e) | (insn & 0x01);
   addr   = (addr << 16) | offset;
   HW_DMSG_DIS("%s 0x%06x [0x%08x]\n",OPCODES[opcode].name, addr << 1, insn << 16 | offset);
 

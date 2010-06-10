@@ -454,7 +454,7 @@ struct atmega_opcode_info_t OPCODES[] = {
   { .fun = opcode_sei,     .name = "SEI"    },
   { .fun = opcode_default, .name = "SR"     },
   { .fun = opcode_st,      .name = "ST"     },
-  { .fun = opcode_std,     .name = "ST"     },
+  { .fun = opcode_std,     .name = "STD"    },
   { .fun = opcode_sts,     .name = "STS"    },
   { .fun = opcode_default, .name = "SWAP"   },
   { .fun = opcode_default, .name = "WDR"    }

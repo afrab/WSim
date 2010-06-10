@@ -648,7 +648,7 @@ static int opcode_com(uint16_t opcode, uint16_t insn)
 static int opcode_neg(uint16_t opcode, uint16_t insn)
 {
   uint8_t dd;
-  int8_t R, Rd;
+  uint8_t R, Rd;
 
   // 1001 010d dddd 0001
   dd = ((insn >> 4) & 0x1f);
@@ -719,7 +719,7 @@ static int opcode_cbr(uint16_t opcode, uint16_t insn)
 }
 
 /* TODO: Code review */
-static int opcode_clc(uint16_t opcode, uint16_t insn)
+static int opcode_clc(uint16_t opcode, uint16_t UNUSED insn)
 {
   // 1001 0100 1000 1000
   HW_DMSG_DIS("%s\n",OPCODES[opcode].name);
@@ -733,7 +733,7 @@ static int opcode_clc(uint16_t opcode, uint16_t insn)
 }
 
 /* TODO: Code review */
-static int opcode_clh(uint16_t opcode, uint16_t insn)
+static int opcode_clh(uint16_t opcode, uint16_t UNUSED insn)
 {
   // 1001 0100 1101 1000
   HW_DMSG_DIS("%s\n",OPCODES[opcode].name);
@@ -747,7 +747,7 @@ static int opcode_clh(uint16_t opcode, uint16_t insn)
 }
 
 /* TODO: Code review */
-static int opcode_clt(uint16_t opcode, uint16_t insn)
+static int opcode_clt(uint16_t opcode, uint16_t UNUSED insn)
 {
   // 1001 0100 1110 1000
   HW_DMSG_DIS("%s\n",OPCODES[opcode].name);
@@ -1231,7 +1231,7 @@ static int opcode_inc(uint16_t opcode, uint16_t insn)
 static int opcode_dec(uint16_t opcode, uint16_t insn)
 {
   uint8_t dd;
-  int8_t R, Rd;
+  uint8_t R, Rd;
   
   // 1001 010d dddd 1010
   dd = ((insn >> 4) & 0x1f);
@@ -1252,7 +1252,7 @@ static int opcode_dec(uint16_t opcode, uint16_t insn)
 }
 
 /* TODO: Code review */
-static int opcode_set(uint16_t opcode, uint16_t insn)
+static int opcode_set(uint16_t opcode, uint16_t UNUSED insn)
 {
   // 1001 0100 0110 1000
   HW_DMSG_DIS("%s\n",OPCODES[opcode].name);
@@ -1266,7 +1266,7 @@ static int opcode_set(uint16_t opcode, uint16_t insn)
 }
 
 /* TODO: Code review */
-static int opcode_seh(uint16_t opcode, uint16_t insn)
+static int opcode_seh(uint16_t opcode, uint16_t UNUSED insn)
 {
   // 1001 0100 0101 1000
   HW_DMSG_DIS("%s\n",OPCODES[opcode].name);
@@ -1280,7 +1280,7 @@ static int opcode_seh(uint16_t opcode, uint16_t insn)
 }
 
 /* TODO: Code review */
-static int opcode_sen(uint16_t opcode, uint16_t insn)
+static int opcode_sen(uint16_t opcode, uint16_t UNUSED insn)
 {
   // 1001 0100 0010 1000
   HW_DMSG_DIS("%s\n",OPCODES[opcode].name);
@@ -1311,7 +1311,7 @@ static int opcode_ser(uint16_t opcode, uint16_t insn)
 }
 
 /* TODO: Code review */
-static int opcode_sev(uint16_t opcode, uint16_t insn)
+static int opcode_sev(uint16_t opcode, uint16_t UNUSED insn)
 {
   // 1001 0100 0011 1000
   HW_DMSG_DIS("%s\n",OPCODES[opcode].name);
@@ -1325,7 +1325,7 @@ static int opcode_sev(uint16_t opcode, uint16_t insn)
 }
 
 /* TODO: Code review */
-static int opcode_sez(uint16_t opcode, uint16_t insn)
+static int opcode_sez(uint16_t opcode, uint16_t UNUSED insn)
 {
   // 1001 0100 0001 1000
   HW_DMSG_DIS("%s\n",OPCODES[opcode].name);
@@ -1850,7 +1850,7 @@ static int opcode_sbi(uint16_t opcode, uint16_t insn)
 }
 
 /* TODO: Code review */
-static int opcode_sec(uint16_t opcode, uint16_t insn)
+static int opcode_sec(uint16_t opcode, uint16_t UNUSED insn)
 {
   // 1001 0100 0000 1000
   HW_DMSG_DIS("%s\n",OPCODES[opcode].name);
@@ -1864,7 +1864,7 @@ static int opcode_sec(uint16_t opcode, uint16_t insn)
 }
 
 /* TODO: Code review */
-static int opcode_ses(uint16_t opcode, uint16_t insn)
+static int opcode_ses(uint16_t opcode, uint16_t UNUSED insn)
 {
   // 1001 0100 0100 1000
   HW_DMSG_DIS("%s\n",OPCODES[opcode].name);

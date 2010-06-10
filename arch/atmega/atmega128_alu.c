@@ -283,6 +283,9 @@ static int opcode_sbiw   (uint16_t opcode, uint16_t insn);
 static int opcode_sbc    (uint16_t opcode, uint16_t insn);
 static int opcode_sbci   (uint16_t opcode, uint16_t insn);
 
+static int opcode_inc    (uint16_t opcode, uint16_t insn);
+static int opcode_dec    (uint16_t opcode, uint16_t insn);
+
 static int opcode_asr   (uint16_t opcode, uint16_t insn);
 
 static int opcode_in     (uint16_t opcode, uint16_t insn);
@@ -353,7 +356,7 @@ struct atmega_opcode_info_t OPCODES[] = {
   { .fun = opcode_default, .name = "BREAK"  },
   { .fun = opcode_sub,     .name = "SUB"    },  /* done: needs reviewing */
   { .fun = opcode_subi,    .name = "SUBI"   },
-  { .fun = opcode_sbc,     .name = "SBC"    }, /* done: needs reviewing */
+  { .fun = opcode_sbc,     .name = "SBC"    }, /* done: needs reviewing & check flag Z*/
   { .fun = opcode_sbci,    .name = "SBCI"   }, /* done: needs reviewing */
   { .fun = opcode_sbiw,    .name = "SBIW"   }, /* done: needs reviewing */
   { .fun = opcode_or,      .name = "OR"     }, /* done: needs reviewing */
@@ -371,8 +374,8 @@ struct atmega_opcode_info_t OPCODES[] = {
   { .fun = opcode_clv,     .name = "CLV"    }, /* done: needs reviewing */
   { .fun = opcode_clz,     .name = "CLZ"    }, /* done: needs reviewing */
   { .fun = opcode_in,      .name = "IN"     },
-  { .fun = opcode_default, .name = "INC"    },
-  { .fun = opcode_default, .name = "DEC"    },
+  { .fun = opcode_inc,     .name = "INC"    }, /* done: needs reviewing */
+  { .fun = opcode_dec,     .name = "DEC"    }, /* done: needs reviewing */
   { .fun = opcode_default, .name = "TST"    },
   { .fun = opcode_default, .name = "CLR"    }, /* == OP_EOR */
   { .fun = opcode_cln,     .name = "CLN"    }, /* done: needs reviewing */
@@ -656,8 +659,8 @@ static int opcode_neg(uint16_t opcode, uint16_t insn)
   MCU_REGS[dd] = R;
   
   WRITE_H((BIT3_(R)) | (BIT3_(Rd)));
-  if (R) SET_C;
-  if (R == 0x80) SET_V;
+  WRITE_C(R != 0);
+  WRITE_V(R == 0x80);
   WRITE_N(BIT7_(R));
   WRITE_Z(R == 0);
   WRITE_S(READ_N ^ READ_V);
@@ -1200,6 +1203,54 @@ static int opcode_in(uint16_t opcode, uint16_t insn)
   return opcode;
 }
 
+/* TODO: Code review & check V flag */
+static int opcode_inc(uint16_t opcode, uint16_t insn)
+{
+  uint8_t dd;
+  int8_t R, Rd;
+  
+  // 1001 010d dddd 0011
+  dd = ((insn >> 4) & 0x1f);
+  HW_DMSG_DIS("%s r%d\n",OPCODES[opcode].name, dd);
+
+  Rd = MCU_REGS[dd];
+  R = Rd + 1;
+  MCU_REGS[dd] = R;
+
+  WRITE_S(READ_N ^ READ_V);
+  WRITE_V(Rd == 0x7f);
+  WRITE_N(BIT7_(R));
+  WRITE_Z(R == 0);
+  
+  ADD_TO_PC(1); // PC is aligned on words
+  SET_CYCLES(1);
+  return opcode;
+}
+
+/* TODO: Code review & check V flag */
+static int opcode_dec(uint16_t opcode, uint16_t insn)
+{
+  uint8_t dd;
+  int8_t R, Rd;
+  
+  // 1001 010d dddd 1010
+  dd = ((insn >> 4) & 0x1f);
+  HW_DMSG_DIS("%s r%d\n",OPCODES[opcode].name, dd);
+  
+  Rd = MCU_REGS[dd];
+  R = Rd - 1;
+  MCU_REGS[dd] = R;
+  
+  WRITE_S(READ_N ^ READ_V);
+  WRITE_V(Rd == 0x80);
+  WRITE_N(BIT7_(R));
+  WRITE_Z(R == 0);
+
+  ADD_TO_PC(1); // PC is aligned on words
+  SET_CYCLES(1);
+  return opcode;
+}
+
 /* TODO: Code review */
 static int opcode_set(uint16_t opcode, uint16_t insn)
 {
@@ -1548,7 +1599,7 @@ static int opcode_sbc(uint16_t opcode, uint16_t insn)
   WRITE_S(READ_N ^ READ_V);
   WRITE_V(((BIT7_(Rd)) & (BIT7n(Rr)) & (BIT7n(R))) | ((BIT7n(Rd)) & (BIT7_(Rr)) & (BIT7_(R))));
   WRITE_N(BIT7_(R));
-	WRITE_C(((BIT7n(Rd)) & (BIT7_(Rr))) | ((BIT7_(Rr)) & (BIT7_(R))) | ((BIT7_(R)) & (BIT7n(Rd))));
+  WRITE_C(((BIT7n(Rd)) & (BIT7_(Rr))) | ((BIT7_(Rr)) & (BIT7_(R))) | ((BIT7_(R)) & (BIT7n(Rd))));
   if (R) CLR_Z;
   
   ADD_TO_PC(1); // PC is aligned on words

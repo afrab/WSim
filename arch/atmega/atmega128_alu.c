@@ -1460,7 +1460,7 @@ static int opcode_fmuls(uint16_t opcode, uint16_t insn)
   
   ADD_TO_PC(1); // PC is aligned on words
   SET_CYCLES(2);
-  return opcode
+  return opcode;
 }
 
 /* TODO: Code review */

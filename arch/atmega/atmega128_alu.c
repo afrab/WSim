@@ -286,6 +286,14 @@ static int opcode_sbci   (uint16_t opcode, uint16_t insn);
 static int opcode_inc    (uint16_t opcode, uint16_t insn);
 static int opcode_dec    (uint16_t opcode, uint16_t insn);
 
+static int opcode_mul    (uint16_t opcode, uint16_t insn);
+static int opcode_muls   (uint16_t opcode, uint16_t insn);
+static int opcode_mulsu  (uint16_t opcode, uint16_t insn);
+
+static int opcode_fmul    (uint16_t opcode, uint16_t insn);
+static int opcode_fmuls   (uint16_t opcode, uint16_t insn);
+static int opcode_fmulsu  (uint16_t opcode, uint16_t insn);
+
 static int opcode_asr   (uint16_t opcode, uint16_t insn);
 
 static int opcode_in     (uint16_t opcode, uint16_t insn);
@@ -386,12 +394,12 @@ struct atmega_opcode_info_t OPCODES[] = {
   { .fun = opcode_sev,     .name = "SEV"    }, /* done: needs reviewing */
   { .fun = opcode_sez,     .name = "SEZ"    }, /* done: needs reviewing */
   { .fun = opcode_sleep,   .name = "SLEEP"  },
-  { .fun = opcode_default, .name = "MUL"    },
-  { .fun = opcode_default, .name = "MULS"   },
-  { .fun = opcode_default, .name = "MULSU"  },
-  { .fun = opcode_default, .name = "FMUL"   },
-  { .fun = opcode_default, .name = "FMULS"  },
-  { .fun = opcode_default, .name = "FMULSU" },
+  { .fun = opcode_mul,     .name = "MUL"    }, /* done: needs reviewing */
+  { .fun = opcode_muls,    .name = "MULS"   }, /* done: needs reviewing */
+  { .fun = opcode_mulsu,   .name = "MULSU"  }, /* done: needs reviewing */
+  { .fun = opcode_fmul,    .name = "FMUL"   }, /* done: needs reviewing */
+  { .fun = opcode_fmuls,   .name = "FMULS"  }, /* done: needs reviewing */
+  { .fun = opcode_fmulsu,  .name = "FMULSU" }, /* done: needs reviewing */
   { .fun = opcode_rjmp,    .name = "RJMP"   },
   { .fun = opcode_default, .name = "IJMP"   },
   { .fun = opcode_default, .name = "EIJMP"  },
@@ -1335,6 +1343,147 @@ static int opcode_sez(uint16_t opcode, uint16_t UNUSED insn)
   
   ADD_TO_PC(1); // PC is aligned on words
   SET_CYCLES(1);
+  return opcode;
+}
+
+/* TODO: Code review */
+static int opcode_mul(uint16_t opcode, uint16_t insn)
+{
+  uint8_t dd, rr;
+  uint16_t R;
+  
+  // 1001 11rd dddd rrrr
+  dd = ((insn >> 4) & 0x1f);
+  rr = ((insn >> 5) & 0x10) | (insn & 0x0f);
+  HW_DMSG_DIS("%s r%d,r%d\n",OPCODES[opcode].name, dd, rr);
+  
+  R = MCU_REGS[dd] * MCU_REGS[rr];
+  MCU_REGS[0]=(uint8_t) R; // low byte
+  MCU_REGS[1]=(uint8_t) (R>>8); // high byte
+  
+  WRITE_C(BIT15_(R));
+  WRITE_Z(R == 0);
+  
+  ADD_TO_PC(1); // PC is aligned on words
+  SET_CYCLES(2);
+  return opcode;
+}
+
+/* TODO: Code review */
+static int opcode_muls(uint16_t opcode, uint16_t insn)
+{
+  uint8_t dd, rr;
+  int16_t R;
+  
+  // 0000 0010 dddd rrrr
+  dd = ((insn >> 4) & 0x0f);
+  rr = (insn & 0x0f);
+  HW_DMSG_DIS("%s r%d,r%d\n",OPCODES[opcode].name, dd, rr);
+  
+  R = ((int8_t)MCU_REGS[dd]) * ((int8_t)MCU_REGS[rr]);
+  MCU_REGS[0]=(uint8_t) R; // low byte
+  MCU_REGS[1]=(uint8_t) (R>>8); // high byte
+  
+  WRITE_C(BIT15_(R));
+  WRITE_Z(R == 0);
+  
+  ADD_TO_PC(1); // PC is aligned on words
+  SET_CYCLES(2);
+  return opcode;
+}
+
+/* TODO: Code review */
+static int opcode_mulsu(uint16_t opcode, uint16_t insn)
+{
+  uint8_t dd, rr;
+  int16_t R;
+  
+  // 0000 0011 0ddd 0rrr
+  dd = ((insn >> 4) & 0x07) + 16;
+  rr = (insn & 0x07) + 16;
+  HW_DMSG_DIS("%s\n",OPCODES[opcode].name);
+  
+  R = ((int8_t)MCU_REGS[dd]) * MCU_REGS[rr];
+  MCU_REGS[0]=(uint8_t) R; // low byte
+  MCU_REGS[1]=(uint8_t) (R>>8); // high byte
+  
+  WRITE_C(BIT15_(R));
+  WRITE_Z(R == 0);
+  
+  ADD_TO_PC(1); // PC is aligned on words
+  SET_CYCLES(2);
+  return opcode;
+}
+
+/* TODO: Code review */
+static int opcode_fmul(uint16_t opcode, uint16_t insn)
+{
+  uint8_t dd, rr;
+  uint16_t preR, R;
+  
+  // 0000 0011 0ddd 1rrr
+  dd = ((insn >> 4) & 0x1f);
+  rr = ((insn >> 5) & 0x10) | (insn & 0x0f);
+  HW_DMSG_DIS("%s r%d,r%d\n",OPCODES[opcode].name, dd, rr);
+  
+  preR = MCU_REGS[dd] * MCU_REGS[rr];
+  R = preR << 1;
+  MCU_REGS[0]=(uint8_t) R; // low byte
+  MCU_REGS[1]=(uint8_t) (R>>8); // high byte
+  
+  WRITE_C(BIT15_(preR));
+  WRITE_Z(R == 0);
+  
+  ADD_TO_PC(1); // PC is aligned on words
+  SET_CYCLES(2);
+  return opcode;
+}
+
+/* TODO: Code review */
+static int opcode_fmuls(uint16_t opcode, uint16_t insn)
+{
+  uint8_t dd, rr;
+  int16_t preR, R;
+  
+  // 0000 0011 0ddd 1rrr
+  dd = ((insn >> 4) & 0x1f);
+  rr = ((insn >> 5) & 0x10) | (insn & 0x0f);
+  HW_DMSG_DIS("%s r%d,r%d\n",OPCODES[opcode].name, dd, rr);
+  
+  preR = ((int8_t)MCU_REGS[dd]) * ((int8_t)MCU_REGS[rr]);
+  R = preR << 1;
+  MCU_REGS[0]=(uint8_t) R; // low byte
+  MCU_REGS[1]=(uint8_t) (R>>8); // high byte
+  
+  WRITE_C(BIT15_(preR));
+  WRITE_Z(R == 0);
+  
+  ADD_TO_PC(1); // PC is aligned on words
+  SET_CYCLES(2);
+  return opcode
+}
+
+/* TODO: Code review */
+static int opcode_fmulsu(uint16_t opcode, uint16_t insn)
+{
+  uint8_t dd, rr;
+  int16_t preR, R;
+  
+  // 0000 0011 1ddd 1rrr
+  dd = ((insn >> 4) & 0x07) + 16;
+  rr = (insn & 0x07) + 16;
+  HW_DMSG_DIS("%s\n",OPCODES[opcode].name);
+  
+  preR = ((int8_t)MCU_REGS[dd]) * MCU_REGS[rr];
+  R = preR << 1;
+  MCU_REGS[0]=(uint8_t) R; // low byte
+  MCU_REGS[1]=(uint8_t) (R>>8); // high byte
+  
+  WRITE_C(BIT15_(preR));
+  WRITE_Z(R == 0);
+  
+  ADD_TO_PC(1); // PC is aligned on words
+  SET_CYCLES(2);
   return opcode;
 }
 

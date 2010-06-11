@@ -385,7 +385,7 @@ struct atmega_opcode_info_t OPCODES[] = {
   { .fun = opcode_in,      .name = "IN"     },
   { .fun = opcode_inc,     .name = "INC"    }, /* done: needs reviewing */
   { .fun = opcode_dec,     .name = "DEC"    }, /* done: needs reviewing */
-  { .fun = opcode_default, .name = "TST"    },
+  { .fun = opcode_default, .name = "TST"    }, /* == OP_AND */
   { .fun = opcode_default, .name = "CLR"    }, /* == OP_EOR */
   { .fun = opcode_cln,     .name = "CLN"    }, /* done: needs reviewing */
   { .fun = opcode_default, .name = "SPM"    },

@@ -328,6 +328,7 @@ static int opcode_jmp    (uint16_t opcode, uint16_t insn);
 static int opcode_rjmp   (uint16_t opcode, uint16_t insn);
 
 static int opcode_call   (uint16_t opcode, uint16_t insn);
+static int opcode_rcall   (uint16_t opcode, uint16_t insn);
 static int opcode_ret    (uint16_t opcode, uint16_t insn);
 
 static int opcode_brne   (uint16_t opcode, uint16_t insn);
@@ -405,7 +406,7 @@ struct atmega_opcode_info_t OPCODES[] = {
   { .fun = opcode_default, .name = "EIJMP"  },
   { .fun = opcode_elpm,    .name = "ELPM"   },
   { .fun = opcode_jmp,     .name = "JMP"    },
-  { .fun = opcode_default, .name = "RCALL"  },
+  { .fun = opcode_rcall,   .name = "RCALL"  }, /* done: needs reviewing */
   { .fun = opcode_default, .name = "ICALL"  },
   { .fun = opcode_default, .name = "EICALL" },
   { .fun = opcode_call,    .name = "CALL"   },
@@ -1171,6 +1172,40 @@ static int opcode_call(uint16_t opcode, uint16_t UNUSED insn)
 #else
 #error "must define PC size to 16 or 22 bits"
 #endif
+
+  return opcode;
+}
+
+/* TODO: Code review */
+static int opcode_rcall(uint16_t opcode, uint16_t insn)
+{
+  uint32_t SP;
+  int16_t kk;
+  
+  // 1101 kkkk kkkk kkkk
+  kk = insn & 0x0fff;
+  if (kk & 0x0800) /* sign extension */
+    kk |= 0xf000;
+  HW_DMSG_DIS("%s %s%d\n",OPCODES[opcode].name, (kk < 0) ? ".":".+", kk * 2);
+
+  SP = SP_READ();
+  HW_DMSG_DIS("atmega128: PC = 0x%04x\n",mcu_get_pc());
+  HW_DMSG_DIS("atmega128: SP = 0x%04x\n",SP);
+  atmega128_ram_write_short(SP, mcu_get_pc() + 1); // STACK = PC + 1;
+  
+#if defined(ATMEGA_PC_16BITS)
+  SP = SP - 2;
+  SP_WRITE(SP);
+  SET_CYCLES(3); 
+#elif defined(ATMEGA_PC_22BITS)
+  SP = SP - 3;
+  SP_WRITE(SP);
+  SET_CYCLES(4);
+#else
+#error "must define PC size to 16 or 22 bits"
+#endif
+
+  ADD_TO_PC( kk + 1); // PC is aligned on words  
 
   return opcode;
 }

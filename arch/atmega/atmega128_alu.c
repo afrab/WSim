@@ -325,10 +325,12 @@ static int opcode_cln    (uint16_t opcode, uint16_t insn);
 static int opcode_ser    (uint16_t opcode, uint16_t insn);
 
 static int opcode_jmp    (uint16_t opcode, uint16_t insn);
+static int opcode_ijmp    (uint16_t opcode, uint16_t insn);
 static int opcode_rjmp   (uint16_t opcode, uint16_t insn);
 
 static int opcode_call   (uint16_t opcode, uint16_t insn);
-static int opcode_rcall   (uint16_t opcode, uint16_t insn);
+static int opcode_icall  (uint16_t opcode, uint16_t insn);
+static int opcode_rcall  (uint16_t opcode, uint16_t insn);
 static int opcode_ret    (uint16_t opcode, uint16_t insn);
 
 static int opcode_brne   (uint16_t opcode, uint16_t insn);
@@ -346,6 +348,7 @@ static int opcode_elpm   (uint16_t opcode, uint16_t insn);
 static int opcode_ld     (uint16_t opcode, uint16_t insn);
 static int opcode_ldd    (uint16_t opcode, uint16_t insn);
 static int opcode_ldi    (uint16_t opcode, uint16_t insn);
+static int opcode_lds    (uint16_t opcode, uint16_t insn);
 
 static int opcode_pop    (uint16_t opcode, uint16_t insn);
 static int opcode_push   (uint16_t opcode, uint16_t insn);
@@ -402,12 +405,12 @@ struct atmega_opcode_info_t OPCODES[] = {
   { .fun = opcode_fmuls,   .name = "FMULS"  }, /* done: needs reviewing */
   { .fun = opcode_fmulsu,  .name = "FMULSU" }, /* done: needs reviewing */
   { .fun = opcode_rjmp,    .name = "RJMP"   },
-  { .fun = opcode_default, .name = "IJMP"   },
+  { .fun = opcode_ijmp,    .name = "IJMP"   }, /* done: needs reviewing */
   { .fun = opcode_default, .name = "EIJMP"  },
   { .fun = opcode_elpm,    .name = "ELPM"   },
   { .fun = opcode_jmp,     .name = "JMP"    },
   { .fun = opcode_rcall,   .name = "RCALL"  }, /* done: needs reviewing */
-  { .fun = opcode_default, .name = "ICALL"  },
+  { .fun = opcode_icall,   .name = "ICALL"  }, /* done: needs reviewing */
   { .fun = opcode_default, .name = "EICALL" },
   { .fun = opcode_call,    .name = "CALL"   },
   { .fun = opcode_ret,     .name = "RET"    },
@@ -446,9 +449,9 @@ struct atmega_opcode_info_t OPCODES[] = {
   { .fun = opcode_default, .name = "BRID"   },
   { .fun = opcode_mov,     .name = "MOV"    },
   { .fun = opcode_movw,    .name = "MOVW"   },
-  { .fun = opcode_default, .name = "NOP"    },
+  { .fun = opcode_nop,     .name = "NOP"    }, /* done: needs reviewing */
   { .fun = opcode_ldi,     .name = "LDI"    },
-  { .fun = opcode_default, .name = "LDS"    },
+  { .fun = opcode_lds,     .name = "LDS"    }, /* done: needs reviewing */
   { .fun = opcode_ld,      .name = "LD"     }, /* LD X */
   { .fun = opcode_ldd,     .name = "LD"     }, /* LD Y / Z */
   { .fun = opcode_default, .name = "LPM"    },
@@ -486,6 +489,16 @@ static int opcode_default(uint16_t opcode, uint16_t UNUSED insn)
   ERROR("Illegal / unknown opcode\n");
   // PC unchanged
   SET_CYCLES(0);
+  return opcode;
+}
+
+static int opcode_nop(uint16_t opcode, uint16_t UNUSED insn)
+{
+  // performs a single cycle No Operation
+  HW_DMSG_DIS("%s\n",OPCODES[opcode].name);
+  
+  ADD_TO_PC(1);
+  SET_CYCLES(1);
   return opcode;
 }
 
@@ -995,6 +1008,17 @@ static int opcode_rjmp(uint16_t opcode, uint16_t insn)
   return opcode;
 }
 
+/* TODO: code review */
+static int opcode_ijmp(uint16_t opcode, uint16_t UNUSED insn)
+{
+  // 1001 0100 0000 1001
+  HW_DMSG_DIS("%s\n",OPCODES[opcode].name);
+
+  mcu_set_pc_next( REG_Z_READ() ); // should add 22bit PC control
+  SET_CYCLES(2);
+  return opcode;
+}
+
 static int opcode_cpi(uint16_t opcode, uint16_t insn)
 {
   uint8_t dd;
@@ -1206,6 +1230,34 @@ static int opcode_rcall(uint16_t opcode, uint16_t insn)
 #endif
 
   ADD_TO_PC( kk + 1); // PC is aligned on words  
+
+  return opcode;
+}
+
+/* TODO: code review */
+static int opcode_icall(uint16_t opcode, uint16_t UNUSED insn)
+{
+  uint32_t SP;
+	  
+  // 1001 0101 0000 1001
+  HW_DMSG_DIS("%s\n",OPCODES[opcode].name);
+  
+  SP = SP_READ();
+  HW_DMSG_DIS("atmega128: PC = 0x%04x\n",mcu_get_pc());
+  HW_DMSG_DIS("atmega128: SP = 0x%04x\n",SP);
+  atmega128_ram_write_short(SP, mcu_get_pc() + 1); // STACK = PC + 1;
+
+#if defined(ATMEGA_PC_16BITS)
+  SP = SP - 2;
+  SP_WRITE(SP);
+  SET_CYCLES(3); 
+#elif defined(ATMEGA_PC_22BITS)
+  SP = SP - 3;
+  SP_WRITE(SP);
+  SET_CYCLES(4);
+#else
+#error "must define PC size to 16 or 22 bits"
+#endif
 
   return opcode;
 }
@@ -1886,6 +1938,28 @@ static int opcode_ldi(uint16_t opcode, uint16_t insn)
   MCU_REGS[rd] = kk;
   ADD_TO_PC(1); // PC is aligned on words
   SET_CYCLES(1);
+  return opcode;
+}
+
+/* TODO: code review */
+static int opcode_lds(uint16_t opcode, uint16_t insn)
+{
+  uint8_t  dd;
+  uint16_t kk;
+  
+  // 1001 000d dddd 0000
+  // kkkk kkkk kkkk kkkk
+  dd = ((insn >> 4) & 0x1f);
+  kk = atmega128_flash_read_short((mcu_get_pc()+1) << 1);
+  // check RAMPD if anything goes wrong
+  HW_DMSG_DIS("%s r%d,0x%04x\n",OPCODES[opcode].name, dd, kk);
+
+  if (kk < MAX_RAM_SIZE)
+     MCU_REGS[dd] = atmega128_ram_read_byte(kk);
+  else ERROR("Error: Memory address not in range in [0x%08x] at 0x%04x\n",insn << 16 | kk, mcu_get_pc());
+
+  ADD_TO_PC(1); // PC is aligned on words
+  SET_CYCLES(2);
   return opcode;
 }
 

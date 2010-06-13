@@ -626,7 +626,7 @@ static void update_onewire_reset_state(int dev, uint64_t current_time, uint64_t 
 	}
       break;
 
-    case ONEWIRE_PRESENCE_PULSE: /* waiting MSP before sending PRESENCE_PULSE : 6µs */
+    case ONEWIRE_PRESENCE_PULSE: /* waiting MSP before sending PRESENCE_PULSE : 6Âµs */
       if (time_in_state > ONEWIRE_MSP_MIN && DS2411_WIRE_STATE == ONEWIRE_INPUT_HIGH)
 	{
 	  DS2411_RESET_STATE = ONEWIRE_PRESENCE_PULSE_END;

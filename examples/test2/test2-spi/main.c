@@ -55,8 +55,8 @@ int main(void)
   P1IES   = 0x00;        // Edge select      = 0:L to H   1:H to L
   P1IFG   = 0x00;
   
-  P2SEL   = 0x00; /* note: basculer toutes les portes inutilisée en IN */
-  P2DIR   = 0x00; /* désactiver les périphériques                      */
+  P2SEL   = 0x00; /* note: basculer toutes les portes inutilisÃ©e en IN */
+  P2DIR   = 0x00; /* dÃ©sactiver les pÃ©riphÃ©riques                      */
   P2IE    = 0x00;
   P2IES   = 0x00;
   P2IFG   = 0x00;

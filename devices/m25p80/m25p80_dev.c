@@ -138,10 +138,10 @@ const char* str_cmd(int n)
  * 2.7 to 3.6V Single Supply Voltage
  * SPI Bus Compatible Serial Interface
  * 40MHz Clock Rate (maximum)
- * Deep Power-down Mode 1µA (typical)
+ * Deep Power-down Mode 1ÂµA (typical)
  * Electronic Signature (13h)
  * Packages
- * ­ ECOPACK® (RoHS compliant)
+ * Â­ ECOPACKÂ® (RoHS compliant)
  */
 #  define M25P_FLASH_SIZE           0x100000
 #  define M25P_SECTOR_MAX           16
@@ -180,11 +180,11 @@ const char* str_cmd(int n)
  * 2.3 to 3.6 V single supply voltage
  * SPI bus compatible serial interface
  * 50 MHz clock rate (maximum)
- * Deep Power-down mode 1 μA (typical)
+ * Deep Power-down mode 1 Î¼A (typical)
  * Electronic signatures
- *  – JEDEC Standard two-byte signature
+ *  â JEDEC Standard two-byte signature
  *    (2011h)
- *  – RES instruction, one-byte signature (10h),
+ *  â RES instruction, one-byte signature (10h),
  *    for backward compatibility
  *
  */
@@ -213,7 +213,7 @@ const char* str_cmd(int n)
 #endif
 
 #else
-#error "must define a m�=25p device"
+#error "must define a mé=25p device"
 #endif
 
 /***************************************************/

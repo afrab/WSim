@@ -36,7 +36,7 @@
 /**
  * \file cc2420_io.h
  * \brief CC2420 IO PIN hardware abstraction
- * \author Clément Burin des Roziers <clement.burin-des-roziers@inria.fr>
+ * \author ClÃ©ment Burin des Roziers <clement.burin-des-roziers@inria.fr>
  * \date January 09
  */
 

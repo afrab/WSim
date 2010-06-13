@@ -36,7 +36,7 @@
 /**
  * \file cc2420_spi.h
  * \brief CC2420 spi macros
- * \author Clément Burin des Roziers <clement.burin-des-roziers@inria.fr>
+ * \author ClÃ©ment Burin des Roziers <clement.burin-des-roziers@inria.fr>
  * \date January 09
  */
 #ifndef _CC2420_SPI_H

@@ -38,7 +38,7 @@
  *  \brief  MSP430 uart0 driver header
  *  \author Antoine Fraboulet
  *  \author Colin Chaballier
- *  \author Clément Burin des Roziers <clement.burin-des-roziers@inria.fr>
+ *  \author ClÃ©ment Burin des Roziers <clement.burin-des-roziers@inria.fr>
  *  \date   2008
  **/
 

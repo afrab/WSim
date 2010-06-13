@@ -402,7 +402,7 @@ void print_DAC(int nb){
 	char bin[11];
 	SEL_OFF;		// select CNA path
 	CS_ON;
-	//delay (20,1);	// (10,1) ->82µs
+	//delay (20,1);	// (10,1) ->82Âµs
 	Delayx100us(1);
 	CS_OFF;
 	i=1024;
@@ -457,7 +457,7 @@ void PRINT_POT(int cmd, int nb)		{
 	char bin[8];
 	SEL_ON;				// select POT-NUM path
 	CS_ON;
-	//delay (20,1);	// (10,1) ->82µs
+	//delay (20,1);	// (10,1) ->82Âµs
 	Delayx100us(1);
 	CS_OFF;
 	
@@ -578,7 +578,7 @@ int main(void)
 		printString(">FIXER VOLUME");
 		
 		Delayx100us(10000);
-		print_DAC(240); // LYON 1ère 240
+		print_DAC(240); // LYON 1Ã¨re 240
 		PRINT_POT (31,128);	 //cmd write , value
 	*/
 	while (1)
@@ -607,7 +607,7 @@ int main(void)
 			for (i=0; i<10; i++) Delayx100us(10);
 			station=station+1;
 			if(station>5) station=1; 
-			if (station==1) print_DAC(240); // LYON 1ère
+			if (station==1) print_DAC(240); // LYON 1Ã¨re
 			if (station==2) print_DAC(300); // NOSTALGIE ,  92.9 Mhz
 			if (station==3) print_DAC(400);
 			if (station==4) print_DAC(512);

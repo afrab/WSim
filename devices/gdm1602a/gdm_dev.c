@@ -280,7 +280,7 @@ static void gdm_shift_addr(int dev, int increment)
 /***************************************************/
 /***************************************************/
 
-#define GDM_BUSY_WAIT_39micro 39000       /* 39 µs */
+#define GDM_BUSY_WAIT_39micro 39000       /* 39 Âµs */
 #define GDM_BUSY_WAIT_153     1530000     /* 1.53 ms */
 
 static void gdm_do_command(int dev)
@@ -295,7 +295,7 @@ static void gdm_do_command(int dev)
       HW_DMSG_GDM("  =======================================\n");
       HW_DMSG_GDM("  LCD set ddram address 0x%x\n",GDM_DATA->dd_addr);
       HW_DMSG_GDM("  =======================================\n");
-      gdm_set_idle_time(dev,GDM_BUSY_WAIT_39micro); // 39 µs
+      gdm_set_idle_time(dev,GDM_BUSY_WAIT_39micro); // 39 Âµs
     }
   else if (GDM_DATA->data & 0x40)
     { // 7. set CG RAM address
@@ -303,7 +303,7 @@ static void gdm_do_command(int dev)
       HW_DMSG_GDM("  =======================================\n");
       HW_DMSG_GDM("  LCD set cgram address %x\n",GDM_DATA->cg_addr);
       HW_DMSG_GDM("  =======================================\n");
-      gdm_set_idle_time(dev,GDM_BUSY_WAIT_39micro); // 39 µs
+      gdm_set_idle_time(dev,GDM_BUSY_WAIT_39micro); // 39 Âµs
     }
   else if (GDM_DATA->data & 0x20)
     { // 6. function set
@@ -326,7 +326,7 @@ static void gdm_do_command(int dev)
 	  ERROR("  =======================================\n");
 	}
       HW_DMSG_GDM("  LCD function set\n");
-      gdm_set_idle_time(dev,GDM_BUSY_WAIT_39micro); // 39 µs
+      gdm_set_idle_time(dev,GDM_BUSY_WAIT_39micro); // 39 Âµs
     }
   else if (GDM_DATA->data & 0x10) 
     { // 5. cursor or display shift  
@@ -344,7 +344,7 @@ static void gdm_do_command(int dev)
       HW_DMSG_GDM("  ===========================\n");
       HW_DMSG_GDM("  LCD cursor or display shift\n");
       HW_DMSG_GDM("  ===========================\n");
-      gdm_set_idle_time(dev,GDM_BUSY_WAIT_39micro); // 39 µs
+      gdm_set_idle_time(dev,GDM_BUSY_WAIT_39micro); // 39 Âµs
     }
   else if (GDM_DATA->data & 0x08)
     { // 4. display on/off control
@@ -356,7 +356,7 @@ static void gdm_do_command(int dev)
       HW_DMSG_GDM("  LCD display on/off display:%d cursor:%d blink:%d\n",
 		  GDM_DATA->display_on,GDM_DATA->cursor_on,GDM_DATA->cursor_blink);
       HW_DMSG_GDM("  ================================================\n");
-      gdm_set_idle_time(dev,GDM_BUSY_WAIT_39micro); // 39 µs
+      gdm_set_idle_time(dev,GDM_BUSY_WAIT_39micro); // 39 Âµs
     }
   else if (GDM_DATA->data & 0x04)
     { // 3. entry mode set
@@ -365,7 +365,7 @@ static void gdm_do_command(int dev)
       HW_DMSG_GDM("  ================================================\n");
       HW_DMSG_GDM("  LCD entry mode set : increment = %d, shift = %d\n",GDM_DATA->increment,GDM_DATA->shift_display);
       HW_DMSG_GDM("  ================================================\n");
-      gdm_set_idle_time(dev,GDM_BUSY_WAIT_39micro); // 39 µs
+      gdm_set_idle_time(dev,GDM_BUSY_WAIT_39micro); // 39 Âµs
     }
   else if (GDM_DATA->data & 0x02)
     { // 2. Returns home : display being shifted to original position
@@ -463,7 +463,7 @@ void gdm_write(int dev, uint32_t addr, uint32_t val)
 		  HW_DMSG_GDM("  LCD write char 0x%x (%c) at cursor %x\n",GDM_DATA->data,isprint(GDM_DATA->data) ? GDM_DATA->data : '.',GDM_DATA->dd_addr);
 		  HW_DMSG_GDM("  =======================================\n");
 		  GDM_GFX_UPDATE = 1;
-		  gdm_set_idle_time(dev,43000); // 43 µs
+		  gdm_set_idle_time(dev,43000); // 43 Âµs
 		  break;
 		case 1: // read
 		  break;

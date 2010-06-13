@@ -574,37 +574,37 @@ gdbremote_stop_reply_packet(struct gdbremote_t *gdb)
 
     POSIX.1-1990
 
-       SIGHUP     1       Term    Déconnexion détectée sur le terminal
-                                  de contrôle ou mort du processus de
-                                  contrôle.
+       SIGHUP     1       Term    DÃ©connexion dÃ©tectÃ©e sur le terminal
+                                  de contrÃ´le ou mort du processus de
+                                  contrÃ´le.
        SIGINT     2       Term    Interruption depuis le clavier.
-       SIGQUIT    3       Core    Demande « Quitter » depuis le clavier.
-       SIGILL     4       Core    Instruction illégale.
-       SIGABRT    6       Core    Signal d'arrêt depuis abort(3).
-       SIGFPE     8       Core    Erreur mathématique virgule flottante.
-       SIGKILL    9       Term    Signal « KILL ».
-       SIGSEGV   11       Core    Référence mémoire invalide.
-       SIGPIPE   13       Term    Écriture dans un tube sans lecteur.
-       SIGALRM   14       Term    Temporisation alarm(2) écoulée.
+       SIGQUIT    3       Core    Demande Â« Quitter Â» depuis le clavier.
+       SIGILL     4       Core    Instruction illÃ©gale.
+       SIGABRT    6       Core    Signal d'arrÃªt depuis abort(3).
+       SIGFPE     8       Core    Erreur mathÃ©matique virgule flottante.
+       SIGKILL    9       Term    Signal Â« KILL Â».
+       SIGSEGV   11       Core    RÃ©fÃ©rence mÃ©moire invalide.
+       SIGPIPE   13       Term    Ã‰criture dans un tube sans lecteur.
+       SIGALRM   14       Term    Temporisation alarm(2) Ã©coulÃ©e.
        SIGTERM   15       Term    Signal de fin.
        SIGUSR1   10       Term    Signal utilisateur 1.
        SIGUSR2   12       Term    Signal utilisateur 2.
-       SIGCHLD   17       Ign     Fils arrêté ou terminé.
-       SIGCONT   18       Cont    Continuer si arrêté.
-       SIGSTOP   19       Stop    Arrêt du processus.
-       SIGTSTP   20       Stop    Stop invoqué depuis tty.
-       SIGTTIN   21       Stop    Lecture sur tty en arrière-plan.
-       SIGTTOU   22       Stop    Écriture sur tty en arrière-plan.
+       SIGCHLD   17       Ign     Fils arrÃªtÃ© ou terminÃ©.
+       SIGCONT   18       Cont    Continuer si arrÃªtÃ©.
+       SIGSTOP   19       Stop    ArrÃªt du processus.
+       SIGTSTP   20       Stop    Stop invoquÃ© depuis tty.
+       SIGTTIN   21       Stop    Lecture sur tty en arriÃ¨re-plan.
+       SIGTTOU   22       Stop    Ã‰criture sur tty en arriÃ¨re-plan.
 
      not in POSIX.1-1990, but in SUSv2 and POSIX.1-2001 :
 
-       SIGBUS     7       Core    Erreur de bus (mauvais accès mémoire).
-       SIGPOLL            Term    Événement « pollable » (Système V).
+       SIGBUS     7       Core    Erreur de bus (mauvais accÃ¨s mÃ©moire).
+       SIGPOLL            Term    Ã‰vÃ©nement Â« pollable Â» (SystÃ¨me V).
                                   Synonyme de SIGIO.
        SIGPROF   27       Term    Expiration de la temporisation
                                   pour le suivi.
        SIGSYS     -       Core    Mauvais argument de fonction (SVr4).
-       SIGTRAP    5       Core    Point d'arrêt rencontré.
+       SIGTRAP    5       Core    Point d'arrÃªt rencontrÃ©.
   */
   
   switch (gdb->last_signal)

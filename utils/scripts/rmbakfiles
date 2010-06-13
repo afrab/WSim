@@ -1,0 +1,9 @@
+#!/bin/bash
+FROM=iso-8859-1
+CURRENTPATH=`pwd`
+TO=UTF-8
+ICONV="iconv -f $FROM -t $TO"
+# Convert
+find $CURRENTPATH -type f -name "*.[ch].bak" | while read fn; do
+rm ${fn}
+done

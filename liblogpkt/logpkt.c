@@ -327,7 +327,7 @@ static void logpkt_rx_dump_pkt(int interface_id)
   if (logpkt_tab[interface_id].rx_pkt_offset && log_mode != LOG_TX_ONLY)
     {
       fprintf(logpkt_logfile,"\n");
-      fprintf(logpkt_logfile,"******* %s: RX packet (n°%d) [%"PRIu64"ns; %"PRIu64"ns] *******\n",
+      fprintf(logpkt_logfile,"******* %s: RX packet (nÂ°%d) [%"PRIu64"ns; %"PRIu64"ns] *******\n",
 	      logpkt_tab[interface_id].interface_name,
 	      logpkt_tab[interface_id].rx_pkt_count,
 	      logpkt_tab[interface_id].rx_start_time,
@@ -353,7 +353,7 @@ static void logpkt_tx_dump_pkt(int interface_id)
   if (logpkt_tab[interface_id].tx_pkt_offset && log_mode != LOG_RX_ONLY)
     {
       fprintf(logpkt_logfile,"\n");
-      fprintf(logpkt_logfile,"******* %s: TX packet (n°%d) [%"PRIu64"ns; %"PRIu64"ns] *******\n",
+      fprintf(logpkt_logfile,"******* %s: TX packet (nÂ°%d) [%"PRIu64"ns; %"PRIu64"ns] *******\n",
 	      logpkt_tab[interface_id].interface_name,
 	      logpkt_tab[interface_id].tx_pkt_count,
 	      logpkt_tab[interface_id].tx_start_time,

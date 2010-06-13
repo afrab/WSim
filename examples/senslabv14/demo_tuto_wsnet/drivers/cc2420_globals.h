@@ -36,7 +36,7 @@
 /**
  * \file cc2420_globals.h
  * \brief Configuration registers addresses and default values
- * \author Clément Burin des Roziers <clement.burin-des-roziers@inria.fr>
+ * \author ClÃ©ment Burin des Roziers <clement.burin-des-roziers@inria.fr>
  * \date 28/01/2009
  * 
  */

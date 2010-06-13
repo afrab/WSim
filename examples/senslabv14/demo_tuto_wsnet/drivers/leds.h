@@ -37,7 +37,7 @@
 /**
  * \file leds.h
  * \brief LEDs macro set
- * \author Clément Burin des Roziers <clement.burin-des-roziers@inria.fr>
+ * \author ClÃ©ment Burin des Roziers <clement.burin-des-roziers@inria.fr>
  * \date November 08
  */
 

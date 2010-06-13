@@ -48,7 +48,7 @@ void set_mcu_speed_dco_mclk_4MHz_smclk_1MHz()
   BCSCTL2 = SELM_0 | DIVS_2;
   
   // dcox = 6, rsel = 7, mod = 0
-  // according to "Bob L'éponge" the MCLK clock speed should
+  // according to "Bob L'Ã©ponge" the MCLK clock speed should
   // be set to 4.16MHz and SMCLK clock speed to 2.08Mhz
   DCOCTL  = DCO2 | DCO1;
   

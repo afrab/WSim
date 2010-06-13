@@ -37,7 +37,7 @@
 /**
  * \file spi1.h
  * \brief SPI_1 macro set
- * \author Clément Burin des Roziers <clement.burin-des-roziers@inria.fr>
+ * \author ClÃ©ment Burin des Roziers <clement.burin-des-roziers@inria.fr>
  * \date November 08
  */
 

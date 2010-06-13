@@ -27,10 +27,10 @@
      - complete READROM command for ds2411
 
      Revision 1.2  2006/05/24 14:52:10  afraboul
-     - réécriture des .h
-     - début mise en forme du .c (uniformisation avec le reste)
+     - rÃ©Ã©criture des .h
+     - dÃ©but mise en forme du .c (uniformisation avec le reste)
      - passage au temps en nano
-     - vérification de l'automate à faire avec temps en nano à faire/finir
+     - vÃ©rification de l'automate Ã  faire avec temps en nano Ã  faire/finir
 
      Revision 1.1  2006/03/28 21:55:40  efleury
      petit pbm de configure avec new version...

@@ -36,7 +36,7 @@
 /**
  *  \file   timerA.c
  *  \brief  MSP430 timerA driver
- *  \author Clément Burin des Roziers
+ *  \author ClÃ©ment Burin des Roziers
  *  \date   November 08
  **/
 

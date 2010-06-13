@@ -36,7 +36,7 @@
 /**
  * \file cc2420.c
  * \brief CC2420 driver implementation
- * \author Clément Burin des Roziers <clement.burin-des-roziers@inria.fr>
+ * \author ClÃ©ment Burin des Roziers <clement.burin-des-roziers@inria.fr>
  * \date January 09
  */
 #include <io.h>

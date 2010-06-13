@@ -70,7 +70,7 @@ msp430_basic_clock_reset()
    *   initial freq ~= 800 kHz
    *
    * The modulator mixing formula is:
-   *      t =(32- MODx) × tDCO + MODx × tDCO+1
+   *      t =(32- MODx) Ã— tDCO + MODx Ã— tDCO+1
    *
    * bcsctl1 initial state 0x80 = 1000 0000
    *     bcsctl1.xt2off = 1 : xt2 is off 
@@ -508,7 +508,7 @@ msp430_basic_clock_adjust_dco_freq()
     }
 
   /* When MODx = 0 the modulator is off. */
-  /* dco_freq_time t = (32- MODx) × tDCO + MODx × tDCO+1    */
+  /* dco_freq_time t = (32- MODx) Ã— tDCO + MODx Ã— tDCO+1    */
   
   /* from msp430f1611.pdf, page 36 */
   /* dco_freq = (32 * fdco * fdco1) / (MODx * fdco + (32 - MODx) * fdco1) */

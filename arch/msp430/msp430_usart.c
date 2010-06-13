@@ -147,7 +147,7 @@ char *str_ssel[] = { "external UCLK", "ACLK", "SMCLK", "SMCLK" };
 /*****************************/                                     
 /**** SPI transmit enable ****/                                     
 /* 
-   TODO: SPI à vérifer : baisser urxex pendant que rx shift != empty arrête réception ?? 
+   TODO: SPI Ã  vÃ©rifer : baisser urxex pendant que rx shift != empty arrÃªte rÃ©ception ?? 
    TODO: AFR: check that SPI SPEED is at most UBRCLK/2
       SPI_SPY("msp430:usart%d:spi:br0   %x\n",NUM,MCU.USART.uxbr0);
       SPI_SPY("msp430:usart%d:spi:br1   %x\n",NUM,MCU.USART.uxbr1);

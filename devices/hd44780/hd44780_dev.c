@@ -302,7 +302,7 @@ static void hd44_shift_addr(int dev, int increment)
 /***************************************************/
 /***************************************************/
 
-#define HD44_BUSY_WAIT_39micro 39000       /* 39 µs */
+#define HD44_BUSY_WAIT_39micro 39000       /* 39 Âµs */
 #define HD44_BUSY_WAIT_153     1530000     /* 1.53 ms */
 
 static void hd44_do_command(int dev)
@@ -317,7 +317,7 @@ static void hd44_do_command(int dev)
       HW_DMSG_HD44("  =======================================\n");
       HW_DMSG_HD44("  LCD set ddram address 0x%x\n",HD44_DATA->dd_addr);
       HW_DMSG_HD44("  =======================================\n");
-      hd44_set_idle_time(dev,HD44_BUSY_WAIT_39micro); // 39 µs
+      hd44_set_idle_time(dev,HD44_BUSY_WAIT_39micro); // 39 Âµs
     }
   else if (HD44_DATA->IR & 0x40)
     { // 7. set CG RAM address
@@ -325,7 +325,7 @@ static void hd44_do_command(int dev)
       HW_DMSG_HD44("  =======================================\n");
       HW_DMSG_HD44("  LCD set cgram address %x\n",HD44_DATA->cg_addr);
       HW_DMSG_HD44("  =======================================\n");
-      hd44_set_idle_time(dev,HD44_BUSY_WAIT_39micro); // 39 µs
+      hd44_set_idle_time(dev,HD44_BUSY_WAIT_39micro); // 39 Âµs
     }
   else if ((HD44_DATA->IR & 0x20) != 0)
     { // 6. function set
@@ -336,7 +336,7 @@ static void hd44_do_command(int dev)
       HW_DMSG_HD44("  LCD function set: DL=%d N=%d F=%d\n",
 		   HD44_DATA->datalength, HD44_DATA->linedisplay, HD44_DATA->fontsize);
       HW_DMSG_HD44("  =======================================\n");
-      hd44_set_idle_time(dev,HD44_BUSY_WAIT_39micro); // 39 µs
+      hd44_set_idle_time(dev,HD44_BUSY_WAIT_39micro); // 39 Âµs
     }
   else if (HD44_DATA->IR & 0x10) 
     { // 5. cursor or display shift  
@@ -354,7 +354,7 @@ static void hd44_do_command(int dev)
       HW_DMSG_HD44("  ===========================\n");
       HW_DMSG_HD44("  LCD cursor or display shift\n");
       HW_DMSG_HD44("  ===========================\n");
-      hd44_set_idle_time(dev,HD44_BUSY_WAIT_39micro); // 39 µs
+      hd44_set_idle_time(dev,HD44_BUSY_WAIT_39micro); // 39 Âµs
     }
   else if (HD44_DATA->IR & 0x08)
     { // 4. display on/off control
@@ -366,7 +366,7 @@ static void hd44_do_command(int dev)
       HW_DMSG_HD44("  LCD display on/off display:%d cursor:%d blink:%d\n",
 		  HD44_DATA->display_on,HD44_DATA->cursor_on,HD44_DATA->blinking_on);
       HW_DMSG_HD44("  ================================================\n");
-      hd44_set_idle_time(dev,HD44_BUSY_WAIT_39micro); // 39 µs
+      hd44_set_idle_time(dev,HD44_BUSY_WAIT_39micro); // 39 Âµs
     }
   else if (HD44_DATA->IR & 0x04)
     { // 3. entry mode set
@@ -376,7 +376,7 @@ static void hd44_do_command(int dev)
       HW_DMSG_HD44("  LCD entry mode set : increment = %d, shift = %d\n",
 		   HD44_DATA->increment,HD44_DATA->display_shift);
       HW_DMSG_HD44("  ================================================\n");
-      hd44_set_idle_time(dev,HD44_BUSY_WAIT_39micro); // 39 µs
+      hd44_set_idle_time(dev,HD44_BUSY_WAIT_39micro); // 39 Âµs
     }
   else if (HD44_DATA->IR & 0x02)
     { // 2. Returns home : display being shifted to original position
@@ -420,7 +420,7 @@ static void hd44_do_data(int dev)
 	       isprint(HD44_DATA->DR) ? HD44_DATA->DR : '.', HD44_DATA->dd_addr);
   HW_DMSG_HD44("  =======================================\n");
   HD44_GFX_UPDATE = 1;
-  hd44_set_idle_time(dev,43000); // 43 µs
+  hd44_set_idle_time(dev,43000); // 43 Âµs
   DDRAM_CELL = HD44_DATA->DR;
   hd44_shift_addr(dev,HD44_DATA->increment);
 }

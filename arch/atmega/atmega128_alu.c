@@ -2059,7 +2059,7 @@ static int opcode_ldi(uint16_t opcode, uint16_t insn)
 static int opcode_lds(uint16_t opcode, uint16_t insn)
 {
     uint8_t  dd;
-    uint16_t kk;
+    uint32_t kk;
 
     // 1001 000d dddd 0000
     // kkkk kkkk kkkk kkkk
@@ -2069,8 +2069,13 @@ static int opcode_lds(uint16_t opcode, uint16_t insn)
     HW_DMSG_DIS("%s r%d,0x%04x\n",OPCODES[opcode].name, dd, kk);
 
     if (kk < MAX_RAM_SIZE)
+      {
         MCU_REGS[dd] = atmega128_ram_read_byte(kk);
-    else ERROR("Error: Memory address not in range in [0x%08x] at 0x%04x\n",insn << 16 | kk, mcu_get_pc());
+      }
+    else 
+      {
+	ERROR("Error: Memory address not in range in [0x%08x] at 0x%04x\n",insn << 16 | kk, mcu_get_pc());
+      }
 
     ADD_TO_PC(1); // PC is aligned on words
     SET_CYCLES(2);

@@ -310,8 +310,6 @@ enum atmega_opcode {
     OP_IN,
     OP_INC,
     OP_DEC,
-    OP_TST,
-    OP_CLR, /* == OP_EOR */
     OP_SPM,
     OP_SER,
     OP_SLEEP,
@@ -462,6 +460,7 @@ struct atmega_opcode_info_t OPCODES[] = {
     { .fun = opcode_add,     .name = "ADD"    }, /* done: needs reviewing */
     { .fun = opcode_adc,     .name = "ADC"    }, /* done: needs reviewing */
     { .fun = opcode_adiw,    .name = "ADIW"   }, /* done: needs reviewing */
+    // TST Rd = AND Rd,Rd
     { .fun = opcode_and,     .name = "AND"    },
     { .fun = opcode_andi,    .name = "ANDI"   }, /* done: needs reviewing */
     { .fun = opcode_asr,     .name = "ASR"    }, /* done: needs reviewing */
@@ -473,6 +472,7 @@ struct atmega_opcode_info_t OPCODES[] = {
     { .fun = opcode_sbiw,    .name = "SBIW"   }, /* done: needs reviewing */
     { .fun = opcode_or,      .name = "OR"     }, /* done: needs reviewing */
     { .fun = opcode_ori,     .name = "ORI"    },
+    // CLR Rd = EOR Rd,Rd
     { .fun = opcode_eor,     .name = "EOR"    },
     { .fun = opcode_com,     .name = "COM"    }, /* done: needs reviewing */
     { .fun = opcode_neg,     .name = "NEG"    }, /* done: needs reviewing + check C & V flags */
@@ -483,8 +483,6 @@ struct atmega_opcode_info_t OPCODES[] = {
     { .fun = opcode_in,      .name = "IN"     },
     { .fun = opcode_inc,     .name = "INC"    }, /* done: needs reviewing */
     { .fun = opcode_dec,     .name = "DEC"    }, /* done: needs reviewing */
-    { .fun = opcode_default, .name = "TST"    }, /* == OP_AND */
-    { .fun = opcode_default, .name = "CLR"    }, /* == OP_EOR */
     { .fun = opcode_default, .name = "SPM"    },
     { .fun = opcode_ser,     .name = "SER"    }, /* done: needs reviewing */
     { .fun = opcode_sleep,   .name = "SLEEP"  },
@@ -547,10 +545,10 @@ struct atmega_opcode_info_t OPCODES[] = {
 
 #define SET_CYCLES(n) do { } while (0)
 #define ADD_TO_PC(k)							\
-	do {									\
-		uint16_t next_pc;                                                   \
-		next_pc = mcu_get_pc() + k;                                         \
-		mcu_set_pc_next( next_pc );                                         \
+	do {									    \
+		uint16_t next_pc;                       \
+		next_pc = mcu_get_pc() + k;             \
+		mcu_set_pc_next( next_pc );             \
 	} while (0)
 
 static int opcode_default(uint16_t opcode, uint16_t UNUSED insn)
@@ -684,16 +682,19 @@ static int opcode_jmp(uint16_t opcode, uint16_t insn)
 
 static int opcode_eor(uint16_t opcode, uint16_t insn)
 {
-    uint8_t rd;
+    uint8_t dd;
     uint8_t rr;
     uint8_t res;
     // 0010 01rd dddd rrrr
     rr = ((insn >> 5) & 0x10) | ((insn >> 0) & 0x0f);
-    rd = ((insn >> 4) & 0x1f);
-    HW_DMSG_DIS("%s r%d,r%d\n",OPCODES[opcode].name, rd, rr);
+    dd = ((insn >> 4) & 0x1f);
+    if (dd == rr)
+        HW_DMSG_DIS("%s r%d\n", "CLR", dd, rr);
+    else
+        HW_DMSG_DIS("%s r%d,r%d\n",OPCODES[opcode].name, dd, rr);
 
-    res = MCU_REGS[rr] ^ MCU_REGS[rd];
-    MCU_REGS[rd] = res;
+    res = MCU_REGS[rr] ^ MCU_REGS[dd];
+    MCU_REGS[dd] = res;
 
     CLR_V;
     WRITE_N(BIT7_(res));
@@ -860,16 +861,20 @@ static int opcode_adiw(uint16_t opcode, uint16_t insn)
 
 static int opcode_and(uint16_t opcode, uint16_t insn)
 {
-    uint8_t rd;
+    uint8_t dd;
     uint8_t rr;
     uint8_t res;
     // 0010 00rd dddd rrrr
     rr = ((insn >> 5) & 0x10) | ((insn >> 0) & 0xf);
-    rd = ((insn >> 4) & 0x1f);
-    HW_DMSG_DIS("%s r%d,r%d\n",OPCODES[opcode].name, rd, rr);
+    dd = ((insn >> 4) & 0x1f);
+    if (rr == dd)
+        HW_DMSG_DIS("%s r%d\n", "TST", dd);
+    else
+        HW_DMSG_DIS("%s r%d,r%d\n",OPCODES[opcode].name, dd, rr);
 
-    res = MCU_REGS[rr] & MCU_REGS[rd];
-    MCU_REGS[rd] = res;
+    res = MCU_REGS[rr] & MCU_REGS[dd];
+    MCU_REGS[dd] = res;
+    
     CLR_V;
     WRITE_N(BIT7_(res));
     WRITE_Z(res == 0);

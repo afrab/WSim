@@ -477,7 +477,7 @@
   <!-- ============================================================ -->
 
   <chapter id="online_gtkwave">
-    <title>Using online trace information with GTKWare</title>
+    <title>Using online trace information with GTKWave</title>
     <section id="onlinegtkwave">
       <title>Generating interactive VCD traces</title>
       <para> the <userinput>--trace</userinput> option can be used to generated 
@@ -488,7 +488,7 @@
 
       <para>
 	The followinf lines can be used to create a named pipe (FIFO) within the filesystem. This
-	pipe is then used a source of VCD traces for GTKWave (shmidcat is a tool included in GTKWare
+	pipe is then used a source of VCD traces for GTKWave (shmidcat is a tool included in GTKWave
 	distribution). The <userinput>vcd:pipe</userinput> option will force wsim to directly generate VCD
 	traces that will be written to the file names <userinput>pipe</userinput>.
       </para>

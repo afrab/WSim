@@ -158,9 +158,12 @@
 /* ************************************************** */
 
 #define RETURN(opcode,insn)                                  \
-	do {							     \
-		return OPCODES[opcode].fun(opcode,insn);		     \
-	} while (0)
+  do {							     \
+    if (MCU_ALU.skip_execute == 0)			     \
+      return OPCODES[opcode].fun(opcode,insn);		     \
+    else						     \
+      return OPCODES[opcode].length;			     \
+  } while (0)
 
 /* ************************************************** */
 /* ************************************************** */
@@ -454,92 +457,93 @@ static int opcode_push   (uint16_t opcode, uint16_t insn);
 struct atmega_opcode_info_t {
     opcode_fun_t   fun;
     char          *name;
+    int            length;
 };
 
 struct atmega_opcode_info_t OPCODES[] = {
-    { .fun = opcode_add,     .name = "ADD"    }, /* done: needs reviewing */
-    { .fun = opcode_adc,     .name = "ADC"    }, /* done: needs reviewing */
-    { .fun = opcode_adiw,    .name = "ADIW"   }, /* done: needs reviewing */
+    { .fun = opcode_add,     .name = "ADD"    , .length = 1 }, /* done: needs reviewing */
+    { .fun = opcode_adc,     .name = "ADC"    , .length = 1 }, /* done: needs reviewing */
+    { .fun = opcode_adiw,    .name = "ADIW"   , .length = 1 }, /* done: needs reviewing */
     // TST Rd = AND Rd,Rd
-    { .fun = opcode_and,     .name = "AND"    },
-    { .fun = opcode_andi,    .name = "ANDI"   }, /* done: needs reviewing */
-    { .fun = opcode_asr,     .name = "ASR"    }, /* done: needs reviewing */
-    { .fun = opcode_default, .name = "BREAK"  },
-    { .fun = opcode_sub,     .name = "SUB"    }, /* done: needs reviewing */
-    { .fun = opcode_subi,    .name = "SUBI"   },
-    { .fun = opcode_sbc,     .name = "SBC"    }, /* done: needs reviewing & check flag Z*/
-    { .fun = opcode_sbci,    .name = "SBCI"   }, /* done: needs reviewing */
-    { .fun = opcode_sbiw,    .name = "SBIW"   }, /* done: needs reviewing */
-    { .fun = opcode_or,      .name = "OR"     }, /* done: needs reviewing */
-    { .fun = opcode_ori,     .name = "ORI"    },
+    { .fun = opcode_and,     .name = "AND"    , .length = 1 },
+    { .fun = opcode_andi,    .name = "ANDI"   , .length = 1 }, /* done: needs reviewing */
+    { .fun = opcode_asr,     .name = "ASR"    , .length = 1 }, /* done: needs reviewing */
+    { .fun = opcode_default, .name = "BREAK"  , .length = 1 },
+    { .fun = opcode_sub,     .name = "SUB"    , .length = 1 }, /* done: needs reviewing */
+    { .fun = opcode_subi,    .name = "SUBI"   , .length = 1 },
+    { .fun = opcode_sbc,     .name = "SBC"    , .length = 1 }, /* done: needs reviewing & check flag Z*/
+    { .fun = opcode_sbci,    .name = "SBCI"   , .length = 1 }, /* done: needs reviewing */
+    { .fun = opcode_sbiw,    .name = "SBIW"   , .length = 1 }, /* done: needs reviewing */
+    { .fun = opcode_or,      .name = "OR"     , .length = 1 }, /* done: needs reviewing */
+    { .fun = opcode_ori,     .name = "ORI"    , .length = 1 },
     // CLR Rd = EOR Rd,Rd
-    { .fun = opcode_eor,     .name = "EOR"    },
-    { .fun = opcode_com,     .name = "COM"    }, /* done: needs reviewing */
-    { .fun = opcode_neg,     .name = "NEG"    }, /* done: needs reviewing + check C & V flags */
-    { .fun = opcode_sbr,     .name = "SBR"    }, /* Code review & What's the difference between SBR & ORI */
-    { .fun = opcode_cbr,     .name = "CBR"    }, /* Check opcode & code review */
+    { .fun = opcode_eor,     .name = "EOR"    , .length = 1 },
+    { .fun = opcode_com,     .name = "COM"    , .length = 1 }, /* done: needs reviewing */
+    { .fun = opcode_neg,     .name = "NEG"    , .length = 1 }, /* done: needs reviewing + check C & V flags */
+    { .fun = opcode_sbr,     .name = "SBR"    , .length = 1 }, /* Code review & What's the difference between SBR & ORI */
+    { .fun = opcode_cbr,     .name = "CBR"    , .length = 1 }, /* Check opcode & code review */
     // BCLR s : CLC, CLZ, CLN, CLV, CLS, CLH, CLT & CLI
-    { .fun = opcode_bclr,    .name = "BCLR"   }, /* done: needs reviewing */
-    { .fun = opcode_in,      .name = "IN"     },
-    { .fun = opcode_inc,     .name = "INC"    }, /* done: needs reviewing */
-    { .fun = opcode_dec,     .name = "DEC"    }, /* done: needs reviewing */
-    { .fun = opcode_default, .name = "SPM"    },
-    { .fun = opcode_ser,     .name = "SER"    }, /* done: needs reviewing */
-    { .fun = opcode_sleep,   .name = "SLEEP"  },
-    { .fun = opcode_mul,     .name = "MUL"    }, /* done: needs reviewing */
-    { .fun = opcode_muls,    .name = "MULS"   }, /* done: needs reviewing */
-    { .fun = opcode_mulsu,   .name = "MULSU"  }, /* done: needs reviewing */
-    { .fun = opcode_fmul,    .name = "FMUL"   }, /* done: needs reviewing */
-    { .fun = opcode_fmuls,   .name = "FMULS"  }, /* done: needs reviewing */
-    { .fun = opcode_fmulsu,  .name = "FMULSU" }, /* done: needs reviewing */
-    { .fun = opcode_rjmp,    .name = "RJMP"   },
-    { .fun = opcode_ijmp,    .name = "IJMP"   }, /* done: needs reviewing */
-    { .fun = opcode_default, .name = "EIJMP"  },
-    { .fun = opcode_elpm,    .name = "ELPM"   },
-    { .fun = opcode_jmp,     .name = "JMP"    },
-    { .fun = opcode_rcall,   .name = "RCALL"  }, /* done: needs reviewing */
-    { .fun = opcode_icall,   .name = "ICALL"  }, /* done: needs reviewing */
-    { .fun = opcode_default, .name = "EICALL" },
-    { .fun = opcode_call,    .name = "CALL"   },
-    { .fun = opcode_ret,     .name = "RET"    },
-    { .fun = opcode_default, .name = "RETI"   },
-    { .fun = opcode_default, .name = "CPSE"   },
-    { .fun = opcode_cbi,     .name = "CBI"    }, /* done: needs reviewing */
-    { .fun = opcode_cp,      .name = "CP"     },
-    { .fun = opcode_cpc,     .name = "CPC"    },
-    { .fun = opcode_cpi,     .name = "CPI"    },
-    { .fun = opcode_ror,     .name = "ROR"    }, /* done: needs reviewing */
-    { .fun = opcode_default, .name = "SBRC"   },
-    { .fun = opcode_default, .name = "SBRS"   },
-    { .fun = opcode_default, .name = "SBIC"   },
-    { .fun = opcode_default, .name = "SBIS"   },
+    { .fun = opcode_bclr,    .name = "BCLR"   , .length = 1 }, /* done: needs reviewing */
+    { .fun = opcode_in,      .name = "IN"     , .length = 1 },
+    { .fun = opcode_inc,     .name = "INC"    , .length = 1 }, /* done: needs reviewing */
+    { .fun = opcode_dec,     .name = "DEC"    , .length = 1 }, /* done: needs reviewing */
+    { .fun = opcode_default, .name = "SPM"    , .length = 1 },
+    { .fun = opcode_ser,     .name = "SER"    , .length = 1 }, /* done: needs reviewing */
+    { .fun = opcode_sleep,   .name = "SLEEP"  , .length = 1 },
+    { .fun = opcode_mul,     .name = "MUL"    , .length = 1 }, /* done: needs reviewing */
+    { .fun = opcode_muls,    .name = "MULS"   , .length = 1 }, /* done: needs reviewing */
+    { .fun = opcode_mulsu,   .name = "MULSU"  , .length = 1 }, /* done: needs reviewing */
+    { .fun = opcode_fmul,    .name = "FMUL"   , .length = 1 }, /* done: needs reviewing */
+    { .fun = opcode_fmuls,   .name = "FMULS"  , .length = 1 }, /* done: needs reviewing */
+    { .fun = opcode_fmulsu,  .name = "FMULSU" , .length = 1 }, /* done: needs reviewing */
+    { .fun = opcode_rjmp,    .name = "RJMP"   , .length = 1 },
+    { .fun = opcode_ijmp,    .name = "IJMP"   , .length = 1 }, /* done: needs reviewing */
+    { .fun = opcode_default, .name = "EIJMP"  , .length = 1 },
+    { .fun = opcode_elpm,    .name = "ELPM"   , .length = 1 },
+    { .fun = opcode_jmp,     .name = "JMP"    , .length = 1 },
+    { .fun = opcode_rcall,   .name = "RCALL"  , .length = 1 }, /* done: needs reviewing */
+    { .fun = opcode_icall,   .name = "ICALL"  , .length = 1 }, /* done: needs reviewing */
+    { .fun = opcode_default, .name = "EICALL" , .length = 1 },
+    { .fun = opcode_call,    .name = "CALL"   , .length = 1 },
+    { .fun = opcode_ret,     .name = "RET"    , .length = 1 },
+    { .fun = opcode_default, .name = "RETI"   , .length = 1 },
+    { .fun = opcode_default, .name = "CPSE"   , .length = 1 },
+    { .fun = opcode_cbi,     .name = "CBI"    , .length = 1 }, /* done: needs reviewing */
+    { .fun = opcode_cp,      .name = "CP"     , .length = 1 },
+    { .fun = opcode_cpc,     .name = "CPC"    , .length = 1 },
+    { .fun = opcode_cpi,     .name = "CPI"    , .length = 1 },
+    { .fun = opcode_ror,     .name = "ROR"    , .length = 1 }, /* done: needs reviewing */
+    { .fun = opcode_default, .name = "SBRC"   , .length = 1 },
+    { .fun = opcode_default, .name = "SBRS"   , .length = 1 },
+    { .fun = opcode_default, .name = "SBIC"   , .length = 1 },
+    { .fun = opcode_default, .name = "SBIS"   , .length = 1 },
     // BRBS s : BRCS, BRLO, BREQ, BRMI, BRVS, BRLT, BRHS, BRTS & BRIE
-    { .fun = opcode_brbs,    .name = "BRBS"   }, /* done: needs reviewing */
+    { .fun = opcode_brbs,    .name = "BRBS"   , .length = 1 }, /* done: needs reviewing */
     // BRBC s : BRCC, BRSH, BRNE, BRPL, BRVC, BRGE, BRHC, BRTC & BRID
-    { .fun = opcode_brbc,    .name = "BRBC"   }, /* done: needs reviewing */
-    { .fun = opcode_bld,     .name = "BLD"    },
-    { .fun = opcode_bst,     .name = "BST"    },
-    { .fun = opcode_mov,     .name = "MOV"    },
-    { .fun = opcode_movw,    .name = "MOVW"   },
-    { .fun = opcode_nop,     .name = "NOP"    }, /* done: needs reviewing */
-    { .fun = opcode_ldi,     .name = "LDI"    },
-    { .fun = opcode_lds,     .name = "LDS"    }, /* done: needs reviewing */
-    { .fun = opcode_ld,      .name = "LD"     }, /* LD X */
-    { .fun = opcode_ldd,     .name = "LDD"    }, /* LD Y / Z */
-    { .fun = opcode_default, .name = "LPM"    },
-    { .fun = opcode_lsr,     .name = "LSR"    }, /* done: needs reviewing */
-    { .fun = opcode_out,     .name = "OUT"    },
-    { .fun = opcode_pop,     .name = "POP"    },
-    { .fun = opcode_push,    .name = "PUSH"   },
-    { .fun = opcode_sbi,     .name = "SBI"    }, /* done: needs reviewing */
+    { .fun = opcode_brbc,    .name = "BRBC"   , .length = 1 }, /* done: needs reviewing */
+    { .fun = opcode_bld,     .name = "BLD"    , .length = 1 },
+    { .fun = opcode_bst,     .name = "BST"    , .length = 1 },
+    { .fun = opcode_mov,     .name = "MOV"    , .length = 1 },
+    { .fun = opcode_movw,    .name = "MOVW"   , .length = 1 },
+    { .fun = opcode_nop,     .name = "NOP"    , .length = 1 }, /* done: needs reviewing */
+    { .fun = opcode_ldi,     .name = "LDI"    , .length = 1 },
+    { .fun = opcode_lds,     .name = "LDS"    , .length = 1 }, /* done: needs reviewing */
+    { .fun = opcode_ld,      .name = "LD"     , .length = 1 }, /* LD X */
+    { .fun = opcode_ldd,     .name = "LDD"    , .length = 1 }, /* LD Y / Z */
+    { .fun = opcode_default, .name = "LPM"    , .length = 1 },
+    { .fun = opcode_lsr,     .name = "LSR"    , .length = 1 }, /* done: needs reviewing */
+    { .fun = opcode_out,     .name = "OUT"    , .length = 1 },
+    { .fun = opcode_pop,     .name = "POP"    , .length = 1 },
+    { .fun = opcode_push,    .name = "PUSH"   , .length = 1 },
+    { .fun = opcode_sbi,     .name = "SBI"    , .length = 1 }, /* done: needs reviewing */
     // BSET s : SEC, SEZ, SEN, SEV, SES, SEH, SET & SEI
-    { .fun = opcode_bset,    .name = "BSET"   }, /* done: needs reviewing */
-    { .fun = opcode_default, .name = "SR"     },
-    { .fun = opcode_st,      .name = "ST"     },
-    { .fun = opcode_std,     .name = "STD"    },
-    { .fun = opcode_sts,     .name = "STS"    },
-    { .fun = opcode_default, .name = "SWAP"   },
-    { .fun = opcode_default, .name = "WDR"    }
+    { .fun = opcode_bset,    .name = "BSET"   , .length = 1 }, /* done: needs reviewing */
+    { .fun = opcode_default, .name = "SR"     , .length = 1 },
+    { .fun = opcode_st,      .name = "ST"     , .length = 1 },
+    { .fun = opcode_std,     .name = "STD"    , .length = 1 },
+    { .fun = opcode_sts,     .name = "STS"    , .length = 1 },
+    { .fun = opcode_default, .name = "SWAP"   , .length = 1 },
+    { .fun = opcode_default, .name = "WDR"    , .length = 1 }
 };
 
 
@@ -2337,6 +2341,19 @@ static int opcode_pop(uint16_t opcode, uint16_t insn)
     return opcode;
 }
 
+/* static */ int opcode_sbrc(uint16_t UNUSED opcode, uint16_t UNUSED insn)
+{
+  /*
+      next_insn = atmega128_flash_read_short( PC + 1 );
+      MCU_ALU.skip_execute = 1;
+      length = extract_opcode( next_insn );
+      MCU_ALU.skip_execute = 0;
+      PC = PC + length;
+      ...
+  */
+  return 0;
+}
+
 /* ************************************************** */
 /* ************************************************** */
 /* ************************************************** */
@@ -2419,8 +2436,9 @@ void atmega128_alu_reset(void)
     mcu_set_pc_next( MCU_BOOT_ADDRESS );
     SR = 0;
 
-    MCU_ALU.interrupts = 0;
-    MCU_ALU.signal     = 0;
+    MCU_ALU.skip_execute = 0;
+    MCU_ALU.interrupts   = 0;
+    MCU_ALU.signal       = 0;
 }
 
 /* ************************************************** */

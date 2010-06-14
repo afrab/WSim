@@ -56,6 +56,7 @@ struct atmega128_alu_t {
 
   uint16_t         pc;
   uint16_t         next_pc;
+  uint16_t         skip_execute;
 
   int              interrupts;
   int              interrupt_vector;

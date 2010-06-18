@@ -3,138 +3,412 @@
     "/usr/share/sgml/docbook/dtd/4.5/docbookx.dtd">
 
 <book lang="en">
-	<bookinfo>
-		<title>WSim Hardware Platform Simulator</title>
-		<copyright><year>2005</year><holder>Worldsens</holder></copyright>
-		<subtitle>Tutorial</subtitle>
-		<authorgroup>
-			<author>
-				<firstname>Antoine</firstname>
-				<surname>Fraboulet</surname>
-			<affiliation>
-			  <orgname>INRIA Rhône Alpes</orgname>
-			  <orgdiv>Amazones Project</orgdiv>
-			  <address>
-			    CITI Laboratory
-			    Domaine Scientifique de la Doua, INSA de Lyon
-			    Bâtiment Claude Chappe 
-			    6, avenue des Arts	
-			    69621 Villeurbanne Cedex
-			    France
-			  </address>
-			</affiliation>
-			</author>
-		</authorgroup>
-		<revhistory>
-			<revision>
-				<revnumber>1.0</revnumber><date>2009-10-07</date>
-				<revremark>First Draft</revremark>
-			</revision>
-		</revhistory>
-		<abstract>
-			<para>WSim tutorial on WSN430 using the eSimu energy consumption monitoring module.</para>
-		</abstract>
-	</bookinfo>
+  <bookinfo>
+    <title>WSim Hardware Platform Simulator</title>
+    <copyright><year>2005</year><holder>Worldsens</holder></copyright>
+    <subtitle>Tutorial</subtitle>
+    <authorgroup>
+      <author>
+	<firstname>Antoine</firstname>
+	<surname>Fraboulet</surname>
+	<affiliation>
+	  <orgname>INRIA Rhône Alpes</orgname>
+	  <orgdiv>Amazones Project</orgdiv>
+	  <address>
+	    CITI Laboratory
+	    Domaine Scientifique de la Doua, INSA de Lyon
+	    Bâtiment Claude Chappe 
+	    6, avenue des Arts	
+	    69621 Villeurbanne Cedex
+	    France
+	  </address>
+	</affiliation>
+      </author>
+    </authorgroup>
+    <revhistory>
+      <revision>
+	<revnumber>0.0</revnumber><date>2009-10-07</date>
+	<revremark>First Draft</revremark>
+      </revision>
+      <revision>
+	<revnumber>1.0</revnumber><date>2010-06-17</date>
+	<revremark>Update, first public version</revremark>
+      </revision>
+    </revhistory>
+    <abstract>
+      <para>
+	WSim tutorial on WSN430 using the eSimu energy consumption
+	and performance monitoring module.
+      </para>
+    </abstract>
+  </bookinfo>
 
 <!-- ============================================================ -->
 <!-- ============================================================ -->
 <!-- ============================================================ -->
 
-	<chapter id="introduction">
-	  <title>Introduction</title>
-	  
-	  <para>This tutorial is intended to get you started
-	    with WSim and eSimu. It shows
-	    you the basics of  executing, debugging and
-	    interpreting results of applications written for
-	    the target microcontrollers.
-	  </para>
-	  
-	  <para>The tutorial uses the wsn430 sensor node but any
-	    MSP430 based platform will run the same way with regards
-	    to energy estimation.
-	  </para>
+<chapter id="introduction">
+  <title>Introduction</title>
+  
+  <para>This tutorial is intended to get you started
+    with WSim and eSimu. It shows
+    you the basics of  executing, debugging and
+    interpreting results of applications written for
+    the target microcontrollers.
+  </para>
+  
+  <para>The tutorial uses the wsn430 sensor node but any
+    MSP430 based platform will run the same way with regards
+    to performance and energy estimation.
+  </para>
 
-	  <para>This tutorial assumes that you are familiar with the basics
-	    of WSim and its associated tools. If not please first visit the
-	    WSim main tutorial.
-	  </para>
-	  
-	  <para>
-	    <itemizedlist mark="bullet" spacing="normal">
-	      <listitem>
-		<simpara>
-		  WSim <ulink url="http://wsim.gforge.inria.fr/">WSim website</ulink>.
-		</simpara>
-	      </listitem>
-	      <listitem>
-		<simpara>
-		  eSimu web site <ulink url="http://esimu.gforge.inria.fr//">eSimu website</ulink>.
-		</simpara>
-	      </listitem>
-	      <listitem>
-		<simpara>
-		  WSim hands-on tutorial <ulink url="http://wsim.gforge.inria.fr/tutorials/wsim/">WSim tutorial</ulink>.
-		</simpara>
-	      </listitem>
-	    </itemizedlist>
-	  </para>
-	</chapter>
-	
-	<!-- ============================================================ -->
-	<!-- ============================================================ -->
-	<!-- ============================================================ -->
+  <para>This tutorial assumes that you are familiar with the basics
+    of WSim and its associated tools. If not please first visit the
+    WSim main tutorial.
+  </para>
+  
+  <para>
+    <itemizedlist mark="bullet" spacing="normal">
+      <listitem>
+	<simpara>
+	  WSim <ulink url="http://wsim.gforge.inria.fr/">WSim website</ulink>.
+	</simpara>
+      </listitem>
+      <listitem>
+	<simpara>
+	  eSimu web site <ulink url="http://esimu.gforge.inria.fr//">eSimu website</ulink>.
+	</simpara>
+      </listitem>
+      <listitem>
+	<simpara>
+	  WSim hands-on tutorial <ulink url="http://wsim.gforge.inria.fr/tutorials/wsim/">WSim tutorial</ulink>.
+	</simpara>
+      </listitem>
+    </itemizedlist>
+  </para>
+
+  <para>
+  Once the complete toolchain has been setup this tutorial will describe how to 
+  gather performance estimation and energy consumption data from distributed application
+  running on top of WSim.
+  </para>
+</chapter>
+
+<!-- ============================================================ -->
+<!-- ============================================================ -->
+<!-- ============================================================ -->
 
 <chapter>
-  <title>Simulation</title>
+  <title>Simulation tools and environment</title>
   <para>
-    esimu
-    elfutils-libelf > 0.145
-    libelf > 0.8.13
-    zlib
-    libwarf > February 2010 http://reality.sgiweb.org/davea/dwarf.html
-    libz
+    In order to use eSimu with WSim your toolchain must be able to generate 
+    <ulink url="http://reality.sgiweb.org/davea/dwarf.html">Dwarf</ulink> debug
+    information format in the ELF file.
   </para>
+  <para>
+    WSim have been tested and is known to work for MSP430 microcontrollers with the following configuration:
+    <itemizedlist mark="bullet" spacing="normal">
+      <listitem>
+	<simpara> MSP GCC 4</simpara>
+      </listitem>
+      <listitem>
+	<simpara> elfutils-libelf > 0.145 </simpara>
+      </listitem>
+      <listitem>
+	<simpara> libwarf > February 2010 </simpara>
+      </listitem>
+    </itemizedlist>
+  </para>
+
+
+  <section id="toolchain_compiler">
+    <title>Compiler Version and Dwarf Debug Information</title>
+    
+    <para>
+      To test the version of your MSPGCC and check that you are at least using version 4.x
+      you can use the <computeroutput>--version</computeroutput>
+      <programlisting>
+	<computeroutput>     
+shell$ msp430-gcc --version
+msp430-gcc (MSPGCC4_r4-20100210) 4.4.3
+Copyright (C) 2010 Free Software Foundation, Inc.
+This is free software; see the source for copying conditions.  There is NO
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+	  </computeroutput>
+	</programlisting>
+    </para>
+    <para>
+      Dwarf information can be verified in ELF file using the msp430-readelf.
+      Your elf file must contain valid debug information that can be found in debug_*
+      sections of the file. The following example shows a valid elf file containing
+      dwarf debug information section.
+      <programlisting>
+	<computeroutput>     
+shell$ msp430-readelf -S wsn430-demo.elf 
+There are 17 section headers, starting at offset 0x1c210:
+
+Section Headers:
+  [Nr] Name              Type            Addr     Off    Size   ES Flg Lk Inf Al
+  [ 0]                   NULL            00000000 000000 000000 00      0   0  0
+  [ 1] .text             PROGBITS        00004000 0000b4 0035fa 00  AX  0   0  2
+  [ 2] .data             PROGBITS        00001100 0036ae 00000c 00  WA  0   0  2
+  [ 3] .bss              NOBITS          0000110c 0000b4 000050 00  WA  0   0  2
+  [ 4] .vectors          PROGBITS        0000ffe0 0036ba 000020 00  AX  0   0  1
+  [ 5] .debug_aranges    PROGBITS        00000000 0036da 00008c 00      0   0  1
+  [ 6] .debug_pubnames   PROGBITS        00000000 003766 004dc7 00      0   0  1
+  [ 7] .debug_info       PROGBITS        00000000 00852d 00d1d2 00      0   0  1
+  [ 8] .debug_abbrev     PROGBITS        00000000 0156ff 0011aa 00      0   0  1
+  [ 9] .debug_line       PROGBITS        00000000 0168a9 002524 00      0   0  1
+  [10] .debug_frame      PROGBITS        00000000 018dce 0009cc 00      0   0  2
+  [11] .debug_str        PROGBITS        00000000 01979a 001ab2 01  MS  0   0  1
+  [12] .debug_loc        PROGBITS        00000000 01b24c 000e53 00      0   0  1
+  [13] .debug_ranges     PROGBITS        00000000 01c09f 0000c4 00      0   0  1
+  [14] .shstrtab         STRTAB          00000000 01c163 0000ab 00      0   0  1
+  [15] .symtab           SYMTAB          00000000 01c4b8 002040 10     16 346  4
+  [16] .strtab           STRTAB          00000000 01e4f8 001250 00      0   0  1
+Key to Flags:
+  W (write), A (alloc), X (execute), M (merge), S (strings)
+  I (info), L (link order), G (group), x (unknown)
+  O (extra OS processing required) o (OS specific), p (processor specific)
+	</computeroutput>
+      </programlisting>
+
+      If you still use gcc3 or a version without dwarf debug info your elf sections
+      will look like these ones. The only debug information are the symbol table (.symtab)
+      and eSimu won't work on your file. You must upgrade your toolchain.
+      
+      <programlisting>
+	<computeroutput>     
+shell$ msp430-readelf -S wsn430-demo.elf 
+There are 10 section headers, starting at offset 0x14a30:
+
+Section Headers:
+  [Nr] Name              Type            Addr     Off    Size   ES Flg Lk Inf Al
+  [ 0]                   NULL            00000000 000000 000000 00      0   0  0
+  [ 1] .text             PROGBITS        00004000 0000b4 002f2c 00  AX  0   0  2
+  [ 2] .data             PROGBITS        00001100 002fe0 00001c 00  WA  0   0  2
+  [ 3] .bss              NOBITS          0000111c 0000b4 000036 00  WA  0   0  2
+  [ 4] .vectors          PROGBITS        0000ffe0 002ffc 000020 00  AX  0   0  1
+  [ 5] .stab             PROGBITS        00000000 00301c 00adac 0c      6   0  4
+  [ 6] .stabstr          STRTAB          00000000 00ddc8 006c21 00      0   0  1
+  [ 7] .shstrtab         STRTAB          00000000 0149e9 000044 00      0   0  1
+  [ 8] .symtab           SYMTAB          00000000 014bc0 001e10 10      9 312  4
+  [ 9] .strtab           STRTAB          00000000 0169d0 0012ad 00      0   0  1
+Key to Flags:
+  W (write), A (alloc), X (execute), M (merge), S (strings)
+  I (info), L (link order), G (group), x (unknown)
+  O (extra OS processing required) o (OS specific), p (processor specific)
+	</computeroutput>
+      </programlisting>
+    </para>
+  </section>
+
+  <section id="toolchain_esimu">
+    <title>Building eSimu</title>
+    <para>
+      eSimu is build around two libraries <computeroutput>ecalib</computeroutput> 
+      and <computeroutput>etracelib</computeroutput>. The build process is 
+      straightforward if you have the right <computeroutput>libdwarf</computeroutput> version, 
+      <computeroutput>flex</computeroutput> and <computeroutput>bison</computeroutput>.
+
+      <programlisting>
+	<computeroutput>
+$ (cd ecalib ; make)
+$ (cd etracelib ; make)
+$ (cd esimu-ng ; make)
+	</computeroutput>
+      </programlisting>
+    </para>
+  </section>
+
+  <section id="toolchain_wsim">
+    <title>Compiling WSim with eSimu option</title>
+    <para>
+      The eSimu backend is not yet enabled by default in the WSim build process. A special
+      version of WSim, linked to eSimu libtrace library needs to be generated.
+    </para>
+    <para>
+      Once the eSimu libraries and binary have been generated, you can compile a new version
+      of your simulator using the following <computeroutput>configure</computeroutput> options.
+      <programlisting>
+	<computeroutput>
+$ configure [...] --enable-etrace \
+          --with-etracelib-prefix=[path-to-esimu-src]/etracelib
+	</computeroutput>
+      </programlisting>
+      Important parts of the command line are the <computeroutput>etrace</computeroutput> 
+      and <computeroutput>etracelib</computeroutput> options.
+    </para>
+    <para>
+      The build process will produce wsim-* binaries as usual but they will contain to more
+      options with regards to a standard build:
+      <programlisting>
+	<computeroutput>
+   --esimu[=arg]          : enable energy trace
+   --esimu-start          : enable energy trace from simulation start
+	</computeroutput>
+      </programlisting>
+    </para>
+  </section>
 
 </chapter>
 
-	<!-- ============================================================ -->
-	<!-- ============================================================ -->
-	<!-- ============================================================ -->
+<!-- ============================================================ -->
+<!-- ============================================================ -->
+<!-- ============================================================ -->
 
 <chapter>
-  <title>Logfiles and trace files</title>
+  <title>Log Files and Trace Files</title>
   <para>
-    Wsim can generate a lot of output and traces to monitor and benchmark 
-    embedded application behavior. Both logs and traces can be used to 
-    retreive information from the application running on top of the msp430
-    and its interaction with the ADC. Logfiles are more often used while
-    debugging I/O while traces and VCD output are used for performance
-    estimation and frequence/latency parameters tuning.
+    cc
   </para>
+
+  <section id="esimu_full">
+    <title>Full Simulation Estimation</title>
+    <para>
+      cc
+    </para>
+  </section>
+
+  <section id="esimu_partial">
+    <title>Windowed Estimation</title>
+    <para>
+      cc
+    </para>
+  </section>
+</chapter>
+
+<!-- ============================================================ -->
+<!-- ============================================================ -->
+<!-- ============================================================ -->
+
+<chapter>
+  <title>Generating Profiles</title>
+
+  <section id="esimu_prof">
+    <title>Source Code Annotation</title>
+    <para>
+      cc
+    </para>
+  </section>
+
+  <section id="esimu_tlin">
+    <title>Linear Profiles</title>
+    <para>
+      cc
+    </para>
+  </section>
 
 </chapter>
 
-	<!-- ============================================================ -->
-	<!-- ============================================================ -->
-	<!-- ============================================================ -->
+<!-- ============================================================ -->
+<!-- ============================================================ -->
+<!-- ============================================================ -->
 
 <chapter>
   <title>Sources and examples</title>
   <para>
+      <programlisting>
+	<computeroutput>
 #define MOV_R4R4()   __asm__ __volatile__ ("mov r4,r4")
 #define ESIMU_START MOV_R4R4
 
 #define MOV_R5R5()   __asm__ __volatile__ ("mov r5,r5")
 #define ESIMU_STOP  MOV_R5R5
+	</computeroutput>
+      </programlisting>
   </para>
 </chapter>
 
+<!-- ============================================================ -->
+<!-- ============================================================ -->
+<!-- ============================================================ -->
 
+<chapter id="links">
+  <title>Useful links and resources</title>
 
-	<!-- ============================================================ -->
-	<!-- ============================================================ -->
-	<!-- ============================================================ -->
+  <para>Cross compilers links</para>
+  <para>
+    <itemizedlist mark="bullet" spacing="normal">
+      <listitem>
+	<simpara>
+	  Gcc4 for MSP430: 
+	  <ulink url="http://mspgcc4.sf.net/">mspgcc</ulink>.
+	</simpara>
+      </listitem>
+      <listitem>
+	<simpara>
+	  Dwarf Debugging Information Format page: 
+	  <ulink url="http://reality.sgiweb.org/davea/dwarf.html">libdwarf</ulink>
+	</simpara>
+      </listitem>
+      <listitem>
+	<simpara>
+	  Elf Utils page:
+	  <ulink url="https://fedorahosted.org/elfutils/">ELF Utils</ulink>
+	</simpara>
+      </listitem>
+    </itemizedlist>
+  </para>
+
+  <para>Simulation tools</para>
+  <para>
+    <itemizedlist mark="bullet" spacing="normal">
+      <listitem>
+	<simpara>
+	  WSim
+	  <ulink url="http://wsim.gforge.inria.fr/">WSim website</ulink>.
+	</simpara>
+      </listitem>
+      <listitem>
+	<simpara>
+	  WSNet2 
+	  <ulink url="http://wsnet.gforge.inria.fr/">WSNet2 website</ulink>.
+	</simpara>
+      </listitem>
+      <listitem>
+	<simpara>
+	  eSimu <ulink url="http://esimu.gforge.inria.fr/">eSimu website</ulink>.
+	</simpara>
+      </listitem>
+    </itemizedlist>
+  </para>
+
+  <para>External tools</para>
+  <para>
+    <itemizedlist mark="bullet" spacing="normal">
+      <listitem>
+	<simpara>
+	  Gtkwave homepage 
+	  <ulink url="http://gtkwave.sourceforge.net/">Gtkwave</ulink>.
+	</simpara>
+      </listitem>
+      <listitem>
+	<simpara>
+	  GtkWave for windows 
+	  <ulink url="http://www.dspia.com/gtkwave.html">Gtkwave</ulink>.
+	</simpara>
+      </listitem>
+      <listitem>
+	<simpara>
+	  kCacheGrind 
+	  <ulink url="http://kcachegrind.sourceforge.net/html/Home.html">kCachegrind</ulink>.
+	</simpara>
+      </listitem>
+      <listitem>
+	<simpara>
+	  Gnuplot 
+	  <ulink url="http://www.gnuplot.info/">Gnuplot</ulink>.
+	</simpara>
+      </listitem>
+    </itemizedlist>
+  </para>
+
+</chapter>
+
+<!-- ============================================================ -->
+<!-- ============================================================ -->
+<!-- ============================================================ -->
 
 </book>
 

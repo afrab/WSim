@@ -58,7 +58,9 @@ int tracer_dirmode_init(tracer_t *t, const char* pattern)
     }
       
   strncpy(t->dir_pattern,pattern,FILENAME_MAX);
+  t->dir_pattern[FILENAME_MAX - 1] = '\0';
   strncpy(t->in_filename,"",FILENAME_MAX);
+  t->in_filename[FILENAME_MAX - 1] = '\0';
   return 0;
 }
 

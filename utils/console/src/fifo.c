@@ -30,6 +30,14 @@
 
 #include "fifo.h"
 
+#if !defined(strncpyz)
+#define strncpyz(dst,src,size)			\
+  do {						\
+    strncpy(dst,src,size);			\
+    dst[size - 1] = '\0';			\
+  } while (0);
+#endif
+
 /* ************************************************** */     
 /* ************************************************** */     
 /* ************************************************** */     
@@ -81,8 +89,8 @@ get_system_fifo(char local_name[MAX_FILENAME], char remote_name[MAX_FILENAME])
 		{
 		  if (ttyname(fd) != NULL && ptsname(fd) != NULL)
 		    {
-		      strncpy(local_name ,ttyname(fd),MAX_FILENAME);
-		      strncpy(remote_name,ptsname(fd),MAX_FILENAME);
+		      strncpyz(local_name ,ttyname(fd),MAX_FILENAME);
+		      strncpyz(remote_name,ptsname(fd),MAX_FILENAME);
 		      return fd;
 		    }
 		}
@@ -152,8 +160,8 @@ fifo_open   (const char *filename)
 
   fifo->fd_in  = fd;
   fifo->fd_out = fd; 
-  strncpy(fifo->local_name,filename,MAX_FILENAME);
-  strncpy(fifo->remote_name,"unknown",MAX_FILENAME);
+  strncpyz(fifo->local_name,filename,MAX_FILENAME);
+  strncpyz(fifo->remote_name,"unknown",MAX_FILENAME);
   return fifo;
 }
 

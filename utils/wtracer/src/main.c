@@ -20,6 +20,14 @@
 #include "drv_gplot.h"
 #include "drv_sitc.h"
 
+#if !defined(strncpyz)
+#define strncpyz(dst,src,size)			\
+  do {						\
+    strncpy(dst,src,size);			\
+    dst[size - 1] = '\0';			\
+  } while (0);
+#endif
+
 /* ************************************************** */
 /* ************************************************** */
 /* ************************************************** */
@@ -58,9 +66,9 @@ int options_parse(tracer_t *t, int argc, char* argv[])
 {
   int c;
   
-  strncpy(t->in_filename,  "wsim.trc", FILENAME_MAX);
-  strncpy(t->in_Dir,       ".",        FILENAME_MAX);
-  strncpy(t->out_filename, "wsim.fmt", FILENAME_MAX);
+  strncpyz(t->in_filename,  "wsim.trc", FILENAME_MAX);
+  strncpyz(t->in_Dir,       ".",        FILENAME_MAX);
+  strncpyz(t->out_filename, "wsim.fmt", FILENAME_MAX);
   t->mode            = TRC_NONE;
   t->out_signal_name = "all";
   t->out_format_name = "raw";
@@ -107,7 +115,7 @@ int options_parse(tracer_t *t, int argc, char* argv[])
 	    ERROR("tracer: cannot combine --in, --dir and --multi options\n");
 	    return 1;
 	  }
-	  strncpy(t->in_filename,optarg,FILENAME_MAX);
+	  strncpyz(t->in_filename,optarg,FILENAME_MAX);
 	  t->mode            = TRC_FILE;
 	  break;
 	case 'm':
@@ -122,11 +130,11 @@ int options_parse(tracer_t *t, int argc, char* argv[])
 	    ERROR("tracer: cannot combine --in, --dir and --multi options\n");
 	    return 1;
 	  }
-	  strncpy(t->in_Dir,optarg,FILENAME_MAX);
+	  strncpyz(t->in_Dir,optarg,FILENAME_MAX);
 	  t->mode            = TRC_DIR;
 	  break;
 	case 'o':
-	  strncpy(t->out_filename,optarg,FILENAME_MAX);
+	  strncpyz(t->out_filename,optarg,FILENAME_MAX);
 	  break;
 	case 'f':
 	  t->out_format_name = optarg;
@@ -305,7 +313,7 @@ int main(int argc, char* argv[])
 	    while (next_arg < argc)
 	      {
 		DMSG(trc,"tracer: processing file %s\n",argv[next_arg]);
-		strncpy(trc->in_filename,argv[next_arg],FILENAME_MAX);
+		strncpyz(trc->in_filename,argv[next_arg],FILENAME_MAX);
 		if (trc->merge == 0)
 		  {
 		    snprintf(trc->out_filename,FILENAME_MAX,"%s.%s", trc->in_filename, drv->ext);

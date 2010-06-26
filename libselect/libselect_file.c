@@ -51,8 +51,8 @@ int libselect_get_system_fifo(char local_name[MAX_FILENAME], char remote_name[MA
 		{
 		  if (ttyname(fd) != NULL && ptsname(fd) != NULL)
 		    {
-		      strncpy(local_name ,ttyname(fd),MAX_FILENAME);
-		      strncpy(remote_name,ptsname(fd),MAX_FILENAME);
+		      strncpyz(local_name ,ttyname(fd),MAX_FILENAME);
+		      strncpyz(remote_name,ptsname(fd),MAX_FILENAME);
 		      return fd;
 		    }
 		}

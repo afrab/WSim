@@ -15,6 +15,7 @@
 #include "liblogger/logger.h"
 #include "libselect/libselect.h"
 
+#include "arch/common/missing.h"
 #include "console_utils.h"
 #include "console_cmd.h"
 #include "console.h"
@@ -82,7 +83,7 @@ static int console_init(console_state cs)
   console_cmd_add(cs,&cmd_run_insn);
   console_cmd_add(cs,&cmd_run_time);
 
-  strncpy(cs->ps1,"wsim > ",CON_PS1_MAX);
+  strncpyz(cs->ps1,"wsim > ",CON_PS1_MAX);
 
   cs->fd_input  = 0;
   cs->fd_output = 1;

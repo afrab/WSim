@@ -15,6 +15,7 @@
 #include <string.h>
 #include <libgen.h>
 
+#include "arch/common/missing.h"
 #include "arch/common/debug.h"
 #include "config.h"
 #include "options.h"
@@ -461,12 +462,12 @@ void options_read_cmdline(struct options_t *s, int *argc, char *argv[])
     {
       s->do_dump = 1;
       if (dump_opt.value)
-	strncpy(s->dumpfile,dump_opt.value,MAX_FILENAME);
+	strncpyz(s->dumpfile,dump_opt.value,MAX_FILENAME);
     }
 
   if (logfile_opt.isset)
     {
-      strncpy(s->logfilename,logfile_opt.value,MAX_FILENAME);
+      strncpyz(s->logfilename,logfile_opt.value,MAX_FILENAME);
     }
 
   /* mode */
@@ -568,7 +569,7 @@ void options_read_cmdline(struct options_t *s, int *argc, char *argv[])
     {
       s->do_trace = 1;
       if (trace_opt.value)
-	strncpy(s->tracefile,trace_opt.value,MAX_FILENAME);
+	strncpyz(s->tracefile,trace_opt.value,MAX_FILENAME);
     }
 
 
@@ -576,7 +577,7 @@ void options_read_cmdline(struct options_t *s, int *argc, char *argv[])
     {
       s->do_etrace = 1;
       if (etrace_opt.value)
-	strncpy(s->etracefile,etrace_opt.value,MAX_FILENAME);
+	strncpyz(s->etracefile,etrace_opt.value,MAX_FILENAME);
     }
 
   if (etrace_start_opt.isset)
@@ -589,7 +590,7 @@ void options_read_cmdline(struct options_t *s, int *argc, char *argv[])
     {
       s->do_logpkt = 1;
       s->logpkt = NULL;
-      strncpy(s->logpktfilename,logpktfile_opt.value,MAX_FILENAME);
+      strncpyz(s->logpktfilename,logpktfile_opt.value,MAX_FILENAME);
     }
 
   if (logpkt_opt.isset)
@@ -619,7 +620,7 @@ void options_read_cmdline(struct options_t *s, int *argc, char *argv[])
     {
       s->do_preload = 1;
       if (preload_opt.value)
-	strncpy(s->preload, preload_opt.value, MAX_FILENAME);
+	strncpyz(s->preload, preload_opt.value, MAX_FILENAME);
     }
 
   if (noelf_opt.isset)
@@ -673,7 +674,7 @@ void options_read_cmdline(struct options_t *s, int *argc, char *argv[])
   OPT_DMSG("parseindex = %d, argc = %d\n",parseindex,*argc);
   if (parseindex < *argc)
     {
-      strncpy(s->progname,argv[parseindex],MAX_FILENAME);
+      strncpyz(s->progname,argv[parseindex],MAX_FILENAME);
     }
   else
     {

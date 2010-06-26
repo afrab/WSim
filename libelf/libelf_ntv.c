@@ -192,7 +192,7 @@ elf32_t libelf_open(const char* filename)
 
   VERBOSE(VSYS,"libelf: memory allocation ok\n");
 
-  strncpy(e->file_name,filename,ELF_MAX_FILENAME);
+  strncpyz(e->file_name,filename,ELF_MAX_FILENAME);
   e->file_size = s.st_size;
 
   if ((f = fopen(filename,"rb")) == NULL)
@@ -530,7 +530,7 @@ static int libelf_read_elf_section_headers(elf32_t elf)
       VERBOSE(VELF,"libelf:sh: [%2d] ",i);
       if (elf->elf_header.shstrndx)
 	{
-	  strncpy(buff, libelf_get_elf_section_name(elf,i), 100);
+	  strncpyz(buff, libelf_get_elf_section_name(elf,i), 100);
 	}
       else
 	{
@@ -630,7 +630,7 @@ static int libelf_read_elf_program_headers(elf32_t elf)
 
       if (elf->elf_program[i].p_type <= elf_ph_type_PHDR)
 	{
-	  strncpy(buff,elf_ph_str_type[elf->elf_program[i].p_type],100);
+	  strncpyz(buff,elf_ph_str_type[elf->elf_program[i].p_type],100);
 	}
       else
 	{

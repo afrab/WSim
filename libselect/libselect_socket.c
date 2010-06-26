@@ -135,7 +135,7 @@ void READ1(char *var, char* delim, int size, int n)
   char *p;
   if ((p = strtok(NULL,delim)) != NULL)
     {
-      strncpy(var, p, size);
+      strncpyz(var, p, size);
       VERBOSE(2,"libselect:skt: %s\n",var);
     }
   else
@@ -155,7 +155,7 @@ libselect_skt_init(struct libselect_socket_t *skt, char *name_org)
   char delim[] = ":";
   char name[MAX_URL];
 
-  strncpy(name,name_org,MAX_URL);
+  strncpyz(name,name_org,MAX_URL);
   skt->socket_listen = -1;
   skt->socket        = -1;
   skt->port          =  0;
@@ -175,8 +175,8 @@ libselect_skt_init(struct libselect_socket_t *skt, char *name_org)
 	    char hostname[MAX_HOSTNAME];
 	    char port[MAX_PORT];
 
-	    strncpy(hostname, strtok(NULL,delim), MAX_HOSTNAME);
-	    strncpy(port    , strtok(NULL,delim), MAX_PORT);
+	    strncpyz(hostname, strtok(NULL,delim), MAX_HOSTNAME);
+	    strncpyz(port    , strtok(NULL,delim), MAX_PORT);
 	    skt->port = atoi(port);
 
 	    DMSG_SKT("wsim:libselect_socket:init: tcp server creation for %s:%d\n",hostname,atoi(port));
@@ -195,8 +195,8 @@ libselect_skt_init(struct libselect_socket_t *skt, char *name_org)
 
 	    char hostname[MAX_HOSTNAME];
 	    char port[MAX_PORT];
-	    strncpy(hostname, strtok(NULL,delim), MAX_HOSTNAME);
-	    strncpy(port    , strtok(NULL,delim), MAX_PORT);
+	    strncpyz(hostname, strtok(NULL,delim), MAX_HOSTNAME);
+	    strncpyz(port    , strtok(NULL,delim), MAX_PORT);
 	    skt->port = atoi(port);
 
 	    if ((skt->socket = libselect_create_socket(SOCK_STREAM, "0.0.0.0", 0)) < 0)

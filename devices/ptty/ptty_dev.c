@@ -96,7 +96,7 @@ int ptty_add_options(int dev_num, int dev_id, const char *dev_name)
 
   opt_array[dev_id].dev_num = dev_num;
   opt_array[dev_id].dev_id  = dev_id;
-  strncpy(opt_array[dev_id].dev_name, dev_name, MAXNAME);
+  strncpyz(opt_array[dev_id].dev_name, dev_name, MAXNAME);
 
   opt_array[dev_id].io.longname    = str_build("%s_io", dev_name);
   opt_array[dev_id].io.type        = required_argument;

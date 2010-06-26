@@ -119,7 +119,7 @@ int libelf_set_section_info(int UNUSED level, int i,char *name, int addr, int of
     {
       ERROR("libelf: too much sections in elf file\n");
     }
-  strncpy(secinfo[i].name,name, SECTION_MAXNAME);
+  strncpyz(secinfo[i].name,name, SECTION_MAXNAME);
   secinfo[i].addr   = addr;
   secinfo[i].offset = offset;
   secinfo[i].size   = size;

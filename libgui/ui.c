@@ -116,7 +116,7 @@ int ui_create(int w, int h, int id)
     {
       if (title_opt.isset && (title_opt.value != NULL))
 	{
-	  strncpy(name, title_opt.value, MAX_TITLE_SIZE);
+	  strncpyz(name, title_opt.value, MAX_TITLE_SIZE);
 	}
       else
 	{
@@ -125,7 +125,7 @@ int ui_create(int w, int h, int id)
     }
   else
     {
-      strncpy(name, "WSim", MAX_TITLE_SIZE);
+      strncpyz(name, "WSim", MAX_TITLE_SIZE);
     }
 
   GUI_DATA_INTERNAL.backend = 

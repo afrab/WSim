@@ -25,4 +25,12 @@
 char *strtok_r(char *str, const char *delim, char **saveptr);
 #endif
 
+#if !defined(strncpyz)
+#define strncpyz(dst,src,size)			\
+  do {						\
+    strncpy(dst,src,size);			\
+    dst[size - 1] = '\0';			\
+  } while (0)
+#endif
+
 #endif

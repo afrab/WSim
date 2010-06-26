@@ -86,7 +86,7 @@ tracer_output_open(char *filename)
   char file[MAX_FILENAME];
   TRACER_BLOCK_THRESHOLD = TRACER_BLOCK_THRESHOLD_INIT;
 
-  strncpy(file,filename,MAX_FILENAME);
+  strncpyz(file,filename,MAX_FILENAME);
   if (strstr(file,"vcd:") == file)
     { 
       char* fptr = file + 4;
@@ -262,8 +262,8 @@ tracer_event_add_id(int width, const char* name, const char* module)
       ERROR("tracer: event id %d \"%s\" must have 0 < width < 65 bits\n",id,name);
     }
   
-  strncpy(tracer_id_name   [id], name,   TRACER_MAX_NAME_LENGTH - 1);
-  strncpy(tracer_id_module [id], module, TRACER_MAX_NAME_LENGTH - 1);
+  strncpyz(tracer_id_name   [id], name,   TRACER_MAX_NAME_LENGTH - 1);
+  strncpyz(tracer_id_module [id], module, TRACER_MAX_NAME_LENGTH - 1);
   tracer_width[id] = width;
 
   DMSG_TRACER("tracer:add:id: %02d=%-10s module=%-10s\n",id,name,module);

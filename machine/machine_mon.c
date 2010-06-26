@@ -315,7 +315,7 @@ void machine_monitor_set(char* args, elf32_t elf)
 	{ 
 	  continue;
 	}
-      strncpy(watchpoint[watchpoint_max].name,subtoken, MONITOR_MAX_VARIABLE_NAME);
+      strncpyz(watchpoint[watchpoint_max].name,subtoken, MONITOR_MAX_VARIABLE_NAME);
 
       /* HEXA:SIZE */
       if (subtoken[0] == '0')
@@ -409,7 +409,7 @@ void machine_modify_set(char* args, elf32_t elf)
 	{
 	  continue;
 	}
-      strncpy( v_name, subtoken, MONITOR_MAX_VARIABLE_NAME);
+      strncpyz( v_name, subtoken, MONITOR_MAX_VARIABLE_NAME);
 
       v_addr = 0;
       v_size = -1;
@@ -454,7 +454,7 @@ void machine_modify_set(char* args, elf32_t elf)
       if ((index = machine_monitor_find_by_addr(v_addr)) == -1)
 	{
 	  index = watchpoint_max++;
-	  strncpy(watchpoint[ index ].name, v_name, MONITOR_MAX_VARIABLE_NAME);
+	  strncpyz(watchpoint[ index ].name, v_name, MONITOR_MAX_VARIABLE_NAME);
 	  watchpoint[ index ].addr = v_addr;
 	  watchpoint[ index ].size = v_size;
 	  watchpoint[ index ].mode = MAC_WATCH_WRITE;

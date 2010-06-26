@@ -154,7 +154,7 @@ int spidev_dsp_device_create(int dev, int UNUSED id, const char *dev_name)
 
   machine.device[dev].state_size    = spidev_dsp_device_size();
   machine.device[dev].name          = malloc(DSP_NAME_MAX);
-  strncpy(machine.device[dev].name, dev_name, DSP_NAME_MAX);
+  strncpyz(machine.device[dev].name, dev_name, DSP_NAME_MAX);
 
   TRACER_SPIDEV_DSP_STATE  = tracer_event_add_id(8, "state"  , dev_name);
   TRACER_SPIDEV_DSP_STROBE = tracer_event_add_id(8, "strobe" , dev_name);

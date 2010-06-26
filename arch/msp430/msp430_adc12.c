@@ -118,7 +118,7 @@ int msp430_adc12_find_inputs()
   char name[MAX_FILENAME];
   int  j;
   int id;
-  strncpy(name, adc12_in_opt.value, MAX_FILENAME);
+  strncpyz(name, adc12_in_opt.value, MAX_FILENAME);
 
   /* --msp430_adc12=1:file,2:file,3:file ... */
 
@@ -160,7 +160,7 @@ int msp430_adc12_find_inputs()
 
       HW_DMSG_ADC12("msp430:adc12: channel %02d = %s\n",id, filename);
       msp430_adc12_channels_valid[id]    = ADC12_CHANN_PTR;
-      strncpy(msp430_adc12_channels_name[id], filename, MAX_FILENAME);
+      strncpyz(msp430_adc12_channels_name[id], filename, MAX_FILENAME);
     }
   return 0;
 }

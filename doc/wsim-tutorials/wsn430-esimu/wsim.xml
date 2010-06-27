@@ -109,13 +109,22 @@
     WSim have been tested and is known to work for MSP430 microcontrollers with the following configuration:
     <itemizedlist mark="bullet" spacing="normal">
       <listitem>
-	<simpara> MSP GCC 4</simpara>
+	<simpara> 
+	  MSP GCC 4 
+	  <ulink url="http://mspgcc4.sourceforge.net/">(link)</ulink></simpara>
       </listitem>
       <listitem>
-	<simpara> elfutils-libelf > 0.145 </simpara>
+	<simpara> 
+	  elfutils-libelf > 0.145 
+	  <ulink url="https://fedorahosted.org/elfutils/">(link)</ulink>
+	  <!-- https://fedorahosted.org/releases/e/l/elfutils/ -->
+	</simpara>
       </listitem>
       <listitem>
-	<simpara> libwarf > February 2010 </simpara>
+	<simpara> 
+	  libwarf > February 2010 
+	  <ulink url="http://reality.sgiweb.org/davea/dwarf.html">(link)</ulink>
+	</simpara>
       </listitem>
     </itemizedlist>
   </para>
@@ -244,8 +253,11 @@ $ configure [...] --enable-etrace \
       options with regards to a standard build:
       <programlisting>
 	<computeroutput>
+
+[...]
    --esimu[=arg]          : enable energy trace
    --esimu-start          : enable energy trace from simulation start
+[...]
 	</computeroutput>
       </programlisting>
     </para>

@@ -512,19 +512,21 @@ int wsnet2_tx(char data, double freq, int mod, double txdB, uint64_t delay, int 
     int len;
 
     /* put doubles into uint64_t variables for swap */
-    uint64_t *pfreq  = (uint64_t *) &freq;
-    uint64_t *ptxdB  = (uint64_t *) &txdB;
+    // uint64_t *pfreq  = (uint64_t *) &freq;
+    // uint64_t *ptxdB  = (uint64_t *) &txdB;
 
     /* format */
     pkt.byte_tx.type              =  WORLDSENS_C_BYTE_TX;
     pkt.byte_tx.node_id           =  wsens.id;
     pkt.byte_tx.period            =  MACHINE_TIME_GET_NANO() - wsens.l_rp;
     pkt.byte_tx.data              =  data;
-    pkt.byte_tx.freq              = *pfreq;
+    // pkt.byte_tx.freq             = *pfreq;
+    memcpy(&pkt.byte_tx.freq, &freq, sizeof(freq));
     pkt.byte_tx.antenna_id        =  wsens.radio[radio_id].antenna_id;
     pkt.byte_tx.wsnet_mod_id      =  wsnet_mod_id_map[mod];
     pkt.byte_tx.wsim_mod_id       =  mod;
-    pkt.byte_tx.power_dbm         = *ptxdB;
+    // pkt.byte_tx.power_dbm        = *ptxdB;
+    memcpy(&pkt.byte_tx.power_dbm, &txdB, sizeof(txdB));
     pkt.byte_tx.duration          =  delay;
  
     worldsens_packet_dump(&pkt);

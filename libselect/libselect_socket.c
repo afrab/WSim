@@ -27,6 +27,7 @@
 #endif
 
 #include "config.h"
+#include "arch/common/missing.h"
 #include "libselect.h"
 #include "libselect_socket.h"
 #include "liblogger/logger.h"

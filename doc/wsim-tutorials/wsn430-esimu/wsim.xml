@@ -270,26 +270,20 @@ $ configure [...] --enable-etrace \
 <!-- ============================================================ -->
 
 <chapter>
-  <title>Log Files and Trace Files</title>
-  <para>
-    Performance estimation in WSim is done offline using a full execution trace.
-    Once the simulation is done and the trace is available, eSimu can generate several
-    information. Each information
-	  <ulink url="http://kcachegrind.sourceforge.net/html/Home.html">kCachegrind</ulink>.
-  </para>
+  <title>Log Files, Traces and Profiles</title>
 
 
-    <figure id="fig:linear">
-      <title>Linear power consumption output example</title>
-      <mediaobject>
-        <imageobject>
-          <imagedata align="center" width="90%" fileref="figures/linear_tx_200-final.jpg"/>
-        </imageobject>
-      </mediaobject>
-    </figure>
+  <section id="esimu_integration">
+    <title>eSimu Simulation Integration</title>
+    <para>
 
+    Information exchange between WSim and eSimu is based on traces. When compiled with eSimu
+    mode, extra options for WSim are available. The main WSim option is the trace filename:
+    <computeroutput>--esimu=[filename]</computeroutput>. The flow of information is illustrated
+    on the next Figure.
+    
     <figure id="fig:esimu">
-      <title> eSimu integration </title>
+      <title> eSimu integration in the simulation process </title>
       <mediaobject>
         <imageobject>
           <imagedata align="center" width="90%" fileref="figures/esimu-1.jpg" />
@@ -297,26 +291,108 @@ $ configure [...] --enable-etrace \
       </mediaobject>
     </figure>
 
-    <figure id="fig:kcache">
-      <title>Kcachegrind output example : cycle accurate performance and energy profiling</title>
-      <mediaobject>
-        <imageobject>
-          <imagedata align="center" width="90%" fileref="figures/kcachegrind_cc1100.jpg"/>
-        </imageobject>
-      </mediaobject>
-    </figure>
+    From a standard WSim simulation script the only thing to add is
+    the <computeroutput>--esimu=[filename]</computeroutput> that starts the 
+    eSimu trace recording tool.
 
+      <programlisting>
+	<computeroutput>
+#! /bin/sh
+
+## =============Conf=====================
+WSIM=wsim-wsn430-esimu
+WTRC=wtracer
+
+LOG="--logfile=wsim.log --verbose=2"
+TRC="--trace=wsim.trc"
+UI="--ui"
+MODE="--mode=time --modearg=30s"
+
+ESIMU=esimu-ng
+CALIB=wsn430.conf
+EOPT="--esimu=wsim.etr"
+## ======================================
+
+## ============ Simulation ==============
+ELF=./wsn430-leds.elf
+WS1="${WSIM} ${UI} ${MODE} ${LOG} ${TRC} ${EOPT} $-ELF"
+
+xterm -T wsim-1 -e "${WS1}" 
+## ======================================
+
+## ============ Traces ==================
+${WTRC} --in=wsim.trc --out=wsim.vcd --format=vcd
+## ======================================</computeroutput>
+      </programlisting>
+
+      In order to gather power and cycle precises performance
+       estimation from the execution traces a platform dependant
+       configuration file is needed. 
+
+      A basic configuration file can be
+      found for wsn430 models in the eSimu source repository:
+      <programlisting>
+	<computeroutput>${git}/esimu/platforms/wsn430/wsn430.conf</computeroutput></programlisting>
+      
+      Defining and refining a platform power consumption is rather
+      easy but not all platforms have been described nor calibrated
+      precisely at this time. The repository will be completed and
+      users are encouraged to contribute if they refine platform
+      models or can calibrate some of the files.
+      
+    </para>
+  </section>
   <section id="esimu_full">
     <title>Full Simulation Estimation</title>
     <para>
-      
+      Full simulation estimation is the easiest way to
+      go. The <computeroutput>--esimu-start</computeroutput> option in
+      WSim will start eSimu trace generation from the beginning and
+      stop the trace at the end of the simulation.
+    </para>
+
+    <para>
+      To add full simulation trace the option can simply be added in the
+      previous script at the following place:
+      <programlisting>
+	<computeroutput>
+EOPT="--esimu-start --esimu=wsim.etr"</computeroutput>
+    </programlisting>
+    </para>
+
+    <para>
+      Although full simulation traces are very easy to use they can generate
+      huge files (hundreds of megabytes to gigabytes). The output is heavily
+      buffered but still slows down the simulation.
     </para>
   </section>
 
   <section id="esimu_partial">
     <title>Windowed Estimation</title>
     <para>
-      cc
+      eSimu traces do not need to contain the whole execution path if you are only
+      interested in portions of code. eSimu traces can be started and stopped from
+      the embedded code using special instructions. This measurement mode explicitly
+      adds instructions to the application binary and is thus intrusive. However the
+      added instruction are chosen so that they do not have any side effect and are
+      equivalent to a <computeroutput>nop</computeroutput> (no operation).
+    </para>
+
+    <para>
+      The MSP430 target has been modified to add eSimu start and stop capabilities.
+      These two actions are available using the following code in your application:
+    <programlisting>
+      <computeroutput>
+#define ESIMU_START()   __asm__ __volatile__ ("mov r4,r4")
+#define ESIMU_STOP()    __asm__ __volatile__ ("mov r5,r5")</computeroutput>
+    </programlisting>
+    These instructions are equivalent to a nop (a nop on the MSP430 is actually translated 
+    to <computeroutput>MOV #0, R3</computeroutput>.
+    </para>
+
+    <para>
+      eSimu start and stop calls can be used in a loop body or called multiple times
+      within the same simulation. 
     </para>
   </section>
 </chapter>
@@ -327,18 +403,101 @@ $ configure [...] --enable-etrace \
 
 <chapter>
   <title>Generating Profiles</title>
+  <para>
+    eSimu can generate profiles using two main modes.
+  </para>
+
+
 
   <section id="esimu_prof">
     <title>Source Code Annotation</title>
     <para>
-      cc
+      eSimu uses the execution trace given by WSim to build an image
+      of the platform activity. This image is combined with a platform
+      calibration file and the Dwarf debug information contained in the
+      ELF file to generate a full performance view of the execution.
     </para>
+    <para>
+      The command line to use to generate the profile is the following:
+      <programlisting>
+	<computeroutput>
+$ESIMU --in=wsim.etr --out=wsim.prf --conf=$CALIB  --mode=prof \ 
+             --exec=application.elf</computeroutput></programlisting>
+    </para>
+
+<!-- trace filename   : wsim.etr -->
+<!-- outout filename  : wsim.dat -->
+<!-- exec filename    : wsn430-timer.elf -->
+<!-- conf filename    : wsn430.conf -->
+<!-- eSimu mode       : linear -->
+<!-- Reading trace ... -->
+<!-- Post processing ... -->
+<!-- Energy : 337622634105424 -->
+<!-- TLIN MODE : Nothing to do !!! -->
+
+    <para>
+      Where <computeroutput>$CALIB</computeroutput> is the simulation
+      platform calibration file.  The profile output format is the
+      description format used in the
+      Valgrind/<ulink url="http://kcachegrind.sourceforge.net/html/Home.html">kCachegrind</ulink>
+      tool.  suite. Next Figure presents a screenshot of a full
+      application debug examined through KCacheGrind.
+    <figure id="fig:kcache">
+      <title>Kcachegrind output example : cycle accurate performance and energy profiling</title>
+      <mediaobject>
+        <imageobject>
+          <imagedata align="center" width="90%" fileref="figures/kcachegrind_cc1100.jpg"/>
+        </imageobject>
+      </mediaobject>
+    </figure>
+    </para>
+    <note>
+      <para>
+	WSim and eSimu are cycle accurate and can handle variable clock frequencies.
+	The CYCLES count performance measure in KCachegrind is given in nanoseconds.
+      </para>
+    </note>
+    <warning>
+      <para>
+	For programs that use lots of interrupts and reentrant interrupts, eSimu might
+	get lost between all function call graphs. Please send us a bug report with 
+	some information on the files that produced the bug, if feasible please include
+	also the ELF file.
+      </para>
+    </warning>
   </section>
+
+
 
   <section id="esimu_tlin">
     <title>Linear Profiles</title>
     <para>
-      cc
+      The second eSimu mode can output timed profiles for each
+      component of the system. These profiles are obtained using the
+      following command line:
+      <programlisting>
+	<computeroutput>
+$ESIMU --in=wsim.etr --out=wsim.dat --conf=$CALIB  --mode=tlin \ 
+             --exec=application.elf</computeroutput></programlisting>
+      
+      Where <computeroutput>$CALIB</computeroutput> is the simulation platform calibration file.
+    </para>
+
+    <para>
+      Linear traces are plotted in raw data files [wsim.dat] with
+      gnuplot or any other plotting program. The next figures have
+      been obtained with the gnuplot program.  Components activity and
+      power consumption appear in the order of
+      the <computeroutput>dev_id</computeroutput> declarations.
+      
+    <figure id="fig:linear">
+      <title>Linear power consumption output example</title>
+      <mediaobject>
+        <imageobject>
+          <imagedata align="center" width="90%" fileref="figures/linear_tx_200-final.jpg"/>
+        </imageobject>
+      </mediaobject>
+    </figure>
     </para>
   </section>
 
@@ -416,6 +575,13 @@ $ configure [...] --enable-etrace \
       </listitem>
     </itemizedlist>
   </para>
+
+  <!-- <simpara> -->
+  <!-- Please make sure to clone the eSimu repository using the following command line: -->
+  <!-- </simpara> -->
+  <!-- <simpara> -->
+  <!-- <computeroutput>git clone git://scm.gforge.inria.fr/esimu/esimu.git</computeroutput> -->
+  <!-- </simpara> -->
 
   <para>External tools</para>
   <para>

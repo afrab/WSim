@@ -272,13 +272,44 @@ $ configure [...] --enable-etrace \
 <chapter>
   <title>Log Files and Trace Files</title>
   <para>
-    cc
+    Performance estimation in WSim is done offline using a full execution trace.
+    Once the simulation is done and the trace is available, eSimu can generate several
+    information. Each information
+	  <ulink url="http://kcachegrind.sourceforge.net/html/Home.html">kCachegrind</ulink>.
   </para>
+
+
+    <figure id="fig:linear">
+      <title>Linear power consumption output example</title>
+      <mediaobject>
+        <imageobject>
+          <imagedata align="center" width="90%" fileref="figures/linear_tx_200-final.jpg"/>
+        </imageobject>
+      </mediaobject>
+    </figure>
+
+    <figure id="fig:esimu">
+      <title> eSimu integration </title>
+      <mediaobject>
+        <imageobject>
+          <imagedata align="center" width="90%" fileref="figures/esimu-1.jpg" />
+        </imageobject>
+      </mediaobject>
+    </figure>
+
+    <figure id="fig:kcache">
+      <title>Kcachegrind output example : cycle accurate performance and energy profiling</title>
+      <mediaobject>
+        <imageobject>
+          <imagedata align="center" width="90%" fileref="figures/kcachegrind_cc1100.jpg"/>
+        </imageobject>
+      </mediaobject>
+    </figure>
 
   <section id="esimu_full">
     <title>Full Simulation Estimation</title>
     <para>
-      cc
+      
     </para>
   </section>
 

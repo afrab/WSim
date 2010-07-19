@@ -86,6 +86,23 @@
 #define BIT14n(v)  !BIT14_(v)
 #define BIT15n(v)  !BIT15_(v)
 
+/* *
+ * Functions to fetch various opcode operands from instructions
+ * */
+
+// Destination source registry ~Dr~ address on 4 bits
+// xxxx xxxx dddd xxxx
+#define DREG_4BITS(i)          ((i >> 4) & 0x0f) + 16
+
+// Destination & eventually source registry ~Dr~ address on 5 bits
+// xxxx xxxd dddd xxxx
+#define DREG_5BITS(i)          ((i >> 4) & 0x1f)
+
+// Source registry ~Sr~ address on 5 bits
+// xxxx xxrx xxxx rrrr
+#define SREG_5BITS(i)          ((i >> 5) & 0x10) | ((i >> 0) & 0x0f)
+
+
 /*
  *  SREG: Status Register
  *  C:    Carry Flag
@@ -500,11 +517,11 @@ struct atmega_opcode_info_t OPCODES[] = {
     { .fun = opcode_ijmp,    .name = "IJMP"   , .length = 1 }, /* done: needs reviewing */
     { .fun = opcode_default, .name = "EIJMP"  , .length = 1 },
     { .fun = opcode_elpm,    .name = "ELPM"   , .length = 1 },
-    { .fun = opcode_jmp,     .name = "JMP"    , .length = 1 },
+    { .fun = opcode_jmp,     .name = "JMP"    , .length = 2 },
     { .fun = opcode_rcall,   .name = "RCALL"  , .length = 1 }, /* done: needs reviewing */
     { .fun = opcode_icall,   .name = "ICALL"  , .length = 1 }, /* done: needs reviewing */
     { .fun = opcode_default, .name = "EICALL" , .length = 1 },
-    { .fun = opcode_call,    .name = "CALL"   , .length = 1 },
+    { .fun = opcode_call,    .name = "CALL"   , .length = 2 },
     { .fun = opcode_ret,     .name = "RET"    , .length = 1 },
     { .fun = opcode_default, .name = "RETI"   , .length = 1 },
     { .fun = opcode_default, .name = "CPSE"   , .length = 1 },
@@ -527,7 +544,7 @@ struct atmega_opcode_info_t OPCODES[] = {
     { .fun = opcode_movw,    .name = "MOVW"   , .length = 1 },
     { .fun = opcode_nop,     .name = "NOP"    , .length = 1 }, /* done: needs reviewing */
     { .fun = opcode_ldi,     .name = "LDI"    , .length = 1 },
-    { .fun = opcode_lds,     .name = "LDS"    , .length = 1 }, /* done: needs reviewing */
+    { .fun = opcode_lds,     .name = "LDS"    , .length = 2 }, /* done: needs reviewing */
     { .fun = opcode_ld,      .name = "LD"     , .length = 1 }, /* LD X */
     { .fun = opcode_ldd,     .name = "LDD"    , .length = 1 }, /* LD Y / Z */
     { .fun = opcode_default, .name = "LPM"    , .length = 1 },
@@ -541,7 +558,7 @@ struct atmega_opcode_info_t OPCODES[] = {
     { .fun = opcode_default, .name = "SR"     , .length = 1 },
     { .fun = opcode_st,      .name = "ST"     , .length = 1 },
     { .fun = opcode_std,     .name = "STD"    , .length = 1 },
-    { .fun = opcode_sts,     .name = "STS"    , .length = 1 },
+    { .fun = opcode_sts,     .name = "STS"    , .length = 2 },
     { .fun = opcode_default, .name = "SWAP"   , .length = 1 },
     { .fun = opcode_default, .name = "WDR"    , .length = 1 }
 };

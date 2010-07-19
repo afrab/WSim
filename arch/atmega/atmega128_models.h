@@ -26,6 +26,9 @@
 #define MCU_MODEL_NAME      "Atmega128"
 #define ATMEGA_PC_16BITS    1
 
+// Clocks & Timers
+#define __atmega128_have_watchdog
+
 /* ********************************************************************** */
 /* ********************************************************************** */
 #elif defined(ATMEGA128L)
@@ -38,6 +41,9 @@
 #define MCU_VERSION         "128"
 #define MCU_MODEL_NAME      "Atmega128L"
 #define ATMEGA_PC_16BITS    1
+
+// Clocks & Timers
+#define __atmega128_have_watchdog
 
 /* ********************************************************************** */
 /* ********************************************************************** */

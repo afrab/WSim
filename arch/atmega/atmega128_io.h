@@ -9,6 +9,24 @@
 #ifndef ATMEGA128_IO_H
 #define ATMEGA128_IO_H
 
+
+/* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
+
+typedef int8_t  (*io_read8_t  ) (uint16_t addr);
+typedef void    (*io_write8_t ) (uint16_t addr, int8_t val);
+
+typedef int8_t  (*peripheral_read8_t  ) (uint16_t addr);
+typedef void    (*peripheral_write8_t ) (uint16_t addr, int8_t val);
+
+typedef int16_t (*peripheral_read16_t ) (uint16_t addr);
+typedef void    (*peripheral_write16_t) (uint16_t addr, int16_t val);
+
+/* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
+
 #if 0
 
 0xFF  Reserved
@@ -143,6 +161,27 @@
 0x00 /* 0x20 */ PINF
 
 #endif
+
+
+
+
+#define ATMEGA128_BYTE(A,S,O,...)     ATMEGA128_##S##_##O##_BYTE(A,##__VA_ARGS__)
+
+#define ATMEGA128_IO_SPACE_READ_BYTE(A)       atmega128_io_read_byte(A)
+#define ATMEGA128_IO_SPACE_WRITE_BYTE(A,V)    atmega128_io_write_byte(A,V)
+
+#define ATMEGA128_RAM_SPACE_READ_BYTE(A)      atmega128_ram_read_byte(A)
+#define ATMEGA128_RAM_SPACE_WRITE_BYTE(A,V)   atmega128_ram_write_byte(A,V)
+
+#define ATMEGA128_SHORT(A,S,O,...)    ATMEGA128_##S##_##O##_SHORT(A,##__VA_ARGS__)
+
+#define ATMEGA128_IO_SPACE_READ_SHORT(A)      atmega128_io_read_byte(A)
+#define ATMEGA128_IO_SPACE_WRITE_SHORT(A,V)   atmega128_io_write_byte(A,V)
+
+#define ATMEGA128_RAM_SPACE_READ_SHORT(A)     atmega128_ram_read_short(A)
+#define ATMEGA128_RAM_SPACE_WRITE_SHORT(A,V)  atmega128_ram_write_short(A,V)
+
+
 
 #define IO_REG_Reserved_0xFF 0xFF
 /*  ..  Reserved */
@@ -296,19 +335,27 @@
  *                  $FFFF
  */
 
-void    atmega128_io_init           (void);
+void    atmega128_io_init       (void);
 
-int8_t  atmega128_io_read_byte      (uint16_t loc);
-void    atmega128_io_write_byte     (uint16_t loc, int8_t val);
+void atmega128_io_register(uint8_t loc, io_read8_t *reader, io_write8_t *writer);
 
-int8_t  atmega128_ram_read_byte     (uint16_t loc);
-void    atmega128_ram_write_byte    (uint16_t loc, int8_t  val);
+int8_t   atmega128_read_byte         (uint16_t loc, uint8_t space);
+void     atmega128_write_byte        (uint16_t loc, int8_t  val, uint8_t space);
 
-int16_t atmega128_ram_read_short    (uint16_t loc); 
-void    atmega128_ram_write_short   (uint16_t loc, int16_t val); 
+int16_t  atmega128_read_short        (uint16_t loc, uint8_t space);
+void     atmega128_write_short       (uint16_t loc, int16_t val, uint8_t space);
 
-int8_t  atmega128_flash_read_byte   (uint32_t loc);
-int16_t atmega128_flash_read_short  (uint32_t loc);
+int8_t   atmega128_io_read_byte      (uint16_t loc);
+void     atmega128_io_write_byte     (uint16_t loc, int8_t val);
+
+int8_t   atmega128_ram_read_byte     (uint16_t loc);
+void     atmega128_ram_write_byte    (uint16_t loc, int8_t  val);
+
+int16_t  atmega128_ram_read_short    (uint16_t loc); 
+void     atmega128_ram_write_short   (uint16_t loc, int16_t val); 
+
+int8_t   atmega128_flash_read_byte   (uint32_t loc);
+int16_t  atmega128_flash_read_short  (uint32_t loc);
 
 
 /* void    atmega128_flash_write_byte  (uint16_t loc, int8_t  val); */

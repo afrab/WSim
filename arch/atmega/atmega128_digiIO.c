@@ -12,13 +12,6 @@
 #include "arch/common/hardware.h"
 #include "atmega128.h"
 
-#define PORTA /* 8-bit I/O */
-#define PORTB /* 8-bit I/O */
-#define PORTC /* 8-bit I/O */
-#define PORTD /* 8-bit I/O */
-#define PORTE /* 8-bit I/O */
-#define PORTF /* 8-bit analog */
-#define PORTG /* 5-bit I/O */
 
 /* ************************************************** */
 /* ************************************************** */
@@ -28,7 +21,7 @@ void atmega128_digiIO_reset(void)
 {
   /* after a reset the pin IO are switched to input mode */
   int i;
-  for(i=0; i<6; i++)
+  for(i=0 ; i<7 ; i++)
     {
       //      DIGIIO_DIR(i) = 0;
       //      DIGIIO_SEL(i) = 0;

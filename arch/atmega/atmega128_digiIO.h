@@ -75,6 +75,13 @@ struct digiIOport_t {
 /* ************************************************** */
 /* ************************************************** */
 
+/** 
+ * input/output register 
+ * 8bit register
+ */
+#define DIGIIO_REGS(p)     MCU.digiIO.gpio_regs[p]
+
+
 /**
  * Digital IO port
  **/
@@ -137,9 +144,7 @@ struct atmega128_digiIO_t {
     uint8_t in_updated;
     uint8_t out_updated;
 
-    struct digiIOport_t[7];
-
-    uint8_t selection[7];
+    uint8_t gpio_regs[21];
 
     /** only for ports 1 & 2 **/
     uint8_t int_enable[2];

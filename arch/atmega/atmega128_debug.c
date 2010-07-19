@@ -58,6 +58,41 @@ char* mcu_regname_str(unsigned r)
     }
 }
 
+
+/* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
+
+#ifdef DEBUG_DIGI_IO 
+char *gpio_reg_name[] =
+    {
+    "PINF",
+    "PINE", "DDRE", "PORTE",
+    "PIND", "DDRD", "PORTD",
+    "PINC", "DDRC", "PORTC",
+    "PINB", "DDRB", "PORTB",
+    "PINA", "DDRA", "PORTA",
+    "DDRF", "PORTF",
+    "PING", "DDRG", "PORTG"
+};
+
+
+char* atmega128_debug_portname(uint16_t addr)
+{
+    uint8_t index = IO_ADDRESS_TO_IDX(addr);
+    
+    if (index < 21)
+    {
+    return gpio_reg_name[index];
+    }
+    else
+    {
+        ERROR("Port register address out of range");
+        return 0;
+    }
+}
+#endif
+
 /* ************************************************** */
 /* ************************************************** */
 /* ************************************************** */

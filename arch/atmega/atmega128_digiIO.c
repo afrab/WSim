@@ -32,17 +32,42 @@ void atmega128_digiIO_reset(void)
 /* ************************************************** */
 /* ************************************************** */
 
-int8_t atmega128_digiIO_mcu_read (uint16_t UNUSED addr)
+int8_t atmega128_digiIO_mcu_read (uint16_t addr)
 {
-  return 0;
+    uint8_t res = 0;
+    uint8_t index = IO_ADDRESS_TO_IDX(addr);
+    
+    HW_DMSG_DIGI_IO("atmega128:dio: read from MCU [%s:0x%02x]\n",
+                    atmega128_debug_portname(addr),addr);
+
+    res = DIGIIO_REGS(index);
+    
+    HW_DMSG_DIGI_IO("atmega128:dio: read  from MCU [%s:0x%02x] = 0x%02x\n",
+                    atmega128_debug_portname(addr),addr,res);
+    
+    return res;
 }
 
 /* ************************************************** */
 /* ************************************************** */
 /* ************************************************** */
 
-void atmega128_digiIO_mcu_write(uint16_t UNUSED addr, int8_t UNUSED val)
+void atmega128_digiIO_mcu_write(uint16_t addr, int8_t UNUSED val)
 {
+    uint8_t index = IO_ADDRESS_TO_IDX(addr);
+    
+    HW_DMSG_DIGI_IO("atmega128:dio: write from MCU [%s:0x%02x] = 0x%02x\n",
+                    atmega128_debug_portname(addr),addr,val & 0xff); 
+
+    if ((index == 0) || ((index-1) % 3 == 0)) // all PINX index addresses
+    {
+        ERROR("atmega128:dio: write on %s input register (read only)\n",
+                atmega128_debug_portname(addr));
+    }
+    else
+    {
+        return; // TODO
+    }
 }
 
 /* ************************************************** */

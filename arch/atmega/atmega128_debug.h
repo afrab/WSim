@@ -15,6 +15,7 @@
 
 void  atmega128_print_SR       (void);
 void  atmega128_print_registers(void);
+char* atmega128_debug_portname(uint16_t addr);
 
 extern char* atmega128_lpm_names[];
 
@@ -69,6 +70,12 @@ extern char* atmega128_lpm_names[];
 #    define HW_DMSG_IO(x...) HW_DMSG_MCU(x)
 #else
 #    define HW_DMSG_IO(x...) do { } while (0)
+#endif
+
+#ifdef DEBUG_DIGI_IO
+#    define HW_DMSG_DIGI_IO(x...) HW_DMSG_MCU(x)
+#else
+#    define HW_DMSG_DIGI_IO(x...) do { } while (0)
 #endif
 
 /* ************************************************** */

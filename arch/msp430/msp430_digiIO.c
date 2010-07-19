@@ -149,10 +149,10 @@ int8_t msp430_digiIO_mcu_read (uint16_t addr)
     case P6SEL: r = DIGIIO_SEL(5); break;
 #endif
     default:
-      ERROR("msp430:dio: read  [0x%02x] undefined\n",addr); 
+      ERROR("msp430:dio: read [0x%02x] undefined\n",addr); 
       break;
     }
-  HW_DMSG_DIGI_IO("msp430:dio: read  from MCU [%s:0x%02x] = 0x%02x\n",
+  HW_DMSG_DIGI_IO("msp430:dio: read from MCU [%s:0x%02x] = 0x%02x\n",
 		  msp430_debug_portname(addr),addr,r);
   return r;
 }

@@ -82,6 +82,17 @@ struct digiIOport_t {
 #define DIGIIO_REGS(p)     MCU.digiIO.gpio_regs[p]
 
 
+#define DIGIIO_IS_INPUT(X)  (X == 0) ||                     \
+                            (((X-1) % 3 == 0) &&            \
+                            (X < 16)) || X == 18
+
+#define DIGIIO_IS_DDR(X)    (((X-2) % 3 == 0) && (X < 16)) || \
+                            (((X-1) % 3 == 0) && (X >= 16))
+
+#define DIGIIO_IS_PORTX(X)  (X != 0) &&                     \
+                            (((X % 3 == 0) && (X < 16)) ||  \
+                            ((X+1 % 3 == 0) && (X >= 16)))
+
 /**
  * Digital IO port
  **/
@@ -93,7 +104,6 @@ struct digiIOport_t {
 #define DIGIIO_PE  4  /* 8-bit I/O    */
 #define DIGIIO_PF  5  /* 8-bit analog */
 #define DIGIIO_PG  6  /* 5-bit I/O    */
-
 
 /*
  * Translate IO Address to array index range : 0 - 20

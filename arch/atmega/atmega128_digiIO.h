@@ -92,9 +92,7 @@ struct digiIOport_t {
  * Translate IO Address to array index range : 0 - 20
  * */
 #define IO_ADDRESS_TO_IDX(X)                           \
-    X %= 81;/* maps IO addresses from 97-101 to 16-20*/ \
-    X %= 44;/* maps IO addresses from 48-59 to 4-15 */   \
-    X %= 32 /* maps IO addresses from 32-35 to 0-3 */
+    X % 81 % 44 % 32
 
 // IO addresses
 #define PINF      0x20 /* 32 */ /* 0 */ /* % 32 */

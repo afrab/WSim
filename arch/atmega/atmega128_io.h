@@ -162,7 +162,9 @@ typedef void    (*peripheral_write16_t) (uint16_t addr, int16_t val);
 
 #endif
 
-
+/* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
 
 
 #define ATMEGA128_BYTE(A,S,O,...)     ATMEGA128_##S##_##O##_BYTE(A,##__VA_ARGS__)
@@ -181,6 +183,10 @@ typedef void    (*peripheral_write16_t) (uint16_t addr, int16_t val);
 #define ATMEGA128_RAM_SPACE_READ_SHORT(A)     atmega128_ram_read_short(A)
 #define ATMEGA128_RAM_SPACE_WRITE_SHORT(A,V)  atmega128_ram_write_short(A,V)
 
+
+/* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
 
 
 #define IO_REG_Reserved_0xFF 0xFF
@@ -337,7 +343,7 @@ typedef void    (*peripheral_write16_t) (uint16_t addr, int16_t val);
 
 void    atmega128_io_init       (void);
 
-void atmega128_io_register(uint8_t loc, io_read8_t *reader, io_write8_t *writer);
+void atmega128_io_register(uint8_t addr, io_read8_t reader, io_write8_t writer);
 
 int8_t   atmega128_read_byte         (uint16_t loc, uint8_t space);
 void     atmega128_write_byte        (uint16_t loc, int8_t  val, uint8_t space);

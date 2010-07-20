@@ -17,14 +17,41 @@
 /* ************************************************** */
 /* ************************************************** */
 
+void atmega128_digiIO_init(void)
+{
+    atmega128_io_register(PINF,  &atmega128_digiIO_mcu_read, &atmega128_digiIO_mcu_write);
+    atmega128_io_register(PINE,  &atmega128_digiIO_mcu_read, &atmega128_digiIO_mcu_write);
+    atmega128_io_register(DDRE,  &atmega128_digiIO_mcu_read, &atmega128_digiIO_mcu_write);
+    atmega128_io_register(PORTE, &atmega128_digiIO_mcu_read, &atmega128_digiIO_mcu_write);
+    atmega128_io_register(PIND,  &atmega128_digiIO_mcu_read, &atmega128_digiIO_mcu_write);
+    atmega128_io_register(DDRD,  &atmega128_digiIO_mcu_read, &atmega128_digiIO_mcu_write);
+    atmega128_io_register(PORTD, &atmega128_digiIO_mcu_read, &atmega128_digiIO_mcu_write);
+    atmega128_io_register(PINC,  &atmega128_digiIO_mcu_read, &atmega128_digiIO_mcu_write);
+    atmega128_io_register(DDRC,  &atmega128_digiIO_mcu_read, &atmega128_digiIO_mcu_write);
+    atmega128_io_register(PORTC, &atmega128_digiIO_mcu_read, &atmega128_digiIO_mcu_write);
+    atmega128_io_register(PINB,  &atmega128_digiIO_mcu_read, &atmega128_digiIO_mcu_write);
+    atmega128_io_register(DDRB,  &atmega128_digiIO_mcu_read, &atmega128_digiIO_mcu_write);
+    atmega128_io_register(PORTB, &atmega128_digiIO_mcu_read, &atmega128_digiIO_mcu_write);
+    atmega128_io_register(PINA,  &atmega128_digiIO_mcu_read, &atmega128_digiIO_mcu_write);
+    atmega128_io_register(DDRA,  &atmega128_digiIO_mcu_read, &atmega128_digiIO_mcu_write);
+    atmega128_io_register(PORTA, &atmega128_digiIO_mcu_read, &atmega128_digiIO_mcu_write);
+    atmega128_io_register(DDRF,  &atmega128_digiIO_mcu_read, &atmega128_digiIO_mcu_write);
+    atmega128_io_register(PORTF, &atmega128_digiIO_mcu_read, &atmega128_digiIO_mcu_write);
+    atmega128_io_register(PING,  &atmega128_digiIO_mcu_read, &atmega128_digiIO_mcu_write);
+    atmega128_io_register(DDRG,  &atmega128_digiIO_mcu_read, &atmega128_digiIO_mcu_write);
+    atmega128_io_register(PORTG, &atmega128_digiIO_mcu_read, &atmega128_digiIO_mcu_write);
+    
+    atmega128_digiIO_reset();
+    return;
+}
+
 void atmega128_digiIO_reset(void)
 {
-  /* after a reset the pin IO are switched to input mode */
-  int i;
-  for(i=0 ; i<7 ; i++)
+    /* after a reset the pin IO are switched to input mode */
+    int i;
+    for(i = 21 ; i-- ; )
     {
-      //      DIGIIO_DIR(i) = 0;
-      //      DIGIIO_SEL(i) = 0;
+        DIGIIO_REGS(i) = 0;
     }
 }
 
@@ -32,7 +59,7 @@ void atmega128_digiIO_reset(void)
 /* ************************************************** */
 /* ************************************************** */
 
-int8_t atmega128_digiIO_mcu_read (uint16_t addr)
+int8_t atmega128_digiIO_mcu_read(uint16_t addr)
 {
     uint8_t res = 0;
     uint8_t index = IO_ADDRESS_TO_IDX(addr);
@@ -60,7 +87,7 @@ void atmega128_digiIO_mcu_write(uint16_t addr, int8_t UNUSED val)
                     atmega128_debug_portname(addr),addr,val & 0xff); 
 
     
-    if (DIGIIO_IS_INPUT) // all PINX index addresses
+    if (DIGIIO_IS_INPUT(index)) // all PINX index addresses
     {
         ERROR("atmega128:dio: write on %s input register (read only)\n",
                 atmega128_debug_portname(addr));

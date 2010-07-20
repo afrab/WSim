@@ -10,66 +10,6 @@
 #define ATMEGA128_DIGIIO_H
 
 
-/* ************************************************** */
-/* ************************************************** */
-/* ************************************************** */
-// digiIO type declarations
-
-// Port input pins
-struct __attribute__ ((packed)) digiIO_pin_t {
-    uint8_t
-        pin0:1,
-        pin1:1,
-        pin2:1,
-        pin3:1,
-        pin4:1,
-        pin5:1,
-        pin6:1,
-        pin7:1;
-};
-
-// Port direction register
-struct __attribute__ ((packed)) digiIO_ddr_t {
-    uint8_t
-        ddr0:1,
-        ddr1:1,
-        ddr2:1,
-        ddr3:1,
-        ddr4:1,
-        ddr5:1,
-        ddr6:1,
-        ddr7:1;
-};
-
-// Port data register
-struct __attribute__ ((packed)) digiIO_portx_t {
-    uint8_t
-        port0:1,
-        port1:1,
-        port2:1,
-        port3:1,
-        port4:1,
-        port5:1,
-        port6:1,
-        port7:1;
-};
-
-struct digiIOport_t {
-    union {
-        struct digiIO_pin_t b;
-        uint8_t        s;
-    } gpio_pin;
-
-    union {
-        struct digiIO_ddr_t b;
-        uint8_t        s;
-    } gpio_ddr;
-
-    union {
-        struct digiIO_portx_t b;
-        uint8_t        s;
-    } gpio_portx;
-};
 
 /* ************************************************** */
 /* ************************************************** */
@@ -79,19 +19,30 @@ struct digiIOport_t {
  * input/output register 
  * 8bit register
  */
-#define DIGIIO_REGS(p)     MCU.digiIO.gpio_regs[p]
+#define DIGIIO_REGS(X)      MCU.digiIO.gpio_regs[X]
 
 
-#define DIGIIO_IS_INPUT(X)  (X == 0) ||                     \
-                            (((X-1) % 3 == 0) &&            \
+#define DIGIIO_IS_INPUT(X)  (X == 0) ||                       \
+                            (((X-1) % 3 == 0) &&              \
                             (X < 16)) || X == 18
 
 #define DIGIIO_IS_DDR(X)    (((X-2) % 3 == 0) && (X < 16)) || \
                             (((X-1) % 3 == 0) && (X >= 16))
 
-#define DIGIIO_IS_PORTX(X)  (X != 0) &&                     \
-                            (((X % 3 == 0) && (X < 16)) ||  \
+#define DIGIIO_IS_PORTX(X)  (X != 0) &&                       \
+                            (((X % 3 == 0) && (X < 16)) ||    \
                             ((X+1 % 3 == 0) && (X >= 16)))
+
+/*
+ * Translate IO Address to array index range : 0 - 20
+ * */
+#define IO_ADDRESS_TO_IDX(X)                                  \
+    X % 81 % 44 % 32
+
+/* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
+
 
 /**
  * Digital IO port
@@ -105,49 +56,64 @@ struct digiIOport_t {
 #define DIGIIO_PF  5  /* 8-bit analog */
 #define DIGIIO_PG  6  /* 5-bit I/O    */
 
-/*
- * Translate IO Address to array index range : 0 - 20
- * */
-#define IO_ADDRESS_TO_IDX(X)                           \
-    X % 81 % 44 % 32
 
 // IO addresses
-#define PINF      0x20 /* 32 */ /* 0 */ /* % 32 */
+enum gpio_regs_t {
+    PINF = 0,
+    PINE,
+    DDRE,
+    PORTE,
+    PIND = 13,
+    DDRD,
+    PORTD,
+    PINC,
+    DDRC,
+    PORTC,
+    PINB,
+    DDRB,
+    PORTB,
+    PINA,
+    DDRA,
+    PORTA,
+    DDRF = 65,
+    PORTF,
+    PING,
+    DDRG,
+    PORTG
+};
 
-#define PINE      0x21 /* 33 */ /* 1 */ /* % 32 */
-#define DDRE      0x22 /* 34 */ /* 2 */ /* % 32 */
-#define PORTE     0x23 /* 35 */ /* 3 */ /* % 32 */
+//#define PINF      0x20 /* 32 */ /* 0 */ /* % 32 */
+//
+//#define PINE      0x21 /* 33 */ /* 1 */ /* % 32 */
+//#define DDRE      0x22 /* 34 */ /* 2 */ /* % 32 */
+//#define PORTE     0x23 /* 35 */ /* 3 */ /* % 32 */
 
-#define PIND      0x30 /* 48 */ /* 4 */ /* % 44 */
-#define DDRD      0x31 /* 49 */ /* 5 */ /* % 44 */
-#define PORTD     0x32 /* 50 */ /* 6 */ /* % 44 */
+//#define PIND      0x30 /* 48 */ /* 4 */ /* % 44 */
+//#define DDRD      0x31 /* 49 */ /* 5 */ /* % 44 */
+//#define PORTD     0x32 /* 50 */ /* 6 */ /* % 44 */
 
-#define PINC      0x33 /* 51 */ /* 7 */ /* % 44 */
-#define DDRC      0x34 /* 52 */ /* 8 */ /* % 44 */
-#define PORTC     0x35 /* 53 */ /* 9 */ /* % 44 */
+//#define PINC      0x33 /* 51 */ /* 7 */ /* % 44 */
+//#define DDRC      0x34 /* 52 */ /* 8 */ /* % 44 */
+//#define PORTC     0x35 /* 53 */ /* 9 */ /* % 44 */
 
-#define PINB      0x36 /* 54 */ /*10 */ /* % 44 */
-#define DDRB      0x37 /* 55 */ /*11 */ /* % 44 */
-#define PORTB     0x38 /* 56 */ /*12 */ /* % 44 */
+//#define PINB      0x36 /* 54 */ /* 10 */ /* % 44 */
+//#define DDRB      0x37 /* 55 */ /* 11 */ /* % 44 */
+//#define PORTB     0x38 /* 56 */ /* 12 */ /* % 44 */
 
-#define PINA      0x39 /* 57 */ /* 13 */ /* % 44 */
-#define DDRA      0x3A /* 58 */ /* 14 */ /* % 44 */
-#define PORTA     0x3B /* 59 */ /* 15 */ /* % 44 */
+//#define PINA      0x39 /* 57 */ /* 13 */ /* % 44 */
+//#define DDRA      0x3A /* 58 */ /* 14 */ /* % 44 */
+//#define PORTA     0x3B /* 59 */ /* 15 */ /* % 44 */
 
-#define DDRF      0x61 /* 97 */ /* 16 */ /* % 81 */
-#define PORTF     0x62 /* 98 */ /* 17 */ /* % 81 */
+//#define DDRF      0x61 /* 97 */ /* 16 */ /* % 81 */
+//#define PORTF     0x62 /* 98 */ /* 17 */ /* % 81 */
 
-#define PING      0x63 /* 99 */ /* 18 */ /* % 81 */
-#define DDRG      0x64 /*100 */ /* 19 */ /* % 81 */
-#define PORTG     0x65 /*101 */ /* 20 */ /* % 81 */
+//#define PING      0x63 /* 99 */ /* 18 */ /* % 81 */
+//#define DDRG      0x64 /*100 */ /* 19 */ /* % 81 */
+//#define PORTG     0x65 /*101 */ /* 20 */ /* % 81 */
 
-
-/**
- * direction : port switch
- * 8bit register
- * PxDIR : 0 = input direction, 1 = output direction
- */
-#define DIGIIO_DIR(p)    MCU.digiIO.direction[p]
+/* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
 
 
 struct atmega128_digiIO_t {
@@ -162,6 +128,7 @@ struct atmega128_digiIO_t {
     uint8_t ifg[2];
 };
 
+void    atmega128_digiIO_init              (void);
 void    atmega128_digiIO_reset             (void);
 
 int8_t  atmega128_digiIO_mcu_read          (uint16_t addr);

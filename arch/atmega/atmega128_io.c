@@ -21,6 +21,51 @@
 /* ************************************************** */
 /* ************************************************** */
 
+static inline uint16_t IO_space_to_RAM_space(uint16_t addr)
+{
+    uint16_t res = 0;
+    
+    if (addr < 64)
+    {
+        res = addr + 32;
+    }
+    else
+    {
+        ERROR("atmega128:io: IO to RAM address space conversion :- %d is out of range", addr);
+    }
+    return res;
+}
+
+static inline uint16_t RAM_space_to_IO_space(uint16_t addr)
+{
+    uint16_t res = 0;
+    
+    if ((addr > 31) && (addr < 96))
+    {
+        res = addr - 32;
+    }
+    else
+    {
+        ERROR("atmega128:io: RAM to IO address space conversion :- %d is out of range", addr);
+    }
+    return res;
+}
+
+static inline uint16_t RAM_space_to_IDX(uint16_t addr)
+{
+    uint16_t res = 0;
+    
+    if ((addr < 158) && (addr > 31))
+    {
+        res = addr - 32;
+    }
+    else
+    {
+        ERROR("atmega128:io: RAM to IDX address conversion :- %d is out of range", addr);
+    }
+    return res;
+}
+
 static int8_t atmega128_read8_sigbus(uint16_t addr)
 {
   mcu_signal_add(SIG_MCU | SIG_MCU_BUS);
@@ -217,16 +262,12 @@ void atmega128_io_init(void)
 /* ************************************************** */
 /* ************************************************** */
 
-void atmega128_io_register(uint8_t loc, io_read8_t *reader, io_write8_t *writer)
+void atmega128_io_register(uint8_t addr, io_read8_t reader, io_write8_t writer)
 {
-    if (loc < 128) {
-        atmega128_io_addr_fptr[loc].read  = *reader;
-        atmega128_io_addr_fptr[loc].write = *writer;
-    }
-    else
-    {
-        ERROR("atmega128:io: register io [%d] out of range\n",loc);
-    }
+    uint16_t loc = RAM_space_to_IDX(addr);
+    
+    atmega128_io_addr_fptr[loc].read  = *reader;
+    atmega128_io_addr_fptr[loc].write = *writer;
 }
 
 /* 

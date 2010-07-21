@@ -255,6 +255,7 @@ struct atmega128_io_addr_fptr_t atmega128_io_addr_fptr[] = {
 
 void atmega128_io_init(void)
 {
+    atmega128_digiIO_init();
     
 }
 

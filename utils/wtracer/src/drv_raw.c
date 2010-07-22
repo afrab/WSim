@@ -38,8 +38,8 @@ void drv_raw_dump_signal(tracer_t *t, tracer_id_t id)
 
   fprintf(t->out_fd,"id:%s\n",t->hdr.id_name[id]);
   fprintf(t->out_fd,"count: %d\n",t->hdr.id_count[id]);
-  fprintf(t->out_fd,"min: %" PRId64 "\n",t->hdr.id_val_min[id]);
-  fprintf(t->out_fd,"max: %" PRId64 "\n",t->hdr.id_val_max[id]);
+  fprintf(t->out_fd,"min: %" PRIu64 "\n",t->hdr.id_val_min[id]);
+  fprintf(t->out_fd,"max: %" PRIu64 "\n",t->hdr.id_val_max[id]);
   fprintf(t->out_fd,"\n");
 
   for(ev=0; ev < t->hdr.ev_count_total; ev++)
@@ -47,7 +47,7 @@ void drv_raw_dump_signal(tracer_t *t, tracer_id_t id)
       tracer_read_sample(t,&s);
       if (s.id == id)
 	{
-	  fprintf(t->out_fd,"%" PRId64 ": %" PRId64 "\n",
+	  fprintf(t->out_fd,"%" PRIu64 ": %" PRIu64 "\n",
 		  s.time, s.val);
 	}
     }

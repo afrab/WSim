@@ -17,27 +17,104 @@
 /* ************************************************** */
 /* ************************************************** */
 
-static inline uint8_t portx_idx_to_port(uint8_t idx)
-{
-    if (idx < 16)
-    {
-        return ((idx / 3) - 1);   
-    }
-    else
-    {
-        return (idx / 3);
-    }
-}
-
+/*
+ * There are 3 discontinuities and 1 irregularity in the IO address range
+ * - 32 : In an ideal world, PINF would have an address of 60 or 96, but isn't
+ * - 33-35 : PORTE's 3 registers
+ * - 48-59 : PORTD, PORTC, PORTB & PORTA's 3 registers each
+ * - 97-101 : PORTG and part of PORTF
+ * 
+ * PINF      0x20 |  32
+ * 
+ * PINE      0x21 |  33
+ * DDRE      0x22 |  34
+ * PORTE     0x23 |  35
+ *
+ * PIND      0x30 |  48
+ * DDRD      0x31 |  49
+ * PORTD     0x32 |  50
+ *
+ * PINC      0x33 |  51
+ * DDRC      0x34 |  52
+ * PORTC     0x35 |  53
+ *
+ * PINB      0x36 |  54
+ * DDRB      0x37 |  55
+ * PORTB     0x38 |  56
+ *
+ * PINA      0x39 |  57
+ * DDRA      0x3A |  58
+ * PORTA     0x3B |  59
+ *
+ * DDRF      0x61 |  97
+ * PORTF     0x62 |  98
+ *
+ * PING      0x63 |  99
+ * DDRG      0x64 | 100
+ * PORTG     0x65 | 101
+ * 
+ * In order to have a regular addressing system :
+ *  - We map 32 to 15
+ *  - The arithmetic modulus 33 of 33-35 maps to 0-2
+ *  - The arithmetic modulus 45 of 48-59 maps to 3-14
+ *  - The arithmetic modulus 81 of 97-101 maps to 16-20
+ * 
+ * 
+ * PINE      0x21 |  33 % 33 =  0
+ * DDRE      0x22 |  34 % 33 =  1
+ * PORTE     0x23 |  35 % 33 =  2
+ *
+ * PIND      0x30 |  48 % 45 =  3
+ * DDRD      0x31 |  49 % 45 =  4
+ * PORTD     0x32 |  50 % 45 =  5
+ *
+ * PINC      0x33 |  51 % 45 =  6
+ * DDRC      0x34 |  52 % 45 =  7
+ * PORTC     0x35 |  53 % 45 =  8
+ *
+ * PINB      0x36 |  54 % 45 =  9
+ * DDRB      0x37 |  55 % 45 = 10
+ * PORTB     0x38 |  56 % 45 = 11
+ *
+ * PINA      0x39 |  57 % 45 = 12
+ * DDRA      0x3A |  58 % 45 = 13
+ * PORTA     0x3B |  59 % 45 = 14
+ *
+ * PINF      0x20 |  32      = 15
+ * DDRF      0x61 |  97 % 81 = 16
+ * PORTF     0x62 |  98 % 81 = 17
+ *
+ * PING      0x63 |  99 % 81 = 18
+ * DDRG      0x64 | 100 % 81 = 19
+ * PORTG     0x65 | 101 % 81 = 20
+ * 
+ * In order to accomplish this, we can apply the 3 consecutive arithmetic 
+ * modulus operations starting with the highest number.
+ * 
+ * - if in 33-35 : % 81 will have no effect, and neither will 45, as they're all 
+ *                 greater then 33, same principle applies to 34 and 34
+ * - if in 48-59 : % 81 will have no effect, but % 45 will reduce the range 
+ *                 45-59 to 3-14, and so %33 will have no effect after the 
+ *                 application of % 45
+ * - if in 97-101 : % 81 will reduce the range 97-101 to 16-20 and so 
+ *                  % 45 and % 33 will have no effect as they're both gonna 
+ *                 greater then the result of the operation.
+ * 
+ * This allows us to do most of the translation in one line :
+ * addr % 81 % 45 % 33
+ * */
 inline uint8_t address_to_digiio_IDX(uint16_t addr)
 {
     int8_t index;
     
-    index = addr % 81 % 45 % 33;
-    
     // we map pinf to 15 in order to make everything else easier.
-    if (index == 32){
+    if (addr == 32)
+    {
         index = 15;
+    }
+    else
+    {
+        index = addr % 81 % 45 % 33;
     }
     
     return index;
@@ -103,6 +180,17 @@ int8_t atmega128_digiIO_mcu_read(uint16_t addr)
 /* ************************************************** */
 /* ************************************************** */
 /* ************************************************** */
+
+/*
+ * The quick address conversion in address_to_digiio_IDX has an added advantage 
+ * of allowing us find the type of register we are operating on since all we 
+ * need to do is look at the arithmetic modulus 3 of the address
+ * 
+ *  - 0 means it's a PINx
+ *  - 1 means it's a DDRx
+ *  - 2 means it's a PORTx
+ * 
+ * */
 
 void atmega128_digiIO_mcu_write(uint16_t addr, int8_t val)
 {

@@ -55,7 +55,7 @@ static inline uint16_t RAM_space_to_IDX(uint16_t addr)
 {
     uint16_t res = 0;
     
-    if ((addr < 158) && (addr > 31))
+    if ((31 < addr) && (addr < 158))
     {
         res = addr - 32;
     }

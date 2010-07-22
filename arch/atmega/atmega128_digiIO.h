@@ -25,6 +25,8 @@
 #define DIGIIO_IS_DDR(X)    (X % 3 == 1)
 #define DIGIIO_IS_PORTX(X)  (X % 3 == 2)
 
+#define IDX_TO_DIGIIO_PORT(X) (X / 3)
+
 #define DIGIIO_PIN 0
 #define DIGIIO_DDR   1
 #define DIGIIO_PORTX 2

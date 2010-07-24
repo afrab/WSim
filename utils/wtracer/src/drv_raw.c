@@ -31,13 +31,33 @@ tracer_driver_t tracer_driver_raw =
 /* ************************************************** */
 /* ************************************************** */
 
+uint64_t drv_raw_bitmask(int size)
+{
+  int i;
+  uint64_t bm = 0;
+  for(i=0; i<size; i++)
+    {
+      bm = (bm << 1) | 1;
+    }
+  return bm;
+}
+
+/* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
+
 void drv_raw_dump_signal(tracer_t *t, tracer_id_t id)
 {
+  uint64_t bitmask;
   tracer_ev_t   ev;
   tracer_sample_t s;
 
+  bitmask = drv_raw_bitmask(t->hdr.id_width[id]);
+
   fprintf(t->out_fd,"id:%s\n",t->hdr.id_name[id]);
   fprintf(t->out_fd,"count: %d\n",t->hdr.id_count[id]);
+  fprintf(t->out_fd,"size: %d\n",t->hdr.id_width[id]);
+  fprintf(t->out_fd,"mask: %" PRIu64 "\n",bitmask);
   fprintf(t->out_fd,"min: %" PRIu64 "\n",t->hdr.id_val_min[id]);
   fprintf(t->out_fd,"max: %" PRIu64 "\n",t->hdr.id_val_max[id]);
   fprintf(t->out_fd,"\n");
@@ -48,7 +68,7 @@ void drv_raw_dump_signal(tracer_t *t, tracer_id_t id)
       if (s.id == id)
 	{
 	  fprintf(t->out_fd,"%" PRIu64 ": %" PRIu64 "\n",
-		  s.time, s.val);
+		  s.time, s.val & bitmask);
 	}
     }
   fprintf(t->out_fd,"\n");

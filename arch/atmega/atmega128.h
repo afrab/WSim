@@ -16,6 +16,7 @@
 #include "atmega128_alu.h"
 #include "atmega128_digiIO.h"
 #include "atmega128_io.h"
+#include "atmega128_io_reserved.h"
 
 #define MCU_T atmega128_mcu_t
 

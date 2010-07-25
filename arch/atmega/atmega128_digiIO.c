@@ -54,8 +54,8 @@ struct digiIO_IDX_mapping_t idx_mapping[] =
     {IO_REG_PORTG,"PORTG"}
 };
 
-#define IO_REG_ADDR(X) idx_mapping[X].IO_reg_addr
-#define IO_REG_NAME(X) idx_mapping[X].name
+#define DIGIIO_REG_ADDR(X) idx_mapping[X].IO_reg_addr
+#define DIGIIO_REG_NAME(X) idx_mapping[X].name
 
 /* ************************************************** */
 /* ************************************************** */
@@ -170,10 +170,10 @@ void atmega128_digiIO_init(void)
     
     for(idx = 0 ; idx < 21 ; idx++)
     {
-        atmega128_io_register(IO_REG_ADDR(idx), 
+        atmega128_io_register(DIGIIO_REG_ADDR(idx), 
                               atmega128_digiIO_mcu_read, 
                               atmega128_digiIO_mcu_write,
-                              IO_REG_NAME(idx));
+                              DIGIIO_REG_NAME(idx));
     }
     
     atmega128_digiIO_reset();

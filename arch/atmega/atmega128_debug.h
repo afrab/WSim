@@ -78,6 +78,12 @@ extern char* atmega128_lpm_names[];
 #    define HW_DMSG_DIGI_IO(x...) do { } while (0)
 #endif
 
+#ifdef DEBUG_IO_RESERVED
+#    define HW_DMSG_IO_RESERVED(x...) HW_DMSG_MCU(x)
+#else
+#    define HW_DMSG_IO_RESERVED(x...) do { } while (0)
+#endif
+
 /* ************************************************** */
 /* ************************************************** */
 /* ************************************************** */

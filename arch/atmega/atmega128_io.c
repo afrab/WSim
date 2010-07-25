@@ -66,6 +66,10 @@ static inline uint16_t RAM_space_to_IDX(uint16_t addr)
     return res;
 }
 
+/* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
+
 static int8_t atmega128_read8_sigbus(uint16_t addr)
 {
   mcu_signal_add(SIG_MCU | SIG_MCU_BUS);
@@ -111,8 +115,9 @@ static int16_t atmega128_read16_sigbus(uint16_t addr)
 /* #if defined(DEBUG_IO) */
 /* addresses correspond to OUT opcode, do not use with ST */
 /* static */
-struct atmega128_io_addr_fptr_t atmega128_io_addr_fptr[MCU_IO_SIZE] = {
-
+struct atmega128_io_addr_fptr_t atmega128_io_addr_fptr[MCU_IO_SIZE];
+//= {
+/*
   { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "PINF"     },
   { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "PINE"     },
   { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "DDRE"     },
@@ -252,7 +257,7 @@ struct atmega128_io_addr_fptr_t atmega128_io_addr_fptr[MCU_IO_SIZE] = {
   { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "UDR1"     },
   { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "UCSR1C"   },
 
-};
+};*/
 
 
 /*
@@ -262,6 +267,16 @@ struct atmega128_io_addr_fptr_t atmega128_io_addr_fptr[MCU_IO_SIZE] = {
 
 void atmega128_io_init(void)
 {
+    int idx;
+    
+    for(idx = 0 ; idx < MCU_IO_SIZE ; idx++)
+    {
+    atmega128_io_addr_fptr[idx].name  = "NOT IMPLEMENTED";
+    atmega128_io_addr_fptr[idx].read  = atmega128_read8_sigbus;
+    atmega128_io_addr_fptr[idx].write = atmega128_write8_sigbus;
+    }
+    
+    atmega128_io_reserved_init();
     atmega128_digiIO_init();
 }
 
@@ -277,6 +292,10 @@ void atmega128_io_register(uint8_t addr, io_read8_t reader, io_write8_t writer, 
     atmega128_io_addr_fptr[loc].write = writer;
     atmega128_io_addr_fptr[loc].name  = name;
 }
+
+/* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
 
 /* 
  * Atmega 128 data memory map

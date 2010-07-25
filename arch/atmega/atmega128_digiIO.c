@@ -23,7 +23,7 @@ struct digiIO_IDX_mapping_t {
 };
 
 // Map indexes back to IO register addresses and name
-struct digiIO_IDX_mapping_t idx_mapping[] = 
+struct digiIO_IDX_mapping_t digiio_idx_mapping[] = 
 {    
     {IO_REG_PINE, "PINE" },
     {IO_REG_DDRE, "DDRE" },
@@ -54,8 +54,8 @@ struct digiIO_IDX_mapping_t idx_mapping[] =
     {IO_REG_PORTG,"PORTG"}
 };
 
-#define DIGIIO_REG_ADDR(X) idx_mapping[X].IO_reg_addr
-#define DIGIIO_REG_NAME(X) idx_mapping[X].name
+#define DIGIIO_REG_ADDR(X) digiio_idx_mapping[X].IO_reg_addr
+#define DIGIIO_REG_NAME(X) digiio_idx_mapping[X].name
 
 /* ************************************************** */
 /* ************************************************** */

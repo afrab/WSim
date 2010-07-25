@@ -107,143 +107,150 @@ static int16_t atmega128_read16_sigbus(uint16_t addr)
 /* ************************************************** */
 /* ************************************************** */
 
-struct atmega128_io_addr_fptr_t {
-  io_read8_t     read;
-  io_write8_t    write;
-  char           *name;
-};
 
 /* #if defined(DEBUG_IO) */
 /* addresses correspond to OUT opcode, do not use with ST */
 /* static */
-struct atmega128_io_addr_fptr_t atmega128_io_addr_fptr[] = {
+struct atmega128_io_addr_fptr_t atmega128_io_addr_fptr[MCU_IO_SIZE] = {
 
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "PINF"     }, /* 0x00 */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "PINE"     }, /* 0x01 */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "DDRE"     }, /* 0x02 */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "PORTE"    }, /* 0x03 */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "ADCL"     }, /* 0x04 */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "ADCH"     }, /* 0x05 */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "ADCSRA"   }, /* 0x06 */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "ADMUX"    }, /* 0x07 */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "ACSR"     }, /* 0x08 */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "UBRR0L"   }, /* 0x09 */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "UCSR0B"   }, /* 0x0A */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "UCSR0A"   }, /* 0x0B */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "UDR0"     }, /* 0x0C */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "SPCR"     }, /* 0x0D */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "SPSR"     }, /* 0x0E */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "SPDR"     }, /* 0x0F */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "PIND"     }, /* 0x10 */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "DDRD"     }, /* 0x11 */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "PORTD"    }, /* 0x12 */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "PINC"     }, /* 0x13 */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "DDRC"     }, /* 0x14 */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "PORTC"    }, /* 0x15 */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "PINB"     }, /* 0x16 */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "DDRB"     }, /* 0x17 */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "PORTB"    }, /* 0x18 */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "PINA"     }, /* 0x19 */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "DDRA"     }, /* 0x1A */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "PORTA"    }, /* 0x1B */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "EECR"     }, /* 0x1C */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "EEDR"     }, /* 0x1D */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "EEARL"    }, /* 0x1E */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "EEARH"    }, /* 0x1F */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "SFIOR"    }, /* 0x20 */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "WDTCR"    }, /* 0x21 */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "OCDR"     }, /* 0x22 */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "OCR2"     }, /* 0x23 */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "TCNT2"    }, /* 0x24 */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "TCCR2"    }, /* 0x25 */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "ICR1L"    }, /* 0x26 */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "ICR1H"    }, /* 0x27 */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "OCR1BL"   }, /* 0x28 */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "OCR1BH"   }, /* 0x29 */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "OCR1AL"   }, /* 0x2A */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "OCR1AH"   }, /* 0x2B */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "TCNT1L"   }, /* 0x2C */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "TCNT1H"   }, /* 0x2D */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "TCCR1B"   }, /* 0x2E */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "TCCR1A"   }, /* 0x2F */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "ASSR"     }, /* 0x30 */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "OCR0"     }, /* 0x31 */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "TCNT0"    }, /* 0x32 */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "TCCR0"    }, /* 0x33 */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "MCUCSR"   }, /* 0x34 */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "MCUCR"    }, /* 0x35 */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "TIFR"     }, /* 0x36 */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "TIMSK"    }, /* 0x37 */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "EIFR"     }, /* 0x38 */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "EIMSK"    }, /* 0x39 */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "EICRB"    }, /* 0x3A */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "RAMPZ"    }, /* 0x3B */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "XDIV"     }, /* 0x3C */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "SPL"      }, /* 0x3D */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "SPH"      }, /* 0x3E */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "SREG"     },  /* 0x3F */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "Reserved" }, /* 0x60 */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "DDRF"     }, /* 0x61 */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "PORTF"    }, /* 0x62 */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "PING"     }, /* 0x63 */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "DDRG"     }, /* 0x64 */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "PORTG"    }, /* 0x65 */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "Reserved" }, /* 0x66 */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "Reserved" }, /* 0x67 */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "SPMCSR"   }, /* 0x68 */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "Reserved" }, /* 0x69 */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "EICRA"    }, /* 0x6A */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "Reserved" }, /* 0x6B */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "XMCRB"    }, /* 0x6C */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "XMCRA"    }, /* 0x6D */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "Reserved" }, /* 0x6E */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "OSCCAL"   }, /* 0x6F */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "TWBR"     }, /* 0x70 */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "TWSR"     }, /* 0x71 */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "TWAR"     }, /* 0x72 */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "TWDR"     }, /* 0x73 */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "TWCR"     }, /* 0x74 */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "Reserved" }, /* 0x75 */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "Reserved" }, /* 0x76 */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "Reserved" }, /* 0x77 */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "OCR1CL"   }, /* 0x78 */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "OCR1CH"   }, /* 0x79 */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "TCCR1C"   }, /* 0x7A */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "Reserved" }, /* 0x7B */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "ETIFR"    }, /* 0x7C */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "ETIMSK"   }, /* 0x7D */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "Reserved" }, /* 0x7E */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "Reserved" }, /* 0x7F */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "ICR3L"    }, /* 0x80 */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "ICR3H"    }, /* 0x81 */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "OCR3CL"   }, /* 0x82 */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "OCR3CH"   }, /* 0x83 */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "OCR3BL"   }, /* 0x84 */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "OCR3BH"   }, /* 0x85 */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "OCR3AL"   }, /* 0x86 */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "OCR3AH"   }, /* 0x87 */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "TCNT3L"   }, /* 0x88 */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "TCNT3H"   }, /* 0x89 */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "TCCR3B"   }, /* 0x8A */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "TCCR3A"   }, /* 0x8B */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "TCCR3C"   }, /* 0x8C */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "Reserved" }, /* 0x8D */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "Reserved" }, /* 0x8E */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "Reserved" }, /* 0x8F */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "UBRR0H"   }, /* 0x90 */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "Reserved" }, /* 0x91 */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "Reserved" }, /* 0x92 */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "Reserved" }, /* 0x93 */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "Reserved" }, /* 0x94 */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "UCSR0C"   }, /* 0x95 */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "Reserved" }, /* 0x96 */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "Reserved" }, /* 0x97 */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "UBRR1H"   }, /* 0x98 */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "UBRR1L"   }, /* 0x99 */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "UCSR1B"   }, /* 0x9A */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "UCSR1A"   }, /* 0x9B */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "UDR1"     }, /* 0x9C */
-  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "UCSR1C"   }, /* 0x9D */
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "PINF"     },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "PINE"     },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "DDRE"     },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "PORTE"    },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "ADCL"     },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "ADCH"     },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "ADCSRA"   },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "ADMUX"    },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "ACSR"     },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "UBRR0L"   },
+  
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "UCSR0B"   },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "UCSR0A"   },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "UDR0"     },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "SPCR"     },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "SPSR"     },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "SPDR"     },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "PIND"     },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "DDRD"     },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "PORTD"    },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "PINC"     },
+  
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "DDRC"     },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "PORTC"    },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "PINB"     },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "DDRB"     },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "PORTB"    },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "PINA"     },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "DDRA"     },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "PORTA"    },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "EECR"     },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "EEDR"     },
+  
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "EEARL"    },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "EEARH"    },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "SFIOR"    },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "WDTCR"    },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "OCDR"     },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "OCR2"     },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "TCNT2"    },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "TCCR2"    },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "ICR1L"    },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "ICR1H"    },
+  
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "OCR1BL"   },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "OCR1BH"   },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "OCR1AL"   },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "OCR1AH"   },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "TCNT1L"   },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "TCNT1H"   },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "TCCR1B"   },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "TCCR1A"   },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "ASSR"     },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "OCR0"     },
+  
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "TCNT0"    },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "TCCR0"    },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "MCUCSR"   },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "MCUCR"    },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "TIFR"     },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "TIMSK"    },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "EIFR"     },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "EIMSK"    },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "EICRB"    },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "RAMPZ"    },
+  
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "XDIV"     },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "SPL"      },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "SPH"      },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "SREG"     },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "Reserved" },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "DDRF"     },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "PORTF"    },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "PING"     },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "DDRG"     },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "PORTG"    },
+  
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "Reserved" },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "Reserved" },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "SPMCSR"   },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "Reserved" },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "EICRA"    },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "Reserved" },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "XMCRB"    },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "XMCRA"    },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "Reserved" },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "OSCCAL"   },
+  
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "TWBR"     },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "TWSR"     },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "TWAR"     },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "TWDR"     },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "TWCR"     },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "Reserved" },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "Reserved" },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "Reserved" },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "OCR1CL"   },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "OCR1CH"   },
+  
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "TCCR1C"   },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "Reserved" },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "ETIFR"    },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "ETIMSK"   },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "Reserved" },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "Reserved" },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "ICR3L"    },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "ICR3H"    },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "OCR3CL"   },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "OCR3CH"   },
+  
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "OCR3BL"   },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "OCR3BH"   },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "OCR3AL"   },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "OCR3AH"   },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "TCNT3L"   },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "TCNT3H"   },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "TCCR3B"   },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "TCCR3A"   },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "TCCR3C"   },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "Reserved" },
+  
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "Reserved" },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "Reserved" },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "UBRR0H"   },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "Reserved" },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "Reserved" },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "Reserved" },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "Reserved" },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "UCSR0C"   },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "Reserved" },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "Reserved" },
+  
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "UBRR1H"   },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "UBRR1L"   },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "UCSR1B"   },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "UCSR1A"   },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "UDR1"     },
+  { .read = atmega128_read8_sigbus, .write = atmega128_write8_sigbus, .name = "UCSR1C"   },
 
 };
 
@@ -256,19 +263,19 @@ struct atmega128_io_addr_fptr_t atmega128_io_addr_fptr[] = {
 void atmega128_io_init(void)
 {
     atmega128_digiIO_init();
-    
 }
 
 /* ************************************************** */
 /* ************************************************** */
 /* ************************************************** */
 
-void atmega128_io_register(uint8_t addr, io_read8_t reader, io_write8_t writer)
+void atmega128_io_register(uint8_t addr, io_read8_t reader, io_write8_t writer, char * name)
 {
     uint16_t loc = RAM_space_to_IDX(addr);
     
-    atmega128_io_addr_fptr[loc].read  = *reader;
-    atmega128_io_addr_fptr[loc].write = *writer;
+    atmega128_io_addr_fptr[loc].read  = reader;
+    atmega128_io_addr_fptr[loc].write = writer;
+    atmega128_io_addr_fptr[loc].name  = name;
 }
 
 /* 

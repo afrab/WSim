@@ -23,6 +23,12 @@ typedef void    (*peripheral_write8_t ) (uint16_t addr, int8_t val);
 typedef int16_t (*peripheral_read16_t ) (uint16_t addr);
 typedef void    (*peripheral_write16_t) (uint16_t addr, int16_t val);
 
+struct atmega128_io_addr_fptr_t {
+  io_read8_t     read;
+  io_write8_t    write;
+  char           *name;
+};
+
 /* ************************************************** */
 /* ************************************************** */
 /* ************************************************** */
@@ -248,11 +254,7 @@ typedef void    (*peripheral_write16_t) (uint16_t addr, int16_t val);
 #define IO_REG_SPMCSR        0x68
 #define IO_REG_Reserved_0x67 0x67
 #define IO_REG_Reserved_0x66 0x66
-#define IO_REG_PORTG         0x65
-#define IO_REG_DDRG          0x64
-#define IO_REG_PING          0x63
-#define IO_REG_PORTF         0x62
-#define IO_REG_DDRF          0x61
+
 #define IO_REG_Reserved_0x60 0x60
 
 /* io regs address starting from 0 */
@@ -293,18 +295,6 @@ typedef void    (*peripheral_write16_t) (uint16_t addr, int16_t val);
 #define IO_REG_EEARL         0x1E /* 0x3E */
 #define IO_REG_EEDR          0x1D /* 0x3D */
 #define IO_REG_EECR          0x1C /* 0x3C */
-#define IO_REG_PORTA         0x1B /* 0x3B */
-#define IO_REG_DDRA          0x1A /* 0x3A */
-#define IO_REG_PINA          0x19 /* 0x39 */
-#define IO_REG_PORTB         0x18 /* 0x38 */
-#define IO_REG_DDRB          0x17 /* 0x37 */
-#define IO_REG_PINB          0x16 /* 0x36 */
-#define IO_REG_PORTC         0x15 /* 0x35 */
-#define IO_REG_DDRC          0x14 /* 0x34 */
-#define IO_REG_PINC          0x13 /* 0x33 */
-#define IO_REG_PORTD         0x12 /* 0x32 */
-#define IO_REG_DDRD          0x11 /* 0x31 */
-#define IO_REG_PIND          0x10 /* 0x30 */
 #define IO_REG_SPDR          0x0F /* 0x2F */
 #define IO_REG_SPSR          0x0E /* 0x2E */
 #define IO_REG_SPCR          0x0D /* 0x2D */
@@ -317,12 +307,10 @@ typedef void    (*peripheral_write16_t) (uint16_t addr, int16_t val);
 #define IO_REG_ADCSRA        0x06 /* 0x26 */
 #define IO_REG_ADCH          0x05 /* 0x25 */
 #define IO_REG_ADCL          0x04 /* 0x24 */
-#define IO_REG_PORTE         0x03 /* 0x23 */
-#define IO_REG_DDRE          0x02 /* 0x22 */
-#define IO_REG_PINE          0x01 /* 0x21 */
-#define IO_REG_PINF          0x00 /* 0x20 */
 
 
+#define IO_MEM_SIZE 0
+#define IO_POINTERS 1
 
 /* 
  * Atmega 128 data memory map
@@ -341,9 +329,10 @@ typedef void    (*peripheral_write16_t) (uint16_t addr, int16_t val);
  *                  $FFFF
  */
 
+
 void    atmega128_io_init       (void);
 
-void atmega128_io_register(uint8_t addr, io_read8_t reader, io_write8_t writer);
+void     atmega128_io_register(uint8_t addr, io_read8_t reader, io_write8_t writer, char * name);
 
 int8_t   atmega128_read_byte         (uint16_t loc, uint8_t space);
 void     atmega128_write_byte        (uint16_t loc, int8_t  val, uint8_t space);

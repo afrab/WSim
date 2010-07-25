@@ -49,30 +49,29 @@
 #define DIGIIO_PF  5  /* 8-bit analog */
 #define DIGIIO_PG  6  /* 5-bit I/O    */
 
-
 // IO addresses
 enum gpio_regs_t {
-    PINF = 0,
-    PINE,
-    DDRE,
-    PORTE,
-    PIND = 13,
-    DDRD,
-    PORTD,
-    PINC,
-    DDRC,
-    PORTC,
-    PINB,
-    DDRB,
-    PORTB,
-    PINA,
-    DDRA,
-    PORTA,
-    DDRF = 65,
-    PORTF,
-    PING,
-    DDRG,
-    PORTG
+    IO_REG_PINF = 32,
+    IO_REG_PINE,
+    IO_REG_DDRE,
+    IO_REG_PORTE,
+    IO_REG_PIND = 48,
+    IO_REG_DDRD,
+    IO_REG_PORTD,
+    IO_REG_PINC,
+    IO_REG_DDRC,
+    IO_REG_PORTC,
+    IO_REG_PINB,
+    IO_REG_DDRB,
+    IO_REG_PORTB,
+    IO_REG_PINA,
+    IO_REG_DDRA,
+    IO_REG_PORTA,
+    IO_REG_DDRF = 97,
+    IO_REG_PORTF,
+    IO_REG_PING,
+    IO_REG_DDRG,
+    IO_REG_PORTG
 };
 
 
@@ -121,6 +120,7 @@ struct atmega128_digiIO_t {
     uint8_t int_edge_select[2];
     uint8_t ifg[2];
 };
+
 
 inline uint8_t address_to_digiio_IDX(uint16_t addr);
 

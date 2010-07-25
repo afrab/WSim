@@ -17,6 +17,50 @@
 /* ************************************************** */
 /* ************************************************** */
 
+struct digiIO_IDX_mapping_t {
+    uint16_t IO_reg_addr;
+    char *name;
+};
+
+// Map indexes back to IO register addresses and name
+struct digiIO_IDX_mapping_t idx_mapping[] = 
+{    
+    {IO_REG_PINE, "PINE" },
+    {IO_REG_DDRE, "DDRE" },
+    {IO_REG_PORTE,"PORTE"},
+    
+    {IO_REG_PIND, "PIND" },
+    {IO_REG_DDRD, "DDRD" },
+    {IO_REG_PORTD,"PORTD"},
+    
+    {IO_REG_PINC, "PINC" },
+    {IO_REG_DDRC, "DDRC" },
+    {IO_REG_PORTC,"PORTC"},
+    
+    {IO_REG_PINB, "PINB" },
+    {IO_REG_DDRB, "DDRB" },
+    {IO_REG_PORTB,"PORTB"},
+    
+    {IO_REG_PINA, "PINA" },
+    {IO_REG_DDRA, "DDRA" },
+    {IO_REG_PORTA,"PORTA"},
+ 
+    {IO_REG_PINF, "PINF" },
+    {IO_REG_DDRF, "DDRF" },
+    {IO_REG_PORTF,"PORTF"},
+    
+    {IO_REG_PING, "PING" },
+    {IO_REG_DDRG, "DDRG" },
+    {IO_REG_PORTG,"PORTG"}
+};
+
+#define IO_REG_ADDR(X) idx_mapping[X].IO_reg_addr
+#define IO_REG_NAME(X) idx_mapping[X].name
+
+/* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
+
 /*
  * There are 3 discontinuities and 1 irregularity in the IO address range
  * - 32 : In an ideal world, PINF would have an address of 60 or 96, but isn't
@@ -122,27 +166,15 @@ inline uint8_t address_to_digiio_IDX(uint16_t addr)
 
 void atmega128_digiIO_init(void)
 {
-    atmega128_io_register(IO_REG_PINF,  &atmega128_digiIO_mcu_read, &atmega128_digiIO_mcu_write);
-    atmega128_io_register(IO_REG_PINE,  &atmega128_digiIO_mcu_read, &atmega128_digiIO_mcu_write);
-    atmega128_io_register(IO_REG_DDRE,  &atmega128_digiIO_mcu_read, &atmega128_digiIO_mcu_write);
-    atmega128_io_register(IO_REG_PORTE, &atmega128_digiIO_mcu_read, &atmega128_digiIO_mcu_write);
-    atmega128_io_register(IO_REG_PIND,  &atmega128_digiIO_mcu_read, &atmega128_digiIO_mcu_write);
-    atmega128_io_register(IO_REG_DDRD,  &atmega128_digiIO_mcu_read, &atmega128_digiIO_mcu_write);
-    atmega128_io_register(IO_REG_PORTD, &atmega128_digiIO_mcu_read, &atmega128_digiIO_mcu_write);
-    atmega128_io_register(IO_REG_PINC,  &atmega128_digiIO_mcu_read, &atmega128_digiIO_mcu_write);
-    atmega128_io_register(IO_REG_DDRC,  &atmega128_digiIO_mcu_read, &atmega128_digiIO_mcu_write);
-    atmega128_io_register(IO_REG_PORTC, &atmega128_digiIO_mcu_read, &atmega128_digiIO_mcu_write);
-    atmega128_io_register(IO_REG_PINB,  &atmega128_digiIO_mcu_read, &atmega128_digiIO_mcu_write);
-    atmega128_io_register(IO_REG_DDRB,  &atmega128_digiIO_mcu_read, &atmega128_digiIO_mcu_write);
-    atmega128_io_register(IO_REG_PORTB, &atmega128_digiIO_mcu_read, &atmega128_digiIO_mcu_write);
-    atmega128_io_register(IO_REG_PINA,  &atmega128_digiIO_mcu_read, &atmega128_digiIO_mcu_write);
-    atmega128_io_register(IO_REG_DDRA,  &atmega128_digiIO_mcu_read, &atmega128_digiIO_mcu_write);
-    atmega128_io_register(IO_REG_PORTA, &atmega128_digiIO_mcu_read, &atmega128_digiIO_mcu_write);
-    atmega128_io_register(IO_REG_DDRF,  &atmega128_digiIO_mcu_read, &atmega128_digiIO_mcu_write);
-    atmega128_io_register(IO_REG_PORTF, &atmega128_digiIO_mcu_read, &atmega128_digiIO_mcu_write);
-    atmega128_io_register(IO_REG_PING,  &atmega128_digiIO_mcu_read, &atmega128_digiIO_mcu_write);
-    atmega128_io_register(IO_REG_DDRG,  &atmega128_digiIO_mcu_read, &atmega128_digiIO_mcu_write);
-    atmega128_io_register(IO_REG_PORTG, &atmega128_digiIO_mcu_read, &atmega128_digiIO_mcu_write);
+    int8_t idx;
+    
+    for(idx = 0 ; idx < 21 ; idx++)
+    {
+        atmega128_io_register(IO_REG_ADDR(idx), 
+                              atmega128_digiIO_mcu_read, 
+                              atmega128_digiIO_mcu_write,
+                              IO_REG_NAME(idx));
+    }
     
     atmega128_digiIO_reset();
 }
@@ -151,6 +183,7 @@ void atmega128_digiIO_reset(void)
 {
     /* after a reset the pin IO are switched to input mode */
     int i;
+    
     for(i = 20 ; i-- ; )
     {
         DIGIIO_REGS(i) = 0;

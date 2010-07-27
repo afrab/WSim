@@ -6,12 +6,12 @@ noinst_LIBRARIES = 		\
 
 INCLUDES=-I$(top_srcdir)
 
-ATMEGA= atmega128_models.h		                              \
+ATMEGA= atmega128_models.h		                          \
 	atmega128.h                   atmega128.c                 \
 	atmega128_debug.h             atmega128_debug.c           \
 	atmega128_alu.h               atmega128_alu.c             \
 	atmega128_io.h                atmega128_io.c              \
-	atmega128_io_reserved.h       atmega128_io_reserved.c     \	
+	atmega128_io_reserved.h       atmega128_io_reserved.c     \
 	atmega128_digiIO.h   atmega128_digiIO.c
 
 libatmega128_a_CFLAGS=-DATMEGA128

@@ -64,6 +64,14 @@
   } while (0)
 
 
+#define CC1100_UPDATE_RSSI(cc1100)					\
+  do {									\
+    if (MACHINE_TIME_GET_NANO() > (cc1100->rx_io_timer + CC1100_SYNCHRO_DELAY_THRESHOLD)) { \
+      cc1100->registers[CC1100_REG_RSSI] = 0;				\
+    }									\
+  } while (0)
+
+
 #define CC1100_RECORD_RSSI(cc1100, dBm)					\
   do {									\
     if ((cc1100->fsm_state == CC1100_STATE_RX)) {			\

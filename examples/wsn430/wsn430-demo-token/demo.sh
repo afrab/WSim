@@ -15,6 +15,18 @@ LOG="--verbose=6"
 MODE="--mode=time --modearg=10s"
 UI=""
 #UI="--ui"
+
+DS0=0a:00:00:00:00:00:00:01
+DS1=0a:00:00:00:00:00:01:01
+DS2=53:00:00:00:00:00:02:01
+DS3=64:00:00:00:00:00:03:01
+DS4=e1:00:00:00:00:00:04:01
+DS5=d6:00:00:00:00:00:05:01
+DS6=8f:00:00:00:00:00:06:01
+DS7=b8:00:00:00:00:00:07:01
+DS8=9c:00:00:00:00:00:08:01
+DS9=ab:00:00:00:00:00:09:01
+DS10=f2:00:00:00:00:00:0a:01
 ## ======================================
 
 
@@ -58,7 +70,8 @@ MODE1=${MODE}
         MODE1="--mode=gdb"
         fi
     fi
-    WS="${WSIM} ${MODE1} ${WSNET_MODE} ${LOG} ${TRC} ${UI} --logfile=n${iter}.log --logpktfile=n${iter}-pkt.log --trace=n${iter}.trc --serial1_io=bk:udp:localhost:600${iter}:localhost:700${iter} --node-id=${iter} --ds2411=0a:00:00:00:00:00:0${iter}:01 ./wsn430-demo.elf"
+    eval DS="\$DS${iter}"
+    WS="${WSIM} ${MODE1} ${WSNET_MODE} ${LOG} ${TRC} ${UI} --logfile=n${iter}.log --logpktfile=n${iter}-pkt.log --trace=n${iter}.trc --serial1_io=bk:udp:localhost:600${iter}:localhost:700${iter} --node-id=${iter} --ds2411=${DS} ./wsn430-demo.elf"
     xterm -T wsim-${iter} -e "${WS}" &
     echo "${WS}"
     iter=`expr ${iter} + 1`

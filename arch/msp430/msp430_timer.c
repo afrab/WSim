@@ -229,18 +229,35 @@ break;
   if ((MCU.TIMER.cctl.b.ccie == 1) && (MCU.TIMER.cctl.b.ccifg == 1))	\
     {									\
       HW_DMSG_TIMER("msp430:" TIMERN ": checkifg " cctln		\
-		    ".ccifg == 1, interrupt set\n");			\
+		    ".ccifg == 1, interrupt set [%"PRId64"\n",		\
+		    MACHINE_TIME_GET_NANO());				\
       msp430_interrupt_set(intr);					\
       return 1;								\
     }
 
 
+static char* timerb_tiv_to_str(int val)
+{
+  switch (val) {
+  case 0:   return "";
+  case 2:   return "TBCCR1";
+  case 4:   return "TBCCR2";
+  case 6:   return "TBCCR3";
+  case 8:   return "TBCCR4";
+  case 0xa: return "TBCCR5";
+  case 0xc: return "TBCCR6";
+  case 0xe: return "Cap/Comp overflow";
+  default:  return "unknown";
+  }
+  return "unknown";
+}
+
 #define ifset(TIMER,TIMERN,cctl,val)					\
   if (MCU.TIMER.cctl.b.ccifg)						\
     {									\
       MCU.TIMER.tiv.s = val;						\
-      HW_DMSG_TIMER("msp430:"TIMERN": tiv set to 0x%02x [%"PRId64"]\n", \
-		    val,MACHINE_TIME_GET_NANO());			\
+      HW_DMSG_TIMER("msp430:"TIMERN": tiv set to 0x%02x = %s [%"PRId64"]\n", \
+		    (val >> 1) & 0x7,timerb_tiv_to_str(val),MACHINE_TIME_GET_NANO()); \
     }
 
 
@@ -606,6 +623,13 @@ void msp430_timerA3_update(void)
 	{
 	  MCU.timerA3.tar += tar_inc;
 	  /* HW_DMSG_TIMER("msp430:timerA3: tar (%x) += %d\n",MCU.timerA3.tar,tar_inc); */
+
+          /**************************/
+          /* capture/compare blocks */
+          /**************************/
+          TIMER_COMPARE(timerA3,"timerA3:taccr1:",tar,taccr,tacctl,1,INTR_TIMERA3_1)
+          TIMER_COMPARE(timerA3,"timerA3:taccr2:",tar,taccr,tacctl,2,INTR_TIMERA3_1)
+
 	  if (MCU.timerA3.tar >= MCU.timerA3.taccr[0])
 	    {
 	      /* (ccr0 - 1) -> ccr0 */
@@ -630,17 +654,20 @@ void msp430_timerA3_update(void)
               TIMER_COMPARE_WRAPS(timerA3,"timerA3:taccr1",taccr,tacctl,1);
 	      TIMER_COMPARE_WRAPS(timerA3,"timerA3:taccr2",taccr,tacctl,2);
 	    }
-          /**************************/
-          /* capture/compare blocks */
-          /**************************/
-          TIMER_COMPARE(timerA3,"timerA3:taccr1:",tar,taccr,tacctl,1,INTR_TIMERA3_1)
-          TIMER_COMPARE(timerA3,"timerA3:taccr2:",tar,taccr,tacctl,2,INTR_TIMERA3_1)
 	}
       break;
 
     case TIMER_CONT:    /* Continuous counter */
       MCU.timerA3.tar += tar_inc;
       /* HW_DMSG_TIMER("msp430:timerA3: tar skip to 0x%04x (inc 0x%04x)\n",MCU.timerA3.tar,tar_inc); */
+
+      /**************************/
+      /* capture/compare blocks */
+      /**************************/
+      TIMER_COMPARE(timerA3,"timerA3",tar,taccr,tacctl,0,INTR_TIMERA3_0)
+      TIMER_COMPARE(timerA3,"timerA3",tar,taccr,tacctl,1,INTR_TIMERA3_1)
+      TIMER_COMPARE(timerA3,"timerA3",tar,taccr,tacctl,2,INTR_TIMERA3_1)
+
       if (MCU.timerA3.tar >= TAR_MAX_LIMIT)
 	{
 	  MCU.timerA3.tactl.b.taifg = 1;
@@ -658,13 +685,6 @@ void msp430_timerA3_update(void)
 	  TIMER_COMPARE_WRAPS(timerA3,"timerA3",taccr,tacctl,1);
 	  TIMER_COMPARE_WRAPS(timerA3,"timerA3",taccr,tacctl,2);
 	}
-      /**************************/
-      /* capture/compare blocks */
-      /**************************/
-      TIMER_COMPARE(timerA3,"timerA3",tar,taccr,tacctl,0,INTR_TIMERA3_0)
-      TIMER_COMPARE(timerA3,"timerA3",tar,taccr,tacctl,1,INTR_TIMERA3_1)
-      TIMER_COMPARE(timerA3,"timerA3",tar,taccr,tacctl,2,INTR_TIMERA3_1)
-
       break;
 
     case TIMER_UD:      /* UP/DOWN counter */
@@ -695,7 +715,7 @@ void msp430_timerA3_update(void)
 		  TIMER_COMPARE(timerA3,"timerA3",tar,taccr,tacctl,2,INTR_TIMERA3_1)
 		}
 	    }
-	  else
+	  else /* timer is down */
 	    {
 	      MCU.timerA3.tar -= tar_inc;
 	      if (MCU.timerA3.tar <= 0)
@@ -1140,6 +1160,19 @@ void msp430_timerB_update(void)
 	{
 	  MCU.timerB.tbr += tbr_inc;
 	  /* HW_DMSG_TIMER("msp430:" TIMERBNAME ": tbr (%x) += %d\n",MCU.timerB.tbr,tbr_inc); */
+
+          /**************************/
+          /* capture/compare blocks */
+          /**************************/
+          TIMER_COMPARE(timerB,TIMERBNAME,tbr,tbcl,tbcctl,1,INTR_TIMERB_1)
+          TIMER_COMPARE(timerB,TIMERBNAME,tbr,tbcl,tbcctl,2,INTR_TIMERB_1)
+#if defined(__msp430_have_timerb7)
+          TIMER_COMPARE(timerB,TIMERBNAME,tbr,tbcl,tbcctl,3,INTR_TIMERB_1)
+          TIMER_COMPARE(timerB,TIMERBNAME,tbr,tbcl,tbcctl,4,INTR_TIMERB_1)
+          TIMER_COMPARE(timerB,TIMERBNAME,tbr,tbcl,tbcctl,5,INTR_TIMERB_1)
+          TIMER_COMPARE(timerB,TIMERBNAME,tbr,tbcl,tbcctl,6,INTR_TIMERB_1)
+#endif
+
 	  if (MCU.timerB.tbr >= MCU.timerB.tbccr[0])
 	    {
 	      /* (ccr0 - 1) -> ccr0 */
@@ -1169,23 +1202,26 @@ void msp430_timerB_update(void)
               TIMER_COMPARE_WRAPS(timerB,TIMERBNAME,tbcl,tbcctl,6);
 #endif
 	    }
-          /**************************/
-          /* capture/compare blocks */
-          /**************************/
-          TIMER_COMPARE(timerB,TIMERBNAME,tbr,tbcl,tbcctl,1,INTR_TIMERB_1)
-          TIMER_COMPARE(timerB,TIMERBNAME,tbr,tbcl,tbcctl,2,INTR_TIMERB_1)
-#if defined(__msp430_have_timerb7)
-          TIMER_COMPARE(timerB,TIMERBNAME,tbr,tbcl,tbcctl,3,INTR_TIMERB_1)
-          TIMER_COMPARE(timerB,TIMERBNAME,tbr,tbcl,tbcctl,4,INTR_TIMERB_1)
-          TIMER_COMPARE(timerB,TIMERBNAME,tbr,tbcl,tbcctl,5,INTR_TIMERB_1)
-          TIMER_COMPARE(timerB,TIMERBNAME,tbr,tbcl,tbcctl,6,INTR_TIMERB_1)
-#endif
 	}
       break;
 
     case TIMER_CONT:    /* Continuous counter */
       MCU.timerB.tbr += tbr_inc;
       /* HW_DMSG_TIMER("msp430:" TIMERBNAME ": tbr +%d -> 0x%04x\n",tbr_inc,MCU.timerB.tbr); */
+
+      /**************************/
+      /* capture/compare blocks */
+      /**************************/
+      TIMER_COMPARE(timerB,TIMERBNAME,tbr,tbcl,tbcctl,0,INTR_TIMERB_0)
+      TIMER_COMPARE(timerB,TIMERBNAME,tbr,tbcl,tbcctl,1,INTR_TIMERB_1)
+      TIMER_COMPARE(timerB,TIMERBNAME,tbr,tbcl,tbcctl,2,INTR_TIMERB_1)
+#if defined(__msp430_have_timerb7)
+      TIMER_COMPARE(timerB,TIMERBNAME,tbr,tbcl,tbcctl,3,INTR_TIMERB_1)
+      TIMER_COMPARE(timerB,TIMERBNAME,tbr,tbcl,tbcctl,4,INTR_TIMERB_1)
+      TIMER_COMPARE(timerB,TIMERBNAME,tbr,tbcl,tbcctl,5,INTR_TIMERB_1)
+      TIMER_COMPARE(timerB,TIMERBNAME,tbr,tbcl,tbcctl,6,INTR_TIMERB_1)
+#endif
+
       if (MCU.timerB.tbr >= MCU.timerB.tbr_limit)
 	{
 	  MCU.timerB.tbctl.b.tbifg = 1;
@@ -1208,18 +1244,6 @@ void msp430_timerB_update(void)
 	  TIMER_COMPARE_WRAPS(timerB,TIMERBNAME,tbcl,tbcctl,6);
 #endif
 	}
-      /**************************/
-      /* capture/compare blocks */
-      /**************************/
-      TIMER_COMPARE(timerB,TIMERBNAME,tbr,tbcl,tbcctl,0,INTR_TIMERB_0)
-      TIMER_COMPARE(timerB,TIMERBNAME,tbr,tbcl,tbcctl,1,INTR_TIMERB_1)
-      TIMER_COMPARE(timerB,TIMERBNAME,tbr,tbcl,tbcctl,2,INTR_TIMERB_1)
-#if defined(__msp430_have_timerb7)
-      TIMER_COMPARE(timerB,TIMERBNAME,tbr,tbcl,tbcctl,3,INTR_TIMERB_1)
-      TIMER_COMPARE(timerB,TIMERBNAME,tbr,tbcl,tbcctl,4,INTR_TIMERB_1)
-      TIMER_COMPARE(timerB,TIMERBNAME,tbr,tbcl,tbcctl,5,INTR_TIMERB_1)
-      TIMER_COMPARE(timerB,TIMERBNAME,tbr,tbcl,tbcctl,6,INTR_TIMERB_1)
-#endif
       break;
 
     case TIMER_UD:      /* UP/DOWN counter */
@@ -1262,7 +1286,7 @@ void msp430_timerB_update(void)
 #endif
 		}
 	    }
-	  else
+	  else /* timer is down */
 	    {
 	      MCU.timerB.tbr -= tbr_inc;
 	      if (MCU.timerB.tbr <= 0)
@@ -1588,9 +1612,10 @@ int msp430_timerB_chkifg(void)
     {
       TCHKIFG(timerB,TIMERBNAME,tbcctl[0],"tbcctl0",INTR_TIMERB_0)
       
-      if ((MCU.timerB.tbctl.b.tbie == 1) && (MCU.timerB.tbctl.b.tbifg == 1))
+	if ((MCU.timerB.tbctl.b.tbie == 1) && (MCU.timerB.tbctl.b.tbifg == 1))
         {
-          HW_DMSG_TIMER("msp430:timerB: checkifg tbctl.tbifg == 1, interrupt set\n");
+          HW_DMSG_TIMER("msp430:timerB: checkifg tbctl.tbifg == 1, interrupt set [%"PRId64"]\n", 
+			MACHINE_TIME_GET_NANO());
           msp430_interrupt_set(INTR_TIMERB_1);
           return 1;
         }

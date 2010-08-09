@@ -321,6 +321,24 @@ Signals are added and removed by using the \verb$mcu_signal_add()$ and \verb$mcu
 Signals status are stored in the 32 bits \verb$mcu.alu.signal$ variable.
 
 
+%% there are several traps, I have validated them in the current version. You can trigger 
+%% them using special macros like these:
+%%
+%% #define __BREAK__                \
+%%    asm( "break_gdb :      \n"    \
+%%         " mov r6, r6      \n");
+%%
+%% Registers 4 to 15 can be used to generate breakpoints. Registers 4 & 5 ("mov r4,r4" and 
+%% "mov r5,r5") are already used by the energy estimation tool.
+%%
+%% For special purpose things you can have a look in /arch/msp430/msp430_alu.c:1280
+%% and do on-demand things using a "mov rx,rx". To trigger a GDB event you should do
+%%
+%%     mcu_signal_add(SIG_MCU | SIG_MCU_TRAP);
+%%     SET_CYCLES(0);
+%%     return;
+
+
 
 \section{I/O}
 \subsection{General}

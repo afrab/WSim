@@ -459,7 +459,7 @@ static void logpkt_tx_dump_pkt(struct _logpkt_state_t *logpkt, int interface_id)
 /* ************************************************** */
 void logpkt_state_save_op(void)
 {
-  int i,j;
+  int i;
   
   for (i = 0; i < nb_interfaces; i++)
     { 

@@ -236,7 +236,7 @@ break;
     }
 
 
-static char* timerb_tiv_to_str(int val)
+char* timerb_tiv_to_str(int val)
 {
   switch (val) {
   case 0:   return "";

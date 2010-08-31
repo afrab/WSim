@@ -33,6 +33,8 @@
 #define second      (1000*1000*1000)
 
 #define OUTPUT_BYTES     4
+#define PERIOD3_ACTIVE   1
+#define SOFT_INTR_EVT    9
 
 /***************************************************/
 /***************************************************/
@@ -49,6 +51,9 @@
 #define PERIOD2_DELTA    (2*second)
 #define PERIOD2_DURATION (41300*microsecond)
 
+#define PERIOD3_DELTA    (5050*microsecond)
+#define PERIOD3_DURATION (4*microsecond)
+
 #define ETRACER_DSP_POWER_STANDBY 1
 #define ETRACER_DSP_POWER_ACTIVE  2
 
@@ -63,7 +68,8 @@ struct ev_t {
 struct ev_t events[] = {
   { .period = PERIOD0_DELTA, .duration = PERIOD0_DURATION },
   { .period = PERIOD1_DELTA, .duration = PERIOD1_DURATION },
-  { .period = PERIOD2_DELTA, .duration = PERIOD2_DURATION }
+  { .period = PERIOD2_DELTA, .duration = PERIOD2_DURATION },
+  { .period = PERIOD3_DELTA, .duration = PERIOD3_DURATION }
 };
 
 #define NEVENTS (sizeof(events)/sizeof(struct ev_t))
@@ -109,6 +115,11 @@ void mydsp_reset(struct dsp_internal_state_t *st)
   etracer_slot_event(st->etrace_id,
 		     ETRACER_PER_EVT_MODE_CHANGED,
 		     ETRACER_DSP_POWER_STANDBY, 0);
+
+#if PERIOD3_ACTIVE == 1
+  etracer_slot_event(SOFT_INTR_EVT, ETRACER_PER_EVT_MODE_CHANGED, 1, 0);
+#endif
+
   HW_DDSP("mydsp:reset\n");
 }
 
@@ -238,7 +249,7 @@ int  mydsp_update(struct dsp_internal_state_t *st, uint32_t *val, uint8_t tx_pen
       
       for(i=0; i<NEVENTS; i++)
 	{
-	  /* *** */
+	  /* start */
 	  if (current_time >= events[i].start)
 	    {
 	      events[i].start += events[i].period;
@@ -253,9 +264,15 @@ int  mydsp_update(struct dsp_internal_state_t *st, uint32_t *val, uint8_t tx_pen
 		case 2:
 		  dsp_set_etrace_active(st);
 		  break;
+		case 3:
+		  #if PERIOD3_ACTIVE == 1
+		  etracer_slot_event(SOFT_INTR_EVT, ETRACER_PER_EVT_MODE_CHANGED, 2, 0);
+		  #endif
+		  break;
 		}
 	    }
 
+	  /* stop */
 	  if (current_time >= events[i].end)
 	    {
 	      events[i].end   += events[i].period;
@@ -270,6 +287,11 @@ int  mydsp_update(struct dsp_internal_state_t *st, uint32_t *val, uint8_t tx_pen
 		case 2:
 		  dsp_set_etrace_standby(st);
 		  st->dsp_output_n = OUTPUT_BYTES;
+		  break;
+		case 3:
+		  #if PERIOD3_ACTIVE == 1
+		  etracer_slot_event(SOFT_INTR_EVT, ETRACER_PER_EVT_MODE_CHANGED, 1, 0);
+		  #endif
 		  break;
 		}
 	    }

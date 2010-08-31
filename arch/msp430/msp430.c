@@ -286,6 +286,12 @@ void mcu_reset(void)
 #if defined(__msp430_have_lcd)
   msp430_lcd_reset();
 #endif
+
+#if defined(SOFT_INTR)
+  MCU.soft_intr         = 0;
+  MCU.soft_intr_timeend = 0;
+  etracer_slot_event(SOFT_INTR_EVT, ETRACER_PER_EVT_MODE_CHANGED, 1, 0);
+#endif
 }
 
 /* ************************************************** */

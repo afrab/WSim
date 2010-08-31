@@ -79,6 +79,14 @@ int msp430_interrupt_start_if_any(void)
   uint16_t ivector;
   uint16_t next_pc;
 
+#if defined(SOFT_INTR)
+  if ((MCU.soft_intr == 1) && (MACHINE_TIME_GET_NANO() >= MCU.soft_intr_timeend))
+    {
+      etracer_slot_event(SOFT_INTR_EVT, ETRACER_PER_EVT_MODE_CHANGED, 1, 0);
+      MCU.soft_intr = 0;
+    }
+#endif
+
   if (MCU_IV && ((SR & MASK_GIE) || (MCU_IV > (1 << 13))))
     {
       int ibit,inum;
@@ -96,7 +104,7 @@ int msp430_interrupt_start_if_any(void)
 	      /* push pc*/
 	      SP -= 2;
 	      /* we are executed at the end of an instruction. As this instruction is
-	       * done we have to push what shoul be the next instruction (resume insn)
+	       * done we have to push what should be the next instruction (resume insn)
 	       */
 	      msp430_write_short(SP,mcu_get_pc_next()); 
 	      /* push sr */
@@ -141,6 +149,11 @@ int msp430_interrupt_start_if_any(void)
 		case INTR_TIMERA3_0:
 		  HW_DMSG_INTR("msp430:intr:   Reset timerA3 taccr0 IFG flag\n");
 		  MCU.timerA3.tacctl[0].b.ccifg = 0;
+#if defined(SOFT_INTR)
+		  MCU.soft_intr         = 1;
+		  MCU.soft_intr_timeend = MACHINE_TIME_GET_NANO() + SOFT_INTR_DUR;
+		  etracer_slot_event(SOFT_INTR_EVT, ETRACER_PER_EVT_MODE_CHANGED, 2, 0);
+#endif
 		  break;
 #endif
 

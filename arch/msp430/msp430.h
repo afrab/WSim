@@ -194,6 +194,11 @@ struct msp430_mcu_t {
 #if defined(__msp430_have_adc12)
   struct msp430_adc12_t        adc12;
 #endif
+
+#if defined(SOFT_INTR)
+  int      soft_intr;
+  uint64_t soft_intr_timeend;
+#endif
 };
 
 /* ************************************************** */

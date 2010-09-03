@@ -531,6 +531,12 @@ void cc1100_tx (struct _cc1100_t *cc1100)
       /* Byte being sent, wait for termination */
       return;
     }
+
+  if (cc1100->txBytes == 0)
+    {
+      /* TX fifo empty, do nothing */
+      return;
+    }
 	
   switch (cc1100->fsm_ustate) 
     {

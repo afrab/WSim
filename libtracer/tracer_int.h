@@ -69,6 +69,13 @@
 #undef DMSG_EVENT
 #define DMSG_EVENT(x...) TRACER_DBG(x)
 
+#if !defined(strncpyz)
+#define strncpyz(dst,src,size)			\
+  do {						\
+    strncpy(dst,src,size);			\
+    dst[size - 1] = '\0';			\
+  } while (0)
+#endif
 
 enum wsens_mode_t {
   WS_MODE_WSNET0 = 0

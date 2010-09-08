@@ -473,7 +473,6 @@ libselect_id_t libselect_id_create(char *argname, int UNUSED flags)
       libselect.entry[id].entry_type = ENTRY_FILE;
       libselect.entry[id].fd_in      = -1;
       libselect.entry[id].fd_out     = 1;
-      libselect.entry[id].fifo_size  = 0;
     }
   else if (strcmp(cmdline,"create") == 0)
     {

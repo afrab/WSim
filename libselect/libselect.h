@@ -32,7 +32,7 @@ signal:
  * and before machine_create() so that devices can register
  * their own handlers
  */
-int libselect_init(void);
+int libselect_init(int ws_mode);
 
 /**
  * libselect_close is called from main() after machine_delete() and before 

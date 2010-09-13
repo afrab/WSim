@@ -264,7 +264,7 @@ int main(int argc, char* argv[])
   tracer_init(o.tracefile, o.wsens_mode);
 
   /* libselect init  */
-  libselect_init();
+  libselect_init(o.wsens_mode);
 
   /* etrace */
   etracer_init(o.etracefile, o.wsens_mode);

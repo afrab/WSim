@@ -127,6 +127,7 @@ struct libselect_t {
 
 static struct libselect_t libselect;
 static int                libselect_init_done = 0;
+static int                libselect_ws_mode   = WS_MODE_WSNET0;
 
 /*****************************************
  * libselect update function pointer
@@ -140,12 +141,14 @@ int libselect_update_registered  ();
 /* ************************************************** */
 /* ************************************************** */
 
-int libselect_init(void)
+int libselect_init(int ws_mode)
 {
   int id;
   memset(&libselect, 0, sizeof(struct libselect_t));
   libselect_init_done  = 1;
   libselect_update_ptr = NULL;
+  libselect_ws_mode    = ws_mode;
+
   for(id=0; id < LIBSELECT_MAX_ENTRY; id++)
     {
       libselect.entry[id].entry_type = ENTRY_NONE;
@@ -670,7 +673,7 @@ uint32_t libselect_id_write(libselect_id_t id, uint8_t *data, uint32_t size)
   uint32_t ret = -1;
   if (libselect.entry[id].fd_out != -1)
     {
-      if (libselect.entry[id].backtrack)
+      if (libselect.entry[id].backtrack && (libselect_ws_mode != WS_MODE_WSNET0))
 	{
 	  ret = libselect_fifo_putblock (libselect.entry[id].fifo_output, data, size);
 	  DMSG_BK("wsim:libselect:bk: WRITE %d bytes to id=%d, fd=%d, fifo=%04d\n",

@@ -87,8 +87,9 @@ int msp430_interrupt_start_if_any(void)
     }
 #endif
 
-  if (MCU_IV && ((SR & MASK_GIE) || (MCU_IV > (1 << 13))))
+  if (MCU_IV && ((SR & MASK_GIE) || (MCU_IV & (1 << 14)) || (MCU_IV & (1 << 15))))
     {
+      fprintf(stderr, "msp430_intr: %d, MCU_IV=%d, GIE == %d\n", 1<<13, MCU_IV, SR & MASK_GIE);
       int ibit,inum;
       /* get ISR address with biggest priority */
       for(ibit=0x8000u, inum=15; ibit; ibit >>= 1, inum--)

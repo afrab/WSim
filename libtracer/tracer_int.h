@@ -47,7 +47,7 @@
 #ifdef WSNET3
 
 #define _TRACER_DBG_MSG      /* tracer debug messages       */
-#define _TRACER_ERROR_MSG    /* tracer error messages       */
+#define TRACER_ERROR_MSG    /* tracer error messages       */
 
 #ifdef TRACER_DBG_MSG
 #    define TRACER_DBG(x...) fprintf(stderr, x)

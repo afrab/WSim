@@ -89,7 +89,7 @@ int msp430_interrupt_start_if_any(void)
 
   if (MCU_IV && ((SR & MASK_GIE) || (MCU_IV & (1 << 14)) || (MCU_IV & (1 << 15))))
     {
-      int ibit,inum;
+      uint16_t ibit,inum;
       /* get ISR address with biggest priority */
       for(ibit=0x8000u, inum=15; ibit; ibit >>= 1, inum--)
 	{

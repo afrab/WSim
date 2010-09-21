@@ -59,7 +59,7 @@ struct atmega128_alu_t {
   uint16_t         skip_execute;
 
   int              interrupts;
-  int              interrupt_vector;
+  uint16_t         interrupt_vector;
   uint64_t         insn_counter;
   uint64_t         cycle_counter;
   uint32_t         signal;

@@ -58,6 +58,8 @@
 #define BIT14_(v)  ((v >> 14) & 1)
 #define BIT15_(v)  ((v >> 15) & 1)
 
+#define BITx_(v,F) ((v >> F) & 1)
+
 /*
 #define BIT0n(v)  !((v >> 0) & 1)
 #define BIT1n(v)  !((v >> 1) & 1)
@@ -90,6 +92,10 @@
  * Functions to fetch various opcode operands from instructions
  * */
 
+// Bit number coded on 3 bits, with an offset defined
+// xxxx xxxx xxxx xbbb <- with offset 0
+#define BIT_NUM(i,F)          ((i >> F) & 0x7)
+
 // Destination source registry ~Dr~ address on 4 bits
 // xxxx xxxx dddd xxxx
 #define DREG_4BITS(i)          ((i >> 4) & 0x0f) + 16
@@ -102,6 +108,8 @@
 // xxxx xxrx xxxx rrrr
 #define SREG_5BITS(i)          ((i >> 5) & 0x10) | ((i >> 0) & 0x0f)
 
+// Switch ALU skip execute mode
+#define SWITCH_SKIP_MODE()     MCU_ALU.skip_execute ^= 1
 
 /*
  *  SREG: Status Register
@@ -387,8 +395,11 @@ enum atmega_opcode {
 };
 
 typedef int (*opcode_fun_t)(uint16_t opcode, uint16_t insn);
+
+static inline unsigned int extract_opcode(uint16_t insn);
+
 static int opcode_default(uint16_t opcode, uint16_t insn);
-static int opcode_nop(uint16_t opcode, uint16_t insn);
+static int opcode_nop    (uint16_t opcode, uint16_t insn);
 
 static int opcode_sleep  (uint16_t opcode, uint16_t insn);
 
@@ -471,6 +482,10 @@ static int opcode_lds    (uint16_t opcode, uint16_t insn);
 static int opcode_pop    (uint16_t opcode, uint16_t insn);
 static int opcode_push   (uint16_t opcode, uint16_t insn);
 
+static int opcode_sbrc   (uint16_t opcode, uint16_t insn);
+static int opcode_sbrs   (uint16_t opcode, uint16_t insn);
+static int opcode_cpse   (uint16_t opcode, uint16_t insn);
+
 struct atmega_opcode_info_t {
     opcode_fun_t   fun;
     char          *name;
@@ -524,14 +539,14 @@ struct atmega_opcode_info_t OPCODES[] = {
     { .fun = opcode_call,    .name = "CALL"   , .length = 2 },
     { .fun = opcode_ret,     .name = "RET"    , .length = 1 },
     { .fun = opcode_default, .name = "RETI"   , .length = 1 },
-    { .fun = opcode_default, .name = "CPSE"   , .length = 1 },
+    { .fun = opcode_cpse,    .name = "CPSE"   , .length = 1 }, /* done: needs reviewing */
     { .fun = opcode_cbi,     .name = "CBI"    , .length = 1 }, /* done: needs reviewing */
     { .fun = opcode_cp,      .name = "CP"     , .length = 1 },
     { .fun = opcode_cpc,     .name = "CPC"    , .length = 1 },
     { .fun = opcode_cpi,     .name = "CPI"    , .length = 1 },
     { .fun = opcode_ror,     .name = "ROR"    , .length = 1 }, /* done: needs reviewing */
-    { .fun = opcode_default, .name = "SBRC"   , .length = 1 },
-    { .fun = opcode_default, .name = "SBRS"   , .length = 1 },
+    { .fun = opcode_sbrc,    .name = "SBRC"   , .length = 1 }, /* done: needs reviewing */
+    { .fun = opcode_sbrs,    .name = "SBRS"   , .length = 1 }, /* done: needs reviewing */
     { .fun = opcode_default, .name = "SBIC"   , .length = 1 },
     { .fun = opcode_default, .name = "SBIS"   , .length = 1 },
     // BRBS s : BRCS, BRLO, BREQ, BRMI, BRVS, BRLT, BRHS, BRTS & BRIE
@@ -595,7 +610,8 @@ static int opcode_nop(uint16_t opcode, uint16_t UNUSED insn)
 
 /* TODO: check flags management */
 /**
- * \brief
+ * \brief Adds two registers without the C Flag and places the result in the destination register Rd.
+ * \f[ Rd \leftarrow Rd + Rr \mbox{ with r and d} \in [0,31] \f]
  * \param opcode
  * \param insn
  * \return opcode
@@ -629,7 +645,8 @@ static int opcode_add(uint16_t opcode, uint16_t insn)
 
 /* TODO: check flags management */
 /**
- * \brief
+ * \brief Adds two registers and the contents of the C Flag and places the result in the destination register Rd.
+ * \f[ Rd \leftarrow Rd + Rr + C \mbox{ with r and d} \in [0,31] \f]
  * \param opcode
  * \param insn
  * \return opcode
@@ -677,7 +694,14 @@ static int opcode_sleep(uint16_t opcode, uint16_t UNUSED insn)
 }
 
 
-
+/**
+ * \brief Jump to an address within the entire 4M (words) Program memory. See also RJMP.
+ * This instruction is not available in all devices. Refer to the device specific instruction set summary.
+ * \f[ PC \leftarrow k \mbox{ with k} \in [0,4M[ \f]
+ * \param opcode
+ * \param insn
+ * \return opcode
+ */
 static int opcode_jmp(uint16_t opcode, uint16_t insn)
 {
     uint32_t addr;
@@ -700,6 +724,7 @@ static int opcode_jmp(uint16_t opcode, uint16_t insn)
     SET_CYCLES(3);
     return opcode;
 }
+
 
 static int opcode_eor(uint16_t opcode, uint16_t insn)
 {
@@ -885,14 +910,20 @@ static int opcode_and(uint16_t opcode, uint16_t insn)
     uint8_t dd;
     uint8_t rr;
     uint8_t res;
+    
     // 0010 00rd dddd rrrr
     rr = ((insn >> 5) & 0x10) | ((insn >> 0) & 0xf);
     dd = ((insn >> 4) & 0x1f);
+    
     if (rr == dd)
+    {
         HW_DMSG_DIS("%s r%d\n", "TST", dd);
+    }
     else
+    {
         HW_DMSG_DIS("%s r%d,r%d\n",OPCODES[opcode].name, dd, rr);
-
+    }
+    
     res = MCU_REGS[rr] & MCU_REGS[dd];
     MCU_REGS[dd] = res;
     
@@ -2195,15 +2226,15 @@ static int opcode_ldd(uint16_t opcode, uint16_t insn)
 
 static int opcode_push(uint16_t opcode, uint16_t insn)
 {
-    uint8_t  rd;
+    uint8_t  dd;
     uint32_t SP;
     // 1001 001d dddd 1111
-    rd = ((insn >> 4) & 0x1f);
+    dd = ((insn >> 4) & 0x1f);
 
-    HW_DMSG_DIS("%s r%d\n",OPCODES[opcode].name, rd);
+    HW_DMSG_DIS("%s r%d\n",OPCODES[opcode].name, dd);
 
     SP=SP_READ();
-    MCU_RAM[ SP ] = MCU_REGS[rd];
+    MCU_RAM[ SP ] = MCU_REGS[dd];
     SP=SP - 1;
     SP_WRITE(SP);
     ADD_TO_PC(1); // PC is aligned on words
@@ -2358,17 +2389,85 @@ static int opcode_pop(uint16_t opcode, uint16_t insn)
     return opcode;
 }
 
-/* static */ int opcode_sbrc(uint16_t UNUSED opcode, uint16_t UNUSED insn)
+static int opcode_sbrc(uint16_t opcode, uint16_t insn)
 {
-  /*
-      next_insn = atmega128_flash_read_short( PC + 1 );
-      MCU_ALU.skip_execute = 1;
-      length = extract_opcode( next_insn );
-      MCU_ALU.skip_execute = 0;
-      PC = PC + length;
-      ...
-  */
-  return 0;
+    int length;
+    uint8_t rr, bb;
+    int16_t next_insn;
+    
+    // 1111 110r rrrr 0bbb
+    rr = DREG_5BITS(insn);
+    bb = BIT_NUM(insn,0);
+    
+    length = 0; // if skip condition is false, length is null
+    next_insn = atmega128_flash_read_short((mcu_get_pc()+1) << 1);
+    
+    SWITCH_SKIP_MODE();
+    
+    if (!BITx_(MCU_REGS[rr],bb))
+    {
+        length = extract_opcode( next_insn );
+    }
+    
+    SWITCH_SKIP_MODE();
+
+    ADD_TO_PC(1 + length);
+    SET_CYCLES(1 + length);
+    return opcode;
+}
+
+static int opcode_sbrs(uint16_t opcode, uint16_t insn)
+{
+    uint8_t length;
+    uint8_t rr, bb;
+    int16_t next_insn;
+    
+    // 1111 111r rrrr 0bbb
+    rr = DREG_5BITS(insn);
+    bb = BIT_NUM(insn,0);
+    
+    length = 0; // if skip condition is false, length is null
+    next_insn = atmega128_flash_read_short((mcu_get_pc()+1) << 1);
+    
+    SWITCH_SKIP_MODE();
+    
+    if (BITx_(MCU_REGS[rr],bb))
+    {
+        length = extract_opcode( next_insn );
+    }
+    
+    SWITCH_SKIP_MODE();
+
+    ADD_TO_PC(1 + length);
+    SET_CYCLES(1 + length);
+    return opcode;
+}
+
+static int opcode_cpse(uint16_t opcode, uint16_t insn)
+{
+    uint8_t length;
+    uint8_t dd, rr;
+    int16_t next_insn;
+    
+    // 0001 00rd dddd rrrr
+    dd = DREG_5BITS(insn);
+    rr = SREG_5BITS(insn);
+    
+    length = 0; // if skip condition is false, length is null
+    next_insn = atmega128_flash_read_short((mcu_get_pc()+1) << 1);
+    
+    SWITCH_SKIP_MODE();
+    
+    if (MCU_REGS[dd] == MCU_REGS[rr])
+    {
+        length = extract_opcode( next_insn );
+    }
+    
+    SWITCH_SKIP_MODE();
+
+    ADD_TO_PC(1 + length);
+    SET_CYCLES(1 + length);
+    return opcode;
 }
 
 /* ************************************************** */

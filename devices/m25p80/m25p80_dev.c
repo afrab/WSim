@@ -138,10 +138,10 @@ const char* str_cmd(int n)
  * 2.7 to 3.6V Single Supply Voltage
  * SPI Bus Compatible Serial Interface
  * 40MHz Clock Rate (maximum)
- * Deep Power-down Mode 1ÂµA (typical)
+ * Deep Power-down Mode 1µA (typical)
  * Electronic Signature (13h)
  * Packages
- * Â­ ECOPACKÂ® (RoHS compliant)
+ * ­ ECOPACK ® (RoHS compliant)
  */
 #  define M25P_FLASH_SIZE           0x100000
 #  define M25P_SECTOR_MAX           16

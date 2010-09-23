@@ -15,6 +15,11 @@
 #define MCU_BFD_ARCH_ID 53
 #define MCU_IO_SIZE     126
 
+#define INTEGRATE_PERIPHERALS()                 \
+    MCU_DIGIIO()                                \
+    MCU_WATCHDOG()
+
+
 /* ********************************************************************** */
 /* ********************************************************************** */
 #if defined(ATMEGA128)

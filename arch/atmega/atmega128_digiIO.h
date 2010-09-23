@@ -9,7 +9,8 @@
 #ifndef ATMEGA128_DIGIIO_H
 #define ATMEGA128_DIGIIO_H
 
-
+#define MCU_DIGIIO()                        \
+    struct atmega128_digiIO_t       digiIO;
 
 /* ************************************************** */
 /* ************************************************** */
@@ -27,10 +28,12 @@
 
 #define IDX_TO_DIGIIO_PORT(X) (X / 3)
 
-#define DIGIIO_PIN 0
+#define DIGIIO_PIN   0
 #define DIGIIO_DDR   1
 #define DIGIIO_PORTX 2
 
+#define DIGIIO_GET_VAL(X,Y)       DIGIIO_REGS(((X * 3) + Y))
+#define DIGIIO_PORT_TO_IDX(X,Y)   ((X * 3) + Y)
 
 /* ************************************************** */
 /* ************************************************** */
@@ -108,10 +111,15 @@ enum gpio_regs_t {
 /* ************************************************** */
 /* ************************************************** */
 
+struct digiio_updated_t
+{
+    uint8_t port_idx;
+    uint8_t val;
+};
 
 struct atmega128_digiIO_t {
-    uint8_t in_updated;
-    uint8_t out_updated;
+    struct digiio_updated_t in_updated;
+    struct digiio_updated_t out_updated;
 
     uint8_t gpio_regs[21];
 

@@ -27,29 +27,33 @@ static int wdt_intervals[] = { 32768, 8192, 512, 64 };
 /* ************************************************** */
 /* ************************************************** */
 
-void 
-msp430_watchdog_reset(void)
+void atmega128_watchdog_init(void)
 {
-  MCU.watchdog.wdtctl.s    = 0x6900u;
+    
+    atmega128_io_register(DIGIIO_REG_ADDR(idx), 
+                          atmega128_digiIO_mcu_read, 
+                          atmega128_digiIO_mcu_write,
+                          DIGIIO_REG_NAME(idx));
+    
+    atmega128_watchdog_reset();
+}
+
+void atmega128_watchdog_reset(void)
+{
   MCU.watchdog.wdtcnt      = 0;
-  MCU.watchdog.wdtinterval = wdt_intervals[MCU.watchdog.wdtctl.b.wdtis];
 }
 
 /* ************************************************** */
 /* ************************************************** */
 /* ************************************************** */
 
-
-
 #define WDT_NMI_RST       0
 #define WDT_NMI_NMI       1
-
 
 #define WDT_SSEL_SMCLK  0
 #define WDT_SSEL_ACLK   1
 
-void 
-msp430_watchdog_update(void)
+void atmega128_watchdog_update(void)
 {
   if (MCU.watchdog.wdtctl.b.wdthold)
     return ;
@@ -97,8 +101,7 @@ msp430_watchdog_update(void)
 /* ************************************************** */
 /* ************************************************** */
 
-int16_t 
-msp430_watchdog_read (uint16_t addr)
+int16_t atmega128_watchdog_read (uint16_t addr)
 {
   assert(addr == WDTCTL);
   HW_DMSG_WD("msp430:watchdog: read wdtctl\n");
@@ -111,8 +114,7 @@ msp430_watchdog_read (uint16_t addr)
 
 #define WD_PASSWORD 0x5a
 
-void 
-msp430_watchdog_write(uint16_t addr, int16_t val)
+void atmega128_watchdog_write(uint16_t addr, int16_t val)
 {
   union {
     struct wdtctl_t b;
@@ -172,16 +174,7 @@ msp430_watchdog_write(uint16_t addr, int16_t val)
 /* ************************************************** */
 /* ************************************************** */
 
-enum watchdog_mode_t msp430_watchdog_getmode(void)
-{ 
-  return MCU.watchdog.wdtctl.b.wdttmsel; 
-}
-
-/* ************************************************** */
-/* ************************************************** */
-/* ************************************************** */
-
-int msp430_watchdog_chkifg()
+int atmega128_watchdog_chkifg()
 {
   if (MCU.sfr.ifg1.b.wdtifg && MCU.sfr.ie1.b.wdtie)
     {

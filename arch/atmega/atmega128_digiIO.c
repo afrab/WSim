@@ -164,9 +164,13 @@ inline uint8_t address_to_digiio_IDX(uint16_t addr)
     return index;
 }
 
+/* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
+
 void atmega128_digiIO_init(void)
 {
-    int8_t idx;
+    uint8_t idx;
     
     for(idx = 0 ; idx < 21 ; idx++)
     {
@@ -246,8 +250,9 @@ void atmega128_digiIO_mcu_write(uint16_t addr, int8_t val)
                 break;
         case DIGIIO_PORTX:
                 oldval = DIGIIO_REGS(index); 
-                DIGIIO_REGS(index) = val;  
-                MCU.digiIO.out_updated = oldval ^ DIGIIO_REGS(index); 
+                DIGIIO_REGS(index) = val;
+                MCU.digiIO.out_updated.port_idx = index;
+                MCU.digiIO.out_updated.val = oldval ^ DIGIIO_REGS(index); 
                 //TRACER_TRACE_PORT3(DIGIIO_REGS(index));
                 break;
         default:
@@ -260,9 +265,13 @@ void atmega128_digiIO_mcu_write(uint16_t addr, int8_t val)
 /* ************************************************** */
 /* ************************************************** */
 
-int atmega128_digiIO_dev_read (int UNUSED port_number, uint8_t UNUSED *val)
+int atmega128_digiIO_dev_read (int port_number, uint8_t *val)
 {
-  return 0;
+    //  HW_DMSG_DIGI_IO("Digital IO read from devices on port %d\n",port_number);
+    
+    *val = DIGIIO_GET_VAL(port_number, DIGIIO_PORTX);
+    
+    return (MCU.digiIO.out_updated.port_idx == DIGIIO_PORT_TO_IDX(port_number, DIGIIO_PORTX)); // port has been updated ?
 }
 
 /* ************************************************** */
@@ -279,7 +288,7 @@ void atmega128_digiIO_dev_write(int UNUSED port_number, uint8_t UNUSED val, uint
 
 int atmega128_digiIO_internal_dev_read (int UNUSED port_number, uint8_t UNUSED *val)
 {
-  return 0;
+    return 0;
 }
 
 /* ************************************************** */
@@ -296,6 +305,11 @@ void atmega128_digiIO_internal_dev_write(int UNUSED port_number, uint8_t UNUSED 
 
 void atmega128_digiIO_update_done(void)
 {
+    MCU.digiIO.in_updated.val       = 0;
+    MCU.digiIO.in_updated.port_idx  = 0;
+    
+    MCU.digiIO.out_updated.val      = 0;
+    MCU.digiIO.out_updated.port_idx = 0;
 }
 
 /* ************************************************** */
@@ -304,7 +318,7 @@ void atmega128_digiIO_update_done(void)
 
 int atmega128_digiIO_chkifg(void)
 {
-  return 0;
+    return 0;
 }
 
 /* ************************************************** */

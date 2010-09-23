@@ -29,17 +29,18 @@ extern char* atmega128_lpm_names[];
 #define DISASSEMBLE
 #define DEBUG_REGISTERS
 #define DEBUG_INTERRUPT
-#define _DEBUG_LPM            /* low power mode */
-#define DEBUG_SYSTEM_CLOCK   /* basic | fll    */
-#define DEBUG_IO             /* mcu bus io     */
+#define _DEBUG_LPM            /* low power mode   */
+#define DEBUG_SYSTEM_CLOCK    /* basic | fll      */
+#define DEBUG_IO              /* mcu bus io       */
 
-#define _DEBUG_TIMER          /* timer Ax Bx    */
-#define _DEBUG_HWMUL          /* hardware mult. */
-#define _DEBUG_BASIC_TIMER    /* basic timer    */
-#define _DEBUG_WATCHDOG       /* watchdog       */
-#define _DEBUG_USART          /* usart 0/1      */
-#define DEBUG_DIGI_IO        /* GPIO           */
-#define _DEBUG_LCD            /* internal LCD   */
+#define _DEBUG_TIMER          /* timer Ax Bx      */
+#define _DEBUG_HWMUL          /* hardware mult.   */
+#define _DEBUG_BASIC_TIMER    /* basic timer      */
+#define _DEBUG_WATCHDOG       /* watchdog         */
+#define _DEBUG_USART          /* usart 0/1        */
+#define DEBUG_DIGI_IO         /* GPIO             */
+#define DEBUG_IO_RESERVED     /* IO reserved addr */
+#define _DEBUG_LCD            /* internal LCD     */
 #endif
 
 #ifdef DEBUG_ATMEGA

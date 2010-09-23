@@ -15,6 +15,7 @@
 #include "atmega128_debug.h"
 #include "atmega128_alu.h"
 #include "atmega128_digiIO.h"
+#include "atmega128_watchdog.h"
 #include "atmega128_io_reserved.h"
 #include "atmega128_io.h"
 
@@ -29,11 +30,12 @@
 /* ************************************************** */
 
 struct atmega128_mcu_t {
-  uint8_t flash       [MAX_FLASH_SIZE];
-  uint8_t eeprom      [MAX_EEPROM_SIZE];
+    uint8_t flash       [MAX_FLASH_SIZE];
+    uint8_t eeprom      [MAX_EEPROM_SIZE];
 
-  struct atmega128_alu_t          alu;
-  struct atmega128_digiIO_t       digiIO;
+    struct atmega128_alu_t          alu;
+  
+    INTEGRATE_PERIPHERALS()
 };
 
 /* ************************************************** */

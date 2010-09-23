@@ -173,13 +173,28 @@ struct atmega128_io_addr_fptr_t {
 /* ************************************************** */
 
 
-#define ATMEGA128_BYTE(A,S,O,...)     ATMEGA128_##S##_##O##_BYTE(A,##__VA_ARGS__)
+/*
+ * 
+ * A : Address
+ * S : Address space
+ * O : READ or WRITE Operation
+ * V : Value if write operation
+ * 
+ * */
+
+#define ATMEGA128_BUS(A,S,O,T,...)     ATMEGA128_##S##_##O##_##T(A,##__VA_ARGS__)
+
+
+
+#define ATMEGA128_BYTE(A,S,O,...)     ATMEGA128_##S##_##O##_BUS(A,##__VA_ARGS__)
 
 #define ATMEGA128_IO_SPACE_READ_BYTE(A)       atmega128_io_read_byte(A)
 #define ATMEGA128_IO_SPACE_WRITE_BYTE(A,V)    atmega128_io_write_byte(A,V)
 
 #define ATMEGA128_RAM_SPACE_READ_BYTE(A)      atmega128_ram_read_byte(A)
 #define ATMEGA128_RAM_SPACE_WRITE_BYTE(A,V)   atmega128_ram_write_byte(A,V)
+
+
 
 #define ATMEGA128_SHORT(A,S,O,...)    ATMEGA128_##S##_##O##_SHORT(A,##__VA_ARGS__)
 

@@ -189,7 +189,7 @@ int cc1100_update_state_rx_overflow (struct _cc1100_t *cc1100)
 /***************************************************/
 /***************************************************/
 int cc1100_update_state_fs_wakeup (struct _cc1100_t *cc1100) {
-	
+
 	/* Check if wakeup is over */
 	if (MACHINE_TIME_GET_NANO() < cc1100->fsm_timer) {
 		return cc1100_io_pins(cc1100);		

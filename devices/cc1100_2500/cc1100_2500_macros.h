@@ -56,18 +56,22 @@
   } while (0)
 
 
-#define CC1100_INIT_RSSI(cc1100)			       \
-  do {							       \
-    /* ToCheck: value  */				       \
-    /* ToCheck: 0 -> -110dBm */				       \
-    /* (int8_t) */ cc1100->registers[CC1100_REG_RSSI] = 0;     \
+#define CC1100_INIT_RSSI(cc1100)					\
+  do {									\
+    /* ToCheck: value  */						\
+    /* ToCheck: 0 -> -110dBm */						\
+    if (MACHINE_TIME_GET_NANO() > (cc1100->channel_busy_timer + CC1100_SYNCHRO_DELAY_THRESHOLD)) { \
+      /* (int8_t) */ cc1100->registers[CC1100_REG_RSSI] = 0;		\
+    }									\
   } while (0)
 
 
 #define CC1100_UPDATE_RSSI(cc1100)					\
   do {									\
-    if (MACHINE_TIME_GET_NANO() > (cc1100->rx_io_timer + CC1100_SYNCHRO_DELAY_THRESHOLD)) { \
+    if (MACHINE_TIME_GET_NANO() > (cc1100->channel_busy_timer + CC1100_SYNCHRO_DELAY_THRESHOLD)) { \
       cc1100->registers[CC1100_REG_RSSI] = 0;				\
+    } else {								\
+      CC1100_RECORD_RSSI(cc1100, cc1100->channel_dbm);			\
     }									\
   } while (0)
 
@@ -86,10 +90,12 @@
   } while (0)
 
 
-#define CC1100_INIT_LQI(cc1100)					\
-  do {								\
-    /* ToCheck: 0 -> -110dBm */					\
-    /* (int8_t) */ cc1100->registers[CC1100_REG_RSSI] = 0;	\
+#define CC1100_INIT_LQI(cc1100)						\
+  do {									\
+    /* ToCheck: 0 -> -110dBm */						\
+    if (MACHINE_TIME_GET_NANO() > (cc1100->channel_busy_timer + CC1100_SYNCHRO_DELAY_THRESHOLD)) { \
+      /* (int8_t) */ cc1100->registers[CC1100_REG_RSSI] = 0;		\
+    }									\
   } while (0)
 
 #define CC1100_RECORD_LQI(cc1100, lqi)				     \
@@ -361,6 +367,11 @@
     CC1100_SET_CRC_FALSE(cc1100);					\
     cc1100->fsm_state   = CC1100_STATE_RX;				\
     cc1100->fsm_pending = CC1100_STATE_IDLE;				\
+    if ((~cc1100_read_register(cc1100, CC1100_REG_MCSM2)) & 0x07)	\
+      {									\
+	cc1100->rx_timeout = MACHINE_TIME_GET_NANO() + cc1100_get_rx_timeout_period(cc1100); \
+	CC1100_DBG_STATE("cc1100:state: rx timeout = %"PRIu64" [%"PRIu64"]\n", cc1100->rx_timeout, MACHINE_TIME_GET_NANO()); \
+      }									\
     tracer_event_record(TRACER_CC1100_STATE, CC1100_STATE_RX);		\
     etracer_slot_event(ETRACER_PER_ID_CC1100,				\
 		       ETRACER_PER_EVT_MODE_CHANGED,			\

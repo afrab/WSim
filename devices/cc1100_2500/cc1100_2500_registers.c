@@ -220,8 +220,8 @@ uint8_t cc1100_read_ro_register(struct _cc1100_t *cc1100, uint8_t addr)
       break;
     }	
   
-  CC1100_DBG_REG("cc1100:register:read RO %s 0x%x read 0x%x\n",
-		 cc1100_register_to_str(addr), addr, val);
+  CC1100_DBG_REG("cc1100:register:read RO %s 0x%x read 0x%x (time: %"PRIu64")\n",
+		 cc1100_register_to_str(addr), addr, val, MACHINE_TIME_GET_NANO());
   return val;
 }
 

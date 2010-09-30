@@ -52,6 +52,17 @@ int cc1100_rx_filter(struct _cc1100_t *cc1100, double frequency, int modulation,
 {
   double freq_cc;
 
+  /* Verify cc1100 signal strength */
+  if (dBm < -90) 
+    {
+      CC1100_DBG_RX("cc1100:rx:filter:node %d: dropping received data [0x%02x,%c], below sensibility\n",
+		    machine_get_node_id(), data & 0xff, isprint((unsigned char)data) ? data:'.');
+      return -1;
+    }
+
+  cc1100->channel_busy_timer = MACHINE_TIME_GET_NANO() + cc1100_get_tx_byte_duration(cc1100);
+  cc1100->channel_dbm = dBm;
+
   /* Verify cc1100 state */
   if (cc1100->fsm_state !=  CC1100_STATE_RX) 
     {
@@ -66,14 +77,6 @@ int cc1100_rx_filter(struct _cc1100_t *cc1100, double frequency, int modulation,
     {
       CC1100_DBG_EXC("cc1100:rx:filter:node %d: RX while fs calibration not done\n",
 		     machine_get_node_id());
-      return -1;
-    }
-
-  /* Verify cc1100 signal strength */
-  if (dBm < -90) 
-    {
-      CC1100_DBG_RX("cc1100:rx:filter:node %d: dropping received data [0x%02x,%c], below sensibility\n",
-		    machine_get_node_id(), data & 0xff, isprint((unsigned char)data) ? data:'.');
       return -1;
     }
 	

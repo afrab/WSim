@@ -122,6 +122,8 @@ struct _cc1100_t
   uint64_t	  tx_io_timer;
   uint64_t	  rx_io_timer;
 
+  uint64_t        channel_busy_timer; /* time while channel is considered as busy */
+
   uint8_t	  CSn_pin;
   uint8_t	  SI_pin;
   uint8_t         SO_pin;
@@ -154,7 +156,8 @@ struct _cc1100_t
   int		  ioOffset;
   int		  ioLength;
   uint16_t	  ioCrc;
-
+  
+  double          channel_dbm;  /* when channel is busy, give the signal power */
   double	  lqi;
   uint8_t	  lqi_cnt;
   int		  pqt;

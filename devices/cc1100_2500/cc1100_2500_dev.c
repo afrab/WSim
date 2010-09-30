@@ -252,6 +252,7 @@ int cc1100_device_create (int dev_num, int fxosc_mhz, char *antenna)
   CC1100_RCOSC_PERIOD_NS = (750 * 1000) / fxosc_mhz;
 
   cc1100->worldsens_radio_id = worldsens_c_rx_register((void*)cc1100, cc1100_callback_rx, antenna);
+  cc1100->channel_busy_timer = 0;
 
   TRACER_CC1100_STATE  = tracer_event_add_id(8, "state",  "cc1100");
   TRACER_CC1100_STROBE = tracer_event_add_id(8, "strobe", "cc1100");
@@ -293,6 +294,7 @@ int cc2500_device_create (int dev_num, int fxosc_mhz, char *antenna)
   CC1100_RCOSC_PERIOD_NS = (750 * 1000) / fxosc_mhz;
 
   cc1100->worldsens_radio_id = worldsens_c_rx_register((void*)cc1100, cc1100_callback_rx, antenna);
+  cc1100->channel_busy_timer = 0;
 
   TRACER_CC1100_STATE  = tracer_event_add_id(8, "state",  "cc2500");
   TRACER_CC1100_STROBE = tracer_event_add_id(8, "strobe", "cc2500");
@@ -358,7 +360,7 @@ void cc1100_reset_internal (struct _cc1100_t *cc1100)
 	
   cc1100->tx_io_timer		= 0;
   cc1100->rx_io_timer		= 0;
-	
+
   cc1100->GO0_pin               = 0;
   cc1100->GO1_pin               = 0;
   cc1100->GO2_pin               = 0;

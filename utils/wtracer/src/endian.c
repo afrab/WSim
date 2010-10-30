@@ -1,6 +1,6 @@
 
 /**
- *  \file   endian.h
+ *  \file   endian.c
  *  \brief  Tracer endianess handling
  *  \author Antoine Fraboulet
  *  \date   2006
@@ -8,7 +8,7 @@
 
 #include <inttypes.h>
 
-#include "endian.h"
+#include "wsim_endian.h"
 
 /* ************************************************** */
 /* ************************************************** */

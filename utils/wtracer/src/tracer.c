@@ -9,7 +9,7 @@
 
 #include "config.h"
 #include "log.h"
-#include "endian.h"
+#include "wsim_endian.h"
 
 #include "tracer.h"
 

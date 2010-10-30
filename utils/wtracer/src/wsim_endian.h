@@ -1,6 +1,6 @@
 
 /**
- *  \file   endian.h
+ *  \file   wsim_endian.h
  *  \brief  Tracer endianess handling
  *  \author Antoine Fraboulet
  *  \date   2006

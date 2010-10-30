@@ -10,7 +10,7 @@
 #include <string.h>
 
 #include "log.h"
-#include "endian.h"
+#include "wsim_endian.h"
 #include "tracer.h"
 #include "drv_raw.h"
 

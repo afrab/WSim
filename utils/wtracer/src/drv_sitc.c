@@ -14,7 +14,7 @@
 #include <dirent.h>
 
 #include "log.h"
-#include "endian.h"
+#include "wsim_endian.h"
 #include "tracer.h"
 #include "drv_sitc.h"
 

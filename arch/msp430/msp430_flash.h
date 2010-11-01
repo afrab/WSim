@@ -104,10 +104,8 @@ struct msp430_flash_t {
     uint16_t            s;
   } fctl3;
 
-  uint8_t  divider;
-  uint32_t flash_freq;
-  uint32_t flash_nano_time;
-  uint32_t flash_nano_delay;
+  uint32_t ticks_divider;
+  uint32_t flash_ticks_left;
 };
 
 /* ************************************************** */
@@ -119,14 +117,14 @@ void    msp430_flash_reset       (void);
 extern void (*msp430_flash_update_ptr)(void);
 #define msp430_flash_update()			\
   do {						\
-    if (msp430_flash_update_ptr)		\
+    if (msp430_flash_update_ptr != NULL)	\
       msp430_flash_update_ptr();		\
   } while (0)
 
 int16_t msp430_flash_read        (uint16_t addr);
 void    msp430_flash_write       (uint16_t addr, int16_t val);
 int     msp430_flash_chkifg      (void);
-void    msp430_flash_start_erase (uint16_t addr);
+void    msp430_flash_start_erase (uint16_t addr, int size, uint32_t val);
 
 /* ************************************************** */
 /* ************************************************** */

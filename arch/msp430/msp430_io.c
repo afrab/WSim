@@ -109,18 +109,16 @@ static void msp430_write16_flash(uint16_t addr, int16_t UNUSED val)
   ERROR("msp430:io: writing short to Flash [0x%04x] PC = 0x%04x\n",addr,mcu_get_pc());
 }
 
-static void msp430_write8_start_flash_erase(uint16_t addr, int8_t UNUSED val)
+static void msp430_write8_start_flash_erase(uint16_t addr, int8_t val)
 {
-  VERBOSE(2,"msp430:io: writing byte 0x%02x to Flash [0x%04x] PC = 0x%04x [START ERASE]\n",
-	  val, addr,mcu_get_pc());
-  msp430_flash_start_erase(addr);
+  // HW_DMSG("msp430:io: writing byte to Flash [0x%04x] PC = 0x%04x\n",addr,mcu_get_pc());
+  msp430_flash_start_erase(addr, 1, val);
 }
 
-static void msp430_write16_start_flash_erase(uint16_t addr, int16_t UNUSED val)
+static void msp430_write16_start_flash_erase(uint16_t addr, int16_t val)
 {
-  VERBOSE(2,"msp430:io: writing short 0x%04x to Flash [0x%04x] PC = 0x%04x [START ERASE]\n",
-	  val, addr,mcu_get_pc());
-  msp430_flash_start_erase(addr);
+  // HW_DMSG("msp430:io: writing short to Flash [0x%04x] PC = 0x%04x\n",addr,mcu_get_pc());
+  msp430_flash_start_erase(addr, 2, val);
 }
 
 static int16_t msp430_read16_flash_jump_pc(uint16_t UNUSED addr)
@@ -218,7 +216,10 @@ static void msp430_set_readptr8(addr_map_read8_t f, uint16_t addr)
 
 static void msp430_set_readptr16(addr_map_read16_t f, uint16_t addr)
 {
-  if ((pread16[addr] ==  0) || (pread16[addr] == msp430_read16_sigbus))
+  if ((pread16[addr] ==  0) || 
+      (pread16[addr] == msp430_read16_sigbus) ||
+      (pread16[addr] == msp430_read16_flash_jump_pc) ||
+      (f             == msp430_read16_flash_jump_pc))
     {
       pread16[addr] = f;
     }
@@ -242,7 +243,8 @@ static void msp430_set_writeptr8(addr_map_write8_t f, uint16_t addr)
 {
   if ((pwrite8[addr] == 0) || 
       (pwrite8[addr] == msp430_write8_sigbus) || 
-      (pwrite8[addr] == msp430_write8_start_flash_erase))
+      (pwrite8[addr] == msp430_write8_start_flash_erase) ||
+      (f             == msp430_write8_start_flash_erase))
     {
       pwrite8[addr] = f;
     }
@@ -251,14 +253,14 @@ static void msp430_set_writeptr8(addr_map_write8_t f, uint16_t addr)
       ERROR("msp430:io: MCU create errror, IO write8 0x%04x function not unique\n",addr);
       machine_exit(0);
     }
-
 }
 
 static void msp430_set_writeptr16(addr_map_write16_t f, uint16_t addr)
 {
   if ((pwrite16[addr] == 0) || 
       (pwrite16[addr] == msp430_write16_sigbus) ||
-      (pwrite16[addr] == msp430_write16_start_flash_erase))
+      (pwrite16[addr] == msp430_write16_start_flash_erase) ||
+      (f              == msp430_write16_start_flash_erase))
     {
       pwrite16[addr] = f;
     }
@@ -275,20 +277,7 @@ static void msp430_set_writeptr16(addr_map_write16_t f, uint16_t addr)
 
 void msp430_io_set_flash_write_start_erase(uint16_t start, uint16_t stop)
 {
-  uint16_t addr;
-  
-  if (start < ADDR_FLASH_START)
-    {
-      ERROR("msp430:io: bad start address to erase flash\n");
-    }
-
-#if 0
-  if (stop > ADDR_FLASH_STOP) /* always false as ADDR_FLASH_STOP is 0xffff */
-    {
-      ERROR("msp430:io: bad stop address to erase flash\n");
-    }
-#endif
-
+  uint32_t addr;
   for(addr = start; addr <= stop; addr++)
     {
       msp430_set_writeptr8  (msp430_write8_start_flash_erase,  addr);
@@ -298,7 +287,7 @@ void msp430_io_set_flash_write_start_erase(uint16_t start, uint16_t stop)
 
 void msp430_io_set_flash_write_normal(uint16_t start, uint16_t stop)
 {
-  uint16_t addr;
+  uint32_t addr;
   for(addr = start; addr <= stop; addr++)
     {
       msp430_set_writeptr8  (msp430_write8_flash,  addr);
@@ -308,7 +297,7 @@ void msp430_io_set_flash_write_normal(uint16_t start, uint16_t stop)
 
 void msp430_io_set_flash_read_jump_pc(uint16_t start, uint16_t stop)
 {
-  uint16_t addr;
+  uint32_t addr;
   for(addr = start; addr <= stop; addr++)
     {
       msp430_set_readptr16 (msp430_read16_flash_jump_pc, addr);
@@ -317,7 +306,7 @@ void msp430_io_set_flash_read_jump_pc(uint16_t start, uint16_t stop)
 
 void msp430_io_set_flash_read_normal (uint16_t start, uint16_t stop)
 {
-  uint16_t addr;
+  uint32_t addr;
   for(addr = start; addr <= stop; addr++)
     {
       msp430_set_readptr16 (msp430_read16_flash, addr);

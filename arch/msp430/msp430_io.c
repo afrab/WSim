@@ -219,7 +219,8 @@ static void msp430_set_readptr16(addr_map_read16_t f, uint16_t addr)
   if ((pread16[addr] ==  0) || 
       (pread16[addr] == msp430_read16_sigbus) ||
       (pread16[addr] == msp430_read16_flash_jump_pc) ||
-      (f             == msp430_read16_flash_jump_pc))
+      (f             == msp430_read16_flash_jump_pc) ||
+      (f             == msp430_read16_ram))
     {
       pread16[addr] = f;
     }

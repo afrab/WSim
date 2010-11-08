@@ -117,6 +117,10 @@
 #define __msp430_have_flash
 
 // Flash erase timings
+#define FLASH_WRITE_TIMING_BYTE    35
+#define FLASH_WRITE_TIMING_FSTBYTE 30
+#define FLASH_WRITE_TIMING_NXTBYTE 21
+#define FLASH_WRITE_TIMING_LSTBYTE  6
 #define FLASH_ERASE_TIMING_MASS  5297
 #define FLASH_ERASE_TIMING_SEG   4819
 
@@ -186,6 +190,10 @@
 #define __msp430_have_flash
 
 // Flash erase timings
+#define FLASH_WRITE_TIMING_BYTE    35
+#define FLASH_WRITE_TIMING_FSTBYTE 30
+#define FLASH_WRITE_TIMING_NXTBYTE 21
+#define FLASH_WRITE_TIMING_LSTBYTE  6
 #define FLASH_ERASE_TIMING_MASS  5297
 #define FLASH_ERASE_TIMING_SEG   4819
 
@@ -295,6 +303,10 @@
 #define __msp430_have_flash
 
 // Flash erase timings
+#define FLASH_WRITE_TIMING_BYTE    35
+#define FLASH_WRITE_TIMING_FSTBYTE 30
+#define FLASH_WRITE_TIMING_NXTBYTE 21
+#define FLASH_WRITE_TIMING_LSTBYTE  6
 #define FLASH_ERASE_TIMING_MASS  5297
 #define FLASH_ERASE_TIMING_SEG   4819
 
@@ -481,6 +493,10 @@
 #define __msp430_have_flash
 
 // Flash erase timings
+#define FLASH_WRITE_TIMING_BYTE    35
+#define FLASH_WRITE_TIMING_FSTBYTE 30
+#define FLASH_WRITE_TIMING_NXTBYTE 21
+#define FLASH_WRITE_TIMING_LSTBYTE  6
 #define FLASH_ERASE_TIMING_MASS  5297
 #define FLASH_ERASE_TIMING_SEG   4819
 
@@ -540,8 +556,12 @@
 #define __msp430_have_flash
 
 // Flash erase timings
-#define FLASH_ERASE_TIMING_MASS  10593
-#define FLASH_ERASE_TIMING_SEG   4819
+#define FLASH_WRITE_TIMING_BYTE       30
+#define FLASH_WRITE_TIMING_FSTBYTE    25
+#define FLASH_WRITE_TIMING_NXTBYTE    18
+#define FLASH_WRITE_TIMING_LSTBYTE     6
+#define FLASH_ERASE_TIMING_MASS    10593
+#define FLASH_ERASE_TIMING_SEG      4819
 
 /* ********************************************************************** */
 /* ********************************************************************** */
@@ -606,8 +626,12 @@
 
 
 // Flash erase timings
-#define FLASH_ERASE_TIMING_MASS  10593
-#define FLASH_ERASE_TIMING_SEG   4819
+#define FLASH_WRITE_TIMING_BYTE       30
+#define FLASH_WRITE_TIMING_FSTBYTE    25
+#define FLASH_WRITE_TIMING_NXTBYTE    18
+#define FLASH_WRITE_TIMING_LSTBYTE     6
+#define FLASH_ERASE_TIMING_MASS    10593
+#define FLASH_ERASE_TIMING_SEG      4819
 
 /* ********************************************************************** */
 /* ********************************************************************** */

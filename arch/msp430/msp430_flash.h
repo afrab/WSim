@@ -106,6 +106,7 @@ struct msp430_flash_t {
 
   uint32_t ticks_divider;
   uint32_t flash_ticks_left;
+  uint32_t flash_write_fst;
 };
 
 /* ************************************************** */

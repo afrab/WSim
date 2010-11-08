@@ -4,6 +4,13 @@
 WSIM=wsim-wsn430
 WTRC=wtracer
 
+if [ "x`which nc.traditional`" = "x" ]
+then
+    NETCAT=nc
+else
+    NETCAT=nc.traditional
+fi
+
 # set WSNET to "wsnet1", "wsnet2", or "" if you are using wsim alone
 WSNET=
 WSNET2_CONF="./worldsens.xml"
@@ -34,7 +41,7 @@ fi
 
 
 ## =============NETCAT====================
-xterm -T netcat-1 -e "nc -u -p 7000 localhost 6000" &
+xterm -T netcat-1 -e "${NETCAT} -u -p 7000 localhost 6000" &
 echo "nc -u -p 7000 localhost 6000"
 ## ======================================
 
@@ -54,7 +61,7 @@ read dummyval
 ## =============End======================
 killall -SIGUSR1 ${WSIM}   > /dev/null 2>&1
 killall -SIGQUIT ${WSNET}  > /dev/null 2>&1
-killall -SIGQUIT nc        > /dev/null 2>&1
+killall -SIGQUIT ${NETCAT} > /dev/null 2>&1
 ## ======================================
 
 

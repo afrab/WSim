@@ -466,6 +466,7 @@ void cc2420_strobe_state_rx_sfd_search(struct _cc2420_t * cc2420)
     case CC2420_STROBE_SRXON :
       logpkt_rx_abort_pkt(cc2420->worldsens_radio_id, "strobe SRXON");
       CC2420_DBG_STROBE("cc2420:strobe:rx_sfd_search: SRXON\n");
+      CC2420_RX_SFD_SEARCH_ENTER(cc2420);
       break;
     case CC2420_STROBE_SACK :
       logpkt_rx_abort_pkt(cc2420->worldsens_radio_id, "strobe SACK");
@@ -544,6 +545,11 @@ void cc2420_strobe_state_rx_frame(struct _cc2420_t * cc2420)
       logpkt_rx_abort_pkt(cc2420->worldsens_radio_id, "strobe STXON");
       CC2420_DBG_STROBE("cc2420:strobe:rx_frame: STXON\n");
       CC2420_TX_CALIBRATE_ENTER(cc2420);
+      break;
+    case CC2420_STROBE_SRXON :
+      logpkt_rx_abort_pkt(cc2420->worldsens_radio_id, "strobe SRXON");
+      CC2420_DBG_STROBE("cc2420:strobe:rx_frame: SRXON\n");
+      CC2420_RX_SFD_SEARCH_ENTER(cc2420); /* verified on hardware */
       break;
     default :
       CC2420_DEBUG("cc2420:strobe:rx_frame: invalid strobe command %d in rx_frame state\n",

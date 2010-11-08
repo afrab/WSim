@@ -749,7 +749,7 @@ uint64_t cc2420_callback_rx(void *arg, struct wsnet_rx_info *wrx)
 		    uint8_t rx_threshold = CC2420_REG_IOCFG0_FIFOP_THR(cc2420->registers[CC2420_REG_IOCFG0]);
 		    CC2420_DEBUG("address recognition OK, checking threshold (%d)\n", rx_threshold);
 		    if (cc2420->rx_data_bytes >= rx_threshold && cc2420->FIFOP_pin == 0x00) {
-		        CC2420_DEBUG("rx_threshold reached, setting up FIFOP\n");
+		      CC2420_DEBUG("rx_threshold (%d) reached, setting up FIFOP\n", rx_threshold);
 			cc2420->FIFOP_pin = 0xFF;
 			cc2420->FIFOP_set =    1;
 		    }
@@ -760,7 +760,7 @@ uint64_t cc2420_callback_rx(void *arg, struct wsnet_rx_info *wrx)
 	  {
 	    uint8_t rx_threshold = CC2420_REG_IOCFG0_FIFOP_THR(cc2420->registers[CC2420_REG_IOCFG0]);
 	    if (cc2420->rx_data_bytes >= rx_threshold && cc2420->FIFOP_pin == 0x00) {
-	      CC2420_DEBUG("rx_threshold reached, setting up FIFOP\n");
+	      CC2420_DEBUG("rx_threshold (%d) reached, setting up FIFOP\n", rx_threshold);
 	      cc2420->FIFOP_pin = 0xFF;
 	      cc2420->FIFOP_set =    1;
 	    }

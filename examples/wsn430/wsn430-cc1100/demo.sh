@@ -6,6 +6,13 @@ WTRC=wtracer
 WSNET1=wsnet1
 WSNET2=wsnet
 
+if [ "x`which nc.traditional`" = "x" ]
+then
+    NETCAT=nc
+else
+    NETCAT=nc.traditional
+fi
+
 # set WSNET to "--wsnet1", "--wsnet2", or "" if you are using wsim alone
 WSNET_MODE=--wsnet1
 WSNET2_CONF="./worldsens.xml"
@@ -44,17 +51,17 @@ else
 fi
 ## ======================================
 
+sleep 0.5
 
 ## =============NETCAT====================
 iter=0
 while [ ${iter} -lt ${NB_NODE} ]
 do
-    NC="nc -u -p 700${iter} localhost 600${iter}"
+    NC="${NETCAT} -u -p 700${iter} localhost 600${iter}"
     xterm -T netcat-${iter} -e "${NC}" &
     echo "${NC}"
     iter=`expr ${iter} + 1`
 done
-sync
 ## ======================================
 
 
@@ -80,7 +87,7 @@ read dummyval
 killall -SIGUSR1 ${WSIM}   > /dev/null 2>&1
 killall -SIGQUIT ${WSNET1} > /dev/null 2>&1
 killall -SIGQUIT ${WSNET2} > /dev/null 2>&1
-killall -SIGUSR1 nc        > /dev/null 2>&1
+killall -SIGUSR1 ${NETCAT} > /dev/null 2>&1
 ## ======================================
 
 

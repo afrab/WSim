@@ -126,6 +126,7 @@ static void main_dump_stats()
 static void  main_run_mode(struct options_t* o)
 {
 #if !defined(__MINGW32__)
+  signal(SIGINT ,signal_quit);
   signal(SIGQUIT,signal_quit);
   signal(SIGUSR1,signal_quit);
   signal(SIGUSR2,signal_quit);

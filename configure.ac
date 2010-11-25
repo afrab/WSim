@@ -295,6 +295,14 @@ if test "${enable_platform_micaz}" = "yes" ; then
 	PLATFORMNAMES="micaz $PLATFORMNAMES"
 fi
 
+dnl Powwow
+AC_ARG_ENABLE([platform-powwow],AS_HELP_STRING([--enable-platform-powwow],[Powwow platform]))
+if test "${enable_platform_powwow}" = "yes" ; then
+	enable_mcu_msp430=yes
+	NPLATFORM=$(($NPLATFORM + 1))
+	PLATFORMNAMES="micaz $PLATFORMNAMES"
+fi
+
 dnl All
 ALL="no"
 AC_ARG_ENABLE([platform-all],AS_HELP_STRING([--enable-platform-all],[all platforms]))
@@ -326,6 +334,7 @@ AM_CONDITIONAL([BUILD_MCUGENP],   [test "${enable_platform_mcugenp}"     = "yes"
 AM_CONDITIONAL([BUILD_MOSAR],     [test "${enable_platform_mosar}"       = "yes"])
 AM_CONDITIONAL([BUILD_MICA2],     [test "${enable_platform_mica2}"       = "yes" -o "$ALL" = "yes"])
 AM_CONDITIONAL([BUILD_MICAZ],     [test "${enable_platform_micaz}"       = "yes" -o "$ALL" = "yes"])
+AM_CONDITIONAL([BUILD_POWWOW],    [test "${enable_platform_powwow}"      = "yes" -o "$ALL" = "yes"])
 
 AM_CONDITIONAL([BUILD_MSP430],    [test "${enable_mcu_msp430}"         = "yes" -o "$ALL" = "yes" ])
 AM_CONDITIONAL([BUILD_ATMEGA],    [test "${enable_mcu_atmega}"         = "yes" -o "$ALL" = "yes" ])
@@ -650,6 +659,7 @@ platforms/iclbsn/Makefile
 platforms/mcugen/Makefile
 platforms/wasp/Makefile
 platforms/wisenode/Makefile
+platforms/powwow/Makefile
 dnl
 libelf/Makefile
 libgdb/Makefile

@@ -22,7 +22,7 @@ export WSIMADD
 
 SUBDIRS=wsn430 ot2006 otsetre ez430 tests telosb \
 	ez430rf mosar mica2 micaz iclbsn wisenode senslab \
-	mcugen wasp
+	mcugen wasp powwow
 
 
 

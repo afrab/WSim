@@ -281,8 +281,8 @@ int devices_create(void)
 #if defined(LOGO1)
 #  define BKG 0xffffff
 #  define OFF 0x202020
-#  include "wsim.xpm"
-#  define WSIM wsim
+#  include "img-senslab-small.xpm"
+#  define IMG img_senslab_small
 #else
 #  define BKG 0x000000
 #  define OFF 0x202020
@@ -301,7 +301,7 @@ int devices_create(void)
 #endif
   res += ptty_device_create     (SERIAL,  SERIAL_ID_0);
 #if defined(LOGO1)
-  res += uigfx_device_create    (LOGO1,   wsim);
+  res += uigfx_device_create    (LOGO1,   IMG);
 #endif
 
   /*********************************/

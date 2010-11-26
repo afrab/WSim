@@ -264,9 +264,7 @@ int devices_create(void)
   machine.device_size[RADIO]  = cc2420_device_size(); // cc2420 radio
 #endif
 
-#if defined(LOGO1)
   machine.device_size[LOGO1]  = uigfx_device_size();
-#endif
 
   /*********************************/
   /* allocate memory               */
@@ -278,15 +276,17 @@ int devices_create(void)
   /* create peripherals            */
   /*********************************/
 
-#if defined(LOGO1)
 #  define BKG 0xffffff
 #  define OFF 0x202020
-#  include "img-senslab-small.xpm"
-#  define IMG img_senslab_small
-#else
-#  define BKG 0x000000
-#  define OFF 0x202020
-#endif
+
+  //#  include "img-senslab-small.xpm"
+  //#  define IMG img_senslab_small
+  //#  include "img-senslab.xpm"
+  //#  define IMG img_senslab
+  #include "wsim.xpm"
+  #define  IMG wsim
+
+
 
   res += system_create          (SYSTEM);
   res += led_device_create      (LED1,    0xee0000,OFF,BKG,"red");
@@ -300,9 +300,7 @@ int devices_create(void)
   res += cc2420_device_create   (RADIO,   xosc_freq / 1000000, cc2420_antenna);
 #endif
   res += ptty_device_create     (SERIAL,  SERIAL_ID_0);
-#if defined(LOGO1)
   res += uigfx_device_create    (LOGO1,   IMG);
-#endif
 
   /*********************************/
   /* place peripherals Gui         */
@@ -312,17 +310,18 @@ int devices_create(void)
     int led_w,led_h;
     int log_w,log_h;
 
-    machine.device[LED1].ui_get_size(LED1,   &led_w, &led_h);
-#if defined(LOGO1)
-    machine.device[LOGO1].ui_get_size(LOGO1, &log_w, &log_h);
+    machine.device[LED1 ].ui_get_size (LED1,   &led_w, &led_h);
+    machine.device[LOGO1].ui_get_size (LOGO1,  &log_w, &log_h);
+#if 1
+    machine.device[LED1 ].ui_set_pos  (LED1,         0,   0);
+    machine.device[LED2 ].ui_set_pos  (LED2,   1*led_w,   0);
+    machine.device[LED3 ].ui_set_pos  (LED3,   2*led_w,   0);
+#else
+    machine.device[LED1 ].ui_set_pos  (LED1, log_w - 3*led_w,   0);
+    machine.device[LED2 ].ui_set_pos  (LED2, log_w - 2*led_w,   0);
+    machine.device[LED3 ].ui_set_pos  (LED3, log_w - 1*led_w,   0);
 #endif
-
-    machine.device[LED1].ui_set_pos  (LED1,         0,   0);
-    machine.device[LED2].ui_set_pos  (LED2,   1*led_w,   0);
-    machine.device[LED3].ui_set_pos  (LED3,   2*led_w,   0);
-#if defined(LOGO1)
-    machine.device[LOGO1].ui_set_pos (LOGO1,        0,   0);
-#endif
+    machine.device[LOGO1].ui_set_pos (LOGO1,         0,   0);
   }
 
   /*********************************/

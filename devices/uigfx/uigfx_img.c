@@ -66,21 +66,31 @@ static void uigfx_xpm_parsecolor(char *str, struct uigfx_map_t *cmap, int nc, in
   l1 = 0;
   l2 = 0;
   l3 = 0;
+  char color[20];
 
   switch (cpp)
     {
     case 1:
-      sscanf(str, "%c c #%c%c%c%c%c%c", &l1, &r1,&r2, &g1,&g2, &b1,&b2);
-      UIIMG_DBG("ui_img_xmp:RRR: %c c #%c%c%c%c%c%c\n", l1, r1,r2, g1,g2, b1,b2);
+      sscanf(str, "%c c %s", &l1, color);
+      UIIMG_DBG("ui_img_xmp:RRR: %c c %s\n", l1, color);
       break;
     case 2:
-      sscanf(str, "%c%c c #%c%c%c%c%c%c", &l1,&l2, &r1,&r2, &g1,&g2, &b1,&b2);
-      UIIMG_DBG("ui_img_xmp:RRR: %c%c c #%c%c%c%c%c%c\n", l1,l2, r1,r2, g1,g2, b1,b2);
+      sscanf(str, "%c%c c %s", &l1,&l2, color);
+      UIIMG_DBG("ui_img_xmp:RRR: %c%c c %s\n", l1,l2, color);
       break;
     case 3:
-      sscanf(str, "%c%c%c c #%c%c%c%c%c%c", &l1,&l2,&l3, &r1,&r2, &g1,&g2, &b1,&b2);
-      UIIMG_DBG("ui_img_xmp:RRR: %c%c%c c #%c%c%c%c%c%c\n", l1,l2,l3, r1,r2, g1,g2, b1,b2);
+      sscanf(str, "%c%c%c c %s", &l1,&l2,&l3, color);
+      UIIMG_DBG("ui_img_xmp:RRR: %c%c%c c %s\n", l1,l2,l3, color);
       break;
+    }
+  
+  if (strcmp(color,"None") != 0)
+    {
+      sscanf(color, "#%c%c%c%c%c%c", &r1,&r2, &g1,&g2, &b1,&b2);
+    }
+  else
+    {
+      r1 = r2 = g1 = g2 = b1 = b2 = 'f';
     }
 
   cmap[nc].name[0] = l1;
@@ -92,7 +102,7 @@ static void uigfx_xpm_parsecolor(char *str, struct uigfx_map_t *cmap, int nc, in
   cmap[nc].b       = uigfx_hexchar2int(b1) << 4 | uigfx_hexchar2int(b2);
   
  
-  UIIMG_DBG("ui_img_xpm:%03d: %2s c #%02x%02x%02x\n", nc, 
+  UIIMG_DBG("ui_img_xpm:%03d: %s c #%02x%02x%02x\n", nc, 
 	    cmap[nc].name, cmap[nc].r, cmap[nc].g, cmap[nc].b);
  
 }

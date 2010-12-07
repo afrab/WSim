@@ -133,6 +133,26 @@
 /* ********************************************************************** */
 /* ********************************************************************** */
 /* ********************************************************************** */
+/**
+   MSP430F149x
+
+   149 memory 60KB
+   ===
+        Flash  0xffe0 - 0xffff : main : interrupt vector
+               0x1100 - 0xffff : main : code memory     
+
+        Flash  0x1000 - 0x10ff : 256 bytes information Flash
+        ROM    0x0c00 - 0x0fff : 1KB Boot ROM
+
+              [0x0a00 - 0x0bff]  empty 512 bytes
+
+        RAM    0x0200 - 0x09ff : 2KB RAM
+               0x0100 - 0x01ff : 16-bit peripherals
+               0x0010 - 0x00ff :  8-bit peripherals
+               0x0000 - 0x000f :  8 bit SFR
+   
+
+**/
 
 #define MCU_BFD_MACH_ID   14 /* bfd_mach_msp14 */
 #define MCU_VERSION       "f149"
@@ -314,65 +334,32 @@
 /* ********************************************************************** */
 /* ********************************************************************** */
 /* ********************************************************************** */
-#elif defined(MSP430f1611)
+#elif defined(MSP430f1611) || defined(MSP430f1612)
 /* ********************************************************************** */
 /* ********************************************************************** */
 /* ********************************************************************** */
 /* ********************************************************************** */
+#if defined(MSP430f1611)
 
 /**
-   MSP430F161x
-   MSP430F149x
-
-   149 memory 60KB
-   ===
-        Flash  0xffe0 - 0xffff : main : interrupt vector
-               0x1100 - 0xffff : main : code memory     
-
-        Flash  0x1000 - 0x10ff : 256 bytes information Flash
-        ROM    0x0c00 - 0x0fff : 1KB Boot ROM
-
-              [0x0a00 - 0x0bff]  empty 512 bytes
-
-	RAM    0x0200 - 0x09ff : 2KB RAM
-	       0x0100 - 0x01ff : 16-bit peripherals
-	       0x0010 - 0x00ff :  8-bit peripherals
-	       0x0000 - 0x000f :  8 bit SFR
-   
-
-**/
-
-//                          6         5         4         3         2         1         0
-//                       3210987654321098765432109876543210987654321098765432109876543210
-//                                                                                          
-#define PIN_ZEO        0b0000000000000000000000000000000000000000000000000000000000000000ULL
-#define P1DATA         0b0000000000000000000000000000000000000000000001111111100000000000ULL
-#define P2DATA         0b0000000000000000000000000000000000000111111110000000000000000000ULL
-#define P3DATA         0b0000000000000000000000000000011111111000000000000000000000000000ULL
-#define P4DATA         0b0000000000000000000001111111100000000000000000000000000000000000ULL
-#define P5DATA         0b0000000000000111111110000000000000000000000000000000000000000000ULL
-#define P6DATA         0b0001110000000000000000000000000000000000000000000000000000111110ULL
-#define TIMERA3        0b0000000000000000000000000000000000000000000000000000000000000000ULL
-
-/*
-   1611 memory 48KB
+   1611 memory 48KB Flash + 10KB RAM
    ====
         Flash  0xffe0 - 0xffff : main : interrupt vector
                0x4000 - 0xffff : main : code memory     
         
         RAM    0x1900 - 0x38ff : 8KB extended RAM
-	       0x1100 - 0x18ff : ram mirrored from 0x0200 - 0x09ff
+               0x1100 - 0x18ff : ram mirrored from 0x0200 - 0x09ff
 
         Flash  0x1000 - 0x10ff : 256 bytes information Flash
         ROM    0x0c00 - 0x0fff : 1KB Boot ROM
 
               [0x0a00 - 0x0bff]  empty 512 bytes
 
-	RAM    0x0200 - 0x09ff : 2KB RAM (mirrored at 0x18ff - 0x1100)
-	       0x0100 - 0x01ff : 16-bit peripherals
-	       0x0010 - 0x00ff :  8-bit peripherals
-	       0x0000 - 0x000f :  8 bit SFR
-*/
+        RAM    0x0200 - 0x09ff : 2KB RAM (mirrored at 0x18ff - 0x1100)
+               0x0100 - 0x01ff : 16-bit peripherals
+               0x0010 - 0x00ff :  8-bit peripherals
+               0x0000 - 0x000f :  8 bit SFR
+**/
 
 #define MCU_BFD_MACH_ID    16 /* bfd_mach_msp16 */
 #define MCU_VERSION        "f1611"
@@ -388,6 +375,57 @@
 #define ADDR_BOOT_START    0x0c00u
 #define ADDR_MIRROR_STOP   0x09ffu
 #define ADDR_MIRROR_START  0x0200u
+
+#elif defined(MSP430f1612)
+
+/**
+   1612 memory 55KB Flash + 3KB RAM
+   ====
+        Flash  0xffe0 - 0xffff : main : interrupt vector
+               0x2500 - 0xffff : main : code memory
+
+        RAM    0x1900 - 0x24ff : 3KB extended RAM
+               0x1100 - 0x18ff : ram mirrored from 0x0200 - 0x09ff
+
+        Flash  0x1000 - 0x10ff : 256 bytes information Flash
+        ROM    0x0c00 - 0x0fff : 1KB Boot ROM
+
+              [0x0a00 - 0x0bff]  empty 512 bytes
+
+        RAM    0x0200 - 0x09ff : 2KB RAM (mirrored at 0x18ff - 0x1100)
+               0x0100 - 0x01ff : 16-bit peripherals
+               0x0010 - 0x00ff :  8-bit peripherals
+               0x0000 - 0x000f :  8 bit SFR
+**/
+
+#define MCU_BFD_MACH_ID    16 /* bfd_mach_msp16 */
+#define MCU_VERSION        "f1612"
+#define MCU_MODEL_NAME     "msp430f1612"
+
+#define ADDR_FLASH_STOP    0xFFFFu
+#define ADDR_FLASH_START   0x2500u
+#define ADDR_RAM_STOP      0x24FFu
+#define ADDR_RAM_START     0x1100u
+#define ADDR_NVM_STOP      0x10ffu
+#define ADDR_NVM_START     0x1000u
+#define ADDR_BOOT_STOP     0x0fffu
+#define ADDR_BOOT_START    0x0c00u
+#define ADDR_MIRROR_STOP   0x09ffu
+#define ADDR_MIRROR_START  0x0200u
+
+#endif
+
+//                          6         5         4         3         2         1         0
+//                       3210987654321098765432109876543210987654321098765432109876543210
+//                                                                                          
+#define PIN_ZEO        0b0000000000000000000000000000000000000000000000000000000000000000ULL
+#define P1DATA         0b0000000000000000000000000000000000000000000001111111100000000000ULL
+#define P2DATA         0b0000000000000000000000000000000000000111111110000000000000000000ULL
+#define P3DATA         0b0000000000000000000000000000011111111000000000000000000000000000ULL
+#define P4DATA         0b0000000000000000000001111111100000000000000000000000000000000000ULL
+#define P5DATA         0b0000000000000111111110000000000000000000000000000000000000000000ULL
+#define P6DATA         0b0001110000000000000000000000000000000000000000000000000000111110ULL
+#define TIMERA3        0b0000000000000000000000000000000000000000000000000000000000000000ULL
 
 #define INTR_RESET        15
 #define INTR_NMI          14
@@ -430,7 +468,7 @@
 #define VECTOR_DMA        VECTOR_DAC12
 
 /**
- * Serial ports 
+ * Serial ports
  *
  * P3.3 UCLK0
  * P3.2 SOMI0

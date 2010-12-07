@@ -5,6 +5,7 @@ noinst_LIBRARIES = \
 	libmsp430f149.a		\
 	libmsp430f449.a		\
 	libmsp430f1611.a	\
+	libmsp430f1612.a	\
 	libmsp430f2013.a	\
 	libmsp430f2274.a
 
@@ -45,6 +46,9 @@ libmsp430f449_a_SOURCES=${MSPSRC}
 
 libmsp430f1611_a_CFLAGS=-DMSP430f1611
 libmsp430f1611_a_SOURCES=${MSPSRC}
+
+libmsp430f1612_a_CFLAGS=-DMSP430f1611
+libmsp430f1612_a_SOURCES=${MSPSRC}
 
 libmsp430f2013_a_CFLAGS=-DMSP430f2013
 libmsp430f2013_a_SOURCES=${MSPSRC}

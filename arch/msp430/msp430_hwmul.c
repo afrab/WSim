@@ -18,7 +18,7 @@
 ** description of the hardware multiplier
 **
 ** this model does not verify timing, results
-** are ready in 1 clock sycle. 
+** are ready in 1 clock cycle. 
 **
 * *****************************************/ 
 

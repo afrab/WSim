@@ -167,9 +167,11 @@ struct uigfx_img_t* uigfx_xpm_create(char **xpm)
       return NULL;
     }
 
+  
   map = (struct uigfx_map_t*)malloc(img->ncolors * sizeof(struct uigfx_map_t));
   if (map == NULL)
     {
+      free(img->pixels);
       free(img);
       return NULL;
     }
@@ -190,11 +192,11 @@ struct uigfx_img_t* uigfx_xpm_create(char **xpm)
 	  int ncolor;
 	  uigfx_readccstr(xpm[1+img->ncolors+i], j, cpp, str);
 	  ncolor = uigfx_readpixel(str, map, img->ncolors, & img->pixels[IMG_LINEAR(i,j)]);
-	  /* ERROR("%02d",ncolor); */
+	  /* ERROR("%02d,",ncolor); */
 	}
       /* ERROR("\n"); */
     }
-
+  free(map);
   return img;
 }
 
@@ -220,16 +222,16 @@ void uigfx_img_draw(struct uigfx_img_t *img)
 {
   int i,j;
   int pixel;
-  static int once = 1;
+  static int warn_only_once = 1;
 
-  if ((img == NULL) && (once == 1))
+  if ((img == NULL) && (warn_only_once == 1))
     {
       ERROR("uigfx: img_draw NULL pointer defined image\n");
-      once = 0;
+      warn_only_once = 0;
       return;
     }
 
-  pixel = (img->x + img->y*machine.ui.width)*machine.ui.bpp;
+  pixel = (img->x + img->y * machine.ui.width) * machine.ui.bpp;
   for(i=0; i < img->h; i++)
     {
       int pii = pixel;

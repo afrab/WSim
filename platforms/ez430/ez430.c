@@ -16,27 +16,31 @@
 
 #include "arch/common/hardware.h"
 #include "arch/msp430/msp430.h"
+
 #include "devices/devices.h"
 #include "devices/led/led_dev.h"
 #include "devices/ptty/ptty_dev.h"
+#include "devices/uigfx/uigfx_dev.h"
 #include "src/options.h"
 
+/* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
 
 /* ****************************************
- * platform description 
+ * platform description : ez430
  *
- * Port 1 led array
- * ======
+ * msp430f2013
+ * Port 1.0 blue led 
  *
  * ***************************************/
 
+#define SYSTEM          0
+#define LED1            1
+#define LOGO1           2
 
-/* ************************************************** */
-/* ************************************************** */
-/* ************************************************** */
-
-#define LED1            0
-#define FREE_DEVICE_MAX 1
+#define END_DEV           LOGO1
+#define BOARD_DEVICE_MAX (END_DEV+1)
 
 /* ************************************************** */
 /* ************************************************** */
@@ -44,6 +48,34 @@
 
 int devices_options_add()
 {
+  return 0;
+}
+
+/* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
+
+struct ez430_struct_t {
+};
+
+#define SYSTEM_DATA      ((struct ez430_struct_t*)(machine.device[SYSTEM].data))
+
+int system_reset (int UNUSED dev) 
+{ 
+  return 0; 
+}
+
+int system_delete(int UNUSED dev) 
+{ 
+  return 0; 
+}
+
+int system_create(int dev_num)
+{
+  machine.device[dev_num].reset         = system_reset;
+  machine.device[dev_num].delete        = system_delete;
+  machine.device[dev_num].state_size    = sizeof(struct ez430_struct_t);
+  machine.device[dev_num].name          = "System Platform";
   return 0;
 }
 
@@ -64,26 +96,43 @@ int devices_create()
   /*********************************/
   /* fix peripheral sizes          */
   /*********************************/
-  machine.device_max           = FREE_DEVICE_MAX;
+  machine.device_max           = BOARD_DEVICE_MAX;
+  machine.device_size[SYSTEM]  = sizeof(struct ez430_struct_t);
   machine.device_size[LED1]    = led_device_size();  /* Led1 */
+  machine.device_size[LOGO1]   = uigfx_device_size();
 
   /*********************************/
   /* allocate memory               */
   /*********************************/
+
   res += devices_memory_allocate();
+
   /*********************************/
   /* create peripherals            */
   /*********************************/
-  res += led_device_create      (LED1,0,0xee,0, "led");      /* RVB */
+
+#  define BKG 0xffffff
+#  define OFF 0x202020
+#  include "ez430.xpm"
+#  define IMG ez___
+
+  res += system_create          (SYSTEM);
+  res += led_device_create      (LED1, 0x0000ee, OFF, BKG, "led");      /* RVB */
+  res += uigfx_device_create    (LOGO1, IMG);
 
   /*********************************/
   /* place peripherals Gui         */
   /*********************************/
+
   {
-    int lw,lh;
-    #define SHIFT 50
-    machine.device[LED1].ui_get_size(LED1,&lw,&lh);
-    machine.device[LED1].ui_set_pos(LED1, SHIFT + 0,  0);
+    int led_w,led_h;
+    int log_w,log_h;
+
+    machine.device[LED1].ui_get_size  (LED1,  &led_w, &led_h);
+    machine.device[LOGO1].ui_get_size (LOGO1, &log_w, &log_h);
+
+    machine.device[LED1].ui_set_pos   (LED1,   0,  0);
+    machine.device[LOGO1].ui_set_pos  (LOGO1,  0,  0);
   }
 
   /*********************************/
@@ -100,6 +149,11 @@ int devices_create()
 /* devices init conditions should be written here */
 int devices_reset_post(void)
 {
+  int refresh = 0;
+
+  REFRESH(LOGO1);
+  REFRESH(LED1);
+  ui_refresh(refresh);
   return 0;
 }
 
@@ -109,8 +163,7 @@ int devices_reset_post(void)
 
 int devices_update()
 {
-  int res = 0;
-  int ev;
+  int res     = 0;
   int refresh = 0;
   uint8_t  val8;
 
@@ -118,24 +171,10 @@ int devices_update()
   /* MCU -> devices                                                              */
   /* *************************************************************************** */
 
-  /* port 3 :                          */
-  /* ========                          */
-  /*   P3.7 urxd1 : serial             */
-  /*   P3.6 utxd1 : serial             */
-  /*   P3.5 urxd0                      */
-  /*   P3.4 utxd0                      */ 
-
-  /* port 5 :                          */
-  /* ========                          */
-  /*   P5.7 NC                         */
-  /*   P5.6 led 3                      */
-  /*   P5.5 led 2                      */
-  /*   P5.4 led 1                      */
-  /*   P5.0 NC                         */
   if (msp430_digiIO_dev_read(PORT1,&val8))
     {
-      {
-	machine.device[LED1].write(LED1,LED_DATA,BIT(val8,LED1));
+      { /* led on port 1.0 */
+	machine.device[LED1].write(LED1,LED_DATA,BIT(val8,0));
 	UPDATE(LED1);
 	REFRESH(LED1);
       }
@@ -146,35 +185,8 @@ int devices_update()
   /* *************************************************************************** */
 
   /* input on UI */
-  switch ((ev = ui_getevent()))
-    {
-    case UI_EVENT_USER:
-      {
-	uint8_t b = 0;
-	// the reset button is negated
-	//  if (machine.ui.val & UI_BUTTON_1)
-	//  msp430_reset_pin((machine.ui.b_down & UI_BUTTON_1) ? 0 : 1);
-	
-	// P0.012 buttons 1 2 and 3 -> p6 3 4 5
-	b |= (machine.ui.b_down & UI_BUTTON_1) ? 0x00 : 0x10;
-	b |= (machine.ui.b_down & UI_BUTTON_2) ? 0x00 : 0x20;
-	b |= (machine.ui.b_down & UI_BUTTON_3) ? 0x00 : 0x40;
-	b |= (machine.ui.b_down & UI_BUTTON_4) ? 0x00 : 0x80;
-
-	msp430_digiIO_dev_write(0, b, 0xf0);
-      }
-      break;
-    case UI_EVENT_QUIT:
-      HW_DMSG_UI("  devices UI event QUIT\n");
-      MCU_SIGNAL = SIG_UI;
-      break;
-    case UI_EVENT_NONE:
-      break;
-    default:
-      ERROR("devices: unknown ui event\n");
-      break;
-    }
-
+  ui_default_input("ez430:devices");
+  
   /* *************************************************************************** */
   /* update                                                                      */
   /* *************************************************************************** */

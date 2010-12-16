@@ -6,7 +6,8 @@ INCLUDES=-I$(top_srcdir)
 
 EZ430MCU=../../arch/msp430/libmsp430f2013.a
 
-EZ430DEV=../../devices/led/libled.a
+EZ430DEV= ../../devices/led/libled.a		\
+		../../devices/uigfx/libuigfx.a
 
 wsim_ez430_CFLAGS=-DMSP430f2013
 wsim_ez430_SOURCES=ez430.c

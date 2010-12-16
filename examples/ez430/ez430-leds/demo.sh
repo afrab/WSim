@@ -26,5 +26,5 @@ DEBUG="callgrind $CALLGRINDOPTS"
 DEBUG=""
 # --tracemode=gplot
 
-${DEBUG} ./wsim --verbose=1 --ui  ez430-leds.elf 
+${DEBUG} wsim-ez430 --verbose=1 --ui  ez430-leds.elf 
 

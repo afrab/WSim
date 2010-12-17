@@ -31,7 +31,7 @@
  * ======
  *   1.4 : 
  *   1.3 : 
- *   1.2 : 
+ *   1.2 : button
  *   1.1 : led GREEN
  *   1.0 : led RED
  *
@@ -40,10 +40,10 @@
  *   2.7 : GDO2
  *   2.6 : GDO0
  *   2.5 :
- *   2.4 : timer ~E
- *   2.3 : timer ~RST
- *   2.2 : timer ~IRQ
- *   2.1 : timer SQW   // TAINCLK
+ *   2.4 : 
+ *   2.3 : 
+ *   2.2 : 
+ *   2.1 : 
  *   2.0 : 
  *
  * Port 3
@@ -52,18 +52,18 @@
  *   3.6 : 
  *   3.5 : uart data in    -> battery expansion board
  *   3.4 : uart data out   -> battery expansion board
- *   3.3 : spi clock (timer + flash + radio)
- *   3.2 : spi somi  (timer + flash + radio)
- *   3.1 : spi simo  (timer + flash + radio)
+ *   3.3 : spi clock (radio)
+ *   3.2 : spi somi  (radio)
+ *   3.1 : spi simo  (radio)
  *   3.0 : radio CSN (~CS)
  *
  * Port 4
  * ======
  *   4.7 : 
- *   4.6 : flash ~HOLD
+ *   4.6 : 
  *   4.5 : 
- *   4.4 : flash ~W
- *   4.3 : flash ~S
+ *   4.4 : 
+ *   4.3 : 
  *   4.2 : 
  *   4.1 : 
  *   4.0 : 
@@ -71,26 +71,6 @@
  * ***************************************/
 
 /* ****************************************
- * Header <> msp430 <> PCB
- *  P01 : GND              : GND
- *  PO2 : VCC_EXT          : batt clip
- *  P03 : P2.0             : timer M41T93 VCC
- *  P04 : P2.1             : timer M41T93 SQW 
- *  P05 : P2.2             : timer M41T93 ~IRQ
- *  P06 : P2.3             : timer M41T93 ~RST
- *  P07 : P2.4             : timer M41T93 ~E
- *  P08 : P4.3             : flash M25P64 ~S
- *  P09 : P4.4             : flash M25P64 ~W
- *  P10 : P4.5             : X (nc)
- *  P11 : P4.6             : flash M25P64 ~HOLD
- *  P12 : GND              : GND
- *  P13 : GDO0 (radio)     : X (nc)
- *  P14 : GDO2 (radio)     : X (nc)
- *  P15 : P3.2 SOMI (spi)  : timer SDO + flash Q
- *  P16 : P3.3 CLK  (spi)  : timer SCL + flash SCL
- *  P17 : P3.0 STE  (i2c)  : X (nc)
- *  P18 : P3.1 SOMI (spi)  : timer SDI + flash D
- *
  *
  * XIN is set to GDO2/radio
  * MSP430x22xx: XT2 is not present.
@@ -112,6 +92,8 @@
 #define END_DEV           LOGO1
 #define BOARD_DEVICE_MAX (END_DEV+1)
 
+#define NAME "ez430rf"
+
 /* ************************************************** */
 /* ************************************************** */
 /* ************************************************** */
@@ -129,13 +111,16 @@ int devices_options_add(void)
 
 struct ez430rf_struct_t {
   int radio_cs;
+  int button_lastvalue;
 };
 
-#define SYSTEM_DATA      ((struct ez430rf_struct_t*)(machine.device[SYSTEM].data))
-#define SYSTEM_RADIO_CS  (SYSTEM_DATA->radio_cs)
+#define SYSTEM_DATA         ((struct ez430rf_struct_t*)(machine.device[SYSTEM].data))
+#define SYSTEM_RADIO_CS     (SYSTEM_DATA->radio_cs)
+#define SYSTEM_BUTTON_LAST  (SYSTEM_DATA->button_lastvalue)
 
 int system_reset (int UNUSED dev) 
 { 
+  SYSTEM_BUTTON_LAST  = 0xff;
   return 0; 
 }
 
@@ -151,6 +136,14 @@ int system_create(int dev_num)
   machine.device[dev_num].delete        = system_delete;
   machine.device[dev_num].state_size    = sizeof(struct ez430rf_struct_t);
   machine.device[dev_num].name          = "System Platform";
+
+  STDOUT("%s:\n", NAME);
+  STDOUT("%s: =========================\n", NAME);
+  STDOUT("%s: boutton 1 = '1'\n", NAME);
+  STDOUT("%s:\n", NAME);
+  STDOUT("%s: 'q' pour quitter (hors mode gdb)\n", NAME);
+  STDOUT("%s: =========================\n", NAME);
+  STDOUT("%s:\n", NAME);
   return 0;
 }
 
@@ -198,15 +191,15 @@ int devices_create(void)
 
 #  define BKG 0xffffff
 #  define OFF 0x202020
-#  include "wsim.xpm"
-#  define WSIM wsim
+#  include "ez430rf.xpm"
+#  define IMG ez___rf
 
   res += system_create          (SYSTEM);
   res += led_device_create      (LED_RED,   0xee0000,OFF,BKG,"red");
   res += led_device_create      (LED_GREEN, 0x00ee00,OFF,BKG,"green");
   res += cc2500_device_create   (RADIO,     xosc_freq / 1000000, cc2500_antenna);
   res += ptty_device_create     (SERIAL,    0);
-  res += uigfx_device_create    (LOGO1,   wsim);
+  res += uigfx_device_create    (LOGO1,     IMG);
 
   /*********************************/
   /* place peripherals Gui         */
@@ -241,7 +234,8 @@ int devices_reset_post(void)
 {
   int refresh = 0;
 
-  SYSTEM_RADIO_CS = 0;
+  SYSTEM_RADIO_CS       = 0;
+  SYSTEM_BUTTON_LAST    = 0xff;
 
   REFRESH(LED_RED);
   REFRESH(LED_GREEN);
@@ -282,61 +276,41 @@ int devices_update(void)
   
   /* port 2 :                          */
   /* ========                          */
-  /*   P2.7 NC                         */
-  /*   P2.6 NC                         */
-  /*   P2.5 NC                         */
-  /*   P2.4 1wire                      */
-  /*   P2.3 NC                         */
-  /*   P2.3 NC                         */
-  /*   P2.1 7seg selector 1            */
-  /*   P2.0 7seg selector 0            */
-  if (msp430_digiIO_dev_read(PORT2,&val8))
-    {
-      etracer_slot_access(0x0, 1, ETRACER_ACCESS_WRITE, ETRACER_ACCESS_BIT, ETRACER_ACCESS_LVL_GPIO, 0);
-    }
 
   /* port 3 :                          */
   /* ========                          */
-  /*   P3.7 urxd1 : serial             */
-  /*   P3.6 utxd1 : serial             */
-  /*   P3.5 urxd0                      */
-  /*   P3.4 utxd0                      */ 
-  /*   P3.3 SPI cc2500 UCLK            */
-  /*   P3.2 SPI cc2500 SOMI            */
-  /*   P3.1 SPI cc2500 SIMO            */
-  /*   P3.0 NC                         */
-#if 0
+  /*   P3.0 radio CSN                  */
   if (msp430_digiIO_dev_read(PORT3,&val8))
     {
-      /* cc2500 is driven by spi                          */
-      /* we could/should check here that the pins are not */
-      /* driven by the GPIO                               */
-    }
-#endif
-
-  /* port 4 :                          */
-  /* ========                          */
-  /*   P4.7 flash hold                 */
-  /*   P4.6 NC                         */
-  /*   P4.5 NC                         */
-  /*   P4.4 CS flash                   */
-  /*   P4.3 NC                         */
-  /*   P4.2 CS cc2500                  */
-  /*   P4.1 batt status                */
-  /*   P4.0 NC                         */
-  if (msp430_digiIO_dev_read(PORT4,&val8))
-    {
-      CC2500_CSn = BIT(val8,2);
+      CC2500_CSn = BIT(val8,0);
       machine.device[RADIO].write(RADIO, CC2500_CSn_MASK, CC2500_CSn << CC2500_CSn_SHIFT);
       etracer_slot_access(0x0, 1, ETRACER_ACCESS_WRITE, ETRACER_ACCESS_BIT, ETRACER_ACCESS_LVL_GPIO, 0);
     }
 
-  /* Usart SPI mode                    */
+  /* port 4 :                          */
+  /* ========                          */
+
+
+  /* Usart                             */
   /* ==============                    */
-  /* SPI 0 : radio                     */
-  /* SPI 1 : flash                     */
-#if 0
+  /* UCA0 : serial                     */
   switch (MCU.usart0.mode)
+    {
+    case USART_MODE_UART:
+      if (msp430_usart0_dev_read_uart(&val8))
+	{
+	  machine.device[SERIAL].write(SERIAL, PTTY_D, val8);
+	  /* etracer_slot_access(0x0, 1, ETRACER_ACCESS_WRITE, ETRACER_ACCESS_BYTE, ETRACER_ACCESS_LVL_OUT, 0); */
+	}
+      break;
+    default:
+      break;
+    }
+
+  /* Usart                             */
+  /* ==============                    */
+  /* UCB0 : radio                      */
+  switch (MCU.usart1.mode)
     {
     case USART_MODE_SPI:
       if (msp430_usart0_dev_read_spi(&val8))
@@ -345,12 +319,10 @@ int devices_update(void)
 	  etracer_slot_access(0x0, 1, ETRACER_ACCESS_WRITE, ETRACER_ACCESS_BYTE, ETRACER_ACCESS_LVL_SPI0, 0);
 	}      
       break; 
-    case USART_MODE_UART:
-      break;
     default:
       break;
     }
-#endif
+
     
   /* *************************************************************************** */
   /* devices -> MCU                                                              */
@@ -364,33 +336,30 @@ int devices_update(void)
     machine.device[ RADIO ].read( RADIO ,&mask,&value);
     if (mask & CC2500_DATA_MASK)
       {
-#if 0
+#if defined(DEBUG_ME_HARDER)
 	if (MCU.usart0.mode != USART_MODE_SPI)
 	  {
-#if defined(DEBUG_ME_HARDER)
-	    ERROR("wsn430:devices: read data on radio while not in SPI mode ?\n");
-#endif
+	    ERROR("ez430rf:devices: read data on radio while not in SPI mode ?\n");
 	  }
+#endif
 	msp430_usart0_dev_write_spi(value & CC2500_DATA_MASK);
 	etracer_slot_access(0x0, 1, ETRACER_ACCESS_READ, ETRACER_ACCESS_BYTE, ETRACER_ACCESS_LVL_SPI0, 0);
-#endif
       }
 
-    if (mask & CC2500_GDO2_MASK) // GDO2 -> P1.4
+    if (mask & CC2500_GDO2_MASK) // GDO2 -> P2.7
       { 
-	msp430_digiIO_dev_write(PORT1, (CC2500_GDO2_MASK & value) ? 0x10 : 0x00, 0x10);
+	msp430_digiIO_dev_write(PORT2, (CC2500_GDO2_MASK & value) ? 0x80 : 0x00, 0x80);
 	etracer_slot_access(0x0, 1, ETRACER_ACCESS_READ, ETRACER_ACCESS_BIT, ETRACER_ACCESS_LVL_GPIO, 0);
       }
-    if (mask & CC2500_GDO0_MASK) // GDO0 -> P1.3
+    if (mask & CC2500_GDO0_MASK) // GDO0 -> P2.6
       { 
-	msp430_digiIO_dev_write(PORT1, (CC2500_GDO0_MASK & value) ? 0x08 : 0x00, 0x08);
+	msp430_digiIO_dev_write(PORT2, (CC2500_GDO0_MASK & value) ? 0x40 : 0x00, 0x40);
 	etracer_slot_access(0x0, 1, ETRACER_ACCESS_READ, ETRACER_ACCESS_BIT, ETRACER_ACCESS_LVL_GPIO, 0);
       }
   }
 
 
   /* input on UART serial */
-#if 0
   if (msp430_usart1_dev_write_uart_ok())
     {
       uint32_t mask,value;
@@ -401,12 +370,57 @@ int devices_update(void)
 	  /* etracer_slot_access(0x0, 1, ETRACER_ACCESS_READ, ETRACER_ACCESS_BYTE, ETRACER_ACCESS_LVL_OUT, 0); */
 	}
     }
-#endif
-
 
 
   /* input on UI */
-  ui_default_input("ez430rf:");
+  /* input on buttons */
+  {
+    int ev;
+    switch ((ev = ui_getevent()))
+      {
+      case UI_EVENT_USER:
+	{
+	  uint8_t b = 0xff;
+	  // the reset button is negated
+	  //  if (machine.ui.val & UI_BUTTON_1)
+	  //  msp430_reset_pin((machine.ui.b_down & UI_BUTTON_1) ? 0 : 1);
+	  
+	  if ((machine.ui.b_down & UI_BUTTON_1) != 0)
+	    {
+	      b &= ~0x10;
+	    }
+
+	  if (b != SYSTEM_BUTTON_LAST)
+	    {
+	      if (((b                  & (0x10)) == 0) && 
+		  ((SYSTEM_BUTTON_LAST & (0x10)) != 0))
+		{
+		  VERBOSE(3,"%s: button 1 pressed\n",NAME);
+		  msp430_digiIO_dev_write(PORT1, 0x00, 0x04);
+		}
+	      
+	      if (((b                  & (0x10)) != 0) && 
+		  ((SYSTEM_BUTTON_LAST & (0x10)) == 0))
+		{
+		  VERBOSE(3,"%s: button 1 released\n",NAME);
+		  msp430_digiIO_dev_write(PORT1, 0x04, 0x04);
+		}
+
+	      SYSTEM_BUTTON_LAST = b;
+	    }
+	}
+	break;
+      case UI_EVENT_QUIT: /* q */
+	HW_DMSG_UI("%s: UI event QUIT\n",NAME);
+	mcu_signal_add(SIG_UI);
+	break;
+      case UI_EVENT_NONE:
+	break;
+      default:
+	ERROR("%s: unknown ui event\n",NAME);
+	break;
+      }
+  }
 
   /* *************************************************************************** */
   /* update                                                                      */

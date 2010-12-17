@@ -630,8 +630,12 @@
 #define INTR_TIMERA3_0     6 // CCR0 CCIFG
 #define INTR_TIMERA3_1     5 // CCR1, CCR2, TAIFG
 #define INTR_IOPORT1       4
+#define INTR_USART1_RX     3
+#define INTR_USART1_TX     2
+#if 0
 #define INTR_UNUSED_1      3
 #define INTR_UNUSED_2      2
+#endif
 #define INTR_IOPORT2       1
 #define INTR_UNUSED_3      0
 
@@ -645,8 +649,13 @@
 #define __msp430_have_port2
 #define __msp430_have_port3
 #define __msp430_have_port4
+
+#define __msp430_have_usart0
+#define __msp430_have_usart1
+#if 0
 #define __msp430_have_usci_a0  /* uart/lin + IrDA + SPI */
 #define __msp430_have_usci_b0  /* SPI + I2C             */
+#endif
 #define __msp430_have_adc10
 #define __msp430_have_cmpa
 #define __msp430_have_cmpa_plus

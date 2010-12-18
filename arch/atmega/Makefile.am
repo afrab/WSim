@@ -12,7 +12,7 @@ ATMEGA= atmega128_models.h		                          \
 	atmega128_alu.h               atmega128_alu.c             \
 	atmega128_io.h                atmega128_io.c              \
 	atmega128_io_reserved.h       atmega128_io_reserved.c     \
-	atmega128_digiIO.h   atmega128_digiIO.c
+	atmega128_digiIO.h            atmega128_digiIO.c
 
 libatmega128_a_CFLAGS=-DATMEGA128
 libatmega128_a_SOURCES=${ATMEGA}

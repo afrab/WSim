@@ -53,6 +53,18 @@ if test "${ac_cv_c_pipe}" != "no"; then
     CFLAGS="-pipe ${CFLAGS}"
 fi
 
+dnl Indent option : enable code indentation
+dnl ============ 
+# The indent target require GNU indent
+AC_PATH_PROG([INDENT], [indent])
+AC_PATH_PROG([GINDENT], [gindent])
+if test x"$GINDENT" != x""; then
+  INDENT="$GINDENT"
+fi
+
+AC_SUBST(INDENT)
+AM_CONDITIONAL(HAS_INDENT, [test x"$INDENT" != x""])
+
 dnl Debug mode : enable debug code for wsim internals
 dnl ============ 
 CFLAGS_save="${CFLAGS}"

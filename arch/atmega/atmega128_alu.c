@@ -213,6 +213,7 @@
  * BREAK
  * BREQ
  * BRGE
+ * 
  * BRHC
  * BRHS
  * BRID
@@ -227,6 +228,7 @@
  * BRTS
  * BRVC
  * BRVS
+ * 
  * BSET
  * BST
  * CALL
@@ -241,6 +243,7 @@
  * CLT
  * CLV
  * CLZ
+ * 
  * COM
  * CP
  * CPC
@@ -256,6 +259,7 @@
  * FMULSU
  * ICALL
  * IJMP
+ * 
  * IN
  * INC
  * JMP
@@ -270,6 +274,7 @@
  * MOVW
  * MUL
  * MULS
+ * 
  * MULSU
  * NEG
  * NOP
@@ -284,6 +289,7 @@
  * RJMP
  * ROL
  * ROR
+ * 
  * SBC
  * SBCI
  * SBI
@@ -298,6 +304,7 @@
  * SEI
  * SEN
  * SER
+ * 
  * SES
  * SET
  * SEV
@@ -314,177 +321,196 @@
  * WDR
  **************************/
 
-enum atmega_opcode {
-    OP_ADD = 0,
-    OP_ADC,
-    OP_ADIW,
-    OP_AND,
-    OP_ANDI,
-    OP_ASR,
-    OP_BREAK,
-    OP_SUB,
-    OP_SUBI,
-    OP_SBC,
-    OP_SBCI,
-    OP_SBIW,
-    OP_OR,
-    OP_ORI,
-    OP_EOR,
-    OP_COM,
-    OP_NEG,
-    OP_SBR,
-    OP_CBR,
-    OP_BCLR,
-    OP_IN,
-    OP_INC,
-    OP_DEC,
-    OP_SPM,
-    OP_SER,
-    OP_SLEEP,
-    OP_MUL,
-    OP_MULS,
-    OP_MULSU,
-    OP_FMUL,
-    OP_FMULS,
-    OP_FMULSU,
-    OP_RJMP,
-    OP_IJMP,
-    OP_EIJMP,
-    OP_ELPM,
-    OP_JMP,
-    OP_RCALL,
-    OP_ICALL,
-    OP_EICALL,
-    OP_CALL,
-    OP_RET,
-    OP_RETI,
-    OP_CPSE,
-    OP_CBI,
-    OP_CP,
-    OP_CPC,
-    OP_CPI,
-    OP_ROR,
-    OP_SBRC,
-    OP_SBRS,
-    OP_SBIC,
-    OP_SBIS,
-    OP_BRBS,
-    OP_BRBC,
-    OP_BLD,
-    OP_BST,
-    OP_MOV,
-    OP_MOVW,
-    OP_NOP,
-    OP_LDI,
-    OP_LDS,
-    OP_LD,
-    OP_LDD,
-    OP_LPM,
-    OP_LSR,
-    OP_OUT,
-    OP_POP,
-    OP_PUSH,
-    OP_SBI,
-    OP_BSET,
-    OP_SR,
-    OP_ST,
-    OP_STD,
-    OP_STS,
-    OP_SWAP,
-    OP_WDR
-};
+//enum atmega_opcode {
+//    OP_ADD = 0,
+//    OP_ADC,
+//    OP_ADIW,
+//    OP_AND,
+//    OP_ANDI,
+//    OP_ASR,
+//    OP_BREAK,
+//    OP_SUB,
+//    OP_SUBI,
+//    OP_SBC,
+//    OP_SBCI,
+//    OP_SBIW,
+//    OP_OR,
+//    OP_ORI,
+//    OP_EOR,
+//    OP_COM,
+//    OP_NEG,
+//    OP_SBR,
+//    OP_CBR,
+//    OP_BCLR,
+//    OP_IN,
+//    OP_INC,
+//    OP_DEC,
+//    OP_SPM,
+//    OP_SER,
+//    OP_SLEEP,
+//    OP_MUL,
+//    OP_MULS,
+//    OP_MULSU,
+//    OP_FMUL,
+//    OP_FMULS,
+//    OP_FMULSU,
+//    OP_RJMP,
+//    OP_IJMP,
+//    OP_EIJMP,
+//    OP_ELPM,
+//    OP_JMP,
+//    OP_RCALL,
+//    OP_ICALL,
+//    OP_EICALL,
+//    OP_CALL,
+//    OP_RET,
+//    OP_RETI,
+//    OP_CPSE,
+//    OP_CBI,
+//    OP_CP,
+//    OP_CPC,
+//    OP_CPI,
+//    OP_ROR,
+//    OP_SBRC,
+//    OP_SBRS,
+//    OP_SBIC,
+//    OP_SBIS,
+//    OP_BRBS,
+//    OP_BRBC,
+//    OP_BLD,
+//    OP_BST,
+//    OP_MOV,
+//    OP_MOVW,
+//    OP_NOP,
+//    OP_LDI,
+//    OP_LDS,
+//    OP_LD,
+//    OP_LDD,
+//    OP_LPM,
+//    OP_LSR,
+//    OP_OUT,
+//    OP_POP,
+//    OP_PUSH,
+//    OP_SBI,
+//    OP_BSET,
+//    OP_SR,
+//    OP_ST,
+//    OP_STD,
+//    OP_STS,
+//    OP_SWAP,
+//    OP_WDR
+//};
+
+#ifndef X
+#	define X(INST, FUNK, WRDS) OP_##INST,
+
+	enum atmega_opcode {
+		#include "8bit_avr_instruction_set.def"
+	};
+#	undef X
+#else
+#	error X macro is already defined, so might not be undefined previously
+#endif
 
 typedef int (*opcode_fun_t)(uint16_t opcode, uint16_t insn);
 
 static inline unsigned int extract_opcode(uint16_t insn);
 
-static int opcode_default(uint16_t opcode, uint16_t insn);
-static int opcode_nop    (uint16_t opcode, uint16_t insn);
+//static int opcode_default(uint16_t opcode, uint16_t insn);
+//static int opcode_nop    (uint16_t opcode, uint16_t insn);
+//
+//static int opcode_sleep  (uint16_t opcode, uint16_t insn);
+//
+//static int opcode_or     (uint16_t opcode, uint16_t insn);
+//static int opcode_eor    (uint16_t opcode, uint16_t insn);
+//static int opcode_ori    (uint16_t opcode, uint16_t insn);
+//static int opcode_sbr    (uint16_t opcode, uint16_t insn);
+//static int opcode_and    (uint16_t opcode, uint16_t insn);
+//static int opcode_andi   (uint16_t opcode, uint16_t insn);
+//static int opcode_cbr    (uint16_t opcode, uint16_t insn);
+//static int opcode_com    (uint16_t opcode, uint16_t insn);
+//static int opcode_neg    (uint16_t opcode, uint16_t insn);
+//
+//static int opcode_add    (uint16_t opcode, uint16_t insn);
+//static int opcode_adc    (uint16_t opcode, uint16_t insn);
+//static int opcode_adiw   (uint16_t opcode, uint16_t insn);
+//
+//static int opcode_sub    (uint16_t opcode, uint16_t insn);
+//static int opcode_subi   (uint16_t opcode, uint16_t insn);
+//static int opcode_sbiw   (uint16_t opcode, uint16_t insn);
+//static int opcode_sbc    (uint16_t opcode, uint16_t insn);
+//static int opcode_sbci   (uint16_t opcode, uint16_t insn);
+//
+//static int opcode_inc    (uint16_t opcode, uint16_t insn);
+//static int opcode_dec    (uint16_t opcode, uint16_t insn);
+//
+//static int opcode_mul    (uint16_t opcode, uint16_t insn);
+//static int opcode_muls   (uint16_t opcode, uint16_t insn);
+//static int opcode_mulsu  (uint16_t opcode, uint16_t insn);
+//
+//static int opcode_fmul   (uint16_t opcode, uint16_t insn);
+//static int opcode_fmuls  (uint16_t opcode, uint16_t insn);
+//static int opcode_fmulsu (uint16_t opcode, uint16_t insn);
+//
+//static int opcode_asr    (uint16_t opcode, uint16_t insn);
+//static int opcode_lsr    (uint16_t opcode, uint16_t insn);
+//static int opcode_ror    (uint16_t opcode, uint16_t insn);
+//
+//static int opcode_in     (uint16_t opcode, uint16_t insn);
+//static int opcode_out    (uint16_t opcode, uint16_t insn);
+//static int opcode_cbi    (uint16_t opcode, uint16_t insn);
+//static int opcode_sbi    (uint16_t opcode, uint16_t insn);
+//
+//static int opcode_cp     (uint16_t opcode, uint16_t insn);
+//static int opcode_cpi    (uint16_t opcode, uint16_t insn);
+//static int opcode_cpc    (uint16_t opcode, uint16_t insn);
+//
+//static int opcode_bset   (uint16_t opcode, uint16_t insn);
+//static int opcode_bclr   (uint16_t opcode, uint16_t insn);
+//static int opcode_bld    (uint16_t opcode, uint16_t insn);
+//static int opcode_bst    (uint16_t opcode, uint16_t insn);
+//
+//static int opcode_ser    (uint16_t opcode, uint16_t insn);
+//
+//static int opcode_jmp    (uint16_t opcode, uint16_t insn);
+//static int opcode_ijmp   (uint16_t opcode, uint16_t insn);
+//static int opcode_rjmp   (uint16_t opcode, uint16_t insn);
+//
+//static int opcode_call   (uint16_t opcode, uint16_t insn);
+//static int opcode_icall  (uint16_t opcode, uint16_t insn);
+//static int opcode_rcall  (uint16_t opcode, uint16_t insn);
+//static int opcode_ret    (uint16_t opcode, uint16_t insn);
+//
+//static int opcode_brbc   (uint16_t opcode, uint16_t insn);
+//static int opcode_brbs   (uint16_t opcode, uint16_t insn);
+//
+//static int opcode_mov    (uint16_t opcode, uint16_t insn);
+//static int opcode_movw   (uint16_t opcode, uint16_t insn);
+//
+//static int opcode_st     (uint16_t opcode, uint16_t insn);
+//static int opcode_sts    (uint16_t opcode, uint16_t insn);
+//static int opcode_std    (uint16_t opcode, uint16_t insn);
+//
+//static int opcode_elpm   (uint16_t opcode, uint16_t insn);
+//static int opcode_ld     (uint16_t opcode, uint16_t insn);
+//static int opcode_ldd    (uint16_t opcode, uint16_t insn);
+//static int opcode_ldi    (uint16_t opcode, uint16_t insn);
+//static int opcode_lds    (uint16_t opcode, uint16_t insn);
+//
+//static int opcode_pop    (uint16_t opcode, uint16_t insn);
+//static int opcode_push   (uint16_t opcode, uint16_t insn);
+//
+//static int opcode_sbrc   (uint16_t opcode, uint16_t insn);
+//static int opcode_sbrs   (uint16_t opcode, uint16_t insn);
+//static int opcode_cpse   (uint16_t opcode, uint16_t insn);
 
-static int opcode_sleep  (uint16_t opcode, uint16_t insn);
-
-static int opcode_or     (uint16_t opcode, uint16_t insn);
-static int opcode_eor    (uint16_t opcode, uint16_t insn);
-static int opcode_ori    (uint16_t opcode, uint16_t insn);
-static int opcode_sbr    (uint16_t opcode, uint16_t insn);
-static int opcode_and    (uint16_t opcode, uint16_t insn);
-static int opcode_andi   (uint16_t opcode, uint16_t insn);
-static int opcode_cbr    (uint16_t opcode, uint16_t insn);
-static int opcode_com    (uint16_t opcode, uint16_t insn);
-static int opcode_neg    (uint16_t opcode, uint16_t insn);
-
-static int opcode_add    (uint16_t opcode, uint16_t insn);
-static int opcode_adc    (uint16_t opcode, uint16_t insn);
-static int opcode_adiw   (uint16_t opcode, uint16_t insn);
-
-static int opcode_sub    (uint16_t opcode, uint16_t insn);
-static int opcode_subi   (uint16_t opcode, uint16_t insn);
-static int opcode_sbiw   (uint16_t opcode, uint16_t insn);
-static int opcode_sbc    (uint16_t opcode, uint16_t insn);
-static int opcode_sbci   (uint16_t opcode, uint16_t insn);
-
-static int opcode_inc    (uint16_t opcode, uint16_t insn);
-static int opcode_dec    (uint16_t opcode, uint16_t insn);
-
-static int opcode_mul    (uint16_t opcode, uint16_t insn);
-static int opcode_muls   (uint16_t opcode, uint16_t insn);
-static int opcode_mulsu  (uint16_t opcode, uint16_t insn);
-
-static int opcode_fmul   (uint16_t opcode, uint16_t insn);
-static int opcode_fmuls  (uint16_t opcode, uint16_t insn);
-static int opcode_fmulsu (uint16_t opcode, uint16_t insn);
-
-static int opcode_asr    (uint16_t opcode, uint16_t insn);
-static int opcode_lsr    (uint16_t opcode, uint16_t insn);
-static int opcode_ror    (uint16_t opcode, uint16_t insn);
-
-static int opcode_in     (uint16_t opcode, uint16_t insn);
-static int opcode_out    (uint16_t opcode, uint16_t insn);
-static int opcode_cbi    (uint16_t opcode, uint16_t insn);
-static int opcode_sbi    (uint16_t opcode, uint16_t insn);
-
-static int opcode_cp     (uint16_t opcode, uint16_t insn);
-static int opcode_cpi    (uint16_t opcode, uint16_t insn);
-static int opcode_cpc    (uint16_t opcode, uint16_t insn);
-
-static int opcode_bset   (uint16_t opcode, uint16_t insn);
-static int opcode_bclr   (uint16_t opcode, uint16_t insn);
-static int opcode_bld    (uint16_t opcode, uint16_t insn);
-static int opcode_bst    (uint16_t opcode, uint16_t insn);
-
-static int opcode_ser    (uint16_t opcode, uint16_t insn);
-
-static int opcode_jmp    (uint16_t opcode, uint16_t insn);
-static int opcode_ijmp   (uint16_t opcode, uint16_t insn);
-static int opcode_rjmp   (uint16_t opcode, uint16_t insn);
-
-static int opcode_call   (uint16_t opcode, uint16_t insn);
-static int opcode_icall  (uint16_t opcode, uint16_t insn);
-static int opcode_rcall  (uint16_t opcode, uint16_t insn);
-static int opcode_ret    (uint16_t opcode, uint16_t insn);
-
-static int opcode_brbc   (uint16_t opcode, uint16_t insn);
-static int opcode_brbs   (uint16_t opcode, uint16_t insn);
-
-static int opcode_mov    (uint16_t opcode, uint16_t insn);
-static int opcode_movw   (uint16_t opcode, uint16_t insn);
-
-static int opcode_st     (uint16_t opcode, uint16_t insn);
-static int opcode_sts    (uint16_t opcode, uint16_t insn);
-static int opcode_std    (uint16_t opcode, uint16_t insn);
-
-static int opcode_elpm   (uint16_t opcode, uint16_t insn);
-static int opcode_ld     (uint16_t opcode, uint16_t insn);
-static int opcode_ldd    (uint16_t opcode, uint16_t insn);
-static int opcode_ldi    (uint16_t opcode, uint16_t insn);
-static int opcode_lds    (uint16_t opcode, uint16_t insn);
-
-static int opcode_pop    (uint16_t opcode, uint16_t insn);
-static int opcode_push   (uint16_t opcode, uint16_t insn);
-
-static int opcode_sbrc   (uint16_t opcode, uint16_t insn);
-static int opcode_sbrs   (uint16_t opcode, uint16_t insn);
-static int opcode_cpse   (uint16_t opcode, uint16_t insn);
+#ifndef X
+#	define X(INST, FUNK, WRDS) static int FUNK(uint16_t opcode, uint16_t insn);
+		#include "8bit_avr_instruction_set.def"
+#	undef X
+#else
+#	error X macro is already defined, so might not be undefined previously
+#endif
 
 struct atmega_opcode_info_t {
     opcode_fun_t   fun;
@@ -492,92 +518,104 @@ struct atmega_opcode_info_t {
     int            length;
 };
 
-struct atmega_opcode_info_t OPCODES[] = {
-    { .fun = opcode_add,     .name = "ADD"    , .length = 1 }, /* done: needs reviewing */
-    { .fun = opcode_adc,     .name = "ADC"    , .length = 1 }, /* done: needs reviewing */
-    { .fun = opcode_adiw,    .name = "ADIW"   , .length = 1 }, /* done: needs reviewing */
-    // TST Rd = AND Rd,Rd
-    { .fun = opcode_and,     .name = "AND"    , .length = 1 },
-    { .fun = opcode_andi,    .name = "ANDI"   , .length = 1 }, /* done: needs reviewing */
-    { .fun = opcode_asr,     .name = "ASR"    , .length = 1 }, /* done: needs reviewing */
-    { .fun = opcode_default, .name = "BREAK"  , .length = 1 },
-    { .fun = opcode_sub,     .name = "SUB"    , .length = 1 }, /* done: needs reviewing */
-    { .fun = opcode_subi,    .name = "SUBI"   , .length = 1 },
-    { .fun = opcode_sbc,     .name = "SBC"    , .length = 1 }, /* done: needs reviewing & check flag Z*/
-    { .fun = opcode_sbci,    .name = "SBCI"   , .length = 1 }, /* done: needs reviewing */
-    { .fun = opcode_sbiw,    .name = "SBIW"   , .length = 1 }, /* done: needs reviewing */
-    { .fun = opcode_or,      .name = "OR"     , .length = 1 }, /* done: needs reviewing */
-    { .fun = opcode_ori,     .name = "ORI"    , .length = 1 },
-    // CLR Rd = EOR Rd,Rd
-    { .fun = opcode_eor,     .name = "EOR"    , .length = 1 },
-    { .fun = opcode_com,     .name = "COM"    , .length = 1 }, /* done: needs reviewing */
-    { .fun = opcode_neg,     .name = "NEG"    , .length = 1 }, /* done: needs reviewing + check C & V flags */
-    { .fun = opcode_sbr,     .name = "SBR"    , .length = 1 }, /* Code review & What's the difference between SBR & ORI */
-    { .fun = opcode_cbr,     .name = "CBR"    , .length = 1 }, /* Check opcode & code review */
-    // BCLR s : CLC, CLZ, CLN, CLV, CLS, CLH, CLT & CLI
-    { .fun = opcode_bclr,    .name = "BCLR"   , .length = 1 }, /* done: needs reviewing */
-    { .fun = opcode_in,      .name = "IN"     , .length = 1 },
-    { .fun = opcode_inc,     .name = "INC"    , .length = 1 }, /* done: needs reviewing */
-    { .fun = opcode_dec,     .name = "DEC"    , .length = 1 }, /* done: needs reviewing */
-    { .fun = opcode_default, .name = "SPM"    , .length = 1 },
-    { .fun = opcode_ser,     .name = "SER"    , .length = 1 }, /* done: needs reviewing */
-    { .fun = opcode_sleep,   .name = "SLEEP"  , .length = 1 },
-    { .fun = opcode_mul,     .name = "MUL"    , .length = 1 }, /* done: needs reviewing */
-    { .fun = opcode_muls,    .name = "MULS"   , .length = 1 }, /* done: needs reviewing */
-    { .fun = opcode_mulsu,   .name = "MULSU"  , .length = 1 }, /* done: needs reviewing */
-    { .fun = opcode_fmul,    .name = "FMUL"   , .length = 1 }, /* done: needs reviewing */
-    { .fun = opcode_fmuls,   .name = "FMULS"  , .length = 1 }, /* done: needs reviewing */
-    { .fun = opcode_fmulsu,  .name = "FMULSU" , .length = 1 }, /* done: needs reviewing */
-    { .fun = opcode_rjmp,    .name = "RJMP"   , .length = 1 },
-    { .fun = opcode_ijmp,    .name = "IJMP"   , .length = 1 }, /* done: needs reviewing */
-    { .fun = opcode_default, .name = "EIJMP"  , .length = 1 },
-    { .fun = opcode_elpm,    .name = "ELPM"   , .length = 1 },
-    { .fun = opcode_jmp,     .name = "JMP"    , .length = 2 },
-    { .fun = opcode_rcall,   .name = "RCALL"  , .length = 1 }, /* done: needs reviewing */
-    { .fun = opcode_icall,   .name = "ICALL"  , .length = 1 }, /* done: needs reviewing */
-    { .fun = opcode_default, .name = "EICALL" , .length = 1 },
-    { .fun = opcode_call,    .name = "CALL"   , .length = 2 },
-    { .fun = opcode_ret,     .name = "RET"    , .length = 1 },
-    { .fun = opcode_default, .name = "RETI"   , .length = 1 },
-    { .fun = opcode_cpse,    .name = "CPSE"   , .length = 1 }, /* done: needs reviewing */
-    { .fun = opcode_cbi,     .name = "CBI"    , .length = 1 }, /* done: needs reviewing */
-    { .fun = opcode_cp,      .name = "CP"     , .length = 1 },
-    { .fun = opcode_cpc,     .name = "CPC"    , .length = 1 },
-    { .fun = opcode_cpi,     .name = "CPI"    , .length = 1 },
-    { .fun = opcode_ror,     .name = "ROR"    , .length = 1 }, /* done: needs reviewing */
-    { .fun = opcode_sbrc,    .name = "SBRC"   , .length = 1 }, /* done: needs reviewing */
-    { .fun = opcode_sbrs,    .name = "SBRS"   , .length = 1 }, /* done: needs reviewing */
-    { .fun = opcode_default, .name = "SBIC"   , .length = 1 },
-    { .fun = opcode_default, .name = "SBIS"   , .length = 1 },
-    // BRBS s : BRCS, BRLO, BREQ, BRMI, BRVS, BRLT, BRHS, BRTS & BRIE
-    { .fun = opcode_brbs,    .name = "BRBS"   , .length = 1 }, /* done: needs reviewing */
-    // BRBC s : BRCC, BRSH, BRNE, BRPL, BRVC, BRGE, BRHC, BRTC & BRID
-    { .fun = opcode_brbc,    .name = "BRBC"   , .length = 1 }, /* done: needs reviewing */
-    { .fun = opcode_bld,     .name = "BLD"    , .length = 1 },
-    { .fun = opcode_bst,     .name = "BST"    , .length = 1 },
-    { .fun = opcode_mov,     .name = "MOV"    , .length = 1 },
-    { .fun = opcode_movw,    .name = "MOVW"   , .length = 1 },
-    { .fun = opcode_nop,     .name = "NOP"    , .length = 1 }, /* done: needs reviewing */
-    { .fun = opcode_ldi,     .name = "LDI"    , .length = 1 },
-    { .fun = opcode_lds,     .name = "LDS"    , .length = 2 }, /* done: needs reviewing */
-    { .fun = opcode_ld,      .name = "LD"     , .length = 1 }, /* LD X */
-    { .fun = opcode_ldd,     .name = "LDD"    , .length = 1 }, /* LD Y / Z */
-    { .fun = opcode_default, .name = "LPM"    , .length = 1 },
-    { .fun = opcode_lsr,     .name = "LSR"    , .length = 1 }, /* done: needs reviewing */
-    { .fun = opcode_out,     .name = "OUT"    , .length = 1 },
-    { .fun = opcode_pop,     .name = "POP"    , .length = 1 },
-    { .fun = opcode_push,    .name = "PUSH"   , .length = 1 },
-    { .fun = opcode_sbi,     .name = "SBI"    , .length = 1 }, /* done: needs reviewing */
-    // BSET s : SEC, SEZ, SEN, SEV, SES, SEH, SET & SEI
-    { .fun = opcode_bset,    .name = "BSET"   , .length = 1 }, /* done: needs reviewing */
-    { .fun = opcode_default, .name = "SR"     , .length = 1 },
-    { .fun = opcode_st,      .name = "ST"     , .length = 1 },
-    { .fun = opcode_std,     .name = "STD"    , .length = 1 },
-    { .fun = opcode_sts,     .name = "STS"    , .length = 2 },
-    { .fun = opcode_default, .name = "SWAP"   , .length = 1 },
-    { .fun = opcode_default, .name = "WDR"    , .length = 1 }
-};
 
+// Designated Initialization
+//struct atmega_opcode_info_t OPCODES[] = {
+//	[OP_ADD   ] = {.fun = opcode_add,     .name = "ADD",    .length = 1 },	/* done: needs reviewing */
+//	[OP_ADC   ] = {.fun = opcode_adc,     .name = "ADC",    .length = 1 },	/* done: needs reviewing */
+//	[OP_ADIW  ] = {.fun = opcode_adiw,    .name = "ADIW",   .length = 1 },	/* done: needs reviewing */
+//	// TST Rd = AND Rd,Rd
+//	[OP_AND   ] = {.fun = opcode_and,     .name = "AND",    .length = 1 },
+//	[OP_ANDI  ] = {.fun = opcode_andi,    .name = "ANDI",   .length = 1 },	/* done: needs reviewing */
+//	[OP_ASR   ] = {.fun = opcode_asr,     .name = "ASR",    .length = 1 },	/* done: needs reviewing */
+//	[OP_BREAK ] = {.fun = opcode_default, .name = "BREAK",  .length = 1 },
+//	[OP_SUB   ] = {.fun = opcode_sub,     .name = "SUB",    .length = 1 },	/* done: needs reviewing */
+//	[OP_SUBI  ] = {.fun = opcode_subi,    .name = "SUBI",   .length = 1 },
+//	[OP_SBC   ] = {.fun = opcode_sbc,     .name = "SBC",    .length = 1 },	/* done: needs reviewing & check flag Z */
+//	[OP_SBCI  ] = {.fun = opcode_sbci,    .name = "SBCI",   .length = 1 },	/* done: needs reviewing */
+//	[OP_SBIW  ] = {.fun = opcode_sbiw,    .name = "SBIW",   .length = 1 },	/* done: needs reviewing */
+//	[OP_OR    ] = {.fun = opcode_or,      .name = "OR",     .length = 1 },	/* done: needs reviewing */
+//	[OP_ORI   ] = {.fun = opcode_ori,     .name = "ORI",    .length = 1 },
+//	// CLR Rd = EOR Rd,Rd
+//	[OP_EOR   ] = {.fun = opcode_eor,     .name = "EOR",    .length = 1 },
+//	[OP_COM   ] = {.fun = opcode_com,     .name = "COM",    .length = 1 },	/* done: needs reviewing */
+//	[OP_NEG   ] = {.fun = opcode_neg,     .name = "NEG",    .length = 1 },	/* done: needs reviewing + check C & V flags */
+//	[OP_SBR   ] = {.fun = opcode_sbr,     .name = "SBR",    .length = 1 },	/* Code review & What's the difference between SBR & ORI */
+//	[OP_CBR   ] = {.fun = opcode_cbr,     .name = "CBR",    .length = 1 },	/* Check opcode & code review */
+//	// BCLR s : CLC, CLZ, CLN, CLV, CLS, CLH, CLT & CLI
+//	[OP_BCLR  ] = {.fun = opcode_bclr,    .name = "BCLR",   .length = 1 },	/* done: needs reviewing */
+//	[OP_IN    ] = {.fun = opcode_in,      .name = "IN",     .length = 1 },
+//	[OP_INC   ] = {.fun = opcode_inc,     .name = "INC",    .length = 1 },	/* done: needs reviewing */
+//	[OP_DEC   ] = {.fun = opcode_dec,     .name = "DEC",    .length = 1 },	/* done: needs reviewing */
+//	[OP_SPM   ] = {.fun = opcode_default, .name = "SPM",    .length = 1 },
+//	[OP_SER   ] = {.fun = opcode_ser,     .name = "SER",    .length = 1 },	/* done: needs reviewing */
+//	[OP_SLEEP ] = {.fun = opcode_sleep,   .name = "SLEEP",  .length = 1 },
+//	[OP_MUL   ] = {.fun = opcode_mul,     .name = "MUL",    .length = 1 },	/* done: needs reviewing */
+//	[OP_MULS  ] = {.fun = opcode_muls,    .name = "MULS",   .length = 1 },	/* done: needs reviewing */
+//	[OP_MULSU ] = {.fun = opcode_mulsu,   .name = "MULSU",  .length = 1 },	/* done: needs reviewing */
+//	[OP_FMUL  ] = {.fun = opcode_fmul,    .name = "FMUL",   .length = 1 },	/* done: needs reviewing */
+//	[OP_FMULS ] = {.fun = opcode_fmuls,   .name = "FMULS",  .length = 1 },	/* done: needs reviewing */
+//	[OP_FMULSU] = {.fun = opcode_fmulsu,  .name = "FMULSU", .length = 1 },	/* done: needs reviewing */
+//	[OP_RJMP  ] = {.fun = opcode_rjmp,    .name = "RJMP",   .length = 1 },
+//	[OP_IJMP  ] = {.fun = opcode_ijmp,    .name = "IJMP",   .length = 1 },	/* done: needs reviewing */
+//	[OP_EIJMP ] = {.fun = opcode_default, .name = "EIJMP",  .length = 1 },
+//	[OP_ELPM  ] = {.fun = opcode_elpm,    .name = "ELPM",   .length = 1 },
+//	[OP_JMP   ] = {.fun = opcode_jmp,     .name = "JMP",    .length = 2 },
+//	[OP_RCALL ] = {.fun = opcode_rcall,   .name = "RCALL",  .length = 1 },	/* done: needs reviewing */
+//	[OP_ICALL ] = {.fun = opcode_icall,   .name = "ICALL",  .length = 1 },	/* done: needs reviewing */
+//	[OP_EICALL] = {.fun = opcode_default, .name = "EICALL", .length = 1 },
+//	[OP_CALL  ] = {.fun = opcode_call,    .name = "CALL",   .length = 2 },
+//	[OP_RET   ] = {.fun = opcode_ret,     .name = "RET",    .length = 1 },
+//	[OP_RETI  ] = {.fun = opcode_default, .name = "RETI",   .length = 1 },
+//	[OP_CPSE  ] = {.fun = opcode_cpse,    .name = "CPSE",   .length = 1 },	/* done: needs reviewing */
+//	[OP_CBI   ] = {.fun = opcode_cbi,     .name = "CBI",    .length = 1 },	/* done: needs reviewing */
+//	[OP_CP    ] = {.fun = opcode_cp,      .name = "CP",     .length = 1 },
+//	[OP_CPC   ] = {.fun = opcode_cpc,     .name = "CPC",    .length = 1 },
+//	[OP_CPI   ] = {.fun = opcode_cpi,     .name = "CPI",    .length = 1 },
+//	[OP_ROR   ] = {.fun = opcode_ror,     .name = "ROR",    .length = 1 },	/* done: needs reviewing */
+//	[OP_SBRC  ] = {.fun = opcode_sbrc,    .name = "SBRC",   .length = 1 },	/* done: needs reviewing */
+//	[OP_SBRS  ] = {.fun = opcode_sbrs,    .name = "SBRS",   .length = 1 },	/* done: needs reviewing */
+//	[OP_SBIC  ] = {.fun = opcode_default, .name = "SBIC",   .length = 1 },
+//	[OP_SBIS  ] = {.fun = opcode_default, .name = "SBIS",   .length = 1 },
+//		// BRBS s : BRCS, BRLO, BREQ, BRMI, BRVS, BRLT, BRHS, BRTS & BRIE
+//	[OP_BRBS  ] = {.fun = opcode_brbs,    .name = "BRBS",   .length = 1 },	/* done: needs reviewing */
+//		// BRBC s : BRCC, BRSH, BRNE, BRPL, BRVC, BRGE, BRHC, BRTC & BRID
+//	[OP_BRBC  ] = {.fun = opcode_brbc,    .name = "BRBC",   .length = 1 },	/* done: needs reviewing */
+//	[OP_BLD   ] = {.fun = opcode_bld,     .name = "BLD",    .length = 1 },
+//	[OP_BST   ] = {.fun = opcode_bst,     .name = "BST",    .length = 1 },
+//	[OP_MOV   ] = {.fun = opcode_mov,     .name = "MOV",    .length = 1 },
+//	[OP_MOVW  ] = {.fun = opcode_movw,    .name = "MOVW",   .length = 1 },
+//	[OP_NOP   ] = {.fun = opcode_nop,     .name = "NOP",    .length = 1 },	/* done: needs reviewing */
+//	[OP_LDI   ] = {.fun = opcode_ldi,     .name = "LDI",    .length = 1 },
+//	[OP_LDS   ] = {.fun = opcode_lds,     .name = "LDS",    .length = 2 },	/* done: needs reviewing */
+//	[OP_LD    ] = {.fun = opcode_ld,      .name = "LD",     .length = 1 },	/* LD X */
+//	[OP_LDD   ] = {.fun = opcode_ldd,     .name = "LDD",    .length = 1 },	/* LD Y / Z */
+//	[OP_LPM   ] = {.fun = opcode_default, .name = "LPM",    .length = 1 },
+//	[OP_LSR   ] = {.fun = opcode_lsr,     .name = "LSR",    .length = 1 },	/* done: needs reviewing */
+//	[OP_OUT   ] = {.fun = opcode_out,     .name = "OUT",    .length = 1 },
+//	[OP_POP   ]  = {.fun = opcode_pop,    .name = "POP",    .length = 1 },
+//	[OP_PUSH  ] = {.fun = opcode_push,    .name = "PUSH",   .length = 1 },
+//	[OP_SBI   ] = {.fun = opcode_sbi,     .name = "SBI",    .length = 1 },	/* done: needs reviewing */
+//		// BSET s : SEC, SEZ, SEN, SEV, SES, SEH, SET & SEI
+//	[OP_BSET  ] = {.fun = opcode_bset,    .name = "BSET",   .length = 1 },	/* done: needs reviewing */
+//	[OP_SR    ] = {.fun = opcode_default, .name = "SR",     .length = 1 },
+//	[OP_ST    ] = {.fun = opcode_st,      .name = "ST",     .length = 1 },
+//	[OP_STD   ] = {.fun = opcode_std,     .name = "STD",    .length = 1 },
+//	[OP_STS   ] = {.fun = opcode_sts,     .name = "STS",    .length = 2 },
+//	[OP_SWAP  ] = {.fun = opcode_default, .name = "SWAP",   .length = 1 },
+//	[OP_WDR   ] = {.fun = opcode_default, .name = "WDR",    .length = 1 }
+//};
+
+#ifndef X
+#	define X(INST, FUNK, WRDS) 	[OP_##INST] = {.fun = FUNK, .name = #INST,    .length = WRDS },
+
+	struct atmega_opcode_info_t OPCODES[] = {
+#		include "8bit_avr_instruction_set.def"
+	};
+#	undef X
+#else
+#	error "X macro is already defined, so might not be undefined previously"
+#endif
 
 #define SET_CYCLES(n) do { } while (0)
 #define ADD_TO_PC(k)							\

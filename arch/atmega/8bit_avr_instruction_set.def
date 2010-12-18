@@ -1,0 +1,86 @@
+// X(INSTRUCTION_CODE, FUNCTION_TO_CALL, NUMBER_OF_WORDS)
+X(ADD,    opcode_add,     1)	/* done: needs reviewing */
+X(ADC,    opcode_adc,     1)	/* done: needs reviewing */
+X(ADIW,   opcode_adiw,    1)	/* done: needs reviewing */
+	// TST Rd = AND Rd,Rd
+X(AND,    opcode_and,     1)
+X(ANDI,   opcode_andi,    1)	/* done: needs reviewing */
+X(ASR,    opcode_asr,     1)	/* done: needs reviewing */
+X(BREAK,  opcode_default, 1)
+X(SUB,    opcode_sub,     1)	/* done: needs reviewing */
+X(SUBI,   opcode_subi,    1)
+X(SBC,    opcode_sbc,     1)	/* done: needs reviewing & check flag Z */
+X(SBCI,   opcode_sbci,    1)	/* done: needs reviewing */
+X(SBIW,   opcode_sbiw,    1)	/* done: needs reviewing */
+X(OR ,    opcode_or,      1)	/* done: needs reviewing */
+X(ORI,    opcode_ori,     1)
+	// CLR Rd = EOR Rd,Rd
+X(EOR,    opcode_eor,     1)
+X(COM,    opcode_com,     1)	/* done: needs reviewing */
+X(NEG,    opcode_neg,     1)	/* done: needs reviewing + check C & V flags */
+X(SBR,    opcode_sbr,     1)	/* Code review & What's the difference between SBR & ORI */
+X(CBR,    opcode_cbr,     1)	/* Check opcode & code review */
+	// BCLR s : CLC, CLZ, CLN, CLV, CLS, CLH, CLT & CLI
+X(BCLR,   opcode_bclr,    1)	/* done: needs reviewing */
+X(IN ,    opcode_in,      1)
+X(INC,    opcode_inc,     1)	/* done: needs reviewing */
+X(DEC,    opcode_dec,     1)	/* done: needs reviewing */
+X(SPM,    opcode_default, 1)
+X(SER,    opcode_ser,     1)	/* done: needs reviewing */
+X(SLEEP,  opcode_sleep,   1)
+X(MUL,    opcode_mul,     1)	/* done: needs reviewing */
+X(MULS,   opcode_muls,    1)	/* done: needs reviewing */
+X(MULSU,  opcode_mulsu,   1)	/* done: needs reviewing */
+X(FMUL,   opcode_fmul,    1)	/* done: needs reviewing */
+X(FMULS,  opcode_fmuls,   1)	/* done: needs reviewing */
+X(FMULSU, opcode_fmulsu,  1)	/* done: needs reviewing */
+X(RJMP,   opcode_rjmp,    1)
+X(IJMP,   opcode_ijmp,    1)	/* done: needs reviewing */
+X(EIJMP,  opcode_default, 1)
+X(ELPM,   opcode_elpm,    1)
+X(JMP,    opcode_jmp,     2)
+X(RCALL,  opcode_rcall,   1)	/* done: needs reviewing */
+X(ICALL,  opcode_icall,   1)	/* done: needs reviewing */
+X(EICALL, opcode_default, 1)
+X(CALL,   opcode_call,    2)
+X(RET,    opcode_ret,     1)
+X(RETI,   opcode_default, 1)
+X(CPSE,   opcode_cpse,    1)	/* done: needs reviewing */
+X(CBI,    opcode_cbi,     1)	/* done: needs reviewing */
+X(CP ,    opcode_cp,      1)
+X(CPC,    opcode_cpc,     1)
+X(CPI,    opcode_cpi,     1)
+X(ROR,    opcode_ror,     1)	/* done: needs reviewing */
+X(SBRC,   opcode_sbrc,    1)	/* done: needs reviewing */
+X(SBRS,   opcode_sbrs,    1)	/* done: needs reviewing */
+X(SBIC,   opcode_default, 1)
+X(SBIS,   opcode_default, 1)
+		// BRBS s : BRCS, BRLO, BREQ, BRMI, BRVS, BRLT, BRHS, BRTS & BRIE
+X(BRBS,   opcode_brbs,    1)	/* done: needs reviewing */
+		// BRBC s : BRCC, BRSH, BRNE, BRPL, BRVC, BRGE, BRHC, BRTC & BRID
+X(BRBC,   opcode_brbc,    1)	/* done: needs reviewing */
+X(BLD,    opcode_bld,     1)
+X(BST,    opcode_bst,     1)
+X(MOV,    opcode_mov,     1)
+X(MOVW,   opcode_movw,    1)
+X(NOP,    opcode_nop,     1)	/* done: needs reviewing */
+X(LDI,    opcode_ldi,     1)
+X(LDS,    opcode_lds,     2)	/* done: needs reviewing */
+X(LD ,    opcode_ld,      1)	/* LD X */
+X(LDD,    opcode_ldd,     1)	/* LD Y / Z */
+X(LPM,    opcode_default, 1)
+X(LSR,    opcode_lsr,     1)	/* done: needs reviewing */
+X(OUT,    opcode_out,     1)
+X(POP,    opcode_pop,     1)
+X(PUSH,   opcode_push,    1)
+X(SBI,    opcode_sbi,     1)	/* done: needs reviewing */
+		// BSET s : SEC, SEZ, SEN, SEV, SES, SEH, SET & SEI
+X(BSET,   opcode_bset,    1)	/* done: needs reviewing */
+X(SR ,    opcode_default, 1)
+X(ST ,    opcode_st,      1)
+X(STD,    opcode_std,     1)
+X(STS,    opcode_sts,     2)
+X(SWAP,   opcode_default, 1)
+X(WDR,    opcode_default, 1)
+// Undefine the X-Macro if defined before including this file
+#undef X

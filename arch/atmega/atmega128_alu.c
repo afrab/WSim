@@ -106,7 +106,7 @@
 
 // Source registry ~Sr~ address on 5 bits
 // xxxx xxrx xxxx rrrr
-#define SREG_5BITS(i)          ((i >> 5) & 0x10) | ((i >> 0) & 0x0f)
+#define SREG_5BITS(i)          ((i >> 5) & 0x10) | (i & 0x0f)
 
 // Switch ALU skip execute mode
 #define SWITCH_SKIP_MODE()     MCU_ALU.skip_execute ^= 1
@@ -660,8 +660,8 @@ static int opcode_add(uint16_t opcode, uint16_t insn)
     int8_t  R, Rd, Rr;
 
     // 0000 11rd dddd rrrr
-    dd = ((insn >> 4) & 0x1f);
-    rr = ((insn >> 5) & 0x10) | (insn & 0x0f);
+    dd = DREG_5BITS(insn);
+    rr = SREG_5BITS(insn);
     HW_DMSG_DIS("%s r%d,r%d\n",OPCODES[opcode].name, dd, rr);
 
     Rd = MCU_REGS[dd];
@@ -695,8 +695,8 @@ static int opcode_adc(uint16_t opcode, uint16_t insn)
     int8_t  R, Rd, Rr;
 
     // 0001 11rd dddd rrrr
-    dd = ((insn >> 4) & 0x1f);
-    rr = ((insn >> 5) & 0x10) | (insn & 0x0f);
+    dd = DREG_5BITS(insn);
+    rr = SREG_5BITS(insn);
     HW_DMSG_DIS("%s r%d,r%d\n",OPCODES[opcode].name, dd, rr);
 
     Rd = MCU_REGS[dd];
@@ -744,6 +744,7 @@ static int opcode_jmp(uint16_t opcode, uint16_t insn)
 {
     uint32_t addr;
     uint16_t offset;
+
     //                A1   A2   B1   B2   C1   C2   D1   D2
     // 0c 94 66 00 : 0000 1100 1001 0100 0110 0110 0000 0000
     //
@@ -770,8 +771,8 @@ static int opcode_eor(uint16_t opcode, uint16_t insn)
     uint8_t rr;
     uint8_t res;
     // 0010 01rd dddd rrrr
-    rr = ((insn >> 5) & 0x10) | ((insn >> 0) & 0x0f);
-    dd = ((insn >> 4) & 0x1f);
+    rr = SREG_5BITS(insn);
+    dd = DREG_5BITS(insn);
     if (dd == rr)
         HW_DMSG_DIS("%s r%d\n", "CLR", dd, rr);
     else
@@ -797,7 +798,7 @@ static int opcode_com(uint16_t opcode, uint16_t insn)
     int8_t R;
 
     // 1001 010d dddd 0000
-    dd = ((insn >> 4) & 0x1f);
+    dd = DREG_5BITS(insn);
     HW_DMSG_DIS("%s r%d\n",OPCODES[opcode].name, dd);
 
     R = 0xFF - MCU_REGS[dd];
@@ -821,7 +822,7 @@ static int opcode_neg(uint16_t opcode, uint16_t insn)
     uint8_t R, Rd;
 
     // 1001 010d dddd 0001
-    dd = ((insn >> 4) & 0x1f);
+    dd = DREG_5BITS(insn);
     HW_DMSG_DIS("%s r%d\n",OPCODES[opcode].name, dd);
 
     Rd = MCU_REGS[dd];
@@ -950,8 +951,8 @@ static int opcode_and(uint16_t opcode, uint16_t insn)
     uint8_t res;
     
     // 0010 00rd dddd rrrr
-    rr = ((insn >> 5) & 0x10) | ((insn >> 0) & 0xf);
-    dd = ((insn >> 4) & 0x1f);
+    rr = SREG_5BITS(insn);
+    dd = DREG_5BITS(insn);
     
     if (rr == dd)
     {
@@ -1007,7 +1008,7 @@ static int opcode_asr(uint16_t opcode, uint16_t insn)
     int8_t R;
 
     // 1001 010d dddd 0101
-    dd = ((insn >> 4) & 0x1f);
+    dd = DREG_5BITS(insn);
     HW_DMSG_DIS("%s r%d\n",OPCODES[opcode].name, dd);
 
     /* set flag C if Rd's LSB is set */
@@ -1034,7 +1035,7 @@ static int opcode_ror(uint16_t opcode, uint16_t insn)
     int8_t R;
 
     // 1001 010d dddd 0111
-    dd = ((insn >> 4) & 0x1f);
+    dd = DREG_5BITS(insn);
     HW_DMSG_DIS("%s r%d\n",OPCODES[opcode].name, dd);
 
     preshiftc = (MCU_REGS[dd] & 0x01);
@@ -1059,7 +1060,7 @@ static int opcode_lsr(uint16_t opcode, uint16_t insn)
     uint16_t R;
 
     // 1001 010d dddd 0110
-    dd = (insn >> 4) & 0x1f;
+    dd = DREG_5BITS(insn);
     HW_DMSG_DIS("%s r%d\n",OPCODES[opcode].name, dd);
 
     // Setting C flag before shift
@@ -1082,7 +1083,7 @@ static int opcode_out(uint16_t opcode, uint16_t insn)
     uint8_t  rr;
     uint8_t  aa;
     // 1011 1AAr rrrr AAAA
-    rr = ((insn >> 4) & 0x1f);
+    rr = DREG_5BITS(insn);
     aa = ((insn >> 5) & 0x30) | ((insn >> 0) & 0xf);
     HW_DMSG_DIS("%s 0x%02x,r%d\n",OPCODES[opcode].name, aa, rr);
 
@@ -1151,14 +1152,15 @@ static int opcode_cpc(uint16_t opcode, uint16_t insn)
     int8_t  Rd, Rr;
     int8_t  R, C;
     // 0000 01rd dddd rrrr
-    rr = ((insn >> 5) & 0x10) | ((insn >> 0) & 0x0f);
-    rd = ((insn >> 4) & 0x10) | ((insn >> 4) & 0x0f);
-    HW_DMSG_DIS("%s r%d,r%d\n",OPCODES[opcode].name, rd, rr);
+    rr = SREG_5BITS(insn);
+    dd = DREG_5BITS(insn); // TODO: dd's value was wrong again
+    HW_DMSG_DIS("%s r%d,r%d\n",OPCODES[opcode].name, dd, rr);
 
-    Rd = MCU_REGS[rd];
+    Rd = MCU_REGS[dd];
     Rr = MCU_REGS[rr];
     C  = READ_C;
     R  = Rd - Rr - C;
+
     // same tests as CP
     WRITE_H(((BIT3n(Rd)) & (BIT3_(Rr))) | ((BIT3_(Rr)) & (BIT3_(R))) | ((BIT3_(R)) & (BIT3n(Rd))));
     WRITE_V(((BIT7_(Rd)) & (BIT7n(Rr)) & (BIT7n(R))) | ((BIT7n(Rd)) & (BIT7_(Rr)) & (BIT7_(R))));
@@ -1180,7 +1182,7 @@ static int opcode_bld(uint16_t opcode, uint16_t insn)
 
     // 1111 100d dddd 0bbb
     bb = insn & 0x7;
-    dd = (insn >> 4) & 0x1f;
+    dd = DREG_5BITS(insn);
     HW_DMSG_DIS("%s r%d,%d\n",OPCODES[opcode].name, dd, bb);
 
     if(READ_T)
@@ -1200,7 +1202,7 @@ static int opcode_bst(uint16_t opcode, uint16_t insn)
 
     // 1111 101d dddd 0bbb
     bb = insn & 0x7;
-    dd = (insn >> 4) & 0x1f;
+    dd = DREG_5BITS(insn);
     HW_DMSG_DIS("%s r%d,%d\n",OPCODES[opcode].name, dd, bb);
 
     WRITE_T(MCU_REGS[dd] & (1 << bb));
@@ -1431,11 +1433,13 @@ static int opcode_brbs(uint16_t opcode, uint16_t insn)
     return opcode;
 }
 
+// TODO: I don't get the first logical branching
 static int opcode_elpm(uint16_t opcode, uint16_t insn)
 {
     uint8_t  dd;
     int8_t   zplus;
     uint32_t addr;
+
     /* OPT:POSSIBLE_SPLIT_OPCODE */
     // (i)   1001 0101 1101 1000
     // (ii)  1001 000d dddd 0110
@@ -1443,7 +1447,7 @@ static int opcode_elpm(uint16_t opcode, uint16_t insn)
     if (BIT4_(insn)) {
         dd = 0;
     } else {
-        dd = (insn >> 4) & 0x1f;
+        dd = DREG_5BITS(insn);
     }
     zplus = BIT0_(insn);
     HW_DMSG_DIS("%s r%d,Z%s\n",OPCODES[opcode].name, dd, (zplus)?"+":"");
@@ -1577,8 +1581,9 @@ static int opcode_in(uint16_t opcode, uint16_t insn)
 {
     uint8_t dd;
     uint8_t aa;
+
     // 1011 0AAd dddd AAAA
-    dd = ((insn >> 4) & 0x1f);
+    dd = DREG_5BITS(insn);
     aa = ((insn >> 5) & 0x30) | ((insn >> 0) & 0x0f);
     HW_DMSG_DIS("%s r%d,0x%02x\n",OPCODES[opcode].name, dd, aa);
 
@@ -1595,7 +1600,7 @@ static int opcode_inc(uint16_t opcode, uint16_t insn)
     int8_t R, Rd;
 
     // 1001 010d dddd 0011
-    dd = ((insn >> 4) & 0x1f);
+    dd = DREG_5BITS(insn);
     HW_DMSG_DIS("%s r%d\n",OPCODES[opcode].name, dd);
 
     Rd = MCU_REGS[dd];
@@ -1619,7 +1624,7 @@ static int opcode_dec(uint16_t opcode, uint16_t insn)
     uint8_t R, Rd;
 
     // 1001 010d dddd 1010
-    dd = ((insn >> 4) & 0x1f);
+    dd = DREG_5BITS(insn);
     HW_DMSG_DIS("%s r%d\n",OPCODES[opcode].name, dd);
 
     Rd = MCU_REGS[dd];
@@ -1660,8 +1665,8 @@ static int opcode_mul(uint16_t opcode, uint16_t insn)
     uint16_t R;
 
     // 1001 11rd dddd rrrr
-    dd = ((insn >> 4) & 0x1f);
-    rr = ((insn >> 5) & 0x10) | (insn & 0x0f);
+    dd = DREG_5BITS(insn);
+    rr = SREG_5BITS(insn);
     HW_DMSG_DIS("%s r%d,r%d\n",OPCODES[opcode].name, dd, rr);
 
     R = MCU_REGS[dd] * MCU_REGS[rr];
@@ -1798,9 +1803,10 @@ static int opcode_mov(uint16_t opcode, uint16_t insn)
 {
     uint8_t rr;
     uint8_t dd;
+
     // 0010 11rd dddd rrrr
-    rr = ((insn >> 5) & 0x10) | (insn & 0x0f);
-    dd = ((insn >> 4) & 0x1f);
+    rr = SREG_5BITS(insn);
+    dd = DREG_5BITS(insn);
     HW_DMSG_DIS("%s r%d,r%d\n",OPCODES[opcode].name,dd,rr);
     MCU_REGS[dd] = MCU_REGS[rr];
     ADD_TO_PC(1); // PC is aligned on words
@@ -1812,6 +1818,7 @@ static int opcode_movw(uint16_t opcode, uint16_t insn)
 {
     uint8_t rr;
     uint8_t dd;
+
     // 0000 0001 dddd rrrr
     rr = ((insn >> 0) & 0x0f) << 1;
     dd = ((insn >> 4) & 0x0f) << 1;
@@ -1829,9 +1836,10 @@ static int opcode_sts(uint16_t opcode, uint16_t insn)
 {
     uint8_t  dd;
     uint16_t kk;
+
     // 1001 001d dddd 0000
     // kkkk kkkk kkkk kkkk
-    dd = ((insn >> 4) & 0x1f);
+    dd = DREG_5BITS(insn);
     kk = atmega128_flash_read_short((mcu_get_pc()+1) << 1);
     // check RAMPD if anything goes wrong
     HW_DMSG_DIS("%s 0x%04x,r%d\n",OPCODES[opcode].name,kk,dd);
@@ -1846,12 +1854,13 @@ static int opcode_st(uint16_t opcode, uint16_t insn)
     uint16_t X;
     uint8_t  rr;
     int predec, postinc;
+
     /* OPT:POSSIBLE_SPLIT_OPCODE */
     // (i)   1001 001r rrrr 1100
     // (ii)  1001 001r rrrr 1101
     // (iii) 1001 001r rrrr 1110
     X  = REG_X_READ();
-    rr = (insn >> 4) & 0x1f;
+    rr = DREG_5BITS(insn);
     postinc = BIT0_(insn);
     predec  = BIT1_(insn);
     HW_DMSG_DIS("%s %sX%s,r%d\n",OPCODES[opcode].name, predec ? "-":"", postinc ? "+":"", rr);
@@ -1936,9 +1945,10 @@ static int opcode_cp(uint16_t opcode, uint16_t insn)
     uint8_t rr, dd;
     int8_t  Rd, Rr;
     int8_t  R;
+
     // 0001 01rd dddd rrrr
-    rr = ((insn >> 5) & 0x10) | ((insn >> 0) & 0x0f);
-    dd = ((insn >> 4) & 0x10) | ((insn >> 4) & 0x0f);
+    rr = SREG_5BITS(insn);
+    dd = DREG_5BITS(insn); // TODO: dd's value was wrong
     HW_DMSG_DIS("%s r%d,r%d\n",OPCODES[opcode].name, dd, rr);
 
     Rd = MCU_REGS[dd];
@@ -1965,8 +1975,8 @@ static int opcode_sub(uint16_t opcode, uint16_t insn)
     int8_t  R, Rd, Rr;
 
     // 0001 10rd dddd rrrr
-    dd = ((insn >> 4) & 0x1f);
-    rr = ((insn >> 5) & 0x10) | (insn & 0x0f);
+    dd = DREG_5BITS(insn);
+    rr = SREG_5BITS(insn);
     HW_DMSG_DIS("%s r%d,r%d\n",OPCODES[opcode].name, dd, rr);
 
     Rd=MCU_REGS[dd];
@@ -1994,6 +2004,7 @@ static int opcode_subi(uint16_t opcode, uint16_t insn)
     uint8_t K;
     int8_t  Rd;
     int8_t  R;
+
     // 0101 KKKK dddd KKKK
     dd = ((insn >> 4) & 0x0f) + 16;
     K  = ((insn >> 4) & 0xf0) | (insn & 0x0f);
@@ -2025,8 +2036,8 @@ static int opcode_sbc(uint16_t opcode, uint16_t insn)
     int8_t R;
 
     // 0000 10rd dddd rrrr
-    dd = ((insn >> 4) & 0x1f);
-    rr = ((insn >> 5) & 0x10) | (insn & 0x0f);
+    dd = DREG_5BITS(insn);
+    rr = SREG_5BITS(insn);
     HW_DMSG_DIS("%s r%d,r%d\n",OPCODES[opcode].name, dd, rr);
 
     Rd=MCU_REGS[dd];
@@ -2113,8 +2124,8 @@ static int opcode_or(uint16_t opcode, uint16_t insn)
     int8_t R;
 
     // 0010 10rd dddd rrrr
-    dd = ((insn >> 4) & 0x1f);
-    rr = ((insn >> 5) & 0x10) | (insn & 0x0f);
+    dd = DREG_5BITS(insn);
+    rr = SREG_5BITS(insn);
     HW_DMSG_DIS("%s r%d,r%d\n",OPCODES[opcode].name, dd, rr);
 
     R = MCU_REGS[dd] | MCU_REGS[rr];
@@ -2134,6 +2145,7 @@ static int opcode_ldi(uint16_t opcode, uint16_t insn)
 {
     uint8_t  rd;
     int8_t   kk;
+
     // 1110 KKKK dddd KKKK
     rd = ((insn >> 4) & 0x0f) + 16;
     kk = ((insn >> 4) & 0xf0) | ((insn >> 0) & 0x0f);
@@ -2153,7 +2165,7 @@ static int opcode_lds(uint16_t opcode, uint16_t insn)
 
     // 1001 000d dddd 0000
     // kkkk kkkk kkkk kkkk
-    dd = ((insn >> 4) & 0x1f);
+    dd = DREG_5BITS(insn);
     kk = atmega128_flash_read_short((mcu_get_pc()+1) << 1);
     // check RAMPD if anything goes wrong
     HW_DMSG_DIS("%s r%d,0x%04x\n",OPCODES[opcode].name, dd, kk);
@@ -2177,13 +2189,14 @@ static int opcode_ld(uint16_t opcode, uint16_t insn)
     uint8_t  dd;
     uint16_t Index;
     int predec, postinc;
+
     // X register
     // ==========
     // (i)   1001 000d dddd 1100
     // (ii)  1001 000d dddd 1101  postinc
     // (iii) 1001 000d dddd 1110  predec
     Index = REG_X_READ();
-    dd   = ((insn >> 4) & 0x1f);
+    dd   = DREG_5BITS(insn);
     postinc = BIT0_(insn);
     predec  = BIT1_(insn);
     HW_DMSG_DIS("%s r%d,%sX%s\n",OPCODES[opcode].name, dd, predec ? "-":"", postinc ? "+":"");
@@ -2266,8 +2279,9 @@ static int opcode_push(uint16_t opcode, uint16_t insn)
 {
     uint8_t  dd;
     uint32_t SP;
+
     // 1001 001d dddd 1111
-    dd = ((insn >> 4) & 0x1f);
+    dd = DREG_5BITS(insn);
 
     HW_DMSG_DIS("%s r%d\n",OPCODES[opcode].name, dd);
 
@@ -2412,8 +2426,9 @@ static int opcode_pop(uint16_t opcode, uint16_t insn)
 {
     uint8_t  rd;
     uint32_t SP;
+
     // 1001 000d dddd 1111
-    rd = ((insn >> 4) & 0x1f);
+    rd = DREG_5BITS(insn);
 
     HW_DMSG_DIS("%s r%d\n",OPCODES[opcode].name, rd);
 

@@ -10,7 +10,7 @@
 #include "arch/common/hardware.h"
 #include "msp430.h"
 
-#if defined(DEBUG_WATCHDOG)
+#if DEBUG_WATCHDOG
 static char *str_ssel[] = { "SMCLK", "ACLK" };
 #endif
 
@@ -21,7 +21,7 @@ static int wdt_intervals[] = { 32768, 8192, 512, 64 };
 /* messages instead of reboots                        */
 /* ************************************************** */
 
-#define _WATCHDOG_ONLY_WARNS
+#define WATCHDOG_ONLY_WARNS 0
 
 /* ************************************************** */
 /* ************************************************** */
@@ -69,7 +69,7 @@ msp430_watchdog_update(void)
       HW_DMSG_WD("msp430:watchdog: interval wrapping\n");
       if (MCU.watchdog.wdtctl.b.wdttmsel == WDT_MODE_WATCHDOG)
 	{
-#if defined(WATCHDOG_ONLY_WARNS)
+#if WATCHDOG_ONLY_WARNS != 0
 	  WARNING("msp430:watchdog: =======================================\n");
 	  WARNING("msp430:watchdog: set interrupt RESET\n");
 	  WARNING("msp430:watchdog: =======================================\n");

@@ -1148,7 +1148,7 @@ static int opcode_cpi(uint16_t opcode, uint16_t insn)
 
 static int opcode_cpc(uint16_t opcode, uint16_t insn)
 {
-    uint8_t rd, rr;
+    uint8_t dd, rr;
     int8_t  Rd, Rr;
     int8_t  R, C;
     // 0000 01rd dddd rrrr

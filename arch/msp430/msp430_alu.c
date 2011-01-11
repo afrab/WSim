@@ -204,7 +204,7 @@ static inline unsigned int extract_opcode(uint16_t insn)
 /*                     */
 /***********************/
 
-#if defined(ETRACE)
+#if ETRACE
 #define ETRACER_SET_JUMP_TYPE(x)  MCU_ALU.etracer_branch_type    = x
 #define ETRACER_BRANCH(x)         MCU_ALU.etracer_branch_type    = x
 
@@ -308,7 +308,7 @@ struct msp430_op_type1
 };
 
 
-#if defined(DEBUG_DISASSEMBLE)
+#if DEBUG_DISASSEMBLE
 #define ASM_LENGTH      50
 #define ASM_VAR()       char asm_str[ASM_LENGTH];
 #define ASM_START(insn)				\

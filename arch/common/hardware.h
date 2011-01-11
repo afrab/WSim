@@ -14,6 +14,9 @@
 
 typedef uint64_t wsimtime_t;
 
+#define likely(x)       __builtin_expect((x),1)
+#define unlikely(x)     __builtin_expect((x),0)
+
 #include <inttypes.h>
 
 #include "libtracer/tracer.h"
@@ -27,7 +30,6 @@ typedef uint64_t wsimtime_t;
 #include "arch/common/mcu.h"
 #include "devices/devices_fd.h"
 #include "machine/machine_fd.h"
-
 
 #define BIT(w,n)   ((w >> n) & 1)
 

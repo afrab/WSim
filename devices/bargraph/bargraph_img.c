@@ -124,7 +124,7 @@ void   bargraph_img_draw  (struct bargraph_img_t *img, int value)
 /* ************************************************** */
 /* ************************************************** */
 
-#define HW_DEBUG_BGRAPH(x...) VERBOSE(10,x)
+#define HW_DEBUG_BGRAPH(x...) MESSAGE(x)
 
 void
 bargraph_img_print(struct bargraph_img_t *img)

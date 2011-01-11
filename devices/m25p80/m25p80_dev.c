@@ -33,11 +33,12 @@ tracer_id_t TRACER_M25P_STROBE;
 /***************************************************/
 /***************************************************/
 
+#undef DEBUG
+
 #ifdef DEBUG
-#define MSG_DEVICES       6
-#define DEBUG_ME_HARDER
-//#define DEBUG_ME_HARDER_2
-#define HW_DMSG_M25(x...) VERBOSE(MSG_DEVICES,x)
+#define DEBUG_ME_HARDER    0
+#define DEBUG_ME_HARDER_2  0
+#define HW_DMSG_M25(x...) HW_DMSG_DEV(x)
 #else
 #define HW_DMSG_M25(x...) do {} while(0)
 #endif
@@ -418,7 +419,7 @@ int m25p_device_create(int dev, int UNUSED id)
     }
   M25P_DUMP = flash_dump_opt.value;
 
-#if defined(DEBUG_ME_HARDER)
+#if DEBUG_ME_HARDER != 0
   HW_DMSG_M25(M25PNAME ": =================================== \n");
   HW_DMSG_M25(M25PNAME ": 0000 CHSW dddd dddd == MASK         \n");
   HW_DMSG_M25(M25PNAME ":      C              : Clock         \n");
@@ -481,7 +482,7 @@ int m25p_delete(int dev)
 
 void m25p_error_dump_internal_state(int UNUSED dev)
 {
-#if defined(DEBUG_ME_HARDER)
+#if DEBUG_ME_HARDER != 0
   HW_DMSG_M25(M25PNAME ": Power mode %d\n",M25P_DATA->power_mode);
   HW_DMSG_M25(M25PNAME ": Command 0x%02x\n",M25P_DATA->command);
   HW_DMSG_M25(M25PNAME ": need complete %d\n",M25P_DATA->command_need_to_complete);
@@ -1176,7 +1177,7 @@ void m25p_write(int dev, uint32_t mask, uint32_t value)
 	}
       else
 	{
-#if defined(DEBUG_ME_HARDER_2)
+#if DEBUG_ME_HARDER_2 != 0
 	  /* debug removed for shared SPI bus */
 	  if (M25P_DATA->hold_bit == 1)
 	    {

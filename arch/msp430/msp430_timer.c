@@ -20,17 +20,17 @@
 
 // # DEBUG_TIMER defined in msp430_debug.h
 
-#if defined(DEBUG_TIMER)
+#if DEBUG_TIMER  != 0
 char *str_mode[] = 
   { "TIMER_STOP", "TIMER_UP", "TIMER_CONT", "TIMER_UD" };
 char *str_clocksrc[] = 
   { "TxCLK", "ACLK", "SMCLK", "INTxCLK" };
 
-#define TIMER_DEBUG_2
+#define TIMER_DEBUG_2 1
 #endif /* DEBUG_TIMER */
 
 
-#if defined(TIMER_DEBUG_2)
+#if TIMER_DEBUG_2 != 0
 static char *str_cap[] = 
   { "compare", "capture" };
 static char *str_capturemode[] = 

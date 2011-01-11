@@ -23,12 +23,6 @@
 /**************************************************/
 /**************************************************/
 
-#if defined(DEBUG)
-#define DMSG_UI(x...) HW_DMSG_UI(x)
-#else
-#define DMSG_UI(x...) do { } while (0)
-#endif
-
 #define UNUSED __attribute__((unused))  
 
 #include <X11/Xlib.h>

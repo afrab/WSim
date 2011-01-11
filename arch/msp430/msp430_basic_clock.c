@@ -573,11 +573,10 @@ msp430_basic_clock_printstate()
 /* ************************************************** */
 /* ************************************************** */
 
-#if defined(TRACER_SPEED)
+#if TRACER_SPEED != 0
 void msp430_basic_clock_speed_tracer_init()
 {
   msp430_basic_clock_speed_tracer_update();
-  VERBOSE(2,"msp430:basic_clock: speed tracer start\n");
 }
 #endif
 

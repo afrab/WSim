@@ -25,10 +25,11 @@ tracer_id_t TRACER_SPIDEV_STROBE;
 /***************************************************/
 /***************************************************/
 
+#undef DEBUG
+
 #ifdef DEBUG
-#define MSG_DEVICES       2
-#define DEBUG_ME_HARDER
-#define HW_DMSG_SPI(x...) VERBOSE(MSG_DEVICES,x)
+#define DEBUG_ME_HARDER 0
+#define HW_DMSG_SPI(x...) HW_DMSG_DEV(x)
 #else
 #define HW_DMSG_SPI(x...) do {} while(0)
 #endif
@@ -123,7 +124,7 @@ int spidev_device_create(int dev, int UNUSED id)
   machine.device[dev].state_size    = spidev_device_size();
   machine.device[dev].name          = NAME " example";
 
-#if defined(DEBUG_ME_HARDER)
+#if DEBUG_ME_HARDER != 0
   HW_DMSG_SPI(NAME ": =================================== \n");
   HW_DMSG_SPI(NAME ": 0000 CHSW dddd dddd == MASK         \n");
   HW_DMSG_SPI(NAME ":      C              : Clock         \n");

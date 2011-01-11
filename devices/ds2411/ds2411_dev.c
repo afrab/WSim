@@ -29,17 +29,19 @@
 #include "devices/ds2411/ds2411.h"
 #include "devices/ds2411/ds2411_dev.h"
 
-#undef DEBUG
-#undef DEBUG_ME_HARDER
 
-//#define DEBUG
-//#define DEBUG_ME_HARDER
-//#define DEBUG_WIRE
-//#define DEBUG_CRC
-//#define DEBUG_SERIAL
+/***************************************************/
+/***************************************************/
+
+#undef DEBUG
+
 
 #ifdef DEBUG
-#define HW_DMSG_DS2411(x...) VERBOSE(2, x)
+#define HW_DMSG_DS2411(x...) HW_DMSG_DEV(x)
+#define DEBUG_ME_HARDER 0
+#define DEBUG_WIRE      0
+#define DEBUG_CRC       0
+#define DEBUG_SERIAL    0
 #else
 #define HW_DMSG_DS2411(x...) do {} while(0)
 #endif
@@ -51,29 +53,36 @@ do {                                                                            
    HW_DMSG_DS2411("ds2411: ======================================================\n");  \
 } while(0)
 
-#ifdef DEBUG_ME_HARDER
+
+#if DEBUG_ME_HARDER != 0
 #define HW_DMSG_DSH(x...)  HW_DMSG_DS2411(x)
 #else
 #define HW_DMSG_DSH(x...)  do {} while(0)
 #endif
 
-#ifdef DEBUG_WIRE
+
+#if DEBUG_WIRE != 0
 #define HW_DMSG_WIRE(x...)  HW_DMSG_DS2411(x)
 #else
 #define HW_DMSG_WIRE(x...)  do {} while(0)
 #endif
 
-#ifdef DEBUG_CRC
+
+#if DEBUG_CRC != 0
 #define HW_DMSG_CRC(x...)  HW_DMSG_DS2411(x)
 #else
 #define HW_DMSG_CRC(x...)  do {} while(0)
 #endif
 
-#ifdef DEBUG_SERIAL
+
+#if DEBUG_SERIAL != 0
 #define HW_DMSG_SER(x...)  HW_DMSG_DS2411(x)
 #else
 #define HW_DMSG_SER(x...)  do {} while(0)
 #endif
+
+/***************************************************/
+/***************************************************/
 
 /***************************/
 /* Global variables        */
@@ -397,8 +406,8 @@ static int ds2411_check_crc(ds2411_serial_number_t *id)
 /***************************************************/
 /***************************************************/
 /***************************************************/
-#if defined(DEBUG_SERIAL)
-static char* ds2411_id_to_str(ds2411_serial_number_t *id)
+
+char* ds2411_id_to_str(ds2411_serial_number_t *id)
 {
   static char idstr[] = SERIAL_MASK_STR;
   sprintf(idstr,SERIAL_ID_STR,
@@ -409,7 +418,7 @@ static char* ds2411_id_to_str(ds2411_serial_number_t *id)
 	  id->fields.family);
   return idstr;
 }
-#endif
+
 /***************************************************/
 /***************************************************/
 /***************************************************/
@@ -967,7 +976,7 @@ static void update_ds2411_state_readrom(int dev, uint64_t current_time, uint64_t
 	    {
 	      DS2411_READROM_BYTENUM  = 0;
 	      HW_DMSG_DSTATE("ds2411: READ ROM finished\n");
-	      VERBOSE(4,"ds2411: READ ROM finished\n");
+	      INFO("ds2411: READ ROM finished\n");
 	      GO_WAIT_RESET(dev);
 	    }
 	}

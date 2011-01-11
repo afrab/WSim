@@ -21,16 +21,6 @@
 /**************************************************/
 /**************************************************/
 
-#if defined(DEBUG)
-#define DMSG_UI(x...) HW_DMSG_UI(x)
-#else
-#define DMSG_UI(x...) do { } while (0)
-#endif
-
-/**************************************************/
-/**************************************************/
-/**************************************************/
-
 /**
  * global variables
  **/
@@ -258,11 +248,11 @@ void ui_default_input (char *name)
   switch ((ev = ui_getevent()))
     {
     case UI_EVENT_USER:
-      HW_DMSG_UI("%s: UI event %04x %04x\n", name, machine.ui.b_up,machine.ui.b_down);
+      DMSG_LIB_UI("%s: UI event %04x %04x\n", name, machine.ui.b_up,machine.ui.b_down);
       break;
 
     case UI_EVENT_QUIT:
-      HW_DMSG_UI("%s: UI event QUIT\n",name);
+      DMSG_LIB_UI("%s: UI event QUIT\n",name);
       mcu_signal_add(SIG_HOST | SIGTERM);
       break;
 

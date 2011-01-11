@@ -10,20 +10,20 @@
 #define WSIM
 
 #if defined(WSIM) /* WSIM */
-#include "wsnet2_pkt.h"
-#include "wsnet2_net.h"
-#include "liblogger/logger.h"
-#define DIRECTION1 "snd -->"
-#define DIRECTION2 "rcv <--"
-#define SOFT       "Libwsnet2"
+  #include "wsnet2_pkt.h"
+  #include "wsnet2_net.h"
+  #include "liblogger/logger.h"
+  #define DIRECTION1 "snd -->"
+  #define DIRECTION2 "rcv <--"
+  #define SOFT       "Libwsnet2"
 #else /* WSNET */
-#include <include/worldsens_pkt.h>
-#include <stdio.h>
-#define ERROR(x...) fprintf(stderr,x)
-#define VERBOSE(UNUSED,x...) fprintf(stderr,x)
-#define DIRECTION1 "rcv <--"
-#define DIRECTION2 "snd -->"
-#define SOFT       "WSNET2:"
+  #include <include/worldsens_pkt.h>
+  #include <stdio.h>
+  #define ERROR(x...) fprintf(stderr,x)
+  #define DMSG_LIB_WSNET(x...) fprintf(stderr,x)
+  #define DIRECTION1 "rcv <--"
+  #define DIRECTION2 "snd -->"
+  #define SOFT       "WSNET2:"
 #endif
 
 #define VLVL 5  /* Verbose level for worldsens_packet_dump function */
@@ -285,187 +285,187 @@ int worldsens_packet_dump(union _worldsens_pkt *msg)
 {
   struct _worldsens_s_header *header = (struct _worldsens_s_header *) msg;
 
-  VERBOSE(VLVL,"%s:=======:pkt: start ====================\n", SOFT);
+  DMSG_LIB_WSNET("%s:=======:pkt: start ====================\n", SOFT);
   switch (header->type)
     {
       /*WSIM->WSNET2*/
     case WORLDSENS_C_CONNECT_REQ:
       {
-	struct _worldsens_c_connect_req *pkt = (struct _worldsens_c_connect_req *)msg;
-	VERBOSE(VLVL,"%s:%s:pkt:    type %s\n",                      SOFT, DIRECTION1, "WORLDSENS_C_CONNECT_REQ");
-	VERBOSE(VLVL,"%s:%s:pkt:    node %d\n",                      SOFT, DIRECTION1, pkt->node_id);
+	UNUSED struct _worldsens_c_connect_req *pkt = (struct _worldsens_c_connect_req *)msg;
+	DMSG_LIB_WSNET("%s:%s:pkt:    type %s\n",                      SOFT, DIRECTION1, "WORLDSENS_C_CONNECT_REQ");
+	DMSG_LIB_WSNET("%s:%s:pkt:    node %d\n",                      SOFT, DIRECTION1, pkt->node_id);
 	break;
       }
     case WORLDSENS_C_SYNC_ACK:
       {
-	struct _worldsens_c_sync_ack *pkt = (struct _worldsens_c_sync_ack *)msg;
-	VERBOSE(VLVL,"%s:%s:pkt:    type %s\n",                      SOFT, DIRECTION1, "WORLDSENS_C_SYNC_ACK");
-	VERBOSE(VLVL,"%s:%s:pkt:    node %d\n",                      SOFT, DIRECTION1, pkt->node_id);
-	VERBOSE(VLVL,"%s:%s:pkt:    rp_id %"PRIu64"\n",              SOFT, DIRECTION1, pkt->rp_id);
+	UNUSED struct _worldsens_c_sync_ack *pkt = (struct _worldsens_c_sync_ack *)msg;
+	DMSG_LIB_WSNET("%s:%s:pkt:    type %s\n",                      SOFT, DIRECTION1, "WORLDSENS_C_SYNC_ACK");
+	DMSG_LIB_WSNET("%s:%s:pkt:    node %d\n",                      SOFT, DIRECTION1, pkt->node_id);
+	DMSG_LIB_WSNET("%s:%s:pkt:    rp_id %"PRIu64"\n",              SOFT, DIRECTION1, pkt->rp_id);
 	break;
       }
     case WORLDSENS_C_BYTE_TX:
       {
-	struct _worldsens_c_byte_tx *pkt = (struct _worldsens_c_byte_tx *)msg;
-	double *power_dbm = (double *) &(pkt->power_dbm);
-	double *freq      = (double *) &(pkt->freq);
-	VERBOSE(VLVL,"%s:%s:pkt:    type %s\n",                      SOFT, DIRECTION1, "WORLDSENS_C_BYTE_TX");
-	VERBOSE(VLVL,"%s:%s:pkt:    node %d\n",                      SOFT, DIRECTION1, pkt->node_id);
-	VERBOSE(VLVL,"%s:%s:pkt:    antenna %"PRId64"\n",            SOFT, DIRECTION1, pkt->antenna_id);
-	VERBOSE(VLVL,"%s:%s:pkt:    wsnet modulation id %"PRId64"\n",SOFT, DIRECTION1, pkt->wsnet_mod_id);
-	VERBOSE(VLVL,"%s:%s:pkt:    wsim modulation id %"PRId64"\n", SOFT, DIRECTION1, pkt->wsim_mod_id);
-	VERBOSE(VLVL,"%s:%s:pkt:    frequence %g hz\n",              SOFT, DIRECTION1, *freq);
-	VERBOSE(VLVL,"%s:%s:pkt:    power %g dbm\n",                 SOFT, DIRECTION1, *power_dbm);
-	VERBOSE(VLVL,"%s:%s:pkt:    duration %"PRIu64"\n",           SOFT, DIRECTION1, pkt->duration);
-	VERBOSE(VLVL,"%s:%s:pkt:    data 0x%02x\n",                  SOFT, DIRECTION1, pkt->data);
-	VERBOSE(VLVL,"%s:%s:pkt:    period %"PRIu64"\n",             SOFT, DIRECTION1, pkt->period);
+	UNUSED struct _worldsens_c_byte_tx *pkt = (struct _worldsens_c_byte_tx *)msg;
+	UNUSED double *power_dbm = (double *) &(pkt->power_dbm);
+	UNUSED double *freq      = (double *) &(pkt->freq);
+	DMSG_LIB_WSNET("%s:%s:pkt:    type %s\n",                      SOFT, DIRECTION1, "WORLDSENS_C_BYTE_TX");
+	DMSG_LIB_WSNET("%s:%s:pkt:    node %d\n",                      SOFT, DIRECTION1, pkt->node_id);
+	DMSG_LIB_WSNET("%s:%s:pkt:    antenna %"PRId64"\n",            SOFT, DIRECTION1, pkt->antenna_id);
+	DMSG_LIB_WSNET("%s:%s:pkt:    wsnet modulation id %"PRId64"\n",SOFT, DIRECTION1, pkt->wsnet_mod_id);
+	DMSG_LIB_WSNET("%s:%s:pkt:    wsim modulation id %"PRId64"\n", SOFT, DIRECTION1, pkt->wsim_mod_id);
+	DMSG_LIB_WSNET("%s:%s:pkt:    frequence %g hz\n",              SOFT, DIRECTION1, *freq);
+	DMSG_LIB_WSNET("%s:%s:pkt:    power %g dbm\n",                 SOFT, DIRECTION1, *power_dbm);
+	DMSG_LIB_WSNET("%s:%s:pkt:    duration %"PRIu64"\n",           SOFT, DIRECTION1, pkt->duration);
+	DMSG_LIB_WSNET("%s:%s:pkt:    data 0x%02x\n",                  SOFT, DIRECTION1, pkt->data);
+	DMSG_LIB_WSNET("%s:%s:pkt:    period %"PRIu64"\n",             SOFT, DIRECTION1, pkt->period);
 	break;
       }
     case WORLDSENS_C_MEASURE_REQ:
       {
-	struct _worldsens_c_measure_req *pkt = (struct _worldsens_c_measure_req *)msg;
-	VERBOSE(VLVL,"%s:%s:pkt:    type %s\n",                      SOFT, DIRECTION1, "WORLDSENS_C_MEASURE_REQ");
-	VERBOSE(VLVL,"%s:%s:pkt:    node %d\n",                      SOFT, DIRECTION1, pkt->node_id);
-	VERBOSE(VLVL,"%s:%s:pkt:    measure id %"PRId64"\n",         SOFT, DIRECTION1, pkt->measure_id);
-	VERBOSE(VLVL,"%s:%s:pkt:    period %"PRIu64"\n",             SOFT, DIRECTION1, pkt->period);
+	UNUSED struct _worldsens_c_measure_req *pkt = (struct _worldsens_c_measure_req *)msg;
+	DMSG_LIB_WSNET("%s:%s:pkt:    type %s\n",                      SOFT, DIRECTION1, "WORLDSENS_C_MEASURE_REQ");
+	DMSG_LIB_WSNET("%s:%s:pkt:    node %d\n",                      SOFT, DIRECTION1, pkt->node_id);
+	DMSG_LIB_WSNET("%s:%s:pkt:    measure id %"PRId64"\n",         SOFT, DIRECTION1, pkt->measure_id);
+	DMSG_LIB_WSNET("%s:%s:pkt:    period %"PRIu64"\n",             SOFT, DIRECTION1, pkt->period);
 	break;
       }
     case WORLDSENS_C_DISCONNECT:
       {
-	struct _worldsens_c_disconnect *pkt = (struct _worldsens_c_disconnect *)msg;
-	VERBOSE(VLVL,"%s:%s:pkt:    type %s\n",                      SOFT, DIRECTION1, "WORLDSENS_C_DISCONNECT");
-	VERBOSE(VLVL,"%s:%s:pkt:    node %d\n",                      SOFT, DIRECTION1, pkt->node_id);
+	UNUSED struct _worldsens_c_disconnect *pkt = (struct _worldsens_c_disconnect *)msg;
+	DMSG_LIB_WSNET("%s:%s:pkt:    type %s\n",                      SOFT, DIRECTION1, "WORLDSENS_C_DISCONNECT");
+	DMSG_LIB_WSNET("%s:%s:pkt:    node %d\n",                      SOFT, DIRECTION1, pkt->node_id);
 	break;
       }
 
       /* WSNET2 -> WSIM */
     case WORLDSENS_S_CONNECT_RSP_OK:
       {
-	struct _worldsens_s_connect_rsp_ok *pkt = (struct _worldsens_s_connect_rsp_ok *)msg;
-	VERBOSE(VLVL,"%s:%s:pkt:    type %s\n",                      SOFT, DIRECTION2, "WORLDSENS_S_CONNECT_RSP_OK");
-	VERBOSE(VLVL,"%s:%s:pkt:    seq  %"PRIu64"\n",               SOFT, DIRECTION2, pkt->seq);
-	VERBOSE(VLVL,"%s:%s:pkt:    rp_next  %"PRIu64"\n",           SOFT, DIRECTION2, pkt->rp_next);
-	VERBOSE(VLVL,"%s:%s:pkt:    rp_duration  %"PRIu64"\n",       SOFT, DIRECTION2, pkt->rp_duration);
-	VERBOSE(VLVL,"%s:%s:pkt:    nb of antenna  %d\n",            SOFT, DIRECTION2, pkt->n_antenna_id);
-	VERBOSE(VLVL,"%s:%s:pkt:    nb of modulation  %d\n",         SOFT, DIRECTION2, pkt->n_modulation_id);
-	VERBOSE(VLVL,"%s:%s:pkt:    nb of measure  %d\n",            SOFT, DIRECTION2, pkt->n_measure_id);
+	UNUSED struct _worldsens_s_connect_rsp_ok *pkt = (struct _worldsens_s_connect_rsp_ok *)msg;
+	DMSG_LIB_WSNET("%s:%s:pkt:    type %s\n",                      SOFT, DIRECTION2, "WORLDSENS_S_CONNECT_RSP_OK");
+	DMSG_LIB_WSNET("%s:%s:pkt:    seq  %"PRIu64"\n",               SOFT, DIRECTION2, pkt->seq);
+	DMSG_LIB_WSNET("%s:%s:pkt:    rp_next  %"PRIu64"\n",           SOFT, DIRECTION2, pkt->rp_next);
+	DMSG_LIB_WSNET("%s:%s:pkt:    rp_duration  %"PRIu64"\n",       SOFT, DIRECTION2, pkt->rp_duration);
+	DMSG_LIB_WSNET("%s:%s:pkt:    nb of antenna  %d\n",            SOFT, DIRECTION2, pkt->n_antenna_id);
+	DMSG_LIB_WSNET("%s:%s:pkt:    nb of modulation  %d\n",         SOFT, DIRECTION2, pkt->n_modulation_id);
+	DMSG_LIB_WSNET("%s:%s:pkt:    nb of measure  %d\n",            SOFT, DIRECTION2, pkt->n_measure_id);
 	break;
       }
     case WORLDSENS_S_CONNECT_RSP_NOK:
       {
-	struct _worldsens_s_connect_rsp_nok *pkt = (struct _worldsens_s_connect_rsp_nok *)msg;
-	VERBOSE(VLVL,"%s:%s:pkt:    type %s\n",                      SOFT, DIRECTION2, "WORLDSENS_S_CONNECT_RSP_NOK");
-	VERBOSE(VLVL,"%s:%s:pkt:    seq  %"PRIu64"\n",               SOFT, DIRECTION2, pkt->seq);
+	UNUSED struct _worldsens_s_connect_rsp_nok *pkt = (struct _worldsens_s_connect_rsp_nok *)msg;
+	DMSG_LIB_WSNET("%s:%s:pkt:    type %s\n",                      SOFT, DIRECTION2, "WORLDSENS_S_CONNECT_RSP_NOK");
+	DMSG_LIB_WSNET("%s:%s:pkt:    seq  %"PRIu64"\n",               SOFT, DIRECTION2, pkt->seq);
 	break;
       }
     case WORLDSENS_S_SYNC_RELEASE:
       {
-	struct _worldsens_s_sync_release *pkt = (struct _worldsens_s_sync_release *)msg;
-	VERBOSE(VLVL,"%s:%s:pkt:    type %s\n",                      SOFT, DIRECTION2, "WORLDSENS_S_RELEASE");
-	VERBOSE(VLVL,"%s:%s:pkt:    seq  %"PRIu64"\n",               SOFT, DIRECTION2, pkt->seq);
-	VERBOSE(VLVL,"%s:%s:pkt:    rp_next  %"PRIu64"\n",           SOFT, DIRECTION2, pkt->rp_next);
-	VERBOSE(VLVL,"%s:%s:pkt:    rp_duration  %"PRIu64"\n",       SOFT, DIRECTION2, pkt->rp_duration);
+	UNUSED struct _worldsens_s_sync_release *pkt = (struct _worldsens_s_sync_release *)msg;
+	DMSG_LIB_WSNET("%s:%s:pkt:    type %s\n",                      SOFT, DIRECTION2, "WORLDSENS_S_RELEASE");
+	DMSG_LIB_WSNET("%s:%s:pkt:    seq  %"PRIu64"\n",               SOFT, DIRECTION2, pkt->seq);
+	DMSG_LIB_WSNET("%s:%s:pkt:    rp_next  %"PRIu64"\n",           SOFT, DIRECTION2, pkt->rp_next);
+	DMSG_LIB_WSNET("%s:%s:pkt:    rp_duration  %"PRIu64"\n",       SOFT, DIRECTION2, pkt->rp_duration);
 	break;
       }
     case WORLDSENS_S_SYNC_REMINDER:
       {
-	struct _worldsens_s_sync_reminder *pkt = (struct _worldsens_s_sync_reminder *)msg;
-	VERBOSE(VLVL,"%s:%s:pkt:    type %s\n",                      SOFT, DIRECTION2, "WORLDSENS_S_REMINDER");
-	VERBOSE(VLVL,"%s:%s:pkt:    seq  %"PRIu64"\n",               SOFT, DIRECTION2, pkt->seq);
-	VERBOSE(VLVL,"%s:%s:pkt:    rp_next  %"PRIu64"\n",           SOFT, DIRECTION2, pkt->rp_next);
+	UNUSED struct _worldsens_s_sync_reminder *pkt = (struct _worldsens_s_sync_reminder *)msg;
+	DMSG_LIB_WSNET("%s:%s:pkt:    type %s\n",                      SOFT, DIRECTION2, "WORLDSENS_S_REMINDER");
+	DMSG_LIB_WSNET("%s:%s:pkt:    seq  %"PRIu64"\n",               SOFT, DIRECTION2, pkt->seq);
+	DMSG_LIB_WSNET("%s:%s:pkt:    rp_next  %"PRIu64"\n",           SOFT, DIRECTION2, pkt->rp_next);
 	break;
       }
     case WORLDSENS_S_BACKTRACK:
       {
-	struct _worldsens_s_backtrack *pkt = (struct _worldsens_s_backtrack *)msg;
-	VERBOSE(VLVL,"%s:%s:pkt:    type %s\n",                      SOFT, DIRECTION2, "WORLDSENS_S_BACKTRACK");
-	VERBOSE(VLVL,"%s:%s:pkt:    seq  %"PRIu64"\n",               SOFT, DIRECTION2, pkt->seq);
-	VERBOSE(VLVL,"%s:%s:pkt:    rp_next  %"PRIu64"\n",           SOFT, DIRECTION2, pkt->rp_next);
-	VERBOSE(VLVL,"%s:%s:pkt:    rp_duration  %"PRIu64"\n",       SOFT, DIRECTION2, pkt->rp_duration);
+	UNUSED struct _worldsens_s_backtrack *pkt = (struct _worldsens_s_backtrack *)msg;
+	DMSG_LIB_WSNET("%s:%s:pkt:    type %s\n",                      SOFT, DIRECTION2, "WORLDSENS_S_BACKTRACK");
+	DMSG_LIB_WSNET("%s:%s:pkt:    seq  %"PRIu64"\n",               SOFT, DIRECTION2, pkt->seq);
+	DMSG_LIB_WSNET("%s:%s:pkt:    rp_next  %"PRIu64"\n",           SOFT, DIRECTION2, pkt->rp_next);
+	DMSG_LIB_WSNET("%s:%s:pkt:    rp_duration  %"PRIu64"\n",       SOFT, DIRECTION2, pkt->rp_duration);
 	break;
       }
 
     case WORLDSENS_S_BYTE_RX:
       {
-	struct _worldsens_s_byte_rx *pkt = (struct _worldsens_s_byte_rx *)msg;
-	double *power_dbm = (double *) &(pkt->power_dbm);
-	double *freq      = (double *) &(pkt->freq);
-	double *sinr      = (double *) &(pkt->sinr);
-	VERBOSE(VLVL,"%s:%s:pkt:    type %s\n",                      SOFT, DIRECTION2, "WORLDSENS_S_BYTE_RX");
-	VERBOSE(VLVL,"%s:%s:pkt:    seq %"PRIu64"\n",                SOFT, DIRECTION2, pkt->seq);
-	VERBOSE(VLVL,"%s:%s:pkt:    node id %d\n",                   SOFT, DIRECTION2, pkt->node_id);
-	VERBOSE(VLVL,"%s:%s:pkt:    antenna %"PRId64"\n",            SOFT, DIRECTION2, pkt->antenna_id);
-	VERBOSE(VLVL,"%s:%s:pkt:    wsim modulation %"PRId64"\n",    SOFT, DIRECTION2, pkt->wsim_mod_id);
-	VERBOSE(VLVL,"%s:%s:pkt:    frequence %g hz\n",              SOFT, DIRECTION2, *freq);
-	VERBOSE(VLVL,"%s:%s:pkt:    power %g dbm\n",                 SOFT, DIRECTION2, *power_dbm);
-	VERBOSE(VLVL,"%s:%s:pkt:    sinr %g dbm\n",                  SOFT, DIRECTION2, *sinr);
-	VERBOSE(VLVL,"%s:%s:pkt:    data 0x%02x\n",                  SOFT, DIRECTION2, pkt->data);
+	UNUSED struct _worldsens_s_byte_rx *pkt = (struct _worldsens_s_byte_rx *)msg;
+	UNUSED double *power_dbm = (double *) &(pkt->power_dbm);
+	UNUSED double *freq      = (double *) &(pkt->freq);
+	UNUSED double *sinr      = (double *) &(pkt->sinr);
+	DMSG_LIB_WSNET("%s:%s:pkt:    type %s\n",                      SOFT, DIRECTION2, "WORLDSENS_S_BYTE_RX");
+	DMSG_LIB_WSNET("%s:%s:pkt:    seq %"PRIu64"\n",                SOFT, DIRECTION2, pkt->seq);
+	DMSG_LIB_WSNET("%s:%s:pkt:    node id %d\n",                   SOFT, DIRECTION2, pkt->node_id);
+	DMSG_LIB_WSNET("%s:%s:pkt:    antenna %"PRId64"\n",            SOFT, DIRECTION2, pkt->antenna_id);
+	DMSG_LIB_WSNET("%s:%s:pkt:    wsim modulation %"PRId64"\n",    SOFT, DIRECTION2, pkt->wsim_mod_id);
+	DMSG_LIB_WSNET("%s:%s:pkt:    frequence %g hz\n",              SOFT, DIRECTION2, *freq);
+	DMSG_LIB_WSNET("%s:%s:pkt:    power %g dbm\n",                 SOFT, DIRECTION2, *power_dbm);
+	DMSG_LIB_WSNET("%s:%s:pkt:    sinr %g dbm\n",                  SOFT, DIRECTION2, *sinr);
+	DMSG_LIB_WSNET("%s:%s:pkt:    data 0x%02x\n",                  SOFT, DIRECTION2, pkt->data);
 	break;
       }
     case WORLDSENS_S_BYTE_SR_RX:
       {
-	struct _worldsens_s_byte_sr_rx *pkt = (struct _worldsens_s_byte_sr_rx *)msg;
-	double *power_dbm = (double *) &(pkt->power_dbm);
-	double *freq      = (double *) &(pkt->freq);
-	double *sinr      = (double *) &(pkt->sinr);
-	VERBOSE(VLVL,"%s:%s:pkt:    type %s\n",                      SOFT, DIRECTION2, "WORLDSENS_S_BYTE_SR_RX");
-	VERBOSE(VLVL,"%s:%s:pkt:    seq %"PRIu64"\n",                SOFT, DIRECTION2, pkt->seq);
-	VERBOSE(VLVL,"%s:%s:pkt:    rp_next  %"PRIu64"\n",           SOFT, DIRECTION2, pkt->rp_next);
-	VERBOSE(VLVL,"%s:%s:pkt:    rp_duration  %"PRIu64"\n",       SOFT, DIRECTION2, pkt->rp_duration);
-	VERBOSE(VLVL,"%s:%s:pkt:    node id %d\n",                   SOFT, DIRECTION2, pkt->node_id);
-	VERBOSE(VLVL,"%s:%s:pkt:    antenna %"PRId64"\n",            SOFT, DIRECTION2, pkt->antenna_id);
-	VERBOSE(VLVL,"%s:%s:pkt:    wsim modulation %"PRId64"\n",    SOFT, DIRECTION2, pkt->wsim_mod_id);
-	VERBOSE(VLVL,"%s:%s:pkt:    frequence %g hz\n",              SOFT, DIRECTION2, *freq);
-	VERBOSE(VLVL,"%s:%s:pkt:    power %g dbm\n",                 SOFT, DIRECTION2, *power_dbm);
-	VERBOSE(VLVL,"%s:%s:pkt:    sinr %g dbm\n",                  SOFT, DIRECTION2, *sinr);
-	VERBOSE(VLVL,"%s:%s:pkt:    data 0x%02x\n",                  SOFT, DIRECTION2, pkt->data);
+	UNUSED struct _worldsens_s_byte_sr_rx *pkt = (struct _worldsens_s_byte_sr_rx *)msg;
+	UNUSED double *power_dbm = (double *) &(pkt->power_dbm);
+	UNUSED double *freq      = (double *) &(pkt->freq);
+	UNUSED double *sinr      = (double *) &(pkt->sinr);
+	DMSG_LIB_WSNET("%s:%s:pkt:    type %s\n",                      SOFT, DIRECTION2, "WORLDSENS_S_BYTE_SR_RX");
+	DMSG_LIB_WSNET("%s:%s:pkt:    seq %"PRIu64"\n",                SOFT, DIRECTION2, pkt->seq);
+	DMSG_LIB_WSNET("%s:%s:pkt:    rp_next  %"PRIu64"\n",           SOFT, DIRECTION2, pkt->rp_next);
+	DMSG_LIB_WSNET("%s:%s:pkt:    rp_duration  %"PRIu64"\n",       SOFT, DIRECTION2, pkt->rp_duration);
+	DMSG_LIB_WSNET("%s:%s:pkt:    node id %d\n",                   SOFT, DIRECTION2, pkt->node_id);
+	DMSG_LIB_WSNET("%s:%s:pkt:    antenna %"PRId64"\n",            SOFT, DIRECTION2, pkt->antenna_id);
+	DMSG_LIB_WSNET("%s:%s:pkt:    wsim modulation %"PRId64"\n",    SOFT, DIRECTION2, pkt->wsim_mod_id);
+	DMSG_LIB_WSNET("%s:%s:pkt:    frequence %g hz\n",              SOFT, DIRECTION2, *freq);
+	DMSG_LIB_WSNET("%s:%s:pkt:    power %g dbm\n",                 SOFT, DIRECTION2, *power_dbm);
+	DMSG_LIB_WSNET("%s:%s:pkt:    sinr %g dbm\n",                  SOFT, DIRECTION2, *sinr);
+	DMSG_LIB_WSNET("%s:%s:pkt:    data 0x%02x\n",                  SOFT, DIRECTION2, pkt->data);
 	break;
       }
     case WORLDSENS_S_MEASURE_RSP:
       {
-	struct _worldsens_s_measure_rsp *pkt = (struct _worldsens_s_measure_rsp *)msg;
-	double *measure_val = (double *) &(pkt->measure_val);
-	VERBOSE(VLVL,"%s:%s:pkt:    type %s\n",                      SOFT, DIRECTION2, "WORLDSENS_S_MEASURE_RSP");
-	VERBOSE(VLVL,"%s:%s:pkt:    seq  %"PRIu64"\n",               SOFT, DIRECTION2, pkt->seq);
-	VERBOSE(VLVL,"%s:%s:pkt:    node id %d\n",                   SOFT, DIRECTION2, pkt->node_id);
-	VERBOSE(VLVL,"%s:%s:pkt:    measure id %"PRId64"\n",         SOFT, DIRECTION2, pkt->measure_id);
-	VERBOSE(VLVL,"%s:%s:pkt:    measure value %f\n",             SOFT, DIRECTION2, *measure_val);
+	UNUSED struct _worldsens_s_measure_rsp *pkt = (struct _worldsens_s_measure_rsp *)msg;
+	UNUSED double *measure_val = (double *) &(pkt->measure_val);
+	DMSG_LIB_WSNET("%s:%s:pkt:    type %s\n",                      SOFT, DIRECTION2, "WORLDSENS_S_MEASURE_RSP");
+	DMSG_LIB_WSNET("%s:%s:pkt:    seq  %"PRIu64"\n",               SOFT, DIRECTION2, pkt->seq);
+	DMSG_LIB_WSNET("%s:%s:pkt:    node id %d\n",                   SOFT, DIRECTION2, pkt->node_id);
+	DMSG_LIB_WSNET("%s:%s:pkt:    measure id %"PRId64"\n",         SOFT, DIRECTION2, pkt->measure_id);
+	DMSG_LIB_WSNET("%s:%s:pkt:    measure value %f\n",             SOFT, DIRECTION2, *measure_val);
 	break;
       }
     case WORLDSENS_S_MEASURE_SR_RSP:
       {
-	struct _worldsens_s_measure_sr_rsp *pkt = (struct _worldsens_s_measure_sr_rsp *)msg;
-	double *measure_val = (double *) &(pkt->measure_val);
-	VERBOSE(VLVL,"%s:%s:pkt:    type %s\n",                      SOFT, DIRECTION2, "WORLDSENS_S_MEASURE_SR_RSP");
-	VERBOSE(VLVL,"%s:%s:pkt:    seq  %"PRIu64"\n",               SOFT, DIRECTION2, pkt->seq);
-	VERBOSE(VLVL,"%s:%s:pkt:    node id %d\n",                   SOFT, DIRECTION2, pkt->node_id);
-	VERBOSE(VLVL,"%s:%s:pkt:    measure id %"PRId64"\n",         SOFT, DIRECTION2, pkt->measure_id);
-	VERBOSE(VLVL,"%s:%s:pkt:    measure value %f\n",             SOFT, DIRECTION2, *measure_val);
-	VERBOSE(VLVL,"%s:%s:pkt:    rp_next  %"PRIu64"\n",           SOFT, DIRECTION2, pkt->rp_next);
-	VERBOSE(VLVL,"%s:%s:pkt:    rp_duration  %"PRIu64"\n",       SOFT, DIRECTION2, pkt->rp_duration);
+	UNUSED struct _worldsens_s_measure_sr_rsp *pkt = (struct _worldsens_s_measure_sr_rsp *)msg;
+	UNUSED double *measure_val = (double *) &(pkt->measure_val);
+	DMSG_LIB_WSNET("%s:%s:pkt:    type %s\n",                      SOFT, DIRECTION2, "WORLDSENS_S_MEASURE_SR_RSP");
+	DMSG_LIB_WSNET("%s:%s:pkt:    seq  %"PRIu64"\n",               SOFT, DIRECTION2, pkt->seq);
+	DMSG_LIB_WSNET("%s:%s:pkt:    node id %d\n",                   SOFT, DIRECTION2, pkt->node_id);
+	DMSG_LIB_WSNET("%s:%s:pkt:    measure id %"PRId64"\n",         SOFT, DIRECTION2, pkt->measure_id);
+	DMSG_LIB_WSNET("%s:%s:pkt:    measure value %f\n",             SOFT, DIRECTION2, *measure_val);
+	DMSG_LIB_WSNET("%s:%s:pkt:    rp_next  %"PRIu64"\n",           SOFT, DIRECTION2, pkt->rp_next);
+	DMSG_LIB_WSNET("%s:%s:pkt:    rp_duration  %"PRIu64"\n",       SOFT, DIRECTION2, pkt->rp_duration);
 	break;
       }
     case WORLDSENS_S_KILLSIM:
       {
-	struct _worldsens_s_killsim *pkt = (struct _worldsens_s_killsim *)msg;
-	VERBOSE(VLVL,"%s:%s:pkt:    type %s\n",                      SOFT, DIRECTION2, "WORLDSENS_S_KILLSIM");
-	VERBOSE(VLVL,"%s:%s:pkt:    seq  %"PRIu64"\n",               SOFT, DIRECTION2, pkt->seq);
+	UNUSED struct _worldsens_s_killsim *pkt = (struct _worldsens_s_killsim *)msg;
+	DMSG_LIB_WSNET("%s:%s:pkt:    type %s\n",                      SOFT, DIRECTION2, "WORLDSENS_S_KILLSIM");
+	DMSG_LIB_WSNET("%s:%s:pkt:    seq  %"PRIu64"\n",               SOFT, DIRECTION2, pkt->seq);
 	break;
       }
     case WORLDSENS_S_KILL:
       {
-	struct _worldsens_s_kill *pkt = (struct _worldsens_s_kill *)msg;
-	VERBOSE(VLVL,"%s:%s:pkt:    type %s\n",                      SOFT, DIRECTION2, "WORLDSENS_S_KILL");
-	VERBOSE(VLVL,"%s:%s:pkt:    seq  %"PRIu64"\n",               SOFT, DIRECTION2, pkt->seq);
-	VERBOSE(VLVL,"%s:%s:pkt:    node id  %d\n",                  SOFT, DIRECTION2, pkt->node_id);
+	UNUSED struct _worldsens_s_kill *pkt = (struct _worldsens_s_kill *)msg;
+	DMSG_LIB_WSNET("%s:%s:pkt:    type %s\n",                      SOFT, DIRECTION2, "WORLDSENS_S_KILL");
+	DMSG_LIB_WSNET("%s:%s:pkt:    seq  %"PRIu64"\n",               SOFT, DIRECTION2, pkt->seq);
+	DMSG_LIB_WSNET("%s:%s:pkt:    node id  %d\n",                  SOFT, DIRECTION2, pkt->node_id);
 	break;
       }
     default:
       {
-	VERBOSE(VLVL,"%s:pkt:Invalide packet type: %d \n", SOFT, header->type);
+	DMSG_LIB_WSNET("%s:pkt:Invalide packet type: %d \n", SOFT, header->type);
       }
     }
-  VERBOSE(VLVL,"%s:=======:pkt: stop =====================\n", SOFT);
+  DMSG_LIB_WSNET("%s:=======:pkt: stop =====================\n", SOFT);
 
   return 0;
 }

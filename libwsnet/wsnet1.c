@@ -43,12 +43,11 @@
 /**************************************************************************/
 /**************************************************************************/
 
-#define DEBUG_PROTOCOL 1
-#define VLVL 0
+#define DEBUG_PROTOCOL 0
 #define SNDSTR "snd --> "
 #define RCVSTR "rcv <-- "
 
-#if defined(DEBUG_PROTOCOL)
+#if DEBUG_PROTOCOL != 0
 #  define PKT_DMP_CNX    1
 #  define PKT_DMP_SYNCH  1
 #  define PKT_DMP_TX     1
@@ -172,7 +171,7 @@ static int64_t  worldsens1_tx_parse_reply          (char *msg, int UNUSED len);
                                                             /* called by c_tx                         */
 static int      worldsens1_synched                 (int dmp);/* blocking synch,     called by c_update */
 
-#if defined(DEBUG_PROTOCOL)
+#if DEBUG_PROTOCOL != 0
 static void     worldsens1_packet_dump_recv        (char *msg, int len);
 static void     worldsens1_packet_dump_send        (char *msg, int len);
 #define WPDBG(x...) 
@@ -1131,7 +1130,7 @@ static int worldsens1_synched(int dmp)
 /**************************************************************************/
 /**************************************************************************/
 
-#if defined(DEBUG_PROTOCOL)
+#if DEBUG_PROTOCOL != 0
 
 static char *wsnet_modulation_name(int n)
 {
@@ -1160,26 +1159,26 @@ static void wsnet_packet_dump(char *msg, int len, char *prfx)
       switch (c)
 	{
 	case 0:
-	  VERBOSE(VLVL,"WSNet:pkt:%s: %02x ", prfx, msg[i] & 0xff);
+	  DMSG_LIB_WSNET("WSNet:pkt:%s: %02x ", prfx, msg[i] & 0xff);
 	  c = c+1;
 	  break;
 	case 4:
-	  VERBOSE(VLVL," %02x ",  msg[i] & 0xff);
+	  DMSG_LIB_WSNET(" %02x ",  msg[i] & 0xff);
 	  c = c+1;
 	  break;
 	case 7:
-	  VERBOSE(VLVL,"%02x\n", msg[i] & 0xff);
+	  DMSG_LIB_WSNET("%02x\n", msg[i] & 0xff);
 	  c = 0;
 	  break;
 	default:
-	  VERBOSE(VLVL,"%02x ",  msg[i] & 0xff);
+	  DMSG_LIB_WSNET("%02x ",  msg[i] & 0xff);
 	  c = c+1;
 	  break;
 	}
     }
  if (c != 0)
     {
-      VERBOSE(VLVL,"\n");
+      DMSG_LIB_WSNET("\n");
     }
 }
 
@@ -1191,21 +1190,21 @@ static void worldsens1_packet_dump_send(char *msg, int len)
   char prfx[] = SNDSTR;
   struct _worldsens_c_connect_pkt *sh = (struct _worldsens_c_connect_pkt *)msg;
 
-  VERBOSE(VLVL,"WSNet:pkt:%s: start ====================\n", prfx);
+  DMSG_LIB_WSNET("WSNet:pkt:%s: start ====================\n", prfx);
   switch (sh->type)
     {
     case WORLDSENS_C_CONNECT:
       {
 	struct _worldsens_c_connect_pkt *pkt = (struct _worldsens_c_connect_pkt *)msg;
-	VERBOSE(VLVL,"WSNet:pkt:%s:   type       %s\n",          prfx, "WORLDSENS_C_CONNECT");
-	VERBOSE(VLVL,"WSNet:pkt:%s:   node       %d\n",          prfx, ntohl(pkt->node));
+	DMSG_LIB_WSNET("WSNet:pkt:%s:   type       %s\n",          prfx, "WORLDSENS_C_CONNECT");
+	DMSG_LIB_WSNET("WSNet:pkt:%s:   node       %d\n",          prfx, ntohl(pkt->node));
       }
       break;
     case WORLDSENS_C_SYNCHED:
       {
 	struct _worldsens_c_synched_pkt *pkt = (struct _worldsens_c_synched_pkt *)msg;
-	VERBOSE(VLVL,"WSNet:pkt:%s:   type       %s\n",          prfx, "WORLDSENS_C_SYNCHED");
-	VERBOSE(VLVL,"WSNet:pkt:%s:   rp_seq     %d\n",          prfx, ntohl(pkt->rp_seq));
+	DMSG_LIB_WSNET("WSNet:pkt:%s:   type       %s\n",          prfx, "WORLDSENS_C_SYNCHED");
+	DMSG_LIB_WSNET("WSNet:pkt:%s:   rp_seq     %d\n",          prfx, ntohl(pkt->rp_seq));
       }
       break;
     case WORLDSENS_C_TX:
@@ -1213,37 +1212,37 @@ static void worldsens1_packet_dump_send(char *msg, int len)
 	struct _worldsens_c_tx_pkt *pkt = (struct _worldsens_c_tx_pkt *)msg;
 	uint64_t tx_mW  = ntohll(pkt->tx_mW);
 	double  *ptx_mW = (double *) &tx_mW;
-	VERBOSE(VLVL,"WSNet:pkt:%s:   type       %s\n",          prfx, "WORLDSENS_C_TX");
-	VERBOSE(VLVL,"WSNet:pkt:%s:   node       %d\n",          prfx, ntohl (pkt->node)     );
-	VERBOSE(VLVL,"WSNet:pkt:%s:   period     %"PRIu64"ns\n", prfx, ntohll(pkt->period)   );
-	VERBOSE(VLVL,"WSNet:pkt:%s:   duration   %"PRIu64"ns\n", prfx, ntohll(pkt->duration) );
-	VERBOSE(VLVL,"WSNet:pkt:%s:   freq       %g MHz\n",      prfx, ntohl (pkt->frequency) / 1000000.0);
-	VERBOSE(VLVL,"WSNet:pkt:%s:   modulation %s (%d)\n",     prfx, 
+	DMSG_LIB_WSNET("WSNet:pkt:%s:   type       %s\n",          prfx, "WORLDSENS_C_TX");
+	DMSG_LIB_WSNET("WSNet:pkt:%s:   node       %d\n",          prfx, ntohl (pkt->node)     );
+	DMSG_LIB_WSNET("WSNet:pkt:%s:   period     %"PRIu64"ns\n", prfx, ntohll(pkt->period)   );
+	DMSG_LIB_WSNET("WSNet:pkt:%s:   duration   %"PRIu64"ns\n", prfx, ntohll(pkt->duration) );
+	DMSG_LIB_WSNET("WSNet:pkt:%s:   freq       %g MHz\n",      prfx, ntohl (pkt->frequency) / 1000000.0);
+	DMSG_LIB_WSNET("WSNet:pkt:%s:   modulation %s (%d)\n",     prfx, 
 		wsnet_modulation_name(ntohl(pkt->modulation)), 
 		ntohl(pkt->modulation));
-	VERBOSE(VLVL,"WSNet:pkt:%s:   tx_mW      %g\n",          prfx, *ptx_mW);
-	VERBOSE(VLVL,"WSNet:pkt:%s:   pkt_seq    %d\n",          prfx, ntohl (pkt->pkt_seq)  );
-	VERBOSE(VLVL,"WSNet:pkt:%s:   data       0x%02x (%c)\n", prfx, pkt->data & 0xff,
+	DMSG_LIB_WSNET("WSNet:pkt:%s:   tx_mW      %g\n",          prfx, *ptx_mW);
+	DMSG_LIB_WSNET("WSNet:pkt:%s:   pkt_seq    %d\n",          prfx, ntohl (pkt->pkt_seq)  );
+	DMSG_LIB_WSNET("WSNet:pkt:%s:   data       0x%02x (%c)\n", prfx, pkt->data & 0xff,
 		isprint( pkt->data & 0xff) ? pkt->data & 0xff : '.');
       }
       break;
     case WORLDSENS_C_DISCONNECT:
       {
 	struct _worldsens_c_disconnect_pkt *pkt = (struct _worldsens_c_disconnect_pkt *)msg; 
-	VERBOSE(VLVL,"WSNet:pkt:%s:   type       %s\n",          prfx, "WORLDSENS_C_DISCONNECT");
-	VERBOSE(VLVL,"WSNet:pkt:%s:   node       %d\n",          prfx, ntohl(pkt->node));
+	DMSG_LIB_WSNET("WSNet:pkt:%s:   type       %s\n",          prfx, "WORLDSENS_C_DISCONNECT");
+	DMSG_LIB_WSNET("WSNet:pkt:%s:   node       %d\n",          prfx, ntohl(pkt->node));
       }
       break;
     default:
       {
-	VERBOSE(VLVL,"WSNet:pkt:%s:   %s\n", prfx, "UNKNOWN PACKET");
-	VERBOSE(VLVL,"WSNet:pkt:%s:   type       %d\n",          prfx, sh->type);
-	VERBOSE(VLVL,"WSNet:pkt:%s:   size       %d\n",          prfx, len);
+	DMSG_LIB_WSNET("WSNet:pkt:%s:   %s\n", prfx, "UNKNOWN PACKET");
+	DMSG_LIB_WSNET("WSNet:pkt:%s:   type       %d\n",          prfx, sh->type);
+	DMSG_LIB_WSNET("WSNet:pkt:%s:   size       %d\n",          prfx, len);
 	wsnet_packet_dump(msg, len, SNDSTR);
       }
       break;
     }
-  VERBOSE(VLVL,"WSNet:pkt:%s: stop =====================\n", prfx);
+  DMSG_LIB_WSNET("WSNet:pkt:%s: stop =====================\n", prfx);
 }
 
 /***************************************************/
@@ -1254,36 +1253,36 @@ static void worldsens1_packet_dump_recv(char *msg, int len)
   char prfx[] = RCVSTR;
   struct _worldsens_s_connect_pkt *sh = (struct _worldsens_s_connect_pkt *)msg;
 
-  VERBOSE(VLVL,"WSNet:pkt:%s: start ====================\n", prfx);
+  DMSG_LIB_WSNET("WSNet:pkt:%s: start ====================\n", prfx);
   switch (sh->type)
     {
     case WORLDSENS_S_ATTRADDR:
       {
 	struct _worldsens_s_connect_pkt *pkt = (struct _worldsens_s_connect_pkt *)msg;
-	VERBOSE(VLVL,"WSNet:pkt:%s:   type       %s\n",          prfx, "WORLDSENS_S_ATTRADDR");
-	VERBOSE(VLVL,"WSNet:pkt:%s:   pkt_seq    %d\n",          prfx, ntohl (pkt->pkt_seq));
-	VERBOSE(VLVL,"WSNet:pkt:%s:   period     %"PRIu64"\n",   prfx, ntohll(pkt->period));
-	VERBOSE(VLVL,"WSNet:pkt:%s:   rp_seq     %d\n",          prfx, ntohl (pkt->rp_seq));
-	VERBOSE(VLVL,"WSNet:pkt:%s:   cnxtime    %"PRIu64"\n",   prfx, ntohll(pkt->cnx_time));
+	DMSG_LIB_WSNET("WSNet:pkt:%s:   type       %s\n",          prfx, "WORLDSENS_S_ATTRADDR");
+	DMSG_LIB_WSNET("WSNet:pkt:%s:   pkt_seq    %d\n",          prfx, ntohl (pkt->pkt_seq));
+	DMSG_LIB_WSNET("WSNet:pkt:%s:   period     %"PRIu64"\n",   prfx, ntohll(pkt->period));
+	DMSG_LIB_WSNET("WSNet:pkt:%s:   rp_seq     %d\n",          prfx, ntohl (pkt->rp_seq));
+	DMSG_LIB_WSNET("WSNet:pkt:%s:   cnxtime    %"PRIu64"\n",   prfx, ntohll(pkt->cnx_time));
       }
       break;
     case WORLDSENS_S_NOATTRADDR:
       {
 	struct _worldsens_s_header *pkt = (struct _worldsens_s_header *)msg;
-	VERBOSE(VLVL,"WSNet:pkt:%s:   type       %s\n",          prfx, "WORLDSENS_S_NOATTRADDR");
-	VERBOSE(VLVL,"WSNet:pkt:%s:   pkt_seq    %d\n",          prfx, ntohl(pkt->pkt_seq));
-	VERBOSE(VLVL,"WSNet:pkt:%s:   no information\n",         prfx);
+	DMSG_LIB_WSNET("WSNet:pkt:%s:   type       %s\n",          prfx, "WORLDSENS_S_NOATTRADDR");
+	DMSG_LIB_WSNET("WSNet:pkt:%s:   pkt_seq    %d\n",          prfx, ntohl(pkt->pkt_seq));
+	DMSG_LIB_WSNET("WSNet:pkt:%s:   no information\n",         prfx);
       }
       break;
     case WORLDSENS_S_RX:
       {
 	struct _worldsens_s_rx_pkt *pkt = (struct _worldsens_s_rx_pkt *)msg;
-	VERBOSE(VLVL,"WSNet:pkt:%s:   type       %s\n",          prfx, "WORLDSENS_S_RX");
-	VERBOSE(VLVL,"WSNet:pkt:%s:   pkt_seq    %d\n",          prfx, ntohl(pkt->pkt_seq));
-	VERBOSE(VLVL,"WSNet:pkt:%s:   size       %d\n",          prfx, ntohl(pkt->size));
-	VERBOSE(VLVL,"WSNet:pkt:%s:   node       %d\n",          prfx, ntohl(pkt->node));
-	VERBOSE(VLVL,"WSNet:pkt:%s:   frequency  %g MHz\n",      prfx, ntohl(pkt->frequency) / 1000000.0f);
-	VERBOSE(VLVL,"WSNet:pkt:%s:   modulation %s (%d)\n",     prfx, 
+	DMSG_LIB_WSNET("WSNet:pkt:%s:   type       %s\n",          prfx, "WORLDSENS_S_RX");
+	DMSG_LIB_WSNET("WSNet:pkt:%s:   pkt_seq    %d\n",          prfx, ntohl(pkt->pkt_seq));
+	DMSG_LIB_WSNET("WSNet:pkt:%s:   size       %d\n",          prfx, ntohl(pkt->size));
+	DMSG_LIB_WSNET("WSNet:pkt:%s:   node       %d\n",          prfx, ntohl(pkt->node));
+	DMSG_LIB_WSNET("WSNet:pkt:%s:   frequency  %g MHz\n",      prfx, ntohl(pkt->frequency) / 1000000.0f);
+	DMSG_LIB_WSNET("WSNet:pkt:%s:   modulation %s (%d)\n",     prfx, 
 		wsnet_modulation_name(ntohl(pkt->modulation)), 
 		ntohl(pkt->modulation));
       }
@@ -1291,25 +1290,25 @@ static void worldsens1_packet_dump_recv(char *msg, int len)
     case WORLDSENS_S_SYNCH_REQ:
       {
         struct _worldsens_s_saverel_pkt *pkt = (struct _worldsens_s_saverel_pkt *)msg; 
-	VERBOSE(VLVL,"WSNet:pkt:%s:   type       %s\n",          prfx, "WORLDSENS_S_SYNC_REQ");
-	VERBOSE(VLVL,"WSNet:pkt:%s:   pkt_seq    %d\n",          prfx, ntohl(pkt->pkt_seq));
-	VERBOSE(VLVL,"WSNet:pkt:%s:   c_rp_seq   %d\n",          prfx, ntohl(pkt->c_rp_seq));
-	VERBOSE(VLVL,"WSNet:pkt:%s:   period     %"PRIu64"\n",   prfx, ntohll(pkt->period));
-	VERBOSE(VLVL,"WSNet:pkt:%s:   n_rp_seq   %d\n",          prfx, ntohl(pkt->n_rp_seq));
+	DMSG_LIB_WSNET("WSNet:pkt:%s:   type       %s\n",          prfx, "WORLDSENS_S_SYNC_REQ");
+	DMSG_LIB_WSNET("WSNet:pkt:%s:   pkt_seq    %d\n",          prfx, ntohl(pkt->pkt_seq));
+	DMSG_LIB_WSNET("WSNet:pkt:%s:   c_rp_seq   %d\n",          prfx, ntohl(pkt->c_rp_seq));
+	DMSG_LIB_WSNET("WSNet:pkt:%s:   period     %"PRIu64"\n",   prfx, ntohll(pkt->period));
+	DMSG_LIB_WSNET("WSNet:pkt:%s:   n_rp_seq   %d\n",          prfx, ntohl(pkt->n_rp_seq));
       }
       break;
     case WORLDSENS_S_RX | WORLDSENS_S_SYNCH_REQ:
       {
 	struct _worldsens_s_srrx_pkt *pkt = (struct _worldsens_s_srrx_pkt *)msg;
-	VERBOSE(VLVL,"WSNet:pkt:%s:   type       %s\n",          prfx, "WORLDSENS_S_ [ RX + SYNCH_REQ ]");
-	VERBOSE(VLVL,"WSNet:pkt:%s:   pkt_seq    %d\n",          prfx, ntohl(pkt->pkt_seq));
-	VERBOSE(VLVL,"WSNet:pkt:%s:   c_rp_seq   %d\n",          prfx, ntohl(pkt->c_rp_seq));
-	VERBOSE(VLVL,"WSNet:pkt:%s:   period     %"PRIu64"\n",   prfx, ntohll(pkt->period));
-	VERBOSE(VLVL,"WSNet:pkt:%s:   n_rp_seq   %d\n",          prfx, ntohl(pkt->n_rp_seq));
-	VERBOSE(VLVL,"WSNet:pkt:%s:   size       %d\n",          prfx, ntohl(pkt->size));
-	VERBOSE(VLVL,"WSNet:pkt:%s:   node       %d\n",          prfx, ntohl(pkt->node));
-	VERBOSE(VLVL,"WSNet:pkt:%s:   frequency  %g MHz\n",      prfx, ntohl(pkt->frequency) / 1000000.0f);
-	VERBOSE(VLVL,"WSNet:pkt:%s:   modulation %s (%d)\n",     prfx, 
+	DMSG_LIB_WSNET("WSNet:pkt:%s:   type       %s\n",          prfx, "WORLDSENS_S_ [ RX + SYNCH_REQ ]");
+	DMSG_LIB_WSNET("WSNet:pkt:%s:   pkt_seq    %d\n",          prfx, ntohl(pkt->pkt_seq));
+	DMSG_LIB_WSNET("WSNet:pkt:%s:   c_rp_seq   %d\n",          prfx, ntohl(pkt->c_rp_seq));
+	DMSG_LIB_WSNET("WSNet:pkt:%s:   period     %"PRIu64"\n",   prfx, ntohll(pkt->period));
+	DMSG_LIB_WSNET("WSNet:pkt:%s:   n_rp_seq   %d\n",          prfx, ntohl(pkt->n_rp_seq));
+	DMSG_LIB_WSNET("WSNet:pkt:%s:   size       %d\n",          prfx, ntohl(pkt->size));
+	DMSG_LIB_WSNET("WSNet:pkt:%s:   node       %d\n",          prfx, ntohl(pkt->node));
+	DMSG_LIB_WSNET("WSNet:pkt:%s:   frequency  %g MHz\n",      prfx, ntohl(pkt->frequency) / 1000000.0f);
+	DMSG_LIB_WSNET("WSNet:pkt:%s:   modulation %s (%d)\n",     prfx, 
 		wsnet_modulation_name(ntohl(pkt->modulation)), 
 		ntohl(pkt->modulation));
       }
@@ -1317,22 +1316,22 @@ static void worldsens1_packet_dump_recv(char *msg, int len)
     case WORLDSENS_S_BACKTRACK:
       {
 	struct _worldsens_s_backtrack_pkt *pkt = (struct _worldsens_s_backtrack_pkt *)msg;
-	VERBOSE(VLVL,"WSNet:pkt:%s:   type       %s\n",          prfx, "WORLDSENS_S_BACKTRACK");
-	VERBOSE(VLVL,"WSNet:pkt:%s:   pkt_seq    %d\n",          prfx, ntohl (pkt->pkt_seq));
-	VERBOSE(VLVL,"WSNet:pkt:%s:   period     %"PRIu64"\n",   prfx, ntohll(pkt->period));
-	VERBOSE(VLVL,"WSNet:pkt:%s:   rp_seq     %d\n",          prfx, ntohl (pkt->rp_seq));
+	DMSG_LIB_WSNET("WSNet:pkt:%s:   type       %s\n",          prfx, "WORLDSENS_S_BACKTRACK");
+	DMSG_LIB_WSNET("WSNet:pkt:%s:   pkt_seq    %d\n",          prfx, ntohl (pkt->pkt_seq));
+	DMSG_LIB_WSNET("WSNet:pkt:%s:   period     %"PRIu64"\n",   prfx, ntohll(pkt->period));
+	DMSG_LIB_WSNET("WSNet:pkt:%s:   rp_seq     %d\n",          prfx, ntohl (pkt->rp_seq));
       }
       break;
     default:
       {
-	VERBOSE(VLVL,"WSNet:pkt:%s:   %s\n",                     prfx, "UNKNOWN PACKET");
-	VERBOSE(VLVL,"WSNet:pkt:%s:   type       %02x\n",        prfx, sh->type);
-	VERBOSE(VLVL,"WSNet:pkt:%s:   size       %d\n",          prfx, len);
+	DMSG_LIB_WSNET("WSNet:pkt:%s:   %s\n",                     prfx, "UNKNOWN PACKET");
+	DMSG_LIB_WSNET("WSNet:pkt:%s:   type       %02x\n",        prfx, sh->type);
+	DMSG_LIB_WSNET("WSNet:pkt:%s:   size       %d\n",          prfx, len);
 	wsnet_packet_dump(msg, len, RCVSTR);
       }
       break;
     }
-  VERBOSE(VLVL,"WSNet:pkt:%s: stop =====================\n", prfx);
+  DMSG_LIB_WSNET("WSNet:pkt:%s: stop =====================\n", prfx);
 }
 #endif
 

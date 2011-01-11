@@ -19,21 +19,24 @@
  * ERROR is used for ... errors
  ****************************************/
 
+#undef DEBUG
+
+
 #if defined(DEBUG)
-#define DEBUG_TRACER
-// #define DEBUG_EVENT
+#define DEBUG_TRACER 0
+#define DEBUG_EVENT  0
 #endif
 
-#if defined(DEBUG_TRACER)
-#define DMSG_TRACER(x...) HW_DMSG(x)
+#if DEBUG_TRACER != 0
+#define DMSG_TRACER(x...)  DMSG_LIB(x)
 #else
-#define DMSG_TRACER(x...) do { } while (0)
+#define DMSG_TRACER(x...)  do { } while (0)
 #endif
 
-#if defined(DEBUG_EVENT)
-#define DMSG_EVENT(x...) HW_DMSG(x)
+#if DEBUG_EVENT != 0
+#define DMSG_EVENT(x...)   DMSG_LIB(x)
 #else
-#define DMSG_EVENT(x...) do { } while (0)
+#define DMSG_EVENT(x...)   do { } while (0)
 #endif
 
 

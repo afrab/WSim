@@ -17,17 +17,14 @@
 /*****************************************************/
 /*****************************************************/
 
-#if defined(DEBUG)
-#define SPI_SPY_MODE__
-#endif
+#define HW_SPY_MODE 0
 
-#define VUART 6         /* USART verbose level */
-
-#if defined(SPI_SPY_MODE)
-#define SPI_SPY(x...) VERBOSE(VUART,x)
+#if HW_SPY_MODE != 0
+#define HW_SPY(x...) HW_DMSG_MCUDEV(x)
 #else
-#define SPI_SPY(x...) do { } while (0)
+#define HW_SPY(x...) do { } while (0)
 #endif
+
 
 /* defined in msp430_debug.h */
 #if defined(DEBUG_USART)  
@@ -149,8 +146,8 @@ char *str_ssel[] = { "external UCLK", "ACLK", "SMCLK", "SMCLK" };
 /* 
    TODO: SPI à vérifer : baisser urxex pendant que rx shift != empty arrête réception ?? 
    TODO: AFR: check that SPI SPEED is at most UBRCLK/2
-      SPI_SPY("msp430:usart%d:spi:br0   %x\n",NUM,MCU.USART.uxbr0);
-      SPI_SPY("msp430:usart%d:spi:br1   %x\n",NUM,MCU.USART.uxbr1);
+      HW_SPY("msp430:usart%d:spi:br0   %x\n",NUM,MCU.USART.uxbr0);
+      HW_SPY("msp430:usart%d:spi:br1   %x\n",NUM,MCU.USART.uxbr1);
 */
 
 #define SPI_MODE_UPDATE(USART,NUM,ME,IE,IFG)                                  \
@@ -184,11 +181,11 @@ do {                                                                          \
                  {                                                            \
                     msp430_interrupt_set(INTR_USART##NUM##_TX);               \
                  }                                                            \
-               HW_DMSG_USART("msp430:usart%d: SPI tx buf -> shifter (%d)\n", \
-			     NUM,MCU.USART.uxtx_shift_delay);		\
-	       VERBOSE(VUART,"msp430:usart%d: SPI send (0x%x,%c) at 0x%04x\n",NUM, \
-		       MCU.USART.uxtxbuf, isprint(MCU.USART.uxtxbuf) ?	\
-		       MCU.USART.uxtxbuf : '.', mcu_get_pc());		\
+               HW_DMSG_USART("msp430:usart%d: SPI tx buf -> shifter (%d)\n",  \
+			     NUM,MCU.USART.uxtx_shift_delay);		      \
+	       HW_SPY("msp430:usart%d: SPI send (0x%x,%c) at 0x%04x\n",NUM,   \
+		       MCU.USART.uxtxbuf, isprint(MCU.USART.uxtxbuf) ?	      \
+		       MCU.USART.uxtxbuf : '.', mcu_get_pc());		      \
             }                                                                 \
          } /* uxtfubuf_full */                                                \
                                                                               \
@@ -268,7 +265,7 @@ do {                                                                          \
           MCU.USART.uxrx_shift_ready = 0;                                     \
           MCU.USART.uxrx_shift_empty = 1;                                     \
           HW_DMSG_USART("msp430:usart%d: SPI rx shifter -> rx buf\n",NUM);    \
-	  VERBOSE(VUART,"msp430:usart%d: SPI receive (0x%x,%c)\n",NUM,	      \
+	  HW_SPY("msp430:usart%d: SPI receive (0x%x,%c)\n",NUM,	              \
                   MCU.USART.uxrxbuf, isgraph(MCU.USART.uxrxbuf) ?	      \
                   MCU.USART.uxrxbuf : '.');	                              \
           MCU.sfr.IFG.b.urxifg##NUM  = 1;                                     \
@@ -342,7 +339,7 @@ do {                                                                          \
                  }                                                            \
                HW_DMSG_USART("msp430:usart%d: UART tx buf -> shifter (delay %d, val %d)\n", \
 			     NUM,MCU.USART.uxtx_shift_delay, MCU.USART.uxtxbuf);            \
-	       VERBOSE(VUART,"msp430:usart%d: UART send (0x%x,%c)\n",NUM,     \
+	       HW_SPY("msp430:usart%d: UART send (0x%x,%c)\n",NUM,            \
                   MCU.USART.uxtxbuf, isgraph(MCU.USART.uxtxbuf) ?             \
                   MCU.USART.uxtxbuf : '.');                                   \
             }                                                                 \
@@ -409,7 +406,7 @@ do {                                                                          \
           MCU.USART.uxrx_shift_ready = 0;                                     \
           MCU.USART.uxrx_shift_empty = 1;                                     \
           HW_DMSG_USART("msp430:usart%d: UART rx shifter -> rx buf\n",NUM);   \
-	  VERBOSE(VUART,"msp430:usart%d: UART receive (0x%x,%c)\n",NUM,       \
+	  HW_SPY("msp430:usart%d: UART receive (0x%x,%c)\n",NUM,              \
                   MCU.USART.uxrxbuf, isgraph(MCU.USART.uxrxbuf) ?             \
                   MCU.USART.uxrxbuf : '.');                                   \
           MCU.sfr.IFG.b.urxifg##NUM  = 1;                                     \
@@ -519,20 +516,20 @@ do {                                                                          \
 /* ************************************************** */
 /* ************************************************** */
 
-#if defined(SPI_SPY_MODE)
-#define SPI_SPY_PRINT_CONFIG(USART,NUM)                                       \
-  SPI_SPY("msp430:usart%d:spi: ============\n",NUM);                          \
-  SPI_SPY("msp430:usart%d:spi:ctl   %x\n",NUM,MCU.USART.uxctl.s);             \
-  SPI_SPY("msp430:usart%d:spi:tctl  %x\n",NUM,MCU.USART.uxtctl.s);            \
-  SPI_SPY("msp430:usart%d:spi:rctl  %x\n",NUM,MCU.USART.uxrctl.s);            \
-  SPI_SPY("msp430:usart%d:spi:br0   %x\n",NUM,MCU.USART.uxbr0);               \
-  SPI_SPY("msp430:usart%d:spi:br1   %x\n",NUM,MCU.USART.uxbr1);               \
-  SPI_SPY("msp430:usart%d:spi:mctl  %x\n",NUM,MCU.USART.uxmctl);              \
-  SPI_SPY("msp430:usart%d:spi:rxbuf %x\n",NUM,MCU.USART.uxrxbuf);             \
-  SPI_SPY("msp430:usart%d:spi:txbuf %x\n",NUM,MCU.USART.uxtxbuf);             \
-  SPI_SPY("msp430:usart%d:spi: ============\n",NUM);                            
+#if defined(HW_SPY_MODE)
+#define HW_SPY_PRINT_CONFIG(USART,NUM)					      \
+  HW_SPY("msp430:usart%d:spi: ============\n",NUM);                           \
+  HW_SPY("msp430:usart%d:spi:ctl   %x\n",NUM,MCU.USART.uxctl.s);              \
+  HW_SPY("msp430:usart%d:spi:tctl  %x\n",NUM,MCU.USART.uxtctl.s);             \
+  HW_SPY("msp430:usart%d:spi:rctl  %x\n",NUM,MCU.USART.uxrctl.s);             \
+  HW_SPY("msp430:usart%d:spi:br0   %x\n",NUM,MCU.USART.uxbr0);                \
+  HW_SPY("msp430:usart%d:spi:br1   %x\n",NUM,MCU.USART.uxbr1);                \
+  HW_SPY("msp430:usart%d:spi:mctl  %x\n",NUM,MCU.USART.uxmctl);               \
+  HW_SPY("msp430:usart%d:spi:rxbuf %x\n",NUM,MCU.USART.uxrxbuf);              \
+  HW_SPY("msp430:usart%d:spi:txbuf %x\n",NUM,MCU.USART.uxtxbuf);              \
+  HW_SPY("msp430:usart%d:spi: ============\n",NUM);                            
 #else                                                                         
-#define SPI_SPY_PRINT_CONFIG(USART,NUM) do {} while(0)
+#define HW_SPY_PRINT_CONFIG(USART,NUM) do {} while(0)
 #endif
 
 #define msp430_usart_set_baudrate(NUM,USART)                                  \
@@ -568,7 +565,7 @@ do {                                                                          \
             MCU.USART.mode = USART_MODE_UART;                                 \
             if (MCU.USART.uxctl.b.sync == 1)                                  \
               {                                                               \
-                SPI_SPY("msp430:usart%d:   switch to USART mode\n",NUM);      \
+                HW_SPY("msp430:usart%d:   switch to USART mode\n",NUM);       \
                 HW_DMSG_USART("msp430:usart%d:   mode   = USART\n",NUM);      \
               }                                                               \
           }                                                                   \
@@ -579,8 +576,8 @@ do {                                                                          \
                 MCU.USART.mode = USART_MODE_SPI;                              \
                 if (MCU.USART.uxctl.b.sync == 0)                              \
                   {                                                           \
-                     SPI_SPY("msp430:usart%d:   switch to SPI mode\n",NUM);   \
-                     SPI_SPY_PRINT_CONFIG(USART,NUM);                         \
+                     HW_SPY("msp430:usart%d:   switch to SPI mode\n",NUM);    \
+                     HW_SPY_PRINT_CONFIG(USART,NUM);                          \
                      HW_DMSG_USART("msp430:usart%d:   mode   = SPI\n",NUM);   \
                   }                                                           \
               }                                                               \
@@ -707,8 +704,8 @@ do {                                                                          \
         etracer_slot_event(ETRACER_PER_ID_MCU_SPI + NUM,                      \
                            ETRACER_PER_EVT_WRITE_COMMAND,                     \
                            ETRACER_PER_ARG_WR_DST_FIFO | ETRACER_ACCESS_LVL_BUS, 0); \
-        SPI_SPY("msp430:usart%d:spi: write byte %x\n",NUM,val & 0xff);        \
-        SPI_SPY_PRINT_CONFIG(USART,NUM);                                      \
+        HW_SPY("msp430:usart%d:spi: write byte %x\n",NUM,val & 0xff);         \
+        HW_SPY_PRINT_CONFIG(USART,NUM);                                       \
         break;                                                                \
       case USART_MODE_I2C:                                                    \
         TRACER_TRACE_USART##NUM(TRACER_I2C_TX_RECV);			      \

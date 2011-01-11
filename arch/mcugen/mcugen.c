@@ -40,7 +40,6 @@ int mcugen_mcu_create(int freq)
   /* tracer_event_add_id */
   mcu_reset();
   mcu_ramctl_init();
-  mcu_print_description();
   return 0;
 }
 

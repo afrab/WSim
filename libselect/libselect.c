@@ -47,23 +47,6 @@
 
 
 /****************************************
- * DEBUG
- * 
- * DMSG is used for general tracer messages
- * while debugging select code
- ****************************************/
-
-// #undef DEBUG
-
-#if defined(DEBUG)
-#define DMSG(x...) VERBOSE(3,x)
-#define DMSG_BK(x...) VERBOSE(3,x)
-#else
-#define DMSG(x...) do {} while(0)
-#define DMSG_BK(x...) do {} while(0)
-#endif
-
-/****************************************
  * For performance purpose and because this
  * is an early version most of the libselect
  * dimensions are fixed

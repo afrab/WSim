@@ -15,8 +15,10 @@
 /***************************************************/
 /***************************************************/
 
+#undef DEBUG
+
 #if defined(DEBUG)
-#define DMSG(x...) VERBOSE(2,x)
+#define DMSG(x...) HW_DMSG(x)
 #else
 #define DMSG(x...) do { } while (0)
 #endif

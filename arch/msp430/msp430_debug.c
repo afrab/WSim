@@ -132,9 +132,9 @@ void msp430_print_registers(int columns)
   int i;
   for(i=0; i < 16; i++)
     {
-      VERBOSE(2," %3s:0x%04x",mcu_regname_str(i),MCU_REGS[i] & 0xffffu);
+      HW_DMSG_MCU(" %3s:0x%04x",mcu_regname_str(i),MCU_REGS[i] & 0xffffu);
       if (((i+1) % columns) == 0)
-	VERBOSE(2,"\n");
+	HW_DMSG_MCU("\n");
     }
 }
 
@@ -146,13 +146,13 @@ void msp430_print_stack(int lines)
 {
   int i;
   uint16_t sp = MCU_REGS[1];
-  VERBOSE(2," stack dump: sp = 0x%04x\n",sp);
+  HW_DMSG_MCU(" stack dump: sp = 0x%04x\n",sp);
 
   for(i = 0; i < lines; i++)
     {
-      uint16_t adr  = sp + 2*(lines-1) - 2*i; 
-      uint16_t data = mcu_jtag_read_word(adr); 
-      VERBOSE(2,"   0x%04x: 0x%04x - %c%c\n", adr, data,
+      UNUSED uint16_t adr  = sp + 2*(lines-1) - 2*i; 
+      UNUSED uint16_t data = mcu_jtag_read_word(adr); 
+      HW_DMSG_MCU("   0x%04x: 0x%04x - %c%c\n", adr, data,
 	      isprint((data >> 8) & 0xff) ? (data >> 8) & 0xff : '.',
 	      isprint((data     ) & 0xff) ? (data     ) & 0xff : '.');
     }

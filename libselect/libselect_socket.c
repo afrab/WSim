@@ -34,7 +34,6 @@
 
 #define LISTENQ 2 // socket listen fifo size (backlog)
 
-#define DMSG_SKT(x...) VERBOSE(11,x)
 
 /* ************************************************** */
 /* ************************************************** */
@@ -111,14 +110,14 @@ libselect_log_connection(struct sockaddr_in *cli)
 
   if (1)
     {
-      VERBOSE(2,"wsim:libselect_socket: connexion opened ");
+      INFO("wsim:libselect:socket: connexion opened ");
 #ifdef INET_NTOP
-      VERBOSE(2,"from %s:%d\n",
+      INFO("from %s:%d\n",
 	       inet_ntop(cli->sin_family,(void*)&cli->sin_addr,
 			 buf_cli,sizeof(buf_cli)),
 	       ntohs(cli->sin_port));
 #else
-      VERBOSE(2,"from %s:%d\n",
+      INFO("from %s:%d\n",
 	       inet_ntoa(cli->sin_addr),
 	       ntohs(cli->sin_port));
 #endif 
@@ -137,7 +136,7 @@ void READ1(char *var, char* delim, int size, int n)
   if ((p = strtok(NULL,delim)) != NULL)
     {
       strncpyz(var, p, size);
-      VERBOSE(2,"libselect:skt: %s\n",var);
+      DMSG_SKT("libselect:skt: %s\n",var);
     }
   else
     {

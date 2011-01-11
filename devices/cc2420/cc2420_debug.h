@@ -7,7 +7,7 @@
  **/
 
 /*
- *  cc1100_debug.h
+ *  cc2420_debug.h
  *  
  *
  *  Created by Nicolas Boulicault on 04/06/07.
@@ -22,12 +22,12 @@
 /***************************************************/
 /***************************************************/
 
-//#define DEBUG
+#undef DEBUG
 
 #if defined(DEBUG)
-#define CC2420_DEBUG(x...)     VERBOSE(2,x)
-#define CC2420_DBG_RX(x...)    VERBOSE(2,x)
-#define CC2420_DBG_TX(x...)    VERBOSE(2,x)
+#define CC2420_DEBUG(x...)     HW_DMSG(x)
+#define CC2420_DBG_RX(x...)    HW_DMSG(x)
+#define CC2420_DBG_TX(x...)    HW_DMSG(x)
 #else
 #define CC2420_DEBUG(x...)     do { } while (0)
 #define CC2420_DBG_RX(x...)    do { } while (0)
@@ -38,38 +38,38 @@
 /***************************************************/
 /***************************************************/
 
-#define CC2420_PINS_DEBUG
-#define CC2420_ACCESS_DEBUG
-#define CC2420_STROBE_DEBUG
-#define CC2420_STATE_DEBUG
-#define _CC2420_MUX_DEBUG
+#define CC2420_DEBUG_PINS
+#define CC2420_DEBUG_ACCESS
+#define CC2420_DEBUG_STROBE
+#define CC2420_DEBUG_STATE
+#define CC2420_DEBUG_MUX
 
-#ifdef CC2420_PINS_DEBUG
-#    define CC2420_DBG_PINS(x...) HW_DMSG(x)
+#ifdef CC2420_DEBUG_PINS
+#    define CC2420_DBG_PINS(x...) CC2420_DEBUG(x)
 #else
 #    define CC2420_DBG_PINS(x...) do { } while (0)
 #endif
 
-#ifdef CC2420_ACCESS_DEBUG
-#    define CC2420_DBG_ACCESS(x...) HW_DMSG(x)
+#ifdef CC2420_DEBUG_ACCESS
+#    define CC2420_DBG_ACCESS(x...) CC2420_DEBUG(x)
 #else
 #    define CC2420_DBG_ACCESS(x...) do { } while (0)
 #endif
 
-#ifdef CC2420_STROBE_DEBUG
-#    define CC2420_DBG_STROBE(x...) HW_DMSG(x)
+#ifdef CC2420_DEBUG_STROBE
+#    define CC2420_DBG_STROBE(x...) CC2420_DEBUG(x)
 #else
 #    define CC2420_DBG_STROBE(x...) do { } while (0)
 #endif
 
-#ifdef CC2420_STATE_DEBUG
-#    define CC2420_DBG_STATE(x...) HW_DMSG(x)
+#ifdef CC2420_DEBUG_STATE
+#    define CC2420_DBG_STATE(x...) CC2420_DEBUG(x)
 #else
 #    define CC2420_DBG_STATE(x...) do { } while (0)
 #endif
 
-#ifdef CC2420_MUX_DEBUG
-#    define CC2420_DBG_MUX(x...) HW_DMSG(x)
+#ifdef CC2420_DEBUG_MUX
+#    define CC2420_DBG_MUX(x...) CC2420_DEBUG(x)
 #else
 #    define CC2420_DBG_MUX(x...) do { } while (0)
 #endif

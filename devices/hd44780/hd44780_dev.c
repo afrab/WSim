@@ -14,11 +14,19 @@
 #include "arch/common/hardware.h"
 #include "devices/hd44780/hd44780_dev.h"
 
+/***************************************************/
+/***************************************************/
+
+#undef DEBUG
+
 #if defined(DEBUG)
-#define HW_DMSG_HD44(x...) VERBOSE(6,x)
+#define HW_DMSG_HD44(x...) HW_DMSG_DEV(x)
 #else
 #define HW_DMSG_HD44(x...) do {} while(0)
 #endif
+
+/***************************************************/
+/***************************************************/
 
 #define HD44_N_LINES     2 
 #define HD44_N_COLS     16 /* 16 char drawn on matrix */

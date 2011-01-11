@@ -14,6 +14,20 @@
 #include "arch/common/hardware.h"
 
 
+/* ************************************************** */
+/* ************************************************** */
+
+#undef DEBUG
+
+#if defined(DEBUG)
+#define LOGPKT_DBG(x...) DMSG_LIB(x) 
+#else
+#define LOGPKT_DBG(x...) do { } while (0)
+#endif 
+
+/* ************************************************** */
+/* ************************************************** */
+
 #undef UNUSED
 #define UNUSED __attribute__((unused))
 
@@ -33,14 +47,6 @@
 #define DEFAULT_LOG_MODE LOG_RX_AND_TX
 
 #define MAXFILENAME 500
-
-#undef DEBUG
-#if defined(DEBUG)
-#define LOGPKT_DBG(x...) VERBOSE(6,x) 
-#else
-#define LOGPKT_DBG(x...) do { } while (0)
-#endif 
-
 
 /* ************************************************** */
 /* ************************************************** */

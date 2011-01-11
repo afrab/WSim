@@ -23,6 +23,17 @@ signal:
   Worldsens   // multicast IP
 */
 
+/****************************************
+ * DEBUG
+ * 
+ * DMSG is used for general tracer messages
+ * while debugging select code
+ ****************************************/
+
+#define DMSG(x...)      DMSG_LIB_SELECT(x)
+#define DMSG_BK(x...)   DMSG_LIB_SELECT(x)
+#define DMSG_SKT(x...)  DMSG_LIB_SELECT(x)
+
 /***************************************************/
 /***************************************************/
 /***************************************************/

@@ -185,7 +185,7 @@ void    msp430_basic_clock_update_done();
 int8_t  msp430_basic_clock_read (uint16_t addr);
 void    msp430_basic_clock_write(uint16_t addr, int8_t val);
 
-#if defined(TRACER_SPEED)
+#if TRACER_SPEED != 0
 void    msp430_basic_clock_speed_tracer_init();
 void    msp430_basic_clock_speed_tracer_update();
 #else

@@ -23,12 +23,40 @@
 /**************************************************/
 /**************************************************/
 /**************************************************/
+/*
+static const int butkey [NB_BUTTONS] = {
+  SDLK_a,
+  SDLK_z,
+  SDLK_e,
+  SDLK_r,
+  SDLK_t,
+  SDLK_y,
+  SDLK_u,
+  SDLK_i
+};
+*/
 
-#if defined(DEBUG)
-#define DMSG_UI(x...) HW_DMSG_UI(x)
-#else
-#define DMSG_UI(x...) do { } while (0)
-#endif
+static const int butkey [NB_BUTTONS] = {
+  SDLK_1,
+  SDLK_2,
+  SDLK_3,
+  SDLK_4,
+  SDLK_5,
+  SDLK_6,
+  SDLK_7,
+  SDLK_8
+};
+
+static const int butcode[NB_BUTTONS] = { 
+  UI_BUTTON_1, 
+  UI_BUTTON_2, 
+  UI_BUTTON_3, 
+  UI_BUTTON_4, 
+  UI_BUTTON_5,
+  UI_BUTTON_6,
+  UI_BUTTON_7,
+  UI_BUTTON_8
+};
 
 /**************************************************/
 /**************************************************/
@@ -70,18 +98,18 @@ void* ui_backend_create(int w, int h, char* title, int *mustlock)
 
   SDL_WM_SetCaption(title,title);
 
-  HW_DMSG_UI("gui:Pixel format 0x%04x\n",
+  DMSG_LIB_UI("gui:Pixel format 0x%04x\n",
 	     (unsigned int)SDL_MapRGB(sdl_screen->format, 250,  250,  250));
-  HW_DMSG_UI("gui:Display %dx%dx%d \n",
+  DMSG_LIB_UI("gui:Display %dx%dx%d \n",
 	     sdl_screen->w, sdl_screen->h, sdl_screen->format->BitsPerPixel);
-  HW_DMSG_UI("gui:   %d bytes per pixel, pitch %d\n", 
+  DMSG_LIB_UI("gui:   %d bytes per pixel, pitch %d\n", 
 	     sdl_screen->format->BytesPerPixel, 
 	     sdl_screen->pitch);
-  HW_DMSG_UI("gui:   mask R 0x%08x G 0x%08x B 0x%08x A 0x%08x\n",
+  DMSG_LIB_UI("gui:   mask R 0x%08x G 0x%08x B 0x%08x A 0x%08x\n",
 	     sdl_screen->format->Rmask, sdl_screen->format->Gmask,
 	     sdl_screen->format->Bmask, sdl_screen->format->Amask);
 
-  HW_DMSG_UI("gui:   colorkey 0x%08x\n", sdl_screen->format->colorkey);
+  DMSG_UI("gui:   colorkey 0x%08x\n", sdl_screen->format->colorkey);
 
   if (SDL_MUSTLOCK(sdl_screen) == 0)
     {
@@ -191,34 +219,34 @@ int ui_backend_update(void* sdl_ptr)
 static void print_modifiers(void)
 {
 	int mod;
-	HW_DMSG_UI(" modifiers:");
+	DMSG_LIB_UI(" modifiers:");
 	mod = SDL_GetModState();
 	if(!mod) {
-		HW_DMSG_UI(" (none)");
+		DMSG_LIB_UI(" (none)");
 		return;
 	}
 	if(mod & KMOD_LSHIFT)
-		HW_DMSG_UI(" LSHIFT");
+		DMSG_LIB_UI(" LSHIFT");
 	if(mod & KMOD_RSHIFT)
-		HW_DMSG_UI(" RSHIFT");
+		DMSG_LIB_UI(" RSHIFT");
 	if(mod & KMOD_LCTRL)
-		HW_DMSG_UI(" LCTRL");
+		DMSG_LIB_UI(" LCTRL");
 	if(mod & KMOD_RCTRL)
-		HW_DMSG_UI(" RCTRL");
+		DMSG_LIB_UI(" RCTRL");
 	if(mod & KMOD_LALT)
-		HW_DMSG_UI(" LALT");
+		DMSG_LIB_UI(" LALT");
 	if(mod & KMOD_RALT)
-		HW_DMSG_UI(" RALT");
+		DMSG_LIB_UI(" RALT");
 	if(mod & KMOD_LMETA)
-		HW_DMSG_UI(" LMETA");
+		DMSG_LIB_UI(" LMETA");
 	if(mod & KMOD_RMETA)
-		HW_DMSG_UI(" RMETA");
+		DMSG_LIB_UI(" RMETA");
 	if(mod & KMOD_NUM)
-		HW_DMSG_UI(" NUM");
+		DMSG_LIB_UI(" NUM");
 	if(mod & KMOD_CAPS)
-		HW_DMSG_UI(" CAPS");
+		DMSG_LIB_UI(" CAPS");
 	if(mod & KMOD_MODE)
-		HW_DMSG_UI(" MODE");
+		DMSG_LIB_UI(" MODE");
 }
 #endif
 
@@ -234,13 +262,13 @@ static void PrintKey(SDL_keysym *sym, int pressed)
 	  {
 	    if (pressed)
 	      {
-		HW_DMSG_UI("Key %s: sym %d keyname %s ", pressed ?  "pressed" : "released",
+		DMSG_LIB_UI("Key %s: sym %d keyname %s ", pressed ?  "pressed" : "released",
 		       sym->sym, SDL_GetKeyName(sym->sym));
 	      }
 	  } 
 	else 
 	  {
-	    HW_DMSG_UI("Unknown Key (scancode = %d) %s ", sym->scancode,
+	    DMSG_LIB_UI("Unknown Key (scancode = %d) %s ", sym->scancode,
 		   pressed ?  "pressed" : "released");
 	  }
 
@@ -250,61 +278,23 @@ static void PrintKey(SDL_keysym *sym, int pressed)
 	    /* Is it a control-character? */
 	    if ( sym->unicode < ' ' ) 
 	      {
-		HW_DMSG_UI(" (^%c)", sym->unicode+'@');
+		DMSG_LIB_UI(" (^%c)", sym->unicode+'@');
 	      } 
 	    else 
 	      {
 #ifdef UNICODE
-		HW_DMSG_UI(" (%c)", sym->unicode);
+		DMSG_LIB_UI(" (%c)", sym->unicode);
 #else
 		/* This is a Latin-1 program, so only show 8-bits */
 		if ( !(sym->unicode & 0xFF00) )
-		  HW_DMSG_UI(" (%c)", sym->unicode);
+		  DMSG_LIB_UI(" (%c)", sym->unicode);
 #endif
 	      }
 	  }
 	print_modifiers();
-	HW_DMSG_UI("\n");
+	DMSG_LIB_UI("\n");
 }
 #endif
-
-/**************************************************/
-/**************************************************/
-/**************************************************/
-/*
-static const int butkey [NB_BUTTONS] = {
-  SDLK_a,
-  SDLK_z,
-  SDLK_e,
-  SDLK_r,
-  SDLK_t,
-  SDLK_y,
-  SDLK_u,
-  SDLK_i
-};
-*/
-
-static const int butkey [NB_BUTTONS] = {
-  SDLK_1,
-  SDLK_2,
-  SDLK_3,
-  SDLK_4,
-  SDLK_5,
-  SDLK_6,
-  SDLK_7,
-  SDLK_8
-};
-
-static const int butcode[NB_BUTTONS] = { 
-  UI_BUTTON_1, 
-  UI_BUTTON_2, 
-  UI_BUTTON_3, 
-  UI_BUTTON_4, 
-  UI_BUTTON_5,
-  UI_BUTTON_6,
-  UI_BUTTON_7,
-  UI_BUTTON_8
-};
 
 /**************************************************/
 /**************************************************/
@@ -355,9 +345,9 @@ int ui_backend_getevent(void* sdl_ptr, uint32_t *b_up, uint32_t* b_down)
 	  break;
 
 	case SDL_QUIT:
-	  HW_DMSG_UI("==============\n");
-	  HW_DMSG_UI("== UI  quit ==\n");
-	  HW_DMSG_UI("==============\n");
+	  DMSG_LIB_UI("==============\n");
+	  DMSG_LIB_UI("== UI  quit ==\n");
+	  DMSG_LIB_UI("==============\n");
 	  ret = UI_EVENT_QUIT;
 	  break;
 

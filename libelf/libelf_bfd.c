@@ -38,7 +38,7 @@
 #define DEBUG_BFD
 
 #ifdef DEBUG_BFD
-#    define HW_DMSG_MBFD(l,x...) VERBOSE(l,x)
+#    define HW_DMSG_MBFD(l,x...) DMSG_LIB(x)
 #else
 #    define HW_DMSG_MBFD(x...)   do { } while (0)
 #endif

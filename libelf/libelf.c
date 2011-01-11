@@ -68,25 +68,25 @@ void libelf_dump_section(uint8_t* data, uint32_t addr, uint32_t size, int maxlin
   
   for (line = 0; (line < maxlines) && (((unsigned)line)*2*DUMP_COLS < size); line ++)
     {
-      uint32_t laddr = addr + line * 2 * DUMP_COLS;
-      OUTPUT("%04x  ",laddr);
+      UNUSED uint32_t laddr = addr + line * 2 * DUMP_COLS;
+      DMSG_LIB_ELF_DMP("%04x  ",laddr);
       
       for(i=0; i<2; i++)
 	{
 	  for(col = 0; col < DUMP_COLS; col ++)
 	    {
-	      OUTPUT("%02x ",data[addr + (line*2+i)*(DUMP_COLS) + col]);
+	      DMSG_LIB_ELF_DMP("%02x ",data[addr + (line*2+i)*(DUMP_COLS) + col]);
 	    }
-	  OUTPUT(" ");
+	  DMSG_LIB_ELF_DMP(" ");
 	}
 
-      OUTPUT("|");
+      DMSG_LIB_ELF_DMP("|");
       for(col = 0; col < 2*DUMP_COLS; col ++)
 	{
-	  char c = data[addr + line * 2 * DUMP_COLS + col];
-	  OUTPUT("%c",(isprint((unsigned char)c) ? c : '.'));
+	  UNUSED char c = data[addr + line * 2 * DUMP_COLS + col];
+	  DMSG_LIB_ELF_DMP("%c",(isprint((unsigned char)c) ? c : '.'));
 	}
-      OUTPUT("|\n");
+      DMSG_LIB_ELF_DMP("|\n");
     }
   
 }
@@ -108,10 +108,10 @@ struct section_info_t {
 static struct section_info_t secinfo[SECTION_NUMBER];
 
 
-int libelf_set_section_info(int UNUSED level, int i,char *name, int addr, int offset, int size)
+int libelf_set_section_info(int i,char *name, int addr, int offset, int size)
 {
   /*
-    VERBOSE(level,"libelf:section:reg [%02d] name %10s: addr %06x, offset %04x, size %04x\n",
+    DMSG_LIB_ELF("libelf:section:reg [%02d] name %10s: addr %06x, offset %04x, size %04x\n",
     i,name,addr,offset,size);
   */
 

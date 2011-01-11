@@ -121,7 +121,7 @@ void   seg7_img_draw  (struct seg7_img_t *img, int value)
 /* ************************************************** */
 /* ************************************************** */
 
-#define HW_DEBUG_7SEG(x...) VERBOSE(10,x)
+#define HW_DEBUG_7SEG(x...) MESSAGE(x)
 
 void
 seg7_img_print(struct seg7_img_t *img)

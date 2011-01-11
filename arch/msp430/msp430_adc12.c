@@ -17,13 +17,12 @@
 /* ************************************************** */
 /* ************************************************** */
 
-#define ADC12_VERBOSE_LEVEL 4
-#define ADC12_DEBUG_LEVEL_2 
+#define HW_DMSG_ADC12(x...) HW_DMSG_MCUDEV(x)
 
-#define HW_DMSG_ADC12(x...) VERBOSE(ADC12_VERBOSE_LEVEL,x)
+#define ADC12_DEBUG_LEVEL_2 0
 
-#if defined(ADC12_DEBUG_LEVEL_2)
-#define HW_DMSG_2_DBG(x...) VERBOSE(ADC12_VERBOSE_LEVEL,x)
+#if ADC12_DEBUG_LEVEL_2 != 0
+#define HW_DMSG_2_DBG(x...) HW_DMSG_ADC12(x)
 #else
 #define HW_DMSG_2_DBG(x...) do { } while (0)
 #endif
@@ -753,7 +752,7 @@ int8_t msp430_adc12_read8(uint16_t addr)
 		    msg, sarg, ref-> arg, val-> arg );			\
   } while (0)
 
-void msp430_adc12_ctl0details(char* msg, uint16_t *c1, int16_t *c2)
+void msp430_adc12_ctl0details(char UNUSED *msg, uint16_t UNUSED *c1, int16_t UNUSED *c2)
 {
   struct adc12ctl0_t *ref = (struct adc12ctl0_t*)c1;
   struct adc12ctl0_t *val = (struct adc12ctl0_t*)c2;
@@ -770,7 +769,7 @@ void msp430_adc12_ctl0details(char* msg, uint16_t *c1, int16_t *c2)
   WR_IF_MOD("adc12sc"    ,adc12sc);
 }
 
-void msp430_adc12_ctl1details(char* msg, uint16_t *c1, int16_t *c2)
+void msp430_adc12_ctl1details(char UNUSED *msg, uint16_t UNUSED *c1, int16_t UNUSED *c2)
 {
   struct adc12ctl1_t *ref = (struct adc12ctl1_t*) c1;
   struct adc12ctl1_t *val = (struct adc12ctl1_t*) c2;
@@ -951,7 +950,7 @@ void msp430_adc12_write16(uint16_t addr, int16_t val)
 /* ************************************************** */
 /* ************************************************** */
 
-void msp430_adc12_mctl_details(int n, struct adc12mctlx_t *mctl)
+void msp430_adc12_mctl_details(int UNUSED n, struct adc12mctlx_t UNUSED *mctl)
 {
   HW_DMSG_ADC12("msp430:adc12:    mctl%d  eos :%d\n",n,mctl->eos);
   HW_DMSG_ADC12("msp430:adc12:    mctl%d  sref:%x\n",n,mctl->sref);

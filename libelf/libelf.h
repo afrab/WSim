@@ -32,7 +32,7 @@ int      libelf_symtab_find_size_by_name(elf32_t elf, const char* name);
 /* ************************************************** */
 /* ************************************************** */
 
-int      libelf_set_section_info   (int level, int i, char *name, int addr, int offset, int size);
+int      libelf_set_section_info   (int i, char *name, int addr, int offset, int size);
 void     libelf_dump_section       (uint8_t* data, uint32_t start, uint32_t size, int maxlines);
 int      libelf_get_section_offset (const char* name);
 

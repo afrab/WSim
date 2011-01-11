@@ -145,7 +145,6 @@ int msp430_mcu_create(int xt1)
 {
   int ret = 0;
 
-  HW_DMSG_MSP("== MSP430 creation\n");
   MCU_INSN_CPT  = 0;
   MCU_CYCLE_CPT = 0;
   ret += msp430_io_init();
@@ -156,8 +155,6 @@ int msp430_mcu_create(int xt1)
 #endif
 
   ret += mcu_ramctl_init();
-  mcu_print_description();
-  HW_DMSG_MSP("==\n");
 
 #if defined(__msp430_have_adc12)
   ret += msp430_adc12_init();

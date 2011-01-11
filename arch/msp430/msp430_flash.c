@@ -17,13 +17,14 @@
 /* if the flash controller is used with a correct software */
 /***********************************************************/
 
+#undef DEBUG
 
-#define F2L 2 /* log level */
-
-#if defined(DEBUG)
-#define HW_TDBG(x...)  HW_DMSG(x)
+#if defined(DEBUG) 
+#  define  HW_TDBG(x...)  HW_DMSG_MCUDEV(x)
+#  define  FLASH_DMSG(x...)     HW_DMSG_MCUDEV(x)
 #else
-#define HW_TDBG(x...)  do { } while (0)
+#  define  HW_TDBG(x...)  do { } while (0)
+#  define  FLASH_DMSG(x...)     do { } while (0)
 #endif
 
 #if defined(__msp430_have_flash)
@@ -79,7 +80,7 @@ void msp430_flash_update_wait(void)
 	{
 	  if (MCUFLASH.fctl1.b.blkwrt == 0)
 	    {
-	      VERBOSE(F2L,"msp430:flash: == operation done, busy == 0\n");
+	      FLASH_DMSG("msp430:flash: == operation done, busy == 0\n");
 	      msp430_io_set_flash_read_normal (ADDR_FLASH_START, ADDR_FLASH_STOP);
 	      msp430_io_set_flash_write_normal(ADDR_FLASH_START, ADDR_FLASH_STOP);
 	      msp430_io_set_flash_write_normal(ADDR_NVM_START,   ADDR_NVM_STOP  );
@@ -90,11 +91,11 @@ void msp430_flash_update_wait(void)
 	    {
 	      if (MCUFLASH.fctl3.b.wait == 0)
 		{
-		  VERBOSE(F2L,"msp430:flash:   write done, wait = 1\n");
+		  FLASH_DMSG("msp430:flash:   write done, wait = 1\n");
 		  MCUFLASH.fctl3.b.wait = 1;
 		  if (MCUFLASH.flash_write_fst == 2)
 		    {
-		      VERBOSE(F2L,"msp430:flash: == operation done, busy == 0\n");
+		      FLASH_DMSG("msp430:flash: == operation done, busy == 0\n");
 		      msp430_io_set_flash_read_normal (ADDR_FLASH_START, ADDR_FLASH_STOP);
 		      msp430_io_set_flash_write_normal(ADDR_FLASH_START, ADDR_FLASH_STOP);
 		      msp430_io_set_flash_write_normal(ADDR_NVM_START,   ADDR_NVM_STOP  );
@@ -204,22 +205,22 @@ void msp430_flash_write (uint16_t addr, int16_t val)
 	if ((MCUFLASH.fctl1.b.blkwrt != fctl1.b.blkwrt) ||
 	    (MCUFLASH.fctl1.b.wrt    != fctl1.b.wrt))
 	  {
-	    VERBOSE(F2L,"msp430:flash:   blkwrt and wrt bits modified (%d,%d)\n",
+	    FLASH_DMSG("msp430:flash:   blkwrt and wrt bits modified (%d,%d)\n",
 		    fctl1.b.blkwrt, fctl1.b.wrt);
 	    MCUFLASH.flash_write_fst  = 0;
 	    switch ((fctl1.b.blkwrt << 1) | fctl1.b.wrt)
 	      {
 	      case 0:
-		VERBOSE(F2L,"msp430:flash:    -- no write\n");
+		FLASH_DMSG("msp430:flash:    -- no write\n");
 		break;
 	      case 1:
-		VERBOSE(F2L,"msp430:flash:    -- wrt == 1, write bit/byte only\n");
+		FLASH_DMSG("msp430:flash:    -- wrt == 1, write bit/byte only\n");
 		break;
 	      case 2:
-		VERBOSE(F2L,"msp430:flash:    -- wrtblk == 1 && wrt == 0, waiting wrt = 1\n");
+		FLASH_DMSG("msp430:flash:    -- wrtblk == 1 && wrt == 0, waiting wrt = 1\n");
 		break;
 	      case 3:
-		VERBOSE(F2L,"msp430:flash:    -- block write prepared\n");
+		FLASH_DMSG("msp430:flash:    -- block write prepared\n");
 		break;
 	      }
 	  }
@@ -228,21 +229,21 @@ void msp430_flash_write (uint16_t addr, int16_t val)
 	    (MCUFLASH.fctl1.b.MERAS != fctl1.b.MERAS))
 	  {
 	    /* start to wait the dummy write or clear */
-	    VERBOSE(F2L,"msp430:flash:   ERASE and MERAS bits modified (%d,%d)\n",
+	    FLASH_DMSG("msp430:flash:   ERASE and MERAS bits modified (%d,%d)\n",
 		    fctl1.b.ERASE, fctl1.b.MERAS);
 	    switch ((fctl1.b.MERAS << 1) | fctl1.b.ERASE)
 	      {
 	      case 0:
-		VERBOSE(F2L,"msp430:flash:    -- no erase\n");
+		FLASH_DMSG("msp430:flash:    -- no erase\n");
 		break;
 	      case 1:
-		VERBOSE(F2L,"msp430:flash:    -- erase individual segment only\n");
+		FLASH_DMSG("msp430:flash:    -- erase individual segment only\n");
 		break;
 	      case 2:
-		VERBOSE(F2L,"msp430:flash:    -- erase all main memory segments\n");
+		FLASH_DMSG("msp430:flash:    -- erase all main memory segments\n");
 		break;
 	      case 3:
-		VERBOSE(F2L,"msp430:flash:    -- erase all main and information memory segments\n");
+		FLASH_DMSG("msp430:flash:    -- erase all main and information memory segments\n");
 		break;
 	      }
 	  }
@@ -251,7 +252,7 @@ void msp430_flash_write (uint16_t addr, int16_t val)
 	    (fctl1.b.wrt == 1) || (fctl1.b.blkwrt == 1))
 	  {
 	    /* start to wait the dummy write or clear */
-	    VERBOSE(F2L,"msp430:flash:   write/erase prepared, waiting for dummy write\n");
+	    FLASH_DMSG("msp430:flash:   write/erase prepared, waiting for dummy write\n");
 	    msp430_io_set_flash_write_start_erase(ADDR_FLASH_START, ADDR_FLASH_STOP);
 	    msp430_io_set_flash_write_start_erase(ADDR_NVM_START,   ADDR_NVM_STOP  );
 	  }
@@ -282,7 +283,7 @@ void msp430_flash_write (uint16_t addr, int16_t val)
 
 	if (MCUFLASH.fctl2.b.fnx != fctl2.b.fnx)
 	  {
-	    VERBOSE(F2L,"msp430:flash: clock divider set to %d (%d+1)\n",
+	    FLASH_DMSG("msp430:flash: clock divider set to %d (%d+1)\n",
 		    fctl2.b.fnx + 1, fctl2.b.fnx);
 	  }
 	if (MCUFLASH.fctl2.b.fsselx != fctl2.b.fsselx)
@@ -290,16 +291,16 @@ void msp430_flash_write (uint16_t addr, int16_t val)
 	    switch (fctl2.b.fsselx)
 	      {
 	      case 0:
-		VERBOSE(F2L,"msp430:flash: clock source from ACLK\n");
+		FLASH_DMSG("msp430:flash: clock source from ACLK\n");
 		break;
 	      case 1:
-		VERBOSE(F2L,"msp430:flash: clock source from MCLK\n");
+		FLASH_DMSG("msp430:flash: clock source from MCLK\n");
 		break;
 	      case 2:
-		VERBOSE(F2L,"msp430:flash: clock source from SMCLK\n");
+		FLASH_DMSG("msp430:flash: clock source from SMCLK\n");
 		break; 
 	      case 3: 
-		VERBOSE(F2L,"msp430:flash: clock source from SMCLK\n");
+		FLASH_DMSG("msp430:flash: clock source from SMCLK\n");
 		break; 
 	      }
 	  }
@@ -322,7 +323,7 @@ void msp430_flash_write (uint16_t addr, int16_t val)
 
 	if (fctl3.b.EMEX == 1)
 	  {
-	    VERBOSE(F2L,"msp430:flash:    EMEX bit is set to 1, emergency exit\n");
+	    FLASH_DMSG("msp430:flash:    EMEX bit is set to 1, emergency exit\n");
 	    msp430_io_set_flash_read_normal (ADDR_FLASH_START, ADDR_FLASH_STOP);
 	    msp430_io_set_flash_write_normal(ADDR_FLASH_START, ADDR_FLASH_STOP);
 	    msp430_io_set_flash_write_normal(ADDR_NVM_START,   ADDR_NVM_STOP  );
@@ -332,7 +333,7 @@ void msp430_flash_write (uint16_t addr, int16_t val)
 	  {
 	    if (MCUFLASH.fctl3.b.lock != fctl3.b.lock)
 	      {
-		VERBOSE(F2L,"msp430:flash:   lock bit set to %d\n",fctl3.b.lock);
+		FLASH_DMSG("msp430:flash:   lock bit set to %d\n",fctl3.b.lock);
 	      }
 
 	    // remove wait and busy from val
@@ -367,13 +368,13 @@ void msp430_flash_start_erase (uint16_t u16addr, int size, uint32_t val)
   switch (size)
     {
     case 1: 
-      VERBOSE(F2L,"msp430:flash: == start erase dummy write8  at [0x%04x] = 0x%02x\n",addr,val & 0xff);
+      FLASH_DMSG("msp430:flash: == start erase dummy write8  at [0x%04x] = 0x%02x\n",addr,val & 0xff);
       break;
     case 2:
-      VERBOSE(F2L,"msp430:flash: == start erase dummy write16 at [0x%04x] = 0x%04x\n",addr,val & 0xffff);
+      FLASH_DMSG("msp430:flash: == start erase dummy write16 at [0x%04x] = 0x%04x\n",addr,val & 0xffff);
       break;
     default:
-      VERBOSE(F2L,"msp430:flash: == start erase dummy write16 at [0x%04x] = 0x%04x\n",addr,val & 0xffff);
+      FLASH_DMSG("msp430:flash: == start erase dummy write16 at [0x%04x] = 0x%04x\n",addr,val & 0xffff);
       break;
     }
 
@@ -383,14 +384,14 @@ void msp430_flash_start_erase (uint16_t u16addr, int size, uint32_t val)
 	{
 	  if (MCUFLASH.flash_write_fst == 0)
 	    {
-	      VERBOSE(F2L,"msp430:flash:   write block [0x%04x] = 0x%04x (first byte, %d)\n",
+	      FLASH_DMSG("msp430:flash:   write block [0x%04x] = 0x%04x (first byte, %d)\n",
 		      u16addr&0xffff,val&0xffff,size);
 	      MCUFLASH.flash_ticks_left = FLASH_WRITE_TIMING_FSTBYTE;
 	      MCUFLASH.flash_write_fst = 1;
 	    }
 	  else
 	    {
-	      VERBOSE(F2L,"msp430:flash:   write block [0x%04x] = 0x%04x (next byte, %d)\n",
+	      FLASH_DMSG("msp430:flash:   write block [0x%04x] = 0x%04x (next byte, %d)\n",
 		      u16addr&0xffff,val&0xffff,size);
 	      if ((u16addr & 0x3f) != 0x3f) 
 		{
@@ -418,12 +419,12 @@ void msp430_flash_start_erase (uint16_t u16addr, int size, uint32_t val)
 	  switch (size)
 	    {
 	    case 1:
-	      VERBOSE(F2L,"msp430:flash:   write byte [0x%04x] = 0x%02x\n",u16addr&0xffff,val&0xff);
+	      FLASH_DMSG("msp430:flash:   write byte [0x%04x] = 0x%02x\n",u16addr&0xffff,val&0xff);
 	      mcu_jtag_write_byte(u16addr,val&0xff);
 	      break;
 	    case 2:
 	    default:
-	      VERBOSE(F2L,"msp430:flash:   write word [0x%04x] = 0x%04x\n",u16addr&0xffff,val&0xffff);
+	      FLASH_DMSG("msp430:flash:   write word [0x%04x] = 0x%04x\n",u16addr&0xffff,val&0xffff);
 	      mcu_jtag_write_word(u16addr,val);
 	      break;
 	    }
@@ -449,7 +450,7 @@ void msp430_flash_start_erase (uint16_t u16addr, int size, uint32_t val)
 	  MCUFLASH.flash_ticks_left = 0;
 	  region_start = 1;
 	  region_stop  = 0;
-	  VERBOSE(F2L,"msp430:flash:    -- no erase \n");
+	  FLASH_DMSG("msp430:flash:    -- no erase \n");
 	  break;
 	  
 	case 1:
@@ -468,7 +469,7 @@ void msp430_flash_start_erase (uint16_t u16addr, int size, uint32_t val)
 	    {
 	      ERROR("msp430:flash: wrong segment address range for erase\n");
 	    }
-	  VERBOSE(F2L,"msp430:flash:    -- erase individual segment only [0x%04x-0x%04x]\n",
+	  FLASH_DMSG("msp430:flash:    -- erase individual segment only [0x%04x-0x%04x]\n",
 		  region_start, region_stop);
 	  break;
 	  
@@ -476,14 +477,14 @@ void msp430_flash_start_erase (uint16_t u16addr, int size, uint32_t val)
 	  MCUFLASH.flash_ticks_left = FLASH_ERASE_TIMING_MASS;
 	  region_start = ADDR_FLASH_START;
 	  region_stop  = ADDR_FLASH_STOP;
-	  VERBOSE(F2L,"msp430:flash:    -- erase all main memory segments\n");
+	  FLASH_DMSG("msp430:flash:    -- erase all main memory segments\n");
 	  break;
 	  
 	case 3:
 	  MCUFLASH.flash_ticks_left = FLASH_ERASE_TIMING_MASS;
 	  region_start = ADDR_FLASH_START;
 	  region_stop  = ADDR_FLASH_STOP;
-	  VERBOSE(F2L,"msp430:flash:    -- erase all main and information memory segments\n");
+	  FLASH_DMSG("msp430:flash:    -- erase all main and information memory segments\n");
 	  for(wptr=ADDR_NVM_START; wptr<=ADDR_NVM_STOP; wptr++)
 	    {
 	      mcu_jtag_write_byte(wptr,0xff);

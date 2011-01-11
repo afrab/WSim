@@ -108,7 +108,7 @@ gdbremote_getpacket (struct gdbremote_t *gdb, char* buffer, int size)
 
   if (count == size)
     {
-      DMSG_GDB("GDB:rcv: packet too long (limit = %d)\n",size);
+      DMSG_LIB_GDB("GDB:rcv: packet too long (limit = %d)\n",size);
       return GDB_PKT_READ_ERROR;
     }
 
@@ -169,7 +169,7 @@ gdbremote_putpacket (struct gdbremote_t *gdb, char *buffer)
   int retry = -1;
   unsigned char cret;
   /*  $<packet info>#<checksum>. */
-  DMSG_GDB_CMD("GDB:snd: reply -%s-\n",buffer);
+  DMSG_LIB_GDB_CMD("GDB:snd: reply -%s-\n",buffer);
   do
     {
       int count;
@@ -222,7 +222,7 @@ void gdbremote_putpacket_hexencoded (struct gdbremote_t *gdb, char *buffer)
 
 #define DONT_SUPPORT                                   \
   do {                                                 \
-    DMSG_GDB("GDB:     unsupported command\n");        \
+    DMSG_LIB_GDB("GDB:     unsupported command\n");        \
     gdbremote_putpacket(gdb,"");                       \
   } while (0) 
 
@@ -286,7 +286,7 @@ gdbremote_general_query_packet(struct gdbremote_t *gdb, char* buffer, int UNUSED
   if (strcmp(token,"C") == 0)
     {
       /* query current thread id */
-      DMSG_GDB_CMD("GDB:     query current thread id\n");
+      DMSG_LIB_GDB_CMD("GDB:     query current thread id\n");
       gdbremote_putpacket(gdb,"QC01");
     }
   else if (strcmp(token,"Offsets") == 0)
@@ -325,7 +325,7 @@ gdbremote_general_query_packet(struct gdbremote_t *gdb, char* buffer, int UNUSED
     }
   else
     {
-      DMSG_GDB_CMD("GDB:   unknown param name %s\n",token);
+      DMSG_LIB_GDB_CMD("GDB:   unknown param name %s\n",token);
       DONT_SUPPORT;
     }
 }
@@ -352,7 +352,7 @@ gdbremote_read_memory(struct gdbremote_t *gdb, char *buffer, int UNUSED size)
   length = strtol(token,NULL,16);
   /* should check packet length */
 
-  DMSG_GDB_CMD("GDB:     read memory at addr 0x%04x length 0x%x\n",addr,length);
+  DMSG_LIB_GDB_CMD("GDB:     read memory at addr 0x%04x length 0x%x\n",addr,length);
 
   for(i=0; i<length; i++)
     {
@@ -386,7 +386,7 @@ gdbremote_write_memory(struct gdbremote_t *gdb, char *buffer, int UNUSED size)
   /* should check packet length */
   token  = strtok(NULL,delim);
 
-  DMSG_GDB_CMD("GDB:     write memory at addr 0x%04x length 0x%x = %s\n",addr,length,token);
+  DMSG_LIB_GDB_CMD("GDB:     write memory at addr 0x%04x length 0x%x = %s\n",addr,length,token);
 
   for(i=0; i< length; i++)
     {
@@ -420,7 +420,7 @@ static void gdbremote_write_memory_binary(struct gdbremote_t *gdb, char *buffer,
   length = strtol(token,NULL,16);
   /* should check packet length */
 
-  DMSG_GDB_CMD("GDB:     write binary at addr 0x%04x length 0x%x = -%s-\n",addr,length,token);
+  DMSG_LIB_GDB_CMD("GDB:     write binary at addr 0x%04x length 0x%x = -%s-\n",addr,length,token);
 
   /* gdbremote_putpacket(gdb,"OK"); */
   DONT_SUPPORT;
@@ -532,7 +532,7 @@ static void gdbremote_write_one_register(struct gdbremote_t *gdb, char *buffer, 
   token  = strtok(NULL,delim);
   regval = gdbremote_4hex2short(token); /* ASSUME: register size == 2 */
 
-  /*  DMSG_GDB_CMD("   reg[%02x] = %04x \n",numreg,(high_byte << 8) | low_byte); */
+  /*  DMSG_LIB_GDB_CMD("   reg[%02x] = %04x \n",numreg,(high_byte << 8) | low_byte); */
   mcu_register_set(numreg, regval);
 
   gdbremote_putpacket(gdb,"OK");
@@ -654,13 +654,13 @@ gdbremote_single_step(struct gdbremote_t *gdb, char *buffer, int UNUSED size)
       /* change the resume address */
       uint16_t s;
       s = gdbremote_4hex2short(token);
-      DMSG_GDB_CMD("GDB:     resume at address %s\n",token);
-      DMSG_GDB("gdbremote: resume at PC = 0x%x, current = 0x%04x\n",s,mcu_get_pc());
+      DMSG_LIB_GDB_CMD("GDB:     resume at address %s\n",token);
+      DMSG_LIB_GDB("gdbremote: resume at PC = 0x%x, current = 0x%04x\n",s,mcu_get_pc());
       mcu_set_pc_next(s);
     }
   else
     {
-      DMSG_GDB("gdbremote: single step at PC current = 0x%04x , sig = 0x%0x %s\n",mcu_get_pc(),
+      DMSG_LIB_GDB("gdbremote: single step at PC current = 0x%04x , sig = 0x%0x %s\n",mcu_get_pc(),
 	       mcu_signal_get(),mcu_signal_str());
     }
 
@@ -671,15 +671,15 @@ gdbremote_single_step(struct gdbremote_t *gdb, char *buffer, int UNUSED size)
   mcu_signal_add(SIG_GDB_SINGLE); 
   machine_run_free();
 
-  DMSG_GDB("gdbremote: exit single step at 0x%04x (next 0x%4x, reg[0] 0x%04x) with signal = 0x%x (%s)\n",
+  DMSG_LIB_GDB("gdbremote: exit single step at 0x%04x (next 0x%4x, reg[0] 0x%04x) with signal = 0x%x (%s)\n",
 	   mcu_get_pc(),mcu_get_pc_next(),mcu_register_get(0),mcu_signal_get(),mcu_signal_str());
   
   if ((mcu_signal_get() & ~SIG_GDB_SINGLE) != 0) 
     {
       /* we expected only GDB_SINGLE */
-      DMSG_GDB("gdbremote: ==================================== \n");
-      DMSG_GDB("gdbremote: out of single step with signal %s\n",mcu_signal_str());
-      DMSG_GDB("gdbremote: ==================================== \n");
+      DMSG_LIB_GDB("gdbremote: ==================================== \n");
+      DMSG_LIB_GDB("gdbremote: out of single step with signal %s\n",mcu_signal_str());
+      DMSG_LIB_GDB("gdbremote: ==================================== \n");
     }
 
   mcu_signal_remove(SIG_GDB_SINGLE);     /* step breakpoint        */
@@ -736,13 +736,13 @@ gdbremote_continue(struct gdbremote_t *gdb, char UNUSED *buffer, int UNUSED size
       /* change the resume address */
       uint16_t s;
       s = gdbremote_4hex2short(token);
-      DMSG_GDB_CMD("GDB:     continue at address %s\n",token);
-      DMSG_GDB("gdbremote: continue at PC = 0x%04x, current = 0x%04x\n",s,mcu_get_pc());
+      DMSG_LIB_GDB_CMD("GDB:     continue at address %s\n",token);
+      DMSG_LIB_GDB("gdbremote: continue at PC = 0x%04x, current = 0x%04x\n",s,mcu_get_pc());
       mcu_set_pc_next(s);
     }
   else
     {
-      DMSG_GDB("gdbremote: continue at PC current = 0x%04x\n",mcu_get_pc());
+      DMSG_LIB_GDB("gdbremote: continue at PC current = 0x%04x\n",mcu_get_pc());
     }
 
 #define GDB_STOP_BITMASK ~(SIG_WORLDSENS_IO)
@@ -757,7 +757,7 @@ gdbremote_continue(struct gdbremote_t *gdb, char UNUSED *buffer, int UNUSED size
 
   assert(libselect_fd_unregister(gdb->skt.socket) != -1);
 
-  DMSG_GDB("gdbremote: exit continue at 0x%04x with signal = 0x%x (%s)\n",
+  DMSG_LIB_GDB("gdbremote: exit continue at 0x%04x with signal = 0x%x (%s)\n",
 	   mcu_get_pc(),mcu_signal_get(),mcu_signal_str());
 
   if ((mcu_signal_get() & SIG_MCU) != 0)
@@ -785,7 +785,7 @@ gdbremote_continue(struct gdbremote_t *gdb, char UNUSED *buffer, int UNUSED size
 	  ctl = mcu_ramctl_read_ctl((uint16_t)i);
 	  if ((ctl & MAC_BREAK_WATCH_FETCH) != 0)
 	    {
-	      DMSG_GDB("gdbremote: break registered at 0x%04x\n",i & 0xffff);
+	      DMSG_LIB_GDB("gdbremote: break registered at 0x%04x\n",i & 0xffff);
 	    }
 	}
     }
@@ -805,7 +805,7 @@ gdbremote_continue(struct gdbremote_t *gdb, char UNUSED *buffer, int UNUSED size
 int breakpoint_insert(int type, uint32_t addr, int length)
 {
   int i;
-  DMSG_GDB_CMD("GDB:     insert breakpoint at 0x%x size %d\n", addr,length);
+  DMSG_LIB_GDB_CMD("GDB:     insert breakpoint at 0x%x size %d\n", addr,length);
 
   for(i=0; i<length; i++)
     {
@@ -819,7 +819,7 @@ int breakpoint_insert(int type, uint32_t addr, int length)
 int breakpoint_delete(int type, uint32_t addr, int length)
 {
   int i;
-  DMSG_GDB_CMD("GDB:     delete breakpoint at 0x%x size %d\n", addr,length);
+  DMSG_LIB_GDB_CMD("GDB:     delete breakpoint at 0x%x size %d\n", addr,length);
   for(i=0; i<length; i++)
     {
       mcu_ramctl_unset_bp(addr + i, type);
@@ -908,7 +908,7 @@ gdbremote_getcmd(struct gdbremote_t *gdb)
       return GDB_CMD_DETACH;
     }
 
-  DMSG_GDB_CMD("GDB:rcv: received pkt -%s-\n",buffer);
+  DMSG_LIB_GDB_CMD("GDB:rcv: received pkt -%s-\n",buffer);
 
   switch (buffer[0])
     {
@@ -918,23 +918,23 @@ gdbremote_getcmd(struct gdbremote_t *gdb)
 
     case 'c': /* c addr : continue at address */
       /* Continue. addr is address to resume. If addr is omitted, resume at current address. */
-      DMSG_GDB_CMD("GDB:     ** continue at address **\n");
+      DMSG_LIB_GDB_CMD("GDB:     ** continue at address **\n");
       gdbremote_continue(gdb,buffer,size);
       break;
 
     case 's': /* s addr : stop */
       /* Single step. addr is the address at which to resume. If addr is omitted, resume at same address. */
-      DMSG_GDB_CMD("GDB:     ** single step **\n");
+      DMSG_LIB_GDB_CMD("GDB:     ** single step **\n");
       gdbremote_single_step(gdb,buffer,size);
       break;
 
     case 'g': /* read general registers */
-      DMSG_GDB_CMD("GDB:     read general registers\n");
+      DMSG_LIB_GDB_CMD("GDB:     read general registers\n");
       gdbremote_read_registers(gdb);
       break;
 
     case 'G': /* write general registers */
-      DMSG_GDB_CMD("GDB:     write general registers\n");
+      DMSG_LIB_GDB_CMD("GDB:     write general registers\n");
       gdbremote_write_registers(gdb,buffer,size);
       break;
 
@@ -963,7 +963,7 @@ gdbremote_getcmd(struct gdbremote_t *gdb)
       break;
 
     case 'D': /* detach gdb from the remote target */
-      DMSG_GDB_CMD("  detach gdb from remote target");
+      DMSG_LIB_GDB_CMD("  detach gdb from remote target");
       libselect_skt_close_client(& gdb->skt);
       gdbremote_putpacket(gdb,"OK");
       return GDB_CMD_DETACH;
@@ -978,19 +978,19 @@ gdbremote_getcmd(struct gdbremote_t *gdb)
 	    switch (threadid)
 	      {
 	      case -1: /* all the threads */
-		DMSG_GDB_CMD("GDB:     step and continue thread=%d : all the threads\n",threadid);
+		DMSG_LIB_GDB_CMD("GDB:     step and continue thread=%d : all the threads\n",threadid);
 		gdbremote_putpacket(gdb,"OK");
 		break;
 	      case 0:  /* pick any thread */
-		DMSG_GDB_CMD("GDB:     step and continue thread=%d : pick any thread\n",threadid);
+		DMSG_LIB_GDB_CMD("GDB:     step and continue thread=%d : pick any thread\n",threadid);
 		gdbremote_putpacket(gdb,"OK");
 		break;
 	      case 1:  /* thread 1 */
-		DMSG_GDB_CMD("GDB:     step and continue thread=%d : selected thread\n",threadid);
+		DMSG_LIB_GDB_CMD("GDB:     step and continue thread=%d : selected thread\n",threadid);
 		gdbremote_putpacket(gdb,"OK");
 		break;
 	      default: /* threadid > 1 */
-		DMSG_GDB_CMD("GDB:     step and continue thread=%d : selected thread > 1\n",threadid);
+		DMSG_LIB_GDB_CMD("GDB:     step and continue thread=%d : selected thread > 1\n",threadid);
 		DONT_SUPPORT;
 		break;
 	      }
@@ -1023,28 +1023,28 @@ gdbremote_getcmd(struct gdbremote_t *gdb)
       break;
 
     case 'k': /* kill request */
-      DMSG_GDB_CMD("GDB:     kill gdb from remote target");
+      DMSG_LIB_GDB_CMD("GDB:     kill gdb from remote target");
       libselect_skt_close_client(& gdb->skt);
       return GDB_CMD_KILL;
 
     case 'p': /* read register */
-      DMSG_GDB_CMD("GDB:     read one register\n");
+      DMSG_LIB_GDB_CMD("GDB:     read one register\n");
       gdbremote_read_one_register(gdb,buffer,size);
       break;
 
     case 'P': /* write register */
-      DMSG_GDB_CMD("GDB:     write one register\n");
+      DMSG_LIB_GDB_CMD("GDB:     write one register\n");
       gdbremote_write_one_register(gdb,buffer,size);
       break;
 
     case 'r': /* reset */
-      DMSG_GDB_CMD("GDB:     reset the entire system\n");
+      DMSG_LIB_GDB_CMD("GDB:     reset the entire system\n");
       machine_reset();
       gdbremote_putpacket(gdb,"OK");
       break;
 
     case 'R': /* Restart */
-      DMSG_GDB_CMD("GDB:     restart the program being debugged\n");
+      DMSG_LIB_GDB_CMD("GDB:     restart the program being debugged\n");
       DONT_SUPPORT;
       /*
        * only available in extended mode
@@ -1054,7 +1054,7 @@ gdbremote_getcmd(struct gdbremote_t *gdb)
       break;
 
     case 'S': /* step with signal */
-      DMSG_GDB_CMD("GDB:     step with signal\n");
+      DMSG_LIB_GDB_CMD("GDB:     step with signal\n");
       gdbremote_step_with_signal(gdb,buffer,size);
       break;
 
@@ -1082,7 +1082,7 @@ gdbremote_getcmd(struct gdbremote_t *gdb)
       gdbremote_write_memory_binary(gdb,buffer,size);
       break;
 
-    case 'z': /* DMSG_GDB_CMD("GDB:     remove breakpoint\n");  */
+    case 'z': /* DMSG_LIB_GDB_CMD("GDB:     remove breakpoint\n");  */
 #if defined(HW_BREAKPOINT_SUPPORT)
       gdbremote_breakpoint(gdb,buffer,size);
 #else
@@ -1090,7 +1090,7 @@ gdbremote_getcmd(struct gdbremote_t *gdb)
 #endif
       break;
 
-    case 'Z': /* DMSG_GDB_CMD("GDB:     insert breakpoint\n"); */
+    case 'Z': /* DMSG_LIB_GDB_CMD("GDB:     insert breakpoint\n"); */
 #if defined(HW_BREAKPOINT_SUPPORT)
       gdbremote_breakpoint(gdb,buffer,size);
 #else
@@ -1099,7 +1099,7 @@ gdbremote_getcmd(struct gdbremote_t *gdb)
       break;
 
     default:
-      DMSG_GDB("GDB: *** remote : unknown command\n");
+      DMSG_LIB_GDB("GDB: *** remote : unknown command\n");
       DONT_SUPPORT;
       break;
     }

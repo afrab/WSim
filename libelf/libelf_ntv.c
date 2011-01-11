@@ -14,9 +14,6 @@
 #include "arch/common/hardware.h"
 #include "libelf.h"
 
-#define VELF 4
-#define VSYS 5
-#define VDMP 6
 
 /* ************************************************** */
 /* libentry point is libelf_load_exec_code()          */
@@ -171,11 +168,11 @@ elf32_t libelf_open(const char* filename)
 
   if (stat(filename,&s) == -1)
     {
-      VERBOSE(VSYS,"wsim:libelf:");
+      DMSG_LIB_ELF("wsim:libelf:");
       return NULL;
     }
 
-  VERBOSE(VSYS,"libelf: file size %d\n",s.st_size);
+  DMSG_LIB_ELF("libelf: file size %d\n",s.st_size);
 
   if ((e = (elf32_t)malloc(sizeof(struct elf32_struct_t))) == NULL)
     {
@@ -190,7 +187,7 @@ elf32_t libelf_open(const char* filename)
     }
   memset(e->file_raw,0,sizeof(uint8_t)*s.st_size);
 
-  VERBOSE(VSYS,"libelf: memory allocation ok\n");
+  DMSG_LIB_ELF("libelf: memory allocation ok\n");
 
   strncpyz(e->file_name,filename,ELF_MAX_FILENAME);
   e->file_size = s.st_size;
@@ -271,7 +268,7 @@ static void swap_elf32_header(elf32_t elf)
   if (elf->data == elf_data_msb)
 #endif
     {
-      VERBOSE(VSYS,"libelf: swaping byte order for elf header\n");
+      DMSG_LIB_ELF("libelf: swaping byte order for elf header\n");
       S2(elf->elf_header.type);
       S2(elf->elf_header.machine);
 
@@ -303,7 +300,7 @@ static void swap_elf32_section_header(elf32_t elf, int i)
   if (elf->data == elf_data_msb)
 #endif
     {
-      VERBOSE(VSYS,"libelf:shdr: swaping byte order for elf section header\n");
+      DMSG_LIB_ELF("libelf:shdr: swaping byte order for elf section header\n");
       S4(s->sh_name);
       S4(s->sh_type);
       S4(s->sh_flags);
@@ -351,59 +348,59 @@ static int libelf_read_elf_header(elf32_t elf)
   memcpy(&(elf->elf_header),elf->file_raw,sizeof(elf32_header_t));
 
   /* ident */
-  VERBOSE(VELF,"\nlibelf:hdr: Elf file header\n");
-  VERBOSE(VELF,"libelf:hdr: ident ");
+  DMSG_LIB_ELF("\nlibelf:hdr: Elf file header\n");
+  DMSG_LIB_ELF("libelf:hdr: ident ");
   for(i=0; i<ELF32_NIDENT; i++)
     {
-      VERBOSE(VELF,"%02x ",elf->elf_header.ident[i]); 
+      DMSG_LIB_ELF("%02x ",elf->elf_header.ident[i]); 
     }
-  VERBOSE(VELF,"\n");
+  DMSG_LIB_ELF("\n");
 
   /* class */
   elf->class = elf->elf_header.ident[ELF_IDENT_CLASS];
-  VERBOSE(VELF,"libelf:hdr:id: class       %3d ",elf->class);
+  DMSG_LIB_ELF("libelf:hdr:id: class       %3d ",elf->class);
   switch (elf->class)
     {
-    case elf_class_none: VERBOSE(VELF,"None"); break;
-    case elf_class_32:   VERBOSE(VELF,"ELF32"); break;
-    case elf_class_64:   VERBOSE(VELF,"ELF64"); break;
+    case elf_class_none: DMSG_LIB_ELF("None"); break;
+    case elf_class_32:   DMSG_LIB_ELF("ELF32"); break;
+    case elf_class_64:   DMSG_LIB_ELF("ELF64"); break;
     }
-  VERBOSE(VELF,"\n");
+  DMSG_LIB_ELF("\n");
 
   /* data */
   elf->data = elf->elf_header.ident[ELF_IDENT_DATA];
-  VERBOSE(VELF,"libelf:hdr:id: data        %3d ",elf->data);
+  DMSG_LIB_ELF("libelf:hdr:id: data        %3d ",elf->data);
   switch (elf->data)
     {
-    case elf_data_none: VERBOSE(VELF,"None"); break;
-    case elf_data_lsb:  VERBOSE(VELF,"2's LSB"); break;
-    case elf_data_msb:  VERBOSE(VELF,"2's MSB"); break;
+    case elf_data_none: DMSG_LIB_ELF("None"); break;
+    case elf_data_lsb:  DMSG_LIB_ELF("2's LSB"); break;
+    case elf_data_msb:  DMSG_LIB_ELF("2's MSB"); break;
     }
-  VERBOSE(VELF,"\n");
+  DMSG_LIB_ELF("\n");
 
   /* other */
-  VERBOSE(VELF,"libelf:hdr:id: version     %3d\n",elf->elf_header.ident[ELF_IDENT_VERSION]);
+  DMSG_LIB_ELF("libelf:hdr:id: version     %3d\n",elf->elf_header.ident[ELF_IDENT_VERSION]);
 
   /* abi */
-  VERBOSE(VELF,"libelf:hdr:id: abi type    %3d ",elf->elf_header.ident[ELF_IDENT_ABI_TYPE]);
+  DMSG_LIB_ELF("libelf:hdr:id: abi type    %3d ",elf->elf_header.ident[ELF_IDENT_ABI_TYPE]);
   switch (elf->elf_header.ident[ELF_IDENT_ABI_TYPE])
     {
-    case elf_abi_none:       VERBOSE(VELF,"None"); break;
-    case elf_abi_hpux:       VERBOSE(VELF,"HP-UX"); break;
-    case elf_abi_netbsd:     VERBOSE(VELF,"NetBSD"); break;
-    case elf_abi_linux:      VERBOSE(VELF,"Linux"); break;
-    case elf_abi_solaris:    VERBOSE(VELF,"Solaris"); break;
-    case elf_abi_aix:        VERBOSE(VELF,"Aix"); break;
-    case elf_abi_irix:       VERBOSE(VELF,"Irix"); break;
-    case elf_abi_freebsd:    VERBOSE(VELF,"FreeBSD"); break;
-    case elf_abi_openbsd:    VERBOSE(VELF,"OpenBSD"); break;
-    case elf_abi_standalone: VERBOSE(VELF,"Standalone"); break;
-    default: VERBOSE(VELF,"Uknown"); break;
+    case elf_abi_none:       DMSG_LIB_ELF("None"); break;
+    case elf_abi_hpux:       DMSG_LIB_ELF("HP-UX"); break;
+    case elf_abi_netbsd:     DMSG_LIB_ELF("NetBSD"); break;
+    case elf_abi_linux:      DMSG_LIB_ELF("Linux"); break;
+    case elf_abi_solaris:    DMSG_LIB_ELF("Solaris"); break;
+    case elf_abi_aix:        DMSG_LIB_ELF("Aix"); break;
+    case elf_abi_irix:       DMSG_LIB_ELF("Irix"); break;
+    case elf_abi_freebsd:    DMSG_LIB_ELF("FreeBSD"); break;
+    case elf_abi_openbsd:    DMSG_LIB_ELF("OpenBSD"); break;
+    case elf_abi_standalone: DMSG_LIB_ELF("Standalone"); break;
+    default: DMSG_LIB_ELF("Uknown"); break;
     }
-  VERBOSE(VELF,"\n");
+  DMSG_LIB_ELF("\n");
 
-  VERBOSE(VELF,"libelf:hdr:id: abi version %3d\n",elf->elf_header.ident[ELF_IDENT_ABI_VERSION]);
-  VERBOSE(VELF,"libelf:hdr:id: pad         %3d\n",elf->elf_header.ident[ELF_IDENT_PAD]);
+  DMSG_LIB_ELF("libelf:hdr:id: abi version %3d\n",elf->elf_header.ident[ELF_IDENT_ABI_VERSION]);
+  DMSG_LIB_ELF("libelf:hdr:id: pad         %3d\n",elf->elf_header.ident[ELF_IDENT_PAD]);
 
   /* ==================================================== */
   /* starting from here we have to take care of endianess */
@@ -412,36 +409,36 @@ static int libelf_read_elf_header(elf32_t elf)
 
   /* type */
   elf->type = elf->elf_header.type;
-  VERBOSE(VELF,"libelf:hdr: type    %d ",elf->type);
+  DMSG_LIB_ELF("libelf:hdr: type    %d ",elf->type);
   switch (elf->type)
     {
-    case elf_type_none: VERBOSE(VELF,"None"); break;
-    case elf_type_rel : VERBOSE(VELF,"Relocatable"); break;
-    case elf_type_exec: VERBOSE(VELF,"Executable"); break;
-    case elf_type_dyn : VERBOSE(VELF,"Shared Object"); break;
-    case elf_type_core: VERBOSE(VELF,"Core"); break;
-    default: VERBOSE(VELF,"Unknown"); break;
+    case elf_type_none: DMSG_LIB_ELF("None"); break;
+    case elf_type_rel : DMSG_LIB_ELF("Relocatable"); break;
+    case elf_type_exec: DMSG_LIB_ELF("Executable"); break;
+    case elf_type_dyn : DMSG_LIB_ELF("Shared Object"); break;
+    case elf_type_core: DMSG_LIB_ELF("Core"); break;
+    default: DMSG_LIB_ELF("Unknown"); break;
     }
-  VERBOSE(VELF,"\n");
+  DMSG_LIB_ELF("\n");
 
   /* machine in elf is called arch in libelf      */
   /* elf->mach is a specific architecture version */
   /* this corresponds to the gnu bfd convention   */
   elf->arch = elf->elf_header.machine;
-  VERBOSE(VELF,"libelf:hdr: machine 0x%x (%d)\n",elf->elf_header.machine,elf->mach);
-  VERBOSE(VELF,"libelf:hdr: version 0x%x\n",     elf->elf_header.version);
-  VERBOSE(VELF,"libelf:hdr: entry   0x%x\n",     elf->elf_header.entry);
-  VERBOSE(VELF,"libelf:hdr: flags   0x%08x\n",   elf->elf_header.flags);
+  DMSG_LIB_ELF("libelf:hdr: machine 0x%x (%d)\n",elf->elf_header.machine,elf->mach);
+  DMSG_LIB_ELF("libelf:hdr: version 0x%x\n",     elf->elf_header.version);
+  DMSG_LIB_ELF("libelf:hdr: entry   0x%x\n",     elf->elf_header.entry);
+  DMSG_LIB_ELF("libelf:hdr: flags   0x%08x\n",   elf->elf_header.flags);
 
-  VERBOSE(VELF,"libelf:hdr: start of program headers %d\n",elf->elf_header.phoff);
-  VERBOSE(VELF,"libelf:hdr: start of section headers %d\n",elf->elf_header.shoff);
+  DMSG_LIB_ELF("libelf:hdr: start of program headers %d\n",elf->elf_header.phoff);
+  DMSG_LIB_ELF("libelf:hdr: start of section headers %d\n",elf->elf_header.shoff);
 
-  VERBOSE(VELF,"libelf:hdr: size of this header      %d\n",elf->elf_header.ehsize);
-  VERBOSE(VELF,"libelf:hdr: size of program headers  %d\n",elf->elf_header.phentsize);
-  VERBOSE(VELF,"libelf:hdr: number of program header %d\n",elf->elf_header.phnum);
-  VERBOSE(VELF,"libelf:hdr: size of section header   %d\n",elf->elf_header.shentsize);
-  VERBOSE(VELF,"libelf:hdr: number of section header %d\n",elf->elf_header.shnum);
-  VERBOSE(VELF,"libelf:hdr: section str table index  %d\n",elf->elf_header.shstrndx);
+  DMSG_LIB_ELF("libelf:hdr: size of this header      %d\n",elf->elf_header.ehsize);
+  DMSG_LIB_ELF("libelf:hdr: size of program headers  %d\n",elf->elf_header.phentsize);
+  DMSG_LIB_ELF("libelf:hdr: number of program header %d\n",elf->elf_header.phnum);
+  DMSG_LIB_ELF("libelf:hdr: size of section header   %d\n",elf->elf_header.shentsize);
+  DMSG_LIB_ELF("libelf:hdr: number of section header %d\n",elf->elf_header.shnum);
+  DMSG_LIB_ELF("libelf:hdr: section str table index  %d\n",elf->elf_header.shstrndx);
 
   /*****************************************/
   /* machine specific part                 */
@@ -523,11 +520,11 @@ static int libelf_read_elf_section_headers(elf32_t elf)
       swap_elf32_section_header(elf,i);
     }
 
-  VERBOSE(VELF,"\nlibelf:sh: Section Headers:\n");
-  VERBOSE(VELF,"libelf:sh: [Nr] Name           Type     Flg addr   offset size lnk info al es\n");
+  DMSG_LIB_ELF("\nlibelf:sh: Section Headers:\n");
+  DMSG_LIB_ELF("libelf:sh: [Nr] Name           Type     Flg addr   offset size lnk info al es\n");
   for(i=0; i<elf->elf_header.shnum; i++)
     {
-      VERBOSE(VELF,"libelf:sh: [%2d] ",i);
+      DMSG_LIB_ELF("libelf:sh: [%2d] ",i);
       if (elf->elf_header.shstrndx)
 	{
 	  strncpyz(buff, libelf_get_elf_section_name(elf,i), 100);
@@ -536,32 +533,32 @@ static int libelf_read_elf_section_headers(elf32_t elf)
 	{
 	  sprintf(buff,"%2ud",(unsigned) elf->elf_section[i].sh_name);
 	}
-      VERBOSE(VELF,"%-14s ",buff);
+      DMSG_LIB_ELF("%-14s ",buff);
 
       if (elf->elf_section[i].sh_type <= elf_sh_type_DYNSYM)
 	{
-	  VERBOSE(VELF,"%-8s ",elf_sh_str_type[elf->elf_section[i].sh_type]);
+	  DMSG_LIB_ELF("%-8s ",elf_sh_str_type[elf->elf_section[i].sh_type]);
 	}
       else
 	{
-	  VERBOSE(VELF,"%-08x    ",elf->elf_section[i].sh_type);
+	  DMSG_LIB_ELF("%-08x    ",elf->elf_section[i].sh_type);
 	}
 
       /* flags */
-      VERBOSE(VELF,"%s",(elf->elf_section[i].sh_flags & elf_sh_flags_WRITE)?"W":" ");
-      VERBOSE(VELF,"%s",(elf->elf_section[i].sh_flags & elf_sh_flags_ALLOC)?"A":" ");
-      VERBOSE(VELF,"%s",(elf->elf_section[i].sh_flags & elf_sh_flags_EXECINSTR)?"X":" ");
+      DMSG_LIB_ELF("%s",(elf->elf_section[i].sh_flags & elf_sh_flags_WRITE)?"W":" ");
+      DMSG_LIB_ELF("%s",(elf->elf_section[i].sh_flags & elf_sh_flags_ALLOC)?"A":" ");
+      DMSG_LIB_ELF("%s",(elf->elf_section[i].sh_flags & elf_sh_flags_EXECINSTR)?"X":" ");
 
-      VERBOSE(VELF," %06x ",elf->elf_section[i].sh_addr);
-      VERBOSE(VELF,"%06x ",elf->elf_section[i].sh_offset);
-      VERBOSE(VELF,"%04x ",elf->elf_section[i].sh_size);
-      VERBOSE(VELF," %2d ",elf->elf_section[i].sh_link);
-      VERBOSE(VELF," %3d ",elf->elf_section[i].sh_info);
-      VERBOSE(VELF,"%2x ",elf->elf_section[i].sh_addralign);
-      VERBOSE(VELF,"%2x ",elf->elf_section[i].sh_entsize);
-      VERBOSE(VELF,"\n");
+      DMSG_LIB_ELF(" %06x ",elf->elf_section[i].sh_addr);
+      DMSG_LIB_ELF("%06x ",elf->elf_section[i].sh_offset);
+      DMSG_LIB_ELF("%04x ",elf->elf_section[i].sh_size);
+      DMSG_LIB_ELF(" %2d ",elf->elf_section[i].sh_link);
+      DMSG_LIB_ELF(" %3d ",elf->elf_section[i].sh_info);
+      DMSG_LIB_ELF("%2x ",elf->elf_section[i].sh_addralign);
+      DMSG_LIB_ELF("%2x ",elf->elf_section[i].sh_entsize);
+      DMSG_LIB_ELF("\n");
 
-      libelf_set_section_info(VELF, i, buff,
+      libelf_set_section_info(i, buff,
 			      elf->elf_section[i].sh_addr,
 			      elf->elf_section[i].sh_offset,
 			      elf->elf_section[i].sh_size);
@@ -622,11 +619,11 @@ static int libelf_read_elf_program_headers(elf32_t elf)
       swap_elf32_program_header(elf,i);
     }
 
-  VERBOSE(VELF,"\nlibelf:ph: Program Headers:\n");
-  VERBOSE(VELF,"libelf:ph: [Nr] Type     Offset Vaddr  Paddr  Filesz Memsz  Flg Al\n");
+  DMSG_LIB_ELF("\nlibelf:ph: Program Headers:\n");
+  DMSG_LIB_ELF("libelf:ph: [Nr] Type     Offset Vaddr  Paddr  Filesz Memsz  Flg Al\n");
   for(i=0; i<elf->elf_header.phnum; i++)
     {
-      VERBOSE(VELF,"libelf:ph: [%2d] ",i);
+      DMSG_LIB_ELF("libelf:ph: [%2d] ",i);
 
       if (elf->elf_program[i].p_type <= elf_ph_type_PHDR)
 	{
@@ -637,21 +634,21 @@ static int libelf_read_elf_program_headers(elf32_t elf)
 	  sprintf(buff,"%ud",(unsigned) elf->elf_program[i].p_type);
 	}
 
-      VERBOSE(VELF,"%-8s ",buff);
-      VERBOSE(VELF,"%06x ",elf->elf_program[i].p_offset);
-      VERBOSE(VELF,"%06x ",elf->elf_program[i].p_vaddr);
-      VERBOSE(VELF,"%06x ",elf->elf_program[i].p_paddr);
-      VERBOSE(VELF,"%06x ",elf->elf_program[i].p_filesz);
-      VERBOSE(VELF,"%06x ",elf->elf_program[i].p_memsz);
+      DMSG_LIB_ELF("%-8s ",buff);
+      DMSG_LIB_ELF("%06x ",elf->elf_program[i].p_offset);
+      DMSG_LIB_ELF("%06x ",elf->elf_program[i].p_vaddr);
+      DMSG_LIB_ELF("%06x ",elf->elf_program[i].p_paddr);
+      DMSG_LIB_ELF("%06x ",elf->elf_program[i].p_filesz);
+      DMSG_LIB_ELF("%06x ",elf->elf_program[i].p_memsz);
       
       /* flags */
-      VERBOSE(VELF,"%s",(elf->elf_program[i].p_flags & elf_ph_flags_READ )?"R":" ");
-      VERBOSE(VELF,"%s",(elf->elf_program[i].p_flags & elf_ph_flags_WRITE)?"W":" ");
-      VERBOSE(VELF,"%s",(elf->elf_program[i].p_flags & elf_ph_flags_EXEC )?"E":" ");
+      DMSG_LIB_ELF("%s",(elf->elf_program[i].p_flags & elf_ph_flags_READ )?"R":" ");
+      DMSG_LIB_ELF("%s",(elf->elf_program[i].p_flags & elf_ph_flags_WRITE)?"W":" ");
+      DMSG_LIB_ELF("%s",(elf->elf_program[i].p_flags & elf_ph_flags_EXEC )?"E":" ");
 
-      VERBOSE(VELF," %2x ",elf->elf_program[i].p_align);
+      DMSG_LIB_ELF(" %2x ",elf->elf_program[i].p_align);
 
-      VERBOSE(VELF,"\n");
+      DMSG_LIB_ELF("\n");
     }
   return 0;
 }
@@ -799,18 +796,18 @@ static void libelf_read_symtab(elf32_t elf, int n, int UNUSED verbose_level)
 
   int             strtab_n = libelf_find_section_by_name(elf,".strtab");
   elf32_sh_t     *strtab_s = &(elf->elf_section[ strtab_n ]);
-  char*           strtab_p = ((char*)elf->file_raw) + strtab_s->sh_offset;
+  UNUSED char*    strtab_p = ((char*)elf->file_raw) + strtab_s->sh_offset;
 
   if ((symtab_s->sh_size % sizeof(elf32_symtab_t)) != 0)
     {
-      VERBOSE(VELF,"libelf: symtab read error, section size is not a multiple of struct size\n");
+      DMSG_LIB_ELF("libelf: symtab read error, section size is not a multiple of struct size\n");
       return;
     }
 
-  VERBOSE(VDMP,"\nlibelf:   Num:    Value  Size Type    Bind   Vis      Ndx Name\n");
+  DMSG_LIB_ELF_DMP("\nlibelf:   Num:    Value  Size Type    Bind   Vis      Ndx Name\n");
   for(i=0; i < (symtab_s->sh_size / sizeof(elf32_symtab_t)); i++)
     {
-      VERBOSE(VDMP,"libelf:   %3d: %08x   %3d %-7s %-6s %-8s %3s", 
+      DMSG_LIB_ELF_DMP("libelf:   %3d: %08x   %3d %-7s %-6s %-8s %3s", 
 	      i, symtab_p[i].st_value, symtab_p[i].st_size,
 	      sttype_chr(ELF32_ST_TYPE(symtab_p[i].st_info)),
 	      stbind_chr(ELF32_ST_BIND(symtab_p[i].st_info)),
@@ -820,12 +817,12 @@ static void libelf_read_symtab(elf32_t elf, int n, int UNUSED verbose_level)
 
       if ( (symtab_p[i].st_name > 0) && (symtab_p[i].st_name < strtab_s->sh_size) )
 	{
-	  VERBOSE(VDMP," %s", strtab_p + symtab_p[i].st_name);
+	  DMSG_LIB_ELF_DMP(" %s", strtab_p + symtab_p[i].st_name);
 	}
 
-      VERBOSE(VDMP,"\n");
+      DMSG_LIB_ELF_DMP("\n");
     }
-  VERBOSE(VDMP,"\n");
+  DMSG_LIB_ELF_DMP("\n");
 }
 
 elf32_symtab_t *libelf_symtab_find_by_name(elf32_t elf, const char* name)
@@ -845,7 +842,7 @@ elf32_symtab_t *libelf_symtab_find_by_name(elf32_t elf, const char* name)
 	{
 	  if (strcmp(name, strtab_p + symtab_p[i].st_name) == 0)
 	    {
-	      VERBOSE(VELF,"libelf:symtab:find_by_name %s found index %d\n",
+	      DMSG_LIB_ELF("libelf:symtab:find_by_name %s found index %d\n",
 		      strtab_p + symtab_p[i].st_name, i);
 	      return symtab_p + i;
 	    }
@@ -861,7 +858,7 @@ uint32_t libelf_symtab_find_addr_by_name(elf32_t elf, const char *name)
     {
       return s->st_value;
     }
-  VERBOSE(VDMP,"libelf:symtab:find_addr_by_name %s not found\n",name);
+  DMSG_LIB_ELF_DMP("libelf:symtab:find_addr_by_name %s not found\n",name);
   return 0;
 }
 
@@ -872,7 +869,7 @@ int libelf_symtab_find_size_by_name(elf32_t elf, const char *name)
     {
       return s->st_size;
     }
-  VERBOSE(VDMP,"libelf:symtab:find_size_by_name %s not found\n",name);
+  DMSG_LIB_ELF_DMP("libelf:symtab:find_size_by_name %s not found\n",name);
   return -1;
 }
 
@@ -895,15 +892,12 @@ static void libelf_load_section(elf32_t elf, int n, int UNUSED verbose_level)
       {
 	if (s->sh_flags & elf_sh_flags_ALLOC)
 	  {
-	    VERBOSE(VELF,"libelf: looking at section %s\n",libelf_get_elf_section_name(elf,n));
-	    VERBOSE(VELF,"libelf:    - allocating %d bytes at 0x%04x\n",s->sh_size,s->sh_addr);
-	    VERBOSE(VELF,"libelf:    - copying 0x%04x bytes from file to 0x%04x in mem\n",s->sh_size,s->sh_addr);
+	    DMSG_LIB_ELF("libelf: looking at section %s\n",libelf_get_elf_section_name(elf,n));
+	    DMSG_LIB_ELF("libelf:    - allocating %d bytes at 0x%04x\n",s->sh_size,s->sh_addr);
+	    DMSG_LIB_ELF("libelf:    - copying 0x%04x bytes from file to 0x%04x in mem\n",s->sh_size,s->sh_addr);
 	    mcu_jtag_write_section(elf->file_raw + s->sh_offset, s->sh_addr, s->sh_size);
-	    if (verbose_level >= VDMP)
-	      {
-		VERBOSE(VDMP,"\n");
-		libelf_dump_section(elf->file_raw, s->sh_offset, s->sh_size, DUMP_COLS);
-	      }
+	    DMSG_LIB_ELF_DMP("\n");
+	    libelf_dump_section(elf->file_raw, s->sh_offset, s->sh_size, DUMP_COLS);
 	    
 #if defined(MSP430_DATA_INIT_WORKAROUND)
 	    if (strcmp(mcu_name(),"msp430") == 0)
@@ -917,29 +911,25 @@ static void libelf_load_section(elf32_t elf, int n, int UNUSED verbose_level)
 		  {
 		    if (text_end == 0)
 		      {
-			VERBOSE(VELF,"libelf: msp430 init data : section text is missing\n");
+			DMSG_LIB_ELF("libelf: msp430 init data : section text is missing\n");
 		      }
-		    VERBOSE(VELF,"libelf: msp430 init data section workaround: copy %d data bytes at 0x%04x\n",s->sh_size,text_end);
+		    DMSG_LIB_ELF("libelf: msp430 init data section workaround: copy %d data bytes at 0x%04x\n",s->sh_size,text_end);
 		    mcu_jtag_write_section(elf->file_raw + s->sh_offset, text_end, s->sh_size);
 		  }
 	      }
 #endif
-	    VERBOSE(VELF,"\n");
+	    DMSG_LIB_ELF("\n");
 	  }
       }
       break;
     case elf_sh_type_SYMTAB:
-      VERBOSE(VELF,"libelf: looking at section %-12s -- symbol table\n",libelf_get_elf_section_name(elf,n));
+      DMSG_LIB_ELF("libelf: looking at section %-12s -- symbol table\n",libelf_get_elf_section_name(elf,n));
       libelf_read_symtab(elf,n,verbose_level);
       break;
     default:
-      VERBOSE(VELF,"libelf: looking at section %-12s (%d) -- not loaded\n",libelf_get_elf_section_name(elf,n), n);
-      if (verbose_level >= VDMP)
-	{
-	  VERBOSE(VDMP,"\n");
-	  libelf_dump_section(elf->file_raw, s->sh_offset, s->sh_size, DUMP_COLS);
-	  VERBOSE(VDMP,"\n");
-	}
+      DMSG_LIB_ELF("libelf: looking at section %-12s (%d) -- not loaded\n",libelf_get_elf_section_name(elf,n), n);
+      DMSG_LIB_ELF_DMP("\n");
+      libelf_dump_section(elf->file_raw, s->sh_offset, s->sh_size, DUMP_COLS);
       break;
     }
 
@@ -948,9 +938,9 @@ static void libelf_load_section(elf32_t elf, int n, int UNUSED verbose_level)
     {
       if (s->sh_flags & elf_sh_flags_ALLOC)
 	{
-	  VERBOSE(VELF,"libelf: looking at section %s\n",libelf_get_elf_section_name(elf,n));
-	  VERBOSE(VELF,"libelf:    - allocating %d bytes at 0x%04x\n",s->sh_size,s->sh_addr);
-	  VERBOSE(VELF,"libelf:    - zeroing bits\n");
+	  DMSG_LIB_ELF("libelf: looking at section %s\n",libelf_get_elf_section_name(elf,n));
+	  DMSG_LIB_ELF("libelf:    - allocating %d bytes at 0x%04x\n",s->sh_size,s->sh_addr);
+	  DMSG_LIB_ELF("libelf:    - zeroing bits\n");
 	  mcu_jtag_write_zero(s->sh_addr,s->sh_size);
 	}
     }
@@ -1023,7 +1013,7 @@ elf32_t libelf_load(const char* filename, int verbose_level)
       return NULL;
     }
 
-  VERBOSE(VSYS,"libelf: opening elf file %s\n",filename);
+  DMSG_LIB_ELF("libelf: opening elf file %s\n",filename);
   libelf_read_elf_header(elf);  
 
   /* check we are using elf32 */
@@ -1057,10 +1047,10 @@ elf32_t libelf_load(const char* filename, int verbose_level)
       return NULL;
     }
 
-  VERBOSE(VELF,"\nlibelf: all tests passed\n");
-  VERBOSE(VELF,"libelf:    arch %3d 0x%02x : %s\n",mcu_arch_id(),mcu_arch_id(),mcu_name());
-  VERBOSE(VELF,"libelf:    mach %3d 0x%02x : %s\n",mcu_mach_id(),mcu_mach_id(),mcu_modelname());
-  VERBOSE(VELF,"\n");
+  DMSG_LIB_ELF("\nlibelf: all tests passed\n");
+  DMSG_LIB_ELF("libelf:    arch %3d 0x%02x : %s\n",mcu_arch_id(),mcu_arch_id(),mcu_name());
+  DMSG_LIB_ELF("libelf:    mach %3d 0x%02x : %s\n",mcu_mach_id(),mcu_mach_id(),mcu_modelname());
+  DMSG_LIB_ELF("\n");
 
   /* 
    * ok, now load the file 
@@ -1068,10 +1058,10 @@ elf32_t libelf_load(const char* filename, int verbose_level)
    * for now we use only section
    */
   mcu_set_pc_next(elf->elf_header.entry);
-  VERBOSE(VELF,"libelf: PC set to 0x%x\n",elf->elf_header.entry);
+  DMSG_LIB_ELF("libelf: PC set to 0x%x\n",elf->elf_header.entry);
   libelf_map_over_section(elf,libelf_load_section,verbose_level);
 
-  VERBOSE(VELF,"\n");
+  DMSG_LIB_ELF("\n");
   return elf;
 }
 

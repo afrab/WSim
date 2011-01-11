@@ -62,7 +62,7 @@ struct led_img_t *led_img_create(uint32_t on, uint32_t off, uint32_t bg)
 	}
     }
   
-  //  led_img_print(img);
+  /* led_img_print(img); */
   return img;
 }
 
@@ -118,7 +118,7 @@ void   led_img_draw  (struct led_img_t *img, int value)
 /* ************************************************** */
 /* ************************************************** */
 
-#define HW_DEBUG_LED(x...) VERBOSE(10,x)
+#define HW_DEBUG_LED(x...) MESSAGE(x)
 
 void
 led_img_print(struct led_img_t *img)

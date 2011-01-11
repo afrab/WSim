@@ -14,8 +14,6 @@
 /* ************************************** */
 /* ************************************** */
 
-#define H1L 2
-#define H2L 7
 #define MAXLINE 100
 
 /* ************************************** */
@@ -71,7 +69,7 @@ int ihex_read_line(char line[MAXLINE])
   uint8_t i,nbytes,checksum;
   uint8_t bytes[MAXLINE];
   
-  VERBOSE(H2L,"wsim:ihex:line: %-44s",line);
+  DMSG_LIB_iHEX("wsim:ihex:line: %-44s",line);
 
   remove_trailing_char(line,'\n');
   remove_trailing_char(line,'\r');
@@ -84,14 +82,14 @@ int ihex_read_line(char line[MAXLINE])
 
   if (line[0] != ':')
     {
-      VERBOSE(H2L,"does not begin with :\n");
+      DMSG_LIB_iHEX("does not begin with :\n");
       return -1;
     }
   
   hexline = &line[1];
   if ((strlen(hexline) & 0x01) == 0x1)
     {
-      VERBOSE(H2L,"size is not a multiple of 2\n");
+      DMSG_LIB_iHEX("size is not a multiple of 2\n");
       return -1;
     }
 
@@ -104,51 +102,51 @@ int ihex_read_line(char line[MAXLINE])
 
   if (checksum != 0)
     {
-      VERBOSE(H2L,"bad checksum %02x %02x\n",checksum,bytes[nbytes - 1]);
+      DMSG_LIB_iHEX("bad checksum %02x %02x\n",checksum,bytes[nbytes - 1]);
       return -1;
     }
 
 #if defined(DEBUG_ME_HARDER)
   for(i=0; i<nbytes; i++)
     {
-      VERBOSE(H2L,"%02x",bytes[i]);
+      DMSG_LIB_iHEX("%02x",bytes[i]);
     }
-  VERBOSE(H2L,"\n");
+  DMSG_LIB_iHEX("\n");
 #endif
 
   int      count = (bytes[0]);
   uint16_t addr  = (bytes[1] << 8) | bytes[2];
   uint8_t  type  = (bytes[3]); 
-  VERBOSE(H2L,":: %02d bytes, addr 0x%04x, type %02x=",count,addr,type);
+  DMSG_LIB_iHEX(":: %02d bytes, addr 0x%04x, type %02x=",count,addr,type);
 
   switch (type)
     {
     case DATA_RECORD   :  /* Data                  */
-      VERBOSE(H2L,"Data :: ");
+      DMSG_LIB_iHEX("Data :: ");
       for(i=0; i<count; i++)
 	{
-	  VERBOSE(H2L,"%02x ",bytes[4+i]);
+	  DMSG_LIB_iHEX("%02x ",bytes[4+i]);
 	  mcu_jtag_write_byte(addr+i,bytes[4+i]);
 	}
-      VERBOSE(H2L,"\n");
+      DMSG_LIB_iHEX("\n");
       return 0;
     case EOF_RECORD    :  /* End of File           */
-      VERBOSE(H2L,"End of File\n");
+      DMSG_LIB_iHEX("End of File\n");
       return 0;
     case ESA_RECORD    :  /* Extended Segment Addr */
-      VERBOSE(H2L,"Extended Segment Addr\n");
+      DMSG_LIB_iHEX("Extended Segment Addr\n");
       return -1;
     case SSA_RECORD    :  /* Segment Start Addr    */
-      VERBOSE(H2L,"Segment Start Addr\n");
+      DMSG_LIB_iHEX("Segment Start Addr\n");
       return -1;
     case ELA_RECORD    :  /* Extended Linear Addr  */
-      VERBOSE(H2L,"Extended Linear Addr\n");
+      DMSG_LIB_iHEX("Extended Linear Addr\n");
       return -1;
     case SLA_RECORD    :  /* Start Linear Addr     */
-      VERBOSE(H2L,"Start Linear Addr\n");
+      DMSG_LIB_iHEX("Start Linear Addr\n");
       return -1;
     default:
-      VERBOSE(H2L,"Unknown line type\n");
+      DMSG_LIB_iHEX("Unknown line type\n");
       return -1;
     }
 
@@ -164,7 +162,7 @@ int mcu_hexfile_load(char *filename)
   FILE *f;
   char buff[MAXLINE];
 
-  VERBOSE(H1L,"wsim:precharge: loading hexfile %s\n",filename);
+  MESSAGE("wsim:precharge: loading hexfile %s\n",filename);
 
   if ((f = fopen(filename,"rb")) == NULL)
     {

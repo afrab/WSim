@@ -18,49 +18,56 @@
 #ifndef _WORLDSENS_DEBUG_H
 #define _WORLDSENS_DEBUG_H
 
+/**************************************************************************/
+/**************************************************************************/
+/**************************************************************************/
+
+//#undef DEBUG
+
+#if defined(DEBUG)
+#define WSNET_DEBUG(x...)     HW_DMSG(x)
+#else
+#define WSNET_DEBUG(x...)     do { } while (0)
+#endif
 
 /**************************************************************************/
 /**************************************************************************/
 /**************************************************************************/
 
-#define WSNET_DMSG_BKTRK
-#define WSNET_DMSG_EXC
-#define WSNET_DMSG_DBG
-#define WSNET_DMSG_TX
-#define WSNET_DMSG_RX
+#define WSNET_DEBUG_BKTRK 0
+#define WSNET_DEBUG_EXC   0
+#define WSNET_DEBUG_DBG   0
+#define WSNET_DEBUG_TX    0
+#define WSNET_DEBUG_RX    0
 
-/**************************************************************************/
-/**************************************************************************/
-/**************************************************************************/
-
-#ifdef WSNET_DMSG_BKTRK
-#    define WSNET_BKTRK(x...) HW_DMSG(x)
+#if WSNET_DEBUG_BKTRK
+#    define WSNET_BKTRK(x...) WSNET_DEBUG(x)
 #else
 #    define WSNET_BKTRK(x...) do { } while (0)
 #endif
 
-#ifdef WSNET_DMSG_EXC
-#    define WSNET_EXC(x...) HW_DMSG(x)
+#if WSNET_DEBUG_EXC
+#    define WSNET_EXC(x...)   WSNET_DEBUG(x)
 #else
-#    define WSNET_EXC(x...) do { } while (0)
+#    define WSNET_EXC(x...)   do { } while (0)
 #endif
 
-#ifdef WSNET_DMSG_DBG
-#    define WSNET_DBG(x...) HW_DMSG(x)
+#if WSNET_DEBUG_DBG
+#    define WSNET_DBG(x...)   WSNET_DEBUG(x)
 #else
-#    define WSNET_DBG(x...) do { } while (0)
+#    define WSNET_DBG(x...)   do { } while (0)
 #endif
 
-#ifdef WSNET_DMSG_TX
-#    define WSNET_TX(x...) HW_DMSG(x)
+#if WSNET_DEBUG_TX
+#    define WSNET_TX(x...)    WSNET_DEBUG(x)
 #else
-#    define WSNET_TX(x...) do { } while (0)
+#    define WSNET_TX(x...)    do { } while (0)
 #endif
 
-#ifdef WSNET_DMSG_RX
-#    define WSNET_RX(x...) HW_DMSG(x)
+#if WSNET_DEBUG_RX
+#    define WSNET_RX(x...)    WSNET_DEBUG(x)
 #else
-#    define WSNET_RX(x...) do { } while (0)
+#    define WSNET_RX(x...)    do { } while (0)
 #endif
 
 #define WSNET_ERROR(x...) ERROR(x)

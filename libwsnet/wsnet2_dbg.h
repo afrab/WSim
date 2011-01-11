@@ -10,54 +10,53 @@
 #ifndef _WSNET2_DEBUG_H
 #define _WSNET2_DEBUG_H
 
+/**************************************************************************/
+/**************************************************************************/
+/**************************************************************************/
+
+#define WSNET2_DMSG_BKTRK 0  /* Backtrack debug messages                  */
+#define WSNET2_DMSG_EXC   0  /* Exceptions debug messages                 */
+#define WSNET2_DMSG_DBG   0  /* General debug messages                    */
+#define WSNET2_DMSG_TX    0  /* TX debug messages                         */
+#define WSNET2_DMSG_RX    0  /* RX debug messages                         */
+#define WSNET2_DMSG_CNCT  0  /* Connection/disconnection messages         */
 
 /**************************************************************************/
 /**************************************************************************/
 /**************************************************************************/
 
-#define WSNET2_DMSG_BKTRK  /* Backtrack debug messages                  */
-#define WSNET2_DMSG_EXC    /* Exceptions debug messages                 */
-#define WSNET2_DMSG_DBG    /* General debug messages                    */
-#define WSNET2_DMSG_TX     /* TX debug messages                         */
-#define WSNET2_DMSG_RX     /* RX debug messages                         */
-#define WSNET2_DMSG_CNCT   /* Connection/disconnection messages         */
-
-/**************************************************************************/
-/**************************************************************************/
-/**************************************************************************/
-
-#ifdef WSNET2_DMSG_BKTRK
-#    define WSNET2_BKTRK(x...) VERBOSE(4,x)
+#if WSNET2_DMSG_BKTRK != 0
+#    define WSNET2_BKTRK(x...) DMSG_LIB_WSNET(x)
 #else
 #    define WSNET2_BKTRK(x...) do { } while (0)
 #endif
 
-#ifdef WSNET2_DMSG_EXC
-#    define WSNET2_EXC(x...) VERBOSE(2,x)
+#if WSNET2_DMSG_EXC != 0
+#    define WSNET2_EXC(x...)   DMSG_LIB_WSNET(x)
 #else
-#    define WSNET2_EXC(x...) do { } while (0)
+#    define WSNET2_EXC(x...)   do { } while (0)
 #endif
 
-#ifdef WSNET2_DMSG_DBG
-#    define WSNET2_DBG(x...) VERBOSE(6,x)
+#if WSNET2_DMSG_DBG != 0
+#    define WSNET2_DBG(x...)   DMSG_LIB_WSNET(x)
 #else
 #    define WSNET2_DBG(x...) do { } while (0)
 #endif
 
-#ifdef WSNET2_DMSG_TX
-#    define WSNET2_TX(x...) VERBOSE(2,x)
+#if WSNET2_DMSG_TX != 0
+#    define WSNET2_TX(x...)    DMSG_LIB_WSNET(x)
 #else
 #    define WSNET2_TX(x...) do { } while (0)
 #endif
 
-#ifdef WSNET2_DMSG_RX
-#    define WSNET2_RX(x...) VERBOSE(2,x)
+#if WSNET2_DMSG_RX != 0
+#    define WSNET2_RX(x...)    DMSG_LIB_WSNET(x)
 #else
 #    define WSNET2_RX(x...) do { } while (0)
 #endif
 
-#ifdef WSNET2_DMSG_CNCT
-#    define WSNET2_CNCT(x...) VERBOSE(2,x)
+#if WSNET2_DMSG_CNCT != 0
+#    define WSNET2_CNCT(x...)  DMSG_LIB_WSNET(x)
 #else
 #    define WSNET2_CNCT(x...) do { } while (0)
 #endif

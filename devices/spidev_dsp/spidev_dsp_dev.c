@@ -27,10 +27,11 @@
 /***************************************************/
 /***************************************************/
 
+#undef DEBUG
+
+
 #ifdef DEBUG
-#define MSG_DEVICES       2
-#define DEBUG_ME_HARDER
-#define HW_DMSG_SPI(x...) VERBOSE(MSG_DEVICES,x)
+#define HW_DMSG_SPI(x...) HW_DMSG_DEV(x)
 #else
 #define HW_DMSG_SPI(x...) do {} while(0)
 #endif

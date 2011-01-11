@@ -21,9 +21,10 @@
 #include "libgui/ui.h"
 
 
-#define NO_UPDATE_LOOP_PRINT
-#if defined(UPDATE_LOOP_PRINT)
-#define HW_UP(x...) VERBOSE(2,x)
+#define UPDATE_LOOP_PRINT 0
+
+#if UPDATE_LOOP_PRINT != 0
+#define HW_UP(x...) INFO(x)
 #else
 #define HW_UP(x...) do {} while(0)
 #endif

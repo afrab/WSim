@@ -171,24 +171,24 @@ static void  main_run_mode(struct options_t* o)
 
 static void main_end(enum wsim_end_mode_t mode)
 {
-  VERBOSE(1,"wsim:end mode %s (%d)\n", wsim_end_mode_str(mode), mode);
+  MESSAGE("wsim:end mode %s (%d)\n", wsim_end_mode_str(mode), mode);
   /* simulation done */
   if (o.do_dump)
     {
-      VERBOSE(2,"wsim:dumper: dump machine state in [%s]\n",o.dumpfile);
+      INFO("wsim:dumper: dump machine state in [%s]\n",o.dumpfile);
       machine_dump(o.dumpfile);
     }
 
   /* finishing traces */
   if (o.do_trace)
     {
-      VERBOSE(2,"wsim:tracer: finalize trace in [%s]\n",o.tracefile);
+      INFO("wsim:tracer: finalize trace in [%s]\n",o.tracefile);
       tracer_close();
     }
 
   if (o.do_etrace)
     {
-      VERBOSE(2,"wsim:tracer: finalize eTrace in [%s]\n",o.etracefile);
+      INFO("wsim:tracer: finalize eTrace in [%s]\n",o.etracefile);
       etracer_close();
     }
 
@@ -237,21 +237,20 @@ int main(int argc, char* argv[])
   logpkt_init(o.do_logpkt, o.logpkt, o.logpktfilename);
 
   OUTPUT("WSim %s, rev %s\n", PACKAGE_VERSION, extract_revision_number());
-  OUTPUT("copyright 2005, 2006, 2007, 2008, 2009, 2010\n");
+  OUTPUT("copyright 2005, 2006, 2007, 2008, 2009, 2010, 2011\n");
   OUTPUT("Citi Lab, INRIA, INSA de Lyon\n");
-  VERBOSE(2,"A. Fraboulet, G. Chelius, E. Fleury\n");
-  VERBOSE(2,"wsim:pid:%d\n",getpid());
+  OUTPUT("wsim:pid:%d\n",getpid());
 
   switch (sizeof(long))
     {
     case 4:
-      VERBOSE(2,"wsim: 32 bits edition\n");
+      INFO("wsim: 32 bits edition\n");
       break;
     case 8:
-      VERBOSE(2,"wsim: 64 bits edition\n");
+      INFO("wsim: 64 bits edition\n");
       break;
     default:
-      VERBOSE(2,"wsim: alien edition\n");
+      INFO("wsim: alien edition\n");
       break;
     }
 
@@ -291,12 +290,14 @@ int main(int argc, char* argv[])
   /* preload flash with file */
   if (o.do_preload)
     {
+      INFO("wsim: preloading file %s\n",o.preload);
       mcu_hexfile_load(o.preload);
     }
 
   /* elf loading */
   if (strcmp(o.progname,"none") != 0)
     {
+      INFO("wsim: loading file %s\n",o.progname);
       if (machine_load_elf(o.progname,o.verbose))
 	{
 	  ERROR("wsim: error while loading Elf file\n");
@@ -334,21 +335,20 @@ int main(int argc, char* argv[])
 
   if (o.do_etrace_at_begin)
     {
-      VERBOSE(2,"wsim: starting eSimu tracer at wsim start\n");
+      INFO("wsim: starting eSimu tracer at wsim start\n");
       etracer_start(); 
     }
 
   if (o.do_monitor || o.do_modify)
     {
-      VERBOSE(2,"wsim: starting memory monitor\n");
+      INFO("wsim: starting memory monitor\n");
       machine_monitor(o.monitor, o.modify);
-      VERBOSE(2,"wsim: end of memory monitor settings\n");
     }
 
   /* tracer creation */
   if (o.do_trace)
     {
-      VERBOSE(2,"wsim: starting tracer\n");
+      INFO("wsim: starting tracer\n");
       tracer_start();
     }
 

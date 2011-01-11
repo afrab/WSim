@@ -395,14 +395,14 @@ int devices_update(void)
 	      if (((b                  & (0x10)) == 0) && 
 		  ((SYSTEM_BUTTON_LAST & (0x10)) != 0))
 		{
-		  VERBOSE(3,"%s: button 1 pressed\n",NAME);
+		  INFO("%s: button 1 pressed\n",NAME);
 		  msp430_digiIO_dev_write(PORT1, 0x00, 0x04);
 		}
 	      
 	      if (((b                  & (0x10)) != 0) && 
 		  ((SYSTEM_BUTTON_LAST & (0x10)) == 0))
 		{
-		  VERBOSE(3,"%s: button 1 released\n",NAME);
+		  INFO("%s: button 1 released\n",NAME);
 		  msp430_digiIO_dev_write(PORT1, 0x04, 0x04);
 		}
 
@@ -411,7 +411,6 @@ int devices_update(void)
 	}
 	break;
       case UI_EVENT_QUIT: /* q */
-	HW_DMSG_UI("%s: UI event QUIT\n",NAME);
 	mcu_signal_add(SIG_UI);
 	break;
       case UI_EVENT_NONE:

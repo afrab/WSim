@@ -381,47 +381,47 @@ int devices_update()
 	  if ((machine.ui.b_down & UI_BUTTON_1) != 0)
 	    {
 	      b &= ~0x10;
-	      VERBOSE(3,"%s: button 1 pressed\n", NAME);
+	      INFO("%s: button 1 pressed\n", NAME);
 	    }
 	  if ((machine.ui.b_down & UI_BUTTON_2) != 0)
 	    {
 	      b &= ~0x20;
-	      VERBOSE(3,"%s: button 2 pressed\n", NAME);
+	      INFO("%s: button 2 pressed\n", NAME);
 	    }
 	  if ((machine.ui.b_down & UI_BUTTON_3) != 0)
 	    {
 	      b &= ~0x40;
-	      VERBOSE(3,"%s: button 3 pressed\n", NAME);
+	      INFO("%s: button 3 pressed\n", NAME);
 	    }
 	  if ((machine.ui.b_down & UI_BUTTON_4) != 0)
 	    {
 	      b &= ~0x80;
-	      VERBOSE(3,"%s: button 4 pressed\n", NAME);
+	      INFO("%s: button 4 pressed\n", NAME);
 	    }
 
 	  if (b != BUTTONS_LAST)
 	    {
 	      int i;
-	      /* VERBOSE(3,"%s: b 0x%02x last 0x%02x\n",NAME,b,BUTTONS_LAST); */
+	      /* HW_DMSG_PLATFORM(3,"%s: b 0x%02x last 0x%02x\n",NAME,b,BUTTONS_LAST); */
 	      for(i=0; i<4; i++)
 		{
 		  if (((b            & (0x10<<i)) == 0) && 
 		      ((BUTTONS_LAST & (0x10<<i)) != 0))
 		    {
-		      VERBOSE(3,"%s: button %d pressed\n",NAME,i+1);
+		      INFO("%s: button %d pressed\n",NAME,i+1);
 		    }
 
 		  if (((b            & (0x10<<i)) != 0) && 
 		      ((BUTTONS_LAST & (0x10<<i)) == 0))
 		    {
-		      VERBOSE(3,"%s: button %d released\n",NAME,i+1);
+		      INFO("%s: button %d released\n",NAME,i+1);
 		    }
 		}
 	    }
 
 	  /* P4.4-7                                */
 	  /* 4 buttons mask                        */
-	  VERBOSE(4,"%s: port4 write 0x%02x\n",NAME,b);
+	  HW_DMSG_PLATFORM(4,"%s: port4 write 0x%02x\n",NAME,b);
 	  msp430_digiIO_dev_write(PORT4, b, 0xf0);
 	  /* p1.7 // Dallas, high to low interrupt */
 	  /* Logical or binded to p1.7 for IRQ     */
@@ -432,7 +432,6 @@ int devices_update()
 	}
 	break;
       case UI_EVENT_QUIT:
-	HW_DMSG_UI("%s: UI event QUIT\n",NAME);
 	mcu_signal_add(SIG_UI);
 	break;
       case UI_EVENT_NONE:

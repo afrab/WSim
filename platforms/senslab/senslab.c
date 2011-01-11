@@ -226,17 +226,17 @@ int devices_create(void)
 
   if (xt1_opt.value) {
     xin_freq = atoi(xt1_opt.value);
-    VERBOSE(1,"senslab: xt1 external crystal set to %d Hz\n",xin_freq);
+    INFO("senslab: xt1 external crystal set to %d Hz\n",xin_freq);
   }
 
   if (xt2_opt.value) {
     xt2_freq = atoi(xt2_opt.value);
-    VERBOSE(1,"senslab: xt2 external crystal set to %d Hz\n",xt2_freq);
+    INFO("senslab: xt2 external crystal set to %d Hz\n",xt2_freq);
   }
 
   /*if (xosc_opt.value) {
     xosc_freq = atoi(xosc_opt.value);
-    VERBOSE(1,"senslab: xosc external crystal set to %d Hz\n",xosc_freq);
+    INFO("senslab: xosc external crystal set to %d Hz\n",xosc_freq);
   }*/
 
   /*********************************/

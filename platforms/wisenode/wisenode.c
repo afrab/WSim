@@ -139,17 +139,17 @@ int devices_create(void)
 
   if (xt1_opt.value) {
     xin_freq = atoi(xt1_opt.value);
-    VERBOSE(1,"%s: xt1 external crystal set to %d Hz\n",NAME,xin_freq);
+    INFO("%s: xt1 external crystal set to %d Hz\n",NAME,xin_freq);
   }
 
   if (xt2_opt.value) {
     xt2_freq = atoi(xt2_opt.value);
-    VERBOSE(1,"%s: xt2 external crystal set to %d Hz\n",NAME,xt2_freq);
+    INFO("%s: xt2 external crystal set to %d Hz\n",NAME,xt2_freq);
   }
 
   if (xosc_opt.value) {
     xosc_freq = atoi(xosc_opt.value);
-    VERBOSE(1,"%s: xosc external crystal set to %d Hz\n",NAME,xosc_freq);
+    INFO("%s: xosc external crystal set to %d Hz\n",NAME,xosc_freq);
   }
 
   /*********************************/
@@ -536,12 +536,12 @@ int devices_update(void)
 	  if ((machine.ui.b_down & UI_BUTTON_1) != 0)
 	    {
 	      b &= ~0x80;
-	      VERBOSE(3,"%s: button 1 pressed\n",NAME);
+	      INFO("%s: button 1 pressed\n",NAME);
 	    }
 	  if ((machine.ui.b_down & UI_BUTTON_2) != 0)
 	    {
 	      b &= ~0x40;
-	      VERBOSE(3,"%s: button 2 pressed\n",NAME);
+	      INFO("%s: button 2 pressed\n",NAME);
 	    }
 
 	  msp430_digiIO_dev_write(PORT2, b, 0xC0);
@@ -550,8 +550,7 @@ int devices_update(void)
 	break; /* UI_EVENT_USER */
 
       case UI_EVENT_QUIT:
-	HW_DMSG_UI("%s: UI event QUIT\n",NAME);
-	mcu_signal_add(SIG_HOST | SIGTERM);
+	mcu_signal_add(SIG_UI);
 	break;
       case UI_EVENT_NONE:
 	break;

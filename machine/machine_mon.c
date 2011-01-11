@@ -171,7 +171,7 @@ void machine_monitor_add_trace(int access_type)
    *
    */
 
-  VERBOSE(6,"machine:monitor: watchpoint trace for addr 0x%04x pc=0x%04x val=0x%04x type=%s\n",
+  INFO("machine:monitor: watchpoint trace for addr 0x%04x pc=0x%04x val=0x%04x type=%s\n",
 	  addr, mcu_get_pc(), value, mode2str(access_type));
 #endif
 
@@ -222,12 +222,12 @@ void machine_monitor_add_trace(int access_type)
 	break;
       case 1:
 	mcu_jtag_write_byte(v_addr, v_value);
-	VERBOSE(6,"  modify:byte variable \"%s\" [0x%04x:%d] = %d (0x%04x)\n", 
+	INFO("  modify:byte variable \"%s\" [0x%04x:%d] = %d (0x%04x)\n", 
 		watchpoint[index].name, v_addr, v_size, v_value, v_value);
 	break;
       case 2:
 	mcu_jtag_write_word(v_addr, v_value);
-	VERBOSE(6,"  modify:word variable \"%s\" [0x%04x:%d] = %d (0x%04x)\n", 
+	INFO("  modify:word variable \"%s\" [0x%04x:%d] = %d (0x%04x)\n", 
 		watchpoint[index].name, v_addr, v_size, v_value, v_value);
 	break;
       default:
@@ -260,24 +260,24 @@ void machine_monitor_add_trace(int access_type)
 	  break;
 
 	case '1': // char
-	  VERBOSE(6,"machine:monitor(%d): Variable:%s at:0x%04x (char) = '%c'\n",
+	  INFO("machine:monitor(%d): Variable:%s at:0x%04x (char) = '%c'\n",
 		  logString[0], watchpoint[ index ].name,watchpoint[ index ].addr,logString[1]);
 	  break;
 	case '2': // Byte (int8)
-	  VERBOSE(6,"machine:monitor(%d): Variable:%s at:0x%04x (int8) = '%d'\n",
+	  INFO("machine:monitor(%d): Variable:%s at:0x%04x (int8) = '%d'\n",
 		  logString[0], watchpoint[ index ].name,watchpoint[ index ].addr,logString[1]);
 	  break;
 	case '3': // Int (int16)
 	  int16 = ((logString[2] & 0xff) << 8) | (logString[1] & 0xff);
-	  VERBOSE(6,"machine:monitor(%d): Variable:%s at:0x%04x (int16) = '%d'\n",
+	  INFO("machine:monitor(%d): Variable:%s at:0x%04x (int16) = '%d'\n",
 		  logString[0], watchpoint[ index ].name,watchpoint[ index ].addr,int16);
 	  break;
 	case '4': // string
-	  VERBOSE(6,"machine:monitor(%d): Variable:%s at:0x%04x (str) = '%s'\n",
+	  INFO("machine:monitor(%d): Variable:%s at:0x%04x (str) = '%s'\n",
 		  logString[0], watchpoint[ index ].name,watchpoint[ index ].addr,&logString[1]);
 	  break;
 	default:
-	  VERBOSE(6,"machine:monitor(%d): Variable:%s at:0x%04x (Unknown type) = '%s'\n",
+	  INFO("machine:monitor(%d): Variable:%s at:0x%04x (Unknown type) = '%s'\n",
 		  logString[0], watchpoint[ index ].name,watchpoint[ index ].addr,iter,logString);
 	  break;
 	}

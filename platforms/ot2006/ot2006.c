@@ -305,7 +305,6 @@ int devices_update()
       }
       break;
     case UI_EVENT_QUIT:
-      HW_DMSG_UI("  devices UI event QUIT\n");
       MCU_SIGNAL = SIG_UI;
       break;
     case UI_EVENT_NONE:

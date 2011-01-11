@@ -191,17 +191,17 @@ int devices_create(void)
 
   if (xt1_opt.value) {
     xin_freq = atoi(xt1_opt.value);
-    VERBOSE(1,"wsn430: xt1 external crystal set to %d Hz\n",xin_freq);
+    INFO("wsn430: xt1 external crystal set to %d Hz\n",xin_freq);
   }
 
   if (xt2_opt.value) {
     xt2_freq = atoi(xt2_opt.value);
-    VERBOSE(1,"wsn430: xt2 external crystal set to %d Hz\n",xt2_freq);
+    INFO("wsn430: xt2 external crystal set to %d Hz\n",xt2_freq);
   }
 
   if (xosc_opt.value) {
     xosc_freq = atoi(xosc_opt.value);
-    VERBOSE(1,"wsn430: xosc external crystal set to %d Hz\n",xosc_freq);
+    INFO("wsn430: xosc external crystal set to %d Hz\n",xosc_freq);
   }
 
   /*********************************/

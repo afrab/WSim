@@ -12,9 +12,10 @@
     <p>Before compiling WSim make sure the following software packages are installed on your system:</p>
     
     <ul style="margin-top: 0pt;">
-      <li><span >gcc</span>,  and <span>make</span></li>    		
-      <li><span >libsdl1.2 et libsdl1.2-dev</span></li>
       <li><span >automake</span> (>= 1.10), <span>autoconf</span> (>= 2.61)</li>
+      <li><span >gcc</span>  and <span>make</span></li>    		
+      <li><span >xorg-dev</span>
+      <li><span >zlib1g-dev</span> 
     </ul>
     
     
@@ -29,7 +30,7 @@
     <p> After checking out the SVN repository, move to the <span class="hilite">./wsim/</span> directory and type the following commands: </p>
 
     <pre class="terminal"><span class="prompt">$ </span> <span class="input">./bootstrap</span></pre>
-    <pre class="terminal"><span class="prompt">$ </span> <span class="input">./configure --enable-ptty --enable-gui --enable-xdebug</span></pre>
+    <pre class="terminal"><span class="prompt">$ </span> <span class="input">./configure</span></pre>
 
 	
     <p>The main configure options are (type <span class="hilite-code"> ./configure --help </span> for a more complete list): </p>

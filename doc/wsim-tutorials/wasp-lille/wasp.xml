@@ -82,9 +82,8 @@ make</computeroutput></programlisting>
 	<title> Executables</title>
       <para>
 	The simulators will be located in /platforms/iclbsn/. wsim-[platform] is a simulator
-	for the platform without the network turned on while worldsens-[platform] will require
-	a valid WSNet1 process to connect to.
-	The event tracer (wtracer) and WSNet1 sources are located in the /utils 
+	for the platform.
+	The event tracer (wtracer) and WSNet sources (wsnet1) are located in the /utils 
 	directory.
       </para>
       </note>

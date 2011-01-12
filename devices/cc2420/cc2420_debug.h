@@ -22,12 +22,10 @@
 /***************************************************/
 /***************************************************/
 
-#undef DEBUG
-
 #if defined(DEBUG)
-#define CC2420_DEBUG(x...)     HW_DMSG(x)
-#define CC2420_DBG_RX(x...)    HW_DMSG(x)
-#define CC2420_DBG_TX(x...)    HW_DMSG(x)
+#define CC2420_DEBUG(x...)     HW_DMSG_DEV(x)
+#define CC2420_DBG_RX(x...)    HW_DMSG_DEV(x)
+#define CC2420_DBG_TX(x...)    HW_DMSG_DEV(x)
 #else
 #define CC2420_DEBUG(x...)     do { } while (0)
 #define CC2420_DBG_RX(x...)    do { } while (0)
@@ -38,37 +36,37 @@
 /***************************************************/
 /***************************************************/
 
-#define CC2420_DEBUG_PINS
-#define CC2420_DEBUG_ACCESS
-#define CC2420_DEBUG_STROBE
-#define CC2420_DEBUG_STATE
-#define CC2420_DEBUG_MUX
+#define CC2420_DEBUG_PINS    0
+#define CC2420_DEBUG_ACCESS  0
+#define CC2420_DEBUG_STROBE  0
+#define CC2420_DEBUG_STATE   0
+#define CC2420_DEBUG_MUX     0
 
-#ifdef CC2420_DEBUG_PINS
+#if CC2420_DEBUG_PINS
 #    define CC2420_DBG_PINS(x...) CC2420_DEBUG(x)
 #else
 #    define CC2420_DBG_PINS(x...) do { } while (0)
 #endif
 
-#ifdef CC2420_DEBUG_ACCESS
+#if CC2420_DEBUG_ACCESS
 #    define CC2420_DBG_ACCESS(x...) CC2420_DEBUG(x)
 #else
 #    define CC2420_DBG_ACCESS(x...) do { } while (0)
 #endif
 
-#ifdef CC2420_DEBUG_STROBE
+#if CC2420_DEBUG_STROBE
 #    define CC2420_DBG_STROBE(x...) CC2420_DEBUG(x)
 #else
 #    define CC2420_DBG_STROBE(x...) do { } while (0)
 #endif
 
-#ifdef CC2420_DEBUG_STATE
+#if CC2420_DEBUG_STATE
 #    define CC2420_DBG_STATE(x...) CC2420_DEBUG(x)
 #else
 #    define CC2420_DBG_STATE(x...) do { } while (0)
 #endif
 
-#ifdef CC2420_DEBUG_MUX
+#if CC2420_DEBUG_MUX
 #    define CC2420_DBG_MUX(x...) CC2420_DEBUG(x)
 #else
 #    define CC2420_DBG_MUX(x...) do { } while (0)

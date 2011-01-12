@@ -22,10 +22,8 @@
 /**************************************************************************/
 /**************************************************************************/
 
-//#undef DEBUG
-
-#if defined(DEBUG)
-#define WSNET_DEBUG(x...)     HW_DMSG(x)
+#if DEBUG
+#define WSNET_DEBUG(x...)     DMSG_LIB_WSNET(x)
 #else
 #define WSNET_DEBUG(x...)     do { } while (0)
 #endif
@@ -34,11 +32,11 @@
 /**************************************************************************/
 /**************************************************************************/
 
-#define WSNET_DEBUG_BKTRK 0
-#define WSNET_DEBUG_EXC   0
-#define WSNET_DEBUG_DBG   0
-#define WSNET_DEBUG_TX    0
-#define WSNET_DEBUG_RX    0
+#define WSNET_DEBUG_BKTRK 1
+#define WSNET_DEBUG_EXC   1
+#define WSNET_DEBUG_DBG   1
+#define WSNET_DEBUG_TX    1
+#define WSNET_DEBUG_RX    1
 
 #if WSNET_DEBUG_BKTRK
 #    define WSNET_BKTRK(x...) WSNET_DEBUG(x)

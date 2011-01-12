@@ -111,7 +111,7 @@ do {                                         \
 #define DEBUG_MCU      0
 #define DEBUG_MCUDEV   0
 #define DEBUG_MACH     0
-#define DEBUG_DEV      0    
+#define DEBUG_DEV      0
 #define DEBUG_PLATFORM 0
 #else
 #define HW_DMSG(x...)     do {} while(0)

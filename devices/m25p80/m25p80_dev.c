@@ -183,9 +183,9 @@ const char* str_cmd(int n)
  * 50 MHz clock rate (maximum)
  * Deep Power-down mode 1 Î¼A (typical)
  * Electronic signatures
- *  â JEDEC Standard two-byte signature
+ *  - JEDEC Standard two-byte signature
  *    (2011h)
- *  â RES instruction, one-byte signature (10h),
+ *  - RES instruction, one-byte signature (10h),
  *    for backward compatibility
  *
  */

@@ -40,7 +40,7 @@
 
 static void msp430_basic_clock_plus_adjust_lfxt1_freq();
 static void msp430_basic_clock_plus_adjust_dco_freq();
-static void msp430_basic_clock_plus_adjust_vlo_freq();
+ void msp430_basic_clock_plus_adjust_vlo_freq();
 static void msp430_basic_clock_plus_printstate();
 
 /**
@@ -62,6 +62,7 @@ static void msp430_basic_clock_plus_printstate();
 void 
 msp430_basic_clock_plus_reset()
 {
+#if 0
   static int firsttime = 0;
 
   /* 
@@ -80,7 +81,6 @@ msp430_basic_clock_plus_reset()
    * ACLK  comes from DCO   bcsctl1.diva=0
    * SMCLK comes from DCO   bcsctl2.divs=0
    */
-
   MCUBCP.dco.s            = 0x60;
   MCUBCP.bcsctl1.s        = 0x84;
   MCUBCP.bcsctl2.s        = 0x00;
@@ -108,6 +108,7 @@ msp430_basic_clock_plus_reset()
       msp430_basic_clock_plus_speed_tracer_init();
       firsttime = 1;
     }
+#endif
 }
 
 /* ************************************************** */
@@ -115,8 +116,9 @@ msp430_basic_clock_plus_reset()
 /* ************************************************** */
 
 int 
-msp430_basic_clock_plus_update(int clock_add)
+msp430_basic_clock_plus_update(int UNUSED clock_add)
 {
+#if 0
 #if defined(HIGH_RES_CLOCK)
   float nano_add = 0;
 #else
@@ -292,6 +294,8 @@ msp430_basic_clock_plus_update(int clock_add)
 #endif
 
   return nano_add;
+#endif
+  return 0;
 }
 
 /* ************************************************** */
@@ -300,6 +304,7 @@ msp430_basic_clock_plus_update(int clock_add)
 
 void msp430_basic_clock_plus_update_done()
 {
+#if 0
   MCUBCP.lfxt1_increment  = 0;
   MCUBCP.xt2_increment    = 0;
   MCUBCP.dco_increment    = 0;
@@ -307,6 +312,7 @@ void msp430_basic_clock_plus_update_done()
   MCUBCP.ACLK_increment   = 0;
   MCUBCP.MCLK_increment   = 0;
   MCUBCP.SMCLK_increment  = 0;
+#endif
 }
 
 /* ************************************************** */
@@ -602,7 +608,7 @@ void msp430_basic_clock_plus_speed_tracer_update()
 
   // internal freqs
   lfxt1 = (MCU_READ_OSCOFF == 0)        ? MCUBCP.lfxt1_freq : 0;
-  xt2   = (MCUBCP.bcsctl1.b.xt2off == 0) ? MCUBCP.xt2_freq   : 0;
+  //  xt2   = (MCUBCP.bcsctl1.b.xt2off == 0) ? MCUBCP.xt2_freq   : 0;
   dco   = (MCU_READ_SCG0 == 0)          ? MCUBCP.dco_freq   : 0;
   
   // multiplex

@@ -220,6 +220,8 @@ void mcu_reset(void)
   /* system clock */
 #if defined(__msp430_have_basic_clock)
   msp430_basic_clock_reset();
+#elif defined(__msp430_have_basic_clock_plus)
+  msp430_basic_clock_plus_reset();
 #elif defined(__msp430_have_fll_and_xt2)
   msp430_fll_clock_reset();
 #else

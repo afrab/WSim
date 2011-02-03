@@ -16,7 +16,8 @@
    MSP430f149 
    MSP430f449
    MSP430f1611   
-   MSP430f2013   
+   MSP430f2013
+   MSP430f2274
 */
 
 /**
@@ -640,9 +641,8 @@
 #define INTR_UNUSED_3      0
 
 // system clock
-#define __msp430_have_basic_clock
 #define __msp430_have_basic_clock_plus
-#define __msp430_have_xt2 
+
 
 // 8 bit blocks
 #define __msp430_have_port1

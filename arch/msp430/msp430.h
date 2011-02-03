@@ -20,6 +20,7 @@
 #include "msp430_intr.h"
 #include "msp430_fll_clock.h"
 #include "msp430_basic_clock.h"
+#include "msp430_basic_clock_plus.h"
 #include "msp430_alu.h"
 #include "msp430_io.h"
 #include "msp430_hwmul.h"
@@ -139,6 +140,9 @@ struct msp430_mcu_t {
 #if defined(__msp430_have_basic_clock)
   struct msp430_basic_clock_t  basic_clock;
 #endif
+#if defined(__msp430_have_basic_clock_plus)
+  struct msp430_basic_clock_plus_t  basic_clock_plus;
+#endif
 
 #if defined(__msp430_have_basic_timer)
   struct msp430_basic_timer_t  bt;
@@ -221,6 +225,10 @@ extern struct msp430_mcu_t mcu_backup;
 
 #if defined(__msp430_have_basic_clock)
 #define MCU_CLOCK          MCU.basic_clock
+#endif
+
+#if defined(__msp430_have_basic_clock_plus)
+#define MCU_CLOCK          MCU.basic_clock_plus
 #endif
 
 #if defined(__msp430_have_fll_and_xt2)

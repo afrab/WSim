@@ -338,44 +338,43 @@ devices_update()
           if ((machine.ui.b_down & UI_BUTTON_1) != 0)
             {
               b &= ~0x01;
-              VERBOSE(4,"%s: button 1 pressed\n", NAME);
+              INFO("%s: button 1 pressed\n", NAME);
             }
           if ((machine.ui.b_down & UI_BUTTON_2) != 0)
             {
               b &= ~0x02;
-              VERBOSE(4,"%s: button 2 pressed\n", NAME);
+              INFO("%s: button 2 pressed\n", NAME);
             }
 
           if (b != BUTTONS_LAST)
             {
               int i;
-              VERBOSE(4,"%s: b 0x%02x last 0x%02x\n",NAME,b,BUTTONS_LAST);
+              HW_DMSG_PLATFORM(4,"%s: b 0x%02x last 0x%02x\n",NAME,b,BUTTONS_LAST);
               for(i=0; i<2; i++)
                 {
                   if (((b            & (0x01<<i)) == 0) &&
                       ((BUTTONS_LAST & (0x01<<i)) != 0))
                     {
-                      VERBOSE(3,"%s: button %d pressed\n",NAME,i+1);
+                      INFO("%s: button %d pressed\n",NAME,i+1);
                     }
 
                   if (((b            & (0x01<<i)) != 0) &&
                       ((BUTTONS_LAST & (0x01<<i)) == 0))
                     {
-                      VERBOSE(3,"%s: button %d released\n",NAME,i+1);
+                      INFO("%s: button %d released\n",NAME,i+1);
                     }
                 }
             }
 
           // Button 1->p1.6, button 2->p1.7
           // 2 buttons mask
-          VERBOSE(4,"%s: port1 write 0x%02x\n",NAME,b<<6);
+          HW_DMSG_PLATFORM(4,"%s: port1 write 0x%02x\n",NAME,b<<6);
           msp430_digiIO_dev_write(PORT1, b<<6, 0xC0);
 
           BUTTONS_LAST = b;
         }
         break;
       case UI_EVENT_QUIT:
-        //HW_DMSG_UI("%s: UI event QUIT\n",NAME);
         mcu_signal_add(SIG_UI);
         break;
       case UI_EVENT_NONE:

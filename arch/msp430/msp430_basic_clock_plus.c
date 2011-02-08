@@ -40,39 +40,40 @@
 
 static void msp430_basic_clock_plus_adjust_lfxt1_freq();
 static void msp430_basic_clock_plus_adjust_dco_freq();
- void msp430_basic_clock_plus_adjust_vlo_freq();
+void msp430_basic_clock_plus_adjust_vlo_freq();
 static void msp430_basic_clock_plus_printstate();
 
 /**
-   After a PUC, MCLK and SMCLK are sourced from DCOCLK at ~800 kHz (see
-   device-specific datasheet for parameters) and ACLK is sourced from LFXT1
-   in LF mode.
+    After a PUC, MCLK and SMCLK are sourced from DCOCLK at ~1.1 MHz (see
+    the device-specific data sheet for parameters) and ACLK is sourced from
+    LFXT1CLK in LF mode with an internal load capacitance of 6pF.
+    
+    Status register control bits SCG0, SCG1, OSCOFF, and CPUOFF configure
+    the MSP430 operating modes and enable or disable portions of the basic clock
+    module+. See Chapter System Resets, Interrupts and Operating Modes. The
+    DCOCTL, BCSCTL1, BCSCTL2, and BCSCTL3 registers configure the basic
+    clock module+.
+    
+    The basic clock module+ can be configured or reconfigured by software at any
+    time during program execution.
 
-   Status register control bits SCG0, SCG1, OSCOFF, and CPUOFF configure
-   the MSP430 operating modes and enable or disable portions of the basic clock
-   module. See Chapter System Resets, Interrupts and Operating Modes. The
-   DCOCTL, BCSCTL1, and BCSCTL2 registers configure the basic clock
-   module
-
-   The basic clock can be configured or reconfigured by software at any time
-   during program execution, for example:
 */
 
 
 void 
 msp430_basic_clock_plus_reset()
 {
-#if 0
+
   static int firsttime = 0;
 
   /* 
    * dco initial state 0x60 = 0110 0000
    *     bcsctl2.rsel = 4
    *     dco.dco      = 3
-   *   initial freq ~= 800 kHz
+   *     initial freq ~= 800 kHz
    *
    * The modulator mixing formula is:
-   *      t =(32- MODx) × tDCO + MODx × tDCO+1
+   *      t =(32− MODx) × tDCO + MODx × tDCO+1
    *
    * bcsctl1 initial state 0x80 = 1000 0000
    *     bcsctl1.xt2off = 1 : xt2 is off 
@@ -82,8 +83,9 @@ msp430_basic_clock_plus_reset()
    * SMCLK comes from DCO   bcsctl2.divs=0
    */
   MCUBCP.dco.s            = 0x60;
-  MCUBCP.bcsctl1.s        = 0x84;
+  MCUBCP.bcsctl1.s        = 0x00;
   MCUBCP.bcsctl2.s        = 0x00;
+  MCUBCP.bcsctl3.s        = 0x00;
 
   MCUBCP.ACLK_bitmask     = BITMASK(MCUBCP.bcsctl1.b.diva);
   MCUBCP.MCLK_bitmask     = BITMASK(MCUBCP.bcsctl2.b.divm);
@@ -91,14 +93,15 @@ msp430_basic_clock_plus_reset()
 
   msp430_basic_clock_plus_adjust_lfxt1_freq();
   msp430_basic_clock_plus_adjust_dco_freq();
+  //msp430_basic_clock_plus_adjust_vlo_freq();
 
 #if defined(HIGH_RES_CLOCK)
   MCUBCP.lfxt1_cycle_nanotime = (MCUBCP.lfxt1_freq > 0) ? ((float)NANO / (float)MCUBCP.lfxt1_freq) : 0.0;
-  MCUBCP.xt2_cycle_nanotime   = (MCUBCP.xt2_freq   > 0) ? ((float)NANO / (float)MCUBCP.xt2_freq)   : 0.0;
+  MCUBCP.vlo_cycle_nanotime   = (MCUBCP.vlo_freq   > 0) ? ((float)NANO / (float)MCUBCP.vlo_freq)   : 0.0;
   MCUBCP.dco_cycle_nanotime   = (float)NANO / (float)MCUBCP.dco_freq;
 #else
   MCUBCP.lfxt1_cycle_nanotime = (MCUBCP.lfxt1_freq > 0) ? (NANO / MCUBCP.lfxt1_freq) : 0;
-  MCUBCP.xt2_cycle_nanotime   = (MCUBCP.xt2_freq   > 0) ? (NANO / MCUBCP.xt2_freq)   : 0;
+  MCUBCP.vlo_cycle_nanotime   = (MCUBCP.vlo_freq   > 0) ? (NANO / MCUBCP.vlo_freq)   : 0;
   MCUBCP.dco_cycle_nanotime   = NANO / MCUBCP.dco_freq;
 #endif
 
@@ -108,7 +111,7 @@ msp430_basic_clock_plus_reset()
       msp430_basic_clock_plus_speed_tracer_init();
       firsttime = 1;
     }
-#endif
+
 }
 
 /* ************************************************** */
@@ -118,7 +121,7 @@ msp430_basic_clock_plus_reset()
 int 
 msp430_basic_clock_plus_update(int UNUSED clock_add)
 {
-#if 0
+
 #if defined(HIGH_RES_CLOCK)
   float nano_add = 0;
 #else
@@ -133,17 +136,43 @@ msp430_basic_clock_plus_update(int UNUSED clock_add)
   /* compute the nano equivalent time            */
   int clock_add_mul = clock_add << MCUBCP.bcsctl2.b.divm;
   switch (MCUBCP.bcsctl2.b.selm)
-    {
+  {
     case 0: /* DCOCLK */
     case 1: /* DCOCLK */
       nano_add = clock_add_mul * MCUBCP.dco_cycle_nanotime;
       break;
-    case 2: /* XT2CLK */
-      nano_add = clock_add_mul * MCUBCP.xt2_cycle_nanotime;
-      break;
-    case 3: /* LFXT1CLK */
-      nano_add = clock_add_mul * MCUBCP.lfxt1_cycle_nanotime;      
-      break;
+    case 2: /* LFXT1CLK or VLOCLK */
+     
+      switch(MCUBCP.bcsctl3.b.lfxt1s)
+      {
+	case 0: /* 32768 Hz Crystal on LFXT1 */
+	  nano_add = clock_add_mul * MCUBCP.lfxt1_cycle_nanotime;
+	  break;
+	case 1: /* Reserved */
+	  break;
+	case 2: /* VLOCKL */
+	  nano_add = clock_add_mul * MCUBCP.vlo_cycle_nanotime;
+	  break;
+	case 3: /* Digital external clock source */
+	  break;
+      }   
+      
+    case 3: /* LFXT1CLK or VLOCLK */
+      
+      switch(MCUBCP.bcsctl3.b.lfxt1s)
+      {
+	case 0: /* 32768 Hz Crystal on LFXT1 */
+	  nano_add = clock_add_mul * MCUBCP.lfxt1_cycle_nanotime;
+	  break;
+	case 1: /* Reserved */
+	  break;
+	case 2: /* VLOCKL */
+	  nano_add = clock_add_mul * MCUBCP.vlo_cycle_nanotime;
+	  break;
+	case 3: /* Digital external clock source */
+	  break;
+      }
+	break;
     }
 
   /********************************************/
@@ -169,15 +198,21 @@ msp430_basic_clock_plus_update(int UNUSED clock_add)
   /* Software can disable LFXT1 by setting OSCOFF, if this signal does not source */
   /* SMCLK or MCLK, as shown in Figure 4-2. */
   /* so it runs if OSCOFF == 0 or it sources MCLK */
-  if ((MCU_READ_OSCOFF == 0) || (MCUBCP.bcsctl2.b.selm == 3 && MCU_READ_CPUOFF == 0)) 
+  if ((MCU_READ_OSCOFF == 0) || (MCUBCP.bcsctl2.b.selm == 3 && MCU_READ_CPUOFF == 0 && MCUBCP.bcsctl3.b.lfxt1s == 0)) 
     {
       CLOCK_DIVMOD_TEMP(MCUBCP.lfxt1_increment,MCUBCP.lfxt1_temp,MCUBCP.lfxt1_cycle_nanotime);
       MCUBCP.lfxt1_counter   += MCUBCP.lfxt1_increment;
+    }
+  else if ((MCU_READ_OSCOFF == 0) || (MCUBCP.bcsctl2.b.selm == 3 && MCU_READ_CPUOFF == 0 && MCUBCP.bcsctl3.b.lfxt1s == 2)) 
+    {
+      CLOCK_DIVMOD_TEMP(MCUBCP.vlo_increment,MCUBCP.vlo_temp,MCUBCP.vlo_cycle_nanotime);
+      MCUBCP.vlo_counter   += MCUBCP.vlo_increment;
     }
   else
     {
       // HW_DMSG_CLOCK("    lfxt1 not updated\n");
     }
+#if 0
 
   /* The XT2OFF bit disables the XT2 oscillator if XT2CLK is not used for */
   /* MCLK or SMCLK as shown in Figure 4-3. */ 

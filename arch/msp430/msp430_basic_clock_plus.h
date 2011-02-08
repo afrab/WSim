@@ -49,13 +49,13 @@
 
 
 
-#define BCP_START     0x56
+#define BCP_START     0x53
 #define BCP_END       0x58
 
 #define BCP_DCOCTL    0x56
 #define BCP_BCSCTL1   0x57
 #define BCP_BCSCTL2   0x58
-#define BCP_BCSCTL3   0x53 // ?
+#define BCP_BCSCTL3   0x53
 
 #if defined(WORDS_BIGENDIAN)
 struct __attribute__ ((packed)) dcoctl_t {

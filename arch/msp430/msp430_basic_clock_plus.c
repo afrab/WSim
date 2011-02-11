@@ -40,7 +40,7 @@
 
 static void msp430_basic_clock_plus_adjust_lfxt1_freq();
 static void msp430_basic_clock_plus_adjust_dco_freq();
-void msp430_basic_clock_plus_adjust_vlo_freq();
+static void msp430_basic_clock_plus_adjust_vlo_freq();
 static void msp430_basic_clock_plus_printstate();
 
 /**
@@ -85,7 +85,7 @@ msp430_basic_clock_plus_reset()
   MCUBCP.dco.s            = 0x60;
   MCUBCP.bcsctl1.s        = 0x00;
   MCUBCP.bcsctl2.s        = 0x00;
-  MCUBCP.bcsctl3.s        = 0x00;
+  MCUBCP.bcsctl3.s        = 0x05;
 
   MCUBCP.ACLK_bitmask     = BITMASK(MCUBCP.bcsctl1.b.diva);
   MCUBCP.MCLK_bitmask     = BITMASK(MCUBCP.bcsctl2.b.divm);
@@ -93,7 +93,7 @@ msp430_basic_clock_plus_reset()
 
   msp430_basic_clock_plus_adjust_lfxt1_freq();
   msp430_basic_clock_plus_adjust_dco_freq();
-  //msp430_basic_clock_plus_adjust_vlo_freq();
+  msp430_basic_clock_plus_adjust_vlo_freq();
 
 #if defined(HIGH_RES_CLOCK)
   MCUBCP.lfxt1_cycle_nanotime = (MCUBCP.lfxt1_freq > 0) ? ((float)NANO / (float)MCUBCP.lfxt1_freq) : 0.0;
@@ -143,35 +143,35 @@ msp430_basic_clock_plus_update(int UNUSED clock_add)
       break;
     case 2: /* LFXT1CLK or VLOCLK */
      
-      switch(MCUBCP.bcsctl3.b.lfxt1s)
+      switch(MCUBCP.bcsctl3.b.lfxt1s) /* LFXT1CLK or VLOCLK : 10 = VLOCKL ; else = LFXT1CLK*/
       {
 	case 0: /* 32768 Hz Crystal on LFXT1 */
-	  nano_add = clock_add_mul * MCUBCP.lfxt1_cycle_nanotime;
-	  break;
 	case 1: /* Reserved */
+	  nano_add = clock_add_mul * MCUBCP.lfxt1_cycle_nanotime;
 	  break;
 	case 2: /* VLOCKL */
 	  nano_add = clock_add_mul * MCUBCP.vlo_cycle_nanotime;
 	  break;
 	case 3: /* Digital external clock source */
+	  nano_add = clock_add_mul * MCUBCP.lfxt1_cycle_nanotime;
 	  break;
       }   
       
-    case 3: /* LFXT1CLK or VLOCLK */
+	case 3: /* LFXT1CLK or VLOCLK : 10 = VLOCKL ; else = LFXT1CLK*/
       
-      switch(MCUBCP.bcsctl3.b.lfxt1s)
+         switch(MCUBCP.bcsctl3.b.lfxt1s) /* LFXT1CLK or VLOCLK : 10 = VLOCKL ; else = LFXT1CLK*/
       {
 	case 0: /* 32768 Hz Crystal on LFXT1 */
-	  nano_add = clock_add_mul * MCUBCP.lfxt1_cycle_nanotime;
-	  break;
 	case 1: /* Reserved */
+	  nano_add = clock_add_mul * MCUBCP.lfxt1_cycle_nanotime;
 	  break;
 	case 2: /* VLOCKL */
 	  nano_add = clock_add_mul * MCUBCP.vlo_cycle_nanotime;
 	  break;
 	case 3: /* Digital external clock source */
+	  nano_add = clock_add_mul * MCUBCP.lfxt1_cycle_nanotime;
 	  break;
-      }
+      }   
 	break;
     }
 
@@ -212,34 +212,38 @@ msp430_basic_clock_plus_update(int UNUSED clock_add)
     {
       // HW_DMSG_CLOCK("    lfxt1 not updated\n");
     }
-#if 0
+
+
+  //Note : MSP430x22xx, XT2 is not present
 
   /* The XT2OFF bit disables the XT2 oscillator if XT2CLK is not used for */
   /* MCLK or SMCLK as shown in Figure 4-3. */ 
   /* so it runs if xt2off == 0 or it sources MCLK or SMCLK */
-  if ((MCUBCP.bcsctl1.b.xt2off == 0) || 
-      (MCUBCP.bcsctl2.b.selm   == 2  && MCU_READ_CPUOFF == 0) || 
-      (MCUBCP.bcsctl2.b.sels   == 1))
-    {
-      CLOCK_DIVMOD_TEMP(MCUBCP.xt2_increment,MCUBCP.xt2_temp,MCUBCP.xt2_cycle_nanotime);
-      MCUBCP.xt2_counter     += MCUBCP.xt2_increment;
-#if defined(DEBUG_SRC_OFF)
-      if (MCUBCP.bcsctl1.b.xt2off == 1)
-	{
-	  HW_DMSG_CLOCK("msp430:basic_clock_plus: xt2 stopped by xt2off = 1 but sources ");
-	  if (MCUBCP.bcsctl2.b.selm == 2)
-	    HW_DMSG_CLOCK("MCLK "); 
-	  if (MCUBCP.bcsctl2.b.sels == 1)
-	    HW_DMSG_CLOCK("SMCLK");
-	  HW_DMSG_CLOCK("\n");
-	  msp430_basic_clock_plus_printstate();
-	}
-#endif
-    }
-  else
-    {
-      // HW_DMSG_CLOCK("    xt2 not updated\n");
-    }
+//   if ((MCUBCP.bcsctl1.b.xt2off == 0) || 
+//       (MCUBCP.bcsctl2.b.selm   == 2  && MCU_READ_CPUOFF == 0) || 
+//       (MCUBCP.bcsctl2.b.sels   == 1))
+//     {
+//       CLOCK_DIVMOD_TEMP(MCUBCP.xt2_increment,MCUBCP.xt2_temp,MCUBCP.xt2_cycle_nanotime);
+//       MCUBCP.xt2_counter     += MCUBCP.xt2_increment;
+// #if defined(DEBUG_SRC_OFF)
+//       if (MCUBCP.bcsctl1.b.xt2off == 1)
+// 	{
+// 	  HW_DMSG_CLOCK("msp430:basic_clock_plus: xt2 stopped by xt2off = 1 but sources ");
+// 	  if (MCUBCP.bcsctl2.b.selm == 2)
+// 	    HW_DMSG_CLOCK("MCLK "); 
+// 	  if (MCUBCP.bcsctl2.b.sels == 1)
+// 	    HW_DMSG_CLOCK("SMCLK");
+// 	  HW_DMSG_CLOCK("\n");
+// 	  msp430_basic_clock_plus_printstate();
+// 	}
+// #endif
+//     }
+//   else
+//     {
+//       // HW_DMSG_CLOCK("    xt2 not updated\n");
+//     }
+
+
 
   /* Software can disable DCOCLK by setting SCG0 when it is not used to source */
   /* SMCLK or MCLK in active mode, as shown in Figure 4-4. */
@@ -293,7 +297,8 @@ msp430_basic_clock_plus_update(int UNUSED clock_add)
   /* SMCLK */
   if (MCU_READ_SCG1 == 0)
     {
-      MCUBCP.SMCLK_temp      += (MCUBCP.bcsctl2.b.sels == 0) ? MCUBCP.dco_increment : MCUBCP.xt2_increment;
+      MCUBCP.SMCLK_temp      += (MCUBCP.bcsctl2.b.sels == 0) ? MCUBCP.dco_increment : 
+				(MCUBCP.bcsctl3.b.lfxt1s == 0) ? MCUBCP.lfxt1_increment : MCUBCP.vlo_increment; 
       MCUBCP.SMCLK_increment  = MCUBCP.SMCLK_temp >> MCUBCP.bcsctl2.b.divs;
       MCUBCP.SMCLK_temp      &= MCUBCP.SMCLK_bitmask;
       MCUBCP.SMCLK_counter   += MCUBCP.SMCLK_increment;
@@ -321,17 +326,18 @@ msp430_basic_clock_plus_update(int UNUSED clock_add)
   /*                                          */
   /********************************************/
 #if defined(DEBUG_EACH_STEP)
-  HW_DMSG_CLOCK("msp430:basic_clock_plus: cycles+%d = nano+%"HRCTYPE" / lfxt1+%d xt2+%d dco+%d / MCLK+%d ACLK+%d SMCLK+%d / %" PRId64 "ns\n",
+  HW_DMSG_CLOCK("msp430:basic_clock_plus: cycles+%d = nano+%"HRCTYPE" / lfxt1+%d vlo+%d dco+%d / MCLK+%d ACLK+%d SMCLK+%d / %" PRId64 "ns\n",
 		clock_add,nano_add,
-		MCUBCP.lfxt1_increment,MCUBCP.xt2_increment,MCUBCP.dco_increment,
+		MCUBCP.lfxt1_increment,MCUBCP.vlo_increment,MCUBCP.dco_increment,
 		MCUBCP.MCLK_increment,MCUBCP.ACLK_increment,MCUBCP.SMCLK_increment,
 		MACHINE_TIME_GET_NANO());
 #endif
 
   return nano_add;
-#endif
+
   return 0;
 }
+
 
 /* ************************************************** */
 /* ************************************************** */
@@ -365,6 +371,8 @@ int8_t msp430_basic_clock_plus_read (uint16_t addr)
       return MCUBCP.bcsctl1.s;
     case BCP_BCSCTL2:
       return MCUBCP.bcsctl2.s;
+    case BCP_BCSCTL3:
+      return MCUBCP.bcsctl3.s;
     default:
       ERROR("msp430:basic_clock_plus: bad read address [0x%04x]\n",addr);
       break;
@@ -488,6 +496,42 @@ void msp430_basic_clock_plus_write(uint16_t addr, int8_t val)
 	msp430_basic_clock_plus_speed_tracer_update();
       }
       break;
+       /* **************************************** */
+      /* **************************************** */
+    case BCP_BCSCTL3:
+      {
+	union {
+	  struct bcsctl3_t b;
+	  int8_t           s;
+	} bcsctl3;
+	
+	bcsctl3.s = val;
+	if (bcsctl3.b.xt2s   != MCUBCP.bcsctl3.b.xt2s)
+	  {
+	    HW_DMSG_CLOCK("msp430:basic_clock_plus: xt2s modified\n");
+	  }
+	if (bcsctl3.b.lfxt1s   != MCUBCP.bcsctl3.b.lfxt1s)
+	  {
+	    HW_DMSG_CLOCK("msp430:basic_clock_plus: lfxt1s modified\n");
+	  }
+	if (bcsctl3.b.xcap   != MCUBCP.bcsctl3.b.xcap)
+	  {
+	    HW_DMSG_CLOCK("msp430:basic_clock_plus: xcap modified\n");
+	  }
+	if (bcsctl3.b.xt2of   != MCUBCP.bcsctl3.b.xt2of)
+	  {
+	    HW_DMSG_CLOCK("msp430:basic_clock_plus: xt2of modified\n");
+	  }
+	if (bcsctl3.b.lfxt1of   != MCUBCP.bcsctl3.b.lfxt1of)
+	  {
+	    HW_DMSG_CLOCK("msp430:basic_clock_plus: lfxt1of modified\n");
+	  }
+	
+	MCUBCP.bcsctl3.s = val;
+	msp430_basic_clock_plus_printstate();
+	msp430_basic_clock_plus_speed_tracer_update();
+      }
+      break;
       /* **************************************** */
       /* **************************************** */
     default:
@@ -566,6 +610,21 @@ msp430_basic_clock_plus_adjust_dco_freq()
 /* ************************************************** */
 /* ************************************************** */
 
+static void 
+msp430_basic_clock_plus_adjust_vlo_freq()
+{
+  /*  MCUBCP.lfxt1_freq           = DEFAULT_LFXT1_FREQ; */
+#if defined(HIGH_RES_CLOCK)
+  MCUBCP.vlo_cycle_nanotime = (float)NANO / (float)MCUBCP.vlo_freq;
+#else
+  MCUBCP.vlo_cycle_nanotime = NANO / MCUBCP.vlo_freq;
+#endif
+}
+
+/* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
+
 static void
 msp430_basic_clock_plus_printstate()
 {
@@ -580,8 +639,16 @@ msp430_basic_clock_plus_printstate()
     {
     case 0: 
     case 1: HW_DMSG_CLOCK("dco"); break;
-    case 2: HW_DMSG_CLOCK("xt2"); break;
-    case 3: HW_DMSG_CLOCK("lfxt1"); break;
+    case 2: 
+    case 3: 
+      switch(MCUBCP.bcsctl3.b.lfxt1s)
+      {
+	case 0: HW_DMSG_CLOCK("lfxt1"); break;
+	case 1:	HW_DMSG_CLOCK("lfxt1"); break;
+	case 2: HW_DMSG_CLOCK("vlo"); break;
+	case 3: HW_DMSG_CLOCK("lfxt1"); break;
+      }
+      break;
     }
   HW_DMSG_CLOCK("    run:%s\n",(MCU_READ_CPUOFF == 0) ? "on" : "off");
 
@@ -595,10 +662,10 @@ msp430_basic_clock_plus_printstate()
   HW_DMSG_CLOCK("    time:%" HRCTYPE "ns",MCUBCP.lfxt1_cycle_nanotime);
   HW_DMSG_CLOCK("    run:%s\n",(MCU_READ_OSCOFF == 0) ? "on" : "off");
 
-  HW_DMSG_CLOCK("msp430:basic_clock_plus:  xt2   ");
-  HW_DMSG_CLOCK("    freq:%dHz",MCUBCP.xt2_freq);
-  HW_DMSG_CLOCK("    time:%" HRCTYPE "ns",MCUBCP.xt2_cycle_nanotime);
-  HW_DMSG_CLOCK("    xt2off:%d\n",MCUBCP.bcsctl1.b.xt2off);
+  HW_DMSG_CLOCK("msp430:basic_clock_plus:  vlo   ");
+  HW_DMSG_CLOCK("    freq:%dHz",MCUBCP.vlo_freq);
+  HW_DMSG_CLOCK("    time:%" HRCTYPE "ns",MCUBCP.vlo_cycle_nanotime);
+  HW_DMSG_CLOCK("    xt2off:%d\n",MCUBCP.bcsctl1.b.xt2off); // ??
 
   HW_DMSG_CLOCK("msp430:basic_clock_plus:  dco   ");
   HW_DMSG_CLOCK("    freq:%dHz",MCUBCP.dco_freq);
@@ -627,10 +694,11 @@ void msp430_basic_clock_plus_speed_tracer_init()
 /* ************************************************** */
 
 #if defined(TRACER_SPEED)
-void msp430_basic_clock_plus_speed_tracer_update()
+void msp430_basic_clock_plus_speed_tracer_update() // TODO
 {
+#if 0
   unsigned int lfxt1 = 0;
-  unsigned int xt2   = 0;
+  unsigned int vlo   = 0;
   unsigned int dco   = 0;
 
   unsigned int aclk  = 0;
@@ -664,6 +732,7 @@ void msp430_basic_clock_plus_speed_tracer_update()
   TRACER_TRACE_ACLK (aclk);
   TRACER_TRACE_MCLK (mclk);
   TRACER_TRACE_SMCLK(smclk);
+#endif
 }
 #endif
 

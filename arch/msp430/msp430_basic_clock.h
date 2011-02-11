@@ -154,7 +154,7 @@ struct msp430_basic_clock_t
   uint64_t dco_counter;
   int      dco_increment;
 
-  /* internal clock temporary variables */
+  /* external clock temporary variables */
 
 #if defined(HIGH_RES_CLOCK)
   float    lfxt1_temp;

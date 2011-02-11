@@ -187,7 +187,7 @@ struct msp430_basic_clock_plus_t
   uint64_t vlo_counter;
   int      vlo_increment;
 
-  /* internal clock temporary variables */
+  /* external clock temporary variables */
 
 #if defined(HIGH_RES_CLOCK)
   float    lfxt1_temp;

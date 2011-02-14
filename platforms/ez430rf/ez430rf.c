@@ -155,19 +155,18 @@ int devices_create(void)
 {
   int res = 0;
   //int xin_freq, xt2_freq, xosc_freq;
-  int xin_freq, xosc_freq;
+  int xin_freq, vlo_freq, xosc_freq;
   char cc2500_antenna[] = "omnidirectionnal"; /* used by wsnet2, only this model available in wsnet2 */
 
   xin_freq  =        0; /*  0 kHz */
-  //xt2_freq  =        0; /*  0 MHz */
+  vlo_freq  =    12000; /* 12 kHz */
   xosc_freq = 26000000; /* 26 MHz */
 
   /*********************************/
   /* MSP430 MCU                    */
   /*********************************/
 
-  //res += msp430_mcu_create(xin_freq, xt2_freq);
-  res += msp430_mcu_create(xin_freq);
+  res += msp430_mcu_create(xin_freq, vlo_freq);
 
   /*********************************/
   /* fix peripheral sizes          */

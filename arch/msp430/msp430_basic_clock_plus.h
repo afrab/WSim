@@ -49,13 +49,13 @@
 
 
 
-#define BCP_START     0x53
+#define BCP_START     0x56
 #define BCP_END       0x58
 
 #define BCP_DCOCTL    0x56
 #define BCP_BCSCTL1   0x57
 #define BCP_BCSCTL2   0x58
-#define BCP_BCSCTL3   0x53
+#define BCP_BCSCTL3   0x53 
 
 #if defined(WORDS_BIGENDIAN)
 struct __attribute__ ((packed)) dcoctl_t {
@@ -192,6 +192,8 @@ struct msp430_basic_clock_plus_t
 #if defined(HIGH_RES_CLOCK)
   float    lfxt1_temp;
   float    lfxt1_cycle_nanotime;
+  float    xt2_temp;
+  float    xt2_cycle_nanotime;
   float    dco_temp;
   float    dco_cycle_nanotime;
   float    vlo_temp;
@@ -200,6 +202,8 @@ struct msp430_basic_clock_plus_t
 #else
   int      lfxt1_temp;
   uint32_t lfxt1_cycle_nanotime;
+  int      xt2_temp;
+  uint32_t xt2_cycle_nanotime;
   int      dco_temp;
   uint32_t dco_cycle_nanotime;
   int      vlo_temp;

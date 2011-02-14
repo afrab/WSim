@@ -83,9 +83,9 @@ msp430_basic_clock_plus_reset()
    * SMCLK comes from DCO   bcsctl2.divs=0
    */
   MCUBCP.dco.s            = 0x60;
-  MCUBCP.bcsctl1.s        = 0x00;
+  MCUBCP.bcsctl1.s        = 0x87;
   MCUBCP.bcsctl2.s        = 0x00;
-  MCUBCP.bcsctl3.s        = 0x05;
+  MCUBCP.bcsctl3.s        = 0x05; 
 
   MCUBCP.ACLK_bitmask     = BITMASK(MCUBCP.bcsctl1.b.diva);
   MCUBCP.MCLK_bitmask     = BITMASK(MCUBCP.bcsctl2.b.divm);
@@ -119,7 +119,7 @@ msp430_basic_clock_plus_reset()
 /* ************************************************** */
 
 int 
-msp430_basic_clock_plus_update(int UNUSED clock_add)
+msp430_basic_clock_plus_update(int clock_add)
 {
 
 #if defined(HIGH_RES_CLOCK)
@@ -141,23 +141,14 @@ msp430_basic_clock_plus_update(int UNUSED clock_add)
     case 1: /* DCOCLK */
       nano_add = clock_add_mul * MCUBCP.dco_cycle_nanotime;
       break;
+
     case 2: /* LFXT1CLK or VLOCLK */
-     
-      switch(MCUBCP.bcsctl3.b.lfxt1s) /* LFXT1CLK or VLOCLK : 10 = VLOCKL ; else = LFXT1CLK*/
-      {
-	case 0: /* 32768 Hz Crystal on LFXT1 */
-	case 1: /* Reserved */
-	  nano_add = clock_add_mul * MCUBCP.lfxt1_cycle_nanotime;
-	  break;
-	case 2: /* VLOCKL */
-	  nano_add = clock_add_mul * MCUBCP.vlo_cycle_nanotime;
-	  break;
-	case 3: /* Digital external clock source */
-	  nano_add = clock_add_mul * MCUBCP.lfxt1_cycle_nanotime;
-	  break;
-      }   
+#if defined(__msp430_have_xt2)
+     nano_add = clock_add_mul * MCUBCP.xt2_cycle_nanotime;
+     break;
+#endif
       
-	case 3: /* LFXT1CLK or VLOCLK : 10 = VLOCKL ; else = LFXT1CLK*/
+    case 3: /* LFXT1CLK or VLOCLK : 10 = VLOCKL ; else = LFXT1CLK*/
       
          switch(MCUBCP.bcsctl3.b.lfxt1s) /* LFXT1CLK or VLOCLK : 10 = VLOCKL ; else = LFXT1CLK*/
       {
@@ -198,50 +189,50 @@ msp430_basic_clock_plus_update(int UNUSED clock_add)
   /* Software can disable LFXT1 by setting OSCOFF, if this signal does not source */
   /* SMCLK or MCLK, as shown in Figure 4-2. */
   /* so it runs if OSCOFF == 0 or it sources MCLK */
-  if ((MCU_READ_OSCOFF == 0) || (MCUBCP.bcsctl2.b.selm == 3 && MCU_READ_CPUOFF == 0 && MCUBCP.bcsctl3.b.lfxt1s == 0)) 
+  if ((MCU_READ_OSCOFF == 0) || (MCUBCP.bcsctl2.b.selm == 3 && MCU_READ_CPUOFF == 0)) 
     {
       CLOCK_DIVMOD_TEMP(MCUBCP.lfxt1_increment,MCUBCP.lfxt1_temp,MCUBCP.lfxt1_cycle_nanotime);
       MCUBCP.lfxt1_counter   += MCUBCP.lfxt1_increment;
-    }
-  else if ((MCU_READ_OSCOFF == 0) || (MCUBCP.bcsctl2.b.selm == 3 && MCU_READ_CPUOFF == 0 && MCUBCP.bcsctl3.b.lfxt1s == 2)) 
-    {
-      CLOCK_DIVMOD_TEMP(MCUBCP.vlo_increment,MCUBCP.vlo_temp,MCUBCP.vlo_cycle_nanotime);
-      MCUBCP.vlo_counter   += MCUBCP.vlo_increment;
     }
   else
     {
       // HW_DMSG_CLOCK("    lfxt1 not updated\n");
     }
 
+  /* VLOCLK */
+  /* TODO: check if VLOCLK is on when not selected by lfxt1s MCUBCP.bcsctl3.b.lfxt1s == 2 */
+  CLOCK_DIVMOD_TEMP(MCUBCP.vlo_increment,MCUBCP.vlo_temp,MCUBCP.vlo_cycle_nanotime);
+  MCUBCP.vlo_counter   += MCUBCP.vlo_increment;
 
-  //Note : MSP430x22xx, XT2 is not present
 
+#if defined(__msp430_have_xt2) 
   /* The XT2OFF bit disables the XT2 oscillator if XT2CLK is not used for */
   /* MCLK or SMCLK as shown in Figure 4-3. */ 
   /* so it runs if xt2off == 0 or it sources MCLK or SMCLK */
-//   if ((MCUBCP.bcsctl1.b.xt2off == 0) || 
-//       (MCUBCP.bcsctl2.b.selm   == 2  && MCU_READ_CPUOFF == 0) || 
-//       (MCUBCP.bcsctl2.b.sels   == 1))
-//     {
-//       CLOCK_DIVMOD_TEMP(MCUBCP.xt2_increment,MCUBCP.xt2_temp,MCUBCP.xt2_cycle_nanotime);
-//       MCUBCP.xt2_counter     += MCUBCP.xt2_increment;
-// #if defined(DEBUG_SRC_OFF)
-//       if (MCUBCP.bcsctl1.b.xt2off == 1)
-// 	{
-// 	  HW_DMSG_CLOCK("msp430:basic_clock_plus: xt2 stopped by xt2off = 1 but sources ");
-// 	  if (MCUBCP.bcsctl2.b.selm == 2)
-// 	    HW_DMSG_CLOCK("MCLK "); 
-// 	  if (MCUBCP.bcsctl2.b.sels == 1)
-// 	    HW_DMSG_CLOCK("SMCLK");
-// 	  HW_DMSG_CLOCK("\n");
-// 	  msp430_basic_clock_plus_printstate();
-// 	}
-// #endif
-//     }
-//   else
-//     {
-//       // HW_DMSG_CLOCK("    xt2 not updated\n");
-//     }
+  if ((MCUBCP.bcsctl1.b.xt2off == 0) || 
+      (MCUBCP.bcsctl2.b.selm   == 2  && MCU_READ_CPUOFF == 0) || 
+      (MCUBCP.bcsctl2.b.sels   == 1))
+    {
+      CLOCK_DIVMOD_TEMP(MCUBCP.xt2_increment,MCUBCP.xt2_temp,MCUBCP.xt2_cycle_nanotime);
+      MCUBCP.xt2_counter     += MCUBCP.xt2_increment;
+#if defined(DEBUG_SRC_OFF)
+      if (MCUBCP.bcsctl1.b.xt2off == 1)
+	{
+	  HW_DMSG_CLOCK("msp430:basic_clock_plus: xt2 stopped by xt2off = 1 but sources ");
+	  if (MCUBCP.bcsctl2.b.selm == 2)
+	    HW_DMSG_CLOCK("MCLK "); 
+	  if (MCUBCP.bcsctl2.b.sels == 1)
+	    HW_DMSG_CLOCK("SMCLK");
+	  HW_DMSG_CLOCK("\n");
+	  msp430_basic_clock_plus_printstate();
+	}
+#endif
+    }
+  else
+    {
+      // HW_DMSG_CLOCK("    xt2 not updated\n");
+    }
+#endif
 
 
 
@@ -289,7 +280,14 @@ msp430_basic_clock_plus_update(int UNUSED clock_add)
     }
 
   /* ACLK */
-  MCUBCP.ACLK_temp           += MCUBCP.lfxt1_increment;
+  if (MCUBCP.bcsctl3.b.lfxt1s == 2)
+  {
+    MCUBCP.ACLK_temp           += MCUBCP.vlo_increment;
+  }
+  else
+  {
+    MCUBCP.ACLK_temp           += MCUBCP.lfxt1_increment;
+  }
   MCUBCP.ACLK_increment       = MCUBCP.ACLK_temp >> MCUBCP.bcsctl1.b.diva;
   MCUBCP.ACLK_temp           &= MCUBCP.ACLK_bitmask;
   MCUBCP.ACLK_counter        += MCUBCP.ACLK_increment;
@@ -297,8 +295,13 @@ msp430_basic_clock_plus_update(int UNUSED clock_add)
   /* SMCLK */
   if (MCU_READ_SCG1 == 0)
     {
-      MCUBCP.SMCLK_temp      += (MCUBCP.bcsctl2.b.sels == 0) ? MCUBCP.dco_increment : 
-				(MCUBCP.bcsctl3.b.lfxt1s == 0) ? MCUBCP.lfxt1_increment : MCUBCP.vlo_increment; 
+#if defined(__msp430_have_xt2)
+      uint64_t temp_sels1 = xt2_temp;
+#else
+      uint64_t temp_sels1 = (MCUBCP.bcsctl3.b.lfxt1s == 2) ? MCUBCP.vlo_increment : MCUBCP.lfxt1_increment;
+#endif
+      
+      MCUBCP.SMCLK_temp      += (MCUBCP.bcsctl2.b.sels == 0) ? MCUBCP.dco_increment : temp_sels1;
       MCUBCP.SMCLK_increment  = MCUBCP.SMCLK_temp >> MCUBCP.bcsctl2.b.divs;
       MCUBCP.SMCLK_temp      &= MCUBCP.SMCLK_bitmask;
       MCUBCP.SMCLK_counter   += MCUBCP.SMCLK_increment;
@@ -434,7 +437,7 @@ void msp430_basic_clock_plus_write(uint16_t addr, int8_t val)
 	  }
 	if (bcsctl1.b.xts    != MCUBCP.bcsctl1.b.xts)
 	  {
-	    if ((bcsctl1.b.xts) && (MCU_CLOCK.lfxt1_freq < 4150000))
+	    if ((bcsctl1.b.xts) && (MCU_CLOCK.lfxt1_freq < 400*1000))
 	      {
 		WARNING("msp430:basic_clock_plus: bcsctl1 setting XTS with low frequency XIN\n");
 	      }
@@ -498,7 +501,7 @@ void msp430_basic_clock_plus_write(uint16_t addr, int8_t val)
       break;
        /* **************************************** */
       /* **************************************** */
-    case BCP_BCSCTL3:
+    case BCP_BCSCTL3: 
       {
 	union {
 	  struct bcsctl3_t b;
@@ -563,27 +566,28 @@ static void
 msp430_basic_clock_plus_adjust_dco_freq()
 {
 #define K *1000
-  /* msp430f1611.pdf, page 36 */
+  /* msp430f2274.pdf, page 32 */
   /* fnom is taken for Vcc=3V */
 
 #if defined(HIGH_RES_CLOCK)
   float fdco,fdco1;
-  static float fnom[8] = /* fnom[rsel], dco=3 */
-    { 130 K, 180 K, 280 K, 470 K, 750 K, 1300 K, 2000 K, 3200 K };
+  static float fnom[16] = /* fnom[rsel], dco=3 */
 #else
   uint64_t fdco, fdco1;
-  static uint32_t fnom[8] = /* fnom[rsel], dco=3 */
-    { 130 K, 180 K, 280 K, 470 K, 750 K, 1300 K, 2000 K, 3200 K };
+  static uint32_t fnom[16] = /* fnom[rsel], dco=3 */
 #endif
+    { 140 K, 170 K, 200 K, 280 K, 400 K, 540 K, 770 K, 1060 K, 1500 K, 2100 K, 
+	3000 K, 4300 K, 5500 K, 7300 K, 9600 K, 13900 K, 18500 K, 26000 K };
 
-  /* S_{Rsel} = f_{rsel+1} / f_{rsel} = 1.65 @ 3V */ 
-#define S_RSEL 1.65
+  /* S_{Rsel} = f_{rsel+1} / f_{rsel} = 1.55 @ 3V */ 
+#define S_RSEL 1.55
+
   /* S_{dco}  = f_{dco+1} / f_{dco}   = 1.12 @ 3V */
 #define S_DCO 1.12
 
   /* resistor = (MCUBCP.bcsctl2.b.dcor == 0) ? "internal" : "external" */
   if (MCUBCP.bcsctl2.b.dcor == 0)
-    { /* internal dco up to 5MHz */
+    { /* */
       fdco  = (float)fnom[MCUBCP.bcsctl1.b.rsel] * (1.0 + (float)(MCUBCP.dco.b.dco - 3) / 10.0);
       fdco1 = S_DCO * (float)fdco;
     }
@@ -596,7 +600,6 @@ msp430_basic_clock_plus_adjust_dco_freq()
   /* When MODx = 0 the modulator is off. */
   /* dco_freq_time t = (32- MODx) × tDCO + MODx × tDCO+1    */
   
-  /* from msp430f1611.pdf, page 36 */
   /* dco_freq = (32 * fdco * fdco1) / (MODx * fdco + (32 - MODx) * fdco1) */
   MCUBCP.dco_freq = (32 * fdco * fdco1) / (MCUBCP.dco.b.mod * fdco + (32 - MCUBCP.dco.b.mod) * fdco1);
 #if defined(HIGH_RES_CLOCK)
@@ -611,7 +614,7 @@ msp430_basic_clock_plus_adjust_dco_freq()
 /* ************************************************** */
 
 static void 
-msp430_basic_clock_plus_adjust_vlo_freq()
+msp430_basic_clock_plus_adjust_vlo_freq() //? (adapté de lfxt1...)
 {
   /*  MCUBCP.lfxt1_freq           = DEFAULT_LFXT1_FREQ; */
 #if defined(HIGH_RES_CLOCK)
@@ -645,7 +648,7 @@ msp430_basic_clock_plus_printstate()
       {
 	case 0: HW_DMSG_CLOCK("lfxt1"); break;
 	case 1:	HW_DMSG_CLOCK("lfxt1"); break;
-	case 2: HW_DMSG_CLOCK("vlo"); break;
+	case 2: HW_DMSG_CLOCK("vlo");   break;
 	case 3: HW_DMSG_CLOCK("lfxt1"); break;
       }
       break;
@@ -665,7 +668,7 @@ msp430_basic_clock_plus_printstate()
   HW_DMSG_CLOCK("msp430:basic_clock_plus:  vlo   ");
   HW_DMSG_CLOCK("    freq:%dHz",MCUBCP.vlo_freq);
   HW_DMSG_CLOCK("    time:%" HRCTYPE "ns",MCUBCP.vlo_cycle_nanotime);
-  HW_DMSG_CLOCK("    xt2off:%d\n",MCUBCP.bcsctl1.b.xt2off); // ??
+  HW_DMSG_CLOCK("    xt2off:%d\n",MCUBCP.bcsctl1.b.xt2off); 
 
   HW_DMSG_CLOCK("msp430:basic_clock_plus:  dco   ");
   HW_DMSG_CLOCK("    freq:%dHz",MCUBCP.dco_freq);
@@ -694,13 +697,15 @@ void msp430_basic_clock_plus_speed_tracer_init()
 /* ************************************************** */
 
 #if defined(TRACER_SPEED)
-void msp430_basic_clock_plus_speed_tracer_update() // TODO
+void msp430_basic_clock_plus_speed_tracer_update() 
 {
-#if 0
   unsigned int lfxt1 = 0;
-  unsigned int vlo   = 0;
+  unsigned int xt1vlo= 0;
   unsigned int dco   = 0;
-
+#if defined(__msp430_have_xt2)
+  unsigned int xt2   = 0;
+#endif
+  
   unsigned int aclk  = 0;
   unsigned int mclk  = 0;
   unsigned int smclk = 0;
@@ -710,29 +715,43 @@ void msp430_basic_clock_plus_speed_tracer_update() // TODO
    */
 
   // internal freqs
-  lfxt1 = (MCU_READ_OSCOFF == 0)        ? MCUBCP.lfxt1_freq : 0;
-  //  xt2   = (MCUBCP.bcsctl1.b.xt2off == 0) ? MCUBCP.xt2_freq   : 0;
-  dco   = (MCU_READ_SCG0 == 0)          ? MCUBCP.dco_freq   : 0;
+  lfxt1  = (MCU_READ_OSCOFF == 0)         ? MCUBCP.lfxt1_freq : 0;
+  xt1vlo = (MCUBCP.bcsctl3.b.lfxt1s == 2) ? MCUBCP.vlo_freq : lfxt1; 
+  dco    = (MCU_READ_SCG0 == 0)           ? MCUBCP.dco_freq   : 0;
+#if defined(__msp430_have_xt2)
+  xt2   = (MCUBCP.bcsctl1.b.xt2off == 0)  ? MCUBCP.xt2_freq   : 0;
+#endif
   
-  // multiplex
+  // multiplex MCLK
   switch (MCUBCP.bcsctl2.b.selm)
     {
     case 0: 
     case 1: mclk = dco;   break;
-    case 2: mclk = xt2;   break;
-    case 3: mclk = lfxt1; break;
+    case 2:
+#if defined(__msp430_have_xt2)
+            mclk = xt2;
+#else
+            mclk = xt1vlo;
+#endif
+            break;
+    case 3: mclk = xt1vlo; break;
     }
+    
+  // multiplex SMCLK  
+#if defined(__msp430_have_xt2)
   smclk = (MCUBCP.bcsctl2.b.sels == 0) ? dco : xt2;
+#else
+  smclk = (MCUBCP.bcsctl2.b.sels == 0) ? dco : xt1vlo;
+#endif
 
   // divider
-  aclk  =                          lfxt1 >> MCUBCP.bcsctl1.b.diva    ;
-  mclk  = (MCU_READ_CPUOFF == 0) ? mclk  >> MCUBCP.bcsctl2.b.divm : 0;
-  smclk = (MCU_READ_SCG1   == 0) ? smclk >> MCUBCP.bcsctl2.b.divs : 0;
+  aclk  =                          xt1vlo >> MCUBCP.bcsctl1.b.diva    ;
+  mclk  = (MCU_READ_CPUOFF == 0) ? mclk   >> MCUBCP.bcsctl2.b.divm : 0;
+  smclk = (MCU_READ_SCG1   == 0) ? smclk  >> MCUBCP.bcsctl2.b.divs : 0;
 
   TRACER_TRACE_ACLK (aclk);
   TRACER_TRACE_MCLK (mclk);
   TRACER_TRACE_SMCLK(smclk);
-#endif
 }
 #endif
 

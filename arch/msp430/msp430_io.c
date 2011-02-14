@@ -395,6 +395,10 @@ int msp430_io_init(void)
 #if defined(__msp430_have_basic_clock)
       P8(i,BC_START,BC_END,msp430_basic_clock_read,msp430_basic_clock_write);
 #endif
+#if defined(__msp430_have_basic_clock_plus)
+      P8_ADDR(i,BCP_BCSCTL3,msp430_basic_clock_plus_read,msp430_basic_clock_plus_write);
+      P8(i,BCP_START,BCP_END,msp430_basic_clock_plus_read,msp430_basic_clock_plus_write);
+#endif
 #if defined(__msp430_have_fll_and_xt2)
       P8(i,FLL_START,FLL_END,msp430_fll_clock_read,msp430_fll_clock_write);
 #endif

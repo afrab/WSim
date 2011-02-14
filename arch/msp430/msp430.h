@@ -239,10 +239,16 @@ extern struct msp430_mcu_t mcu_backup;
 
 #define MCU_INTR           msp430_interrupt
 
-#if defined(__msp430_have_xt2)
-int  msp430_mcu_create(int xin_freq, int xt2in_freq);
+#if defined(__msp430_have_basic_clock_plus)
+   #if defined(__msp430_have_xt2)
+   int msp430_mcu_create(int xt1, int xt2, int vlo);
+   #else
+   int msp430_mcu_create(int xt1, int vlo);
+   #endif
+#elif defined(__msp430_have_xt2)
+int msp430_mcu_create(int xt1, int xt2);
 #else
-int  msp430_mcu_create(int xin_freq);
+int msp430_mcu_create(int xt1);
 #endif
 
 void     msp430_reset_pin_assert ();

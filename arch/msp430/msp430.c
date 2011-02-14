@@ -137,7 +137,13 @@ int mcu_options_add(void)
 /* ************************************************** */
 /* ************************************************** */
 
-#if defined(__msp430_have_xt2)
+#if defined(__msp430_have_basic_clock_plus)
+   #if defined(__msp430_have_xt2)
+   int msp430_mcu_create(int xt1, int xt2, int vlo)
+   #else
+   int msp430_mcu_create(int xt1, int vlo)
+   #endif
+#elif defined(__msp430_have_xt2)
 int msp430_mcu_create(int xt1, int xt2)
 #else
 int msp430_mcu_create(int xt1)
@@ -152,6 +158,9 @@ int msp430_mcu_create(int xt1)
   MCU_CLOCK.lfxt1_freq = xt1;
 #if defined(__msp430_have_xt2)
   MCU_CLOCK.xt2_freq   = xt2;
+#endif
+#if defined(__msp430_have_basic_clock_plus)
+  MCU_CLOCK.vlo_freq   = vlo;
 #endif
 
   ret += mcu_ramctl_init();

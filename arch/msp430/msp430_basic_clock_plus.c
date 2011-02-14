@@ -296,9 +296,9 @@ msp430_basic_clock_plus_update(int clock_add)
   if (MCU_READ_SCG1 == 0)
     {
 #if defined(__msp430_have_xt2)
-      uint64_t temp_sels1 = xt2_temp;
+      int temp_sels1 = xt2_temp;
 #else
-      uint64_t temp_sels1 = (MCUBCP.bcsctl3.b.lfxt1s == 2) ? MCUBCP.vlo_increment : MCUBCP.lfxt1_increment;
+      int temp_sels1 = (MCUBCP.bcsctl3.b.lfxt1s == 2) ? MCUBCP.vlo_increment : MCUBCP.lfxt1_increment;
 #endif
       
       MCUBCP.SMCLK_temp      += (MCUBCP.bcsctl2.b.sels == 0) ? MCUBCP.dco_increment : temp_sels1;
@@ -576,8 +576,11 @@ msp430_basic_clock_plus_adjust_dco_freq()
   uint64_t fdco, fdco1;
   static uint32_t fnom[16] = /* fnom[rsel], dco=3 */
 #endif
-    { 140 K, 170 K, 200 K, 280 K, 400 K, 540 K, 770 K, 1060 K, 1500 K, 2100 K, 
-	3000 K, 4300 K, 5500 K, 7300 K, 9600 K, 13900 K, 18500 K, 26000 K };
+    { /*  140 K,  DCO frequency (0, 0) */
+      170  K,  200 K,  280 K,  400 K,  540 K,  770 K,  1060 K,  1500 K, 
+      2100 K, 3000 K, 4300 K, 5500 K, 7300 K, 9600 K, 13900 K, 18500 K
+      /* 26000 K, DCO frequency (15, 7) */
+    };
 
   /* S_{Rsel} = f_{rsel+1} / f_{rsel} = 1.55 @ 3V */ 
 #define S_RSEL 1.55

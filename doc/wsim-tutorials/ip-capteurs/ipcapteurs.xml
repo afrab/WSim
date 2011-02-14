@@ -582,7 +582,11 @@ gnuplot &lt; wsim.gp</computeroutput></programlisting>
       <itemizedlist mark="bullet" spacing="normal">
 	<listitem>
 	  <simpara>
-	  <ulink url="http://mspgcc4.sf.net/">web</ulink>Gcc for MSP430</simpara>
+	  <ulink url="http://adt-orsi.project.citi-lab.fr/tutorials/liveusb/">web</ulink> Howto pour les clés USB</simpara>
+	</listitem>
+ 	<listitem>
+	  <simpara>
+	  <ulink url="http://mspgcc4.sf.net/">web</ulink> GCC for MSP430</simpara>
 	</listitem>
 	<listitem>
 	  <simpara>

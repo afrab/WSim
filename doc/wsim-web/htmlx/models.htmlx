@@ -12,13 +12,23 @@
 	The models included in the WSim distribution are the following:	<br><br>
 	
 	<TABLE BORDER="0" width="90%" align="center" cellpadding="2" cellspacing="1" bgcolor="#aebfd1">
+
+<!-- SEPARATOR -->
+<!-- SEPARATOR -->
+
   		<TR align="middle" bgcolor="#7192be">
 			<TH WIDTH="20%"> Models </TH>
 			<TH WIDTH="70%"> Included in WSim distribution </TH>
   		</TR>
   		<TR align="middle" bgcolor="#ffffff">
 			<TD> <b>Micro controllers </b> </TD>
-			<TD> Ti MSP430, Atmel ATMega128 (ongoing work) </TD>
+			<TD> 
+			  Ti MSP430, <br />
+			    - f149 <br />
+			    - f1611, f1616 <br />
+			    - f2212, f2213, f2274 <br />
+			  Atmel ATMega128 (ongoing work) 
+			</TD>
   		</TR>
   		<TR align="middle" bgcolor="#ffffff">
 			<TD> <b>Flash Memories</b> </TD>
@@ -34,17 +44,24 @@
   		</TR>
 
 <!-- SEPARATOR -->
-  		<TR align="middle" bgcolor="#7192be"> <TD>  </TD> <TD>  </TD> </TR>
 <!-- SEPARATOR -->
+
+  		<TR align="middle" bgcolor="#7192be">
+			<TH WIDTH="20%"> Platforms </TH>
+			<TH WIDTH="70%">  </TH>
+  		</TR>
 	    
 	    <TR align="middle" bgcolor="#ffffff">
 	      <TD> <b>MSP based Platforms</b> </TD>
 	      <TD> 
-		INRIA WSN430v1, WSN430 v13b, WSN430 v14, <br>
-		Berkeley Telosb, <br>
-		CSEM Wisenodes,  <br>
-                ICL BSN nodes,   <br>
-	        Ti eZ430 usb key,<br>
+		CITI/INRIA WSN430v1, <br />
+		WSN430 v13b (<b>Senslab nodes</b> with CC1100), <br />
+                WSN430 v14, (Senslab nodes with CC2420), <br />
+		Berkeley <b>Telosb</b>, Tmote <b>sky</b><br />
+		CSEM Wisenodes,  <br />
+                ICL BSN nodes,   <br />
+	        Ti <b>eZ430</b> usb key,<br />
+		Ti <b>ez430-RF2500</b> key, <br />
                 ...
 	      </TD>
 	    </TR>
@@ -57,13 +74,20 @@
 	    </TR>
 
 <!-- SEPARATOR -->
-  		<TR align="middle" bgcolor="#7192be"> <TD>  </TD> <TD>  </TD> </TR>
+  		<TR align="middle" bgcolor="#7192be">
+			<TH WIDTH="20%"> Environment </TH>
+			<TH WIDTH="70%">  </TH>
+  		</TR>
 <!-- SEPARATOR -->
 
   		<TR align="middle" bgcolor="#ffffff">
-			<TD> <b>Environment</b> </TD>
+			<TD> <b></b> </TD>
 			<TD> WSNet simulation interface </TD>
   		</TR>
+
+
+
+
 
 <!-- SEPARATOR -->
   		<TR align="middle" bgcolor="#7192be"> <TD>  </TD> <TD>  </TD> </TR>

@@ -95,6 +95,24 @@
 	      </TD>
 	    </TR>
 
+	    <TR>
+	      <TD></TD>
+	    </TR>
+
+	    <TR align="middle" bgcolor="#ffffff">
+	      <TD> <b>Journées IP/Capteurs</b> </TD>
+	      <TD> Utilisation de WSim/WSnet avec Contiki et 6LoWPAN.</TD>
+	      <TD> 
+		<a href="./tutorials/ipcapteurs/index.html" > <!-- target="_new"> -->
+		  <img style="border: 0px solid ; width: 44px; height: 48px;" 
+		    src="./figures/html.png" alt="" />
+		</a> 
+		<a href="./tutorials/ipcapteurs/files/wsim-tutorial.pdf" > <!-- target="_new"> -->
+		  <img style="border: 0px solid ; width: 44px; height: 48px;" 
+		    src="./figures/pdf.png" alt="" />
+		</a> 
+	      </TD>
+	    </TR>
 	  </TABLE> 
 	  
   </div>

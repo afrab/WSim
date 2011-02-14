@@ -1,0 +1,36 @@
+HTMLSTYLE=htmlconfig.xsl
+#PDFSTYLE=pdfconfig.xsl
+#PDFSTYLE=/usr/share/sgml/docbook/xsl-stylesheets/fo/docbook.xsl
+PDFSTYLE=/usr/share/xml/docbook/stylesheet/nwalsh/fo/docbook.xsl
+HTMLOPTION=xhtml
+PDFOPTION=-pdf
+XMLOPTION=-xml
+XSLOPTION=-xsl
+
+%.html: %.xml
+	./xmltohtml --stringparam encoding=utf-8 $(HTMLOPTION) -m $(HTMLSTYLE) $<
+
+%.pdf: %.xml
+	fop $(XMLOPTION) $< $(XSLOPTION) $(PDFSTYLE) $(PDFOPTION) wsim.pdf
+
+html: ipcapteurs.html
+	rm -rf htdocs
+	mkdir htdocs
+	mv *.html 		htdocs
+	cp -r navig		htdocs
+	cp -r figures		htdocs 
+	cp -r files		htdocs 
+	cp -r css 		htdocs
+
+upload: html 
+	rsync -ruz -e ssh --delete  htdocs/ \
+	afraboul@scm.gforge.inria.fr:/home/groups/wsim/htdocs/tutorials/ipcapteurs
+#	scp wsim.pdf afraboul@scm.gforge.inria.fr:/home/groups/wsim/htdocs/tutorials/
+
+pdf: ipcapteurs.pdf
+
+all: html pdf
+
+clean:
+	rm -rf htdocs *.html *.pdf *.aux *.dvi *.fo *.log *.out
+

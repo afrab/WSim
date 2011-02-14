@@ -12,10 +12,11 @@
     <p>Before compiling WSim make sure the following software packages are installed on your system:</p>
     
     <ul style="margin-top: 0pt;">
-      <li><span >automake</span> (>= 1.10), <span>autoconf</span> (>= 2.61)</li>
-      <li><span >gcc</span>  and <span>make</span></li>    		
-      <li><span >xorg-dev</span>
-      <li><span >zlib1g-dev</span> 
+      <li><span >subversion  </span></li>
+      <li><span >autoconf    </span> (>= 2.61)</li>
+      <li><span >gcc         </span> and <span>make</span></li>    		
+      <li><span >xorg-dev    </span>
+      <li><span >zlib1g-dev  </span> 
     </ul>
     
     
@@ -36,7 +37,7 @@
     <p>The main configure options are (type <span class="hilite-code"> ./configure --help </span> for a more complete list): </p>
     <ul style="margin-top: 0pt;">
       <li><span class="hilite">--prefix=PREFIX</span>: to specify an install directory other than /usr/local/bin/</li> 
-      <li><span class="hilite">--enable-debug</span>: enable debugging symbols</li>
+      <!-- <li><span class="hilite">--enable-debug</span>: enable debugging symbols</li> -->
       <li><span class="hilite">--enable-platform-xxx</span>: compiles only platform xxx</li>
     </ul>
 		
@@ -56,8 +57,11 @@
     <span class="hilite">export PATH</span>
     </p>
 
-    <p>Remark: follow the same procedure if you need to install WConsole, WTracer, or WSNet. There source codes are included in WSim repository (in <span class="hilite">./wsim/utils/</span> directory)</p>
+    <p>Remark: follow the same procedure if you need to install <b>WConsole</b>, <b>WTracer</b>, or <b>WSNet</b>. There source codes are included in WSim repository (in <span class="hilite">./wsim/utils/</span> directory)</p>
 
+    <h3>Compiling WSim</h3>
+
+    Once WSim is compiled please jump to the <a href="tutorial.html">Tutorial</a> section of the website.
 </div>
 
 <!-- FOOTER -->

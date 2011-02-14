@@ -1,0 +1,623 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" 
+    "/usr/share/xml/docbook/schema/dtd/4.5/docbookx.dtd">
+
+<book lang="fr">
+  <bookinfo>
+    <title>Tutorial IPv6 et WSim / WSNet</title>
+    <subtitle>
+      IPv6/Contiki sur les capteurs Senslab 
+      <inlinemediaobject>
+	<imageobject>
+	  <imagedata align="center" fileref="figures/logo-senslab.png"/>
+	</imageobject>
+      </inlinemediaobject>
+    </subtitle>
+    <date>
+      2011-01-13
+    </date>
+    
+    <authorgroup>
+      <author>
+	<firstname>Antoine</firstname>
+	<surname>Fraboulet</surname>
+      </author>
+      <author>
+	<firstname>Julien</firstname>
+	<surname>Carpentier</surname>
+	<affiliation>
+	  <orgname>Université de Lyon, INRIA</orgname>
+	  <orgdiv>INSA-Lyon, CITI</orgdiv>
+	  <address>
+	    CITI Laboratory
+	    Domaine Scientifique de la Doua, INSA de Lyon
+	    Bâtiment Claude Chappe 
+	    <street>6, avenue des Arts</street>
+	    <postcode>69621</postcode> <city>Villeurbanne</city> Cedex
+	    <country>France</country>
+	  </address>
+	</affiliation>
+      </author>
+    </authorgroup>
+    <!-- <revhistory> -->
+    <!--   <revision> -->
+    <!-- 	<revnumber>0.0</revnumber><date>2009-03-02</date> -->
+    <!--   </revision> -->
+    <!--   <revision> -->
+    <!-- 	<revnumber>0.5</revnumber><date>2009-03-08</date> -->
+    <!--   </revision> -->
+    <!--   <revision> -->
+    <!-- 	<revnumber>0.8</revnumber><date>2009-03-11</date> -->
+    <!--   </revision> -->
+    <!-- </revhistory> -->
+  </bookinfo>
+
+<!-- ========================================================= -->
+<!-- ========================================================= -->
+<!-- ========================================================= -->
+<!-- ========================================================= -->
+<!-- ========================================================= -->
+<!-- ========================================================= -->
+<!-- ========================================================= -->
+<!-- ========================================================= -->
+  
+  <chapter id="introduction">
+    <title>Introduction</title>
+    <para>Ce tutoriel présente l'utilisation de WSim et WSNet pour
+    les plateformes Senslab et l'utilisation des protocoles IPv6 et
+    802.15.4.</para>
+
+    <para>
+      <itemizedlist mark="bullet" spacing="normal">
+	<listitem>
+	  <simpara>
+	    WSim <ulink url="http://wsim.gforge.inria.fr/">web</ulink>.
+	    WSNet <ulink url="http://wsnet.gforge.inria.fr/">web</ulink>.
+	  </simpara>
+	</listitem>
+      </itemizedlist>
+    </para>
+
+      <para>
+	Pour compiler WSim et WSNet pour ce tutorial il suffit d'utiliser les 
+	commandes suivantes:
+	<programlisting><computeroutput>configure 
+make
+make install</computeroutput></programlisting>
+      </para>
+
+      <note>
+	<title> Executables</title>
+      <para>
+	Le simulateur WSim sera installé dans
+	<computeroutput>/usr/local/bin</computeroutput>.  Le nom de la
+	plateforme compilée dans le simulateur est inclus dans le nom
+	de l'exécutatble:
+	<computeroutput>wsim-[platform]</computeroutput>.  Les outils
+	de gestion de trace (wtracer) et la version de base de WSNet1
+	sont situées dans le répertoire
+	<computeroutput>${wsim}/utils</computeroutput>.
+      </para>
+      <para>
+	La version complète de WSnet2 est compilée est installée de la
+	même façon. L'exécutable une fois installée se trouve dans le
+	répertoire
+	<computeroutput>/usr/local/wsnet-2.0/bin</computeroutput>.
+      </para>
+      </note>
+    <para>
+      <itemizedlist mark="bullet" spacing="normal">
+	<listitem>
+	  <simpara>
+	    Tutorial  <ulink url="files/ip-capteurs.pdf">Slides</ulink>.
+	  </simpara>
+	</listitem>
+      </itemizedlist>
+    </para>
+
+    <figure id="im01">
+      <title>Capteur senslab v1.4</title>
+      <mediaobject>
+	<imageobject>
+	  <imagedata align="center" width="90%" fileref="figures/senslab-v13.jpg"/>
+	</imageobject>
+      </mediaobject>
+    </figure>
+
+  </chapter>
+
+<!-- ========================================================= -->
+<!-- ========================================================= -->
+<!-- ========================================================= -->
+<!-- ========================================================= -->
+<!-- ========================================================= -->
+<!-- ========================================================= -->
+<!-- ========================================================= -->
+<!-- ========================================================= -->
+
+  <chapter id="basics">
+    <title>Bases de la simulation</title>
+    <sect1>
+
+      <title>Vérification de la configuration et premier exemple</title>
+
+      <para>This very short example can test if the GCC toolchain the simulator 
+      and the OS are installed and configured on your machine.</para>
+
+      <para>L'image de disque est configurée avec les sources de Contiki dans le
+      répertoire </para>
+      
+      <para>
+	<programlisting>
+  <computeroutput>${HOME}/IPCapteur2010/Contiki</computeroutput></programlisting>
+      </para>
+
+      <para>Le premier exemple que nous allons traiter est les
+      <computeroutput>hello world</computeroutput> présent dans les
+      exemples.</para>
+
+      <para>
+	<programlisting>
+  <computeroutput>cd ~/IPCapteur2010/Contiki/examples/01_hello-world
+  make</computeroutput></programlisting>
+      </para>
+
+      <para>L'étape de compilation doit vous donner un exécutable
+      <computeroutput>hello-world.wsn430</computeroutput> qui est
+      celui qui serait pris en compte pour le téléchargement sur les 
+      noeuds physiques.</para>
+
+      <para>La première utilisation du simulateur que nous allons
+      mettre en place correspond à la ligne suivante:</para>
+      <para>
+	<programlisting>
+  <computeroutput>wsim-senslabv14 --ui --mode=time --modearg=10s \
+     --serial0_io=stdout hello-world.wsn430</computeroutput></programlisting>
+      </para>
+
+    <figure id="sc01">
+      <title>Premier exemple : 01_hello-world</title>
+      <mediaobject>
+	<imageobject>
+	  <imagedata align="center" width="90%" fileref="figures/sc_01.png"/>
+	</imageobject>
+      </mediaobject>
+    </figure>
+    </sect1>
+
+<!-- ========================================================= -->
+<!-- ========================================================= -->
+
+    <sect1>
+      <title>Utilisation des traces</title>
+      <para>
+	La simulation permet d'avoir de nombreuses informations sur l'état
+	interne de la plateforme pendant l'exécution du programme
+	<programlisting>
+  <computeroutput>wsim-senslabv14 --ui --mode=time --modearg=10s \
+     --serial0_io=stdout --trace=wsim.trc hello-world.wsn430</computeroutput></programlisting>
+      </para>
+      <para>
+	Un moyen d'utilisation simple des traces est de passer par GtkWave.
+	<programlisting>
+  <computeroutput>wtracer --in=wsim.trc --out=wsim.vcd --format=vcd
+     gtkwave wsim.vcd</computeroutput></programlisting>
+
+    <figure id="sc02">
+      <title>Visualisation de traces avec GtkWave</title>
+      <mediaobject>
+	<imageobject>
+	  <imagedata align="center" width="90%" fileref="figures/sc_gtkwave.png"/>
+	</imageobject>
+      </mediaobject>
+    </figure>
+
+      </para>
+      <para>
+         Plusieurs formats sont disponibles pour la visualisation des traces dont des
+	 sorties permettant l'utilisation de gnuplot
+    <programlisting>
+  <computeroutput>     
+wtracer --in=wsim.trc --format=gplot --out=wsim.gp
+gnuplot &lt; wsim.gp</computeroutput></programlisting>
+
+    <figure id="sc03">
+      <title>Visualisation de traces avec Gnuplot</title>
+      <mediaobject>
+	<imageobject>
+	  <imagedata align="center" width="80%" fileref="figures/wsim.gp.clk_mclk.png"/>
+	</imageobject>
+      </mediaobject>
+    </figure>
+
+      </para>
+    </sect1>
+
+<!-- ========================================================= -->
+<!-- ========================================================= -->
+
+    <sect1>
+      <title>Port série et entrées/sorties</title>
+      <para>
+	Les ports séries des machines sont utilisables et peuvent être
+	manipulés depuis des outils hors de la simulation.
+	<programlisting>
+  <computeroutput>wsim-senslabv14 --ui --mode=time --modearg=10s \
+     --serial0_io=udp:localhost:6000:localhost:7000 --trace=wsim.trc hello-world.wsn430</computeroutput></programlisting>
+      </para>
+
+     <figure id="sc04">
+      <title>Utilisation d'une liaison UDP pour le port série</title>
+      <mediaobject>
+	<imageobject>
+	  <imagedata align="center" width="90%" fileref="figures/sc_nc.png"/>
+	</imageobject>
+      </mediaobject>
+    </figure>
+
+
+
+      <para>
+	Le mode de simulation avec le réseau est une simulation distribuée parallèle avec
+	retour arrière. Un des effets visible de ce mode de simulation est de faire
+	rejouer des parties de programme aux noeuds qui subissent des backtracks. Un
+	buffer de temporisation et d'annulation des backtracks de simulation est disponible
+	sur le port série, il faut rajouter bk: à la ligne de commande pour activer ce
+	buffer.
+
+	  <programlisting>
+  <computeroutput>wsim-senslabv14 --ui --mode=time --modearg=10s \
+     --serial0_io=bk:udp:localhost:6001:localhost:7001 --trace=wsim.trc hello-world.wsn430</computeroutput></programlisting>
+      </para>
+    </sect1>
+
+<!-- ========================================================= -->
+<!-- ========================================================= -->
+
+    <sect1>
+      <title>Debug et pas à pas avec GDB</title>
+      <para>
+	La simulation peut-être dirigée par GDB. Pour utiliser ce mode de 
+	simulation il faut modifier les paramètres de lancement de la 
+	simulation et utiliser le mode <userinput>gdb</userinput>
+
+	<programlisting>
+  <computeroutput>wsim-senslabv14 --ui --mode=gdb --modearg=2159 \
+     --serial0_io=udp:localhost:6000:localhost:7000 --trace=wsim.trc hello-world.wsn430</computeroutput></programlisting>
+      </para>
+
+     <figure id="sc06">
+      <title>Utilisation de GDB/Insight pour le debug sur cible</title>
+      <mediaobject>
+	<imageobject>
+	  <imagedata align="center" width="90%" fileref="figures/sc_gdb.png"/>
+	</imageobject>
+      </mediaobject>
+    </figure>
+
+    </sect1>
+
+  </chapter>
+
+<!-- ========================================================= -->
+<!-- ========================================================= -->
+<!-- ========================================================= -->
+<!-- ========================================================= -->
+<!-- ========================================================= -->
+<!-- ========================================================= -->
+<!-- ========================================================= -->
+<!-- ========================================================= -->
+
+  <chapter id="advanced">
+    <title>Simulation avec un réseau sans fil</title>
+
+    <para>
+      <figure id="dist_simul">
+	<title>Distributed Simulation Setup</title>
+	<mediaobject>
+	  <imageobject>
+	    <imagedata align="center" width="90%" fileref="figures/dist_simul.png"/>
+	  </imageobject>
+	</mediaobject>
+      </figure>
+    </para>
+
+    <sect1>
+      <title>Simulation avec la version de base de WSNet</title>
+      <para>
+	WSim contient une version simplifiée de WSNet. Cette version reproduit
+	un réseau parfait et est utile pour déboguer de façon pratique des programmes.
+	L'utilisation du couplage WSim/WSNet nécessite un script de lancement 
+	pour les simulations. 
+      </para>
+
+      <para>
+	<note>
+	  <title>Configuration du réseau WSim</title>
+	  <para>
+	    Les options de configuration <computeroutput>--wsnet2</computeroutput> et
+	    <computeroutput>--wsnet1</computeroutput> permettent de choisir la version
+	    du simulateur réseau utilisé. La version par défaut est <computeroutput>--wsnet1</computeroutput>.
+	  </para>
+	</note>
+      </para>
+      <para>
+	<note>
+	  <title>Configuration multicast</title>
+	  <para>La simulation ne peut fonctionner que si le multicast est 
+	  validé sur la machine. Si la simulation démarre mais se bloque au 
+	  premier point de synchronisation c'est qu'il y a un défaut de configuration
+	  du réseau multicast.</para>
+	</note>
+      </para>
+
+      <para>
+	Vous pouvez lancer la démo à l'aide du script <computeroutput>demo.sh</computeroutput>
+	qui se trouve dans le répertoire de l'exemple <computeroutput>05_ipv6</computeroutput>
+	<programlisting>
+  <computeroutput>cd ${CONTIKI}/examples/05_ipv6
+  ./demo.sh</computeroutput></programlisting>
+      
+        Le script lance 5 programmes avec les bons paramètres:
+      <itemizedlist mark="bullet" spacing="normal">
+	<listitem><simpara>Le simulateur WSNet1 pour la simulation du réseau radio</simpara></listitem>
+	<listitem><simpara>2 instances de WSim pour la simulation des noeuds</simpara></listitem>
+	<listitem><simpara>2 terminaux avec netcat configuré pour servir de console série aux capteurs</simpara></listitem>
+      </itemizedlist>
+	
+	<programlisting>
+  <computeroutput>msp430-insight udp-server.wsn430</computeroutput></programlisting>
+      </para>
+      <figure id="sc05">
+      <title>Simulation d'un réseau de 2 noeuds IPv6 avec WSNet1</title>
+      <mediaobject>
+	<imageobject>
+	  <imagedata align="center" width="90%" fileref="figures/sc_wsnet1.png"/>
+	</imageobject>
+      </mediaobject>
+    </figure>
+
+      <para>
+	<note>
+	  <title>Configuration des adresses IPv6 dans Contiki</title>
+	  <para>
+	    Contiki utilise l'adresse matérielle fournie pas le composant 
+	    <computeroutput>DS2411</computeroutput> pour calculer et 
+	    configurer l'adresse IPv6 des noeuds. L'option 
+	    <computeroutput>--ds2411=xx</computeroutput> de WSim permet
+	    de forcer l'attribution d'un numéro de série à un noeud.
+	    Le numéro de série contient un CRC et ne peut donc pas être
+	    totalement arbitraire. 10 adresses pré-calculées valides sont
+	    disponibles dans le script de configuration.
+	  </para>
+	</note>
+      </para>
+
+      <para>
+	<note>
+	  <title>Modification de l'adresse du serveur</title>
+	  <para>
+	    L'exemple UDP/IPv6 de Contiki contient en dur dans le code
+	    du client <computeroutput>udp_client.c</computeroutput>
+	    l'adresse de destination des paquets. Pour que le test
+	    puisse être effectué dans WSim il faut donc soit modifier
+	    l'adresse dans les sources, soit attribuer la bonne adresse
+	    au serveur.
+	  </para>
+	</note>
+      </para>
+    </sect1>
+
+<!-- ========================================================= -->
+<!-- ========================================================= -->
+
+    <sect1>
+      <title>Simulation et debug d'une application distribuée</title>
+      <para>
+	La mise en place du debug sur la simulation reprend exactement
+	les mêmes principes que dans le cas simple. Pour mettre en
+	place le debug il suffit de changer de mode et passer en mode
+	<computeroutput>GDB</computeroutput>.
+      </para>
+      <para>
+	Le script de lancement peut servir à nouveau en utilisant
+	la commande 
+	<programlisting>
+  <computeroutput>./demo.sh gdb 1</computeroutput></programlisting>
+
+  La mise en place d'un mode de debug sur un des noeuds permet de faire
+  passer toute la simulation en pas à pas avec une synchronisation sur 
+  l'activité du noeud observé.
+
+      <figure id="sc07">
+      <title>Simulation d'un réseau de 2 noeuds IPv6 avec WSNet1 et GDB</title>
+      <mediaobject>
+	<imageobject>
+	  <imagedata align="center" width="90%" fileref="figures/sc_wsnet1_gdb.png"/>
+	</imageobject>
+      </mediaobject>
+    </figure>
+
+      </para>
+    </sect1>
+
+    <sect1>
+      <title>Comparaison et ajustement des traces</title>
+      <para>
+	L'outil wtracer permet de fusionner plusieurs fichiers de trace 
+	afin de pouvoir comparer dans le temps les activités des capteurs.
+	La commande
+	<programlisting>
+  <computeroutput> wtracer --out=glob.vcd --format=vcd --merge --multi wsim*.trc</computeroutput></programlisting>
+  permet de relire et fusionner toutes les traces dans le répertoire pour les présenter
+  sous une ligne unique.
+      </para>
+    <para>
+      <figure id="trc_simul">
+	<title>Comparaison de traces</title>
+	<mediaobject>
+	  <imageobject>
+	    <imagedata align="center"  fileref="figures/dist_trace.png"/>
+	  </imageobject>
+	</mediaobject>
+      </figure>
+      </para>
+    </sect1>
+
+    <sect1>
+      <title>Simulation avec WSNet2</title>
+      <para>
+	WSNet2 est la version complète de celle fournie par défaut dans WSim.
+	La configuration de la simulation nécessite un fichier supplémentaire
+	pour décrire les propriétés du réseaux ainsi que les attributs de chacun
+	noeuds comme la position, la mobilité et tous les autres paramètres disponibles
+	dans WSNet2.
+      </para>
+      <para>
+	L'option a changer côté WSim est de passer de <computeroutput>--wsnet1</computeroutput> à
+	<computeroutput>--wsnet2</computeroutput>. Les options <computeroutput>--node-id</computeroutput>
+	restent identiques à leur utilisation dans le mode <computeroutput>--wsnet1</computeroutput>.
+      </para>
+
+    <para>
+      <figure id="trc_wsnet2">
+	<title>Comparaison de traces</title>
+	<mediaobject>
+	  <imageobject>
+	    <imagedata align="center" width="80%" fileref="figures/example_nodes_pos.png"/>
+	  </imageobject>
+	</mediaobject>
+      </figure>
+      </para>
+    </sect1>
+
+  </chapter>
+
+<!-- ========================================================= -->
+<!-- ========================================================= -->
+<!-- ========================================================= -->
+<!-- ========================================================= -->
+<!-- ========================================================= -->
+<!-- ========================================================= -->
+<!-- ========================================================= -->
+<!-- ========================================================= -->
+  
+  <chapter id="links">
+    <title>Liens et ressources utiles</title>
+
+    <para>Plateforme Senslab</para>
+    <para>
+      <itemizedlist mark="bullet" spacing="normal">
+	<listitem>
+	  <simpara> Portail Senslab <ulink url="http://www.senslab.info/">lien</ulink>. </simpara>
+	</listitem>
+	<listitem>
+	  <simpara> SensTools <ulink url="http://senstools.gforge.inria.fr/">lien</ulink>. </simpara>
+	</listitem>
+      </itemizedlist>
+    </para>
+
+    <para>GCC pour MSP430</para>
+    <para>
+      <itemizedlist mark="bullet" spacing="normal">
+	<listitem>
+	  <simpara> Gcc for MSP430: <ulink url="http://mspgcc4.sf.net/">MSP GCC 4</ulink>.</simpara>
+	</listitem>
+	<!-- <listitem> -->
+	<!--   <simpara> </simpara> -->
+	<!-- </listitem> -->
+      </itemizedlist>
+    </para>
+
+    <para>Système d'exploitation et pile IPv6</para>
+    <para>
+      <itemizedlist mark="bullet" spacing="normal">
+	<listitem>
+	  <simpara> Contiki: <ulink url="http://www.sics.se/contiki/">webpage</ulink>. </simpara>
+	</listitem>
+	<listitem>
+	  <simpara> Contiki pour les plateformes Senslab: <ulink url="http://senstools.gforge.inria.fr/doku.php?id=os:contiki">webpage</ulink>. </simpara>
+	</listitem>
+      </itemizedlist>
+    </para>
+
+    <para>Simulateurs</para>
+    <para>
+      <itemizedlist mark="bullet" spacing="normal">
+	<listitem>
+	  <simpara>
+	    WSim
+	    <ulink url="http://wsim.gforge.inria.fr/">webpage</ulink>.
+	  </simpara>
+	</listitem>
+	<listitem>
+	  <simpara>
+	    Tutoriaux pour WSim
+	    <ulink url="http://wsim.gforge.inria.fr/tutorial.html">webpage</ulink>.
+	  </simpara>
+	</listitem>
+	<listitem>
+	  <simpara>
+	    WSNet2 
+	    <ulink url="http://wsnet.gforge.inria.fr/">webpage</ulink>.
+	  </simpara>
+	</listitem>
+	<listitem>
+	  <simpara>
+	    Tutoriaux pour WSNet
+	    <ulink url="http://wsnet.gforge.inria.fr/tutorial.html">webpage</ulink>.
+	  </simpara>
+	</listitem>
+	<listitem>
+	  <simpara>
+	    eSimu <ulink url="http://esimu.gforge.inria.fr/">webpage</ulink>.
+	  </simpara>
+	</listitem>
+      </itemizedlist>
+    </para>
+
+    <para>Outils externes</para>
+    <para>
+      <itemizedlist mark="bullet" spacing="normal">
+	<listitem>
+	  <simpara>
+	    Gtkwave homepage 
+	    <ulink url="http://gtkwave.sourceforge.net/">webpage</ulink>.
+	  </simpara>
+	</listitem>
+	<listitem>
+	  <simpara>
+	    GtkWave for windows 
+	    <ulink url="http://www.dspia.com/gtkwave.html">webpage</ulink>.
+	  </simpara>
+	</listitem>
+	<listitem>
+	  <simpara>
+	    kCacheGrind 
+	    <ulink url="http://kcachegrind.sourceforge.net/html/Home.html">webpage</ulink>.
+	  </simpara>
+	</listitem>
+	<!-- <listitem> -->
+	<!--   <simpara> -->
+	<!--     Gnuplot  -->
+	<!--     <ulink url="http://www.gnuplot.info/">Gnuplot</ulink>. -->
+	<!--   </simpara> -->
+	<!-- </listitem> -->
+      </itemizedlist>
+    </para>
+
+
+
+  </chapter>
+
+
+<!-- ========================================================= -->
+<!-- ========================================================= -->
+<!-- ========================================================= -->
+<!-- ========================================================= -->
+<!-- ========================================================= -->
+<!-- ========================================================= -->
+<!-- ========================================================= -->
+<!-- ========================================================= -->
+
+</book>

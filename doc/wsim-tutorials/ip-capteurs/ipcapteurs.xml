@@ -509,23 +509,11 @@ gnuplot &lt; wsim.gp</computeroutput></programlisting>
     <para>
       <itemizedlist mark="bullet" spacing="normal">
 	<listitem>
-	  <simpara> Portail Senslab <ulink url="http://www.senslab.info/">lien</ulink>. </simpara>
+	  <simpara> <ulink url="http://www.senslab.info/">web</ulink> Portail Senslab  </simpara>
 	</listitem>
 	<listitem>
-	  <simpara> SensTools <ulink url="http://senstools.gforge.inria.fr/">lien</ulink>. </simpara>
+	  <simpara>  <ulink url="http://senstools.gforge.inria.fr/">web</ulink> SensTools </simpara>
 	</listitem>
-      </itemizedlist>
-    </para>
-
-    <para>GCC pour MSP430</para>
-    <para>
-      <itemizedlist mark="bullet" spacing="normal">
-	<listitem>
-	  <simpara> Gcc for MSP430: <ulink url="http://mspgcc4.sf.net/">MSP GCC 4</ulink>.</simpara>
-	</listitem>
-	<!-- <listitem> -->
-	<!--   <simpara> </simpara> -->
-	<!-- </listitem> -->
       </itemizedlist>
     </para>
 
@@ -533,10 +521,25 @@ gnuplot &lt; wsim.gp</computeroutput></programlisting>
     <para>
       <itemizedlist mark="bullet" spacing="normal">
 	<listitem>
-	  <simpara> Contiki: <ulink url="http://www.sics.se/contiki/">webpage</ulink>. </simpara>
+	  <simpara> <ulink url="http://www.sics.se/contiki/">web</ulink> Contiki </simpara>
 	</listitem>
 	<listitem>
-	  <simpara> Contiki pour les plateformes Senslab: <ulink url="http://senstools.gforge.inria.fr/doku.php?id=os:contiki">webpage</ulink>. </simpara>
+	  <simpara>
+	    <ulink url="http://senstools.gforge.inria.fr/doku.php?id=os:contiki"> web </ulink>
+	    Contiki pour les plateformes Senslab
+	  </simpara>
+	</listitem>
+	<listitem>
+	  <simpara>
+	    <ulink url="files/contiki-wsn430-v1.3.tar.gz">
+	    lien local pour Contiki/Senslab</ulink> 
+	  </simpara>
+	</listitem>
+	<listitem>
+	  <simpara>
+	    <ulink url="files/wsn430-drivers-v1.6.1.tar.gz">
+	    Drivers pour les plateformes Senslab</ulink> 
+	  </simpara>
 	</listitem>
       </itemizedlist>
     </para>
@@ -546,31 +549,29 @@ gnuplot &lt; wsim.gp</computeroutput></programlisting>
       <itemizedlist mark="bullet" spacing="normal">
 	<listitem>
 	  <simpara>
-	    WSim
-	    <ulink url="http://wsim.gforge.inria.fr/">webpage</ulink>.
+	    <ulink url="http://wsim.gforge.inria.fr/">web</ulink> WSim
 	  </simpara>
 	</listitem>
 	<listitem>
 	  <simpara>
+	    <ulink url="http://wsim.gforge.inria.fr/tutorial.html">web</ulink>
 	    Tutoriaux pour WSim
-	    <ulink url="http://wsim.gforge.inria.fr/tutorial.html">webpage</ulink>.
 	  </simpara>
 	</listitem>
 	<listitem>
 	  <simpara>
-	    WSNet2 
-	    <ulink url="http://wsnet.gforge.inria.fr/">webpage</ulink>.
+	    <ulink url="http://wsnet.gforge.inria.fr/">web</ulink> WSNet2 
 	  </simpara>
 	</listitem>
 	<listitem>
 	  <simpara>
+	    <ulink url="http://wsnet.gforge.inria.fr/tutorial.html">web</ulink>
 	    Tutoriaux pour WSNet
-	    <ulink url="http://wsnet.gforge.inria.fr/tutorial.html">webpage</ulink>.
 	  </simpara>
 	</listitem>
 	<listitem>
 	  <simpara>
-	    eSimu <ulink url="http://esimu.gforge.inria.fr/">webpage</ulink>.
+	    <ulink url="http://esimu.gforge.inria.fr/">web</ulink> eSimu
 	  </simpara>
 	</listitem>
       </itemizedlist>
@@ -581,20 +582,24 @@ gnuplot &lt; wsim.gp</computeroutput></programlisting>
       <itemizedlist mark="bullet" spacing="normal">
 	<listitem>
 	  <simpara>
+	  <ulink url="http://mspgcc4.sf.net/">web</ulink>Gcc for MSP430</simpara>
+	</listitem>
+	<listitem>
+	  <simpara>
+	    <ulink url="http://gtkwave.sourceforge.net/">web</ulink>
 	    Gtkwave homepage 
-	    <ulink url="http://gtkwave.sourceforge.net/">webpage</ulink>.
 	  </simpara>
 	</listitem>
 	<listitem>
 	  <simpara>
+	    <ulink url="http://www.dspia.com/gtkwave.html">web</ulink>
 	    GtkWave for windows 
-	    <ulink url="http://www.dspia.com/gtkwave.html">webpage</ulink>.
 	  </simpara>
 	</listitem>
 	<listitem>
 	  <simpara>
+	    <ulink url="http://kcachegrind.sourceforge.net/html/Home.html">web</ulink>
 	    kCacheGrind 
-	    <ulink url="http://kcachegrind.sourceforge.net/html/Home.html">webpage</ulink>.
 	  </simpara>
 	</listitem>
 	<!-- <listitem> -->

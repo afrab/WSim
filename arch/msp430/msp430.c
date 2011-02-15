@@ -165,6 +165,16 @@ int msp430_mcu_create(int xt1)
 
   ret += mcu_ramctl_init();
 
+  /* infomem information */
+  {
+    int i;
+    int size = sizeof(infomem)/sizeof(infomem_t);
+    for(i=0; i < size; i++)
+      {
+	mcu_jtag_write_byte(infomem[i].addr, infomem[i].value);
+      }
+  }
+
 #if defined(__msp430_have_adc12)
   ret += msp430_adc12_init();
 #endif

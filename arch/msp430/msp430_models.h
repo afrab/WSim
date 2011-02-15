@@ -56,6 +56,12 @@
 #define MCU_ARCH_ID MCU_EM_ARCH_ID
 #endif
 
+struct _infomem_t {
+  uint16_t addr;
+  uint8_t  value;
+};
+typedef struct _infomem_t infomem_t;
+
 /* ********************************************************************** */
 /* ********************************************************************** */
 /* ********************************************************************** */
@@ -99,6 +105,8 @@
 // system clock
 #define __msp430_have_basic_clock
 #define __msp430_have_xt2 
+
+static infomem_t UNUSED infomem[] = {};
 
 // 8 bit blocks
 #define __msp430_have_port1
@@ -188,6 +196,8 @@
 //
 #define __msp430_have_basic_clock
 #define __msp430_have_xt2 
+
+static infomem_t UNUSED infomem[] = {};
 
 // hwmul
 #define __msp430_have_hwmul
@@ -297,6 +307,8 @@
 // system clock
 #define __msp430_have_fll_and_xt2
 #define __msp430_have_xt2 
+
+static infomem_t UNUSED infomem[] = {};
 
 // hwmul
 #define __msp430_have_hwmul
@@ -506,6 +518,8 @@
 #define __msp430_have_basic_clock
 #define __msp430_have_xt2 
 
+static infomem_t UNUSED infomem[] = {};
+
 // hwmul
 #define __msp430_have_hwmul
 
@@ -577,6 +591,8 @@
 #define __msp430_have_basic_clock
 #define __msp430_have_xt2 
 
+static infomem_t UNUSED infomem[] = {};
+
 // 8 bit blocks
 #define __msp430_have_port1
 #define __msp430_have_port2
@@ -643,6 +659,16 @@
 // system clock
 #define __msp430_have_basic_clock_plus
 
+static infomem_t UNUSED infomem[] = {
+  { 0x10f8, 0x70 },
+  { 0x10f9, 0x8f },
+  { 0x10fa, 0x79 },
+  { 0x10fb, 0x8e },
+  { 0x10fc, 0x68 },
+  { 0x10fd, 0x8d },
+  { 0x10fe, 0xa9 },
+  { 0x10ff, 0x86 }
+};
 
 // 8 bit blocks
 #define __msp430_have_port1

@@ -349,7 +349,7 @@ devices_update()
           if (b != BUTTONS_LAST)
             {
               int i;
-              HW_DMSG_PLATFORM(4,"%s: b 0x%02x last 0x%02x\n",NAME,b,BUTTONS_LAST);
+              HW_DMSG_PLATFORM("%s: b 0x%02x last 0x%02x\n",NAME,b,BUTTONS_LAST);
               for(i=0; i<2; i++)
                 {
                   if (((b            & (0x01<<i)) == 0) &&
@@ -368,7 +368,7 @@ devices_update()
 
           // Button 1->p1.6, button 2->p1.7
           // 2 buttons mask
-          HW_DMSG_PLATFORM(4,"%s: port1 write 0x%02x\n",NAME,b<<6);
+          HW_DMSG_PLATFORM("%s: port1 write 0x%02x\n",NAME,b<<6);
           msp430_digiIO_dev_write(PORT1, b<<6, 0xC0);
 
           BUTTONS_LAST = b;

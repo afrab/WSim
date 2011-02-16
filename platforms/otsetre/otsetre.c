@@ -421,12 +421,14 @@ int devices_update()
 
 	  /* P4.4-7                                */
 	  /* 4 buttons mask                        */
-	  HW_DMSG_PLATFORM(4,"%s: port4 write 0x%02x\n",NAME,b);
+	  HW_DMSG_PLATFORM("%s:   port4 write 0x%02x\n",NAME,b);
 	  msp430_digiIO_dev_write(PORT4, b, 0xf0);
+
 	  /* p1.7 // Dallas, high to low interrupt */
 	  /* Logical or binded to p1.7 for IRQ     */
 	  /* p1.7 high to low on button pressed    */
-	  msp430_digiIO_dev_write(PORT1, b ? 0x80 : 0x00, 0x80);
+	  HW_DMSG_PLATFORM("%s:   port1 write 0x%02x\n",NAME, (b != 0xf0) ? 0x00 : 0x80);
+	  msp430_digiIO_dev_write(PORT1, (b != 0xf0) ? 0x00 : 0x80, 0x80);
 
 	  BUTTONS_LAST = b;
 	}

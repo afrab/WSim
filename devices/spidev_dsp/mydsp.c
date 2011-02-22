@@ -20,12 +20,24 @@
 /***************************************************/
 /***************************************************/
 
+#undef DEBUG
+
+
 #ifdef DEBUG
-#define MSG_DEVICES       2
-#define DEBUG_ME_HARDER
-#define HW_DDSP(x...) VERBOSE(MSG_DEVICES,x)
+#define HW_DDSP(x...) HW_DMSG_DEV(x)
 #else
 #define HW_DDSP(x...) do {} while(0)
+#endif
+
+/***************************************************/
+/***************************************************/
+/***************************************************/
+#if 0
++#define SOFT_INTR     1
++#define SOFT_INTR_DUR 3510 /* 3.5 us */
++#define SOFT_INTR_EVT ETRACER_PER_ID_MCU_ADC
++#define WATCHDOG_ONLY_WARNS
++#endif
 #endif
 
 #define microsecond (1000)
@@ -33,8 +45,11 @@
 #define second      (1000*1000*1000)
 
 #define OUTPUT_BYTES     4
+
+#define DSP_ACTIVE       1
 #define PERIOD3_ACTIVE   1
-#define SOFT_INTR_EVT    9
+
+#define SOFT_INTR_EVT    ETRACER_PER_ID_MCU_ADC
 
 /***************************************************/
 /***************************************************/
@@ -112,9 +127,12 @@ void mydsp_reset(struct dsp_internal_state_t *st)
   st->dsp_index_max = 0;
   st->dsp_output_n  = 0;
   st->etrace_state  = 0;
+
+#if DSP_ACTIVE == 1
   etracer_slot_event(st->etrace_id,
 		     ETRACER_PER_EVT_MODE_CHANGED,
 		     ETRACER_DSP_POWER_STANDBY, 0);
+#endif
 
 #if PERIOD3_ACTIVE == 1
   etracer_slot_event(SOFT_INTR_EVT, ETRACER_PER_EVT_MODE_CHANGED, 1, 0);
@@ -207,9 +225,11 @@ void dsp_set_etrace_active(struct dsp_internal_state_t *st)
 {
   if (st->etrace_state == 0)
     {
+#if DSP_ACTIVE == 1
       etracer_slot_event(st->etrace_id,
 			 ETRACER_PER_EVT_MODE_CHANGED,
 			 ETRACER_DSP_POWER_ACTIVE, 0);
+#endif
     }
   st->etrace_state ++;
 }
@@ -226,9 +246,11 @@ void dsp_set_etrace_standby(struct dsp_internal_state_t *st)
   st->etrace_state --;
   if (st->etrace_state == 0)
     {
+#if DSP_ACTIVE == 1
       etracer_slot_event(st->etrace_id,
 			 ETRACER_PER_EVT_MODE_CHANGED,
 			 ETRACER_DSP_POWER_STANDBY, 0);
+#endif
     }
 }
 

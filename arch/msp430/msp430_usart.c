@@ -532,12 +532,14 @@ do {                                                                          \
 #define HW_SPY_PRINT_CONFIG(USART,NUM) do {} while(0)
 #endif
 
-#define msp430_usart_set_baudrate(NUM,USART)                                  \
-{                                                                             \
-  USART.uxbr_div = ((USART.uxbr1 << 8 | USART.uxbr0) / 2) * (USART.uxctl.b.charb + 7); \
-  HW_DMSG_USART("msp430:usart%d:   baudrate : uxbr = %d, div = %d\n",      \
-		NUM,((USART.uxbr1 << 8 | USART.uxbr0) / 2), USART.uxbr_div);   \
-}
+
+#define msp430_usart_set_baudrate(NUM,USART)				      \
+  { /* slau049f.pdf page 261 */						      \
+    USART.uxbr_div = ((USART.uxbr1 << 8 | USART.uxbr0) / 2) * (USART.uxctl.b.charb + 7); \
+    HW_DMSG_USART("msp430:usart%d:   baudrate : uxbr = %d, div = %d\n",	      \
+		  NUM,(USART.uxbr1 << 8 | USART.uxbr0), USART.uxbr_div);      \
+  }
+
 
 #define USART_WRITE(USART,NUM,IE,IFG)                                         \
   switch (addr)                                                               \

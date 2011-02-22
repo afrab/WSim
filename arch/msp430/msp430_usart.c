@@ -206,8 +206,8 @@ do {                                                                          \
             case 2:                                                           \
             case 3:                                                           \
               MCU.USART.uxtx_shift_delay -= MCU_CLOCK.SMCLK_increment;        \
-	      HW_DMSG_USART("msp430:usart%d, smclk SPI delay %d\n",           \
-			    NUM,MCU.USART.uxtx_shift_delay);                  \
+	      /*HW_DMSG_USART("msp430:usart%d, smclk SPI delay %d\n",*/	\
+	      /*  NUM,MCU.USART.uxtx_shift_delay);	*/		\
               break;                                                          \
               }                                                               \
                                                                               \
@@ -535,8 +535,8 @@ do {                                                                          \
 #define msp430_usart_set_baudrate(NUM,USART)                                  \
 {                                                                             \
   USART.uxbr_div = ((USART.uxbr1 << 8 | USART.uxbr0) / 2) * (USART.uxctl.b.charb + 7); \
-  HW_DMSG_USART("msp430:usart%d:   baudrate = div N %d/bit - %d/byte\n",      \
-		NUM,((USART.uxbr1 << 8 | USART.uxbr0) / 2),USART.uxbr_div);   \
+  HW_DMSG_USART("msp430:usart%d:   baudrate : uxbr = %d, div = %d\n",      \
+		NUM,((USART.uxbr1 << 8 | USART.uxbr0) / 2), USART.uxbr_div);   \
 }
 
 #define USART_WRITE(USART,NUM,IE,IFG)                                         \
@@ -552,11 +552,11 @@ do {                                                                          \
 	                                                                      \
 	ctl.s = val;                                                          \
 	HW_DMSG_USART("msp430:usart%d: write uxctl = 0x%02x\n",NUM,val & 0xff);                    \
-	HW_DMSG_USART("msp430:usart%d:   swrst  = %d\n",NUM, ctl.b.swrst);    \
-	HW_DMSG_USART("msp430:usart%d:   sync   = %d\n",NUM, ctl.b.sync);     \
-	HW_DMSG_USART("msp430:usart%d:   mm     = %d (multi master)\n",NUM, ctl.b.mm);             \
-	HW_DMSG_USART("msp430:usart%d:   listen = %d (loopback)\n",NUM, ctl.b.listen);             \
-	HW_DMSG_USART("msp430:usart%d:   spb    = %d (0:1 stop, 1:2 stop bits)\n",NUM, ctl.b.spb); \
+	/* HW_DMSG_USART("msp430:usart%d:   swrst  = %d\n",NUM, ctl.b.swrst); */ \
+	/* HW_DMSG_USART("msp430:usart%d:   sync   = %d\n",NUM, ctl.b.sync);  */ \
+	/* HW_DMSG_USART("msp430:usart%d:   mm     = %d (multi master)\n",NUM, ctl.b.mm); */  \
+	/* HW_DMSG_USART("msp430:usart%d:   listen = %d (loopback)\n",NUM, ctl.b.listen); */  \
+	/* HW_DMSG_USART("msp430:usart%d:   spb    = %d (0:1 stop, 1:2 stop bits)\n",NUM, ctl.b.spb); */  \
 	/* ctl.b.sync == 0                         : UART */                  \
 	/* ctl.b.sync == 1, ctl.b.spb == 0         : SPI  */                  \
 	/* ctl.b.sync == 1, ctl.b.spb == 1         : I2C  */                  \

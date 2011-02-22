@@ -208,7 +208,7 @@ int8_t atmega128_digiIO_mcu_read(uint16_t addr)
 
     res = DIGIIO_REGS(index);
     
-    HW_DMSG_DIGI_IO("atmega128:dio: read from MCU [%s:0x%02x] = 0x%02x\n",
+    HW_DMSG_DIGI_IO("atmega128:dio: read  from MCU [%s:0x%02x] = 0x%02x\n",
                     atmega128_debug_portname(addr),addr,res);
     
     return res;

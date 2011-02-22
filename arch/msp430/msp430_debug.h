@@ -45,9 +45,9 @@ extern char* msp430_lpm_names[];
 #define DEBUG_HWMUL         0 /* hardware mult. */
 #define DEBUG_BASIC_TIMER   0 /* basic timer    */
 #define DEBUG_WATCHDOG      0 /* watchdog       */
-#define DEBUG_USART         0 /* usart 0/1      */
-#define DEBUG_USART_INFO    0 /* usart 0/1      */
-#define DEBUG_DIGI_IO       0 /* GPIO           */
+#define DEBUG_USART         1 /* usart 0/1      */
+#define DEBUG_USART_INFO    1 /* usart 0/1      */
+#define DEBUG_DIGI_IO       1 /* GPIO           */
 #define DEBUG_LCD           0 /* internal LCD   */
 #endif
 
@@ -94,37 +94,37 @@ extern char* msp430_lpm_names[];
 #endif
 
 #if DEBUG_SYSTEM_TIME
-#    define HW_DMSG_TIME(x...) HW_DMSG_MCU(x)
+#    define HW_DMSG_TIME(x...) HW_DMSG_MCUDEV(x)
 #else
 #    define HW_DMSG_TIME(x...) do { } while (0)
 #endif
 
 #if DEBUG_IO
-#    define HW_DMSG_IO(x...) HW_DMSG_MCU(x)
+#    define HW_DMSG_IO(x...) HW_DMSG_MCUDEV(x)
 #else
 #    define HW_DMSG_IO(x...) do { } while (0)
 #endif
 
 #if DEBUG_SFR
-#    define HW_DMSG_SFR(x...) HW_DMSG_MCU(x)
+#    define HW_DMSG_SFR(x...) HW_DMSG_MCUDEV(x)
 #else
 #    define HW_DMSG_SFR(x...) do { } while (0)
 #endif
 
 #if DEBUG_SYSTEM_CLOCK
-#    define HW_DMSG_CLOCK(x...) HW_DMSG_MCU(x)
+#    define HW_DMSG_CLOCK(x...) HW_DMSG_MCUDEV(x)
 #else
 #    define HW_DMSG_CLOCK(x...) do { } while (0)
 #endif
 
 #if DEBUG_TIMER
-#    define HW_DMSG_TIMER(x...) HW_DMSG_MCU(x)
+#    define HW_DMSG_TIMER(x...) HW_DMSG_MCUDEV(x)
 #else
 #    define HW_DMSG_TIMER(x...) do { } while (0)
 #endif
 
 #if DEBUG_BASIC_TIMER
-#    define HW_DMSG_BT(x...) HW_DMSG_MCU(x)
+#    define HW_DMSG_BT(x...) HW_DMSG_MCUDEV(x)
 #else
 #    define HW_DMSG_BT(x...) do { } while (0)
 #endif
@@ -136,27 +136,27 @@ extern char* msp430_lpm_names[];
 #endif
 
 #if DEBUG_DIGI_IO
-#    define HW_DMSG_DIGI_IO(x...) HW_DMSG_MCU(x)
+#    define HW_DMSG_DIGI_IO(x...) HW_DMSG_MCUDEV(x)
 #else
 #    define HW_DMSG_DIGI_IO(x...) do { } while (0)
 #endif
 
 #if DEBUG_LCD
-#    define HW_DMSG_LCD(x...) HW_DMSG_MCU(x)
+#    define HW_DMSG_LCD(x...) HW_DMSG_MCUDEV(x)
 #else
 #    define HW_DMSG_LCD(x...) do { } while (0)
 #endif
 
 #if DEBUG_USART
-#    define HW_DMSG_USART(x...) HW_DMSG_MCU(x)
+#    define HW_DMSG_USART(x...) HW_DMSG_MCUDEV(x)
 #else
 #    define HW_DMSG_USART(x...) do { } while (0)
 #endif
 
 #if DEBUG_USART_INFO
-#    define HW_DMSG_USART(x...) HW_DMSG_MCU_INFO(x)
+#    define HW_DMSG_USART_INFO(x...) HW_DMSG_MCU_INFO(x)
 #else
-#    define HW_DMSG_USART(x...) do { } while (0)
+#    define HW_DMSG_USART_INFO(x...) do { } while (0)
 #endif
 
 #if DEBUG_HWMUL

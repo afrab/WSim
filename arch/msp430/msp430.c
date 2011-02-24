@@ -261,6 +261,11 @@ void mcu_reset(void)
   msp430_flash_reset();
 #endif
 
+  /* usci_b */
+#if defined(__msp430_have_uscib0)
+  msp430_uscib0_reset();
+#endif
+  
   /* usart */
 #if defined(__msp430_have_usart0)
   msp430_usart0_reset();

@@ -295,6 +295,14 @@ int devices_update(void)
   /* Usart                             */
   /* ==============                    */
   /* UCA0 : serial                     */
+  
+#if defined (__msp430_have_uscib0)
+
+
+//TODO
+
+
+#else
   switch (MCU.usart0.mode)
     {
     case USART_MODE_UART:
@@ -323,13 +331,14 @@ int devices_update(void)
     default:
       break;
     }
+#endif
 
     
   /* *************************************************************************** */
   /* devices -> MCU                                                              */
   /* *************************************************************************** */
 
-
+#if 0
   /* input on radio */
   {
     uint32_t mask  = 0;
@@ -358,9 +367,10 @@ int devices_update(void)
 	etracer_slot_access(0x0, 1, ETRACER_ACCESS_READ, ETRACER_ACCESS_BIT, ETRACER_ACCESS_LVL_GPIO, 0);
       }
   }
+  
 
 
-  /* input on UART serial */
+/* input on UART serial */
   if (msp430_usart1_dev_write_uart_ok())
     {
       uint32_t mask,value;
@@ -371,7 +381,7 @@ int devices_update(void)
 	  /* etracer_slot_access(0x0, 1, ETRACER_ACCESS_READ, ETRACER_ACCESS_BYTE, ETRACER_ACCESS_LVL_OUT, 0); */
 	}
     }
-
+#endif
 
   /* input on UI */
   /* input on buttons */

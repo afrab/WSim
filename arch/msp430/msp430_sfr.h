@@ -43,32 +43,56 @@ struct __attribute__ ((packed)) ie1_t {
 };
 #endif
 
-#if defined(WORDS_BIGENDIAN)
-struct __attribute__ ((packed)) ie2_t { 
-  uint8_t
-    btie:1,
-    u6:1,
-    utxie1:1,
-    urxie1:1,
-    u3:1,
-    u2:1,
-    u1:1,
-    u0:1;
-};
-#else
-struct __attribute__ ((packed)) ie2_t { 
-  uint8_t
-    u0:1,
-    u1:1,
-    u2:1,
-    u3:1,
-    urxie1:1,
-    utxie1:1,
-    u6:1,
-    btie:1;
-};
-#endif
 
+#if defined(__msp430_have_uscib0)
+    #if defined(WORDS_BIGENDIAN)
+    struct __attribute__ ((packed)) ie2_t {
+      uint8_t
+	unused:4,
+	ucb0txie:1,
+	ucb0rxie:1,
+	uca0txie:1,
+	uca0rxie:1;
+    };
+    #else
+    struct __attribute__ ((packed)) ie2_t {
+      uint8_t
+	uca0rxie:1,
+	uca0txie:1,
+	ucb0rxie:1,
+	ucb0txie:1,
+	unused:4;
+    };
+    #endif  
+#else
+    #if defined(WORDS_BIGENDIAN)
+    struct __attribute__ ((packed)) ie2_t { 
+      uint8_t
+	btie:1,
+	u6:1,
+	utxie1:1,
+	urxie1:1,
+	u3:1,
+	u2:1,
+	u1:1,
+	u0:1;
+    };
+    #else
+    struct __attribute__ ((packed)) ie2_t { 
+      uint8_t
+	u0:1,
+	u1:1,
+	u2:1,
+	u3:1,
+	urxie1:1,
+	utxie1:1,
+	u6:1,
+	btie:1;
+    };
+    #endif   
+#endif
+    
+    
 #if defined(WORDS_BIGENDIAN)
 struct __attribute__ ((packed)) ifg1_t {
   uint8_t
@@ -93,31 +117,55 @@ struct __attribute__ ((packed)) ifg1_t {
 };
 #endif
 
-#if defined(WORDS_BIGENDIAN)
-struct __attribute__ ((packed)) ifg2_t {
-  uint8_t
-    btifg:1,
-    u6:1,
-    utxifg1:1,
-    urxifg1:1,
-    u3:1,
-    u2:1,
-    u1:1,
-    u0:1;
-};
+
+#if defined(__msp430_have_uscib0)
+    #if defined(WORDS_BIGENDIAN)
+    struct __attribute__ ((packed)) ifg2_t {
+      uint8_t
+	unused:4,
+	ucb0txifg:1,
+	ucb0rxifg:1,
+	uca0txifg:1,
+	uca0rxifg:1;
+    };
+    #else
+    struct __attribute__ ((packed)) ifg2_t {
+      uint8_t
+	uca0rxifg:1,
+	uca0txifg:1,
+	ucb0rxifg:1,
+	ucb0txifg:1,
+	unused:4;
+    };
+    #endif
 #else
-struct __attribute__ ((packed)) ifg2_t {
-  uint8_t
-    u0:1,
-    u1:1,
-    u2:1,
-    u3:1,
-    urxifg1:1,
-    utxifg1:1,
-    u6:1,
-    btifg:1;
-};
+    #if defined(WORDS_BIGENDIAN)
+    struct __attribute__ ((packed)) ifg2_t {
+      uint8_t
+	btifg:1,
+	u6:1,
+	utxifg1:1,
+	urxifg1:1,
+	u3:1,
+	u2:1,
+	u1:1,
+	u0:1;
+    };
+    #else
+    struct __attribute__ ((packed)) ifg2_t {
+      uint8_t
+	u0:1,
+	u1:1,
+	u2:1,
+	u3:1,
+	urxifg1:1,
+	utxifg1:1,
+	u6:1,
+	btifg:1;
+    };
+    #endif
 #endif
+
 
 #if defined(WORDS_BIGENDIAN)
 struct __attribute__ ((packed)) me1_t {

@@ -164,6 +164,17 @@ int msp430_interrupt_start_if_any(void)
 		  break;
 #endif
 
+#if defined(__msp430_have_uscib0)
+		case INTR_USCIB0_RX:
+		  HW_DMSG_INTR("msp430:intr:   Reset USCIB0 rx IFG flag\n");
+		  MCU.sfr.ifg2.b.ucb0rxifg = 0;
+		  break;
+		case INTR_USCIB0_TX:
+		  HW_DMSG_INTR("msp430:intr:   Reset USCIB0 tx IFG flag\n");
+		  MCU.sfr.ifg2.b.ucb0txifg = 0;
+		  break;
+#endif
+		  
 #if defined(__msp430_have_usart0)
 		case INTR_USART0_RX:
 		  HW_DMSG_INTR("msp430:intr:   Reset USART0 rx IFG flag\n");
@@ -215,6 +226,10 @@ int msp430_interrupt_checkifg(void)
 #endif
 #if defined(__msp430_have_flash)
   res |= msp430_flash_chkifg();
+#endif
+  /* usci */
+#if defined(__msp430_have_uscib0)
+  res |= msp430_uscib0_chkifg();
 #endif
   /* usart */
 #if defined(__msp430_have_usart0)

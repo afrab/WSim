@@ -641,18 +641,18 @@ static infomem_t UNUSED infomem[] = {};
 #define INTR_TIMERB3_1    12
 #define INTR_COMP_A       11
 #define INTR_WATCHDOG     10
-#define INTR_USART0_RX     9
-#define INTR_USART0_TX     8
+#define INTR_USCIB0_RX     9
+#define INTR_USCIB0_TX     8
 #define INTR_ADC12         7
 #define INTR_TIMERA3_0     6 // CCR0 CCIFG
 #define INTR_TIMERA3_1     5 // CCR1, CCR2, TAIFG
 #define INTR_IOPORT1       4
+#if 0
 #define INTR_USART1_RX     3
 #define INTR_USART1_TX     2
-#if 0
+#endif
 #define INTR_UNUSED_1      3
 #define INTR_UNUSED_2      2
-#endif
 #define INTR_IOPORT2       1
 #define INTR_UNUSED_3      0
 
@@ -676,8 +676,8 @@ static infomem_t UNUSED infomem[] = {
 #define __msp430_have_port3
 #define __msp430_have_port4
 
-#define __msp430_have_usart0
-#define __msp430_have_usart1
+#define __msp430_have_uscib0
+
 #if 0
 #define __msp430_have_usci_a0  /* uart/lin + IrDA + SPI */
 #define __msp430_have_usci_b0  /* SPI + I2C             */

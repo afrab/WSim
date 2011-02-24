@@ -1,10 +1,12 @@
 
 /**
  *  \file   msp430_basic_clock_plus.h
- *  \brief  MSP430x2xx basic clock plus definition 
+ *  \brief  MSP430x2xx basic clock plus definition (based on "msp430_basic_clock.h") 
  *  \author Julien Carpentier
  *  \date   2011
  **/
+
+// WARNING : mportant mofications in this file must be send back in "msp430_basic_block.h"
 
 #ifndef MSP430_BASIC_CLOCK_PLUS_H
 #define MSP430_BASIC_CLOCK_PLUS_H

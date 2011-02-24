@@ -405,8 +405,11 @@ int msp430_io_init(void)
 #if defined(__msp430_have_basic_timer)
       P8(i,BASIC_TIMER_START,BASIC_TIMER_END,msp430_basic_timer_read,msp430_basic_timer_write);
 #endif
-
+      
       P8(i,DIGIIO_START,DIGIIO_END,msp430_digiIO_mcu_read,msp430_digiIO_mcu_write);
+#if defined(__msp430_have_uscib0)
+      P8(i,USCIB0_START,USCIB0_END,msp430_uscib0_read,msp430_uscib0_write);
+#endif
 #if defined(__msp430_have_usart0)
       P8(i,USART0_START,USART0_END,msp430_usart0_read,msp430_usart0_write);
 #endif

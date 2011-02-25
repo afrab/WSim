@@ -953,10 +953,9 @@ void msp430_uscib0_update()
 
 
 /* usart read from MCU */
-int8_t msp430_uscib0_read(uint16_t addr)
+int8_t msp430_uscib0_read(uint16_t UNUSED addr)
 {
-
-  int8_t res;
+  int8_t res = 0;
   #if 0
   switch (addr)         //TODO (work in progress)                                                      
     {                                                                         
@@ -1011,7 +1010,7 @@ int8_t msp430_uscib0_read(uint16_t addr)
 }
 
 /* usart write from MCU */
-void msp430_uscib0_write(uint16_t addr, int8_t val)
+void msp430_uscib0_write(uint16_t UNUSED addr, int8_t UNUSED val)
 {
   //USART_WRITE(usart0,0,ie1,ifg1)
 }
@@ -1027,14 +1026,14 @@ int msp430_uscib0_chkifg()
 /********* External Peripheral API *********/
 
 /* usart SPI read from peripherals */
-int msp430_uscib0_dev_read_spi(uint8_t *val)
+int msp430_uscib0_dev_read_spi(uint8_t UNUSED *val)
 {
   //SPI_READ(usart0,0,me1,*val)
   return 0;
 }
 
 /* usart SPI write from peripherals */
-void msp430_uscib0_dev_write_spi(uint8_t val)
+void msp430_uscib0_dev_write_spi(uint8_t UNUSED val)
 {
   //SPI_WRITE(usart0,0,me1,val)
 }

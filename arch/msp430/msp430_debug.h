@@ -45,10 +45,11 @@ extern char* msp430_lpm_names[];
 #define DEBUG_HWMUL         0 /* hardware mult. */
 #define DEBUG_BASIC_TIMER   0 /* basic timer    */
 #define DEBUG_WATCHDOG      0 /* watchdog       */
+#define DEBUG_FLASH         0 /* mcu flash      */
 #define DEBUG_USCIB         0 /* uscib 0/1      */
-#define DEBUG_USART         1 /* usart 0/1      */
-#define DEBUG_USART_INFO    1 /* usart 0/1      */
-#define DEBUG_DIGI_IO       1 /* GPIO           */
+#define DEBUG_USART         0 /* usart 0/1      */
+#define DEBUG_USART_INFO    0 /* usart 0/1      */
+#define DEBUG_DIGI_IO       0 /* GPIO           */
 #define DEBUG_LCD           0 /* internal LCD   */
 #endif
 
@@ -146,6 +147,12 @@ extern char* msp430_lpm_names[];
 #    define HW_DMSG_LCD(x...) HW_DMSG_MCUDEV(x)
 #else
 #    define HW_DMSG_LCD(x...) do { } while (0)
+#endif
+
+#if DEBUG_FLASH
+#    define HW_DMSG_FLASH(x...) HW_DMSG_MCUDEV(x)
+#else
+#    define HW_DMSG_FLASH(x...) do { } while (0)
 #endif
 
 #if DEBUG_USCIB

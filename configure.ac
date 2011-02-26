@@ -53,6 +53,19 @@ if test "${ac_cv_c_pipe}" != "no"; then
     CFLAGS="-pipe ${CFLAGS}"
 fi
 
+dnl -flto
+dnl =====
+CFLAGS_save="${CFLAGS}"
+AC_CACHE_CHECK([if \$CC accepts -flto],
+    [ac_cv_c_flto],
+    [CFLAGS="-flto ${CFLAGS_save}"
+     AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[]], [[]])],[ac_cv_c_flto=yes],[ac_cv_c_flto=no])])
+CFLAGS="${CFLAGS_save}"
+if test "${ac_cv_c_flto}" != "no"; then
+    CFLAGS="-flto ${CFLAGS}"
+fi
+
+
 dnl Indent option : enable code indentation
 dnl ============ 
 # The indent target require GNU indent

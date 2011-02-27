@@ -283,8 +283,13 @@ int devices_create(void)
   //#  define IMG img_senslab_small
   //#  include "img-senslab.xpm"
   //#  define IMG img_senslab
-  #include "wsim.xpm"
-  #define  IMG wsim
+#if defined(SLABV13B)
+  #include "wsim13b.xpm"
+  #define  IMG wsim__b
+#elif defined(SLABV14)
+  #include "wsim14.xpm"
+  #define  IMG wsim__
+#endif
 
 
 

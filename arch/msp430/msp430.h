@@ -227,15 +227,14 @@ extern struct msp430_mcu_t mcu_backup;
 #define MCU_HWMUL          MCU.hwmul
 #define MCU_FLASH          MCU.flash
 #define MCU_RAM            MCU.ram
+#define MCU_DMA            MCU.dma
 
 #if defined(__msp430_have_basic_clock)
 #define MCU_CLOCK          MCU.basic_clock
 #endif
-
 #if defined(__msp430_have_basic_clock_plus)
 #define MCU_CLOCK          MCU.basic_clock_plus
 #endif
-
 #if defined(__msp430_have_fll_and_xt2)
 #define MCU_CLOCK          MCU.fll_clock
 #endif

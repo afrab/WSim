@@ -40,7 +40,7 @@ extern char* msp430_lpm_names[];
 #define DEBUG_IO            0 /* mcu bus io     */
 #define DEBUG_SFR           0 /* sfr registers  */
 
-
+#define DEBUG_DMA           0 /* dma            */
 #define DEBUG_TIMER         0 /* timer Ax Bx    */
 #define DEBUG_HWMUL         0 /* hardware mult. */
 #define DEBUG_BASIC_TIMER   0 /* basic timer    */
@@ -93,6 +93,12 @@ extern char* msp430_lpm_names[];
 #    define HW_DMSG_LPM(x...) HW_DMSG_MCU(x)
 #else
 #    define HW_DMSG_LPM(x...) do { } while (0)
+#endif
+
+#if DEBUG_DMA
+#    define HW_DMSG_DMA(x...) HW_DMSG_MCUDEV(x)
+#else
+#    define HW_DMSG_DMA(x...) do { } while (0)
 #endif
 
 #if DEBUG_SYSTEM_TIME

@@ -16,14 +16,17 @@
 enum dma_addr_t {
   DMACTL0      = 0x0122,
   DMACTL1      = 0x0124,
+
   DMA0CTL      = 0x01E0,
   DMA0SA       = 0x01E2,
   DMA0DA       = 0x01E4,
   DMA0SZ       = 0x01E6,
+
   DMA1CTL      = 0x01E8,
   DMA1SA       = 0x01EA,
   DMA1DA       = 0x01EC,
   DMA1SZ       = 0x01EE,
+
   DMA2CTL      = 0x01F0,
   DMA2SA       = 0x01F2,
   DMA2DA       = 0x01F4,
@@ -104,12 +107,15 @@ struct __attribute__ ((packed)) dmaXctl_t {
 };
 #endif
 
-struct __attribute__ ((packed)) dmaXsa_t {
-  uint16_t sa;
-};
+struct dmaXchannel_t {
+  union {
+    struct dmaXctl_t  b;
+    uint16_t          s;
+  } dmaXctl;
 
-struct __attribute__ ((packed)) dmaXda_t {
-  uint16_t da;
+  uint16_t dmaXsa;
+  uint16_t dmaXda;
+  uint16_t dmaXsz;
 };
 
 /* ************************************************** */
@@ -127,32 +133,7 @@ struct msp430_dma_t {
     uint16_t          s;
   } dmactl1;
 
-  union {
-    struct dmaXctl_t  b;
-    uint16_t          s;
-  } dma0ctl;
-
-  uint16_t dma0sa;
-  uint16_t dma0da;
-  uint16_t dma0sz;
-
-  union {
-    struct dmaXctl_t  b;
-    uint16_t          s;
-  } dma1ctl;
-
-  uint16_t dma1sa;
-  uint16_t dma1da;
-  uint16_t dma1sz;
-
-  union {
-    struct dmaXctl_t  b;
-    uint16_t          s;
-  } dma2ctl;
-
-  uint16_t dma2sa;
-  uint16_t dma2da;
-  uint16_t dma2sz;
+  struct dmaXchannel_t channel[3];
 };
 
 /* ************************************************** */
@@ -163,7 +144,7 @@ void    msp430_dma_reset ();
 void    msp430_dma_update();
 int16_t msp430_dma_read  (uint16_t addr);
 void    msp430_dma_write (uint16_t addr, int16_t val);
-#define msp430_dma_chkifg() 0
+int     msp430_dma_chkifg();
 
 #endif /* have_dma */
 #endif

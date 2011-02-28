@@ -20,26 +20,184 @@
 
 void msp430_dma_reset()
 {
-  int i;
+  int chann;
 
-  MCU_DMA.dmactl0.s = 0;
-  MCU_DMA.dmactl1.s = 0;
-  for(i=0; i < DMA_CHANNELS; i++)
+  MCU_DMA.dmactl0.s    = 0;
+  MCU_DMA.dmactl1.s    = 0;
+  for(chann=0; chann < DMA_CHANNELS; chann++)
     {
-      MCU_DMA.channel[i].dmaXctl.s = 0;
+      MCU_DMA.channel[ chann ].dmaXctl.s = 0;
       /* SA, DA and SZ are not changed on Reset */
-      /* MCU_DMA.channel[i].dmaXsa    = 0;      */
-      /* MCU_DMA.channel[i].dmaXda    = 0;      */
-      /* MCU_DMA.channel[i].dmaXsz    = 0;      */
+      /* MCU_DMA.channel[ chann ].dmaXsa    = 0;      */
+      /* MCU_DMA.channel[ chann ].dmaXda    = 0;      */
+      /* MCU_DMA.channel[ chann ].dmaXsz    = 0;      */
+      MCU_DMA.channel[ chann ].state    = DMA_RESET;
+      MCU_DMA.channel[ chann ].t_size   = 0;
+      MCU_DMA.channel[ chann ].t_srcadd = 0;
+      MCU_DMA.channel[ chann ].t_dstadd = 0;
     }
+  DMA_CLEAR_TRIGGERS();
 }
 
 /* ************************************************** */
 /* ************************************************** */
 /* ************************************************** */
 
+static inline int DMA_TRIG_IS_SET(int UNUSED chann, int UNUSED trig)
+{
+  if (trig == 14) /* DMA_TRIG_DMAxIFG */
+    return MCU_DMA.dma_triggers & (1 << (16+chann));
+
+  return MCU_DMA.dma_triggers & (1 << trig);
+}
+
+
 void msp430_dma_update()
 {
+  int chann;
+  int incr[] = { 0, 0, -1, +1 };
+
+  for(chann=0; chann < DMA_CHANNELS; chann++)
+    {
+      /* if (MCU_DMA.channel[ chann ].dmaXctl.b.en) */
+	{
+	  /* channel        */
+	  struct dmaXchannel_t *pchan = & MCU_DMA.channel[ chann ];
+	  /* transfer mode  */
+	  int UNUSED single = (pchan->dmaXctl.b.dt & 0x1) == 0x0;
+	  int block  = (pchan->dmaXctl.b.dt & 0x1) == 0x1;
+	  int burst  = (pchan->dmaXctl.b.dt & 0x2) == 0x2;
+	  int repeat = (pchan->dmaXctl.b.dt & 0x4) == 0x4;
+	  
+	  if (block) ERROR("msp430:dma:channel %d: BLOCK mode not implemented\n", chann);
+	  if (burst) ERROR("msp430:dma:channel %d: BURST mode not implemented\n", chann);
+	  
+	  switch (pchan->state) 
+	    {
+	      /***********/
+	    case DMA_RESET:
+	      /***********/
+	      if (pchan->dmaXctl.b.en == 1)
+		{
+		  pchan->state         = DMA_IDLE;
+		  pchan->t_srcadd      = pchan->dmaXsa;
+		  pchan->t_dstadd      = pchan->dmaXda;
+		  pchan->t_size        = pchan->dmaXsz;
+
+		  if (pchan->dmaXsz == 0)
+		    {
+		      pchan->state         = DMA_RESET;
+		      pchan->dmaXctl.b.ifg = 1;
+		      pchan->dmaXctl.b.en  = 0;
+		      WARNING("msp430:dma:channel %d: starting DMA with transfer size == 0\n", chann);
+		      break; /* break switch */
+		    }
+		}
+	      /* fall */
+
+	      /***********/
+	    case DMA_IDLE:
+	      /***********/
+	      if (pchan->dmaXctl.b.abort == 0)
+		{
+		  pchan->state = DMA_WAIT;
+		}
+	      /* fall */
+
+	      /***********/
+	    case DMA_WAIT:
+	      /***********/
+	      {
+		int trig = (MCU_DMA.dmactl0.s >> ( chann * 4)) & 0x0f;
+		if (DMA_TRIG_IS_SET( chann, trig ))
+		  {
+		    pchan->state     = DMA_HOLD;
+		    pchan->mclk_wait = 2;
+		  }
+	      }
+	      break; /* don't fall, wait 2 MCLK cycles */
+
+	      /***********/
+	    case DMA_HOLD:
+	      /***********/
+	      /* wait 2 MCLK done -> copy */
+	      if (pchan->dmaXctl.b.srcbyte) 
+		{
+		  uint8_t byte = msp430_read_byte ( pchan->t_srcadd );
+		  if (pchan->dmaXctl.b.dstbyte) 
+		    {
+		      msp430_write_byte ( pchan->t_dstadd, byte );
+		    }
+		  else
+		    {
+		      msp430_write_short( pchan->t_dstadd, 0x0000 | byte );
+		    }
+		}
+	      else
+		{
+		  uint16_t word = msp430_read_short( pchan->t_srcadd );
+		  if (pchan->dmaXctl.b.dstbyte) 
+		    {
+		      msp430_write_byte ( pchan->t_dstadd, word & 0x00ff );
+		    }
+		  else
+		    {
+		      msp430_write_short( pchan->t_dstadd, word );
+		    }
+		}
+	      pchan->state = DMA_DEC;
+	      /* fall */
+
+	      /***********/
+	    case DMA_DEC:
+	      /***********/
+	      {
+		/* increment mode */
+		int srcadd = incr[ pchan->dmaXctl.b.srcincr ] * ( 2 - pchan->dmaXctl.b.srcbyte );
+		int dstadd = incr[ pchan->dmaXctl.b.dstincr ] * ( 2 - pchan->dmaXctl.b.dstbyte ); 
+
+		pchan->dmaXsz --;
+		pchan->t_srcadd += srcadd;
+		pchan->t_dstadd += dstadd;
+		
+		if (! MCU_DMA.channel[ chann ].dmaXctl.b.en)
+		  {
+		    pchan->state = DMA_RESET;
+		  }
+		else if (pchan->dmaXsz > 0)
+		  {
+		    pchan->dmaXctl.b.ifg     = 1;
+		    if (! repeat)
+		      {
+			pchan->dmaXctl.b.en  = 0;
+			pchan->state         = DMA_RESET;
+		      }
+		    else
+		      {
+			pchan->t_srcadd      = pchan->dmaXsa;
+			pchan->t_dstadd      = pchan->dmaXda;
+			pchan->dmaXsz        = pchan->t_size;
+			pchan->state         = DMA_WAIT;
+			pchan->dmaXctl.b.req = 0;
+		      }
+		  }
+		else /* dmaXsz > 0 */
+		  {
+		    pchan->state         = DMA_WAIT;
+		    pchan->dmaXctl.b.req = 0;
+		  }
+	      }
+	      break;
+		
+	      /***********/
+	    case DMA_BURST:
+	      /***********/
+	      break;
+	    }
+	}
+    }
+
+  DMA_CLEAR_TRIGGERS();
 }
 
 /* ************************************************** */
@@ -110,7 +268,9 @@ int16_t msp430_dma_read  (uint16_t addr)
 /* ************************************************** */
 /* ************************************************** */
 
-static char *trig_str[] = {
+char* msp430_trig_str(int chann, int sel)
+{
+  char UNUSED *trig_str[] = {
 /* 00 */"DMAREQ bit (software trigger)",
 	"TACCR2 CCIFG bit",
 	"TBCCR2 CCIFG bit",
@@ -130,17 +290,15 @@ static char *trig_str[] = {
 	"DMA2IFG bit triggers DMA channel 0",
 	"DMA0IFG bit triggers DMA channel 1",
 	"DMA1IFG bit triggers DMA channel 2"
-};
+  };
 
-char* msp430_trig_str(int chann, int sel)
-{
-  if (sel != 14)
-    return trig_str[sel];
-  return trig_str[16+chann];
+  if (sel == 14) /* DMA_TRIG_DMAxIFG */
+    return trig_str[16+chann];
+
+  return trig_str[sel];
 }
 
 /* ************************************************** */
-
 
 void msp430_dmaxctl_str(int UNUSED chann, struct dmaXctl_t UNUSED *old, struct dmaXctl_t UNUSED *new)
 {
@@ -166,7 +324,7 @@ void msp430_dmaxctl_str(int UNUSED chann, struct dmaXctl_t UNUSED *old, struct d
 	      incr_str[new->srcincr]);
   HW_DMSG_DMA("msp430:dma:chann %d:    -- %s, %s\n", chann,
 	      mode_str[new->dt],
-	      (new->level)?"edge":"level");
+	      (new->level)?"level":"edge");
 }
 
 /* ************************************************** */

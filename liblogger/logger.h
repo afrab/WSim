@@ -38,10 +38,13 @@ void REAL_STDERR(char* fmp, ...);
  * 1 - WARNING
  * 2 - INFO
  * 3 - 
- *   -
- * 5 - HW_DMSG -
- *   -          MAIN UTILS
- *   -          devices
+ * 4 -
+ * 5 - HW_DMSG - hardware related messages
+ *   -          mcu
+ *   -          mcu devices
+ *   -          platform
+ *   -          platform devices 
+ *   -          machine
  * 6 - LIB_DMSG -
  *   -          ELF   loader
  *   -          WSNet protocol dump
@@ -49,7 +52,6 @@ void REAL_STDERR(char* fmp, ...);
  *   -          GUI   backend
  *   -          tracer
  *   -          logpkt
-
  *   -          etracer
  *   -          
  */

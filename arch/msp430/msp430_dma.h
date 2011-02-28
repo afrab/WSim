@@ -107,6 +107,15 @@ struct __attribute__ ((packed)) dmaXctl_t {
 };
 #endif
 
+enum dma_state_t {
+  DMA_RESET = 0, 
+  DMA_IDLE  = 1,
+  DMA_WAIT  = 2, 
+  DMA_HOLD  = 3, 
+  DMA_DEC   = 4,
+  DMA_BURST = 5
+};
+
 struct dmaXchannel_t {
   union {
     struct dmaXctl_t  b;
@@ -116,6 +125,13 @@ struct dmaXchannel_t {
   uint16_t dmaXsa;
   uint16_t dmaXda;
   uint16_t dmaXsz;
+
+  uint16_t t_size;
+  uint16_t t_srcadd;
+  uint16_t t_dstadd;
+  
+  enum dma_state_t state; 
+  int      mclk_wait;
 };
 
 /* ************************************************** */
@@ -134,6 +150,7 @@ struct msp430_dma_t {
   } dmactl1;
 
   struct dmaXchannel_t channel[3];
+  uint32_t           dma_triggers;
 };
 
 /* ************************************************** */
@@ -145,6 +162,89 @@ void    msp430_dma_update();
 int16_t msp430_dma_read  (uint16_t addr);
 void    msp430_dma_write (uint16_t addr, int16_t val);
 int     msp430_dma_chkifg();
+
+/* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
+
+#if 0
+/* 00 */"DMAREQ bit (software trigger)"
+	"TACCR2 CCIFG bit"
+	"TBCCR2 CCIFG bit"
+	"URXIFG0 (UART/SPI mode), USART0 data received (I2C mode)"
+	"UTXIFG0 (UART/SPI mode), USART0 transmit ready (I2C mode)"
+/* 05 */"DAC12_0CTL DAC12IFG bit"
+	"ADC12 ADC12IFGx bit"
+	"TACCR0 CCIFG bit"
+	"TBCCR0 CCIFG bit"
+	"URXIFG1 bit"
+/* 10 */"UTXIFG1 bit"
+	"Multiplier ready"
+	"No action"
+	"No action"
+	"DMAxIFG bit triggers DMA channel x"
+/* 15 */"External trigger DMAE0"
+	"DMA2IFG bit triggers DMA channel 0"
+	"DMA0IFG bit triggers DMA channel 1"
+	"DMA1IFG bit triggers DMA channel 2"
+#endif
+
+#define DMA_SET_TRIGGER(trig)			\
+  do {						\
+    MCU_DMA.dma_triggers |= trig;		\
+  } while(0)
+
+#define DMA_CLEAR_TRIGGERS()			\
+  do {						\
+    MCU_DMA.dma_triggers = 0;			\
+  } while (0)
+
+#define DMA_TRIG_DMAREQ    	(1 <<  0)
+#define DMA_TRIG_TACCR2    	(1 <<  1)
+#define DMA_TRIG_TBCCR2    	(1 <<  2)
+#define DMA_TRIG_URXIFG0   	(1 <<  3)
+#define DMA_TRIG_UTXIFG0   	(1 <<  4)
+#define DMA_TRIG_DAC12IFG  	(1 <<  5)
+#define DMA_TRIG_ADC12IFG  	(1 <<  6)
+#define DMA_TRIG_TACCR0    	(1 <<  7)
+#define DMA_TRIG_TBCCR0    	(1 <<  8)
+#define DMA_TRIG_URXIFG1   	(1 <<  9)
+#define DMA_TRIG_ITXIFG1   	(1 << 10)
+#define DMA_TRIG_MULTIPLIER	(1 << 11)
+#define DMA_TRIG_NOACTION0 	(1 << 12)
+#define DMA_TRIG_NOACTION1 	(1 << 13)
+#define DMA_TRIG_DMAxIFG 	(1 << 14) /* should no be used */
+#define DMA_TRIG_DMAE0  	(1 << 15)
+/* replaces DMA_TRIG_DMAxIFG for channels 0, 1 and 2 */
+#define DMA_TRIG_DMA2IFG        (1 << 16) /* channel 0 */
+#define DMA_TRIG_DMA0IFG        (1 << 17) /* channel 1 */
+#define DMA_TRIG_DMA1IFG        (1 << 18) /* channel 2 */
+
+#define DMA_SET_TACCR2()        DMA_SET_TRIGGER( DMA_TRIG_TACCR2     )
+#define DMA_SET_TBCCR2()        DMA_SET_TRIGGER( DMA_TRIG_TBCCR2     )
+#define DMA_SET_URXIFG0()       DMA_SET_TRIGGER( DMA_TRIG_URXIFG0    )
+#define DMA_SET_UTXIFG0()       DMA_SET_TRIGGER( DMA_TRIG_UTXIFG0    )
+#define DMA_SET_DAC12IFG()      DMA_SET_TRIGGER( DMA_TRIG_DAC12IFG   )
+#define DMA_SET_ADC12IFG()      DMA_SET_TRIGGER( DMA_TRIG_ADC12IFG   )
+#define DMA_SET_TACCR0()        DMA_SET_TRIGGER( DMA_TRIG_TACCR0     )
+#define DMA_SET_TBCCR0()        DMA_SET_TRIGGER( DMA_TRIG_TBCCR0     )
+#define DMA_SET_URXIFG1()       DMA_SET_TRIGGER( DMA_TRIG_URXIFG1    )
+#define DMA_SET_UTXIFG1()       DMA_SET_TRIGGER( DMA_TRIG_ITXIFG1    )
+#define DMA_SET_MULTIPLIER()    DMA_SET_TRIGGER( DMA_TRIG_MULTIPLIER )
+#define DMA_SET_NOACTION0()     DMA_SET_TRIGGER( DMA_TRIG_NOACTION0  )
+#define DMA_SET_NOACTION1()     DMA_SET_TRIGGER( DMA_TRIG_NOACTION1  )
+
+#define DMA_SET_DMA2IFG()       DMA_SET_TRIGGER( DMA_TRIG_DMA2IFG    )
+#define DMA_SET_DMA0IFG()       DMA_SET_TRIGGER( DMA_TRIG_DMA0IFG    )
+#define DMA_SET_DMA1IFG()       DMA_SET_TRIGGER( DMA_TRIG_DMA1IFG    )
+#define DMA_SET_DMAxIFG( chann )		\
+  do {						\
+    DMA_SET_TRIGGER( 1 << (16 + chann ) );	\
+  } while(0)
+
+/* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
 
 #endif /* have_dma */
 #endif

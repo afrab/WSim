@@ -181,6 +181,10 @@ do {                                                                          \
                  {                                                            \
                     msp430_interrupt_set(INTR_USART##NUM##_TX);               \
                  }                                                            \
+	       else							      \
+		 {							      \
+		   DMA_SET_UTXIFG##NUM ();				      \
+		 }							      \
                HW_DMSG_USART("msp430:usart%d: SPI tx buf -> shifter (%d)\n",  \
 			     NUM,MCU.USART.uxtx_shift_delay);		      \
 	       HW_SPY("msp430:usart%d: SPI send (0x%x,%c) at 0x%04x\n",NUM,   \
@@ -273,6 +277,10 @@ do {                                                                          \
             {                                                                 \
                msp430_interrupt_set(INTR_USART##NUM##_RX);                    \
             }                                                                 \
+	  else								      \
+	    {								      \
+	      DMA_SET_URXIFG##NUM ();					      \
+	    }								      \
         } /* shift ready */                                                   \
     } /* urxe. spie */                                                        \
 } while (0)
@@ -337,6 +345,10 @@ do {                                                                          \
                  {                                                            \
                     msp430_interrupt_set(INTR_USART##NUM##_TX);               \
                  }                                                            \
+	       else							      \
+		 {							      \
+		   DMA_SET_UTXIFG##NUM ();				      \
+		 }							      \
                HW_DMSG_USART("msp430:usart%d: UART tx buf -> shifter (delay %d, val %d)\n", \
 			     NUM,MCU.USART.uxtx_shift_delay, MCU.USART.uxtxbuf);            \
 	       HW_SPY("msp430:usart%d: UART send (0x%x,%c)\n",NUM,            \
@@ -414,6 +426,10 @@ do {                                                                          \
             {                                                                 \
                msp430_interrupt_set(INTR_USART##NUM##_RX);                    \
             }                                                                 \
+	  else								      \
+	    {								      \
+	      DMA_SET_URXIFG##NUM ();					      \
+	    }								      \
         } /* shift ready */                                                   \
     } /* me.urxe */                                                           \
 } while (0)

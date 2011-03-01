@@ -69,31 +69,97 @@ void msp430_sfr_write(uint16_t addr, int8_t val)
 {
   switch(addr)
     {
+      /***********/
     case SFR_IE1:
+      /***********/
       MCU.sfr.ie1.s  = val;
       HW_DMSG_SFR("msp430:sfr: write IE1 [0x%04x] = 0x%02x\n",addr,val & 0xff); 
       break;
+
+      /***********/
     case SFR_IE2:
+      /***********/
       MCU.sfr.ie2.s  = val;
       HW_DMSG_SFR("msp430:sfr: write IE2 [0x%04x] = 0x%02x\n",addr,val & 0xff); 
       break;
+
+      /***********/
     case SFR_IFG1:
-      MCU.sfr.ifg1.s = val;
-      HW_DMSG_SFR("msp430:sfr: write IFG1 [0x%04x] = 0x%02x\n",addr,val & 0xff); 
+      /***********/
+      {
+	union {
+	  struct ifg1_t    b;
+	  uint8_t          s;
+	} ifg1;
+
+	ifg1.s = val;
+#if defined(__msp430_have_usart0)
+	if (ifg1.b.utxifg0 == 1 && MCU.sfr.ie1.b.utxie0 == 0)
+	  {
+	    DMA_SET_UTXIFG0();
+	  }
+	if (ifg1.b.urxifg0 == 1 && MCU.sfr.ie1.b.urxie0 == 0)
+	  {
+	    DMA_SET_URXIFG0();
+	  }
+#endif
+	MCU.sfr.ifg1.s = ifg1.s;
+      	HW_DMSG_SFR("msp430:sfr: write IFG1 [0x%04x] = 0x%02x\n",addr,ifg1.s & 0xff); 
+      }
       break;
+
+      /***********/
     case SFR_IFG2:
-      MCU.sfr.ifg2.s = val;
-      HW_DMSG_SFR("msp430:sfr: write IFG2 [0x%04x] = 0x%02x\n",addr,val & 0xff); 
+      /***********/
+      {
+	union {
+	  struct ifg2_t    b;
+	  uint8_t          s;
+	} ifg2;
+
+	ifg2.s = val;
+#if defined(__msp430_have_uscia0)
+	if (ifg2.b.uca0txifg == 1 && MCU.sfr.ie2.b.uca0txie == 0)
+	  {
+	    DMA_SET_UTXIFG0();
+	  }
+	if (ifg2.b.uca0rxifg == 1 && MCU.sfr.ie2.b.uca0rxie == 0)
+	  {
+	    DMA_SET_URXIFG0();
+	  }
+#endif
+#if defined(__msp430_have_usart1)
+	if (ifg2.b.utxifg1 == 1 && MCU.sfr.ie2.b.utxie1 == 0)
+	  {
+	    DMA_SET_UTXIFG1();
+	  }
+	if (ifg2.b.urxifg1 == 1 && MCU.sfr.ie2.b.urxie1 == 0)
+	  {
+	    DMA_SET_URXIFG1();
+	  }
+#endif
+	MCU.sfr.ifg2.s = ifg2.s;
+	HW_DMSG_SFR("msp430:sfr: write IFG2 [0x%04x] = 0x%02x\n",addr,val & 0xff); 
+      }
       break;
+
+      /***********/
     case SFR_MER1:
+      /***********/
       MCU.sfr.me1.s  = val;
       HW_DMSG_SFR("msp430:sfr: write ME1 [0x%04x] = 0x%02x\n",addr,val & 0xff); 
       break;
+
+      /***********/
     case SFR_MER2:
+      /***********/
       MCU.sfr.me2.s  = val;
       HW_DMSG_SFR("msp430:sfr: write ME2 [0x%04x] = 0x%02x\n",addr,val & 0xff); 
       break;
+
+      /***********/
     default:
+      /***********/
       ERROR("msp430:sfr: write bad address [0x%04x]=0x%02x\n",addr,val & 0xff);
       break;
     }

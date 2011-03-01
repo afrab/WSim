@@ -168,25 +168,25 @@ int     msp430_dma_chkifg();
 /* ************************************************** */
 
 #if 0
-/* 00 */"DMAREQ bit (software trigger)"
-	"TACCR2 CCIFG bit"
-	"TBCCR2 CCIFG bit"
-	"URXIFG0 (UART/SPI mode), USART0 data received (I2C mode)"
-	"UTXIFG0 (UART/SPI mode), USART0 transmit ready (I2C mode)"
-/* 05 */"DAC12_0CTL DAC12IFG bit"
-	"ADC12 ADC12IFGx bit"
-	"TACCR0 CCIFG bit"
-	"TBCCR0 CCIFG bit"
-	"URXIFG1 bit"
-/* 10 */"UTXIFG1 bit"
-	"Multiplier ready"
-	"No action"
-	"No action"
-	"DMAxIFG bit triggers DMA channel x"
-/* 15 */"External trigger DMAE0"
-	"DMA2IFG bit triggers DMA channel 0"
-	"DMA0IFG bit triggers DMA channel 1"
-	"DMA1IFG bit triggers DMA channel 2"
+/* 00  x */"DMAREQ bit (software trigger)"
+/*       */"TACCR2 CCIFG bit"
+/*       */"TBCCR2 CCIFG bit"
+/*     x */"URXIFG0 (UART/SPI mode), USART0 data received (I2C mode)"
+/*     x */"UTXIFG0 (UART/SPI mode), USART0 transmit ready (I2C mode)"
+/* 05    */"DAC12_0CTL DAC12IFG bit"
+/*       */"ADC12 ADC12IFGx bit"
+/*       */"TACCR0 CCIFG bit"
+/*       */"TBCCR0 CCIFG bit"
+/*     x */"URXIFG1 bit"
+/* 10  x */"UTXIFG1 bit"
+/*       */"Multiplier ready"
+/*     x */"No action"
+/*     x */"No action"
+/*     x */"DMAxIFG bit triggers DMA channel x"
+/* 15  x */"External trigger DMAE0"
+/*     x */"DMA2IFG bit triggers DMA channel 0"
+/*     x */"DMA0IFG bit triggers DMA channel 1"
+/*     x */"DMA1IFG bit triggers DMA channel 2"
 #endif
 
 #define DMA_SET_TRIGGER(trig)			\
@@ -209,7 +209,7 @@ int     msp430_dma_chkifg();
 #define DMA_TRIG_TACCR0    	(1 <<  7)
 #define DMA_TRIG_TBCCR0    	(1 <<  8)
 #define DMA_TRIG_URXIFG1   	(1 <<  9)
-#define DMA_TRIG_ITXIFG1   	(1 << 10)
+#define DMA_TRIG_UTXIFG1   	(1 << 10)
 #define DMA_TRIG_MULTIPLIER	(1 << 11)
 #define DMA_TRIG_NOACTION0 	(1 << 12)
 #define DMA_TRIG_NOACTION1 	(1 << 13)
@@ -220,6 +220,7 @@ int     msp430_dma_chkifg();
 #define DMA_TRIG_DMA0IFG        (1 << 17) /* channel 1 */
 #define DMA_TRIG_DMA1IFG        (1 << 18) /* channel 2 */
 
+#define DMA_SET_REQ()           DMA_SET_TRIGGER( DMA_TRIG_DMAREQ     )
 #define DMA_SET_TACCR2()        DMA_SET_TRIGGER( DMA_TRIG_TACCR2     )
 #define DMA_SET_TBCCR2()        DMA_SET_TRIGGER( DMA_TRIG_TBCCR2     )
 #define DMA_SET_URXIFG0()       DMA_SET_TRIGGER( DMA_TRIG_URXIFG0    )
@@ -229,22 +230,54 @@ int     msp430_dma_chkifg();
 #define DMA_SET_TACCR0()        DMA_SET_TRIGGER( DMA_TRIG_TACCR0     )
 #define DMA_SET_TBCCR0()        DMA_SET_TRIGGER( DMA_TRIG_TBCCR0     )
 #define DMA_SET_URXIFG1()       DMA_SET_TRIGGER( DMA_TRIG_URXIFG1    )
-#define DMA_SET_UTXIFG1()       DMA_SET_TRIGGER( DMA_TRIG_ITXIFG1    )
+#define DMA_SET_UTXIFG1()       DMA_SET_TRIGGER( DMA_TRIG_UTXIFG1    )
 #define DMA_SET_MULTIPLIER()    DMA_SET_TRIGGER( DMA_TRIG_MULTIPLIER )
 #define DMA_SET_NOACTION0()     DMA_SET_TRIGGER( DMA_TRIG_NOACTION0  )
 #define DMA_SET_NOACTION1()     DMA_SET_TRIGGER( DMA_TRIG_NOACTION1  )
+#define DMA_SET_DMAxIFG()       ERROR("msp430:dma: DMA_SET_DMAxIFG() should not be used\n")
+#define DMA_SET_DMAE0()         DMA_SET_TRIGGER( DMA_TRIG_DMAE0      )
 
 #define DMA_SET_DMA2IFG()       DMA_SET_TRIGGER( DMA_TRIG_DMA2IFG    )
 #define DMA_SET_DMA0IFG()       DMA_SET_TRIGGER( DMA_TRIG_DMA0IFG    )
 #define DMA_SET_DMA1IFG()       DMA_SET_TRIGGER( DMA_TRIG_DMA1IFG    )
-#define DMA_SET_DMAxIFG( chann )		\
+
+#define DMA_SET_DMAxIFG_FOR_CHANN( chann )	\
   do {						\
     DMA_SET_TRIGGER( 1 << (16 + chann ) );	\
+  } while(0)
+
+#define DMA_SET_DMAxIFG_FROM_CHANN( chann )	\
+  do {						\
+    int target = (chann + 1) % 3;		\
+    DMA_SET_TRIGGER( 1 << (16 + target ));	\
   } while(0)
 
 /* ************************************************** */
 /* ************************************************** */
 /* ************************************************** */
 
+#else  /* have_dma */
+
+#define DMA_SET_REQ()           do { } while (0)
+#define DMA_SET_TACCR2()        do { } while (0)
+#define DMA_SET_TBCCR2()        do { } while (0)
+#define DMA_SET_URXIFG0()       do { } while (0)
+#define DMA_SET_UTXIFG0()       do { } while (0)
+#define DMA_SET_DAC12IFG()      do { } while (0)
+#define DMA_SET_ADC12IFG()      do { } while (0)
+#define DMA_SET_TACCR0()        do { } while (0)
+#define DMA_SET_TBCCR0()        do { } while (0)
+#define DMA_SET_URXIFG1()       do { } while (0)
+#define DMA_SET_UTXIFG1()       do { } while (0)
+#define DMA_SET_MULTIPLIER()    do { } while (0)
+#define DMA_SET_NOACTION0()     do { } while (0)
+#define DMA_SET_NOACTION1()     do { } while (0)
+#define DMA_SET_DMAxIFG()       ERROR("msp430:dma: DMA_SET_DMAxIFG() should not be used\n")
+#define DMA_SET_DMAE0()         do { } while (0)
+
 #endif /* have_dma */
+
+/* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
 #endif

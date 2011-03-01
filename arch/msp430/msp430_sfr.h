@@ -44,7 +44,7 @@ struct __attribute__ ((packed)) ie1_t {
 #endif
 
 
-#if defined(__msp430_have_uscib0)
+#if defined(__msp430_have_uscia0) || defined(__msp430_have_uscib0)
     #if defined(WORDS_BIGENDIAN)
     struct __attribute__ ((packed)) ie2_t {
       uint8_t
@@ -118,7 +118,7 @@ struct __attribute__ ((packed)) ifg1_t {
 #endif
 
 
-#if defined(__msp430_have_uscib0)
+#if defined(__msp430_have_uscia0) || defined(__msp430_have_uscib0)
     #if defined(WORDS_BIGENDIAN)
     struct __attribute__ ((packed)) ifg2_t {
       uint8_t

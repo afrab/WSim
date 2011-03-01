@@ -45,10 +45,14 @@ void msp430_dma_reset()
 
 static inline int DMA_TRIG_IS_SET(int UNUSED chann, int UNUSED trig)
 {
-  if (trig == 14) /* DMA_TRIG_DMAxIFG */
-    return MCU_DMA.dma_triggers & (1 << (16+chann));
-
-  return MCU_DMA.dma_triggers & (1 << trig);
+  if (MCU_DMA.channel[ chann ].dmaXctl.b.level == 0) /* edge */
+    {
+      if (trig == 14) /* DMA_TRIG_DMAxIFG */
+	return MCU_DMA.dma_triggers & (1 << (16+chann));
+      
+      return MCU_DMA.dma_triggers & (1 << trig);
+    }
+  return 0;
 }
 
 
@@ -67,7 +71,7 @@ void msp430_dma_update()
 	  int UNUSED single = (pchan->dmaXctl.b.dt & 0x1) == 0x0;
 	  int block  = (pchan->dmaXctl.b.dt & 0x1) == 0x1;
 	  int burst  = (pchan->dmaXctl.b.dt & 0x2) == 0x2;
-	  int repeat = (pchan->dmaXctl.b.dt & 0x4) == 0x4;
+	  
 	  
 	  if (block) ERROR("msp430:dma:channel %d: BLOCK mode not implemented\n", chann);
 	  if (burst) ERROR("msp430:dma:channel %d: BURST mode not implemented\n", chann);
@@ -83,7 +87,6 @@ void msp430_dma_update()
 		  pchan->t_srcadd      = pchan->dmaXsa;
 		  pchan->t_dstadd      = pchan->dmaXda;
 		  pchan->t_size        = pchan->dmaXsz;
-
 		  if (pchan->dmaXsz == 0)
 		    {
 		      pchan->state         = DMA_RESET;
@@ -92,6 +95,12 @@ void msp430_dma_update()
 		      WARNING("msp430:dma:channel %d: starting DMA with transfer size == 0\n", chann);
 		      break; /* break switch */
 		    }
+		  pchan->dmaXctl.b.req = 0;
+		  HW_DMSG_DMA("msp430:dma:chann %d: go IDLE\n",chann);
+		}
+	      else 
+		{
+		  break;
 		}
 	      /* fall */
 
@@ -101,6 +110,11 @@ void msp430_dma_update()
 	      if (pchan->dmaXctl.b.abort == 0)
 		{
 		  pchan->state = DMA_WAIT;
+		  HW_DMSG_DMA("msp430:dma:chann %d: go WAIT\n",chann);
+		}
+	      else
+		{
+		  break;
 		}
 	      /* fall */
 
@@ -113,6 +127,7 @@ void msp430_dma_update()
 		  {
 		    pchan->state     = DMA_HOLD;
 		    pchan->mclk_wait = 2;
+		    HW_DMSG_DMA("msp430:dma:chann %d: go HOLD\n",chann);
 		  }
 	      }
 	      break; /* don't fall, wait 2 MCLK cycles */
@@ -146,6 +161,9 @@ void msp430_dma_update()
 		    }
 		}
 	      pchan->state = DMA_DEC;
+	      HW_DMSG_DMA("msp430:dma:chann %d: copy [0x%04x] <- [0x%04x] done, go DEC\n",
+			  chann, pchan->t_srcadd, pchan->t_dstadd);
+
 	      /* fall */
 
 	      /***********/
@@ -160,17 +178,24 @@ void msp430_dma_update()
 		pchan->t_srcadd += srcadd;
 		pchan->t_dstadd += dstadd;
 		
-		if (! MCU_DMA.channel[ chann ].dmaXctl.b.en)
+		if (MCU_DMA.channel[ chann ].dmaXctl.b.en == 0)
 		  {
 		    pchan->state = DMA_RESET;
+		    HW_DMSG_DMA("msp430:dma:chann %d: go RESET, en == 0\n",chann);
 		  }
-		else if (pchan->dmaXsz > 0)
+		else if (pchan->dmaXsz == 0)
 		  {
-		    pchan->dmaXctl.b.ifg     = 1;
-		    if (! repeat)
+		    int repeat = (pchan->dmaXctl.b.dt & 0x4) == 0x4;
+
+		    /* set interrupt flag */
+		    pchan->dmaXctl.b.ifg         = 1;
+		    DMA_SET_DMAxIFG_FROM_CHANN( chann ); 
+
+		    if (repeat == 0)
 		      {
 			pchan->dmaXctl.b.en  = 0;
 			pchan->state         = DMA_RESET;
+			HW_DMSG_DMA("msp430:dma:chann %d: go RESET, sz == 0, repeat == 0\n",chann);
 		      }
 		    else
 		      {
@@ -179,12 +204,14 @@ void msp430_dma_update()
 			pchan->dmaXsz        = pchan->t_size;
 			pchan->state         = DMA_WAIT;
 			pchan->dmaXctl.b.req = 0;
+			HW_DMSG_DMA("msp430:dma:chann %d: go WAIT, sz == 0, sz <- %d, repeat == 1\n",chann,pchan->dmaXsz);
 		      }
 		  }
 		else /* dmaXsz > 0 */
 		  {
 		    pchan->state         = DMA_WAIT;
 		    pchan->dmaXctl.b.req = 0;
+		    HW_DMSG_DMA("msp430:dma:chann %d: go WAIT sz = %d\n",chann,pchan->dmaXsz);
 		  }
 	      }
 	      break;
@@ -216,6 +243,7 @@ int16_t msp430_dma_read  (uint16_t addr)
   else if (addr == DMACTL1)
     {
       val = MCU_DMA.dmactl1.s;
+      
       HW_DMSG_DMA("msp430:dma: read  DMACTL1 = 0x%04x\n", val);
     }
   else if (DMA0CTL <= addr && addr <= DMA2SZ)
@@ -368,6 +396,18 @@ void msp430_dma_write (uint16_t addr, int16_t val)
 	{
 	  HW_DMSG_DMA("msp430:dma:    -- (onfetch, r-robin, ennmi) = (%d,%d,%d)\n",
 		      dmactl1.b.dma_onfetch , dmactl1.b.round_robin , dmactl1.b.ennmi);
+	  if (dmactl1.b.dma_onfetch == 1)
+	    {
+	      ERROR("msp430:dma:    -- onfetch not implemented\n");
+	    }
+	  if (dmactl1.b.round_robin == 1)
+	    {
+	      ERROR("msp430:dma:    -- round_robin not implemented\n");
+	    }
+	  if (dmactl1.b.ennmi == 1)
+	    {
+	      ERROR("msp430:dma:    -- ennmi not implemented\n");
+	    }
 	}
       MCU_DMA.dmactl1.s = dmactl1.s;
     }
@@ -403,11 +443,17 @@ void msp430_dma_write (uint16_t addr, int16_t val)
 		  }
 		if (dmaxctl.b.req && !pchan->dmaXctl.b.req)
 		  {
+		    /* check to see if the set must go in update() */
+		    DMA_SET_DMAxIFG_FOR_CHANN( chann );
 		    HW_DMSG_DMA("msp430:dma:chann %d:    +- req :: start DMA\n", chann);
 		  }
 		if (dmaxctl.b.ifg && !pchan->dmaXctl.b.ifg)
 		  {
 		    HW_DMSG_DMA("msp430:dma:chann %d:    +- ifg :: interrupt request\n", chann);
+		  }
+		if (dmaxctl.b.level == 1)
+		  {
+		    ERROR      ("msp430:dma:chann %d:    +- level == 1 not implemented\n", chann);
 		  }
 	      }
 	    pchan->dmaXctl.s = dmaxctl.s;
@@ -449,7 +495,7 @@ int msp430_dma_chkifg()
     {
       if (MCU_DMA.channel[i].dmaXctl.b.ie && MCU_DMA.channel[i].dmaXctl.b.ifg)
 	{
-	  msp430_interrupt_set(INTR_DMA);
+	  msp430_interrupt_set( INTR_DMA );
 	  return 1;
 	}
     }

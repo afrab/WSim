@@ -87,6 +87,7 @@
  *   4.3 : Enable -> battery charger
  *   4.2 : CS_radio cc1100(V1.3B)/cc2420(V1.4)
  *   4.1 : STATUS -> battery charger
+ *   4.0 : NC
  *
  * Port 5
  * ======

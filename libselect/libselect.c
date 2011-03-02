@@ -531,9 +531,9 @@ int libselect_id_close(libselect_id_t id)
     case ENTRY_UDP:
       libselect_skt_close_client (& libselect.entry[id].skt);
       break;
-    case ENTRY_FD_ONLY:
-      ERROR("wsim:libselect:close: cannot close id %d of type FD_ONLY\n",id);
-      return 1;
+    case ENTRY_FD_ONLY: /* I/O data is not handled by libselect */
+      /* WARNING("wsim:libselect:close: cannot close id %d of type FD_ONLY\n",id); */
+      return 0;
     case ENTRY_WIN32_PIPE:
 #ifdef WINPIPES
       CloseHandle((HANDLE)libselect.entry[id].fd_out);

@@ -103,8 +103,8 @@ inline void msp430_alu_reset(void)
   MCU_ALU.next_pc          = MCU_ALU.regs[PC_REG_IDX]; 
   SR = 0;
 
-  MCU_ALU.interrupts = 0;
-  MCU_ALU.signal     = 0;
+  MCU_ALU.interrupt_vector = 0;
+  MCU_ALU.signal           = 0;
 }
 
 /******************************************************************************************/
@@ -1005,7 +1005,7 @@ static inline void msp430_mcu_update(unsigned int msp430_instruction_cycles)
     }
   if (debug_IV != MCU_IV)
     {
-      HW_DMSG_INTR("msp430:intr:debug:update: IV set to 0x%04x at PC=0x%04x\n",MCU_IV,mcu_get_pc());
+      HW_DMSG_INTR("msp430:intr:debug:update: IV set to 0x%08x at PC=0x%04x\n",MCU_IV,mcu_get_pc());
     }
 #endif
 

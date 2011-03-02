@@ -46,9 +46,8 @@ static char *str_ccis[] =
 /****************************************************/
 /****************************************************/
 
-static void msp430_timerA3_set_tiv(void);
-static void msp430_timerB_set_tiv (void);
-
+void msp430_timerA3_set_tiv(void);
+void msp430_timerB_set_tiv (void);
 
 /****************************************************/
 /* timer set clock div parameters                   */
@@ -515,7 +514,7 @@ void msp430_timerA3_reset(void)
 /* ************************************************** */
 /* ************************************************** */
 
-static void msp430_timerA3_set_tiv(void)
+void msp430_timerA3_set_tiv(void)
 {
        ifset(timerA3,"timerA3",tacctl[1],0x02)    /* highest */
   else ifset(timerA3,"timerA3",tacctl[2],0x04)
@@ -1099,7 +1098,7 @@ void msp430_timerB_reset(void)
 
 /* ************************************************** */
 
-static void msp430_timerB_set_tiv(void)
+void msp430_timerB_set_tiv(void)
 { /* tbcctl0 excluded -> int 0 */
        ifset(timerB,TIMERBNAME,tbcctl[1],0x02)   /* highest */
   else ifset(timerB,TIMERBNAME,tbcctl[2],0x04)

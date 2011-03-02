@@ -13,21 +13,19 @@
 /** INTERRUPTS ****************************************************************************/
 /******************************************************************************************/
 
-void msp430_interrupt_set(uint16_t intr)
+void msp430_interrupt_set(int intr_num)
 {
-  if ((SR & MASK_GIE) || (intr > 13)) // interrupt enable or NMI
+  if ((SR & MASK_GIE) || (intr_num >= INTR_FIRST_NMI)) // interrupt enable or NMI
     {
       HW_DMSG_INTR("msp430:intr: Interrupt %d to be scheduled vector : 0x%04x -> 0x%04x [%"PRIu64"]\n",
-		   intr,MCU_IV, MCU_IV | (1 << intr), MACHINE_TIME_GET_NANO());
-      MCU_IV |= 1 << intr;
+		   intr_num,MCU_IV, MCU_IV | (1 << intr_num), MACHINE_TIME_GET_NANO());
+      MCU_IV |= 1 << intr_num;
     }
   else
     {
-      /* FIXME: test if we miss some interrupts */
       WARNING("msp430:intr: Interrupt %d received but GIE = 0 (current PC = 0x%04x [%"PRIu64"])\n",
-	      intr,mcu_get_pc(), MACHINE_TIME_GET_NANO());
-      /* HW_DMSG_INTR("msp430:intr: Interrupt %d received but GIE = 0 (current PC = 0x%04x)\n",intr,mcu_get_pc()); */
-      MCU_IV |= 1 << intr;
+	      intr_num,mcu_get_pc(), MACHINE_TIME_GET_NANO());
+      MCU_IV |= 1 << intr_num;
     }
 }
 
@@ -76,7 +74,7 @@ int msp430_interrupt_start_if_any(void)
    *
    */
 
-  uint16_t ivector;
+  uint32_t ivector;
   uint16_t next_pc;
 
 #if defined(SOFT_INTR)
@@ -89,13 +87,18 @@ int msp430_interrupt_start_if_any(void)
 
   if (MCU_IV && ((SR & MASK_GIE) || (MCU_IV & (1 << 14)) || (MCU_IV & (1 << 15))))
     {
-      uint16_t ibit,inum;
       /* get ISR address with biggest priority */
+#if defined(__msp430_have_16_interrupts)
+      uint16_t ibit,inum;
       for(ibit=0x8000u, inum=15; ibit; ibit >>= 1, inum--)
+#elif defined(__msp430_have_32_interrupts)
+      uint32_t ibit,inum;
+      for(ibit=0x80000000u, inum=31; ibit; ibit >>= 1, inum--)
+#endif
 	{
 	  if (MCU_IV & ibit)
 	    {
-	      ivector = 0xFFE0u + inum * 2;
+	      ivector = INTR_BASE_IV_ADDR + inum * 2;
 	      next_pc = msp430_read_short(ivector);
 	      
 	      HW_DMSG_INTR("msp430:intr: IRQ %d [%"PRId64"] PC [0x%04x] jumps to [0x%04x], IV=0x%04x, SR=0x%04x\n",
@@ -128,7 +131,7 @@ int msp430_interrupt_start_if_any(void)
 	      /* says SCG0 is not cleared on interrupt */
 	      SR = SR & MASK_SCG0; // reset SR, except SCG0
 
-	      MCU_ALU.interrupts += 1;
+	      MCU_ALU.irq_counter += 1;
 
 	      /*****************************************/
 	      /* reset IFG for single-source interrupt */

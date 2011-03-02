@@ -10,7 +10,6 @@
 #ifndef MSP430_MODELS_H
 #define MSP430_MODELS_H
 
-
 /**
    MSP430f135
    MSP430f149 
@@ -20,32 +19,6 @@
    MSP430f2274
 */
 
-/**
-  
-  MSP430 Memory organization
-
-  [slau056e.pdf page 17]
-
-  0x0ffff
-    interrupt vector table
-  0x0ffe0
-    Flash
-  --
-    [empty]
-  --
-    RAM
-  0x00200
-  0x001ff
-    16 bits peripherals modules
-  0x00100
-  0x000ff
-    8 bits peripherals modules 
-  0x00010
-  0x0000f
-    special functions registers
-  0x00000
-
-**/
 #define MCU_NAME         "msp430" /* used in libelf_ntv */
 #define MCU_EM_ARCH_ID   105      /* elf EM_ == 0x69    */
 #define MCU_BFD_ARCH_ID  62       /* bfd                */
@@ -103,6 +76,8 @@ typedef struct _infomem_t infomem_t;
 #define INTR_UNUSED_3      0
 
 #define __msp430_have_16_interrupts
+#define INTR_FIRST_NMI    14
+#define INTR_BASE_IV_ADDR 0xFFE0u
 
 // infomem
 static infomem_t UNUSED infomem[] = {};
@@ -177,6 +152,8 @@ static infomem_t UNUSED infomem[] = {};
 #define INTR_UNUSED        0 // do not define INTR_DAC12
 
 #define __msp430_have_16_interrupts
+#define INTR_FIRST_NMI    14
+#define INTR_BASE_IV_ADDR 0xFFE0u
 
 // infomem
 static infomem_t UNUSED infomem[] = {};
@@ -255,6 +232,8 @@ static infomem_t UNUSED infomem[] = {};
 #define INTR_BT             0
 
 #define __msp430_have_16_interrupts
+#define INTR_FIRST_NMI    14
+#define INTR_BASE_IV_ADDR 0xFFE0u
 
 // infomem
 static infomem_t UNUSED infomem[] = {};
@@ -362,6 +341,8 @@ static infomem_t UNUSED infomem[] = {};
 #define INTR_I2C          INTR_USART0_TX
 
 #define __msp430_have_16_interrupts
+#define INTR_FIRST_NMI    14
+#define INTR_BASE_IV_ADDR 0xFFE0u
 
 // infomem
 static infomem_t UNUSED infomem[] = {};
@@ -407,11 +388,17 @@ static infomem_t UNUSED infomem[] = {};
 /* ********************************************************************** */
 /* ********************************************************************** */
 /* ********************************************************************** */
-#elif defined(MSP430f2013)
+#elif defined(MSP430f2012) || defined(MSP430f2013)
 
+#if defined(MSP430f2012)
 #define MCU_BFD_MACH_ID   20
-#define MCU_VERSION       "f2013"         // "f201x"
+#define MCU_VERSION       "f2013"
 #define MCU_MODEL_NAME    "msp430f2013"
+#elif defined(MSP430f2013)
+#define MCU_BFD_MACH_ID   20
+#define MCU_VERSION       "f2012"
+#define MCU_MODEL_NAME    "msp430f2012"
+#endif
 
 #define ADDR_FLASH_STOP   0xFFFFu
 #define ADDR_FLASH_START  0xF800u
@@ -420,24 +407,25 @@ static infomem_t UNUSED infomem[] = {};
 #define ADDR_RAM_STOP     0x027fu
 #define ADDR_RAM_START    0x0200u
 
-#define INTR_RESET        15
-#define INTR_NMI          14
-#define INTR_TIMERB3_0    13
-#define INTR_TIMERB3_1    12
-#define INTR_COMP_A       11
-#define INTR_WATCHDOG     10
-#define INTR_USART0_RX     9
-#define INTR_USART0_TX     8
-#define INTR_ADC12         7
-#define INTR_TIMERA3_0     6 // CCR0 CCIFG
-#define INTR_TIMERA3_1     5 // CCR1, CCR2, TAIFG
-#define INTR_IOPORT1       4
-#define INTR_UNUSED_1      3
-#define INTR_UNUSED_2      2
-#define INTR_IOPORT2       1
-#define INTR_UNUSED_3      0
+#define INTR_RESET        31
+#define INTR_NMI          30
+// 29
+// 28
+#define INTR_COMP_A       27
+#define INTR_WATCHDOG     26
+#define INTR_TIMERA2_0    25
+#define INTR_TIMERA2_1    24     
+// 23
+// 22
+#define INTR_ADC10        21
+#define INTR_USI          20       
+#define INTR_IOPORT2      19
+#define INTR_IOPORT1      18
+// 17 - 0
 
 #define __msp430_have_32_interrupts
+#define INTR_FIRST_NMI    30
+#define INTR_BASE_IV_ADDR 0xFFC0u
 
 // infomem
 static infomem_t UNUSED infomem[] = {};
@@ -453,15 +441,18 @@ static infomem_t UNUSED infomem[] = {};
 #define __msp430_have_port4
 #define __msp430_have_port5
 #define __msp430_have_port6
-#define __msp430_have_usart0
-#define __msp430_have_cmpa
+#define __msp430_have_usi
 
 // 16 bit blocks
-#define __msp430_have_timera3
-#define __msp430_have_timerb3
-#define __msp430_have_watchdog
-#define __msp430_have_adc10
 #define __msp430_have_flash
+#define __msp430_have_timera2
+#define __msp430_have_watchdog
+
+#if defined(MSP430f2012)
+#define __msp430_have_adc10
+#elif defined(MSP430f2013)
+#define __msp430_have_sd16
+#endif
 
 // Flash erase timings
 #define FLASH_WRITE_TIMING_BYTE       30
@@ -488,24 +479,25 @@ static infomem_t UNUSED infomem[] = {};
 #define ADDR_RAM_STOP     0x027fu
 #define ADDR_RAM_START    0x0200u
 
-#define INTR_RESET        15
-#define INTR_NMI          14
-#define INTR_TIMERB3_0    13
-#define INTR_TIMERB3_1    12
-#define INTR_COMP_A       11
-#define INTR_WATCHDOG     10
-#define INTR_USCIB0_RX     9
-#define INTR_USCIB0_TX     8
-#define INTR_ADC12         7
-#define INTR_TIMERA3_0     6 // CCR0 CCIFG
-#define INTR_TIMERA3_1     5 // CCR1, CCR2, TAIFG
-#define INTR_IOPORT1       4
-#define INTR_UNUSED_1      3
-#define INTR_UNUSED_2      2
-#define INTR_IOPORT2       1
-#define INTR_UNUSED_3      0
+#define INTR_RESET        31
+#define INTR_NMI          30
+#define INTR_TIMERB3_0    29
+#define INTR_TIMERB3_1    28
+// 27
+#define INTR_WATCHDOG     26
+#define INTR_TIMERA3_0    25
+#define INTR_TIMERA3_1    24     
+#define INTR_USCIB0_RX    23
+#define INTR_USCIB0_TX    22
+#define INTR_ADC10        21
+// 20
+#define INTR_IOPORT2      19
+#define INTR_IOPORT1      18
+// 17 - 0
 
 #define __msp430_have_32_interrupts
+#define INTR_FIRST_NMI    30
+#define INTR_BASE_IV_ADDR 0xFFC0u
 
 // infomem
 static infomem_t UNUSED infomem[] = {

@@ -392,7 +392,7 @@ void mcu_dump_stats(int64_t user_nanotime)
     }
   OUTPUT("  mcu exit at PC                : 0x%04x\n",mcu_get_pc());
   OUTPUT("  mcu exit in LPM mode          : %s\n",msp430_lpm_names[RUNNING_MODE()]);
-  OUTPUT("  mcu exit with IV              : 0x%04x\n",MCU_IV);
+  OUTPUT("  mcu exit with IV              : 0x%08x\n",MCU_IV);
 }
 
 /* ************************************************** */

@@ -9,7 +9,7 @@
 #ifndef MSP430_INTR_H
 #define MSP430_INTR_H
 
-void  msp430_interrupt_set          (uint16_t intr);
+void  msp430_interrupt_set          (int intr_num);
 int   msp430_interrupt_checkifg     (void);
 int   msp430_interrupt_start_if_any (void);
 

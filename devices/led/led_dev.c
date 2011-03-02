@@ -8,6 +8,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "arch/common/hardware.h"
 #include "devices/led/led_img.h"
@@ -20,6 +21,7 @@ struct led_t {
   int               val;
   int               update;
   tracer_id_t       trid;
+  char             *name;
   struct led_img_t *img;
 };
 
@@ -27,6 +29,7 @@ struct led_t {
 #define ST_UPDATE (((struct led_t*)(machine.device[dev].data))->update)
 #define ST_ID     (((struct led_t*)(machine.device[dev].data))->trid)
 #define ST_IMG    (((struct led_t*)(machine.device[dev].data))->img)
+#define ST_NAME   (((struct led_t*)(machine.device[dev].data))->name)
 
 int  led_reset       (int dev);
 int  led_delete      (int dev);
@@ -48,12 +51,17 @@ int led_device_size()
 
 int led_device_create(int dev_num, uint32_t on, uint32_t off, uint32_t bg, char* name)
 {
+  int len;
   struct led_t *dev = (struct led_t*) machine.device[dev_num].data;
   
   dev->img      = led_img_create(on,off,bg);
   dev->update   = 0;
   dev->val      = 0;
   dev->trid     = tracer_event_add_id(1, name, "led");
+
+  len           = strlen(name) + 1;
+  dev->name     = (char*) malloc ( len );
+  snprintf(dev->name, len, "%s", name);
 
   machine.device[dev_num].reset         = led_reset;
   machine.device[dev_num].delete        = led_delete;
@@ -65,9 +73,11 @@ int led_device_create(int dev_num, uint32_t on, uint32_t off, uint32_t bg, char*
   machine.device[dev_num].ui_get_size   = led_ui_get_size;
   machine.device[dev_num].ui_set_pos    = led_ui_set_pos;
   machine.device[dev_num].ui_get_pos    = led_ui_get_pos;
-
   machine.device[dev_num].state_size    = led_device_size();
-  machine.device[dev_num].name          = "Led display";
+
+  len = strlen("Led display ") + strlen(name) + 1;
+  machine.device[dev_num].name          = (char*)malloc( len );
+  snprintf(machine.device[dev_num].name, len, "Led display %s", name);
 
   return 0;
 }
@@ -81,6 +91,8 @@ int led_reset(int dev)
 
 int led_delete(int dev)
 {
+  free( ST_NAME );
+  free( machine.device[dev].name );
   led_img_delete(ST_IMG);
   return 0;
 }

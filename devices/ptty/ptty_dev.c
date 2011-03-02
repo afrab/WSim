@@ -62,6 +62,7 @@ int  ptty_ui_draw     (int dev);
 void ptty_ui_get_size (int dev, int *w, int *h);
 void ptty_ui_set_pos  (int dev, int  x, int  y);
 void ptty_ui_get_pos  (int dev, int *x, int *y);
+void ptty_statdump    (int dev, int64_t UNUSED user_nanotime);
 
 /***************************************************/
 /***************************************************/
@@ -155,7 +156,7 @@ int ptty_device_create(int dev, int id)
   machine.device[dev].ui_get_pos    = ptty_ui_get_pos;
   machine.device[dev].state_size    = ptty_device_size();
   machine.device[dev].name          = "ptty serial I/O";
-
+  machine.device[dev].statdump      = ptty_statdump;
 
   if (opt_array[id].io.value != NULL)
     {
@@ -179,6 +180,18 @@ int ptty_device_create(int dev, int id)
 int ptty_reset(int UNUSED dev)
 {
   return 0;
+}
+
+/***************************************************/
+/***************************************************/
+/***************************************************/
+
+void ptty_statdump(int dev, int64_t UNUSED user_nanotime)
+{
+  if (opt_array[PTTY_SERID].io.value)
+    {
+      OUTPUT("     + opt: %s\n",  opt_array[PTTY_SERID].io.value);
+    }
 }
 
 /***************************************************/

@@ -23,7 +23,7 @@
 #define DEBUG_PTTY
 
 #ifdef DEBUG_PTTY
-#    define HW_DMSG_PTTY(x...) HW_DMSG(x)
+#    define HW_DMSG_PTTY(x...) HW_DMSG_DEV(x)
 #else
 #    define HW_DMSG_PTTY(x...) do { } while (0)
 #endif

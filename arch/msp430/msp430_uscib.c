@@ -89,42 +89,6 @@ char *str_ssel[] = { "external UCLK", "ACLK", "SMCLK", "SMCLK" };
 /*****************************************************************************/
 /*                                                                           */
 /*                                                                           */
-/* UART mode                                                                 */
-/*                                                                           */
-/*                                                                           */
-/*****************************************************************************/
-/*****************************************************************************/
-/*****************************************************************************/
-/*****************************************************************************/
-
-static inline int32_t USART_MODE_UPDATE_BITCLK(int ssel, int num)
-{
-  int32_t res = 0;
-  switch (ssel)
-    {
-    case 0:
-      ERROR("msp430:usart%d: UART clk = UCLK\n",num);
-      res = 0;
-      break;
-    case 1:
-      res = MCU_CLOCK.ACLK_increment;
-      break;
-    case 2:
-    case 3:
-      res = MCU_CLOCK.SMCLK_increment;
-      break;
-    }
-  return res;
-}
-
-                    
-
-/*****************************************************************************/
-/*****************************************************************************/
-/*****************************************************************************/
-/*****************************************************************************/
-/*                                                                           */
-/*                                                                           */
 /*                                                                           */
 /*                                                                           */
 /*                                                                           */
@@ -133,205 +97,24 @@ static inline int32_t USART_MODE_UPDATE_BITCLK(int ssel, int num)
 /*****************************************************************************/
 /*****************************************************************************/
 
-
+#endif
 #if defined(HW_SPY_MODE)
-#define HW_SPY_PRINT_CONFIG(USART,NUM)					      \
-  HW_SPY("msp430:usart%d:spi: ============\n",NUM);                           \
-  HW_SPY("msp430:usart%d:spi:ctl   %x\n",NUM,MCU.USART.uxctl.s);              \
-  HW_SPY("msp430:usart%d:spi:tctl  %x\n",NUM,MCU.USART.uxtctl.s);             \
-  HW_SPY("msp430:usart%d:spi:rctl  %x\n",NUM,MCU.USART.uxrctl.s);             \
-  HW_SPY("msp430:usart%d:spi:br0   %x\n",NUM,MCU.USART.uxbr0);                \
-  HW_SPY("msp430:usart%d:spi:br1   %x\n",NUM,MCU.USART.uxbr1);                \
-  HW_SPY("msp430:usart%d:spi:mctl  %x\n",NUM,MCU.USART.uxmctl);               \
-  HW_SPY("msp430:usart%d:spi:rxbuf %x\n",NUM,MCU.USART.uxrxbuf);              \
-  HW_SPY("msp430:usart%d:spi:txbuf %x\n",NUM,MCU.USART.uxtxbuf);              \
-  HW_SPY("msp430:usart%d:spi: ============\n",NUM);                            
+#define HW_SPY_PRINT_CONFIG()					         \
+  HW_SPY("msp430:uscib0: ============\n");                               \
+  HW_SPY("msp430:uscib0:ctl0  %x\n",  MCU.uscib0.ucbxctl0.s);            \
+  HW_SPY("msp430:uscib0:ctl   %x\n",  MCU.uscib0.ucbxctl1.s);            \
+  HW_SPY("msp430:uscib0:br0   %x\n",  MCU.uscib0.ucbxbr0);               \
+  HW_SPY("msp430:uscib0:br1   %x\n",  MCU.uscib0.ucbxbr1);               \
+  HW_SPY("msp430:uscib0:stat  %x\n",  MCU.uscib0.ucbxstat);              \
+  HW_SPY("msp430:uscib0:rxbuf %x\n",  MCU.uscib0.ucbxrxbuf);             \
+  HW_SPY("msp430:uscib0:txbuf %x\n",  MCU.uscib0.ucbxtxbuf);             \
+  HW_SPY("msp430:uscib0: ============\n");                            
 #else                                                                         
-#define HW_SPY_PRINT_CONFIG(USART,NUM) do {} while(0)
+#define HW_SPY_PRINT_CONFIG() do {} while(0)
 #endif
 
-#define msp430_usart_set_baudrate(NUM,USART)                                  \
-{                                                                             \
-  USART.uxbr_div = ((USART.uxbr1 << 8 | USART.uxbr0) / 2) * (USART.uxctl.b.charb + 7); \
-  HW_DMSG_USART("msp430:usart%d:   baudrate = div N %d/bit - %d/byte\n",      \
-		NUM,((USART.uxbr1 << 8 | USART.uxbr0) / 2),USART.uxbr_div);   \
-}
-
-#define USART_WRITE(USART,NUM,IE,IFG)                                         \
-  switch (addr)                                                               \
-    {                                                                         \
-    case U##NUM##CTL        :                                                 \
-      {                                                                       \
-	union {                                                               \
-	  struct uxctl_t      b;                                              \
-	  struct uxctl_spi_t  b_spi;                                          \
-	  uint8_t             s;                                              \
-	} ctl;                                                                \
-	                                                                      \
-	ctl.s = val;                                                          \
-	HW_DMSG_USART("msp430:usart%d: write uxctl = 0x%02x\n",NUM,val & 0xff);                    \
-	HW_DMSG_USART("msp430:usart%d:   swrst  = %d\n",NUM, ctl.b.swrst);    \
-	HW_DMSG_USART("msp430:usart%d:   sync   = %d\n",NUM, ctl.b.sync);     \
-	HW_DMSG_USART("msp430:usart%d:   mm     = %d (multi master)\n",NUM, ctl.b.mm);             \
-	HW_DMSG_USART("msp430:usart%d:   listen = %d (loopback)\n",NUM, ctl.b.listen);             \
-	HW_DMSG_USART("msp430:usart%d:   spb    = %d (0:1 stop, 1:2 stop bits)\n",NUM, ctl.b.spb); \
-	/* ctl.b.sync == 0                         : UART */                  \
-	/* ctl.b.sync == 1, ctl.b.spb == 0         : SPI  */                  \
-	/* ctl.b.sync == 1, ctl.b.spb == 1         : I2C  */                  \
-        if (ctl.b.sync == 0)                                                  \
-          {                                                                   \
-            MCU.USART.mode = USART_MODE_UART;                                 \
-            if (MCU.USART.uxctl.b.sync == 1)                                  \
-              {                                                               \
-                HW_SPY("msp430:usart%d:   switch to USART mode\n",NUM);       \
-                HW_DMSG_USART("msp430:usart%d:   mode   = USART\n",NUM);      \
-              }                                                               \
-          }                                                                   \
-        else /* ctl.b.sync == 1 */                                            \
-          {                                                                   \
-            if (ctl.b.spb == 0)                                               \
-              {                                                               \
-                MCU.USART.mode = USART_MODE_SPI;                              \
-                if (MCU.USART.uxctl.b.sync == 0)                              \
-                  {                                                           \
-                     HW_SPY("msp430:usart%d:   switch to SPI mode\n",NUM);    \
-                     HW_SPY_PRINT_CONFIG(USART,NUM);                          \
-                     HW_DMSG_USART("msp430:usart%d:   mode   = SPI\n",NUM);   \
-                  }                                                           \
-              }                                                               \
-            else /* ctl.b.spb == 1 */                                         \
-              {                                                               \
-		/* #if defined(__msp430_have_usart0_with_i2c) */              \
-                if (NUM == 0) /* only uart0 can have i2c */                   \
-		  {                                                           \
-                     MCU.USART.mode = USART_MODE_I2C;                         \
-                     ERROR("msp430:usart%d:   i2c mode is not implemented\n",NUM);                 \
-                     HW_DMSG_USART("msp430:usart%d:   mode   = I2C (not supported)\n",NUM);        \
-                  }                                                           \
-                else                                                          \
-                 {                                                            \
-		     ERROR("msp430:usart%d:   i2c does not exist on USART%d\n",NUM,NUM);           \
-		 }							      \
-              }                                                               \
-          }                                                                   \
-                                                                              \
-	HW_DMSG_USART("msp430:usart%d:   length = %d bits\n",NUM,             \
-                                           (ctl.b.charb == 1) ? 8:7);         \
-                                                                              \
-        if ((ctl.b.swrst == 1) && (MCU.USART.uxctl.b.swrst == 0))             \
-          {                                                                   \
-             /* reset  URXIEx, UTXIEx, URXIFGx, OE, and FE bits */            \
-             /* set UTXIFGx flag                                */            \
-             HW_DMSG_USART("msp430:usart%d:   swrst  = 1, reset flags\n",     \
-                            NUM);                                             \
-             MCU.sfr.IE.b.urxie##NUM     = 0;                                 \
-             MCU.sfr.IE.b.utxie##NUM     = 0;                                 \
-             MCU.sfr.IFG.b.urxifg##NUM   = 0;                                 \
-             MCU.USART.uxrctl.b.oe       = 0;                                 \
-             MCU.USART.uxrctl.b.fe       = 0;                                 \
-             MCU.sfr.IFG.b.utxifg##NUM   = 1;                                 \
-             /* finishing current transaction */                              \
-             MCU.USART.uxtxbuf_full      = 0;                                 \
-             MCU.USART.uxtx_full_delay   = 0;                                 \
-             MCU.USART.uxtctl.b.txept    = 1;                                 \
-             MCU.USART.uxtx_shift_empty  = 1;                                 \
-             MCU.USART.uxrxbuf_full      = 0;                                 \
-             MCU.USART.uxrx_shift_empty  = 1;                                 \
-          }                                                                   \
-	MCU.USART.uxctl.s = val;                                              \
-        if (ctl.b.charb != MCU.USART.uxctl.b.charb) {                         \
-           msp430_usart_set_baudrate(NUM, MCU.USART);                         \
-        }                                                                     \
-      }                                                                       \
-      break;                                                                  \
-                                                                              \
-    case U##NUM##TCTL       :  /* transmit ctrl register */                   \
-      {                                                                       \
-	union {                                                               \
-	  struct uxtctl_t     b;                                              \
-	  struct uxtctl_spi_t b_spi;                                          \
-	  uint8_t             s;                                              \
-	} tctl;                                                               \
-        tctl.s = val;                                                         \
-        HW_DMSG_USART("msp430:usart%d: write uxtctl = 0x%02x\n",NUM,val & 0xff);                   \
-        HW_DMSG_USART("msp430:usart%d:   spi:ckph    = %d (clock phase)\n",NUM,tctl.b.ckph);       \
-        HW_DMSG_USART("msp430:usart%d:   ckpl        = %d (clock polarity)\n",NUM,tctl.b.ckpl);    \
-        HW_DMSG_USART("msp430:usart%d:   ssel        = %d (%s)\n",            \
-                      NUM,tctl.b.ssel,str_ssel[tctl.b.ssel]);                 \
-        HW_DMSG_USART("msp430:usart%d:   uart:urxse  = %d (recv start edge)\n",NUM,tctl.b.urxse);  \
-        HW_DMSG_USART("msp430:usart%d:   uart:txwake = %d (0:data 1:addr)\n",NUM,tctl.b.txwake);   \
-        if (tctl.b.txwake == 1) {                                             \
-           MCU.USART.next_tx_type = usart_data;                               \
-        } else {                                                              \
-           MCU.USART.next_tx_type = usart_address;                            \
-        }                                                                     \
-        HW_DMSG_USART("msp430:usart%d:   spi:stc     = %d (4pin spi, 3pin spi)\n",NUM,tctl.b.stc); \
-        HW_DMSG_USART("msp430:usart%d:   txept       = %d (tx empty flag)\n",NUM,tctl.b.txept);    \
-	MCU.USART.uxtctl.s = val;                                             \
-        if (tctl.b.ssel != MCU.USART.uxtctl.b.ssel)                           \
-          {                                                                   \
-             msp430_usart_set_baudrate(NUM, MCU.USART);                       \
-          }                                                                   \
-      }                                                                       \
-      break;                                                                  \
-    case U##NUM##RCTL       : /* receive ctrl register */                     \
-      HW_DMSG_USART("msp430:usart%d: write uxrctl = 0x%02x\n",NUM,val & 0xff);\
-      MCU.USART.uxrctl.s = val;                                               \
-      break;                                                                  \
-    case U##NUM##MCTL       : /* modulation ctrl register */                  \
-      HW_DMSG_USART("msp430:usart%d: write uxmctl = 0x%02x\n",NUM,val & 0xff);\
-      MCU.USART.uxmctl = val;                                                 \
-      msp430_usart_set_baudrate(NUM, MCU.USART);                              \
-      break;                                                                  \
-    case U##NUM##BR0        : /* baud rate ctrl register 0 */                 \
-      HW_DMSG_USART("msp430:usart%d: write uxbr0  = 0x%02x\n",NUM,val & 0xff);\
-      MCU.USART.uxbr0 = val;                                                  \
-      msp430_usart_set_baudrate(NUM, MCU.USART);                              \
-      break;                                                                  \
-    case U##NUM##BR1        : /* baud rate ctrl register 1 */                 \
-      HW_DMSG_USART("msp430:usart%d: write uxbr1  = 0x%02x\n",NUM,val & 0xff);\
-      MCU.USART.uxbr1 = val;                                                  \
-      msp430_usart_set_baudrate(NUM, MCU.USART);                              \
-      break;                                                                  \
-    case U##NUM##RXBUF      :                                                 \
-      ERROR("msp430:usart%d: writing to read only register RXBUFF\n",NUM);    \
-      break;                                                                  \
-    case U##NUM##TXBUF      :                                                 \
-      HW_DMSG_USART("msp430:usart%d: write uxtxbuf  = 0x%02x [PC=0x%04x]\n",NUM,val & 0xff, \
-		    mcu_get_pc());					\
-      if ((MCU.USART.uxtxbuf_full == 1) && (MCU.USART.uxctl.b.mm == 1)) /* master */ \
-        {                                                                     \
-          WARNING("msp430:usart%d:    overwriting tx buffer with [0x%02x]\n", \
-                NUM,val & 0xff);                                              \
-        }                                                                     \
-      MCU.USART.uxtxbuf            = val;                                     \
-      MCU.USART.uxtxbuf_full       = 1;                                       \
-      MCU.USART.uxtx_full_delay    = 1; /* go to shifter after xx BITCLK */   \
-      MCU.USART.uxtctl.b.txept     = 0;                                       \
-      MCU.sfr.IFG.b.utxifg##NUM    = 0;                                       \
-      switch (MCU.USART.mode) {                                               \
-      case USART_MODE_UART:                                                   \
-        TRACER_TRACE_USART##NUM(TRACER_UART_TX_RECV);			      \
-        /* can be a dupe from the platform file */                            \
-        etracer_slot_event(ETRACER_PER_ID_MCU_USART + NUM,                    \
-                           ETRACER_PER_EVT_WRITE_COMMAND,                     \
-                           ETRACER_PER_ARG_WR_DST_FIFO, 0);                   \
-        break;                                                                \
-      case USART_MODE_SPI:                                                    \
-        TRACER_TRACE_USART##NUM(TRACER_SPI_TX_RECV);  			      \
-        etracer_slot_event(ETRACER_PER_ID_MCU_SPI + NUM,                      \
-                           ETRACER_PER_EVT_WRITE_COMMAND,                     \
-                           ETRACER_PER_ARG_WR_DST_FIFO | ETRACER_ACCESS_LVL_BUS, 0); \
-        HW_SPY("msp430:usart%d:spi: write byte %x\n",NUM,val & 0xff);         \
-        HW_SPY_PRINT_CONFIG(USART,NUM);                                       \
-        break;                                                                \
-      case USART_MODE_I2C:                                                    \
-        TRACER_TRACE_USART##NUM(TRACER_I2C_TX_RECV);			      \
-        break;                                                                \
-      }                                                                       \
-      break;                                                                  \
-    }  /* switch */                                                           
-
+                       
+#if 0
 /* ************************************************** */
 /* ************************************************** */
 /* ************************************************** */
@@ -467,13 +250,23 @@ static inline int32_t USART_MODE_UPDATE_BITCLK(int ssel, int num)
     } 
   
 #endif
+#if defined(__msp430_have_uscib0)
 /* ************************************************** */
 /* ************************************************** */
 /* ************************************************** */
 
-#if defined(__msp430_have_uscib0)
+void msp430_uscib0_set_baudrate()                                  
+{   
+
+  MCU.uscib0.ucbxbr_div = ((MCU.uscib0.ucbxbr1 << 8 | MCU.uscib0.ucbxbr0) / 2) * (7+!(MCU.uscib0.ucbxctl0.b.uc7bit)); 
+  HW_DMSG_USCIB("msp430:uscib0:   baudrate = div N %d/bit - %d/byte\n",      
+		  ((MCU.uscib0.ucbxbr1 << 8 | MCU.uscib0.ucbxbr0) / 2),MCU.uscib0.ucbxbr_div); 
+
+}
+
 void msp430_uscib0_reset()
 {
+
   MCU.uscib0.ucbxctl1.b.ucswrst     = 1; 
   
   MCU.uscib0.ucbxrxbuf              = 0;
@@ -636,7 +429,7 @@ int8_t msp430_uscib0_read(uint16_t addr)
 
   switch (addr)                                                              
     {                                                                         
-    case UCB0XCTL0 :                                                 
+    case UCB0CTL0 :                                                 
       res = MCU.uscib0.ucbxctl0.s;                                               
       HW_DMSG_USCIB("msp430:uscib0: read ucbxctl0 = 0x%02x\n",res & 0xff);  
       break;                                                                 
@@ -682,34 +475,53 @@ int8_t msp430_uscib0_read(uint16_t addr)
 }
 
 /* uscib0 write from MCU */
-void msp430_uscib0_write(uint16_t UNUSED addr, int8_t UNUSED val)
+void msp430_uscib0_write(uint16_t addr, int8_t val)
 {
   switch (addr)                                                               
     {                                                                         
-    case UCB0XCTL0        :                                                 
+    case UCB0CTL0        :		/* ctrl register 0 */                                            
       { 
-	
-// 	union {                                                               
-// 	  struct uxctl_t      b;                                              
-// 	  struct uxctl_spi_t  b_spi;                                          
-// 	  uint8_t             s;                                              
-// 	} ctl;                                                                
-// 	                                                                      
-// 	ctl.s = val;                                                   ctl.s ???  
-	
-	MCU.uscib0.ucbxctl0.s = val;                                                          
+	/*temporary value*/
+	union {                                                               
+	  struct ucbxctl0_t   b;
+	  uint8_t             s;                                              
+	} ctl0;                                                                                                                             
+	ctl0.s = val;                                               
+	/*debug message*/
 	HW_DMSG_USCIB("msp430:uscib0: write ucbxctl0 = 0x%02x\n", val & 0xff);                    
-	HW_DMSG_USCIB("msp430:uscib0: ucckph = %d\n", 	MCU.uscib0.ucbxctl0.b.ucckph);
-	HW_DMSG_USCIB("msp430:uscib0: ucckpl = %d\n", 	MCU.uscib0.ucbxctl0.b.ucckpl);
-	HW_DMSG_USCIB("msp430:uscib0: ucmsb = %d\n", 	MCU.uscib0.ucbxctl0.b.ucmsb);
-	HW_DMSG_USCIB("msp430:uscib0: uc7bit = %d\n", 	MCU.uscib0.ucbxctl0.b.uc7bit);
-	HW_DMSG_USCIB("msp430:uscib0: ucmst = %d\n", 	MCU.uscib0.ucbxctl0.b.ucmst);
-	HW_DMSG_USCIB("msp430:uscib0: ucmode = %d\n", 	MCU.uscib0.ucbxctl0.b.ucmode);
-	HW_DMSG_USCIB("msp430:uscib0: ucsync = %d\n", 	MCU.uscib0.ucbxctl0.b.ucsync);                                                                     
+	HW_DMSG_USCIB("msp430:uscib0: ucckph = %d\n", 	ctl0.b.ucckph);
+	HW_DMSG_USCIB("msp430:uscib0: ucckpl = %d\n", 	ctl0.b.ucckpl);
+	HW_DMSG_USCIB("msp430:uscib0: ucmsb = %d\n", 	ctl0.b.ucmsb);
+	HW_DMSG_USCIB("msp430:uscib0: uc7bit = %d\n", 	ctl0.b.uc7bit);
+	HW_DMSG_USCIB("msp430:uscib0: ucmst = %d\n", 	ctl0.b.ucmst);
+	HW_DMSG_USCIB("msp430:uscib0: ucmode = %d\n", 	ctl0.b.ucmode);
+	HW_DMSG_USCIB("msp430:uscib0: ucsync = %d\n", 	ctl0.b.ucsync);                                                                     
 	HW_DMSG_USCIB("msp430:uscib0:   length = %d bits\n",             
-                                           (MCU.uscib0.ucbxctl0.b.uc7bit == 1) ? 7:8);         
-                                                                              
-        if (MCU.uscib0.ucbxctl1.b.ucswrst == 1)       
+                                           (ctl0.b.uc7bit == 1) ? 7:8);         
+        /*modifications*/                                                                          
+        MCU.uscib0.ucbxctl0.s = val;
+	if (ctl0.b.uc7bit != MCU.uscib0.ucbxctl0.b.uc7bit) {                         
+           msp430_uscib0_set_baudrate();                         
+        } 
+      }                                                                       
+      break;                                                                  
+             
+      
+    case UCB0CTL1       :		/* ctrl register 1 */                
+      {                                                                       
+	/*temporary value*/
+	union {                                                               
+	  struct ucbxctl1_t   b;
+	  uint8_t             s;                                              
+	} ctl1;                                                                                                                                      
+	ctl1.s = val;                                                                   
+	/*debug message*/
+        HW_DMSG_USCIB("msp430:uscib0: write ucbxctl1 = 0x%02x\n", val & 0xff);                   
+        HW_DMSG_USCIB("msp430:uscib0: ucssel = %d\n", 	ctl1.b.ucssel);
+	HW_DMSG_USCIB("msp430:uscib0: unused = %d\n", 	ctl1.b.unused);
+	HW_DMSG_USCIB("msp430:uscib0: ucswrst = %d\n", 	ctl1.b.ucswrst);
+	/*modifications*/
+	if ((ctl1.b.ucswrst == 0) && (MCU.uscib0.ucbxctl1.b.ucswrst == 0))       
           {                                                                   
              /* reset  UCB0RXIE, UCB0TXIE, UCB0RXIFG, UCOE, and UCFE bits */            
              /* set    UCB0TXIFG flag                                     */           
@@ -719,97 +531,85 @@ void msp430_uscib0_write(uint16_t UNUSED addr, int8_t UNUSED val)
              MCU.sfr.ifg2.b.ucb0rxifg         = 0; 
 	     MCU.sfr.ifg2.b.ucb0txifg         = 1; 
              MCU.uscib0.ucbxstat.b.ucoe       = 0;                                 
-             MCU.uscib0.ucbxstat.b.ucfce      = 0;                                 
-                                             
+             MCU.uscib0.ucbxstat.b.ucfce      = 0;                                                                     
              /* finishing current transaction */                              
              MCU.uscib0.ucbxtxbuf_full        = 0;                                 
-             MCU.uscib0.ucbxtx_full_delay     = 0;
-             //MCU.uscib0.ucbxtctl.b.txept      = 1;                   //empty flag MSP430x2xx ??                   
+             MCU.uscib0.ucbxtx_full_delay     = 0;             
              MCU.uscib0.ucbxtx_shift_empty    = 1;                                 
              MCU.uscib0.ucbxrxbuf_full        = 0;                                 
              MCU.uscib0.ucbxrx_shift_empty    = 1;                                 
-          }                                                             //TODO       
-	/*MCU.USART.uxctl.s = val;                                      ctl.b ???             
-        if (ctl.b.charb != MCU.USART.uxctl.b.charb) {                         
-           msp430_usart_set_baudrate(NUM, MCU.USART);                         
-        }                                              */                       
-      }                                                                       
-      break;                                                                  
-#if 0                                                                          
-    case U##NUM##TCTL       :  /* transmit ctrl register */                  
-      {                                                                       
+          }  
+          MCU.uscib0.ucbxctl1.s = val;    
+	}
+	break;  
+
+	
+    case UCB0BR0        :		/* baud rate ctrl register 0 */                 
+      /*debug message*/
+      HW_DMSG_USCIB("msp430:uscib0: write ucbxbr0  = 0x%02x\n", val & 0xff);
+      /*modifications*/
+      MCU.uscib0.ucbxbr0 = val;                                                  
+      msp430_uscib0_set_baudrate();                              
+      break;  
+      
+      
+    case UCB0BR1        :		/* baud rate ctrl register 1 */                 
+      /*debug message*/
+      HW_DMSG_USCIB("msp430:uscib0: write ucbxbr1  = 0x%02x\n", val & 0xff);
+      /*modifications*/
+      MCU.uscib0.ucbxbr1 = val;                                                  
+      msp430_uscib0_set_baudrate();                            
+      break;   
+      
+      
+    case UCB0STAT       :		/* Status register */  
+      {
+      /*temporary value*/
 	union {                                                               
-	  struct uxtctl_t     b;                                              
-	  struct uxtctl_spi_t b_spi;                                          
+	  struct ucbxstat_t   b;
 	  uint8_t             s;                                              
-	} tctl;                                                               
-        tctl.s = val;                                                         
-        HW_DMSG_USCIB("msp430:uscib0: write uxtctl = 0x%02x\n",NUM,val & 0xff);                   
-        HW_DMSG_USCIB("msp430:uscib0:   spi:ckph    = %d (clock phase)\n",NUM,tctl.b.ckph);       
-        HW_DMSG_USCIB("msp430:uscib0:   ckpl        = %d (clock polarity)\n",NUM,tctl.b.ckpl);    
-        HW_DMSG_USCIB("msp430:uscib0:   ssel        = %d (%s)\n",            
-                      NUM,tctl.b.ssel,str_ssel[tctl.b.ssel]);                 
-        HW_DMSG_USCIB("msp430:uscib0:   uart:urxse  = %d (recv start edge)\n",NUM,tctl.b.urxse);  
-        HW_DMSG_USCIB("msp430:uscib0:   uart:txwake = %d (0:data 1:addr)\n",NUM,tctl.b.txwake);   
-        if (tctl.b.txwake == 1) {                                             
-           MCU.USART.next_tx_type = usart_data;                               
-        } else {                                                              
-           MCU.USART.next_tx_type = usart_address;                            
-        }                                                                     
-        HW_DMSG_USCIB("msp430:uscib0:   spi:stc     = %d (4pin spi, 3pin spi)\n",NUM,tctl.b.stc); 
-        //HW_DMSG_USCIB("msp430:uscib0:   txept       = %d (tx empty flag)\n",NUM,tctl.b.txept);    //empty flag MSP430x2xx ??   
-	MCU.USART.uxtctl.s = val;                                             
-        if (tctl.b.ssel != MCU.USART.uxtctl.b.ssel)                           
-          {                                                                   
-             msp430_usart_set_baudrate(NUM, MCU.USART);                       
-          }                                                                   
-      }                                                                       
-      break;                                                                  
-    case U##NUM##RCTL       : /* receive ctrl register */                     
-      HW_DMSG_USCIB("msp430:uscib0: write uxrctl = 0x%02x\n",NUM,val & 0xff);
-      MCU.USART.uxrctl.s = val;                                               
-      break;                                                                  
-    case U##NUM##MCTL       : /* modulation ctrl register */                  
-      HW_DMSG_USCIB("msp430:uscib0: write uxmctl = 0x%02x\n",NUM,val & 0xff);
-      MCU.USART.uxmctl = val;                                                
-      msp430_usart_set_baudrate(NUM, MCU.USART);                              
-      break;                                                                  
-    case U##NUM##BR0        : /* baud rate ctrl register 0 */                 
-      HW_DMSG_USCIB("msp430:uscib0: write uxbr0  = 0x%02x\n",NUM,val & 0xff);
-      MCU.USART.uxbr0 = val;                                                  
-      msp430_usart_set_baudrate(NUM, MCU.USART);                              
-      break;                                                                  
-    case U##NUM##BR1        : /* baud rate ctrl register 1 */                 
-      HW_DMSG_USCIB("msp430:uscib0: write uxbr1  = 0x%02x\n",NUM,val & 0xff);
-      MCU.USART.uxbr1 = val;                                                  
-      msp430_usart_set_baudrate(NUM, MCU.USART);                            
-      break;                                                                  
-    case U##NUM##RXBUF      :                                                
-      ERROR("msp430:uscib0: writing to read only register RXBUFF\n",NUM);    
-      break;                                                                  
-    case U##NUM##TXBUF      :                                                 
-      HW_DMSG_USCIB("msp430:uscib0: write ucbxtxbuf  = 0x%02x [PC=0x%04x]\n",NUM,val & 0xff, 
+	} stat;                                                                                                                                      
+	stat.s = val;          
+	/*debug message*/
+        HW_DMSG_USCIB("msp430:uscib0: write ucbxstat = 0x%02x\n", val & 0xff);                   
+        HW_DMSG_USCIB("msp430:uscib0: uclisten = %d\n", stat.b.uclisten);
+	HW_DMSG_USCIB("msp430:uscib0: ucfce = %d\n", 	stat.b.ucfce);
+	HW_DMSG_USCIB("msp430:uscib0: unused = %d\n", 	stat.b.unused);
+	HW_DMSG_USCIB("msp430:uscib0: ucbusy = %d\n", 	stat.b.ucbusy);
+	/*modifications*/
+	MCU.uscib0.ucbxstat.s = val;
+      }
+      break;
+      
+                                                             
+    case UCB0RXBUF      :                                                
+      ERROR("msp430:uscib0: writing to read only register UCB0RXBUF\n");    
+      break;                
+      
+      
+    case UCB0TXBUF      :    
+      {
+      HW_DMSG_USCIB("msp430:uscib0: write ucbxtxbuf  = 0x%02x [PC=0x%04x]\n",val & 0xff, 
 		    mcu_get_pc());					
-      if ((MCU.USART.ucbxtxbuf_full == 1) && (MCU.USART.uxctl.b.mm == 1)) /* master */ 
+      if ((MCU.uscib0.ucbxtxbuf_full == 1) && (MCU.uscib0.ucbxctl0.b.ucmst == 1)) /* master */ 
         {                                                                     
-          WARNING("msp430:uscib0:    overwriting tx buffer with [0x%02x]\n", 
-                NUM,val & 0xff);                                              
+          WARNING("msp430:uscib0:    overwriting tx buffer with [0x%02x]\n",val & 0xff);                                              
         }                                                                     
-      MCU.USART.ucbxtxbuf            = val;                                     
-      MCU.USART.ucbxtxbuf_full       = 1;                                       
-      MCU.USART.ucbxtx_full_delay    = 1; /* go to shifter after xx BITCLK */   
-      MCU.USART.uxtctl.b.txept     = 0;                                       
-      MCU.sfr.ifg2.b.utxifg##NUM    = 0;                                       
+      MCU.uscib0.ucbxtxbuf               = val;                                     
+      MCU.uscib0.ucbxtxbuf_full          = 1;                                       
+      MCU.uscib0.ucbxtx_full_delay       = 1;                                   
+      MCU.sfr.ifg2.b.ucb0txifg           = 0;                                       
       /*TRACER_TRACE_USCIB0(TRACER_USCIB0_TX_RECV); 
       etracer_slot_event(ETRACER_PER_ID_MCU_USCIB0,                      
                            ETRACER_PER_EVT_WRITE_COMMAND,                     
                            ETRACER_PER_ARG_WR_DST_FIFO | ETRACER_ACCESS_LVL_BUS, 0);*/ 
-        HW_SPY("msp430:uscib0:spi: write byte %x\n",NUM,val & 0xff);         
-        HW_SPY_PRINT_CONFIG(USART,NUM);                                       
+      
+        HW_SPY("msp430:uscib0: write byte %x\n",val & 0xff);         
+        HW_SPY_PRINT_CONFIG();                                      
                                                       
       }                                                                       
       break;    
-#endif   
+ 
     }  /* switch */                     
 }
 

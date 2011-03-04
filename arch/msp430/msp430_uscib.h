@@ -89,6 +89,7 @@ struct msp430_uscib_t
   uint8_t   ucbxbr1;
   uint8_t   ucbxrxbuf;
   uint8_t   ucbxtxbuf;
+  uint32_t  ucbxbr_div;
   
   uint8_t   ucbxrxbuf_full;
   uint8_t   ucbxrx_shift_buf;
@@ -118,7 +119,7 @@ struct msp430_uscib_t
 #define USCIB0_START  0x068
 #define USCIB0_END    0x06f
 
-#define UCB0XCTL0    0x068
+#define UCB0CTL0     0x068
 #define UCB0CTL1     0x069
 #define UCB0BR0      0x06a
 #define UCB0BR1      0x06b

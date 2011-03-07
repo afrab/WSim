@@ -485,7 +485,7 @@ int msp430_uscib0_dev_read_spi(uint8_t *val)
                                                                                                                  
     if (MCU.uscib0.ucbxtx_shift_ready == 1)                                   
       {                                                                    
-	  val = MCU.uscib0.ucbxtx_shift_buf;                                     
+	  *val = MCU.uscib0.ucbxtx_shift_buf;                                     
 	  MCU.uscib0.ucbxtx_shift_ready = 0;                                     
 	  MCU.uscib0.ucbxtx_shift_empty = 1;                                     
           /*TRACER_TRACE_USCIB0(TRACER_USCIB0_IDLE);			      

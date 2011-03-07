@@ -17,7 +17,6 @@
 /*****************************************************/
 /*****************************************************/
 
-//WORK IN PROGRESS (USART, spi mode => USCIB)
 #define HW_SPY_MODE 0
 
 #if HW_SPY_MODE != 0
@@ -79,25 +78,7 @@ char *str_ssel[] = { "external UCLK", "ACLK", "SMCLK", "SMCLK" };
 /* ************************************************** */
 /* ************************************************** */
 /* ************************************************** */
-#if 0  
 
-                
-
-/*****************************************************************************/
-/*****************************************************************************/
-/*****************************************************************************/
-/*****************************************************************************/
-/*                                                                           */
-/*                                                                           */
-/*                                                                           */
-/*                                                                           */
-/*                                                                           */
-/*****************************************************************************/
-/*****************************************************************************/
-/*****************************************************************************/
-/*****************************************************************************/
-
-#endif
 #if defined(HW_SPY_MODE)
 #define HW_SPY_PRINT_CONFIG()					         \
   HW_SPY("msp430:uscib0: ============\n");                               \
@@ -114,142 +95,7 @@ char *str_ssel[] = { "external UCLK", "ACLK", "SMCLK", "SMCLK" };
 #endif
 
                        
-#if 0
-/* ************************************************** */
-/* ************************************************** */
-/* ************************************************** */
 
-#define USART_CHKIFG(NUM,IE,IFG)                                              \
-   int ret = 0;                                                               \
-   if (MCU.sfr.IFG.b.utxifg##NUM && MCU.sfr.IE.b.utxie##NUM)                  \
-     {                                                                        \
-        msp430_interrupt_set(INTR_USART##NUM##_TX);                           \
-        ret = 1;                                                              \
-     }                                                                        \
-   if (MCU.sfr.IFG.b.urxifg##NUM && MCU.sfr.IE.b.urxie##NUM)                  \
-     {                                                                        \
-        msp430_interrupt_set(INTR_USART##NUM##_RX);                           \
-        ret = 1;                                                              \
-     }                                                                        \
-   return ret;
-
-/* ************************************************** */
-/* ************************************************** */
-/* ************************************************** */
-
-/* read from external peripherals */
-
-#define SPI_READ(USART,NUM,ME,val)                                            \
-  if (MCU.USART.mode == USART_MODE_SPI)                                       \
-    {                                                                         \
-      if (MCU.USART.uxtx_shift_ready == 1)                                    \
-	{                                                                     \
-	  val = MCU.USART.uxtx_shift_buf;                                     \
-	  MCU.USART.uxtx_shift_ready = 0;                                     \
-	  MCU.USART.uxtx_shift_empty = 1;                                     \
-          TRACER_TRACE_USART##NUM(TRACER_UART_IDLE);			      \
-          etracer_slot_event(ETRACER_PER_ID_MCU_SPI + NUM,                    \
-                             ETRACER_PER_EVT_WRITE_COMMAND,                   \
-                            (ETRACER_PER_ARG_WR_SRC_FIFO | (ETRACER_ACCESS_LVL_SPI + NUM)), 0); \
-	  return 1;                                                           \
-	}                                                                     \
-    }                                                                         \
-  return 0;
-
-
-#define SPI_WRITE_OK(USART)                                                   \
-  (MCU.USART.mode == USART_MODE_SPI && MCU.USART.uxrx_shift_empty == 1)      
-
-/* usart SPI write from peripherals */
-#if 0
-// removed from RX, a byte is received while TX
-      if (MCU.USART.uxrx_shift_empty != 1)                                    \
-	{                                                                     \
-	  ERROR("msp430:usart%d: SPI rx value while rx shift not empty (%d)\n", \
-	          NUM,MCU.USART.uxrx_shift_delay);                            \
-	}                                                                     \
-      else                                                                    \
-
-#endif
-
-#define SPI_WRITE(USART,NUM,ME,val)                                           \
-  if (MCU.sfr.ME.b.urxe##NUM == 1)  /* verif Digi IO _SEL & _DIR */           \
-    {                                                                         \
-        {                                                                     \
-	  TRACER_TRACE_USART##NUM(TRACER_SPI_RX_RECV);			      \
-          MCU.USART.uxrx_shift_buf   = val;                                   \
-          MCU.USART.uxrx_shift_empty = 0;                                     \
-          MCU.USART.uxrx_shift_ready = 0;				      \
-	  /* no delay, as delay has been taken into account during tx*/	      \
-          MCU.USART.uxrx_shift_delay = 0;				      \
-	  if (MCU.USART.uxctl.b.mm == 0)				      \
-	    MCU.USART.uxrx_slave_rx_done = 1;  				      \
-          etracer_slot_event(ETRACER_PER_ID_MCU_SPI + NUM,                    \
-                             ETRACER_PER_EVT_WRITE_COMMAND,                   \
-                            (ETRACER_PER_ARG_WR_DST_FIFO | (ETRACER_ACCESS_LVL_SPI + NUM)), 0); \
-          HW_DMSG_USART("msp430:usart%d: SPI rx value 0x%02x\n",NUM,val);  \
-        }                                                                     \
-    }                                                                         \
-  else                                                                        \
-    {                                                                         \
-      if (MCU.USART.uxrx_shift_empty != 1)                                    \
-        {                                                                     \
-          HW_DMSG_USART("msp430:usart%d: SPI receive disable while shit not empty\n",NUM); \
-        }                                                                     \
-      ERROR("msp430:usart%d: SPI data RX but not in receive enable state\n",NUM);    \
-    } 
-
-
-
-
-
-#define UART_READ(USART,NUM,ME,val)                                           \
-  if (MCU.USART.mode == USART_MODE_UART)                                      \
-    {                                                                         \
-      if (MCU.USART.uxtx_shift_ready == 1)                                    \
-	{                                                                     \
-	  val = MCU.USART.uxtx_shift_buf;                                     \
-	  MCU.USART.uxtx_shift_ready = 0;                                     \
-	  MCU.USART.uxtx_shift_empty = 1;                                     \
-          TRACER_TRACE_USART##NUM(TRACER_UART_IDLE);			      \
-	  return 1;                                                           \
-	}                                                                     \
-    }                                                                         \
-  return 0;
-
-
-#define UART_WRITE_OK(USART)                                                  \
-  (MCU.USART.mode == USART_MODE_UART && MCU.USART.uxrx_shift_empty == 1)      
-
-
-#define UART_WRITE(USART,NUM,ME,val)                                          \
-  if (MCU.sfr.ME.b.urxe##NUM == 1)  /* verif Digi IO _SEL & _DIR */           \
-    {                                                                         \
-      if (MCU.USART.uxrx_shift_empty != 1)                                    \
-	{                                                                     \
-	  ERROR("msp430:usart%d: UART rx value while rx shift not empty (%d)\n",\
-	          NUM,MCU.USART.uxrx_shift_delay);                            \
-	}                                                                     \
-      else                                                                    \
-        {                                                                     \
-	  TRACER_TRACE_USART##NUM(TRACER_UART_RX_RECV);			      \
-          MCU.USART.uxrx_shift_buf   = val;                                   \
-          MCU.USART.uxrx_shift_empty = 0;                                     \
-          MCU.USART.uxrx_shift_ready = 0;                                     \
-          MCU.USART.uxrx_shift_delay = MCU.USART.uxbr_div;                    \
-          HW_DMSG_USART("msp430:usart%d: UART rx shift reg value 0x%02x\n",NUM,val);    \
-        }                                                                     \
-    }                                                                         \
-  else                                                                        \
-    {                                                                         \
-      if (MCU.USART.uxrx_shift_empty != 1)                                    \
-        {                                                                     \
-          HW_DMSG_USART("msp430:usart%d: UART receive disable while shit not empty\n",NUM);\
-        }                                                                     \
-      ERROR("msp430:usart%d: UART data RX but not in receive enable state\n",NUM);   \
-    } 
-  
-#endif
 #if defined(__msp430_have_uscib0)
 /* ************************************************** */
 /* ************************************************** */
@@ -602,7 +448,7 @@ void msp430_uscib0_write(uint16_t addr, int8_t val)
       /*TRACER_TRACE_USCIB0(TRACER_USCIB0_TX_RECV); 
       etracer_slot_event(ETRACER_PER_ID_MCU_USCIB0,                      
                            ETRACER_PER_EVT_WRITE_COMMAND,                     
-                           ETRACER_PER_ARG_WR_DST_FIFO | ETRACER_ACCESS_LVL_BUS, 0);*/ 
+                           ETRACER_PER_ARG_WR_DST_FIFO | ETRACER_ACCESS_LVL_BUS, 0); */
       
         HW_SPY("msp430:uscib0: write byte %x\n",val & 0xff);         
         HW_SPY_PRINT_CONFIG();                                      
@@ -613,33 +459,73 @@ void msp430_uscib0_write(uint16_t addr, int8_t val)
     }  /* switch */                     
 }
 
-/* usart chk ifg for MCU interrupt */
+/* uscib0 chk ifg for MCU interrupt */
 int msp430_uscib0_chkifg()
 {
-  //USART_CHKIFG(0,ie1,ifg1)
-  return 0;
+  int ret = 0;                                                               
+   if (MCU.sfr.ifg2.b.ucb0txifg  && MCU.sfr.ie2.b.ucb0txie)                  
+     {                                                                        
+        msp430_interrupt_set(INTR_USCIB0_TX);                           
+        ret = 1;                                                              
+     }                                                                        
+   if (MCU.sfr.ifg2.b.ucb0rxifg && MCU.sfr.ie2.b.ucb0rxie)                  
+     {                                                                        
+        msp430_interrupt_set(INTR_USCIB0_RX);                           
+        ret = 1;                                                              
+     }                                                                        
+   return ret;
 }
 
 /*******************************************/
 /********* External Peripheral API *********/
 
-/* usart SPI read from peripherals */
-int msp430_uscib0_dev_read_spi(uint8_t UNUSED *val)
+/* uscib0 SPI read from peripherals */
+int msp430_uscib0_dev_read_spi(uint8_t *val)
 {
-  //SPI_READ(usart0,0,me1,*val)
-  return 0;
+                                                                                                                 
+    if (MCU.uscib0.ucbxtx_shift_ready == 1)                                   
+      {                                                                    
+	  val = MCU.uscib0.ucbxtx_shift_buf;                                     
+	  MCU.uscib0.ucbxtx_shift_ready = 0;                                     
+	  MCU.uscib0.ucbxtx_shift_empty = 1;                                     
+          /*TRACER_TRACE_USCIB0(TRACER_USCIB0_IDLE);			      
+          etracer_slot_event(ETRACER_PER_ID_MCU_SPI + NUM,                    
+                             ETRACER_PER_EVT_WRITE_COMMAND,                   
+                            (ETRACER_PER_ARG_WR_SRC_FIFO | (ETRACER_ACCESS_LVL_SPI + NUM)), 0); */
+	  return 1;                                                           
+      }
+    else
+      
+	  return 0;
+
 }
 
-/* usart SPI write from peripherals */
-void msp430_uscib0_dev_write_spi(uint8_t UNUSED val)
+/* uscib0 SPI write from peripherals */
+void msp430_uscib0_dev_write_spi(uint8_t val)
 {
-  //SPI_WRITE(usart0,0,me1,val)
+                                                                   
+    //TRACER_TRACE_USCIB0(TRACER_SPI_RX_RECV);      
+    MCU.uscib0.ucbxrx_shift_buf   = val;                                   
+    MCU.uscib0.ucbxrx_shift_empty = 0;                                     
+    MCU.uscib0.ucbxrx_shift_ready = 0;      
+    /* no delay, as delay has been taken into account during tx*/	      
+    MCU.uscib0.ucbxrx_shift_delay = 0;      
+    
+    if (MCU.uscib0.ucbxctl0.b.ucmst == 0)
+      {
+	    MCU.uscib0.ucbxrx_slave_rx_done = 1;      
+          /*etracer_slot_event(ETRACER_PER_ID_MCU_SPI + NUM,                    
+                             ETRACER_PER_EVT_WRITE_COMMAND,                   
+                            (ETRACER_PER_ARG_WR_DST_FIFO | (ETRACER_ACCESS_LVL_SPI + NUM)), 0);*/
+          HW_DMSG_USCIB("msp430:uscib0: SPI rx value 0x%02x\n",val);  
+       }                                                                     
+     
 }
 
+/* uscib0 SPI verification */
 int msp430_uscib0_dev_write_spi_ok()
 {
-  //return SPI_WRITE_OK(usart0);
-  return 0;
+  return MCU.uscib0.ucbxrx_shift_empty == 1;
 }
 
 

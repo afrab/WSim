@@ -87,6 +87,7 @@ extern tracer_id_t MSP430_TRACER_PORT5;
 extern tracer_id_t MSP430_TRACER_PORT6;
 extern tracer_id_t MSP430_TRACER_USART0;
 extern tracer_id_t MSP430_TRACER_USART1;
+//extern tracer_id_t MSP430_TRACER_USCIB0;
 
 #if defined(XCODE_DEBUG)
 #define TRACER_TRACE_PC(v)			\
@@ -122,6 +123,8 @@ extern tracer_id_t MSP430_TRACER_USART1;
 
 #define TRACER_TRACE_USART0(v)  tracer_event_record(MSP430_TRACER_USART0,v)
 #define TRACER_TRACE_USART1(v)  tracer_event_record(MSP430_TRACER_USART1,v)
+
+//#define TRACER_TRACE_USCIB0(v)  tracer_event_record(MSP430_TRACER_USCIB0,v)
 
 /* ************************************************** */
 /* ************************************************** */

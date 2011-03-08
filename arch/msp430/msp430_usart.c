@@ -811,7 +811,7 @@ do {                                                                          \
     {                                                                         \
       if (MCU.USART.uxrx_shift_empty != 1)                                    \
         {                                                                     \
-          HW_DMSG_USART("msp430:usart%d: SPI receive disable while shit not empty\n",NUM); \
+          HW_DMSG_USART("msp430:usart%d: SPI receive disable while shift not empty\n",NUM); \
         }                                                                     \
       ERROR("msp430:usart%d: SPI data RX but not in receive enable state\n",NUM);    \
     } 
@@ -861,7 +861,7 @@ do {                                                                          \
     {                                                                         \
       if (MCU.USART.uxrx_shift_empty != 1)                                    \
         {                                                                     \
-          HW_DMSG_USART("msp430:usart%d: UART receive disable while shit not empty\n",NUM);\
+          HW_DMSG_USART("msp430:usart%d: UART receive disable while shift not empty\n",NUM);\
         }                                                                     \
       ERROR("msp430:usart%d: UART data RX but not in receive enable state\n",NUM);   \
     } 

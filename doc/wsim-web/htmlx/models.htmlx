@@ -32,15 +32,21 @@
   		</TR>
   		<TR align="middle" bgcolor="#ffffff">
 			<TD> <b>Flash Memories</b> </TD>
-			<TD> ST m25p80, m25p10. Atmel atd45xx </TD>
+			<TD> ST M25Pxx. Atmel ATD45xx </TD>
   		</TR>
   		<TR align="middle" bgcolor="#ffffff">
-			<TD> <b>Wireless Chipset</b> </TD>
+			<TD> <b>Wireless Chipsets</b> </TD>
 			<TD> Chipcon CC1100, CC1101, CC2500, CC2420</TD>
   		</TR>
   		<TR align="middle" bgcolor="#ffffff">
 			<TD> <b>Others</b> </TD>
-			<TD> Maxim serial ID DS2411, Leds, Bargraphs, 7 segments modules, LCD display (hd44780, gdm1602)</TD>
+			<TD> 
+			  Maxim serial ID DS2411, 
+			  Leds, 
+			  Bargraphs, 
+			  7 segments modules, 
+			  LCD display (hd44780, gdm1602)
+			</TD>
   		</TR>
 
 <!-- SEPARATOR -->
@@ -56,7 +62,7 @@
 	      <TD> 
 		CITI/INRIA WSN430v1, <br />
 		WSN430 v13b (<b>Senslab nodes</b> with CC1100), <br />
-                WSN430 v14, (Senslab nodes with CC2420), <br />
+                WSN430 v14, (<b>Senslab nodes</b> with CC2420), <br />
 		Berkeley <b>Telosb</b>, Tmote <b>sky</b><br />
 		CSEM Wisenodes,  <br />
                 ICL BSN nodes,   <br />
@@ -69,7 +75,7 @@
 	      <TD> <b>ATMega based platforms</b> </TD>
 	      <TD> 
 		Berkeley MicaZ, <br>
-		Berkelay Mica2 
+		Berkeley Mica2 
               </TD>
 	    </TR>
 

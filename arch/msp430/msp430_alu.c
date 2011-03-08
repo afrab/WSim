@@ -379,6 +379,11 @@ static void msp430_type1_double_operands(uint16_t insns)
     case 0x0: /* sreg register */
       switch (opt1.src_reg)
 	{
+	case PC_REG_IDX:
+	  opt1.src_val    = decode_next_pc;
+	  opt1.src_t_mode = SRC_TIMING_0;
+	  ASM_ADD("%s,",mcu_regname_str(opt1.src_reg));
+	  break;
 	case CG2_REG_IDX:
 	  opt1.src_val    = 0x0000;
 	  opt1.src_t_mode = SRC_TIMING_0;
@@ -395,8 +400,8 @@ static void msp430_type1_double_operands(uint16_t insns)
     case 0x1: /* source is indexed on sreg */
       switch (opt1.src_reg)
 	{
-	case PC_REG_IDX: /* symbolic : [ PC+2 ] + PC */ 
-	  s_offset        = msp430_read_short( decode_next_pc ) + mcu_get_pc() + 2; 
+	case PC_REG_IDX: /* symbolic : [ PC+2 ] + PC */
+	  s_offset        = msp430_read_short( decode_next_pc ) + decode_next_pc;
 	  opt1.src_val    = msp430_read_short( s_offset );
 	  opt1.src_t_mode = SRC_TIMING_3;
 	  decode_next_pc += 2;
@@ -430,6 +435,12 @@ static void msp430_type1_double_operands(uint16_t insns)
     case 0x2: /* source is indirect @Rn */
       switch (opt1.src_reg)
 	{
+	case PC_REG_IDX: /* [PC + 2] */
+	  s_offset        = decode_next_pc;
+	  opt1.src_val    = READ_SRC(opt1.byte, s_offset);
+	  opt1.src_t_mode = SRC_TIMING_1;
+	  ASM_ADD("@%s,",mcu_regname_str(opt1.src_reg));
+	  break;
 	case CG1_REG_IDX: /* CG1 == +4 */
 	  opt1.src_val    = 0x0004;
 	  opt1.src_t_mode = SRC_TIMING_0;
@@ -501,7 +512,7 @@ static void msp430_type1_double_operands(uint16_t insns)
       switch (opt1.dst_reg)
 	{
 	case PC_REG_IDX: /* symbolic */ 
-	  opt1.dst_addr   = msp430_read_short( decode_next_pc ) + decode_next_pc ; // MCU_ALU.regs[opt1.dst_reg];
+	  opt1.dst_addr   = msp430_read_short( decode_next_pc ) + decode_next_pc ; 
 	  opt1.dst_t_mode = DST_TIMING_2;
 	  ASM_ADD("0x%04x",opt1.dst_addr & 0xffff);
 	  break;
@@ -513,7 +524,8 @@ static void msp430_type1_double_operands(uint16_t insns)
 	default:         /* index */
 	  opt1.dst_addr   = msp430_read_short( decode_next_pc ) + MCU_ALU.regs[opt1.dst_reg];
 	  opt1.dst_t_mode = DST_TIMING_2;
-	  ASM_ADD("%d(%s)",msp430_read_short( decode_next_pc ) & 0xffff,mcu_regname_str(opt1.dst_reg));
+	  ASM_ADD("%d(%s)",msp430_read_short( decode_next_pc ) & 0xffff,
+	          mcu_regname_str(opt1.dst_reg));
 	  break;
 	}
       decode_next_pc += 2;
@@ -593,6 +605,12 @@ static void msp430_type2_single_operand(uint16_t insns)
     case 0x0: /* sreg register */
       switch (opt2.reg)
 	{
+	case PC_REG_IDX:
+	  opt2.mode   = REG_MODE;
+	  opt2.val    = decode_next_pc;
+	  opt2.t_mode = OPT2_TIMING_0;
+	  ASM_ADD("%s",mcu_regname_str(opt2.reg));
+	  break;
 	case CG2_REG_IDX:
 	  opt2.mode   = CST_MODE;
 	  opt2.val    = 0x0000;
@@ -647,6 +665,13 @@ static void msp430_type2_single_operand(uint16_t insns)
     case 0x2:
       switch (opt2.reg)
 	{
+	case PC_REG_IDX:
+	  opt2.mode   = MEM_MODE;
+	  opt2.addr   = decode_next_pc;
+	  opt2.val    = READ_SRC(opt2.byte,opt2.addr);
+	  opt2.t_mode = OPT2_TIMING_1;
+	  ASM_ADD("@%s",mcu_regname_str(opt2.reg));
+	  break;
 	case CG1_REG_IDX: /* CG1 == +4 */
 	  opt2.mode   = CST_MODE;
 	  opt2.val    = 0x0004;
@@ -835,9 +860,30 @@ static int opt2_cycles_class3[5] = {  4, 4,  5,  5,  5 }; // OP_CALL
 /******************************************************************************************/
 /******************************************************************************************/
 /******************************************************************************************/
-#define READ_OPT1_DST ((opt1.dst_mode == REG_MODE) ?                               \
-		     (MCU_REGS[opt1.dst_reg]) :                                    \
-		     ((opt1.byte == 1) ? msp430_read_byte(opt1.dst_addr) & 0xff : msp430_read_short(opt1.dst_addr)))
+#if 0
+((opt1.dst_mode == REG_MODE) ?						\
+ (MCU_REGS[opt1.dst_reg]) :						\
+ ((opt1.byte == 1) ? msp430_read_byte(opt1.dst_addr) & 0xff : msp430_read_short(opt1.dst_addr)))
+#endif
+
+static inline uint16_t READ_OPT1_DST()
+{
+  if (opt1.dst_mode == REG_MODE)
+    {
+      if (opt1.dst_reg == PC_REG_IDX)
+	return  mcu_get_pc_next();
+      else
+	return MCU_REGS[opt1.dst_reg];
+    }
+  else if (opt1.byte == 1)
+    {
+      return msp430_read_byte(opt1.dst_addr) & 0xff;
+    }
+  else
+    {
+      return msp430_read_short(opt1.dst_addr); 
+    }
+}
 
 static inline void WRITE(int m, int b, int r, uint16_t a, int16_t res)
 {
@@ -1041,31 +1087,33 @@ static void msp430_mcu_run_insn()
       MCU_ALU.etracer_reti             = 0;
 #endif
 
-      /* pc_current is used through the function */
-      /* regs[PC] = PC_next, must be done at end of execution to keep Debug correct */
+      /* ********************************************************** */
+      /* MCU_ALU.curr_pc is used through the function               */
+      /* regs[PC] = PC_next, must be done at end of execution       */
+      /* to maintain correct Debug information                      */
+      /* ********************************************************** */
+      
       MCU_ALU.curr_pc = MCU_ALU.regs[PC_REG_IDX] = MCU_ALU.next_pc;
 
       HW_DMSG_FD("msp430: -- Fetch start - 0x%04x ---------------------------------\n",MCU_ALU.curr_pc);
 
-      /* fetch + decode + execute */
+      /* fetch */
       insn = msp430_fetch_short(MCU_ALU.curr_pc);
       TRACER_TRACE_PC(MCU_ALU.curr_pc);
       if ((mcu_signal_get() & SIG_MAC) != 0)
 	{
-	  insn = 0x0000;
-	  SET_CYCLES(0);
+	  insn = 0x0000; /* extract_opcode will return 0; */
 	  HW_DMSG_FD("msp430:alu:  Memory Access Control on fetch at 0x%04x\n",MCU_ALU.curr_pc);
-	  HW_DMSG_FD("msp430:alu:  MCU_SIGTRAP 0\n");
-	  return;
 	}
 
+      /* decode */
       opcode = extract_opcode(insn);
-
       if ((mcu_signal_get() & SIG_MAC) != 0)
 	{
 	  HW_DMSG_FD("msp430:alu:  Memory Access Control on operand at 0x%04x\n",MCU_ALU.curr_pc);
 	}
 
+      /* execute */
       switch(opcode)
         {
 	  /* ********************************************************************** */
@@ -1246,19 +1294,19 @@ static void msp430_mcu_run_insn()
 
 	case OP_DADD:
 	  {
-	    int i, c, s, d, b;
+	    int i, c, src, dst, b;
 	    int16_t result;
 	    msp430_type1_double_operands( insn );
 
 	    b = opt1.byte ? 2 : 4;
 	    c = READ_C;
-	    s = opt1.src_val;
-	    d = READ_OPT1_DST;
+	    src = opt1.src_val;
+	    dst = READ_OPT1_DST();
 
 	    result = 0;
 	    for(i=0; i < b; i++ )
 	    {
-	      short tmp = (s & 0xf) + (d & 0xf) + c;
+	      short tmp = (src & 0xf) + (dst & 0xf) + c;
 	      
 	      if (tmp >= 10) 
 		{
@@ -1270,8 +1318,8 @@ static void msp430_mcu_run_insn()
 		  c = 0;
 		}
 	      
-	      s >>= 4;
-	      d >>= 4;
+	      src >>= 4;
+	      dst >>= 4;
 	      result |= tmp << (i*4);
 	    }
 
@@ -1348,8 +1396,8 @@ static void msp430_mcu_run_insn()
 	    msp430_type1_double_operands( insn );
 	    mask = BIT_MASK(opt1.byte);
 	    addc = ((opcode==OP_ADDC) ? READ_C : 0);
-	    src  = opt1.src_val  & mask;
-	    dst  = READ_OPT1_DST & mask;
+	    src  = opt1.src_val    & mask;
+	    dst  = READ_OPT1_DST() & mask;
 
 	    result = src + dst + addc ;
 	    C = (result & BIT_CARRY_MASK(opt1.byte)) != 0;
@@ -1380,8 +1428,8 @@ static void msp430_mcu_run_insn()
 	    msp430_type1_double_operands( insn );
 	    mask = BIT_MASK(opt1.byte);
 	    subc = ((opcode==OP_SUBC) ? READ_C : 1);
-	    src  = opt1.src_val  & mask;
-	    dst  = READ_OPT1_DST & mask;
+	    src  = opt1.src_val    & mask;
+	    dst  = READ_OPT1_DST() & mask;
 
 	    result = ((~src) & mask) + dst + subc;
 	    C = (result & BIT_CARRY_MASK(opt1.byte)) != 0;
@@ -1410,8 +1458,8 @@ static void msp430_mcu_run_insn()
 	    int mask,msb,src,dst,result,C,t1,t2;
 	    msp430_type1_double_operands( insn );
 	    mask = BIT_MASK(opt1.byte);
-	    src  = opt1.src_val  & mask;
-	    dst  = READ_OPT1_DST & mask;
+	    src  = opt1.src_val    & mask;
+	    dst  = READ_OPT1_DST() & mask;
 
 	    result = ((~src) & mask) + dst + 1;
 	    C = (result & BIT_CARRY_MASK(opt1.byte)) != 0;
@@ -1438,8 +1486,8 @@ static void msp430_mcu_run_insn()
 	    int mask,src,dst,result;
 	    msp430_type1_double_operands( insn );
 	    mask = BIT_MASK(opt1.byte);
-	    src  = opt1.src_val  & mask;
-	    dst  = READ_OPT1_DST & mask;
+	    src  = opt1.src_val    & mask;
+	    dst  = READ_OPT1_DST() & mask;
 
 	    result = (~src & dst) & mask;
 
@@ -1456,8 +1504,8 @@ static void msp430_mcu_run_insn()
 	    int mask,src,dst,result;
 	    msp430_type1_double_operands( insn );
 	    mask = BIT_MASK(opt1.byte);
-	    src  = opt1.src_val  & mask;
-	    dst  = READ_OPT1_DST & mask;
+	    src  = opt1.src_val    & mask;
+	    dst  = READ_OPT1_DST() & mask;
 
 	    result = (src | dst) & mask;
 
@@ -1474,8 +1522,8 @@ static void msp430_mcu_run_insn()
 	    int mask,msb,src,dst,result;
 	    msp430_type1_double_operands( insn );
 	    mask = BIT_MASK(opt1.byte);
-	    src  = opt1.src_val  & mask;
-	    dst  = READ_OPT1_DST & mask;
+	    src  = opt1.src_val    & mask;
+	    dst  = READ_OPT1_DST() & mask;
 
 	    result = (src & dst) & mask;
 
@@ -1496,8 +1544,8 @@ static void msp430_mcu_run_insn()
 	    int mask,msb,src,dst,result;
 	    msp430_type1_double_operands( insn );
 	    mask = BIT_MASK(opt1.byte);
-	    src  = opt1.src_val  & mask;
-	    dst  = READ_OPT1_DST & mask;
+	    src  = opt1.src_val    & mask;
+	    dst  = READ_OPT1_DST() & mask;
 
 	    result = (src ^ dst) & mask;
 
@@ -1519,8 +1567,8 @@ static void msp430_mcu_run_insn()
 	    int mask,msb,src,dst,result;
 	    msp430_type1_double_operands( insn );
 	    mask = BIT_MASK(opt1.byte);
-	    src  = opt1.src_val  & mask;
-	    dst  = READ_OPT1_DST & mask;
+	    src  = opt1.src_val    & mask;
+	    dst  = READ_OPT1_DST() & mask;
 
 	    result = (src & dst) & mask;
 
@@ -1666,9 +1714,9 @@ static void msp430_mcu_run_insn()
 
         } /* case OP_*/
 
+
       /* PC = PC_next, must be done at end of execution to keep Debug correct */
       MCU_ALU.regs[PC_REG_IDX] = MCU_ALU.next_pc;
-
 #if defined(DEBUG) && defined(DEBUG_REGISTERS)
       msp430_print_registers(4);
 #endif
@@ -1681,17 +1729,18 @@ static void msp430_mcu_run_insn()
 #if defined(DEBUG_ME_HARDER)
       if (((debug_SR & MASK_GIE) == 0) && ((SR & MASK_GIE) == MASK_GIE))
 	{
-	  HW_DMSG_INTR("msp430:intr:debug: GIE set back to 1 at PC=0x%04x\n",MCU_ALU.curr_pc);
+	  HW_DMSG_INTR("msp430:intr:debug: GIE set back to 1 at PC=0x%04x\n",
+	               MCU_ALU.curr_pc);
 	  TRACER_TRACE_GIE(1);
 	}
 #endif
 
 #if defined(ETRACE)
       etracer_slot_insn(MCU_ALU.curr_pc, /* WARNING : MSB problem when uin16_t -> uint32_t */
-			msp430_insn_class(opcode),
-			msp430_instruction_cycles,
-			MCU_ALU.etracer_nseq_flag,         /* previous instruction was a jump      */
-			MCU_ALU.etracer_seq_address,       /* sequential exec would have been here */
+                        msp430_insn_class(opcode),
+                        msp430_instruction_cycles,
+                        MCU_ALU.etracer_nseq_flag,     /* previous instruction was a jump      */
+			MCU_ALU.etracer_seq_address,   /* sequential exec would have been here */
 			MCU_ALU.etracer_branch_type,
 			MCU_ALU.etracer_except,
 			MCU_ALU.etracer_reti);

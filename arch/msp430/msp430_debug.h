@@ -27,7 +27,7 @@ extern char* msp430_lpm_names[];
 /* ************************************************** */
 
 #if defined(DEBUG)
-#define DEBUG_MSP430        0
+#define DEBUG_MSP430        0 /* MSP430 states  */
 #define DEBUG_FETCH_DECODE  0
 #define DEBUG_DISASSEMBLE   0
 #define DEBUG_SIGNAL        0

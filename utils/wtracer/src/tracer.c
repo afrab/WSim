@@ -283,8 +283,10 @@ static int tracer_load(tracer_t *t)
       tracer_swap_header(t);
     }
   
-  if (t->debug)
-    tracer_dump_header(t);
+  if (t->debug || t->verbose)
+    {
+      tracer_dump_header(t);
+    }
   return 0;
 }
 

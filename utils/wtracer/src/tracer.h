@@ -106,6 +106,7 @@ struct tracer_struct_t {
   int                debug;
   enum tracer_mode_t mode;
   int                merge;
+  int                verbose;
 
   char               in_filename[FILENAME_MAX];
   char               out_filename[FILENAME_MAX];

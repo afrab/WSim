@@ -45,6 +45,7 @@ void usage(char* prog)
   --end=time       default: max       \n\
   --debug          default: no        \n\
   --merge          default: no        \n\
+  --verbose        default: no        \n\
   --help                              \n\
 \n\
   ex:\n\
@@ -75,6 +76,7 @@ int options_parse(tracer_t *t, int argc, char* argv[])
   t->start_time      = 0;
   t->stop_time       = DEFAULT_STOP_TIME;
   t->merge           = 0;
+  t->verbose         = 0;
 #ifdef DEBUG
   t->debug           = 1;
 #else
@@ -98,6 +100,7 @@ int options_parse(tracer_t *t, int argc, char* argv[])
 	  {"multi",   no_argument,       0, 'm'},
 	  {"out",     required_argument, 0, 'o'},
 	  {"signal",  required_argument, 0, 's'},
+	  {"verbose", no_argument,       0, 'v'},
 	  {0, 0, 0, 0}
 	};
       
@@ -154,6 +157,9 @@ int options_parse(tracer_t *t, int argc, char* argv[])
 	case 'D':
 	  t->debug           = 1;
 	  break;
+	case 'v':
+	  t->verbose         = 1;
+	  break;
 	case 'h':
 	  usage(argv[0]);
 	  break;
@@ -183,6 +189,7 @@ void options_print(tracer_t *t)
   DMSG(t,"tracer:opt: stop time    : %"PRId64"\n",t->stop_time);
   DMSG(t,"tracer:opt: merge        : %d\n",t->merge);
   DMSG(t,"tracer:opt: debug        : %d\n",t->debug);
+  DMSG(t,"tracer:opt: verbose      : %d\n",t->verbose);
 }
 
 /* ************************************************** */

@@ -10,6 +10,7 @@ HTMLX=	\
 	models.htmlx		\
 	overview.htmlx		\
 	people.htmlx		\
+	projects.htmlx		\
 	publications.htmlx	\
 	related.htmlx		\
 	tools.htmlx		\

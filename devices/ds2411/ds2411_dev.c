@@ -23,7 +23,6 @@
 #include <string.h>
 #include <stdlib.h>
 #include <assert.h>
-#include <strings.h> /* bzero */
 
 #include "arch/common/hardware.h"
 #include "devices/ds2411/ds2411.h"
@@ -33,18 +32,12 @@
 /***************************************************/
 /***************************************************/
 
-#undef DEBUG
-
-
-#ifdef DEBUG
-#define HW_DMSG_DS2411(x...) HW_DMSG_DEV(x)
+#define DEBUG_CMD       0
 #define DEBUG_ME_HARDER 0
 #define DEBUG_WIRE      0
 #define DEBUG_CRC       0
 #define DEBUG_SERIAL    0
-#else
-#define HW_DMSG_DS2411(x...) do {} while(0)
-#endif
+
 
 #define HW_DMSG_DSTATE(x...)                                                            \
 do {                                                                                    \
@@ -52,6 +45,13 @@ do {                                                                            
    HW_DMSG_DS2411(x);                                                                   \
    HW_DMSG_DS2411("ds2411: ======================================================\n");  \
 } while(0)
+
+
+#if DEBUG_CMD != 0
+#define HW_DMSG_DS2411(x...) HW_DMSG_DEV(x)
+#else
+#define HW_DMSG_DS2411(x...) do {} while(0)
+#endif
 
 
 #if DEBUG_ME_HARDER != 0
@@ -434,7 +434,7 @@ static ds2411_serial_number_t ds2411_str_to_id(char *serial)
       serial = SERIAL_DEFAULT_ID;
     }
 
-  bzero(&id, sizeof(ds2411_serial_number_t));
+  memset(&id, 0, sizeof(ds2411_serial_number_t));
 
   n = sscanf(serial,SERIAL_ID_STR, &i0,&i1,&i2,&i3,&i4,&i5,&i6,&i7);
   if (n != DS2411_REG_NUMBER_LEN)
@@ -490,7 +490,7 @@ int ds2411_reset(int dev)
   ds2411_serial_number_t id;
   id = DS2411_ID;
 
-  bzero(DS2411_DATA,sizeof(*(DS2411_DATA)));
+  memset(DS2411_DATA, 0, sizeof(*(DS2411_DATA)));
 
   DS2411_ID           = id;
   DS2411_LVL0_STATE   = ONEWIRE_LVL0_RESET;

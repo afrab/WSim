@@ -6,7 +6,23 @@
 <div id="main-body">
 
   <h2 id="intro">Contact</h2>
-  	<p>For questions please contact us <a href="mailto:antoine.fraboulet@insa-lyon.fr?subject=About%20WSim">here</a>.</p>
+  	<p>For questions please contact us 
+	  <a href="mailto:afraboul@users.gforge.inria.fr?subject=About%20WSim">here</a>.
+	</p>
+
+  <h2 id="ml">Mailing Lists</h2>
+  <p>WSim users 
+    <ul>
+    <li> <a href="mailto:wsim-users@lists.gforge.inria.fr">Mailing list</a></li>
+    <li> <a href="http://lists.gforge.inria.fr/pipermail/wsim-users/"> Archives </a></li>
+    </ul>
+  </p>
+
+  <p>WSim commits
+    <ul>
+    <li><a href="http://lists.gforge.inria.fr/pipermail/wsim-commits/" > Archives </a></li>
+    </ul>
+  </p>
 
 </div>
 

@@ -1,22 +1,27 @@
 #! /bin/sh
 
-BASE=${HOME}/projets
+WSIM=wsim-msp135
+WTRACE=wtracer
 
-WBASE=${BASE}/worldsens/build
+#ESIMU=${BASE}/os_basse_conso/tools/skyeye/eSimu/src/esimu
 
-WSIM=${WBASE}/wsim-etrace/platforms/tests/wsim-test1
-WCONSOLE=${WBASE}/wconsole/src/wconsole
-WTRACE=${WBASE}/wtracer/src/wtracer
+TIME=5s
 
-ESIMU=${BASE}/os_basse_conso/tools/skyeye/eSimu/src/esimu
+UI=""
+MODE="--mode=time --modearg=${TIME}"
+LOGS="--verbose=1 --logfile=wsim.log"
+TRACE="--trace=wsim.trc"
+SERIAL="--serial0_io=stdout"
 
-TIME=$(( 5 * 1000000000 ))
+W="${WSIM} ${UI} ${MODE} ${SERIAL} ${TRACE} ${LOGS} insn.elf"
+echo $W
+time $W
 
-time ${WSIM} --ui --serial0=stdout --mode=time --modearg=${TIME} --trace=wsim.trc --esimu=wsim.etr --logfile=wsim.log insn.elf
-${WTRACE} --in=wsim.trc --out=wsim.gp --format=gplot
+${WTRACE} --in=wsim.trc --out=wsim.vcd --format=vcd
+${WTRACE} --in=wsim.trc --out=wsim.gp  --format=gplot
 gnuplot < wsim.gp
 
-${ESIMU} --bin=wsim.etr --out=wsim.prof --exec=insn.elf
+# ${ESIMU} --bin=wsim.etr --out=wsim.prof --exec=insn.elf
 
 
 

@@ -200,6 +200,8 @@ int main(void)
 
   uart0_init();
 #endif
+
+  asm("add #0,r0");
   
   printf("Test program ready.\n");
 
@@ -227,8 +229,8 @@ int main(void)
   printf("  [2]    = [%d]\n",2);
   printf("  [80]   = [%x]\n",(3 << 7) & 0xff);
 
-  test_equal   (1 ,onewire_crc8_bytes(0,"01:02:03:04:05:06:07",7),0x5a);
-  test_equal   (2 ,test_and(0,"01:02:03:04:05:06:07",7),0);
+  test_equal   (1 ,onewire_crc8_bytes(0,(uint8_t*)"01:02:03:04:05:06:07",7),0x5a);
+  test_equal   (2 ,test_and(0,(uint8_t*)"01:02:03:04:05:06:07",7),0);
 
   test_equalf16(11 ,tand16,0xffff,0xff,0xff);
   test_equalf16(12 ,tand16,0xff  ,0xff,0xff);

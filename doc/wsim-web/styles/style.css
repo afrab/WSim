@@ -9,14 +9,8 @@
 /* #### common styles #### */
 
 body {
-
-	font-family: "Helvetica", Arial, sans-serif;
-	color: black;
-	background-color: white;
-	margin: 0px;
-	font-size: 100%;
-
-    color: #000;
+    font-family: sans-serif;
+    color: black;
     background-color: #333;
     margin: 0;
     padding: 1em 0.4em;
@@ -38,7 +32,6 @@ body {
     color: white;
     background: inherit;
     padding-top: 1em;
-   /* font-size: smaller;*/
     font-weight: bold;
 }
 
@@ -95,7 +88,6 @@ pre {
     color: inherit;
     background: #eee;
     float: right;
-/*    font-size: x-small;*/
     text-align: center;
 }
 
@@ -148,7 +140,6 @@ a img.screenthumb:hover {
     float: right;
     text-align: right;
     margin-right: 1ex;
-/*    font-size: smaller;*/
     font-style: italic;
     padding-top: 0em;
 }
@@ -224,7 +215,6 @@ acronym, .titleTip {
     background-color: #5651a1; /* INRIA color */
     margin: 0;
     padding: 0.2ex 1ex 0.2ex 1.5mm;
-/*    background-image:url(/images/GSB_Logo-3.png); */
     background-repeat:no-repeat;
     background-position: center left;
     height: 111px; /*TODO 141*/
@@ -376,7 +366,6 @@ acronym, .titleTip {
 }
 
 .sideBarTitle2 {
-    /* font-size: medium;*/
     font-weight: bold;
     margin: 0 0 0.5em 2.5mm;
     padding: 0.5em 0.8em 0 0;
@@ -396,7 +385,6 @@ acronym, .titleTip {
     margin: 0;
     padding: 0;
     border-bottom: 0px solid #fff;
-    /*font-size: 1.6ex;*/
 }
 
 #side-bar2 a {
@@ -551,7 +539,6 @@ dd {
     margin: 0;
     padding: 1em 2.5mm 2.5ex 2.5mm;
     clear: both;
-/*    font-size: small;*/
     border-top: 1px solid rgb(153,153,153);
 }
 
@@ -591,7 +578,6 @@ a:active {
     background: #147;
     font-style: normal;
     font-weight: normal;
-/*    font-size: smaller;*/
     padding: 8px;
     border: 1px solid #333;
     margin-right: 0;

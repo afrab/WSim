@@ -25,6 +25,7 @@
 #include "msp430_io.h"
 #include "msp430_hwmul.h"
 #include "msp430_digiIO.h"
+#include "msp430_uscia.h"
 #include "msp430_uscib.h"
 #include "msp430_usart.h"
 #include "msp430_basic_timer.h"
@@ -168,6 +169,10 @@ struct msp430_mcu_t {
   struct msp430_watchdog_t     watchdog;
 #endif
 
+#if defined(__msp430_have_uscia0)
+  struct msp430_uscia_t        uscia0;
+#endif
+  
 #if defined(__msp430_have_uscib0)
   struct msp430_uscib_t        uscib0;
 #endif

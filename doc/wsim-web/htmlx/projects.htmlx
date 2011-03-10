@@ -51,7 +51,7 @@
 
     SEPARATOR()
 
-
+    ENTRY( 1 month , 70% , Add Msp430x2xx family for ez430-rf2500 plateform)
     ENTRY( 1 month , , Add atmel 802.15.4 wireless chipsets )
     ENTRY( 2 months, , Include libQEmu ARM model in WSim to target Kortex M3 models in WSim )
     ENTRY( 3 months, , Build a GUI around WSim / WSNet )

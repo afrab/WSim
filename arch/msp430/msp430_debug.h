@@ -161,6 +161,12 @@ extern char* msp430_lpm_names[];
 #    define HW_DMSG_FLASH(x...) do { } while (0)
 #endif
 
+#if DEBUG_USCIA
+#    define HW_DMSG_USCIA(x...) HW_DMSG_MCUDEV(x)
+#else
+#    define HW_DMSG_USCIA(x...) do { } while (0)
+#endif
+
 #if DEBUG_USCIB
 #    define HW_DMSG_USCIB(x...) HW_DMSG_MCUDEV(x)
 #else

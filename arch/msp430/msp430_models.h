@@ -487,8 +487,8 @@ static infomem_t UNUSED infomem[] = {};
 #define INTR_WATCHDOG     26
 #define INTR_TIMERA3_0    25
 #define INTR_TIMERA3_1    24     
-#define INTR_USCIB0_RX    23
-#define INTR_USCIB0_TX    22
+#define INTR_USCIX0_RX    23 // Multiple Source Flag (USCIA0 & USCIB0)
+#define INTR_USCIX0_TX    22 // Multiple Source Flag (USCIA0 & USCIB0)
 #define INTR_ADC10        21
 // 20
 #define INTR_IOPORT2      19

@@ -1,7 +1,7 @@
 
 /**
  *  \file   msp430_uscib.h
- *  \brief  MSP430 USCIB definition (based on "msp430_usart.h")
+ *  \brief  MSP430 USCIB definition (based on "msp430_usart.h" SPI MODE)
  *  \author Julien Carpentier
  *  \date   2011
  **/

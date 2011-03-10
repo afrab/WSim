@@ -407,6 +407,14 @@ int msp430_io_init(void)
 #endif
       
       P8(i,DIGIIO_START,DIGIIO_END,msp430_digiIO_mcu_read,msp430_digiIO_mcu_write);
+      
+#if defined(__msp430_have_uscia0)
+      P8_ADDR(i,UCA0ABCTL,msp430_uscia0_read,msp430_uscia0_write);
+      P8_ADDR(i,UCA0IRTCTL,msp430_uscia0_read,msp430_uscia0_write);
+      P8_ADDR(i,UCA0IRRCTL,msp430_uscia0_read,msp430_uscia0_write);
+      P8(i,USCIA0_START,USCIA0_END,msp430_uscia0_read,msp430_uscia0_write);
+#endif
+      
 #if defined(__msp430_have_uscib0)
       P8(i,USCIB0_START,USCIB0_END,msp430_uscib0_read,msp430_uscib0_write);
 #endif

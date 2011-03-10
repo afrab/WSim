@@ -167,17 +167,27 @@ int msp430_interrupt_start_if_any(void)
 		  break;
 #endif
 
-#if defined(__msp430_have_uscib0)
-		case INTR_USCIB0_RX:
-		  HW_DMSG_INTR("msp430:intr:   Reset USCIB0 rx IFG flag\n");
-		  MCU.sfr.ifg2.b.ucb0rxifg = 0;
+#if defined(__msp430_have_uscia0) || defined(__msp430_have_uscib0)
+		case INTR_USCIX0_RX:
+		  #if defined(__msp430_have_uscia0)
+		    HW_DMSG_INTR("msp430:intr:   Reset USCIA0 rx IFG flag\n");
+		    MCU.sfr.ifg2.b.uca0rxifg = 0;
+		  #else
+		    HW_DMSG_INTR("msp430:intr:   Reset USCIB0 rx IFG flag\n");
+		    MCU.sfr.ifg2.b.ucb0rxifg = 0;
+		  #endif
 		  break;
-		case INTR_USCIB0_TX:
-		  HW_DMSG_INTR("msp430:intr:   Reset USCIB0 tx IFG flag\n");
-		  MCU.sfr.ifg2.b.ucb0txifg = 0;
+		case INTR_USCIX0_TX:
+		  #if defined(__msp430_have_uscia0)
+		    HW_DMSG_INTR("msp430:intr:   Reset USCIA0 tx IFG flag\n");
+		    MCU.sfr.ifg2.b.uca0txifg = 0;
+		  #else
+		    HW_DMSG_INTR("msp430:intr:   Reset USCIB0 tx IFG flag\n");
+		    MCU.sfr.ifg2.b.ucb0txifg = 0;
+		  #endif
 		  break;
 #endif
-		  
+		  	  
 #if defined(__msp430_have_usart0)
 		case INTR_USART0_RX:
 		  HW_DMSG_INTR("msp430:intr:   Reset USART0 rx IFG flag\n");
@@ -231,6 +241,9 @@ int msp430_interrupt_checkifg(void)
   res |= msp430_flash_chkifg();
 #endif
   /* usci */
+#if defined(__msp430_have_uscia0)
+  res |= msp430_uscia0_chkifg();
+#endif
 #if defined(__msp430_have_uscib0)
   res |= msp430_uscib0_chkifg();
 #endif

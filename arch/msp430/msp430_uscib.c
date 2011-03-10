@@ -34,22 +34,12 @@ char *str_ssel[] = { "external UCLK", "ACLK", "SMCLK", "SMCLK" };
 /*****************************************************/
 /*****************************************************/
 
-// #define TRACER_UART_IDLE     0 
+// #define TRACER_SPI_IDLE     0 
 // 
-// #define TRACER_UART_TX_RECV  1  /* data written to TXBUF      */
-// #define TRACER_UART_TX_READY 2  /* data TX shifter ok         */
-// #define TRACER_UART_RX_RECV  3  /* data written to Rx shifter */
-// #define TRACER_UART_RX_READY 4  /* data written to Rx buff    */
-// 
-// #define TRACER_SPI_TX_RECV   6
-// #define TRACER_SPI_TX_READY  7
-// #define TRACER_SPI_RX_RECV   8
-// #define TRACER_SPI_RX_READY  9
-// 
-// #define TRACER_I2C_TX_RECV   11
-// #define TRACER_I2C_TX_READY  12
-// #define TRACER_I2C_RX_RECV   13
-// #define TRACER_I2C_RX_READY  14
+// #define TRACER_SPI_TX_RECV  1  /* data written to TXBUF      */
+// #define TRACER_SPI_TX_READY 2  /* data TX shifter ok         */
+// #define TRACER_SPI_RX_RECV  3  /* data written to Rx shifter */
+// #define TRACER_SPI_RX_READY 4  /* data written to Rx buff    */
 
 
 /*****************************************************/
@@ -83,7 +73,7 @@ char *str_ssel[] = { "external UCLK", "ACLK", "SMCLK", "SMCLK" };
 #define HW_SPY_PRINT_CONFIG()					         \
   HW_SPY("msp430:uscib0: ============\n");                               \
   HW_SPY("msp430:uscib0:ctl0  %x\n",  MCU.uscib0.ucbxctl0.s);            \
-  HW_SPY("msp430:uscib0:ctl   %x\n",  MCU.uscib0.ucbxctl1.s);            \
+  HW_SPY("msp430:uscib0:ctl1  %x\n",  MCU.uscib0.ucbxctl1.s);            \
   HW_SPY("msp430:uscib0:br0   %x\n",  MCU.uscib0.ucbxbr0);               \
   HW_SPY("msp430:uscib0:br1   %x\n",  MCU.uscib0.ucbxbr1);               \
   HW_SPY("msp430:uscib0:stat  %x\n",  MCU.uscib0.ucbxstat);              \
@@ -103,11 +93,9 @@ char *str_ssel[] = { "external UCLK", "ACLK", "SMCLK", "SMCLK" };
 
 void msp430_uscib0_set_baudrate()                                  
 {   
-
   MCU.uscib0.ucbxbr_div = ((MCU.uscib0.ucbxbr1 << 8 | MCU.uscib0.ucbxbr0) / 2) * (7+!(MCU.uscib0.ucbxctl0.b.uc7bit)); 
   HW_DMSG_USCIB("msp430:uscib0:   baudrate = div N %d/bit - %d/byte\n",      
 		  ((MCU.uscib0.ucbxbr1 << 8 | MCU.uscib0.ucbxbr0) / 2),MCU.uscib0.ucbxbr_div); 
-
 }
 
 void msp430_uscib0_reset()
@@ -167,7 +155,7 @@ void msp430_uscib0_update()
 		MCU.sfr.ifg2.b.ucb0txifg  = 1;                                         
 		if (MCU.sfr.ie2.b.ucb0txie)                                 
                  {                                                            
-                    msp430_interrupt_set(INTR_USCIB0_TX);           
+                    msp430_interrupt_set(INTR_USCIX0_TX);           
                  }   
                  
                  
@@ -261,7 +249,7 @@ void msp430_uscib0_update()
           MCU.sfr.ifg2.b.ucb0rxifg  = 1;                                     
           if (MCU.sfr.ie2.b.ucb0rxie)                                        
             {                                                                 
-               msp430_interrupt_set(INTR_USCIB0_RX);                    
+               msp430_interrupt_set(INTR_USCIX0_RX);                    
             }                                                                 
         } /* shift ready */                                                   
     } /* urxe. spie */                                                        
@@ -342,7 +330,7 @@ void msp430_uscib0_write(uint16_t addr, int8_t val)
 	HW_DMSG_USCIB("msp430:uscib0: ucmst = %d\n", 	ctl0.b.ucmst);
 	HW_DMSG_USCIB("msp430:uscib0: ucmode = %d\n", 	ctl0.b.ucmode);
 	HW_DMSG_USCIB("msp430:uscib0: ucsync = %d\n", 	ctl0.b.ucsync);                                                                     
-	HW_DMSG_USCIB("msp430:uscib0:   length = %d bits\n",             
+	HW_DMSG_USCIB("msp430:uscib0: length = %d bits\n",             
                                            (ctl0.b.uc7bit == 1) ? 7:8);         
         /*modifications*/                                                                          
         MCU.uscib0.ucbxctl0.s = val;
@@ -465,12 +453,12 @@ int msp430_uscib0_chkifg()
   int ret = 0;                                                               
    if (MCU.sfr.ifg2.b.ucb0txifg  && MCU.sfr.ie2.b.ucb0txie)                  
      {                                                                        
-        msp430_interrupt_set(INTR_USCIB0_TX);                           
+        msp430_interrupt_set(INTR_USCIX0_TX);                           
         ret = 1;                                                              
      }                                                                        
    if (MCU.sfr.ifg2.b.ucb0rxifg && MCU.sfr.ie2.b.ucb0rxie)                  
      {                                                                        
-        msp430_interrupt_set(INTR_USCIB0_RX);                           
+        msp430_interrupt_set(INTR_USCIX0_RX);                           
         ret = 1;                                                              
      }                                                                        
    return ret;

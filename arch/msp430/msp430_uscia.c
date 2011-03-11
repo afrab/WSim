@@ -167,7 +167,7 @@ void msp430_uscia0_update()
 		  }                                                            
 		else      
 		  {      
-		    //DMA_SET_UTXIFG(); TODO  "implicit declaration ?" 
+		    DMA_SET_UTXIFG0();
 		  }		      
 		HW_DMSG_USCIA("msp430:uscia0: USCIA tx buf -> shifter (delay %d, val %d)\n", 
 			      MCU.uscia0.ucaxtx_shift_delay, MCU.uscia0.ucaxtxbuf);            
@@ -241,7 +241,7 @@ void msp430_uscia0_update()
 	      }                                                                  
 	    else       
 	      {      
-		//DMA_SET_URXIFG(); TODO "implicit declaration ?"    
+		DMA_SET_URXIFG0();
 	      }      
 	 } /* shift ready */  
 	  
@@ -282,7 +282,7 @@ int8_t msp430_uscia0_read(uint16_t addr)
       res = MCU.uscia0.ucaxrxbuf;                                                
       MCU.sfr.ifg2.b.uca0rxifg   = 0;                                          
       MCU.uscia0.ucaxrxbuf_full  = 0;                                          
-      /*TRACER_TRACE_USCIA0(TRACER_USCIA_IDLE);*/                                                                                                 \
+      /*TRACER_TRACE_USCIA(TRACER_USCIA_IDLE);*/                                                                                                 \
       MCU.uscia0.ucaxstat.b.ucoe = 0;                                          
       HW_DMSG_USCIA("msp430:uscia0: read ucaxrxbuf = 0x%02x\n", res & 0xff);
       break;                                                                  
@@ -526,31 +526,61 @@ void msp430_uscia0_write(uint16_t UNUSED addr, int8_t UNUSED val)
 /* uscia0 chk ifg for MCU interrupt */
 int msp430_uscia0_chkifg()
 {
-    //TODO
-    return 0;
+   int ret = 0;                                                               
+   if (MCU.sfr.ifg2.b.uca0txifg  && MCU.sfr.ie2.b.uca0txie)                  
+     {                                                                        
+        msp430_interrupt_set(INTR_USCIX0_TX);                           
+        ret = 1;                                                              
+     }                                                                        
+   if (MCU.sfr.ifg2.b.uca0rxifg && MCU.sfr.ie2.b.uca0rxie)                  
+     {                                                                        
+        msp430_interrupt_set(INTR_USCIX0_RX);                           
+        ret = 1;                                                              
+     }                                                                        
+   return ret;
 }
 
 /*******************************************/
 /********* External Peripheral API *********/
 
 /* uscia0 SPI read from peripherals */
-int msp430_uscia0_dev_read_spi(uint8_t UNUSED *val)
+int msp430_uscia0_dev_read_uart(uint8_t *val)
 {
-    //TODO
-    return 0;
+      int ret = 0;
+      if (MCU.uscia0.ucaxtx_shift_ready == 1)                                    
+	{                                                                     
+	  *val = MCU.uscia0.ucaxtx_shift_buf;                                     
+	  MCU.uscia0.ucaxtx_shift_ready = 0;                                     
+	  MCU.uscia0.ucaxtx_shift_empty = 1;                                     
+          /*TRACER_TRACE_USCIA(TRACER_UART_IDLE);*/			      
+	  ret = 1;                          
+	}
+      return ret;
 }
 
 /* uscia0 SPI write from peripherals */
-void msp430_uscia0_dev_write_spi(uint8_t UNUSED val)
-{
-    //TODO
+void msp430_uscia0_dev_write_uart(uint8_t val)
+{                                                                
+      if (MCU.uscia0.ucaxrx_shift_empty != 1)                                    
+	{                                                                     
+	  ERROR("msp430:uscia0: USCIA rx value while rx shift not empty (%d)\n", 
+			      MCU.uscia0.ucaxrx_shift_delay);                            
+	}                                                                     
+      else                                                                    
+        {                                                                     
+	  /*TRACER_TRACE_USCIA(TRACER_UART_RX_RECV);*/
+          MCU.uscia0.ucaxrx_shift_buf   = val;                                   
+          MCU.uscia0.ucaxrx_shift_empty = 0;                                     
+          MCU.uscia0.ucaxrx_shift_ready = 0;                                     
+          MCU.uscia0.ucaxrx_shift_delay = MCU.uscia0.ucaxbr_div;                    
+          HW_DMSG_USCIA("msp430:uscia0: USCIA rx shift reg value 0x%02x\n",val);    
+        }                                                                     
 }
 
 /* uscia0 SPI verification */
-int msp430_uscia0_dev_write_spi_ok()
+int msp430_uscia0_dev_write_uart_ok()
 {
-    //TODO
-    return 0;
+    return MCU.uscia0.ucaxrx_shift_empty == 1;
 }
 
 

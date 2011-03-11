@@ -241,9 +241,9 @@ void   msp430_uscia0_write(uint16_t addr, int8_t val);
 int    msp430_uscia0_chkifg();
 
 
-int    msp430_uscia0_dev_read_spi      (uint8_t *val);
-void   msp430_uscia0_dev_write_spi     (uint8_t val);
-int    msp430_uscia0_dev_write_spi_ok  ();
+int    msp430_uscia0_dev_read_uart      (uint8_t *val);
+void   msp430_uscia0_dev_write_uart     (uint8_t val);
+int    msp430_uscia0_dev_write_uart_ok  ();
 
 
 #endif

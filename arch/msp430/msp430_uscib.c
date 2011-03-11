@@ -470,7 +470,7 @@ int msp430_uscib0_chkifg()
 /* uscib0 SPI read from peripherals */
 int msp430_uscib0_dev_read_spi(uint8_t *val)
 {
-                                                                                                                 
+    int ret = 0;                                                                                                             
     if (MCU.uscib0.ucbxtx_shift_ready == 1)                                   
       {                                                                    
 	  *val = MCU.uscib0.ucbxtx_shift_buf;                                     
@@ -480,12 +480,9 @@ int msp430_uscib0_dev_read_spi(uint8_t *val)
           etracer_slot_event(ETRACER_PER_ID_MCU_SPI + NUM,                    
                              ETRACER_PER_EVT_WRITE_COMMAND,                   
                             (ETRACER_PER_ARG_WR_SRC_FIFO | (ETRACER_ACCESS_LVL_SPI + NUM)), 0); */
-	  return 1;                                                           
+	  ret=1;                                                           
       }
-    else
-      
-	  return 0;
-
+      return ret;
 }
 
 /* uscib0 SPI write from peripherals */

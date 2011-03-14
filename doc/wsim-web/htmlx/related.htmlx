@@ -13,8 +13,14 @@
       <li><a href="http://www.wasp-project.org/">Wasp</a> Wirelessly Accessible Sensor Populations, European Project IST-034963.</li>
       <li><a href="http://www.mosar-sic.org/">Mosar</a> LSH European Project MOSAR (Mastering hOSpital Antimicrobial Resistance and its spread into the community).</li>
       <li><a href="http://www.senslab.info/">SensLab</a> ANR TLCOM. The purpose of the SensLAB project is to deploy a very large scale open wireless sensor network platform.</li>
+      <li><a href="http://sensas.gforge.inria.fr/wiki/doku.php?id=start">SensAS</a> Sensas aims to propose mainly robotics application based on wireless sensor and actuator network nodes provided from the work done around senslab and senstools projects.</li>
       <li><a href="http://senstools.gforge.inria.fr/">SensTools</a> SensTools provides a set of hardware and software tools for the WSN430 platform. Some basic drivers and several OSes are provided.</li>
+      <li><a href="http://adt-orsi.project.citi-lab.fr/">ORSI</a> ORSI is an INRIA sponsored software development support.
       <li><a href="http://surveiller-prevenir.irisa.fr/">Surveiller Prevenir</a> ANR RNRT. The SVP project addresses the understanding, the conception, and the implementation of an integrated ambient architecture that would ease the optimization in the deployment of surveillance and prevention services in different types of dynamic networks.</li>
+    </ul>
+
+    <ul>
+      
     </ul>
 
     <h2 id="tools">Tools / Utilities</h2>

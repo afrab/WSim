@@ -29,35 +29,40 @@
 
     
     ENTRY( 1 day   , , Add mode to slow down simulation to meet realtime mode )
-    ENTRY( 1 day   , , Improve wsnet1 information tracing output)
+    ENTRY( 1 day   , , Improve WSNet1 information tracing output)
     ENTRY( 2 days  , , Move source code building system from autoconf/automake 
                        to <a href="http://www.cmake.org/">Cmake</a> )
     ENTRY( 2 days  , , Build binary packages for Linux and Windows using the Cmake system and 
                        <a href="http://www.vtk.org/Wiki/CMake:Packaging_With_CPack">Cpack</a> )
+    ENTRY( 2 days  , , Write a python wrapper around WSim per-platforms executables. )
+
+    ENTRY( 4 days  , , Refactor MSP430 fetch/decode/execute simulation loop to use tables 
+		       of function pointers. )
     ENTRY( 5 days  , , Work on a more sophisticated information logging	module with flags 
 		       instead of debug levels )
 
 
     SEPARATOR()
 
-
-    ENTRY( 1 week  , , Refactor MSP430 fetch/decode/execute simulation loop to use tables 
-		       of function pointers. )
     ENTRY( 1 week  , , Add MSPX instruction set to MSP430 MCU )
     ENTRY( 1 week  , , Merge libetrace from <a href="http://esimu.gforge.inria.fr/">eSimu</a> 
 		       in WSim and build test cases for unit and regression testing. )
-    ENTRY( 2 weeks , , MSP430 refactoring to support 20 bits pointers and address and write unit tests. )
-    ENTRY( 2 weeks , , Add peripherals to Atmel MCU to target Arduino boards. )
-
+    ENTRY( 2 weeks , , MSP430 refactoring to support 20 bits pointers and address.)
+    ENTRY( 2 weeks , , Write unit tests for msp430 MCUs and peripherals.)
+    ENTRY( 2 weeks , , Write unit tests for Atmel MCUs and peripherals.)
+    ENTRY( 2 weeks , , Benchmark and test the ez430RF2500 platform and build and energy profile for WSim/eSimu. )
+    ENTRY( 3 weeks , , Add a SD Card peripheral model with optional host filesystem access. )
+    ENTRY( > 3 weeks , , Add MCU peripherals to Atmel MCU-alu to target Arduino boards. )
 
     SEPARATOR()
 
-    ENTRY( 1 month , 70% , Add Msp430x2xx family for ez430-rf2500 plateform)
-    ENTRY( 1 month , , Add atmel 802.15.4 wireless chipsets )
-    ENTRY( 2 months, , Include libQEmu ARM model in WSim to target Kortex M3 models in WSim )
-    ENTRY( 3 months, , Build a GUI around WSim / WSNet )
+
+    ENTRY( 1 month , 70% , Add Msp430x2xx family for ez430-rf2500 platform. )
+    ENTRY( 1 month , , Add Atmel 802.15.4 wireless chipsets. )
+    ENTRY( 2 months, , Include libQEmu ARM model in WSim to target Kortex M3 models in WSim. )
+    ENTRY( 3 months, , Build a GUI around WSim / WSNet. )
     ENTRY( 3 months, , Add a mixed simulation mode on top of WSim / WSNet. This mode would 
-		       allow <b>n</b> WSNet node to run with <b>m</b> WSim emulated nodes )
+		       allow <b>n</b> WSNet node to run with <b>m</b> WSim emulated nodes. )
 
     
     SEPARATOR()

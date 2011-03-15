@@ -29,6 +29,7 @@
 
     
     ENTRY( 1 day   , , Add mode to slow down simulation to meet realtime mode )
+    ENTRY( 1 day   , , Improve wsnet1 information tracing output)
     ENTRY( 2 days  , , Move source code building system from autoconf/automake 
                        to <a href="http://www.cmake.org/">Cmake</a> )
     ENTRY( 2 days  , , Build binary packages for Linux and Windows using the Cmake system and 

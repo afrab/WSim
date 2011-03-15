@@ -3,6 +3,9 @@
 #include "header.html"
 <!-- /HEADER  -->
 
+#define QUESTION(QNAME,QUESTION) <li><a href= QNAME > QUESTION </a></li>
+#define ANSWER(QNAME,QUESTION) <li><a name= QNAME ></a><b> QUESTION </b></br></li>
+
   <div id="main-body">
     
     <h2 id="intro">FAQ</h2>
@@ -10,29 +13,33 @@
     <ul>
       <li><b>About WSim</b></a><br>
 	  <ol>
-	    <li><a href="#1-1">What is WSim ?</a></li>
-	    <li><a href="#1-2">How much does it cost ?</a></li>
-            <li><a href="#1-3">Who to contact ?</a></li>
+	    QUESTION("#1-1",What is WSim ?)
+	    QUESTION("#1-2",How much does it cost ?)
+            QUESTION("#1-3",Who should I contact ?)
 	  </ol>
       </li>
 
-      <li><b>For users</b></a><br>
+      <li><b>Using WSim</b></a><br>
 	  <ol>
-	    <li><a href="#2-1">Can I use WSim for TinyOS applications ?</a></li>
+	    QUESTION("#2-1",How many nodes can I use in a WSim+WSNet simulation ?)
+	    QUESTION("#2-2",Can I use WSim for TinyOS applications ?)
+	    QUESTION("#2-3",How can I debug my application using WSim ?)
+	    QUESTION("#2-4",What is the meaning of the message "block not implemented" ?)
+	    QUESTION("#2-5",I get a behaviour mismatch between simulation and real target. What should I do ?)
 	  </ol>
       </li>
 
       <li><b>Tools</b></a><br>
 	  <ol>
-	    <li><a href="#3-1">How can I compare easily two or more
-      traces coming from different nodes ?</a></li>
+	    QUESTION("#3-1",How can I compare easily two or more traces coming from different nodes ?)
+	    </li>
 	  </ol>
       </li>
 
       <li><b>Troubles</b></a><br>
 	  <ol>
-	    <li><a href="#4-1">I get a multicast error when trying to use WSim + WSNet, what goes wrong ?</a></li>
-	    <li><a href="#4-2">When using WSim + WSNet, WConsole output displays sereval times the same data, why ?</a></li>
+	    QUESTION("#4-1",I get a multicast error when trying to use WSim + WSNet. What goes wrong ?)
+	    QUESTION("#4-2",Why does WConsole display several times the same data ?)
 	  </ol>
       </li>
     </ul>
@@ -41,57 +48,112 @@
 
 <!-- ANSWERS -->
 
+
     <h2 id="intro">About WSim</h2>
     <ol>
       <li><a name="1-1"></a><b>What is WSim ?</b></ br></li>
       <p>
-	WSim is a full system emulator for microcontroller based platforms.
+	WSim is a full system emulator for micro-controller based platforms.
 	WSim uses a emulation loop that is byte precise and cycle precise
-	on instruction boudaries. This behavior allows to debug and analyse
-	application using the same firmware as the tarfet platform. WSim currently
-	support many Ti MSP430 microcontroller models as well Chipcon radio
+	on instruction boundaries. This behaviour allows to debug and analyse
+	application using the same firmware as the target platform. WSim currently
+	support many Ti MSP430 micro-controller models as well Chipcon radio
 	chips and several other devices.
       </p>
 
       <li><a name="1-2"></a><b>How much does it cost ?</b></ br></li>
       <p>
-	Nothing. WSim is under the Cecill free software license agreement.
+	Nothing. WSim is under the Cecill and GNU GPL free software license agreement.
       </p> 
 
       <li><a name="1-3"></a><b>Who/Why to contact ?</b></ br></li>
       <p>
 	If you have any remark, question or contribution to this simulator,  
-	do not hesitate to contact one of the developpers. Inputs and  
-	feedbacks are more than welcome.
-	In particular, do not hesitate to ask for additions in this faq or in  
+	do not hesitate to contact one of the developers. Inputs and  
+	feedback are more than welcome.
+	In particular, do not hesitate to ask for additions in this FAQ or in  
 	the tutorials.
       </p>      
     </ol>
       
     [ <a href="#top"><b>Back to Top</b></a> ]
       
-    <h2 id="intro">For users</h2>
+    <h2 id="intro">Using WSim</h2>
       <ol>
-      <li><a name="2-1"></a><b> Can I use WSim for TinyOS applications ?</b></br>
-      </li>
-      <p>
-	WSim is independant of any operating system. You can use
-	TinyOS, MantisOS, FreeRTOS, Contiki or any embedded OS with
-	WSim. Please see the
+
+	ANSWER("2-1",How many nodes can I use in a WSim+WSNet simulation ?)
+	<p> You can easily use 10 to 15 WSim nodes in a simulation on
+	  a reasonable machine. The CPU load will mainly depend on the
+	  wireless network activity you are simulating.
+	</p>
+	<p>
+	  Larger simulations can also be easily built using simulation
+	  distribution across several machines on a local network. The
+	  distributed parallel simulation technique used between WSim
+	  nodes and WSNet relies on multicast IP in order to be able
+	  to distribute the simulation on a set of machines. If you
+	  want to simulate a large number of nodes then you should
+	  dedicate a processor to the WSNet program as it will be the
+	  central synchronisation point for all nodes and thus be on
+	  the critical path concerning performance issues.
+	</p>
+
+        ANSWER("2-2",Can I use WSim for TinyOS applications ?)
+	<p> WSim is independant of any operating system. You can
+	use TinyOS, MantisOS, FreeRTOS, Contiki or any embedded OS
+	with WSim. Please see the
 	<a href="http://wsim.gforge.inria.fr/tutorials/telosb-tinyos/index.html">TinyOS/Wsim</a>
-	tutorial.
-      </p>
+	tutorial. 
+	</p>
+
+	ANSWER("2-3",How can I debug my application using WSim ?)
+	<p> One of the main use of WSim is made during the debugging phase of an 
+	  application. If you need to get more detailed information on the hardware
+	  events generated by your software you should switch on debugging information
+	  in the source code and recompile WSim.
+        </p>
+	<p> The main entry point for logs and debug information can be
+	  found in liblogger/logger.h This file is the main entry for
+	  debugging. Each model in WSim has then its internal debug
+	  message filtering system. For the MSP430 the file to look
+	  for is arch/msp430/msp430_debug.h If you have any specific
+	  needs or are looking for special information on hardware
+	  events that could help you debug your application the best
+	  is to post
+	  on <a href="mailto:wsim-users@lists.gforge.inria.fr">wsim-user</a>
+	</p>
+
+	ANSWER("2-4",What is the meaning of the message "block not implemented" ?)
+	<p> This message means that a hardware part of the simulation
+	  platform is not yet done or finished. Most of the work on
+	  emulation is done on request and user needs, please fill a
+	  feature request on
+	  the <a href="https://gforge.inria.fr/tracker/?group_id=1304">tracker</a>
+	  or contact
+	  the <a href="mailto:wsim-users@lists.gforge.inria.fr">mailing-list</a>. We
+	  are of course also welcome to submit a patch if you have
+	  time to implement the missing parts.
+	</p>
+
+	ANSWER("2-5",I get a behaviour mismatch between simulation and real target. What should I do ?)
+	<p> Well, simulation is not perfect all the time. If you find
+	  such behaviour mismatch then please provide us with a small
+	  example on how to reproduce the error on the
+	  user <a href="mailto:wsim-users@lists.gforge.inria.fr">mailing-list</a>
+	  mailing list. Simulation mismatch can often be dealt with in
+	  a few days.
+	</p>
+
       </ol>
       
+
     [ <a href="#top"><b>Back to Top</b></a> ]
       
     <h2 id="intro">Tools</h2>
     <ol>
-      <li><a name="3-1"></a><b> How can I compare easily two or more
-      traces coming from different nodes ?</b></ br></li>
-      <p>
-	You have to use the <code>--merge</code> option
-	in <code>wtracer</code>. This option synchronizes all the
+      ANSWER("3-1", How can I compare easily two or more traces coming from different nodes ?)
+      <p> You have to use the <code>--merge</code> option
+	in <code>wtracer</code>. This option synchronises all the
 	different traces so that events can be compared in time.
 	The <code>--merge</code> option can be
 	seen <a href="http://wsim.gforge.inria.fr/tutorials/telosb-tinyos/debugging.html#traces">here</a>
@@ -103,22 +165,29 @@
       
     <h2 id="intro">Troubles</h2>
     <ol>
-      <li><a name="4-1"></a><b> I get a multicast error when trying to use WSim + WSNet, what goes wrong ?</b></ br></li>
-      <p>
-	If you are not connected to internet you may need to add a route as following :
+      ANSWER("4-1", I get a multicast error when trying to use WSim + WSNet. What goes wrong ?)
+      <p> If you are not connected to internet you may need to add a
+      route as following :
       </p>
-      <p>
-	 <code>$route add -net 224.0.0.0 netmask 255.0.0.0 lo</code>
+      <p> <code>$route add -net 224.0.0.0 netmask 255.0.0.0 lo</code>
       </p>
-      <li><a name="4-2"></a><b> When using WSim + WSNet, WConsole output displays sereval times the same data, why ?</b></ br></li>
-      <p>
-	It is a normal behaviour due to backtrack mechanism : nodes synchronization is performed by rendez-vous. If an event happen before next rendez-vous, a new appointment will be set and nodes will backtrack to last synchronisation point. The program after the synchronisation point is going to be rexecuted, resulting in a double (or more) display on WConsole.
+
+      ANSWER("4-2",Why does WConsole display several times the same data ?)
+      <p> It is a normal behaviour due to backtrack mechanism : nodes
+	synchronisation is performed by rendez-vous. If an event
+	happen before next rendez-vous, a new appointment will be set
+	and nodes will backtrack to last synchronisation point. The
+	program after the synchronisation point is going to be
+	executed, resulting in a double (or more) display on WConsole.
       </p>
-      <p>
-	Nevertheless an option has been added to fix this trouble. The serial output is buffered and sent only when reaching a synchronisation point. This patch introduces a small lag in serial output, but same data is sent only once.
+      <p> Nevertheless an option has been added to fix this
+	trouble. The serial output is buffered and sent only when
+	reaching a synchronisation point. This patch introduces a
+	small lag in serial output, but same data is sent only once.
       </p>
-      <p>
-	You can change the behavior by using a command line argument <code>--serial1_io=bk:[arg]</code> instead of <code>--serial1_io=[arg]</code>
+      <p> You can change the behaviour by using a command line
+	argument <code>--serial1_io=bk:[arg]</code> instead
+	of <code>--serial1_io=[arg]</code>
       </p>
     </ol>
       

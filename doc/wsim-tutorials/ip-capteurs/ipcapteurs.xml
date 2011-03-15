@@ -109,7 +109,7 @@ make install</computeroutput></programlisting>
       <itemizedlist mark="bullet" spacing="normal">
 	<listitem>
 	  <simpara>
-	    Tutorial  <ulink url="files/ip-capteurs.pdf">Slides</ulink>.
+	    Tutorial  <ulink url="files/wsim-tutorial.pdf">Slides</ulink>.
 	  </simpara>
 	</listitem>
       </itemizedlist>
@@ -141,8 +141,10 @@ make install</computeroutput></programlisting>
 
       <title>Vérification de la configuration et premier exemple</title>
 
-      <para>This very short example can test if the GCC toolchain the simulator 
-      and the OS are installed and configured on your machine.</para>
+      <para>Ce court exemple permet de tester si la chaine de compilation GCC, 
+      le simulateur et le système d'exploitation sont installés et configurés sur votre machine.</para>
+      
+      
 
       <para>L'image de disque est configurée avec les sources de Contiki dans le
       répertoire </para>

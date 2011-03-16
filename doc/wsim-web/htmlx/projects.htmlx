@@ -28,20 +28,20 @@
     </tr>
 
     
-    ENTRY( 1 day   , , Add mode to slow down simulation to meet realtime mode )
-    ENTRY( 1 day   , , Improve WSNet1 information tracing output)
+    ENTRY( 1 day   , , Add mode to slow down simulation to meet realtime mode. )
+    ENTRY( 1 day   , , Improve WSNet1 information tracing output. )
     ENTRY( 2 days  , , Move source code building system from autoconf/automake 
-                       to <a href="http://www.cmake.org/">Cmake</a> )
+                       to <a href="http://www.cmake.org/">Cmake</a>. )
     ENTRY( 2 days  , , Build binary packages for Linux and Windows using the Cmake system and 
-                       <a href="http://www.vtk.org/Wiki/CMake:Packaging_With_CPack">Cpack</a> )
+                       <a href="http://www.vtk.org/Wiki/CMake:Packaging_With_CPack">Cpack</a>. )
     ENTRY( 2 days  , , Build a test infrastructure around WSim using 
-		       <a href="http://www.vtk.org/Wiki/CMake_Testing_With_CTest">Ctest</a> )
+		       <a href="http://www.vtk.org/Wiki/CMake_Testing_With_CTest">Ctest</a>. )
     ENTRY( 2 days  , , Write a python wrapper around WSim per-platforms executables. )
 
     ENTRY( 4 days  , , Refactor MSP430 fetch/decode/execute simulation loop to use tables 
 		       of function pointers. )
     ENTRY( 5 days  , , Work on a more sophisticated information logging	module with flags 
-		       instead of debug levels )
+		       instead of verbose levels. )
 
 
     SEPARATOR()
@@ -64,7 +64,7 @@
     ENTRY( 2 months, , Include libQEmu ARM model in WSim to target Kortex M3 models in WSim. )
     ENTRY( 3 months, , Build a GUI around WSim / WSNet. )
     ENTRY( 3 months, , Add a mixed simulation mode on top of WSim / WSNet. This mode would 
-		       allow <b>n</b> WSNet node to run with <b>m</b> WSim emulated nodes. )
+		       allow <b>n</b> WSNet nodes to run with <b>m</b> WSim emulated nodes. )
 
     
     SEPARATOR()

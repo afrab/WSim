@@ -472,12 +472,14 @@ static infomem_t UNUSED infomem[] = {};
 #define MCU_VERSION       "f2274"
 #define MCU_MODEL_NAME    "msp430f2274"
 
-#define ADDR_FLASH_STOP   0xFFFFu
-#define ADDR_FLASH_START  0xF800u
-#define ADDR_NVM_STOP     0x10ffu
-#define ADDR_NVM_START    0x1000u
-#define ADDR_RAM_STOP     0x027fu
-#define ADDR_RAM_START    0x0200u
+#define ADDR_FLASH_STOP    0xFFFFu
+#define ADDR_FLASH_START   0x8000u
+#define ADDR_NVM_STOP      0x10ffu
+#define ADDR_NVM_START     0x1000u
+#define ADDR_BOOTMEM_STOP  0x0FFFu
+#define ADDR_BOOTMEM_START 0x0C00u
+#define ADDR_RAM_STOP      0x05FFu
+#define ADDR_RAM_START     0x0200u
 
 #define INTR_RESET        31
 #define INTR_NMI          30

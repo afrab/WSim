@@ -34,6 +34,8 @@
                        to <a href="http://www.cmake.org/">Cmake</a> )
     ENTRY( 2 days  , , Build binary packages for Linux and Windows using the Cmake system and 
                        <a href="http://www.vtk.org/Wiki/CMake:Packaging_With_CPack">Cpack</a> )
+    ENTRY( 2 days  , , Build a test infrastructure around WSim using 
+		       <a href="http://www.vtk.org/Wiki/CMake_Testing_With_CTest">Ctest</a> )
     ENTRY( 2 days  , , Write a python wrapper around WSim per-platforms executables. )
 
     ENTRY( 4 days  , , Refactor MSP430 fetch/decode/execute simulation loop to use tables 

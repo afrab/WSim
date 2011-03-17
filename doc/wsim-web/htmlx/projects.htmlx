@@ -49,8 +49,10 @@
     ENTRY( 1 week  , , Add MSPX instruction set to MSP430 MCU )
     ENTRY( 1 week  , , Merge libetrace from <a href="http://esimu.gforge.inria.fr/">eSimu</a> 
 		       in WSim and build test cases for unit and regression testing. )
-    ENTRY( 1 week  , , Add tsl2550 peripheral model for Senslab platforms. )
-    ENTRY( 1 week  , , Add ds1722 peripheral model for Senslab platforms. )
+    ENTRY( 1 week  , , Add <a href="http://www.taosinc.com/ProductDetails.aspx?id=133">tsl2550</a> 
+		       peripheral model for Senslab platforms. )
+    ENTRY( 1 week  , , Add <a href="http://www.maxim-ic.com/datasheet/index.mvp/id/2766">ds1722</a> 
+		       peripheral model for Senslab platforms. )
     ENTRY( 1 week  , , Implement I2C on USART for MSP430 micro-controllers. )
     ENTRY( 2 weeks , , MSP430 refactoring to support 20 bits pointers and address.)
     ENTRY( 2 weeks , , Write unit tests for msp430 MCUs and peripherals.)

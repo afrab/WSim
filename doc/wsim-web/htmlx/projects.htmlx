@@ -37,11 +37,11 @@
     ENTRY( 2 days  , , Build a test infrastructure around WSim using 
 		       <a href="http://www.vtk.org/Wiki/CMake_Testing_With_CTest">Ctest</a>. )
     ENTRY( 2 days  , , Write a python wrapper around WSim per-platforms executables. )
-
+    ENTRY( 4 days  , , Add MSP430 adc10 model to the msp430 block library. )
     ENTRY( 4 days  , , Refactor MSP430 fetch/decode/execute simulation loop to use tables 
 		       of function pointers. )
     ENTRY( 5 days  , , Work on a more sophisticated information logging	module with flags 
-		       instead of verbose levels. )
+		       instead of debug levels. )
 
 
     SEPARATOR()
@@ -49,7 +49,9 @@
     ENTRY( 1 week  , , Add MSPX instruction set to MSP430 MCU )
     ENTRY( 1 week  , , Merge libetrace from <a href="http://esimu.gforge.inria.fr/">eSimu</a> 
 		       in WSim and build test cases for unit and regression testing. )
-    ENTRY( 1 week  , , Add MSP430 adc10 model to the block library. )
+    ENTRY( 1 week  , , Add tsl2550 peripheral model for Senslab platforms. )
+    ENTRY( 1 week  , , Add ds1722 peripheral model for Senslab platforms. )
+    ENTRY( 1 week  , , Implement I2C on USART for MSP430 micro-controllers. )
     ENTRY( 2 weeks , , MSP430 refactoring to support 20 bits pointers and address.)
     ENTRY( 2 weeks , , Write unit tests for msp430 MCUs and peripherals.)
     ENTRY( 2 weeks , , Write unit tests for Atmel MCUs and peripherals.)

@@ -49,6 +49,7 @@
     ENTRY( 1 week  , , Add MSPX instruction set to MSP430 MCU )
     ENTRY( 1 week  , , Merge libetrace from <a href="http://esimu.gforge.inria.fr/">eSimu</a> 
 		       in WSim and build test cases for unit and regression testing. )
+    ENTRY( 1 week  , , Add MSP430 adc10 model to the block library. )
     ENTRY( 2 weeks , , MSP430 refactoring to support 20 bits pointers and address.)
     ENTRY( 2 weeks , , Write unit tests for msp430 MCUs and peripherals.)
     ENTRY( 2 weeks , , Write unit tests for Atmel MCUs and peripherals.)

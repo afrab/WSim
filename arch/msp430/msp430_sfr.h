@@ -92,29 +92,53 @@ struct __attribute__ ((packed)) ie1_t {
     #endif   
 #endif
     
-    
-#if defined(WORDS_BIGENDIAN)
-struct __attribute__ ((packed)) ifg1_t {
-  uint8_t
-    utxifg0:1,
-    urxifg0:1,
-    padding1:1,
-    nmiifg:1,
-    padding2:2,
-    ofifg:1,
-    wdtifg:1;
-};
+
+#if defined(__msp430_have_uscia0) || defined(__msp430_have_uscib0)
+    #if defined(WORDS_BIGENDIAN)
+    struct __attribute__ ((packed)) ifg1_t {
+      uint8_t
+        unused:3;
+        nmiifg:1,
+        rstifg:1,
+        porifg:1,        
+        ofifg:1,
+        wdtifg:1;
+    };
+    #else
+    struct __attribute__ ((packed)) ifg1_t {
+      uint8_t
+        wdtifg:1,
+        ofifg:1,
+        porifg:1,
+        rstifg:1,        
+        nmiifg:1,
+        unused:3;        
+    };
+    #endif
 #else
-struct __attribute__ ((packed)) ifg1_t {
-  uint8_t
-    wdtifg:1,
-    ofifg:1,
-    padding2:2,
-    nmiifg:1,
-    padding1:1,
-    urxifg0:1,
-    utxifg0:1;
-};
+    #if defined(WORDS_BIGENDIAN)
+    struct __attribute__ ((packed)) ifg1_t {
+      uint8_t
+        utxifg0:1,
+        urxifg0:1,
+        padding1:1,
+        nmiifg:1,
+        padding2:2,
+        ofifg:1,
+        wdtifg:1;
+    };
+    #else
+    struct __attribute__ ((packed)) ifg1_t {
+      uint8_t
+        wdtifg:1,
+        ofifg:1,
+        padding2:2,
+        nmiifg:1,
+        padding1:1,
+        urxifg0:1,
+        utxifg0:1;
+    };
+    #endif
 #endif
 
 

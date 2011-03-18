@@ -79,14 +79,12 @@ struct __attribute__ ((packed)) bcsctl1_t {
     xt2off:1,
     xts:1, //XTS = 1 is not supported in MSP430x20xx devices (#define __msp430_have_xts > msp430_models.h ?)
     diva:2,
-    xt5v:1,
-    rsel:3;
+    rsel:4;
 };
 #else
 struct __attribute__ ((packed)) bcsctl1_t {
   uint8_t
-    rsel:3,
-    xt5v:1,
+    rsel:4,
     diva:2,
     xts:1, //XTS = 1 is not supported in MSP430x20xx devices (#define __msp430_have_xts > msp430_models.h ?)
     xt2off:1;

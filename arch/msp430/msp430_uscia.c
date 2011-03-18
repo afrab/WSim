@@ -26,9 +26,9 @@
 #endif
 
 /* defined in msp430_debug.h */
-#if defined(DEBUG_USCIA)  
-char *str_ssel[] = { "external UCLK", "ACLK", "SMCLK", "SMCLK" };
-#endif
+// #if defined(DEBUG_USCIA)  
+// char *str_ssel[] = { "external UCLK", "ACLK", "SMCLK", "SMCLK" };
+// #endif
 
 /*****************************************************/
 /*****************************************************/
@@ -326,11 +326,11 @@ void msp430_uscia0_write(uint16_t UNUSED addr, int8_t UNUSED val)
 	ctl0.s = val;                                               
 	/*debug message*/
 	HW_DMSG_USCIA("msp430:uscia0: write ucaxctl0 = 0x%02x\n", val & 0xff);                    
-	HW_DMSG_USCIA("msp430:uscia0: ucpen = %d\n", 	ctl0.b.ucckph);
-	HW_DMSG_USCIA("msp430:uscia0: ucpar = %d\n", 	ctl0.b.ucckpl);
+	HW_DMSG_USCIA("msp430:uscia0: ucpen = %d\n", 	ctl0.b.ucpen);
+	HW_DMSG_USCIA("msp430:uscia0: ucpar = %d\n", 	ctl0.b.ucpar);
 	HW_DMSG_USCIA("msp430:uscia0: ucmsb = %d\n", 	ctl0.b.ucmsb);
 	HW_DMSG_USCIA("msp430:uscia0: uc7bit = %d\n", 	ctl0.b.uc7bit);
-	HW_DMSG_USCIA("msp430:uscia0: ucspb = %d\n", 	ctl0.b.ucmst);
+	HW_DMSG_USCIA("msp430:uscia0: ucspb = %d\n", 	ctl0.b.ucspb);
 	HW_DMSG_USCIA("msp430:uscia0: ucmode = %d\n", 	ctl0.b.ucmode);
 	HW_DMSG_USCIA("msp430:uscia0: ucsync = %d\n", 	ctl0.b.ucsync);                                                                     
 	HW_DMSG_USCIA("msp430:uscia0: length = %d bits\n",             
@@ -355,9 +355,13 @@ void msp430_uscia0_write(uint16_t UNUSED addr, int8_t UNUSED val)
 	/*debug message*/
 	HW_DMSG_USCIA("msp430:uscia0: write ucaxctl1 = 0x%02x\n", val & 0xff);                    
 	HW_DMSG_USCIA("msp430:uscia0: ucssel  = %d\n", 	ctl1.b.ucssel);
-	HW_DMSG_USCIA("msp430:uscia0: unused  = %d\n", 	ctl1.b.unused);
+	HW_DMSG_USCIA("msp430:uscia0: ucrxeie  = %d\n", ctl1.b.ucrxeie);
+	HW_DMSG_USCIA("msp430:uscia0: ucbrkie = %d\n", 	ctl1.b.ucbrkie);
+	HW_DMSG_USCIA("msp430:uscia0: ucdorm = %d\n", 	ctl1.b.ucdorm);
+	HW_DMSG_USCIA("msp430:uscia0: uctxaddr = %d\n", ctl1.b.uctxaddr);
+	HW_DMSG_USCIA("msp430:uscia0: uctxbrk = %d\n", 	ctl1.b.uctxbrk);
 	HW_DMSG_USCIA("msp430:uscia0: ucswrst = %d\n", 	ctl1.b.ucswrst);
-	
+
         /*modifications*/                                                                          
 	if ((ctl1.b.ucswrst == 0) && (MCU.uscia0.ucaxctl1.b.ucswrst == 0))       
           {                                                                   
@@ -428,14 +432,15 @@ void msp430_uscia0_write(uint16_t UNUSED addr, int8_t UNUSED val)
 	  stat.s = val;          
 	  /*debug message*/
 	  HW_DMSG_USCIA("msp430:uscia0: write ucbxstat = 0x%02x\n", val & 0xff);                   
-	  HW_DMSG_USCIA("msp430:uscia0: uclisten = %d\n", stat.b.uclisten);
-	  HW_DMSG_USCIA("msp430:uscia0: ucfe = %d\n", 	stat.b.ucfe);
-	  HW_DMSG_USCIA("msp430:uscia0: ucfoe = %d\n", 	stat.b.ucfoe);
-	  HW_DMSG_USCIA("msp430:uscia0: ucpe = %d\n", 	stat.b.ucpe);
-	  HW_DMSG_USCIA("msp430:uscia0: ucbrk = %d\n", 	stat.b.ucbrk);
-	  HW_DMSG_USCIA("msp430:uscia0: ucbrxerr = %d\n", stat.b.ucbrxerr);
-	  HW_DMSG_USCIA("msp430:uscia0: ucbaddr = %d\n", 	stat.b.ucbaddr);
-	  HW_DMSG_USCIA("msp430:uscia0: ucbusy = %d\n", 	stat.b.ucbusy);
+	  HW_DMSG_USCIA("msp430:uscia0: uclisten = %d\n",stat.b.uclisten);
+	  HW_DMSG_USCIA("msp430:uscia0: ucfe = %d\n",	 stat.b.ucfe);
+	  HW_DMSG_USCIA("msp430:uscia0: ucoe = %d\n", 	 stat.b.ucoe);
+	  HW_DMSG_USCIA("msp430:uscia0: ucpe = %d\n", 	 stat.b.ucpe);
+	  HW_DMSG_USCIA("msp430:uscia0: ucbrk = %d\n", 	 stat.b.ucbrk);
+	  HW_DMSG_USCIA("msp430:uscia0: ucrxerr = %d\n", stat.b.ucrxerr);
+	  HW_DMSG_USCIA("msp430:uscia0: ucaddr = %d\n",  stat.b.ucaddr);
+	  HW_DMSG_USCIA("msp430:uscia0: ucbusy = %d\n",	 stat.b.ucbusy);
+	  
 	  /*modifications*/
 	  MCU.uscia0.ucaxstat.s = val;
 	}
@@ -477,6 +482,7 @@ void msp430_uscia0_write(uint16_t UNUSED addr, int8_t UNUSED val)
 	  HW_DMSG_USCIA("msp430:uscia0: ucirtxpl  = %d\n",  irtctl.b.ucirtxpl);
 	  HW_DMSG_USCIA("msp430:uscia0: ucirtxclk = %d\n",  irtctl.b.ucirtxclk);
 	  HW_DMSG_USCIA("msp430:uscia0: uciren    = %d\n",  irtctl.b.uciren);
+	  
 	  /*modifications*/
 	  MCU.uscia0.ucaxirtctl.s = val;
 	}
@@ -510,11 +516,13 @@ void msp430_uscia0_write(uint16_t UNUSED addr, int8_t UNUSED val)
 	  abctl.s = val;          
 	  /*debug message*/
 	  HW_DMSG_USCIA("msp430:uscia0: write ucbxabctl = 0x%02x\n", val & 0xff);                   
-	  HW_DMSG_USCIA("msp430:uscia0: ucdelim  = %d\n",  abctl.b.ucdelim);
-	  HW_DMSG_USCIA("msp430:uscia0: ucstoe   = %d\n",  abctl.b.ucstoe);
-	  HW_DMSG_USCIA("msp430:uscia0: ucbtoe   = %d\n",  abctl.b.ucbtoe);
-	  HW_DMSG_USCIA("msp430:uscia0: reserved = %d\n",  abctl.b.reserved);
-	  HW_DMSG_USCIA("msp430:uscia0: ucabden  = %d\n",  abctl.b.ucabden);
+	  HW_DMSG_USCIA("msp430:uscia0: reserved0 = %d\n",  abctl.b.reserved0);
+	  HW_DMSG_USCIA("msp430:uscia0: ucdelim  = %d\n",   abctl.b.ucdelim);
+	  HW_DMSG_USCIA("msp430:uscia0: ucstoe   = %d\n",   abctl.b.ucstoe);
+	  HW_DMSG_USCIA("msp430:uscia0: ucbtoe   = %d\n",   abctl.b.ucbtoe);
+	  HW_DMSG_USCIA("msp430:uscia0: reserved1 = %d\n",  abctl.b.reserved1);
+	  HW_DMSG_USCIA("msp430:uscia0: ucabden  = %d\n",   abctl.b.ucabden);
+    
 	  /*modifications*/
 	  MCU.uscia0.ucaxabctl.s = val;
 	}

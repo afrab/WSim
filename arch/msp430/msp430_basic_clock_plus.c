@@ -449,11 +449,7 @@ void msp430_basic_clock_plus_write(uint16_t addr, int8_t val)
 	  {
 	    HW_DMSG_CLOCK("msp430:basic_clock_plus: ACLK diva shifter modified\n");
 	  }
-	if (bcsctl1.b.xt5v   != 0)
-	  {
-	    ERROR("msp430:basic_clock_plus: bcsctl1 xt5v should always be reset\n");
-	  }
-
+	  
 	MCUBCP.bcsctl1.s = val;
 	MCUBCP.ACLK_bitmask  = BITMASK(MCUBCP.bcsctl1.b.diva);
 	msp430_basic_clock_plus_adjust_lfxt1_freq();	

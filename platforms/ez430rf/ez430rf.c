@@ -25,7 +25,7 @@
 /* ************************************************** */
 
 /* ****************************************
- * platform description for WSN430 devices
+ * platform description for ez430rf devices
  *
  * Port 1
  * ======
@@ -50,12 +50,12 @@
  * ======
  *   3.7 : 
  *   3.6 : 
- *   3.5 : uart data in    -> battery expansion board
- *   3.4 : uart data out   -> battery expansion board
- *   3.3 : spi clock (radio)
- *   3.2 : spi somi  (radio)
- *   3.1 : spi simo  (radio)
- *   3.0 : radio CSN (~CS)
+ *   3.5 : USCIA uart data in   
+ *   3.4 : USCIA uart data out   
+ *   3.3 : USCIB spi clock (radio)
+ *   3.2 : USCIB spi somi  (radio)
+ *   3.1 : USCIB spi simo  (radio)
+ *   3.0 : USCIB STE radio CSN (~CS)
  *
  * Port 4
  * ======
@@ -280,7 +280,15 @@ int devices_update(void)
 
   /* port 3 :                          */
   /* ========                          */
-  /*   P3.0 radio CSN                  */
+
+  /*   P3.5 : USCIA uart data in        */
+  /*   P3.4 : USCIA uart data out       */
+  /*   P3.4 : USCIA uart data out       */
+  /*   P3.3 : USCIB spi clock (radio)   */
+  /*   P3.2 : USCIB spi somi  (radio)   */
+  /*   P3.1 : USCIB spi simo  (radio)   */
+  /*   P3.0 : USCIB STE radio (~CS)     */
+  
   if (msp430_digiIO_dev_read(PORT3,&val8))
     {
       CC2500_CSn = BIT(val8,0);
@@ -291,54 +299,30 @@ int devices_update(void)
   /* port 4 :                          */
   /* ========                          */
 
-
-  /* Usart                             */
+  /* USCIA (UART Mode)                 */
   /* ==============                    */
   /* UCA0 : serial                     */
+  if (msp430_uscia0_dev_read_uart(&val8))
+   {
+      machine.device[SERIAL].write(SERIAL, PTTY_D, val8);
+      etracer_slot_access(0x0, 1, ETRACER_ACCESS_WRITE, ETRACER_ACCESS_BYTE, ETRACER_ACCESS_LVL_OUT, 0);
+   }
   
-#if defined (__msp430_have_uscib0)
-
-
-//TODO
-
-
-#else
-  switch (MCU.usart0.mode)
-    {
-    case USART_MODE_UART:
-      if (msp430_usart0_dev_read_uart(&val8))
-	{
-	  machine.device[SERIAL].write(SERIAL, PTTY_D, val8);
-	  /* etracer_slot_access(0x0, 1, ETRACER_ACCESS_WRITE, ETRACER_ACCESS_BYTE, ETRACER_ACCESS_LVL_OUT, 0); */
-	}
-      break;
-    default:
-      break;
-    }
-
-  /* Usart                             */
-  /* ==============                    */
-  /* UCB0 : radio                      */
-  switch (MCU.usart1.mode)
-    {
-    case USART_MODE_SPI:
-      if (msp430_usart0_dev_read_spi(&val8))
-	{
-	  machine.device[RADIO].write(RADIO, CC2500_DATA_MASK, val8);
-	  etracer_slot_access(0x0, 1, ETRACER_ACCESS_WRITE, ETRACER_ACCESS_BYTE, ETRACER_ACCESS_LVL_SPI0, 0);
-	}      
-      break; 
-    default:
-      break;
-    }
-#endif
+  /* USCIB (SPI Mode)                 */
+  /* ==============                   */
+  /* UCB0 : radio                     */
+  if (msp430_uscib0_dev_read_spi(&val8))
+   {
+      machine.device[RADIO].write(RADIO, CC2500_DATA_MASK, val8);
+      etracer_slot_access(0x0, 1, ETRACER_ACCESS_WRITE, ETRACER_ACCESS_BYTE, ETRACER_ACCESS_LVL_SPI0, 0);
+  }      
 
     
   /* *************************************************************************** */
   /* devices -> MCU                                                              */
   /* *************************************************************************** */
 
-#if 0
+
   /* input on radio */
   {
     uint32_t mask  = 0;
@@ -346,16 +330,9 @@ int devices_update(void)
     machine.device[ RADIO ].read( RADIO ,&mask,&value);
     if (mask & CC2500_DATA_MASK)
       {
-#if defined(DEBUG_ME_HARDER)
-	if (MCU.usart0.mode != USART_MODE_SPI)
-	  {
-	    ERROR("ez430rf:devices: read data on radio while not in SPI mode ?\n");
-	  }
-#endif
-	msp430_usart0_dev_write_spi(value & CC2500_DATA_MASK);
+	msp430_uscib0_dev_write_spi(value & CC2500_DATA_MASK);
 	etracer_slot_access(0x0, 1, ETRACER_ACCESS_READ, ETRACER_ACCESS_BYTE, ETRACER_ACCESS_LVL_SPI0, 0);
       }
-
     if (mask & CC2500_GDO2_MASK) // GDO2 -> P2.7
       { 
 	msp430_digiIO_dev_write(PORT2, (CC2500_GDO2_MASK & value) ? 0x80 : 0x00, 0x80);
@@ -368,20 +345,18 @@ int devices_update(void)
       }
   }
   
-
-
-/* input on UART serial */
-  if (msp430_usart1_dev_write_uart_ok())
+  /* input on USCIA serial */
+  if (msp430_uscia0_dev_write_uart_ok())
     {
       uint32_t mask,value;
       machine.device[SERIAL].read(SERIAL,&mask,&value);
       if ((mask & PTTY_D) != 0)
 	{
-	  msp430_usart1_dev_write_uart(value & PTTY_D);
-	  /* etracer_slot_access(0x0, 1, ETRACER_ACCESS_READ, ETRACER_ACCESS_BYTE, ETRACER_ACCESS_LVL_OUT, 0); */
+	  msp430_uscia0_dev_write_uart(value & PTTY_D);
+	  etracer_slot_access(0x0, 1, ETRACER_ACCESS_READ, ETRACER_ACCESS_BYTE, ETRACER_ACCESS_LVL_OUT, 0);
 	}
     }
-#endif
+
 
   /* input on UI */
   /* input on buttons */

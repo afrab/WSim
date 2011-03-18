@@ -46,7 +46,8 @@ extern char* msp430_lpm_names[];
 #define DEBUG_BASIC_TIMER   0 /* basic timer    */
 #define DEBUG_WATCHDOG      0 /* watchdog       */
 #define DEBUG_FLASH         0 /* mcu flash      */
-#define DEBUG_USCIB         0 /* uscib 0/1      */
+#define DEBUG_USCIA         1 /* uscib 0/1      */
+#define DEBUG_USCIB         1 /* uscib 0/1      */
 #define DEBUG_USART         0 /* usart 0/1      */
 #define DEBUG_USART_INFO    0 /* usart 0/1      */
 #define DEBUG_DIGI_IO       0 /* GPIO           */

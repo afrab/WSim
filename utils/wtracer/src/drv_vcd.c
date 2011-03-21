@@ -108,7 +108,7 @@ static void vcd_dump_header(tracer_t *t)
 
   fprintf(t->out_fd,"$end\n");
   fprintf(t->out_fd,"\n");
-  fprintf(t->out_fd,"$version %s $end\n",PACKAGE_VERSION);
+  fprintf(t->out_fd,"$version 1.0 $end\n");
   fprintf(t->out_fd,"\n");
   fprintf(t->out_fd,"$timescale 1ns $end\n");
   fprintf(t->out_fd,"\n");
@@ -307,7 +307,7 @@ int drv_vcd_process_file(tracer_t *t)
 
   fprintf(t->out_fd,"\n");                                         /* header end         */
   fprintf(t->out_fd,"$enddefinitions $end\n\n");                   /* header end         */
-  fprintf(t->out_fd,"$comment\n  %s\n$end\n\n", PACKAGE_STRING);   /* comments           */
+  fprintf(t->out_fd,"$comment\n  wtracer\n$end\n\n");              /* comments           */
 
   vcd_dump_init_vars(t,&t,1);                                      /* dumpvars init to 0 */
   fprintf(t->out_fd,"\n\n\n");                                     /* start data         */
@@ -426,12 +426,12 @@ static int drv_vcd_dump_merge(tracer_t *t, tracer_t *trc[], int nbtrc)
 
   /* header */
 
-  vcd_dump_header(t);                                              /* header             */
-  vcd_dump_scopes(t,trc,nbtrc);                                    /* scopes             */
-  fprintf(t->out_fd,"$enddefinitions $end\n\n");                   /* header end         */
-  fprintf(t->out_fd,"$comment\n  %s\n$end\n\n", PACKAGE_STRING);   /* comments           */
-  vcd_dump_init_vars(t,trc,nbtrc);                                 /* dumpvars init to 0 */
-  fprintf(t->out_fd,"\n\n\n");                                     /* start data         */
+  vcd_dump_header(t);                                        /* header             */
+  vcd_dump_scopes(t,trc,nbtrc);                              /* scopes             */
+  fprintf(t->out_fd,"$enddefinitions $end\n\n");             /* header end         */
+  fprintf(t->out_fd,"$comment\n  wtracer\n$end\n\n");        /* comments           */
+  vcd_dump_init_vars(t,trc,nbtrc);                           /* dumpvars init to 0 */
+  fprintf(t->out_fd,"\n\n\n");                               /* start data         */
 
   /* data */
 

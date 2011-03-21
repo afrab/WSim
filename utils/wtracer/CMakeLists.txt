@@ -20,12 +20,25 @@ add_executable(wtracer.elf  \\
   ${WTRACER}/src/drv_sitc   \\
   ${WTRACER}/src/endian     \\
   ${WTRACER}/src/log        \\
-  ${WTRACER}/src/tracer)
+  ${WTRACER}/src/tracer
+)
 
 
 INCLUDE (CheckIncludeFiles)
+CHECK_INCLUDE_FILES(strings.h  HAVE_STRINGS_H)
+CHECK_INCLUDE_FILES(inttypes.h HAVE_INTTYPES_H)
+CHECK_INCLUDE_FILES(stdint.h   HAVE_STDINT_H)
+
+INCLUDE (CheckFunctionExists) 
+CHECK_FUNCTION_EXISTS(strtok_r FUNC_STRTOK_R_DEFINED) 
+
 INCLUDE (CheckTypeSize) 
-CHECK_INCLUDE_FILES(strings.h HAVE_STRINGS_H) 
-CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/config.h.in ${CMAKE_CURRENT_BINARY_DIR}/config.h)
+CHECK_TYPE_SIZE("char"         SIZEOF_CHAR)
+CHECK_TYPE_SIZE("short"        SIZEOF_SHORT)
+CHECK_TYPE_SIZE("int"          SIZEOF_INT)
+CHECK_TYPE_SIZE("long"         SIZEOF_LONG)
+CHECK_TYPE_SIZE("long long"    SIZEOF_LONG_LONG)
+
+CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config.h)
 
 

@@ -37,6 +37,7 @@
     ENTRY( 2 days  , , Build a test infrastructure around WSim using 
 		       <a href="http://www.vtk.org/Wiki/CMake_Testing_With_CTest">Ctest</a>. )
     ENTRY( 2 days  , , Write a python wrapper around WSim per-platforms executables. )
+    ENTRY( 2 days  , , Work on WSim documentation and produce a standalone documentation. )
     ENTRY( 4 days  , , Add MSP430 adc10 model to the msp430 block library. )
     ENTRY( 4 days  , , Refactor MSP430 fetch/decode/execute simulation loop to use tables 
 		       of function pointers. )

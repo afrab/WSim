@@ -17,7 +17,7 @@
 /*****************************************************/
 /*****************************************************/
 
-#define HW_SPY_MODE 0
+#define HW_SPY_MODE 1
 
 #if HW_SPY_MODE != 0
 #define HW_SPY(x...) HW_DMSG_MCUDEV(x)
@@ -452,7 +452,7 @@ void msp430_uscia0_write(uint16_t UNUSED addr, int8_t UNUSED val)
 	
       case UCA0TXBUF      :    
 	{
-	  HW_DMSG_USCIA("msp430:usart%d: write ucaxtxbuf  = 0x%02x [PC=0x%04x]\n",val & 0xff, mcu_get_pc());
+	  HW_DMSG_USCIA("msp430:uscia0: write ucaxtxbuf  = 0x%02x [PC=0x%04x]\n",val &0xff, mcu_get_pc());
 	  if (MCU.uscia0.ucaxtxbuf_full == 1)
 	  {                                                                     
 	    WARNING("msp430:uscia0:    overwriting tx buffer with [0x%02x]\n",val & 0xff);                                              

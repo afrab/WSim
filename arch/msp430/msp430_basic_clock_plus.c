@@ -20,7 +20,7 @@
 /*************************/
 /* print each clock step */
 /*************************/
-#undef DEBUG_EACH_STEP
+#define DEBUG_EACH_STEP 1
 
 /*******************************************************************/
 /* check when clocks are disables but still used for signal source */
@@ -331,7 +331,7 @@ msp430_basic_clock_plus_update(int clock_add)
   /********************************************/
   /*                                          */
   /********************************************/
-#if defined(DEBUG_EACH_STEP)
+#if DEBUG_EACH_STEP != 0
   HW_DMSG_CLOCK("msp430:basic_clock_plus: cycles+%d = nano+%"HRCTYPE" / lfxt1+%d vlo+%d dco+%d / MCLK+%d ACLK+%d SMCLK+%d / %" PRId64 "ns\n",
 		clock_add,nano_add,
 		MCUBCP.lfxt1_increment,MCUBCP.vlo_increment,MCUBCP.dco_increment,

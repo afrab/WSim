@@ -26,9 +26,9 @@
 #endif
 
 /* defined in msp430_debug.h */
-#if defined(DEBUG_USCIB)  
-char *str_ssel[] = { "external UCLK", "ACLK", "SMCLK", "SMCLK" };
-#endif
+// #if defined(DEBUG_USCIB)  
+// char *str_ssel[] = { "external UCLK", "ACLK", "SMCLK", "SMCLK" };
+// #endif
 
 /*****************************************************/
 /*****************************************************/

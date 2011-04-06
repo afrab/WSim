@@ -36,7 +36,7 @@ extern char* msp430_lpm_names[];
 #define DEBUG_GIE           0
 #define DEBUG_LPM           0 /* low power mode */
 #define DEBUG_SYSTEM_TIME   0 /* nano time      */
-#define DEBUG_SYSTEM_CLOCK  0 /* basic | fll    */
+#define DEBUG_SYSTEM_CLOCK  1 /* basic | fll    */
 #define DEBUG_IO            0 /* mcu bus io     */
 #define DEBUG_SFR           0 /* sfr registers  */
 

@@ -177,7 +177,7 @@ struct msp430_basic_clock_plus_t
 
   uint32_t lfxt1_freq;
   uint64_t lfxt1_counter;
-  uint32_t lfxt1_increment;
+  int      lfxt1_increment;
 
   uint32_t dco_freq;
   uint64_t dco_counter;
@@ -216,6 +216,7 @@ struct msp430_basic_clock_plus_t
 /* ************************************************** */
 /* ************************************************** */
 
+void    msp430_basic_clock_plus_create();
 void    msp430_basic_clock_plus_reset();
 
 int     msp430_basic_clock_plus_update(int clock_add);
@@ -239,6 +240,7 @@ void    msp430_basic_clock_plus_speed_tracer_update();
 /* ************************************************** */
 /* ************************************************** */
 /* ************************************************** */
-
+#else
+#define msp430_basic_clock_plus_create() do { } while (0)
 #endif /* defined(__msp430_have_basic_clock_plus) */
 #endif /* _H_ */

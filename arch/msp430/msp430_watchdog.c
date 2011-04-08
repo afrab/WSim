@@ -14,6 +14,8 @@
 static char *str_ssel[] = { "SMCLK", "ACLK" };
 #endif
 
+#if defined(__msp430_have_watchdog)
+
 static int wdt_intervals[] = { 32768, 8192, 512, 64 };
 
 /* ************************************************** */
@@ -26,6 +28,13 @@ static int wdt_intervals[] = { 32768, 8192, 512, 64 };
 /* ************************************************** */
 /* ************************************************** */
 /* ************************************************** */
+
+void 
+msp430_watchdog_create(void)
+{
+  msp430_io_register_range16(WATCHDOG_START,WATCHDOG_END,msp430_watchdog_read,msp430_watchdog_write);
+}
+
 
 void 
 msp430_watchdog_reset(void)
@@ -194,3 +203,4 @@ int msp430_watchdog_chkifg()
 /* ************************************************** */
 /* ************************************************** */
 /* ************************************************** */
+#endif

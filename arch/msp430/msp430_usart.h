@@ -9,6 +9,9 @@
 #ifndef MSP430_USART_H
 #define MSP430_USART_H
 
+#if defined(__msp430_have_usart0) || defined(__msp430_have_usart1)
+
+
 #if defined(WORDS_BIGENDIAN)
 struct __attribute__ ((packed)) uxctl_t {
   uint8_t
@@ -224,10 +227,13 @@ struct msp430_usart_t
 
 };
 
+#endif // uart0 || usart1
+
 /* ************************************************** */
 /* ************************************************** */
 /* ************************************************** */
 
+#if defined(__msp430_have_usart0)
 #define USART0_START 0x0070
 #define USART0_END   0x0077
 
@@ -247,6 +253,7 @@ struct msp430_usart_t
 #define I2CSA        0x011A //short
 #define I2CIV        0x011C
 
+void   msp430_usart0_create();
 void   msp430_usart0_reset();
 void   msp430_usart0_update();
 int8_t msp430_usart0_read (uint16_t addr);
@@ -260,6 +267,9 @@ int    msp430_usart0_dev_write_spi_ok  ();
 int    msp430_usart0_dev_read_uart     (uint8_t *val);
 void   msp430_usart0_dev_write_uart    (uint8_t val);
 int    msp430_usart0_dev_write_uart_ok ();
+#else
+#define msp430_usart0_create() do { } while (0)
+#endif
 
 /* ************************************************** */
 /* ************************************************** */
@@ -278,6 +288,7 @@ int    msp430_usart0_dev_write_uart_ok ();
 #define U1RXBUF      0x007e
 #define U1TXBUF      0x007f
 
+void   msp430_usart1_create();
 void   msp430_usart1_reset();
 void   msp430_usart1_update();
 int8_t msp430_usart1_read (uint16_t addr);
@@ -292,6 +303,8 @@ int    msp430_usart1_dev_write_spi_ok  ();
 int    msp430_usart1_dev_read_uart     (uint8_t *val);
 void   msp430_usart1_dev_write_uart    (uint8_t val);
 int    msp430_usart1_dev_write_uart_ok ();
+#else
+#define msp430_usart1_create() do { } while (0)
 #endif
 
 /* ************************************************** */

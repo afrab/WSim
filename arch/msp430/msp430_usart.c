@@ -871,6 +871,12 @@ do {                                                                          \
 /* ************************************************** */
 
 #if defined(__msp430_have_usart0)
+
+void msp430_usart0_create()
+{
+  msp430_io_register_range8(USART0_START,USART0_END,msp430_usart0_read,msp430_usart0_write);
+}
+
 void msp430_usart0_reset()
 {
   MCU.usart0.uxctl.s  = 1;    // swrst
@@ -965,6 +971,11 @@ void msp430_usart1_reset()
   MCU.sfr.ifg2.s     |= 0x020; // utxifg1
 
   USART_RESET(usart1);
+}
+
+void msp430_usart1_create()
+{
+  msp430_io_register_range8(USART1_START,USART1_END,msp430_usart1_read,msp430_usart1_write);
 }
 
 /***************************/

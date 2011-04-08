@@ -27,17 +27,19 @@ struct msp430_adc10_t {
 /* ************************************************** */
 /* ************************************************** */
 
-void    msp430_adc10_reset ();
-void    msp430_adc10_update();
+void    msp430_adc10_create (void);
+void    msp430_adc10_reset  (void);
+void    msp430_adc10_update (void);
 int16_t msp430_adc10_read16 (uint16_t addr);
 void    msp430_adc10_write16(uint16_t addr, int16_t val);
 int8_t  msp430_adc10_read8  (uint16_t addr);
 void    msp430_adc10_write8 (uint16_t addr, int8_t val);
-#define msp430_adc10_chkifg()   0
+#define msp430_adc10_chkifg()  0
 
 /* ************************************************** */
 /* ************************************************** */
 /* ************************************************** */
-
+#else
+#define msp430_adc10_create() do { } while (0)
 #endif /* have_adc10 */
 #endif

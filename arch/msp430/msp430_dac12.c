@@ -15,7 +15,19 @@
 /* ************************************************** */
 /* ************************************************** */
 
-void msp430_dac12_reset()
+void msp430_dac12_create(void)
+{
+  msp430_io_register_addr16(DAC12_0CTL,msp430_dac12_read,msp430_dac12_write);
+  msp430_io_register_addr16(DAC12_1CTL,msp430_dac12_read,msp430_dac12_write);
+  msp430_io_register_addr16(DAC12_0DAT,msp430_dac12_read,msp430_dac12_write);
+  msp430_io_register_addr16(DAC12_1DAT,msp430_dac12_read,msp430_dac12_write);
+}
+
+/* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
+
+void msp430_dac12_reset(void)
 {
 }
 
@@ -23,7 +35,7 @@ void msp430_dac12_reset()
 /* ************************************************** */
 /* ************************************************** */
 
-void msp430_dac12_update()
+void msp430_dac12_update(void)
 {
 }
 

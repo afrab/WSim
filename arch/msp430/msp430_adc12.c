@@ -278,7 +278,7 @@ uint16_t msp430_adc12_sample_input(int hw_channel_x)
 /* ************************************************** */
 /* ************************************************** */
 
-int msp430_adc12_init(void)
+static int msp430_adc12_init(void)
 {
   int i;
 
@@ -314,6 +314,19 @@ int msp430_adc12_init(void)
 
   
   return 0;
+}
+
+/* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
+
+void msp430_adc12_create(void)
+{
+  msp430_io_register_range8 (ADC12MCTL0,ADC12MCTL15,msp430_adc12_read8 ,msp430_adc12_write8);
+  msp430_io_register_range16(ADC12CTL0 ,ADC12IV    ,msp430_adc12_read16,msp430_adc12_write16);
+  msp430_io_register_range16(ADC12MEM0 ,ADC12MEM15 ,msp430_adc12_read16,msp430_adc12_write16);
+  
+  msp430_adc12_init();
 }
 
 /* ************************************************** */

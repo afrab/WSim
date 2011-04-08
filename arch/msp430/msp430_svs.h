@@ -23,14 +23,16 @@ struct msp430_svs_t {
 /* ************************************************** */
 /* ************************************************** */
 
+void   msp430_svs_create();
 void   msp430_svs_reset ();
 void   msp430_svs_update();
-int8_t msp430_svs_read  (uint8_t addr);
-void   msp430_svs_write (uint8_t addr, int8_t val);
+int8_t msp430_svs_read  (uint16_t addr);
+void   msp430_svs_write (uint16_t addr, int8_t val);
 
 /* ************************************************** */
 /* ************************************************** */
 /* ************************************************** */
-
+#else
+#define msp430_svs_create() do { } while (0)
 #endif /* have_svs */
 #endif

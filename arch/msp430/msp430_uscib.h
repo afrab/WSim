@@ -127,7 +127,7 @@ struct msp430_uscib_t
 #define UCB0RXBUF    0x06e
 #define UCB0TXBUF    0x06f
 
-
+void   msp430_uscib0_create();
 void   msp430_uscib0_reset();
 void   msp430_uscib0_update();
 int8_t msp430_uscib0_read (uint16_t addr);
@@ -140,6 +140,8 @@ void   msp430_uscib0_dev_write_spi     (uint8_t val);
 int    msp430_uscib0_dev_write_spi_ok  ();
 
 
+#else
+#define msp430_uscib0_create() do { } while (0)
 #endif
 
 /* ************************************************** */

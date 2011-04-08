@@ -15,6 +15,15 @@
 /* ************************************************** */
 /* ************************************************** */
 
+void msp430_svs_create()
+{
+  msp430_io_register_addr8(SVSCTL,msp430_svs_read,msp430_svs_write);
+}
+
+/* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
+
 void msp430_svs_reset()
 {
 }
@@ -31,7 +40,7 @@ void msp430_svs_update()
 /* ************************************************** */
 /* ************************************************** */
 
-int8_t msp430_svs_read  (uint8_t addr)
+int8_t msp430_svs_read  (uint16_t addr)
 {
   ERROR("msp430:svs: read [0x%04x] block not implemented\n",addr);
   return 0;
@@ -41,7 +50,7 @@ int8_t msp430_svs_read  (uint8_t addr)
 /* ************************************************** */
 /* ************************************************** */
 
-void msp430_svs_write (uint8_t addr, int8_t val)
+void msp430_svs_write (uint16_t addr, int8_t val)
 {
   ERROR("msp430:svs: write [0x%04x] = 0x%02x, block not implemented\n",addr,val);
 }

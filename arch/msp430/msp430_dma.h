@@ -157,11 +157,12 @@ struct msp430_dma_t {
 /* ************************************************** */
 /* ************************************************** */
 
-void    msp430_dma_reset ();
-void    msp430_dma_update();
+void    msp430_dma_create(void);
+void    msp430_dma_reset (void);
+void    msp430_dma_update(void);
 int16_t msp430_dma_read  (uint16_t addr);
 void    msp430_dma_write (uint16_t addr, int16_t val);
-int     msp430_dma_chkifg();
+int     msp430_dma_chkifg(void);
 
 /* ************************************************** */
 /* ************************************************** */
@@ -257,6 +258,8 @@ int     msp430_dma_chkifg();
 /* ************************************************** */
 
 #else  /* have_dma */
+
+#define msp430_dma_create()     do { } while (0)
 
 #define DMA_SET_REQ()           do { } while (0)
 #define DMA_SET_TACCR2()        do { } while (0)

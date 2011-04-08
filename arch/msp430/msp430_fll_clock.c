@@ -35,6 +35,17 @@ static void msp430_fll_clock_printstate();
 /* ************************************************** */
 /* ************************************************** */
 
+void msp430_fll_clock_create()
+{
+#if defined(__msp430_have_fll_and_xt2)
+  msp430_io_register_range8(FLL_START,FLL_END,msp430_fll_clock_read,msp430_fll_clock_write);
+#endif
+}
+
+/* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
+
 void msp430_fll_clock_puc()
 {
   MCUFLL.scfqctl.s        = 0x1f; // puc

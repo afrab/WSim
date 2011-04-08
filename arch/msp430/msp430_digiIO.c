@@ -83,6 +83,15 @@
 /* ************************************************** */
 /* ************************************************** */
 
+void msp430_digiIO_create()
+{
+  msp430_io_register_range8(DIGIIO_START,DIGIIO_END,msp430_digiIO_mcu_read,msp430_digiIO_mcu_write);
+}
+
+/* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
+
 void msp430_digiIO_reset()
 {
   /* after a reset the pin IO are switched to input mode */

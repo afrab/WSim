@@ -177,6 +177,7 @@ struct msp430_fll_clock_t
 /* ************************************************** */
 /* ************************************************** */
 
+void    msp430_fll_clock_create();
 void    msp430_fll_clock_reset();
 
 int     msp430_fll_clock_update(int clock_add);
@@ -192,6 +193,7 @@ void    msp430_fll_clock_write(uint16_t addr, int8_t val);
 /* ************************************************** */
 /* ************************************************** */
 /* ************************************************** */
-
+#else
+#define msp430_fll_clock_create() do { } while (0)
 #endif
 #endif /* _H_ */

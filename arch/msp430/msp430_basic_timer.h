@@ -52,12 +52,14 @@ struct msp430_basic_timer_t
   int32_t ctl2;  /* 0x47 */
 };
 
-
+void   msp430_basic_timer_create();
 void   msp430_basic_timer_reset ();
 void   msp430_basic_timer_update();
 int8_t msp430_basic_timer_read  (uint16_t addr);
 void   msp430_basic_timer_write (uint16_t addr, int8_t val);
 int    msp430_basic_timer_chkifg();
 
+#else
+#define msp430_basic_timer_create() do { } while(0)
 #endif
 #endif

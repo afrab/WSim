@@ -28,8 +28,10 @@
 /* ************************************************** */
 /* ************************************************** */
 
-void msp430_hwmul_init()
+void msp430_hwmul_create()
 {
+  msp430_io_register_range8(HWMUL_START,HWMUL_END+1, msp430_hwmul_read8,  msp430_hwmul_write8);
+  msp430_io_register_range16(HWMUL_START,HWMUL_END,  msp430_hwmul_read16, msp430_hwmul_write16);
   memset(&MCU_HWMUL,0,sizeof(struct msp430_hwmul_t));
 }
 
@@ -46,7 +48,7 @@ void msp430_hwmul_reset()
 /* ************************************************** */
 /* ************************************************** */
 
-int16_t msp430_hwmul_read  (uint16_t addr)
+int16_t msp430_hwmul_read16  (uint16_t addr)
 {
   int16_t res;
   switch (addr)
@@ -73,7 +75,7 @@ int8_t msp430_hwmul_read8 (uint16_t addr)
   int8_t  res8;
   int16_t res16;
   
-  res16 = msp430_hwmul_read(addr & ~0x1);
+  res16 = msp430_hwmul_read16(addr & ~0x1);
   res8  = ((addr & 0x1) == 0) ? (res16 & 0xff) : ((res16 >> 8) & 0xff); 
   return res8;
 }
@@ -82,7 +84,7 @@ int8_t msp430_hwmul_read8 (uint16_t addr)
 /* ************************************************** */
 /* ************************************************** */
 
-void    msp430_hwmul_write (uint16_t addr, int16_t val)
+void    msp430_hwmul_write16 (uint16_t addr, int16_t val)
 {
 
   switch (addr)
@@ -220,7 +222,7 @@ void msp430_hwmul_write8 (uint16_t addr, int8_t val)
       val16 = val;
     }
 
-  msp430_hwmul_write(addr16,val16);
+  msp430_hwmul_write16(addr16,val16);
 }
 
 /* ************************************************** */

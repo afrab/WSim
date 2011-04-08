@@ -13,6 +13,22 @@
 /* ************************************************** */
 /* ************************************************** */
 
+void msp430_adc10_create()
+{
+  msp430_io_register_addr8 (ADC10AE  ,msp430_adc10_read8 ,msp430_adc10_write8);
+  msp430_io_register_addr8 (ADC10DTC0,msp430_adc10_read8 ,msp430_adc10_write8);
+  msp430_io_register_addr8 (ADC10DTC1,msp430_adc10_read8 ,msp430_adc10_write8);
+
+  msp430_io_register_addr16(ADC10CTL0,msp430_adc10_read16,msp430_adc10_write16);
+  msp430_io_register_addr16(ADC10CTL1,msp430_adc10_read16,msp430_adc10_write16);
+  msp430_io_register_addr16(ADC10MEM ,msp430_adc10_read16,msp430_adc10_write16);
+  msp430_io_register_addr16(ADC10SA  ,msp430_adc10_read16,msp430_adc10_write16);
+}
+
+/* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
+
 void msp430_adc10_reset()
 {
 }

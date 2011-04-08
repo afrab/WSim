@@ -42,6 +42,20 @@ static void msp430_basic_clock_adjust_lfxt1_freq();
 static void msp430_basic_clock_adjust_dco_freq();
 static void msp430_basic_clock_printstate();
 
+/* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
+
+void 
+msp430_basic_clock_create()
+{
+  msp430_io_register_range8(BC_START,BC_END,msp430_basic_clock_read,msp430_basic_clock_write);
+}
+
+/* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
+
 /**
    After a PUC, MCLK and SMCLK are sourced from DCOCLK at ~800 kHz (see
    device-specific datasheet for parameters) and ACLK is sourced from LFXT1

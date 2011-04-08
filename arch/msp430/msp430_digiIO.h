@@ -97,6 +97,7 @@ struct msp430_digiIO_t
 };
 
 
+void    msp430_digiIO_create            (void);
 void    msp430_digiIO_reset             (void);
 
 int8_t  msp430_digiIO_mcu_read          (uint16_t addr);

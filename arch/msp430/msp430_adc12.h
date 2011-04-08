@@ -273,7 +273,8 @@ struct msp430_adc12_t {
 /* ************************************************** */
 
 int     msp430_adc12_option_add (void);
-int     msp430_adc12_init       (void);
+
+void    msp430_adc12_create     (void);
 void    msp430_adc12_reset      (void);
 void    msp430_adc12_update     (void);
 int16_t msp430_adc12_read16     (uint16_t addr);
@@ -285,6 +286,7 @@ int     msp430_adc12_chkifg     (void);
 /* ************************************************** */
 /* ************************************************** */
 /* ************************************************** */
-
+#else
+#define msp430_adc12_create() do { } while (0)
 #endif /* have_adc12 */
 #endif

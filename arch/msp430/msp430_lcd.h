@@ -82,10 +82,13 @@ struct msp430_lcd_t
   uint8_t mem[LCD_MEM_SIZE];
 };
 
-int    msp430_lcd_reset();
-void   msp430_lcd_update();
+void   msp430_lcd_create(void);
+void   msp430_lcd_reset(void);
+void   msp430_lcd_update(void);
 int8_t msp430_lcd_read (uint16_t addr);
 void   msp430_lcd_write(uint16_t addr, int8_t val);
 
+#else
+#define msp430_lcd_create() do { } while (0)
 #endif
 #endif

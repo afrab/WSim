@@ -23,8 +23,9 @@ struct msp430_dac12_t {
 /* ************************************************** */
 /* ************************************************** */
 
-void    msp430_dac12_reset ();
-void    msp430_dac12_update();
+void    msp430_dac12_create(void);
+void    msp430_dac12_reset (void);
+void    msp430_dac12_update(void);
 int16_t msp430_dac12_read  (uint16_t addr);
 void    msp430_dac12_write (uint16_t addr, int16_t val);
 #define msp430_dac12_chkifg()   0

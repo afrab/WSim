@@ -113,6 +113,7 @@ struct msp430_flash_t {
 /* ************************************************** */
 /* ************************************************** */
 
+void    msp430_flash_create      (void);
 void    msp430_flash_reset       (void);
 
 extern void (*msp430_flash_update_ptr)(void);
@@ -130,6 +131,7 @@ void    msp430_flash_start_erase (uint16_t addr, int size, uint32_t val);
 /* ************************************************** */
 /* ************************************************** */
 /* ************************************************** */
-
+#else
+#define msp430_flash_create() do { } while (0)
 #endif /* have_flash */
 #endif

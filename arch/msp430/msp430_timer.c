@@ -504,6 +504,19 @@ char* timerb_tiv_to_str(int val)
 /* ************************************************** */
 /* ************************************************** */
 
+void msp430_timerA3_create()
+{
+  msp430_io_register_addr8(TAIV,msp430_timerA3_read8,msp430_timerA3_write8);
+  msp430_io_register_range8(TIMER_A3_START,TIMER_A3_END+1,msp430_timerA3_read8,msp430_timerA3_write8);
+
+  msp430_io_register_addr16(TAIV,msp430_timerA3_read,msp430_timerA3_write);
+  msp430_io_register_range16(TIMER_A3_START,TIMER_A3_END,msp430_timerA3_read,msp430_timerA3_write);
+}
+
+/* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
+
 void msp430_timerA3_reset(void)
 {
   memset(&MCU.timerA3,0,sizeof(struct msp430_timerA3_t));
@@ -1037,6 +1050,13 @@ int msp430_timerA3_chkifg(void)
 
 #if defined(__msp430_have_timera5)
 
+void msp430_timerA5_create()
+{
+  // check 8 address space
+  msp430_io_register_addr16(TA1IV,msp430_timerA5_read,msp430_timerA5_write);
+  msp430_io_register_range16(TIMER_A5_START,TIMER_A5_END,msp430_timerA5_read,msp430_timerA5_write);
+}
+
 void msp430_timerA5_reset(void)
 {
   memset(&MCU.timerA5,0,sizeof(struct msp430_timerA3_t));
@@ -1087,6 +1107,12 @@ static void msp430_timerB_set_limit(int i)
 {
   MCU.timerB.tbr_limit = timerB_limit[i];
   HW_DMSG_TIMER("msp430:" TIMERBNAME ": set tbr limit to 0x%04x\n",MCU.timerB.tbr_limit);
+}
+
+void msp430_timerB_create(void)
+{
+  msp430_io_register_addr16(TBIV,msp430_timerB_read,msp430_timerB_write);
+  msp430_io_register_range16(TIMER_B_START,TIMER_B_END,msp430_timerB_read,msp430_timerB_write);
 }
 
 void msp430_timerB_reset(void)

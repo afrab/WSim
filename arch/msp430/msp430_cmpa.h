@@ -25,6 +25,7 @@ struct msp430_cmpa_t {
 /* ************************************************** */
 /* ************************************************** */
 
+void   msp430_cmpa_create();
 void   msp430_cmpa_reset ();
 void   msp430_cmpa_update();
 int8_t msp430_cmpa_read  (uint16_t addr);
@@ -34,6 +35,8 @@ void   msp430_cmpa_write (uint16_t addr, int8_t val);
 /* ************************************************** */
 /* ************************************************** */
 
+#else
+#define msp430_cmpa_create() do { } while (0)
 #endif /* have_cmpa */
 #endif
  

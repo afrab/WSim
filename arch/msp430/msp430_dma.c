@@ -18,6 +18,17 @@
 /* ************************************************** */
 /* ************************************************** */
 
+void msp430_dma_create(void)
+{
+  msp430_io_register_addr16(DMACTL0,msp430_dma_read,msp430_dma_write);
+  msp430_io_register_addr16(DMACTL1,msp430_dma_read,msp430_dma_write);
+  msp430_io_register_range16(DMA_START,DMA_END,msp430_dma_read,msp430_dma_write);
+}
+
+/* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
+
 void msp430_dma_reset()
 {
   int chann;

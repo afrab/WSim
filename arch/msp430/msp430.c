@@ -137,12 +137,29 @@ int mcu_options_add(void)
 /* ************************************************** */
 /* ************************************************** */
 
+void msp430_infomem_init(void)
+{
+  /* infomem information */
+  {
+    int i;
+    int size = sizeof(infomem)/sizeof(infomem_t);
+    for(i=0; i < size; i++)
+      {
+	mcu_jtag_write_byte(infomem[i].addr, infomem[i].value);
+      }
+  }
+}
+
+/* ************************************************** */
+/* ** MCU_CREATE ************************************ */
+/* ************************************************** */
+
 #if defined(__msp430_have_basic_clock_plus)
-   #if defined(__msp430_have_xt2)
-   int msp430_mcu_create(int xt1, int xt2, int vlo)
-   #else
-   int msp430_mcu_create(int xt1, int vlo)
-   #endif
+  #if defined(__msp430_have_xt2)
+  int msp430_mcu_create(int xt1, int xt2, int vlo)
+  #else
+  int msp430_mcu_create(int xt1, int vlo)
+  #endif
 #elif defined(__msp430_have_xt2)
 int msp430_mcu_create(int xt1, int xt2)
 #else
@@ -153,7 +170,39 @@ int msp430_mcu_create(int xt1)
 
   MCU_INSN_CPT  = 0;
   MCU_CYCLE_CPT = 0;
-  ret += msp430_io_init();
+
+  msp430_io_create();
+  mcu_ramctl_init();
+  msp430_infomem_init();
+
+
+  // basic
+  msp430_sfr_create();
+  msp430_svs_create();
+  msp430_hwmul_create();
+  msp430_digiIO_create();
+  // system clock
+  msp430_basic_clock_create();
+  msp430_basic_clock_plus_create();
+  msp430_fll_clock_create();
+  // serial serial interfaces
+  msp430_uscia0_create();
+  msp430_uscib0_create();
+  msp430_usart0_create();
+  msp430_usart1_create();
+  // timers
+  msp430_watchdog_create();
+  msp430_basic_timer_create();
+  msp430_timerA3_create();
+  msp430_timerA5_create();
+  msp430_timerB_create();
+  // misc
+  msp430_dma_create();
+  msp430_lcd_create();
+  msp430_cmpa_create();
+  msp430_adc12_create();
+  msp430_adc10_create();
+
 
   MCU_CLOCK.lfxt1_freq = xt1;
 #if defined(__msp430_have_xt2)
@@ -163,46 +212,18 @@ int msp430_mcu_create(int xt1)
   MCU_CLOCK.vlo_freq   = vlo;
 #endif
 
-  ret += mcu_ramctl_init();
-
-  /* infomem information */
-  {
-    int i;
-    int size = sizeof(infomem)/sizeof(infomem_t);
-    for(i=0; i < size; i++)
-      {
-	mcu_jtag_write_byte(infomem[i].addr, infomem[i].value);
-      }
-  }
-
-#if defined(__msp430_have_adc12)
-  ret += msp430_adc12_init();
-#endif
-
+  msp430_trace_pc_switch = 0;
+  msp430_trace_sp_switch = 0;
   if (trace_pc_opt.isset) 
     {
       MSP430_TRACER_PC       = tracer_event_add_id(16, "PC", "msp430");
       msp430_trace_pc_switch = 1;
-#if !defined(XCODE_DEBUG)
-      WARNING("msp430:option trc_pc is inactive, WSim must be compiled with --enable-xcode\n");
-#endif
-    }
-  else
-    {
-      msp430_trace_pc_switch = 0;
     }
 
   if (trace_sp_opt.isset) 
     {
       MSP430_TRACER_SP       = tracer_event_add_id(16, "SP", "msp430");
       msp430_trace_sp_switch = 1;
-#if !defined(XCODE_DEBUG)
-      WARNING("msp430:option trc_sp is inactive, WSim must be compiled with --enable-xcode\n");
-#endif
-    }
-  else
-    {
-      msp430_trace_sp_switch = 0;
     }
 
   MSP430_TRACER_GIE    = tracer_event_add_id(1,  "intr_gie",   "msp430");

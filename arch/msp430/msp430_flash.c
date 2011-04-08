@@ -46,7 +46,16 @@ void (*msp430_flash_update_ptr) (void);
 /* ************************************************** */
 /* ************************************************** */
 
-void msp430_flash_reset()
+void msp430_flash_create(void)
+{
+  msp430_io_register_range16(FLASHCTL_START,FLASHCTL_END,msp430_flash_read,msp430_flash_write);
+}
+
+/* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
+
+void msp430_flash_reset(void)
 {
   MCUFLASH.fctl1.s          = 0x09600;
   MCUFLASH.fctl2.s          = 0x09642;

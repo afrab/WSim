@@ -44,15 +44,17 @@ struct msp430_hwmul_t {
   } add_out;
 };
 
-void    msp430_hwmul_init  ();
-void    msp430_hwmul_reset ();
+void    msp430_hwmul_create  ();
+void    msp430_hwmul_reset   ();
 
-int16_t msp430_hwmul_read  (uint16_t addr);
-void    msp430_hwmul_write (uint16_t addr, int16_t val);
+int16_t msp430_hwmul_read16  (uint16_t addr);
+void    msp430_hwmul_write16 (uint16_t addr, int16_t val);
 
-int8_t  msp430_hwmul_read8 (uint16_t addr);
-void    msp430_hwmul_write8(uint16_t addr, int8_t val);
+int8_t  msp430_hwmul_read8   (uint16_t addr);
+void    msp430_hwmul_write8  (uint16_t addr, int8_t val);
 
+#else
+#define msp430_hwmul_create() do { } while (0)
 #endif // __have_hwmul
 
 #endif // MSP430

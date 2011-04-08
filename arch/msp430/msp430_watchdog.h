@@ -62,16 +62,16 @@ struct msp430_watchdog_t
   int wdtinterval;
 };
 
+void    msp430_watchdog_create (void);
 void    msp430_watchdog_reset  (void);
 void    msp430_watchdog_update (void);
 int16_t msp430_watchdog_read   (uint16_t addr);
 void    msp430_watchdog_write  (uint16_t addr, int16_t val);
 
 enum watchdog_mode_t msp430_watchdog_getmode(void);
-/* #define msp430_watchdog_getmode() MCU.watchdog.wdtctl.b.wdttmsel */
+int     msp430_watchdog_chkifg ();
 
-/* ifg flag is in sfr registers */
-int     msp430_watchdog_chkifg();
-
+#else
+#define msp430_watchdog_create() do { } while (0)
 #endif /* defined */
 #endif /* header */

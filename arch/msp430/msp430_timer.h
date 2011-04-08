@@ -190,6 +190,7 @@ struct msp430_timerA3_t
   enum timer_ud_mode_t  udmode;
 };
 
+void    msp430_timerA3_create (void);
 void    msp430_timerA3_reset  (void);
 void    msp430_timerA3_update (void);
 void    msp430_timerA3_capture(void);
@@ -199,6 +200,8 @@ int8_t  msp430_timerA3_read8  (uint16_t addr);
 void    msp430_timerA3_write8 (uint16_t addr, int8_t val);
 int     msp430_timerA3_chkifg ();
 
+#else
+#define msp430_timerA3_create() do { } while (0)
 #endif
 
 /***************************************************/
@@ -229,6 +232,7 @@ struct msp430_timerA5_t
 {
 };
 
+void    msp430_timerA5_create (void);
 void    msp430_timerA5_reset  (void);
 void    msp430_timerA5_update (void);
 void    msp430_timerA5_capture(void);
@@ -236,6 +240,8 @@ int16_t msp430_timerA5_read   (uint16_t addr);
 void    msp430_timerA5_write  (uint16_t addr, int16_t val);
 #define msp430_timerA5_chkifg() 0
 
+#else
+#define msp430_timerA5_create() do { } while (0)
 #endif /* have_timera5 */
 
 /***************************************************/
@@ -385,6 +391,7 @@ struct msp430_timerB_t
   int  tbr_limit;
 };
 
+void    msp430_timerB_create (void);
 void    msp430_timerB_reset  (void);
 void    msp430_timerB_update (void);
 void    msp430_timerB_capture(void);
@@ -392,6 +399,8 @@ int16_t msp430_timerB_read   (uint16_t addr);
 void    msp430_timerB_write  (uint16_t addr, int16_t val);
 int     msp430_timerB_chkifg (void);
 
+#else
+#define msp430_timerB_create() do { } while (0)
 #endif /* have_timerb */
 
 /***************************************************/

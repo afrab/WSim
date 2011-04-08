@@ -17,12 +17,6 @@
 /* ************************************************** */
 /* ************************************************** */
 
-typedef int8_t  (*addr_map_read8_t  ) (uint16_t addr);
-typedef void    (*addr_map_write8_t ) (uint16_t addr, int8_t val);
-
-typedef int16_t (*addr_map_read16_t ) (uint16_t addr);
-typedef void    (*addr_map_write16_t) (uint16_t addr, int16_t val);
-
 #define ADDR64K 0x10000
 
 static addr_map_read8_t   pread8  [ADDR64K];
@@ -318,49 +312,40 @@ void msp430_io_set_flash_read_normal (uint16_t start, uint16_t stop)
 /* ** I/O Function pointers assignment ************** */
 /* ************************************************** */
 
-static void P8_ADDR(uint16_t i, uint16_t ADDR,
-		    addr_map_read8_t read8, addr_map_write8_t write8)
+void msp430_io_register_addr8(uint16_t addr, 
+                              addr_map_read8_t read8, addr_map_write8_t write8)
 {
-  if (i == ADDR)
-    {
-     msp430_set_readptr8(read8,i);
-     msp430_set_writeptr8(write8,i);
-  }
+  msp430_set_readptr8  (read8,  addr);
+  msp430_set_writeptr8 (write8, addr);
 }
 
-static void P8(uint16_t i, uint16_t start, uint16_t stop, 
-	       addr_map_read8_t read8, addr_map_write8_t write8)
+void msp430_io_register_range8(uint16_t start, uint16_t stop, 
+                               addr_map_read8_t read8, addr_map_write8_t write8)
 {
-  if ((i>=start) && (i<=stop))
+  uint32_t addr;
+  for(addr = start; addr <= stop; addr++)
     {
-      msp430_set_readptr8(read8,i);
-      msp430_set_writeptr8(write8,i);
+      msp430_set_readptr8  (read8,  addr);
+      msp430_set_writeptr8 (write8, addr);
     }
 }
 
 
-static void P16_ADDR(uint16_t i, uint16_t ADDR,
-		     addr_map_read16_t read16, addr_map_write16_t write16)
+void msp430_io_register_addr16(uint16_t addr, 
+                               addr_map_read16_t read16, addr_map_write16_t write16)
 {
-  if (i == ADDR)
-    {
-      msp430_set_readptr16(read16,i);
-      msp430_set_writeptr16(write16,i);
-    }
+  msp430_set_readptr16  (read16,  addr);
+  msp430_set_writeptr16 (write16, addr);
 }
 
-static void P16(uint16_t i, uint16_t start, uint16_t stop, 
-		addr_map_read16_t read16, addr_map_write16_t write16)
+void msp430_io_register_range16(uint16_t start, uint16_t stop, 
+                                addr_map_read16_t read16, addr_map_write16_t write16)
 {
-  if ((i & 1) != 0)
+  uint32_t addr;
+  for(addr = start; addr <= stop; addr+=2)
     {
-      return;
-    }
-
-  if ((i>=start) && (i<=stop))
-    {
-      msp430_set_readptr16(read16,i);
-      msp430_set_writeptr16(write16,i);
+      msp430_set_readptr16  (read16,  addr);
+      msp430_set_writeptr16 (write16, addr);
     }
 }
 
@@ -368,9 +353,10 @@ static void P16(uint16_t i, uint16_t start, uint16_t stop,
 /* ************************************************** */
 /* ************************************************** */
 
-int msp430_io_init(void)
+void msp430_io_create(void)
 {
-  int32_t i;
+  uint32_t i;
+
   memset(pread8  ,0,sizeof(pread8));
   memset(pwrite8 ,0,sizeof(pwrite8));
   memset(pread16 ,0,sizeof(pread16));
@@ -378,149 +364,31 @@ int msp430_io_init(void)
 
   for(i=0; i < ADDR64K; i++) 
     {
-      P8_ADDR  (i,i,msp430_read8_sigbus,  msp430_write8_sigbus);
-      P16_ADDR (i,i,msp430_read16_sigbus, msp430_write16_sigbus);
+      msp430_io_register_addr8 (i, msp430_read8_sigbus,  msp430_write8_sigbus);
+      msp430_io_register_addr16(i, msp430_read16_sigbus, msp430_write16_sigbus);
     }
 
-  for(i=0; i < ADDR64K; i++)
-    {
-      // ///////
-      // 8 bits
-      // ///////
-      P8(i,SFR_START,SFR_END,msp430_sfr_read,msp430_sfr_write);
+  // memory 
+  msp430_io_register_range8(ADDR_FLASH_START,  ADDR_FLASH_STOP,  msp430_read8_flash,  msp430_write8_flash);
+  msp430_io_register_range8(ADDR_RAM_START,    ADDR_RAM_STOP,    msp430_read8_ram,    msp430_write8_ram);
+  msp430_io_register_range8(ADDR_NVM_START,    ADDR_NVM_STOP,    msp430_read8_flash,  msp430_write8_flash);
 
-#if defined(__msp430_have_svs_at_55)
-      P8_ADDR(i,SVSCTL,msp430_svs_read,msp430_svs_write);
-#endif
-#if defined(__msp430_have_basic_clock)
-      P8(i,BC_START,BC_END,msp430_basic_clock_read,msp430_basic_clock_write);
-#endif
-#if defined(__msp430_have_basic_clock_plus)
-      P8_ADDR(i,BCP_BCSCTL3,msp430_basic_clock_plus_read,msp430_basic_clock_plus_write);
-      P8(i,BCP_START,BCP_END,msp430_basic_clock_plus_read,msp430_basic_clock_plus_write);
-#endif
-#if defined(__msp430_have_fll_and_xt2)
-      P8(i,FLL_START,FLL_END,msp430_fll_clock_read,msp430_fll_clock_write);
-#endif
-#if defined(__msp430_have_basic_timer)
-      P8(i,BASIC_TIMER_START,BASIC_TIMER_END,msp430_basic_timer_read,msp430_basic_timer_write);
-#endif
-      
-      P8(i,DIGIIO_START,DIGIIO_END,msp430_digiIO_mcu_read,msp430_digiIO_mcu_write);
-      
-#if defined(__msp430_have_uscia0)
-      P8_ADDR(i,UCA0ABCTL,msp430_uscia0_read,msp430_uscia0_write);
-      P8_ADDR(i,UCA0IRTCTL,msp430_uscia0_read,msp430_uscia0_write);
-      P8_ADDR(i,UCA0IRRCTL,msp430_uscia0_read,msp430_uscia0_write);
-      P8(i,USCIA0_START,USCIA0_END,msp430_uscia0_read,msp430_uscia0_write);
-#endif
-      
-#if defined(__msp430_have_uscib0)
-      P8(i,USCIB0_START,USCIB0_END,msp430_uscib0_read,msp430_uscib0_write);
-#endif
-#if defined(__msp430_have_usart0)
-      P8(i,USART0_START,USART0_END,msp430_usart0_read,msp430_usart0_write);
-#endif
-#if defined(__msp430_have_usart1)
-      P8(i,USART1_START,USART1_END,msp430_usart1_read,msp430_usart1_write);
-#endif
-#if defined(__msp430_have_lcd)
-      P8(i,LCD_IOMEM_BEGIN,LCD_IOMEM_END,msp430_lcd_read,msp430_lcd_write);
-#endif
-#if defined(__msp430_have_cmpa)
-      P8(i,CMPA_START,CMPA_END,msp430_cmpa_read,msp430_cmpa_write);
-#endif
+  msp430_io_register_range16(ADDR_FLASH_START, ADDR_FLASH_STOP, msp430_read16_flash,  msp430_write16_flash);
+  msp430_io_register_range16(ADDR_RAM_START,   ADDR_RAM_STOP,   msp430_read16_ram,    msp430_write16_ram);
+  msp430_io_register_range16(ADDR_NVM_START,   ADDR_NVM_STOP,   msp430_read16_flash,  msp430_write16_flash);
 
-#if defined(__msp430_have_hwmul)
-      P16(i,HWMUL_START,HWMUL_END,  msp430_hwmul_read, msp430_hwmul_write);
-      P8 (i,HWMUL_START,HWMUL_END+1,msp430_hwmul_read8,msp430_hwmul_write8);
-#endif
-	
-      P8(i,ADDR_FLASH_START,  ADDR_FLASH_STOP,  msp430_read8_flash,        msp430_write8_flash);
-      P8(i,ADDR_RAM_START,    ADDR_RAM_STOP,    msp430_read8_ram,          msp430_write8_ram);
-      P8(i,ADDR_NVM_START,    ADDR_NVM_STOP,    msp430_read8_flash,        msp430_write8_flash);
 #if defined(ADDR_BOOT_START)
-      P8(i,ADDR_BOOT_START,   ADDR_BOOT_STOP,   msp430_read8_flash,        msp430_write8_flash);
+  msp430_io_register_range16(ADDR_BOOT_START,ADDR_BOOT_STOP,msp430_read16_flash,msp430_write16_flash);
+  msp430_io_register_range8 (ADDR_BOOT_START,ADDR_BOOT_STOP,msp430_read8_flash, msp430_write8_flash);
 #endif
+
 #if defined(ADDR_MIRROR_START)
-      P8(i,ADDR_MIRROR_START, ADDR_MIRROR_STOP, msp430_read8_ram_mirrored, msp430_write8_ram_mirrored);
+  msp430_io_register_range16(ADDR_MIRROR_START,ADDR_MIRROR_STOP, 
+                             msp430_read16_ram_mirrored, msp430_write16_ram_mirrored);
+  msp430_io_register_range8 (ADDR_MIRROR_START,ADDR_MIRROR_STOP, 
+                             msp430_read8_ram_mirrored, msp430_write8_ram_mirrored);
 #endif
 
-      P16(i,ADDR_FLASH_START,  ADDR_FLASH_STOP,  msp430_read16_flash,        msp430_write16_flash);
-      P16(i,ADDR_RAM_START,    ADDR_RAM_STOP,    msp430_read16_ram,          msp430_write16_ram);
-      P16(i,ADDR_NVM_START,    ADDR_NVM_STOP,    msp430_read16_flash,        msp430_write16_flash);
-#if defined(ADDR_BOOT_START)
-      P16(i,ADDR_BOOT_START,   ADDR_BOOT_STOP,   msp430_read16_flash,        msp430_write16_flash);
-#endif
-#if defined(ADDR_MIRROR_START)
-      P16(i,ADDR_MIRROR_START, ADDR_MIRROR_STOP, msp430_read16_ram_mirrored, msp430_write16_ram_mirrored);
-#endif
-
-
-#if defined(__msp430_have_timera3)
-	  P8_ADDR(i,TAIV,msp430_timerA3_read8,msp430_timerA3_write8);
-	  P8     (i,TIMER_A3_START,TIMER_A3_END+1,msp430_timerA3_read8,msp430_timerA3_write8);
-#endif
-#if defined(__msp430_have_adc12)
-	  P8 (i,ADC12MCTL0,ADC12MCTL15,msp430_adc12_read8 ,msp430_adc12_write8);
-#endif
-#if defined(__msp430_have_adc10)
-	  P8_ADDR (i,ADC10AE  ,msp430_adc10_read8 ,msp430_adc10_write8);
-	  P8_ADDR (i,ADC10DTC0,msp430_adc10_read8 ,msp430_adc10_write8);
-	  P8_ADDR (i,ADC10DTC1,msp430_adc10_read8 ,msp430_adc10_write8);
-#endif
-
-      // ////////
-      // 16 bits
-      // ////////
-      if ((i & 1) == 0)
-	{
-#if defined(__msp430_have_watchdog)
-	  P16(i,WATCHDOG_START,WATCHDOG_END,msp430_watchdog_read,msp430_watchdog_write);
-#endif
-#if defined(__msp430_have_timera3)
-	  P16_ADDR(i,TAIV,msp430_timerA3_read,msp430_timerA3_write);
-	  P16(i,TIMER_A3_START,TIMER_A3_END,msp430_timerA3_read,msp430_timerA3_write);
-#endif
-#if defined(__msp430_have_timera5) 
-	  P16_ADDR(i,TA1IV,msp430_timerA5_read,msp430_timerA5_write);
-	  P16(i,TIMER_A5_START,TIMER_A5_END,msp430_timerA5_read,msp430_timerA5_write);
-#endif
-#if defined(__msp430_have_timerb3) || defined(__msp430_have_timerb7)
-	  P16_ADDR(i,TBIV,msp430_timerB_read,msp430_timerB_write);
-	  P16(i,TIMER_B_START,TIMER_B_END,msp430_timerB_read,msp430_timerB_write);
-#endif
-#if defined(__msp430_have_dma)
-	  P16_ADDR(i,DMACTL0,msp430_dma_read,msp430_dma_write);
-	  P16_ADDR(i,DMACTL1,msp430_dma_read,msp430_dma_write);
-	  P16(i,DMA_START,DMA_END,msp430_dma_read,msp430_dma_write);
-#endif
-#if defined(__msp430_have_flash)
-	  P16(i,FLASHCTL_START,FLASHCTL_END,msp430_flash_read,msp430_flash_write);
-#endif
-#if defined(__msp430_have_adc12)
-	  P16(i,ADC12CTL0 ,ADC12IV    ,msp430_adc12_read16,msp430_adc12_write16);
-	  P16(i,ADC12MEM0 ,ADC12MEM15 ,msp430_adc12_read16,msp430_adc12_write16);
-#endif
-#if defined(__msp430_have_adc10)
-	  P16_ADDR(i,ADC10CTL0,msp430_adc10_read16,msp430_adc10_write16);
-	  P16_ADDR(i,ADC10CTL1,msp430_adc10_read16,msp430_adc10_write16);
-	  P16_ADDR(i,ADC10MEM ,msp430_adc10_read16,msp430_adc10_write16);
-	  P16_ADDR(i,ADC10SA  ,msp430_adc10_read16,msp430_adc10_write16);
-#endif
-#if defined(__msp430_have_dac12)
-	  P16_ADDR(i,DAC12_0CTL,msp430_dac12_read,msp430_dac12_write);
-	  P16_ADDR(i,DAC12_1CTL,msp430_dac12_read,msp430_dac12_write);
-	  P16_ADDR(i,DAC12_0DAT,msp430_dac12_read,msp430_dac12_write);
-	  P16_ADDR(i,DAC12_1DAT,msp430_dac12_read,msp430_dac12_write);
-#endif
-	}
-    }
-
-  /* Notes:
-   * should fill pread/pwrite with memory access functions and test performance
-   */
-  return 0;
 }
 
 /* ************************************************** */

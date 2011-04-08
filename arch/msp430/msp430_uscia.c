@@ -95,6 +95,18 @@ UART mode features include:
 /* ************************************************** */
 /* ************************************************** */
 
+void msp430_uscia0_create()
+{
+  msp430_io_register_addr8 (UCA0ABCTL,msp430_uscia0_read,msp430_uscia0_write);
+  msp430_io_register_addr8 (UCA0IRTCTL,msp430_uscia0_read,msp430_uscia0_write);
+  msp430_io_register_addr8 (UCA0IRRCTL,msp430_uscia0_read,msp430_uscia0_write);
+  msp430_io_register_range8(USCIA0_START,USCIA0_END,msp430_uscia0_read,msp430_uscia0_write);
+}
+
+/* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
+
 static inline int32_t USCIA_MODE_UPDATE_BITCLK(int ucssel)
 {
   int32_t res = 0;

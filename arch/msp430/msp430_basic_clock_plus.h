@@ -177,7 +177,7 @@ struct msp430_basic_clock_plus_t
 
   uint32_t lfxt1_freq;
   uint64_t lfxt1_counter;
-  int      lfxt1_increment;
+  uint32_t lfxt1_increment;
 
   uint32_t dco_freq;
   uint64_t dco_counter;

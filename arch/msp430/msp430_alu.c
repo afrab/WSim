@@ -986,6 +986,9 @@ static inline void msp430_mcu_update(unsigned int msp430_instruction_cycles)
 #if defined(__msp430_have_flash)
   msp430_flash_update();
 #endif
+#if defined(__msp430_have_uscia0)
+  msp430_uscia0_update();   
+#endif
 #if defined(__msp430_have_uscib0)
   msp430_uscib0_update();   
 #endif

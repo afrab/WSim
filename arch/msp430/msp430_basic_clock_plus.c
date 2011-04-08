@@ -47,7 +47,7 @@ static void msp430_basic_clock_plus_adjust_vlo_freq();
 static void msp430_basic_clock_plus_printstate();
 
 /**
-    After a PUC, MCLK and SMCLK are sourced from DCOCLK at ~1.1 MHz (see
+    After a PUC, MCLK and SMCLK are sourced om DCOCLK at ~1.1 MHz (see
     the device-specific data sheet for parameters) and ACLK is sourced from
     LFXT1CLK in LF mode with an internal load capacitance of 6pF.
     
@@ -121,10 +121,8 @@ msp430_basic_clock_plus_reset()
 /* ************************************************** */
 /* ************************************************** */
 
-int 
-msp430_basic_clock_plus_update(int clock_add)
+int msp430_basic_clock_plus_update(int clock_add)
 {
-
 #if defined(HIGH_RES_CLOCK)
   float nano_add = 0;
 #else
@@ -188,6 +186,9 @@ msp430_basic_clock_plus_update(int clock_add)
   } while (0)                     
 #endif
 
+
+
+
   /* OSCOFF -> LFXT1 */
   /* Software can disable LFXT1 by setting OSCOFF, if this signal does not source */
   /* SMCLK or MCLK, as shown in Figure 4-2. */
@@ -199,11 +200,11 @@ msp430_basic_clock_plus_update(int clock_add)
     }
   else
     {
-      // HW_DMSG_CLOCK("    lfxt1 not updated\n");
+       HW_DMSG_CLOCK("    lfxt1 not updated\n");
     }
 
   /* VLOCLK */
-  /* TODO: check if VLOCLK is on when not selected by lfxt1s MCUBCP.bcsctl3.b.lfxt1s == 2 */
+ /* TODO: check if VLOCLK is on when not selected by lfxt1s MCUBCP.bcsctl3.b.lfxt1s == 2 */
   CLOCK_DIVMOD_TEMP(MCUBCP.vlo_increment,MCUBCP.vlo_temp,MCUBCP.vlo_cycle_nanotime);
   MCUBCP.vlo_counter   += MCUBCP.vlo_increment;
 
@@ -301,7 +302,7 @@ msp430_basic_clock_plus_update(int clock_add)
 #if defined(__msp430_have_xt2)
       int temp_sels1 = xt2_temp;
 #else
-      int temp_sels1 = (MCUBCP.bcsctl3.b.lfxt1s == 2) ? MCUBCP.vlo_increment : MCUBCP.lfxt1_increment;
+      int temp_sels1 = (MCUBCP.bcsctl3.b.lfxt1s == 2) ? MCUBCP.vlo_increment : (int)MCUBCP.lfxt1_increment;
 #endif
       
       MCUBCP.SMCLK_temp      += (MCUBCP.bcsctl2.b.sels == 0) ? MCUBCP.dco_increment : temp_sels1;
@@ -351,15 +352,13 @@ msp430_basic_clock_plus_update(int clock_add)
 
 void msp430_basic_clock_plus_update_done()
 {
-#if 0
   MCUBCP.lfxt1_increment  = 0;
-  MCUBCP.xt2_increment    = 0;
+  MCUBCP.vlo_increment    = 0;
   MCUBCP.dco_increment    = 0;
 
   MCUBCP.ACLK_increment   = 0;
   MCUBCP.MCLK_increment   = 0;
   MCUBCP.SMCLK_increment  = 0;
-#endif
 }
 
 /* ************************************************** */

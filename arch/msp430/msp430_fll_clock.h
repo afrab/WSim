@@ -195,5 +195,6 @@ void    msp430_fll_clock_write(uint16_t addr, int8_t val);
 /* ************************************************** */
 #else
 #define msp430_fll_clock_create() do { } while (0)
+#define msp430_fll_clock_reset()  do { } while (0)
 #endif
 #endif /* _H_ */

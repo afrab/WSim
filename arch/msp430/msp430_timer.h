@@ -202,6 +202,7 @@ int     msp430_timerA3_chkifg ();
 
 #else
 #define msp430_timerA3_create() do { } while (0)
+#define msp430_timerA3_reset()  do { } while (0)
 #endif
 
 /***************************************************/
@@ -242,6 +243,7 @@ void    msp430_timerA5_write  (uint16_t addr, int16_t val);
 
 #else
 #define msp430_timerA5_create() do { } while (0)
+#define msp430_timerA5_reset()  do { } while (0)
 #endif /* have_timera5 */
 
 /***************************************************/
@@ -401,6 +403,7 @@ int     msp430_timerB_chkifg (void);
 
 #else
 #define msp430_timerB_create() do { } while (0)
+#define msp430_timerB_reset()  do { } while (0)
 #endif /* have_timerb */
 
 /***************************************************/

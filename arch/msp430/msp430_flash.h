@@ -133,5 +133,6 @@ void    msp430_flash_start_erase (uint16_t addr, int size, uint32_t val);
 /* ************************************************** */
 #else
 #define msp430_flash_create() do { } while (0)
+#define msp430_flash_reset()  do { } while (0)
 #endif /* have_flash */
 #endif

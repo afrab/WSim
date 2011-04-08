@@ -90,5 +90,6 @@ void   msp430_lcd_write(uint16_t addr, int8_t val);
 
 #else
 #define msp430_lcd_create() do { } while (0)
+#define msp430_lcd_reset()  do { } while (0)
 #endif
 #endif

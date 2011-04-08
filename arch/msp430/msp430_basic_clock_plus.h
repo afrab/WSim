@@ -242,5 +242,6 @@ void    msp430_basic_clock_plus_speed_tracer_update();
 /* ************************************************** */
 #else
 #define msp430_basic_clock_plus_create() do { } while (0)
+#define msp430_basic_clock_plus_reset()  do { } while (0)
 #endif /* defined(__msp430_have_basic_clock_plus) */
 #endif /* _H_ */

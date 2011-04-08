@@ -37,6 +37,7 @@ void   msp430_cmpa_write (uint16_t addr, int8_t val);
 
 #else
 #define msp430_cmpa_create() do { } while (0)
+#define msp430_cmpa_reset()  do { } while (0)
 #endif /* have_cmpa */
 #endif
  

@@ -73,5 +73,6 @@ int     msp430_watchdog_chkifg ();
 
 #else
 #define msp430_watchdog_create() do { } while (0)
+#define msp430_watchdog_reset()  do { } while (0)
 #endif /* defined */
 #endif /* header */

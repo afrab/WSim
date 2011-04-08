@@ -260,6 +260,7 @@ int     msp430_dma_chkifg(void);
 #else  /* have_dma */
 
 #define msp430_dma_create()     do { } while (0)
+#define msp430_dma_reset()      do { } while (0)
 
 #define DMA_SET_REQ()           do { } while (0)
 #define DMA_SET_TACCR2()        do { } while (0)

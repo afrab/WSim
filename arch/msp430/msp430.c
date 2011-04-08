@@ -185,7 +185,7 @@ int msp430_mcu_create(int xt1)
   msp430_basic_clock_create();
   msp430_basic_clock_plus_create();
   msp430_fll_clock_create();
-  // serial serial interfaces
+  // serial interfaces
   msp430_uscia0_create();
   msp430_uscib0_create();
   msp430_usart0_create();
@@ -196,12 +196,15 @@ int msp430_mcu_create(int xt1)
   msp430_timerA3_create();
   msp430_timerA5_create();
   msp430_timerB_create();
+  // analog
+  msp430_cmpa_create();
+  msp430_adc10_create();
+  msp430_adc12_create();
+  msp430_dac12_create();
   // misc
   msp430_dma_create();
+  msp430_flash_create();
   msp430_lcd_create();
-  msp430_cmpa_create();
-  msp430_adc12_create();
-  msp430_adc10_create();
 
 
   MCU_CLOCK.lfxt1_freq = xt1;
@@ -251,90 +254,39 @@ int msp430_mcu_create(int xt1)
 
 void mcu_reset(void)
 {
-  msp430_sfr_reset(); /* keep sfr first */
+  /* 
+   * Important: keep sfr first 
+   */
+  msp430_sfr_reset(); 
 
-#if defined(__msp430_have_svs_at_0x55)
-  msp430_svs_reset();
-#endif
-
-  /* system clock */
-#if defined(__msp430_have_basic_clock)
-  msp430_basic_clock_reset();
-#elif defined(__msp430_have_basic_clock_plus)
-  msp430_basic_clock_plus_reset();
-#elif defined(__msp430_have_fll_and_xt2)
-  msp430_fll_clock_reset();
-#else
-  #error "msp430 reset : no system clock"
-#endif
-
-  /* general */
   msp430_alu_reset();
-  msp430_digiIO_reset();
-
-#if defined(__msp430_have_hwmul)
+  msp430_svs_reset();
   msp430_hwmul_reset();
-#endif
-#if defined(__msp430_have_dma)
-  msp430_dma_reset();
-#endif
-#if defined(__msp430_have_flash)
-  msp430_flash_reset();
-#endif
-
-    /* usci_a */
-#if defined(__msp430_have_uscia0)
+  msp430_digiIO_reset();
+  // system clock
+  msp430_basic_clock_reset();
+  msp430_basic_clock_plus_reset();
+  msp430_fll_clock_reset();
+  // serial interfaces
   msp430_uscia0_reset();
-#endif
-  
-  /* usci_b */
-#if defined(__msp430_have_uscib0)
   msp430_uscib0_reset();
-#endif
-  
-  /* usart */
-#if defined(__msp430_have_usart0)
   msp430_usart0_reset();
-#endif
-#if defined(__msp430_have_usart1)
   msp430_usart1_reset();
-#endif
-
-  /* timers */
-#if defined(__msp430_have_watchdog)
+  // timers
   msp430_watchdog_reset();
-#endif
-#if defined(__msp430_have_basic_timer)
   msp430_basic_timer_reset();
-#endif
-#if defined(__msp430_have_timera3)
   msp430_timerA3_reset();
-#endif
-#if defined(__msp430_have_timera5)
   msp430_timerA5_reset();
-#endif
-#if defined(__msp430_have_timerb3) || defined(__msp430_have_timerb7)
   msp430_timerB_reset();
-#endif
-
-  /* cmp, adc, dac */
-#if defined(__msp430_have_cmpa)
-  msp430_cmpa_reset();
-#endif
-#if defined(__msp430_have_adc12)
-  msp430_adc12_reset();
-#endif
-#if defined(__msp430_have_adc10)
+  // analog
   msp430_adc10_reset();
-#endif
-#if defined(__msp430_have_dac12)
+  msp430_adc12_reset();
   msp430_dac12_reset();
-#endif
-
-  /* misc */
-#if defined(__msp430_have_lcd)
+  msp430_cmpa_reset();
+  // misc
+  msp430_dma_reset();
+  msp430_flash_reset();
   msp430_lcd_reset();
-#endif
 
 #if defined(SOFT_INTR)
   MCU.soft_intr         = 0;

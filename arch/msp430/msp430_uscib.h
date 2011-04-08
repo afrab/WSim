@@ -142,6 +142,7 @@ int    msp430_uscib0_dev_write_spi_ok  ();
 
 #else
 #define msp430_uscib0_create() do { } while (0)
+#define msp430_uscib0_reset()  do { } while (0)
 #endif
 
 /* ************************************************** */

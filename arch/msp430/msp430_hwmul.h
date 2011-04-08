@@ -55,6 +55,7 @@ void    msp430_hwmul_write8  (uint16_t addr, int8_t val);
 
 #else
 #define msp430_hwmul_create() do { } while (0)
+#define msp430_hwmul_reset()  do { } while (0)
 #endif // __have_hwmul
 
 #endif // MSP430

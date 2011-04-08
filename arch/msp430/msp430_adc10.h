@@ -41,5 +41,6 @@ void    msp430_adc10_write8 (uint16_t addr, int8_t val);
 /* ************************************************** */
 #else
 #define msp430_adc10_create() do { } while (0)
+#define msp430_adc10_reset()  do { } while (0)
 #endif /* have_adc10 */
 #endif

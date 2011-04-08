@@ -269,6 +269,7 @@ void   msp430_usart0_dev_write_uart    (uint8_t val);
 int    msp430_usart0_dev_write_uart_ok ();
 #else
 #define msp430_usart0_create() do { } while (0)
+#define msp430_usart0_reset()  do { } while (0)
 #endif
 
 /* ************************************************** */
@@ -305,6 +306,7 @@ void   msp430_usart1_dev_write_uart    (uint8_t val);
 int    msp430_usart1_dev_write_uart_ok ();
 #else
 #define msp430_usart1_create() do { } while (0)
+#define msp430_usart1_reset()  do { } while (0)
 #endif
 
 /* ************************************************** */

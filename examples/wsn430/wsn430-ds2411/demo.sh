@@ -27,7 +27,7 @@ UI=""
 
 
 ## =============WSIM=====================
-WS1="${WSIM} ${MODE} ${LOG} ${TRC} ${DS0} ${SERIAL} ./wsn430-ds2411.elf"
+WS1="${WSIM} ${MODE} ${LOG} ${TRC} --ds2411=${DS0} ${SERIAL} ./wsn430-ds2411.elf"
 xterm -T wsim-1 -e "${WS1}" &
 echo "${WS1}"
 ## ======================================

@@ -202,7 +202,13 @@ int main(void)
 #endif
 
   asm("add #0,r0");
-  
+
+  printf("sizeof char      : %d\n",sizeof(char));
+  printf("sizeof short     : %d\n",sizeof(short));
+  printf("sizeof int       : %d\n",sizeof(int));
+  printf("sizeof long      : %d\n",sizeof(long int));
+  printf("sizeof long long : %d\n",sizeof(long long int));
+
   printf("Test program ready.\n");
 
   printf("should fail: ");

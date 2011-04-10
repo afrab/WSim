@@ -261,6 +261,8 @@ struct msp430_sfr_t
 
 void    msp430_sfr_create();
 void    msp430_sfr_reset();
+#define msp430_sfr_update() do { } while (0)
+
 int8_t  msp430_sfr_read (uint16_t addr);
 void    msp430_sfr_write(uint16_t addr, int8_t val);
 

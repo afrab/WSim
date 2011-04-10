@@ -99,6 +99,7 @@ struct msp430_digiIO_t
 
 void    msp430_digiIO_create            (void);
 void    msp430_digiIO_reset             (void);
+#define msp430_digiIO_update()          do { } while (0)
 
 int8_t  msp430_digiIO_mcu_read          (uint16_t addr);
 void    msp430_digiIO_mcu_write         (uint16_t addr, int8_t val);

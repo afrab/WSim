@@ -62,5 +62,6 @@ int    msp430_basic_timer_chkifg();
 #else
 #define msp430_basic_timer_create() do { } while(0)
 #define msp430_basic_timer_reset()  do { } while(0)
+#define msp430_basic_timer_update() do { } while(0)
 #endif
 #endif

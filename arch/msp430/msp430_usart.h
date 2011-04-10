@@ -270,6 +270,7 @@ int    msp430_usart0_dev_write_uart_ok ();
 #else
 #define msp430_usart0_create() do { } while (0)
 #define msp430_usart0_reset()  do { } while (0)
+#define msp430_usart0_update() do { } while (0)
 #endif
 
 /* ************************************************** */
@@ -307,6 +308,7 @@ int    msp430_usart1_dev_write_uart_ok ();
 #else
 #define msp430_usart1_create() do { } while (0)
 #define msp430_usart1_reset()  do { } while (0)
+#define msp430_usart1_update() do { } while (0)
 #endif
 
 /* ************************************************** */

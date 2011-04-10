@@ -35,5 +35,6 @@ void   msp430_svs_write (uint16_t addr, int8_t val);
 #else
 #define msp430_svs_create() do { } while (0)
 #define msp430_svs_reset()  do { } while (0)
+#define msp430_svs_update() do { } while (0)
 #endif /* have_svs */
 #endif

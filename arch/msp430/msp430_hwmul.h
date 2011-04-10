@@ -46,6 +46,7 @@ struct msp430_hwmul_t {
 
 void    msp430_hwmul_create  ();
 void    msp430_hwmul_reset   ();
+#define msp430_hwmul_update() do { } while (0)
 
 int16_t msp430_hwmul_read16  (uint16_t addr);
 void    msp430_hwmul_write16 (uint16_t addr, int16_t val);
@@ -56,6 +57,7 @@ void    msp430_hwmul_write8  (uint16_t addr, int8_t val);
 #else
 #define msp430_hwmul_create() do { } while (0)
 #define msp430_hwmul_reset()  do { } while (0)
+#define msp430_hwmul_update() do { } while (0)
 #endif // __have_hwmul
 
 #endif // MSP430

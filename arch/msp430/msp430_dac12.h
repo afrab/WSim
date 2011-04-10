@@ -36,5 +36,6 @@ void    msp430_dac12_write (uint16_t addr, int16_t val);
 #else
 #define msp430_dac12_create() do { } while (0)
 #define msp430_dac12_reset()  do { } while (0)
+#define msp430_dac12_update() do { } while (0)
 #endif /* have_dac12 */
 #endif

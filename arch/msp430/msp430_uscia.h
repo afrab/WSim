@@ -250,6 +250,7 @@ int    msp430_uscia0_dev_write_uart_ok  ();
 #else
 #define msp430_uscia0_create() do { } while (0)
 #define msp430_uscia0_reset()  do { } while (0)
+#define msp430_uscia0_update() do { } while (0)
 #endif
 /* ************************************************** */
 /* ************************************************** */

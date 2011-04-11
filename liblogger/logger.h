@@ -111,7 +111,7 @@ do {                                         \
 #if defined(DEBUG)
 #define HW_DMSG(x...)     VERBOSE(5,x) 
 #define DEBUG_MCU      0
-#define DEBUG_MCUDEV   1
+#define DEBUG_MCUDEV   0
 #define DEBUG_MACH     0
 #define DEBUG_DEV      0
 #define DEBUG_PLATFORM 0

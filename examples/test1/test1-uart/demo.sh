@@ -13,12 +13,12 @@ fi
 
 case $SERMODE in
     "stdout")
-        SERIAL="--serial1_io=stdout"
         NCCMD=""
+        SERIAL="--serial1_io=stdout"
         ;;
     "UDP")
-        NCCMD="${NETCAT} -u -p 7000 localhost 6000"
-        SERIAL="--serial1_io=udp:localhost:6000:localhost:7000"
+        NCCMD="${NETCAT} -u -p 7000 localhost 6010"
+        SERIAL="--serial1_io=udp:localhost:6010:localhost:7000"
         ;;
     "TCP")
         NCCMD="${NETCAT} localhost 6000"
@@ -30,9 +30,10 @@ esac
 ## ##################################################
 
 WSIM=wsim-msp1611
-WSIM=~/tmp/wsim/platforms/tests/wsim-msp1611
 
-${WSIM}  --ui ${SERIAL} --trace=wsim.trc uart.elf &
+CMD="${WSIM} --ui ${SERIAL} --trace=wsim.trc uart.elf"
+echo $CMD
+$CMD &
 
 ## ##################################################
 ## ##################################################

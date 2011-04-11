@@ -294,7 +294,7 @@ int devices_update()
 #define READ_DEV_TO_UART(DEV,USART,MASK)                    \
 do                                                          \
   {                                                         \
-    if (MCU.USART.uxrx_shift_empty == 1)                    \
+    if (msp430_##USART##_dev_write_uart_ok())		    \
       {                                                     \
          machine.device[ DEV ].read( DEV ,&mask,&value);    \
          if ((mask & MASK) != 0)                            \

@@ -20,9 +20,9 @@
 /***************************************************/
 /***************************************************/
 
-#define DEBUG_PTTY
+#define DEBUG_PTTY 0
 
-#ifdef DEBUG_PTTY
+#if DEBUG_PTTY != 0
 #    define HW_DMSG_PTTY(x...) HW_DMSG_DEV(x)
 #else
 #    define HW_DMSG_PTTY(x...) do { } while (0)

@@ -12,14 +12,15 @@
 #include "arch/common/debug.h"
 #include "mgetopt.h"
 
-#undef DEBUG
-#ifdef DEBUG
+#define DEBUG 0
+
+#if DEBUG != 0
 #  define DMSG(x...)  fprintf(stderr,x)
 #else
 #  define DMSG(x...)  do { } while(0)
 #endif
 
-#define ERROR(x...)  fprintf(stderr,x)
+#define ERROR(x...)    fprintf(stderr,x)
 #define WARNING(x...)  fprintf(stderr,x)
 
 

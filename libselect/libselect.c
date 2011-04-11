@@ -52,8 +52,8 @@
  * dimensions are fixed
  ****************************************/
 
-#define SELECT_SKIP_UPDATES_e
-#if defined(SELECT_SKIP_UPDATES)
+#define SELECT_SKIP_UPDATES 0
+#if SELECT_SKIP_UPDATES != 0
 #define LIBSELECT_UPDATE_SKIP   200
 #endif
 
@@ -195,7 +195,7 @@ int libselect_update_registered()
   struct timeval timeout;
   unsigned char buffer[BUFFER_MAX];
 
-#if defined(SELECT_SKIP_UPDATES)
+#if SELECT_SKIP_UPDATES != 0
   static int skippy = 0;
   if (skippy < LIBSELECT_UPDATE_SKIP)
     {

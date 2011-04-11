@@ -12,15 +12,12 @@
 
 #include "arch/common/hardware.h"
 #include "arch/msp430/msp430.h"
+
 #include "devices/devices.h"
 #include "devices/led/led_dev.h"
 #include "devices/ptty/ptty_dev.h"
 #include "src/options.h"
 
-#if defined(GUI)
-#include "libgui/ui.h"
-#define UI_EVENT_SKIP (10*1000)
-#endif
 
 /* ****************************************
  * platform description 
@@ -60,9 +57,9 @@
 
 #if defined(__msp430_have_usart1)
 #  define SERIAL1           10
-#  define FREE_DEVICE_MAX   11
+#  define BOARD_DEVICE_MAX   11
 #else
-#  define FREE_DEVICE_MAX   10
+#  define BOARD_DEVICE_MAX   10
 #endif
 
 
@@ -124,7 +121,7 @@ int devices_create()
   /*********************************/
   /* fix peripheral sizes          */
   /*********************************/
-  machine.device_max           = FREE_DEVICE_MAX;
+  machine.device_max           = BOARD_DEVICE_MAX;
   machine.device_size[SYSTEM]  = sizeof(struct test1_struct_t);
   machine.device_size[LED1]    = led_device_size();    // Led1
   machine.device_size[LED2]    = led_device_size();    // Led2
@@ -146,18 +143,23 @@ int devices_create()
   /*********************************/
   /* create peripherals            */
   /*********************************/
+
+#  define ON  0xee0000
+#  define BKG 0x000000
+#  define OFF 0x202020
+
   res += system_create          (SYSTEM);
-  res += led_device_create      (LED1,0xee,0,0,"led1");
-  res += led_device_create      (LED2,0xee,0,0,"led2");
-  res += led_device_create      (LED3,0xee,0,0,"led3");
-  res += led_device_create      (LED4,0xee,0,0,"led4");
-  res += led_device_create      (LED5,0xee,0,0,"led5");
-  res += led_device_create      (LED6,0xee,0,0,"led6");
-  res += led_device_create      (LED7,0xee,0,0,"led7");
-  res += led_device_create      (LED8,0xee,0,0,"led8");
+  res += led_device_create      (LED1,ON,OFF,BKG,"led1");
+  res += led_device_create      (LED2,ON,OFF,BKG,"led2");
+  res += led_device_create      (LED3,ON,OFF,BKG,"led3");
+  res += led_device_create      (LED4,ON,OFF,BKG,"led4");
+  res += led_device_create      (LED5,ON,OFF,BKG,"led5");
+  res += led_device_create      (LED6,ON,OFF,BKG,"led6");
+  res += led_device_create      (LED7,ON,OFF,BKG,"led7");
+  res += led_device_create      (LED8,ON,OFF,BKG,"led8");
   res += ptty_device_create     (SERIAL0,0);
 #if defined(SERIAL1)
-  res += ptty_device_create     (SERIAL1,0);
+  res += ptty_device_create     (SERIAL1,1);
 #endif
 
   /*********************************/
@@ -191,6 +193,16 @@ int devices_create()
 /* devices init conditions should be written here */
 int devices_reset_post()
 {
+  int refresh = 0;
+  REFRESH(LED1);
+  REFRESH(LED2);
+  REFRESH(LED3);
+  REFRESH(LED4);
+  REFRESH(LED5);
+  REFRESH(LED6);
+  REFRESH(LED7);
+  REFRESH(LED8);
+  ui_refresh(refresh);
   return 0;
 }
 
@@ -253,16 +265,27 @@ int devices_update()
 	 msp430_usart0_dev_write_uart(value & PTTY_D);
      }
 
-  /* input on UI */
-  ui_default_input("test1:");
+#if defined(SERIAL1)
+  /* input on usart0 line */
+  if (msp430_usart1_dev_write_uart_ok())
+     {
+       uint32_t mask,value;
+       machine.device[SERIAL1].read(SERIAL1,&mask,&value);
+       if ((mask & PTTY_D) != 0)
+	 msp430_usart1_dev_write_uart(value & PTTY_D);
+     }
+#endif
+
+  /* input on GUI */
+  ui_default_input("test1:devices");
 
   /* *************************************************************************** */
   /* update                                                                      */
   /* *************************************************************************** */
   LIBSELECT_UPDATE();
   LIBWSNET_UPDATE();
-  UPDATE(SERIAL0);
 
+  UPDATE(SERIAL0);
 #if defined(SERIAL1)
   UPDATE(SERIAL1);
 #endif

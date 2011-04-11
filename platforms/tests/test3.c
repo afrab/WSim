@@ -19,11 +19,6 @@
 #include "devices/uigfx/uigfx_dev.h"
 #include "src/options.h"
 
-#if defined(GUI)
-#include "libgui/ui.h"
-#define UI_EVENT_SKIP 1000
-#endif
-
 /* ****************************************
  * platform description 
  *
@@ -125,9 +120,7 @@ int devices_create()
   machine.device_size[SERIAL0] = ptty_device_size();
   machine.device_size[SERIAL1] = ptty_device_size();
   machine.device_size[SPIDEV1] = spidev_device_size();
-#if defined(LOGO1)
-  machine.device_size[LOGO1]  = uigfx_device_size();
-#endif
+  machine.device_size[LOGO1]   = uigfx_device_size();
 
   /*********************************/
   /* allocate memory               */
@@ -138,15 +131,10 @@ int devices_create()
   /* create peripherals            */
   /*********************************/
 
-#if defined(LOGO1)
 #  define BKG 0xffffff
 #  define OFF 0x202020
 #  include "wsim.xpm"
 #  define WSIM wsim
-#else
-#  define BKG 0x000000
-#  define OFF 0x202020
-#endif
 
   res += system_create          (SYSTEM);
   res += led_device_create      (LED1,    0xee0000,OFF,BKG,"led1");
@@ -160,22 +148,18 @@ int devices_create()
   res += ptty_device_create     (SERIAL0, 0);
   res += ptty_device_create     (SERIAL1, 1);
   res += spidev_device_create   (SPIDEV1, 0);
-#if defined(LOGO1)
   res += uigfx_device_create    (LOGO1,   wsim);
-#endif
 
   /*********************************/
   /* place peripherals Gui         */
   /*********************************/
-#if defined(GUI)
+
   {
     int lw,lh;
     int LW,LH;
 
     machine.device[LED1].ui_get_size(LED1,&lw,&lh);
-#if defined(LOGO1)
     machine.device[LOGO1].ui_get_size(LOGO1, &LW, &LH);
-#endif
 
     machine.device[LED1].ui_set_pos(LED1,    0,  0);
     machine.device[LED2].ui_set_pos(LED2,   lw,  0);
@@ -185,11 +169,9 @@ int devices_create()
     machine.device[LED6].ui_set_pos(LED6, 5*lw,  0);
     machine.device[LED7].ui_set_pos(LED7, 6*lw,  0);
     machine.device[LED8].ui_set_pos(LED8, 7*lw,  0);
-#if defined(LOGO1)
     machine.device[LOGO1].ui_set_pos (LOGO1,        0,   0);
-#endif
   }
-#endif
+
   /*********************************/
   /* end of platform specific part */
   /*********************************/
@@ -300,7 +282,7 @@ int devices_update()
 #define READ_DEV_TO_UART(DEV,USART,MASK)                    \
 do                                                          \
   {                                                         \
-    if (MCU.USART.uxrx_shift_empty == 1)                    \
+    if (msp430_##USART##_dev_write_uart_ok())		    \
       {                                                     \
          machine.device[ DEV ].read( DEV ,&mask,&value);    \
          if ((mask & MASK) != 0)                            \
@@ -314,14 +296,11 @@ while(0)
 #define READ_DEV_TO_SPI(DEV,USART,MASK)			    \
 do                                                          \
   {                                                         \
-    if (MCU.USART.uxrx_shift_empty == 1)                    \
-      {                                                     \
          machine.device[ DEV ].read( DEV ,&mask,&value);    \
          if ((mask & MASK) != 0)                            \
            {                                                \
 	     msp430_##USART##_dev_write_spi(value & MASK);  \
            }                                                \
-      }                                                     \
   }                                                         \
 while(0)
 

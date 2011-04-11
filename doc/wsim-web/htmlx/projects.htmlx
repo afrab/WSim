@@ -30,6 +30,7 @@
     
     ENTRY( 1 day   , , Add mode to slow down simulation to meet realtime mode. )
     ENTRY( 1 day   , , Improve WSNet1 information tracing output. )
+    ENTRY( 1 day   , , Upgrade drivers and examples to newer version of MspGCC4. )
     ENTRY( 2 days  , 15% , Move source code building system from autoconf/automake 
                        to <a href="http://www.cmake.org/">Cmake</a>. )
     ENTRY( 2 days  , , Build binary packages for Linux and Windows using the Cmake system and 
@@ -55,7 +56,7 @@
     ENTRY( 1 week  , , Add <a href="http://www.maxim-ic.com/datasheet/index.mvp/id/2766">ds1722</a> 
 		       peripheral model for Senslab platforms. )
     ENTRY( 1 week  , , Implement I2C on USART for MSP430 micro-controllers. )
-    ENTRY( 2 weeks , , MSP430 refactoring to support 20 bits pointers and address.)
+    ENTRY( 2 weeks , 5% , MSP430 refactoring and 20 bits support for pointers and address.)
     ENTRY( 2 weeks , , Write unit tests for msp430 MCUs and peripherals.)
     ENTRY( 2 weeks , , Write unit tests for Atmel MCUs and peripherals.)
     ENTRY( 2 weeks , , Benchmark and test the ez430RF2500 platform and build and energy profile for WSim/eSimu. )

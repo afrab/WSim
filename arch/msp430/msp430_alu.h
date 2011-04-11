@@ -118,6 +118,8 @@ struct msp430_alu_t {
 /*                      */
 /************************/
 
-void     msp430_alu_reset (void);
+void         msp430_alu_reset    (void);
+unsigned int msp430_mcu_run_insn (void);
+unsigned int msp430_mcu_run_lpm  (void);
 
 #endif

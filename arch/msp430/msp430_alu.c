@@ -946,138 +946,11 @@ static inline void WRITE(int m, int b, int r, uint16_t a, int16_t res)
 /******************************************************************************************/
 /******************************************************************************************/
 
-static inline void msp430_mcu_update(unsigned int msp430_instruction_cycles)
+unsigned int msp430_mcu_run_insn()
 {
-  int time;
-#if defined(DEBUG_ME_HARDER)
-  uint16_t debug_SR = SR;
-  uint16_t debug_IV = MCU_IV;
-#endif
-  
-  /*****************************/
-  /* basic clock must be first */
-  /*****************************/
-  time = MCU_CLOCK_SYSTEM_UPDATE(msp430_instruction_cycles);
-  
-  MACHINE_TIME_SET_INCR(time);
-  //  HW_DMSG_INTR("-");
-
-  
-  /********************/
-  /* internal devices */
-  /********************/
-  msp430_watchdog_update();
-#if defined(__msp430_have_basic_timer)
-  msp430_basic_timer_update();
-#endif
-#if defined(__msp430_have_timera3)
-  msp430_timerA3_update();
-#endif
-#if defined(__msp430_have_timera5)
-  msp430_timerA5_update();
-#endif
-#if defined(__msp430_have_timerb3) || defined(__msp430_have_timerb7)
-  msp430_timerB_update();
-#endif
-
-#if defined(__msp430_have_dma)
-  msp430_dma_update();
-#endif
-#if defined(__msp430_have_flash)
-  msp430_flash_update();
-#endif
-#if defined(__msp430_have_uscia0)
-  msp430_uscia0_update();   
-#endif
-#if defined(__msp430_have_uscib0)
-  msp430_uscib0_update();   
-#endif
-#if defined(__msp430_have_usart0)
-  msp430_usart0_update();   
-#endif
-#if defined(__msp430_have_usart1)
-  msp430_usart1_update();
-#endif
-  
-#if defined(__msp430_have_lcd)
-  msp430_lcd_update();
-#endif
-  
-#if defined(__msp430_have_cmpa)
-  msp430_cmpa_update();
-#endif
-#if defined(__msp430_have_adc12)
-  msp430_adc12_update();
-#endif
-#if defined(__msp430_have_adc10)
-  msp430_adc10_update();
-#endif
-#if defined(__msp430_have_dac12)
-  msp430_dac12_update();
-#endif
-
-  /***************************/
-  /* external devices update */
-  /***************************/
-  devices_update(); /* update digi IO ports */
-  
-  /************************************/
-  /* timers capture operations        */
-  /************************************/
-#if defined(__msp430_have_timera3)
-  msp430_timerA3_capture();
-#endif
-#if defined(__msp430_have_timera5)
-  msp430_timerA5_capture();
-#endif
-#if defined(__msp430_have_timerb3) || defined(__msp430_have_timerb7)
-  msp430_timerB_capture();
-#endif
-
-  /******************************************/
-  /* clear update flags on internal devices */
-  /******************************************/
-  msp430_digiIO_update_done();
-  
-  MCU_CLOCK_SYSTEM_UPDATE_DONE();
-  
-  /*********************************/
-  /* etrace for eSimu              */
-  /*********************************/
-  etracer_slot_end(time); /* record current slot, start a new one */
-
-#if defined(DEBUG_ME_HARDER)
-  if (((debug_SR & MASK_GIE) == 0) && ((SR & MASK_GIE) == MASK_GIE))
-    {
-      HW_DMSG_INTR("msp430:intr:debug:update: GIE set back to 1 at PC=0x%04x\n",mcu_get_pc());
-      TRACER_TRACE_GIE(1); 
-    }
-  if (debug_IV != MCU_IV)
-    {
-      HW_DMSG_INTR("msp430:intr:debug:update: IV set to 0x%08x at PC=0x%04x\n",MCU_IV,mcu_get_pc());
-    }
-#endif
-
-  MCU_ALU.etracer_except = msp430_interrupt_start_if_any();
-
-  /*********************************/
-  /* check for a pending interrupt */
-  /*********************************/
-  
-  MACHINE_TIME_CLR_INCR();
-}
-
-/******************************************************************************************/
-/******************************************************************************************/
-/******************************************************************************************/
-
-static void msp430_mcu_run_insn()
-{
-  do 
-    {
       uint16_t insn;
       unsigned int opcode;
-      unsigned int msp430_instruction_cycles;
+      unsigned int msp430_instruction_cycles = 0; // used through SET_CYCLES(n)
 
 #if defined(DEBUG_ME_HARDER)
       uint16_t debug_SR = SR;
@@ -1137,7 +1010,7 @@ static void msp430_mcu_run_insn()
 	    default:
 	      ERROR("msp430:alu: MCU_SIGTRAP %d (0x%04x) unknown\n",insn,insn);
 	    }
-	  return;
+	  return msp430_instruction_cycles;
 
 	  	  
 	  /* ********************************************************************** */
@@ -1367,7 +1240,7 @@ static void msp430_mcu_run_insn()
 		    WARNING("msp430: PC:0x%04x software internal mov 6 : MCU TRAP\n",MCU_ALU.curr_pc & 0xffff); 
 		    mcu_signal_add(SIG_MCU | SIG_MCU_TRAP);
 		    SET_CYCLES(0);
-		    return;
+		    return msp430_instruction_cycles;
 
 		  case 0x4707: 
 		    tracer_start();
@@ -1713,7 +1586,7 @@ static void msp430_mcu_run_insn()
           ERROR("msp430:alu: Unknown opcode 0x%04x at 0x%04x\n", insn, MCU_ALU.curr_pc);
 	  SET_CYCLES(0);
 	  mcu_signal_add(SIG_MCU | SIG_MCU_ILL);
-	  return;
+	  return msp430_instruction_cycles;
 
         } /* case OP_*/
 
@@ -1749,84 +1622,18 @@ static void msp430_mcu_run_insn()
 			MCU_ALU.etracer_reti);
 #endif
 
-      /* device updates */
-      msp430_mcu_update(msp430_instruction_cycles);
-
-    }
-  while (MCU_ALU.signal == 0);
+      return msp430_instruction_cycles;
 }
 
 /******************************************************************************************/
 /******************************************************************************************/
 /******************************************************************************************/
 
-static inline void msp430_mcu_run_lpm(void)
+unsigned int msp430_mcu_run_lpm(void)
 {
 #define LPM_UPDATE_CYCLES 4
-  do { 
-    etracer_slot_set_pc( MCU_ALU.curr_pc );
-    msp430_mcu_update(LPM_UPDATE_CYCLES);
-  } while (MCU_ALU.signal == 0); 
-}
-
-/******************************************************************************************/
-/******************************************************************************************/
-/******************************************************************************************/
-
-/**
- * msp430_mcu_run
- * low power state machine handling
- */
-void mcu_run()
-{
-  uint32_t signal;
-  int curr_run_mode;
-  int prev_run_mode;
-
-  curr_run_mode = RUNNING_MODE(); 
-  MCU_CLOCK_SYSTEM_SPEED_TRACER();
-
-  do {
-    /*
-     * if (runmode & 1 == 1) then the cpuoff bit is set and MCLK is disabled 
-     */
-    if ((curr_run_mode & 1) == 0)
-      {
-	msp430_mcu_run_insn();
-      }
-    else
-      {
-	/* VERBOSE(3,"msp430: run LPM mode\n"); */
-	msp430_mcu_run_lpm();
-      }
-
-    prev_run_mode = curr_run_mode; 
-    curr_run_mode = RUNNING_MODE();
-    signal        = mcu_signal_get();
-
-    /*
-     * update rmode after a couple of instructions
-     */
-    if ((signal & SIG_MCU_LPM_CHANGE) != 0)
-      {
-	HW_DMSG_LPM("msp430:lpm: Low power mode [%s] changed to [%s] at [%" PRId64 "]\n",
-		    msp430_lpm_names[prev_run_mode],          
-		    msp430_lpm_names[curr_run_mode], 
-		    MACHINE_TIME_GET_NANO());
-	TRACER_TRACE_LPM(curr_run_mode);
-	MCU_CLOCK_SYSTEM_SPEED_TRACER();
-	mcu_signal_remove(SIG_MCU_LPM_CHANGE); 
-	signal = mcu_signal_get();
-
-	/* we were AM, we are going at least LPM0 */
-	if (((prev_run_mode & 1) == 0) && ((curr_run_mode & 1) != 0))
-	  {
-	    etracer_slot_set_ns();
-	  }
-
-      }
-
-  } while (signal == 0);
+  etracer_slot_set_pc( MCU_ALU.curr_pc );
+  return LPM_UPDATE_CYCLES;
 }
 
 /******************************************************************************************/

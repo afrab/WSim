@@ -196,12 +196,16 @@ void machine_exit(int arg)
 static inline uint32_t machine_run(void)
 {
   uint32_t sig;
-  /*
-   *  HW_DMSG_MACH("machine: run()\n"); 
-   */
+
+  mcu_system_clock_speed_tracer_update();
+
   do {
 
-    mcu_run();
+    mcu_run();         // MCU step
+    devices_update();  // call platform
+    mcu_update_done(); // MCU step done
+
+    MACHINE_TIME_CLR_INCR();
 
     sig = mcu_signal_get();
     if ((sig & SIG_MAC) != 0)

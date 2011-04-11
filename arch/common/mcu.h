@@ -118,6 +118,7 @@ void     mcu_print_description  (void);
 
 void     mcu_reset              (void);
 void     mcu_run                (void);
+void     mcu_update_done        (void);
 
 int      mcu_registers_number   (void);
 uint16_t mcu_register_get       (int i);
@@ -141,6 +142,8 @@ void     mcu_dump_stats         (int64_t user_nanotime);
 
 uint64_t mcu_get_cycles         (void);
 uint64_t mcu_get_insn           (void);
+
+void     mcu_system_clock_speed_tracer_update(void);
 
 /* ************************************** */
 /* ************************************** */

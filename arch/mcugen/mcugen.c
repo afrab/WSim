@@ -105,28 +105,22 @@ static void mcugen_mcu_update(unsigned int cycles)
 /******************************************************************************************/
 /******************************************************************************************/
 
-static void mcugen_mcu_run_insn(void)
+unsigned int mcugen_mcu_run_insn(void)
 {
-  do 
-    {
-      unsigned int cycles = 0;
-      // MCU_ALU.pc = MCU_ALU.next_pc;
-      // cycles = mcugen_execute_insn();
-      mcugen_mcu_update(cycles);
-    }
-  while (MCU.signal == 0);
+  unsigned int cycles = 0;
+  // MCU_ALU.pc = MCU_ALU.next_pc;
+  // cycles = mcugen_execute_insn();
+  return cycles; 
 }
 
 /******************************************************************************************/
 /******************************************************************************************/
 /******************************************************************************************/
 
-static void mcugen_mcu_run_lpm(void)
+unsigned int mcugen_mcu_run_lpm(void)
 {
 #define LPM_UPDATE_CYCLES 2
-  do {
-    mcugen_mcu_update(LPM_UPDATE_CYCLES);
-  } while (MCU.signal == 0);
+  return LPM_UPDATE_CYCLES;
 }
 
 /******************************************************************************************/
@@ -147,45 +141,63 @@ void mcu_run(void)
   uint32_t signal;
   int curr_run_mode;
   int prev_run_mode;
+  unsigned int cycles;
 
   curr_run_mode = mcugen_running_mode(); 
 
-  do {
-    if ((curr_run_mode & 1) == 0)
-      {
-	mcugen_mcu_run_insn();
-      }
-    else
-      {
-	mcugen_mcu_run_lpm();
-      }
+  if ((curr_run_mode & 1) == 0)
+    {
+      cycles = mcugen_mcu_run_insn();
+    }
+  else
+    {
+      cycles = mcugen_mcu_run_lpm();
+    }
 
-    prev_run_mode = curr_run_mode; 
-    curr_run_mode = mcugen_running_mode();
-    signal        = mcu_signal_get();
-
-    if ((signal & SIG_MCU_LPM_CHANGE) != 0)
-      {
-	HW_DMSG("mcugen:lpm: Low power mode changed at [%" PRId64 "]\n",
-		    MACHINE_TIME_GET_NANO());
-	mcu_signal_remove(SIG_MCU_LPM_CHANGE); 
-	signal = mcu_signal_get();
-
-	/* we were AM, we are going at least LPM0 */
-	if (((prev_run_mode & 1) == 0) && ((curr_run_mode & 1) != 0))
-	  {
-	    etracer_slot_set_ns();
-	  }
-
-      }
-
-  } while (MCU.signal == 0);
-
+  mcugen_mcu_update(cycles);
+  signal        = mcu_signal_get();
+  
+  if ((signal & SIG_MCU_LPM_CHANGE) != 0)
+    {
+      prev_run_mode = curr_run_mode; 
+      curr_run_mode = mcugen_running_mode();
+      HW_DMSG("mcugen:lpm: Low power mode changed at [%" PRId64 "]\n",
+              MACHINE_TIME_GET_NANO());
+      mcu_signal_remove(SIG_MCU_LPM_CHANGE); 
+      signal = mcu_signal_get();
+      
+      /* we were AM, we are going at least LPM0 */
+      if (((prev_run_mode & 1) == 0) && ((curr_run_mode & 1) != 0))
+	{
+	  etracer_slot_set_ns();
+	}
+      
+    }
 }
 
 /******************************************************************************************/
 /******************************************************************************************/
 /******************************************************************************************/
+
+void mcu_update_done()
+{
+  // clear flags for this simulation step
+  // etracer_slot_end( MACHINE_TIME_GET_INCR() ); 
+  // start IRQ if any is pending
+}
+
+/******************************************************************************************/
+/******************************************************************************************/
+/******************************************************************************************/
+
+void mcu_system_clock_speed_tracer_update(void)
+{
+  // MCU_CLOCK_SYSTEM_SPEED_TRACER();
+}
+
+/* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
 
 uint64_t mcu_get_cycles(void)
 {

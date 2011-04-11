@@ -3126,7 +3126,7 @@ static inline unsigned int extract_opcode(uint16_t insn)
 /******************************************************************************************/
 /******************************************************************************************/
 
-static void atmega128_mcu_update(unsigned int UNUSED cycles)
+void atmega128_mcu_update(unsigned int UNUSED cycles)
 {
     /* time update from cycles     */
     /* internal devices update (1) */
@@ -3134,38 +3134,54 @@ static void atmega128_mcu_update(unsigned int UNUSED cycles)
     /* internal devices update (2) */
 }
 
-/******************************************************************************************/
-/******************************************************************************************/
-/******************************************************************************************/
-
-static void atmega128_mcu_run_insn(void)
+void mcu_update_done()
 {
-    do {
-        uint16_t insn       = 0;
-        unsigned int opcode = 0;
-        unsigned int cycles = 0;
+    /* time update from cycles     */
+    /* internal devices update (1) */
+    /* external devices update     */
+    /* internal devices update (2) */
 
-        MCU_ALU.pc = MCU_ALU.next_pc;
-        insn = atmega128_flash_read_short(MCU_ALU.pc << 1);
-        opcode = extract_opcode(insn);
-        MCU_INSN_CPT  += 1;
-#if defined(ETRACE)
-        /* eslot */
-#endif
-        atmega128_mcu_update(cycles);
-    } while (MCU_ALU.signal == 0);
+  /*
+   * etrace for eSimu
+   * record current slot, start a new one
+   */
+  //  etracer_slot_end( MACHINE_TIME_GET_INCR() ); 
+
+  /*
+   * Pending IRQ
+   */
+  // MCU_ALU.etracer_except = atmega128_interrupt_start_if_any();
 }
 
 /******************************************************************************************/
 /******************************************************************************************/
 /******************************************************************************************/
 
-static void atmega128_mcu_run_lpm(void)
+unsigned int atmega128_mcu_run_insn(void)
+{
+  uint16_t insn       = 0;
+  unsigned int opcode = 0;
+  unsigned int cycles = 0;
+  
+  MCU_ALU.pc = MCU_ALU.next_pc;
+  insn = atmega128_flash_read_short(MCU_ALU.pc << 1);
+  opcode = extract_opcode(insn);
+  MCU_INSN_CPT  += 1;
+#if defined(ETRACE)
+  /* eslot */
+#endif
+  return cycles;
+}
+
+/******************************************************************************************/
+/******************************************************************************************/
+/******************************************************************************************/
+
+unsigned int atmega128_mcu_run_lpm(void)
 {
 #define LPM_UPDATE_CYCLES 2
-    do {
-        atmega128_mcu_update(LPM_UPDATE_CYCLES);
-    } while (MCU_ALU.signal == 0);
+  //  etracer_slot_set_pc( MCU_ALU.curr_pc );
+  return LPM_UPDATE_CYCLES;
 }
 
 /******************************************************************************************/
@@ -3176,42 +3192,38 @@ void mcu_run(void)
 {
     int curr_run_mode;
     int prev_run_mode;
+    unsigned int cycles;
 
     curr_run_mode = RUNNING_MODE();
-    //MCU_CLOCK_SYSTEM_SPEED_TRACER();
 
-    do {
-        if (1==1) { /* current run mode == active */
-            HW_DMSG_FD("----------------------------------------------\n");
-            atmega128_mcu_run_insn();
-            HW_DMSG_FD("\n");
-        } else {
-            atmega128_mcu_run_lpm();
-        }
-
-        prev_run_mode = curr_run_mode;
-        curr_run_mode = RUNNING_MODE();
-
-        /*
-         * update rmode after a couple of instructions
-         */
-        if (MCU_ALU.signal & SIG_MCU_LPM_CHANGE) {
-            HW_DMSG_LPM("atmega128:lpm: Low power mode [%s] changed to [%s] at [%" PRId64 "]\n",
-                        atmega128_lpm_names[prev_run_mode],
-                        atmega128_lpm_names[curr_run_mode],
-                        MACHINE_TIME_GET_NANO());
-            //TRACER_TRACE_LPM(curr_run_mode);
-            //MCU_CLOCK_SYSTEM_SPEED_TRACER();
-            MCU_ALU.signal &= ~SIG_MCU_LPM_CHANGE;
-
-            if (((prev_run_mode & 1) == 0) && ((curr_run_mode & 1) != 0)) {
-                etracer_slot_set_ns();
-            }
-
-        }
-
-    } while (MCU_ALU.signal == 0);
-
+    if (1==1) { /* current run mode == active */
+      cycles = atmega128_mcu_run_insn();
+    } else {
+      cycles = atmega128_mcu_run_lpm();
+    }
+    
+    atmega128_mcu_update(cycles);
+    
+    /*
+     * update rmode after a couple of instructions
+     */
+    if (MCU_ALU.signal & SIG_MCU_LPM_CHANGE) 
+      {
+	prev_run_mode = curr_run_mode;
+	curr_run_mode = RUNNING_MODE();
+	HW_DMSG_LPM("atmega128:lpm: Low power mode [%s] changed to [%s] at [%" PRId64 "]\n",
+	            atmega128_lpm_names[prev_run_mode],
+	            atmega128_lpm_names[curr_run_mode],
+	            MACHINE_TIME_GET_NANO());
+	//TRACER_TRACE_LPM(curr_run_mode);
+	//MCU_CLOCK_SYSTEM_SPEED_TRACER();
+	MCU_ALU.signal &= ~SIG_MCU_LPM_CHANGE;
+	
+	if (((prev_run_mode & 1) == 0) && ((curr_run_mode & 1) != 0)) 
+	  {
+	    etracer_slot_set_ns();
+	  }
+      }
 }
 
 /******************************************************************************************/

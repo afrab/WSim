@@ -106,13 +106,9 @@ msp430_basic_clock_reset()
   msp430_basic_clock_adjust_dco_freq();
 
 #if defined(HIGH_RES_CLOCK)
-  MCUBC.lfxt1_cycle_nanotime = (MCUBC.lfxt1_freq > 0) ? ((float)NANO / (float)MCUBC.lfxt1_freq) : 0.0;
   MCUBC.xt2_cycle_nanotime   = (MCUBC.xt2_freq   > 0) ? ((float)NANO / (float)MCUBC.xt2_freq)   : 0.0;
-  MCUBC.dco_cycle_nanotime   = (float)NANO / (float)MCUBC.dco_freq;
 #else
-  MCUBC.lfxt1_cycle_nanotime = (MCUBC.lfxt1_freq > 0) ? (NANO / MCUBC.lfxt1_freq) : 0;
   MCUBC.xt2_cycle_nanotime   = (MCUBC.xt2_freq   > 0) ? (NANO / MCUBC.xt2_freq)   : 0;
-  MCUBC.dco_cycle_nanotime   = NANO / MCUBC.dco_freq;
 #endif
 
   msp430_basic_clock_printstate();
@@ -163,16 +159,20 @@ msp430_basic_clock_update(int clock_add)
 #if defined(HIGH_RES_CLOCK)
 #define CLOCK_DIVMOD_TEMP(inc,tmp,nanotime)   \
   do {                                        \
-    tmp += nano_add;                          \
-    inc  = tmp / nanotime;                    \
-    tmp  = tmp - (inc * nanotime);            \
+    if (nanotime > 0) {                       \
+      tmp += nano_add;			      \
+      inc  = tmp / nanotime;		      \
+      tmp  = tmp - (inc * nanotime);	      \
+    }					      \
   } while (0)                     
 #else
 #define CLOCK_DIVMOD_TEMP(inc,tmp,nanotime)   \
   do {                                        \
-    tmp += nano_add;                          \
-    inc = tmp / nanotime;                     \
-    tmp %= nanotime;                          \
+    if (nanotime > 0) {	                      \
+      tmp += nano_add;			      \
+      inc = tmp / nanotime;		      \
+      tmp %= nanotime;			      \
+    }					      \
   } while (0)                     
 #endif
 
@@ -477,9 +477,9 @@ msp430_basic_clock_adjust_lfxt1_freq()
 {
   /*  MCUBC.lfxt1_freq           = DEFAULT_LFXT1_FREQ; */
 #if defined(HIGH_RES_CLOCK)
-  MCUBC.lfxt1_cycle_nanotime = (float)NANO / (float)MCUBC.lfxt1_freq;
+  MCUBC.lfxt1_cycle_nanotime = (MCUBC.lfxt1_freq > 0) ? ((float)NANO / (float)MCUBC.lfxt1_freq) : 0.0;
 #else
-  MCUBC.lfxt1_cycle_nanotime = NANO / MCUBC.lfxt1_freq;
+  MCUBC.lfxt1_cycle_nanotime = (MCUBC.lfxt1_freq > 0) ? (NANO / MCUBC.lfxt1_freq) : 0;
 #endif
 }
 

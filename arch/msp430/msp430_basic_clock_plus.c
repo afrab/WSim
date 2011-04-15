@@ -113,16 +113,6 @@ msp430_basic_clock_plus_reset()
   msp430_basic_clock_plus_adjust_dco_freq();
   msp430_basic_clock_plus_adjust_vlo_freq();
 
-#if defined(HIGH_RES_CLOCK)
-  MCUBCP.lfxt1_cycle_nanotime = (MCUBCP.lfxt1_freq > 0) ? ((float)NANO / (float)MCUBCP.lfxt1_freq) : 0.0;
-  MCUBCP.vlo_cycle_nanotime   = (MCUBCP.vlo_freq   > 0) ? ((float)NANO / (float)MCUBCP.vlo_freq)   : 0.0;
-  MCUBCP.dco_cycle_nanotime   = (float)NANO / (float)MCUBCP.dco_freq;
-#else
-  MCUBCP.lfxt1_cycle_nanotime = (MCUBCP.lfxt1_freq > 0) ? (NANO / MCUBCP.lfxt1_freq) : 0;
-  MCUBCP.vlo_cycle_nanotime   = (MCUBCP.vlo_freq   > 0) ? (NANO / MCUBCP.vlo_freq)   : 0;
-  MCUBCP.dco_cycle_nanotime   = NANO / MCUBCP.dco_freq;
-#endif
-
   msp430_basic_clock_plus_printstate();
   if (firsttime == 0)
     {
@@ -189,16 +179,20 @@ msp430_basic_clock_plus_update(int clock_add)
 #if defined(HIGH_RES_CLOCK)
 #define CLOCK_DIVMOD_TEMP(inc,tmp,nanotime)   \
   do {                                        \
-    tmp += nano_add;                          \
-    inc  = tmp / nanotime;                    \
-    tmp  = tmp - (inc * nanotime);            \
+    if (nanotime > 0) {                       \
+      tmp += nano_add;			      \
+      inc  = tmp / nanotime;		      \
+      tmp  = tmp - (inc * nanotime);	      \
+    }					      \
   } while (0)                     
 #else
 #define CLOCK_DIVMOD_TEMP(inc,tmp,nanotime)   \
   do {                                        \
-    tmp += nano_add;                          \
-    inc = tmp / nanotime;                     \
-    tmp %= nanotime;                          \
+    if (nanotime > 0) {                       \
+      tmp += nano_add;			      \
+      inc = tmp / nanotime;		      \
+      tmp %= nanotime;			      \
+    }					      \
   } while (0)                     
 #endif
 
@@ -563,9 +557,9 @@ msp430_basic_clock_plus_adjust_lfxt1_freq()
 {
   /*  MCUBCP.lfxt1_freq           = DEFAULT_LFXT1_FREQ; */
 #if defined(HIGH_RES_CLOCK)
-  MCUBCP.lfxt1_cycle_nanotime = (float)NANO / (float)MCUBCP.lfxt1_freq;
+  MCUBCP.lfxt1_cycle_nanotime = (MCUBCP.lfxt1_freq > 0) ? ((float)NANO / (float)MCUBCP.lfxt1_freq) : 0.0;
 #else
-  MCUBCP.lfxt1_cycle_nanotime = NANO / MCUBCP.lfxt1_freq;
+  MCUBCP.lfxt1_cycle_nanotime = (MCUBCP.lfxt1_freq > 0) ? (NANO / MCUBCP.lfxt1_freq) : 0;
 #endif
 }
 
@@ -628,13 +622,12 @@ msp430_basic_clock_plus_adjust_dco_freq()
 /* ************************************************** */
 
 static void 
-msp430_basic_clock_plus_adjust_vlo_freq() //? (adapté de lfxt1...)
+msp430_basic_clock_plus_adjust_vlo_freq()
 {
-  /*  MCUBCP.lfxt1_freq           = DEFAULT_LFXT1_FREQ; */
 #if defined(HIGH_RES_CLOCK)
-  MCUBCP.vlo_cycle_nanotime = (float)NANO / (float)MCUBCP.vlo_freq;
+  MCUBCP.vlo_cycle_nanotime = (MCUBCP.vlo_freq   > 0) ? ((float)NANO / (float)MCUBCP.vlo_freq)   : 0.0;
 #else
-  MCUBCP.vlo_cycle_nanotime = NANO / MCUBCP.vlo_freq;
+  MCUBCP.vlo_cycle_nanotime = (MCUBCP.vlo_freq   > 0) ? (NANO / MCUBCP.vlo_freq)   : 0;
 #endif
 }
 
@@ -647,7 +640,16 @@ msp430_basic_clock_plus_printstate()
 {
   HW_DMSG_CLOCK("msp430:basic_clock_plus: === Basic Clock state === PC 0x%04x\n",mcu_get_pc());
   HW_DMSG_CLOCK("msp430:basic_clock_plus:  ACLK  ");
-  HW_DMSG_CLOCK("    div: 1 << %d\n",MCUBCP.bcsctl1.b.diva);
+  HW_DMSG_CLOCK("    div: 1 << %d",MCUBCP.bcsctl1.b.diva);
+  HW_DMSG_CLOCK("    src:");
+  switch (MCUBCP.bcsctl3.b.lfxt1s)
+    {
+    case 2: HW_DMSG_CLOCK("vlo"); break;
+    case 0: 
+    case 1: 
+    case 3: HW_DMSG_CLOCK("lfxt1"); break;
+    }
+  HW_DMSG_CLOCK("\n");
 
   HW_DMSG_CLOCK("msp430:basic_clock_plus:  MCLK  ");
   HW_DMSG_CLOCK("    div: 1 << %d",MCUBCP.bcsctl2.b.divm);
@@ -656,7 +658,11 @@ msp430_basic_clock_plus_printstate()
     {
     case 0: 
     case 1: HW_DMSG_CLOCK("dco"); break;
+#if defined(__msp430_have_xt2)
+    case 2: HW_DMSG_CLOCK("xt2");   break;
+#else
     case 2: 
+#endif
     case 3: 
       switch(MCUBCP.bcsctl3.b.lfxt1s)
       {

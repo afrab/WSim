@@ -181,7 +181,7 @@ void msp430_uscia0_update()
 		  {      
 		    DMA_SET_UTXIFG0();
 		  }		      
-		HW_DMSG_USCIA("msp430:uscia0: USCIA tx buf -> shifter (delay %d, val %d)\n", 
+		HW_DMSG_USCIA("msp430:uscia0: USCIA tx buf -> shifter (delay %d, val 0x%02x)\n", 
 			      MCU.uscia0.ucaxtx_shift_delay, MCU.uscia0.ucaxtxbuf);            
 		HW_SPY("msp430:uscia0: USCIA send (0x%x,%c)\n",            
 		    MCU.uscia0.ucaxtxbuf, isgraph(MCU.uscia0.ucaxtxbuf) ?             

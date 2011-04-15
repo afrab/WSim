@@ -20,7 +20,7 @@
 /*************************/
 /* print each clock step */
 /*************************/
-#define DEBUG_EACH_STEP 1
+#define DEBUG_EACH_STEP 0
 
 /*******************************************************************/
 /* check when clocks are disables but still used for signal source */

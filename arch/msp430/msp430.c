@@ -340,29 +340,43 @@ void msp430_devices_update(unsigned int cycles)
 
 void mcu_update_done()
 {
-  /*
-   * timers capture operations
-   */
+  uint32_t signal;
+  /* timers capture operations                    */
   msp430_timerA3_capture();
   msp430_timerA5_capture();
   msp430_timerB_capture();
 
-  /*
-   * clear update flags on internal devices
-   */
+  /* clear update flags on internal devices       */
   msp430_digiIO_update_done();
   MCU_CLOCK_SYSTEM_UPDATE_DONE();
 
-  /*
-   * etrace for eSimu
-   * record current slot, start a new one
-   */
+  /* eSimu: record current slot, start a new one  */
   etracer_slot_end( MACHINE_TIME_GET_INCR() ); 
 
-  /*
-   * Pending IRQ
-   */
+  /* Pending IRQ                                  */
   MCU_ALU.etracer_except = msp430_interrupt_start_if_any();
+
+  /* */
+  signal = mcu_signal_get();
+  if ((signal & SIG_MCU_LPM_CHANGE) != 0)
+    {
+      int prev_run_mode = MCU_ALU.curr_run_mode; 
+      int curr_run_mode = RUNNING_MODE();
+      HW_DMSG_LPM("msp430:lpm: Low power mode [%s] changed to [%s] at [%" PRId64 "]\n",
+                  msp430_lpm_names[prev_run_mode],          
+                  msp430_lpm_names[curr_run_mode], 
+                  MACHINE_TIME_GET_NANO());
+
+      TRACER_TRACE_LPM(curr_run_mode);
+      MCU_CLOCK_SYSTEM_SPEED_TRACER();
+      mcu_signal_remove(SIG_MCU_LPM_CHANGE); 
+       
+      /* we were AM, we are going at least LPM0 */
+      if (((prev_run_mode & 1) == 0) && ((curr_run_mode & 1) != 0))
+	{
+	  etracer_slot_set_ns();
+	}
+    }
 }
 
 /* ************************************************** */
@@ -375,17 +389,14 @@ void mcu_update_done()
  */
 void mcu_run()
 {
-  uint32_t signal;
-  int curr_run_mode;
-  int prev_run_mode;
   unsigned int cycles;
 
-  curr_run_mode = RUNNING_MODE(); 
+  MCU_ALU.curr_run_mode = RUNNING_MODE(); 
 
   /*
    * if (runmode & 1 == 1) then the cpuoff bit is set and MCLK is disabled 
    */
-  if ((curr_run_mode & 1) == 0)
+  if ((MCU_ALU.curr_run_mode & 1) == 0)
     {
       cycles = msp430_mcu_run_insn();
     }
@@ -396,27 +407,6 @@ void mcu_run()
     }
 
   msp430_devices_update(cycles);
-  signal = mcu_signal_get();
-  
-  if ((signal & SIG_MCU_LPM_CHANGE) != 0)
-    {
-      prev_run_mode = curr_run_mode; 
-      curr_run_mode = RUNNING_MODE();
-      HW_DMSG_LPM("msp430:lpm: Low power mode [%s] changed to [%s] at [%" PRId64 "]\n",
-                  msp430_lpm_names[prev_run_mode],          
-                  msp430_lpm_names[curr_run_mode], 
-                  MACHINE_TIME_GET_NANO());
-      TRACER_TRACE_LPM(curr_run_mode);
-      MCU_CLOCK_SYSTEM_SPEED_TRACER();
-      mcu_signal_remove(SIG_MCU_LPM_CHANGE); 
-      signal = mcu_signal_get();
-      
-      /* we were AM, we are going at least LPM0 */
-      if (((prev_run_mode & 1) == 0) && ((curr_run_mode & 1) != 0))
-	{
-	  etracer_slot_set_ns();
-	}
-    }
 }
 
 /* ************************************************** */

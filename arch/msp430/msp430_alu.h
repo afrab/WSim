@@ -22,6 +22,9 @@ struct msp430_alu_t {
   uint64_t         cycle_counter;
   uint64_t         irq_counter;
 
+  // variables used between mcu_run() and mcu_update_done()
+  uint32_t         curr_run_mode;
+
   // etrace + gdb utils
   mcu_register_t   curr_pc;
   mcu_register_t   sequ_pc;

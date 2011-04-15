@@ -250,7 +250,7 @@ inline void machine_run_free(void)
   uint32_t sig;
   sig = machine_run();
   
-  HW_DMSG_MACH("machine:run: stopped at 0x%04x with signal %s\n",mcu_get_pc(),mcu_signal_str());
+  HW_DMSG_MACH("machine:run: stopped at 0x%04x with signal 0x%x=%s\n",mcu_get_pc(),sig,mcu_signal_str());
   /*
    * Allowed outside tools signals
    *    SIG_GDB | SIG_CONSOLE | SIG_WORLDSENS_IO 

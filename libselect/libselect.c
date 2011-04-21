@@ -475,7 +475,31 @@ libselect_id_t libselect_id_create(char *argname, int UNUSED flags)
       libselect.entry[id].fd_in      = -1;
       libselect.entry[id].fd_out     = fd;
     }
-  else 
+  else if (strchr(cmdline,',') != NULL)
+    {
+      // cmdline = output, input 
+      char *c;
+      int fd_in, fd_out;
+      
+      c = strchr(cmdline,',');
+      c[0] = '\0';
+      c = c+1;
+
+      if ((fd_out = open(cmdline,O_WRONLY)) == -1)
+	{
+	  ERROR("wsim:libselect: Cannot open file %s\n",cmdline);
+	  return -1;
+	}
+      if ((fd_in = open(c,O_RDONLY)) == -1)
+	{
+	  ERROR("wsim:libselect: Cannot open file %s\n",c);
+	  return -1;
+	}
+      libselect.entry[id].entry_type = ENTRY_FILE;
+      libselect.entry[id].fd_in      = fd_in;
+      libselect.entry[id].fd_out     = fd_out;
+    }
+  else // cmdline = fifo_out
     {
       int fd;
       if ((fd = open(cmdline,O_WRONLY)) == -1)

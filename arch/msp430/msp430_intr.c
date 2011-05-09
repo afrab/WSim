@@ -14,6 +14,7 @@
 /******************************************************************************************/
 
 void msp430_interrupt_set(int intr_num)
+{
 #if defined(__msp430_have_16_interrupts)
    uint16_t one = 1;
 #elif defined(__msp430_have_32_interrupts)
@@ -21,7 +22,6 @@ void msp430_interrupt_set(int intr_num)
 #elif defined(__msp430_have_64_interrupts)
    uint64_t one = 1;
 #endif
-{
   if ((SR & MASK_GIE) || (intr_num >= INTR_FIRST_NMI)) // interrupt enable or NMI
     {
       HW_DMSG_INTR("msp430:intr: Interrupt %d to be scheduled vector : 0x%04x -> 0x%04x [%"PRIu64"]\n",

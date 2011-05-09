@@ -14,18 +14,25 @@
 /******************************************************************************************/
 
 void msp430_interrupt_set(int intr_num)
+#if defined(__msp430_have_16_interrupts)
+   uint16_t one = 1;
+#elif defined(__msp430_have_32_interrupts)
+   uint32_t one = 1;
+#elif defined(__msp430_have_64_interrupts)
+   uint64_t one = 1;
+#endif
 {
   if ((SR & MASK_GIE) || (intr_num >= INTR_FIRST_NMI)) // interrupt enable or NMI
     {
       HW_DMSG_INTR("msp430:intr: Interrupt %d to be scheduled vector : 0x%04x -> 0x%04x [%"PRIu64"]\n",
-		   intr_num,MCU_IV, MCU_IV | (1 << intr_num), MACHINE_TIME_GET_NANO());
-      MCU_IV |= 1 << intr_num;
+		   intr_num,MCU_IV, MCU_IV | (one << intr_num), MACHINE_TIME_GET_NANO());
+      MCU_IV |= one << intr_num;
     }
   else
     {
       WARNING("msp430:intr: Interrupt %d received but GIE = 0 (current PC = 0x%04x [%"PRIu64"])\n",
 	      intr_num,mcu_get_pc(), MACHINE_TIME_GET_NANO());
-      MCU_IV |= 1 << intr_num;
+      MCU_IV |= one << intr_num;
     }
 }
 
@@ -94,6 +101,9 @@ int msp430_interrupt_start_if_any(void)
 #elif defined(__msp430_have_32_interrupts)
       uint32_t ibit,inum;
       for(ibit=0x80000000u, inum=31; ibit; ibit >>= 1, inum--)
+#elif defined(__msp430_have_64_interrupts)
+      uint64_t ibit,inum;
+      for(ibit=0x8000000000000000u, inum=63; ibit; ibit >>= 1, inum--)
 #endif
 	{
 	  if (MCU_IV & ibit)

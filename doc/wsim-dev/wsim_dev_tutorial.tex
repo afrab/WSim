@@ -18,13 +18,17 @@
 
 
 \title{\huge{WSim tutorial for developers}}
-\author{Loïc Lemaître}
+\author{Loïc Lemaître, Antoine Fraboulet}
 
 
 \begin{document}
   \maketitle
 
-\abstract{This document is aimed to help developers that would like to create or complement modules on WSim. It is not a full description of WSim source code, but a short introduction to allow to understand its architecture. It also gives some ways to debug your WSim code.}
+  \abstract{This document is aimed to help developers that would like
+    to create or complement modules on WSim. It is not a full
+    description of WSim source code, but a short introduction to allow
+    to understand its architecture. It also gives some ways to debug
+    your WSim code.}
 
   \tableofcontents
 
@@ -32,9 +36,7 @@
 
 WSim source code directory (\verb$/wsim$) contains the following subdirectories:
 \begin{itemize}
-  \item \verb$/arch$: implementation of the two supported MCU (MSP430 and ATMEGA).
-
-  \item \verb$/autom4te.cache$:
+  \item \verb$/arch$: implementation of the supported MCU (MSP430, ATMEGA, mcugen).
 
   \item \verb$/devices$: implementation of external peripherals;
 
@@ -56,17 +58,17 @@ WSim source code directory (\verb$/wsim$) contains the following subdirectories:
   
   \item \verb$/liblogpkt$: radio packets logger;
 
-  \item \verb$/libselect$: inputs and outputs between WSim and external application (WConsole, WSnet);
+  \item \verb$/libselect$: inputs and outputs between WSim and external application (WConsole, WSNet);
 
   \item \verb$/libtracer$: WSim traces (\verb$*.trc$);
 
-  \item \verb$/libwsnet$: WSnet interface;
+  \item \verb$/libwsnet$: WSnet interfaces;
 
   \item \verb$/machine$: bind platform model and simulator;
 
   \item \verb$/platforms$: implementation of the different platforms (wsn430, telosb, senslab...);
 
-  \item \verb$/src$: point of entry of the program. Deal with the wsim options (arguments) too;
+  \item \verb$/src$: entry point  of the program. Deal with the WSim options (arguments) too;
 
   \item \verb$/utils$: compilable sources of useful tools (WTracer, WConsole, ...);
 \end{itemize}
@@ -75,45 +77,60 @@ WSim source code directory (\verb$/wsim$) contains the following subdirectories:
 \chapter{Program execution overview}
 \label{prog-exec}
 
-The point of entry of the program is the \verb$main.c$ file located in the \verb$src/$ directory.
+The point of entry of the program is the \verb$main.c$ file located in
+the \verb$src/$ directory.
 
 \section{Initialisation}
-The initialisation is carried out in the \verb$main()$ function of the previous named file.
+The initialisation is carried out in the \verb$main()$ function of the
+previous named file.
+
 \begin{enumerate}
-  \item Program starts by adding program options and specific options of the platform (given on command line);      
-  \item Next step is the initialisation of WSim modules: log messages handler (liblogger), interface with external applications (libselect), traces handler (libtracer and libetrace);
-  \item The machine is then created: machine structure initialisation, and platform (MCU + devices) creation;
-  \item The *.elf program is loaded (if WSim is not in debugging mode);
-  \item Display is created if requested;
-  \item tracer and etracer are started if requested;
-  \item WSim is ready to run.
+\item Program starts by adding program options and specific options of the platform (given on command line);     \item Next step is the initialisation of WSim modules: log messages handler (liblogger), interface with external applications (libselect), traces handler (libtracer and libetrace);
+\item The machine is then created: machine structure initialisation, and platform (MCU + devices) creation;
+\item The *.elf program is loaded (if WSim is not in debugging mode);
+\item Display is created if requested;
+\item tracer and etracer are started if requested;
+\item WSim is ready to run.
 \end{enumerate}
 
 \section{Running}
 WSim supports 5 different simulation modes:
 \begin{itemize}
-  \item \textbf{Standard run}: simulation runs until the end of the *.elf program;
+  \item \textbf{Standard run}: simulation runs endlessly;
   \item \textbf{Instruction}: simulation runs for a predefined number of MCU instruction;
   \item \textbf{Time}: simulation runs for a predefined time;
-  \item \textbf{GDB}: simulation runs in debugging mode, being remoted by GDB;
+  \item \textbf{GDB}: simulation runs in debugging mode, being remotely controlled by GDB;
   \item \textbf{Console}: enables to handle simulation execution from a command line.
 \end{itemize}
 
-At the end of the \verb$main.c$ function, the  \verb$main_run_mode()$ function of the same file is called, in order to select the right simulation mode. At this time WSim is going to execute the first instruction of the *.elf program. Diagram \ref{wsim-instruction} presents the steps of one instruction execution.
+At the end of the \verb$main.c$ function, the \verb$main_run_mode()$
+function of the same file is called, in order to select the right
+simulation mode. At this time WSim is going to execute the first
+instruction of the *.elf program. Diagram \ref{wsim-instruction}
+presents the steps of one instruction execution.
 
 \begin{figure}[ht]
 \begin{center}
   \includegraphics[scale=0.8]{figures/wsim_diag_execution.eps}
 \end{center}
-\caption{Steps of one instruction execution}
+\caption{Steps for one instruction execution}
 \label{wsim-instruction}
 \end{figure}
 
-The core of the instruction execution is the \verb$msp430_mcu_run_insn()$ function of the\\ \verb$/arch/msp430/msp430_alu.c$ file. This function fetches, decodes, executes one instruction, launches devices update and IRQ consideration (performed by \verb$msp430_mcu_update()$ function).
+The core of the instruction execution is the
+\verb$msp430_mcu_run_insn()$ function of the\\
+\verb$/arch/msp430/msp430_alu.c$ file. This function fetches, decodes,
+executes one instruction, launches devices update and IRQ
+consideration (performed by \verb$msp430_mcu_update()$ function).
 
-If the MCU is in low power mode \verb$msp430_mcu_run_lpm()$ of the \verb$/arch/msp430/msp430_alu.c$ file is called instead of \verb$msp430_mcu_run_insn()$.\\
+If the MCU is in low power mode \verb$msp430_mcu_run_lpm()$ of 
+the \verb$/arch/msp430/msp430_alu.c$ file is called instead of 
+\verb$msp430_mcu_run_insn()$.\\
 
-Next paragraph describes the called functions chains, for each WSim mode, to get from the \verb$main.c$ file to the execution of one instruction.
+Next paragraph describes the called functions chains, for each WSim
+mode, to get from the \verb$main.c$ file to the execution of one
+instruction.
+
 \begin{itemize}
   \item Standard run: \verb$machine_run_free()$ $\longrightarrow$ \verb$machine_run()$ $\longrightarrow$ \verb$mcu_run()$ $\longrightarrow$ \verb$msp430_mcu_run_insn()$ or \verb$msp430_mcu_run_lpm()$ $\longrightarrow$ \verb$msp430_mcu_update()$;
   \item Instruction mode: \verb$machine_run_insn()$ $\longrightarrow$ \verb$machine_run()$ $\longrightarrow$ \verb$mcu_run()$ $\longrightarrow$ \\\verb$msp430_mcu_run_insn()$ or \verb$msp430_mcu_run_lpm()$ $\longrightarrow$ \verb$msp430_mcu_update()$;
@@ -140,21 +157,39 @@ For standard, instruction and time modes, statistics of the simulation are writt
 
 \section{Memory}
 \subsection{General}
-Main storage are MCU state, platform external devices state (radio, leds, ...), and possibly internal platform state. A backup of these states is periodically carried out so that it allows to recover easily the previous saved state of the platform in order to backtrack.
+Main storage are MCU state, platform external devices state (radio,
+leds, ...), and possibly internal platform state. A backup of these
+states is periodically carried out so that it allows to recover easily
+the previous saved state of the platform in order to backtrack.
 
 \subsubsection{Devices and platform}
 When a platform is built, an instance of each of its devices is created in order to save its states. The memory allocation  is done by the \verb$devices_memory_allocate()$ function of the \verb$devices.c$ file, located in the \verb$/devices$ directory. This function is called by the platform description file. In this function, the needed space to save the states of every platform device is computed, in order to store all the data in a contiguous memory spaces.  The pointers to access to them are stored into the \verb$machine.devices_state$ and the \verb$machine.devices_state_backup$ (\verb$machine$ is a global structure storing devices states, devices number, devices size and time of simulation).\\
 
-Moreover saving internal platform states may be necessary. They are then stored in a platform specific structure (of your platform file), you have to define. This structure must be saved in the same contiguous space than the devices, by considering it as a device.
+Moreover saving internal platform states may be necessary. They are
+then stored in a platform specific structure (of your platform file),
+you have to define. This structure must be saved in the same
+contiguous space than the devices, by considering it as a device.
 
 \subsubsection{MCU}
-The MCU state and its backup are stored into global structures (\verb$mcu$ and \verb$mcu_backup$), since we know the needed space and as there is only one MCU by platform. So we need not indirections (through pointers) to access to the MCU structure, in spite of the device structure.
+The MCU state and its backup are stored into global structures
+(\verb$mcu$ and \verb$mcu_backup$), since we know the needed space and
+as there is only one MCU by platform. So we need not indirections
+(through pointers) to access to the MCU structure, in spite of the
+device structure.
 
 \subsection{Backtracks}
-Backtracks are used when WSim operates with WSnet. WSim may need to backtrack in two different cases indeed:
+Backtracks are used when WSim operates with WSnet. WSim may need to
+backtrack in two different cases indeed:
+
 \begin{itemize}
-  \item when an event is added before next rendez-vous, and a node is running beyond this event time. An other meeting point is then set at event time, and the state of the node is restored to the last state saved.
-  \item when one of WSim nodes is in debugging mode, and stopped at a breakpoint, the other nodes are still running. As soon as the WSim node in debugging mode is running again, the other nodes are backtracked.
+\item when an event is added before next rendez-vous, and a node is
+  running beyond this event time. An other meeting point is then set
+  at event time, and the state of the node is restored to the last
+  state saved.
+\item when one of WSim nodes is in debugging mode, and stopped at a
+  breakpoint, the other nodes are still running. As soon as the WSim
+  node in debugging mode is running again, the other nodes are
+  backtracked.
 \end{itemize}
 
 \begin{figure}
@@ -173,23 +208,36 @@ Backtracks are used when WSim operates with WSnet. WSim may need to backtrack in
 \label{wsim backtrack 2}
 \end{figure}
 
-State backup saves are performed by WSim nodes through the \verb$void machine_state_save()$ function, as soon as a synchronisation is successfull or a response is received by WSnet from a WSim node. To come back from the present state to the backup one, \verb$void machine_state_restore()$ of the \verb$/machine/machine.c$ file is called. This function executes the following tasks:
+State backup saves are performed by WSim nodes through the
+\verb$void machine_state_save()$ function, as soon as a
+synchronisation is successfull or a response is received by WSnet from
+a WSim node. To come back from the present state to the backup one,
+\verb$void machine_state_restore()$ of the \verb$/machine/machine.c$
+file is called. This function executes the following tasks:
+
 \begin{itemize}
-  \item restoring the state of the MCU (copy of the MCU structure in the MCU backup structure)
-  \item setting the time simulation to the time of the backup
-  \item replacing the content of the present state memory by the content of the backup state one
-  \item restoring traces
-  \item restoring WSnet state
+\item restoring the state of the MCU (copy of the MCU structure in the
+  MCU backup structure)
+\item setting the time simulation to the time of the backup
+\item replacing the content of the present state memory by the content
+  of the backup state one
+\item restoring traces
+\item restoring WSnet state
 \end{itemize}
 
 
 \section{Clocks}
 
-MSP430 time resolution is implemented in nanoseconds in WSim. Each time an instruction is executed, the MCLK is incremented and ACLK, ACLKn, SMCLK are computed according to MCLK value.\\
+MSP430 time resolution is implemented in nanoseconds in WSim. Each
+time an instruction is executed, the MCLK is incremented and ACLK,
+ACLKn, SMCLK are computed according to MCLK value.\\
 
-MSP430 clocks functions are written in the \verb$/arch/msp430/msp430_basic_clock.c$ or\\ \verb$/arch/msp430/msp430_fll_clock.c$ depending of the MSP430 model.\\
+MSP430 clocks functions are written in the
+\verb$/arch/msp430/msp430_basic_clock.c$ or\\
+\verb$/arch/msp430/msp430_fll_clock.c$ depending of the 
+MSP430 model.\\
 
-The figure \ref{wsim-clocks} presents the clocks update chain.
+The figure~\ref{wsim-clocks} presents the clocks update chain.
 
 \begin{figure}[!h]
 \begin{center}
@@ -200,10 +248,11 @@ The figure \ref{wsim-clocks} presents the clocks update chain.
 \end{figure}
 
 %%%%%%%%%%%%%%%A COMPRENDRE ET AJOUTER%%%%%%%%%%%%%%%%%%%%%
-%-Correspond aux é ́ché ́ances du traitement des interruptions
-%-Ecriture des modèles de p ́ériph ́ériques en consé ́quences
+%-Correspond aux échéances du traitement des interruptions
+%-Ecriture des modèles de périphériques en conséquences
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+\section{Input Outputs and libselect module}
 
 
 \section{Signals}

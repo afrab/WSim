@@ -676,8 +676,8 @@ uint64_t cc2420_callback_rx(void *arg, struct wsnet_rx_info *wrx)
 	    /* rx_frame_end will be used in rx_fifo_pop to update the state of FIFOP */
 	    if (cc2420->nb_rx_frames == 0) {
 		cc2420->rx_frame_end = cc2420->rx_frame_start + cc2420->rx_len;
-		if (cc2420->rx_frame_end < 0) {
-		    cc2420->rx_frame_end += CC2420_RAM_RXFIFO_LEN;
+		if (cc2420->rx_frame_end >= CC2420_RAM_RXFIFO_LEN) {
+		  cc2420->rx_frame_end -= CC2420_RAM_RXFIFO_LEN;
 		}
 	    }
 	}

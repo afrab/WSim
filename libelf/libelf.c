@@ -14,7 +14,7 @@
 #include "libelf.h"
 
 #ifdef DEBUG
-#    define HW_DMSG_ELF(x...) HW_DMSG_MACH(x)
+#    define HW_DMSG_ELF(x...) DMSG_LIB_ELF(x)
 #else
 #    define HW_DMSG_ELF(x...) do { } while (0)
 #endif

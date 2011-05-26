@@ -42,9 +42,9 @@ void REAL_STDERR(char* fmp, ...);
  * 5 - HW_DMSG - hardware related messages
  *   -          mcu
  *   -          mcu devices
+ *   -          external devices 
  *   -          platform
- *   -          platform devices 
- *   -          machine
+ *   -          misc
  * 6 - LIB_DMSG -
  *   -          ELF   loader
  *   -          WSNet protocol dump
@@ -112,9 +112,9 @@ do {                                         \
 #define HW_DMSG(x...)     VERBOSE(5,x) 
 #define DEBUG_MCU      0
 #define DEBUG_MCUDEV   0
-#define DEBUG_MACH     0
-#define DEBUG_DEV      0
+#define DEBUG_EXTDEV   0
 #define DEBUG_PLATFORM 0
+#define DEBUG_MISC     0
 #else
 #define HW_DMSG(x...)     do {} while(0)
 #endif
@@ -134,14 +134,7 @@ do {                                         \
 #endif
 
 
-#if DEBUG_MACH != 0
-#    define HW_DMSG_MACH(x...) HW_DMSG(x)
-#else
-#    define HW_DMSG_MACH(x...) do { } while (0)
-#endif
-
-
-#if DEBUG_DEV != 0
+#if DEBUG_EXTDEV != 0
 #    define HW_DMSG_DEV(x...)  HW_DMSG(x)
 #else
 #    define HW_DMSG_DEV(x...)  do { } while (0)
@@ -152,6 +145,13 @@ do {                                         \
 #    define HW_DMSG_PLATFORM(x...)  HW_DMSG(x)
 #else
 #    define HW_DMSG_PLATFORM(x...)  do { } while (0)
+#endif
+
+
+#if DEBUG_MISC != 0
+#    define HW_DMSG_MISC(x...)  HW_DMSG(x)
+#else
+#    define HW_DMSG_MISC(x...)  do { } while (0)
 #endif
 
 

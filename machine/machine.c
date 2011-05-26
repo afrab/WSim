@@ -57,11 +57,11 @@ int machine_create()
   int res = 0;
 
 #if defined(DEBUG_MEMFOOTPRINT)
-  HW_DMSG_MACH("machine: internal memory size is %d bytes\n",(int)sizeof(struct machine_t));
-  HW_DMSG_MACH("  machine_info_t : %d\n",(int)sizeof(struct machine_info_t));
-  HW_DMSG_MACH("  device_t       : %d\n",(int)sizeof(struct device_t));
-  HW_DMSG_MACH("  tracer_t       : %d\n",(int)sizeof(tracer_t));
-  HW_DMSG_MACH("  ui_t           : %d\n",(int)sizeof(struct ui_t));
+  HW_DMSG_MISC("machine: internal memory size is %d bytes\n",(int)sizeof(struct machine_t));
+  HW_DMSG_MISC("  machine_info_t : %d\n",(int)sizeof(struct machine_info_t));
+  HW_DMSG_MISC("  device_t       : %d\n",(int)sizeof(struct device_t));
+  HW_DMSG_MISC("  tracer_t       : %d\n",(int)sizeof(tracer_t));
+  HW_DMSG_MISC("  ui_t           : %d\n",(int)sizeof(struct ui_t));
 #endif
 
   /* zero memory */
@@ -159,7 +159,7 @@ int machine_dump(const char *filename)
 {
   FILE *file;
 
-  HW_DMSG_MACH("machine: dump state to file %s\n",filename);
+  HW_DMSG_MISC("machine: dump state to file %s\n",filename);
   if ((file = fopen(filename, "wb")) == NULL)
     {
       ERROR("machine: cannot dump state to file %s\n",filename);
@@ -250,7 +250,7 @@ inline void machine_run_free(void)
   uint32_t sig;
   sig = machine_run();
   
-  HW_DMSG_MACH("machine:run: stopped at 0x%04x with signal 0x%x=%s\n",mcu_get_pc(),sig,mcu_signal_str());
+  HW_DMSG_MISC("machine:run: stopped at 0x%04x with signal 0x%x=%s\n",mcu_get_pc(),sig,mcu_signal_str());
   /*
    * Allowed outside tools signals
    *    SIG_GDB | SIG_CONSOLE | SIG_WORLDSENS_IO 
@@ -283,7 +283,7 @@ uint64_t machine_run_insn(uint64_t insn)
 {
   uint32_t sig;
   uint64_t i;
-  HW_DMSG_MACH("machine: will run for %" PRIu64 " instructions\n",insn);
+  HW_DMSG_MISC("machine: will run for %" PRIu64 " instructions\n",insn);
 
   mcu_signal_add(SIG_RUN_INSN);
   machine_state_save();
@@ -314,7 +314,7 @@ uint64_t machine_run_insn(uint64_t insn)
 wsimtime_t machine_run_time(wsimtime_t nanotime)
 {
   uint32_t sig;
-  HW_DMSG_MACH("machine: will run for %" PRIu64 " nano seconds\n",nanotime);
+  HW_DMSG_MISC("machine: will run for %" PRIu64 " nano seconds\n",nanotime);
 
   mcu_signal_add(SIG_RUN_TIME);
   machine_state_save();

@@ -221,17 +221,17 @@ struct msp430_uscia_t
 #define USCIA0_START  0x060
 #define USCIA0_END    0x067
 
+#define UCA0ABCTL     0x05D
+#define UCA0IRTCTL    0x05E
+#define UCA0IRRCTL    0x05F
 #define UCA0CTL0      0x060
 #define UCA0CTL1      0x061
 #define UCA0BR0       0x062
 #define UCA0BR1       0x063
 #define UCA0MCTL      0x064
 #define UCA0STAT      0x065
-#define UCA0RXBUF     0x056
+#define UCA0RXBUF     0x066
 #define UCA0TXBUF     0x067
-#define UCA0ABCTL     0x05D
-#define UCA0IRTCTL    0x05E
-#define UCA0IRRCTL    0x05F
 
 
 void   msp430_uscia0_create();

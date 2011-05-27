@@ -597,7 +597,7 @@ msp430_basic_clock_plus_adjust_dco_freq()
   if (MCUBCP.bcsctl2.b.dcor == 0)
     { /* */
       fdco  = (float)fnom[MCUBCP.bcsctl1.b.rsel] * (1.0 + (float)(MCUBCP.dco.b.dco - 3) / 10.0);
-      fdco1 = S_DCO * (float)fdco;
+      fdco1 = S_DCO * (float)fdco;	
     }
   else /* dcor == 1 */
     { 
@@ -605,16 +605,26 @@ msp430_basic_clock_plus_adjust_dco_freq()
       fdco1 = S_DCO * (float)fdco;
     }
 
+
+  
   /* When MODx = 0 the modulator is off. */
   /* dco_freq_time t = (32- MODx) × tDCO + MODx × tDCO+1    */
   
   /* dco_freq = (32 * fdco * fdco1) / (MODx * fdco + (32 - MODx) * fdco1) */
   MCUBCP.dco_freq = (32 * fdco * fdco1) / (MCUBCP.dco.b.mod * fdco + (32 - MCUBCP.dco.b.mod) * fdco1);
+  
+  //---------DEBUG----- 
+  MCUBCP.dco_fdco_calib = (16*(32-MCUBCP.dco.b.mod)*fdco1) / (32 * fdco1 - (16 * MCUBCP.dco.b.mod)); 
+  MCUBCP.dco_fnom_calib = (10 * MCUBCP.dco_fdco_calib) / (MCUBCP.dco.b.dco + 7);
+  //--------------------
+  
 #if defined(HIGH_RES_CLOCK)
   MCUBCP.dco_cycle_nanotime = (float)NANO / (float)MCUBCP.dco_freq;
 #else
   MCUBCP.dco_cycle_nanotime = NANO / MCUBCP.dco_freq;
 #endif
+  
+
 }
 
 /* ************************************************** */
@@ -692,6 +702,8 @@ msp430_basic_clock_plus_printstate()
 
   HW_DMSG_CLOCK("msp430:basic_clock_plus:  dco   ");
   HW_DMSG_CLOCK("    freq:%dHz",MCUBCP.dco_freq);
+  HW_DMSG_CLOCK("    calib_fdco:%dHz",MCUBCP.dco_fdco_calib);
+  HW_DMSG_CLOCK("    ddco_fnom_calib:%dHz",MCUBCP.dco_fnom_calib);
   HW_DMSG_CLOCK("    time:%" HRCTYPE "ns",MCUBCP.dco_cycle_nanotime);
   HW_DMSG_CLOCK("    dcox:%d\n",MCUBCP.dco.b.dco);
   HW_DMSG_CLOCK("msp430:basic_clock_plus:            rselx:%d, mod:%d, resistor:%s, run:%s\n",

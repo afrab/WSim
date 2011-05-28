@@ -256,6 +256,7 @@ struct msp430_usart_t
 void   msp430_usart0_create();
 void   msp430_usart0_reset();
 void   msp430_usart0_update();
+void   msp430_usart0_update_done();
 int8_t msp430_usart0_read (uint16_t addr);
 void   msp430_usart0_write(uint16_t addr, int8_t val);
 int    msp430_usart0_chkifg();
@@ -268,9 +269,10 @@ int    msp430_usart0_dev_read_uart     (uint8_t *val);
 void   msp430_usart0_dev_write_uart    (uint8_t val);
 int    msp430_usart0_dev_write_uart_ok ();
 #else
-#define msp430_usart0_create() do { } while (0)
-#define msp430_usart0_reset()  do { } while (0)
-#define msp430_usart0_update() do { } while (0)
+#define msp430_usart0_create()      do { } while (0)
+#define msp430_usart0_reset()       do { } while (0)
+#define msp430_usart0_update()      do { } while (0)
+#define msp430_usart0_update_done() do { } while (0)
 #endif
 
 /* ************************************************** */

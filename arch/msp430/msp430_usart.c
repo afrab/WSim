@@ -35,22 +35,22 @@ char *str_ssel[] = { "external UCLK", "ACLK", "SMCLK", "SMCLK" };
 /*****************************************************/
 /*****************************************************/
 
-#define TRACER_UART_IDLE     0 
+#define TRACER_UART_IDLE     0x00 
 
-#define TRACER_UART_TX_RECV  1  /* data written to TXBUF      */
-#define TRACER_UART_TX_READY 2  /* data TX shifter ok         */
-#define TRACER_UART_RX_RECV  3  /* data written to Rx shifter */
-#define TRACER_UART_RX_READY 4  /* data written to Rx buff    */
+#define TRACER_UART_TX_RECV  0x01  /* data written to TX buff    */
+#define TRACER_UART_TX_READY 0x02  /* data written to TX shifter */
+#define TRACER_UART_RX_RECV  0x01  /* data written to Rx shifter */
+#define TRACER_UART_RX_READY 0x02  /* data written to Rx buff    */
 
-#define TRACER_SPI_TX_RECV   6
-#define TRACER_SPI_TX_READY  7
-#define TRACER_SPI_RX_RECV   8
-#define TRACER_SPI_RX_READY  9
+#define TRACER_SPI_TX_RECV   0x11
+#define TRACER_SPI_TX_READY  0x12
+#define TRACER_SPI_RX_RECV   0x11
+#define TRACER_SPI_RX_READY  0x12
 
-#define TRACER_I2C_TX_RECV   11
-#define TRACER_I2C_TX_READY  12
-#define TRACER_I2C_RX_RECV   13
-#define TRACER_I2C_RX_READY  14
+#define TRACER_I2C_TX_RECV   0x21
+#define TRACER_I2C_TX_READY  0x22
+#define TRACER_I2C_RX_RECV   0x21
+#define TRACER_I2C_RX_READY  0x22
 
 /*****************************************************/
 /*****************************************************/
@@ -411,12 +411,13 @@ do {                                                                          \
 		     MCU.USART.uxrx_shift_buf,                                \
                      isgraph(MCU.USART.uxrx_shift_buf) ?                      \
                      MCU.USART.uxrx_shift_buf : '.');                         \
-            }                                                                 \
-          /*tracer_event_record(TRACER_USART##NUM,TRACER_UART_RX_READY);*/    \
+            }								      \
+          TRACER_TRACE_USART##NUM##RX(TRACER_UART_RX_READY);                  \
           MCU.USART.uxrxbuf          = MCU.USART.uxrx_shift_buf;              \
           MCU.USART.uxrxbuf_full     = 1;                                     \
-          MCU.USART.uxrx_shift_ready = 0;                                     \
-          MCU.USART.uxrx_shift_empty = 1;                                     \
+	  /*   moved to update_done   */				\
+          /*MCU.USART.uxrx_shift_ready = 0;*/				\
+	  /*MCU.USART.uxrx_shift_empty = 1;*/				\
           HW_DMSG_USART("msp430:usart%d: UART rx shifter -> rx buf\n",NUM);   \
 	  HW_SPY("msp430:usart%d: UART receive (0x%x,%c)\n",NUM,              \
                   MCU.USART.uxrxbuf, isgraph(MCU.USART.uxrxbuf) ?             \
@@ -501,7 +502,7 @@ do {                                                                          \
       res = MCU.USART.uxrxbuf;                                                \
       MCU.sfr.IFG.b.urxifg##NUM = 0;                                          \
       MCU.USART.uxrxbuf_full    = 0;                                          \
-      TRACER_TRACE_USART##NUM(TRACER_UART_IDLE);                              \
+      TRACER_TRACE_USART##NUM##RX(TRACER_UART_IDLE);                          \
       switch (MCU.USART.mode) {                                               \
       case USART_MODE_UART:                                                   \
         break;                                                                \
@@ -548,10 +549,15 @@ do {                                                                          \
 #define HW_SPY_PRINT_CONFIG(USART,NUM) do {} while(0)
 #endif
 
-
+/*
+ * Baud Rate Timing:  slau049f.pdf page 261 
+ * 
+ *
+ */
 #define msp430_usart_set_baudrate(NUM,USART)				      \
-  { /* slau049f.pdf page 261 */						      \
-    USART.uxbr_div = ((USART.uxbr1 << 8 | USART.uxbr0) / 2) * (USART.uxctl.b.charb + 7); \
+  {                     						      \
+    USART.uxbr_div = ((USART.uxbr1 << 8 | USART.uxbr0)) *                     \
+                     (USART.uxctl.b.charb + 7);				      \
     HW_DMSG_USART("msp430:usart%d:   baudrate : uxbr = %d, div = %d\n",	      \
 		  NUM,(USART.uxbr1 << 8 | USART.uxbr0), USART.uxbr_div);      \
   }
@@ -711,14 +717,14 @@ do {                                                                          \
       MCU.sfr.IFG.b.utxifg##NUM    = 0;                                       \
       switch (MCU.USART.mode) {                                               \
       case USART_MODE_UART:                                                   \
-        TRACER_TRACE_USART##NUM(TRACER_UART_TX_RECV);			      \
+        TRACER_TRACE_USART##NUM##TX(TRACER_UART_TX_RECV);		      \
         /* can be a dupe from the platform file */                            \
         etracer_slot_event(ETRACER_PER_ID_MCU_USART + NUM,                    \
                            ETRACER_PER_EVT_WRITE_COMMAND,                     \
                            ETRACER_PER_ARG_WR_DST_FIFO, 0);                   \
         break;                                                                \
       case USART_MODE_SPI:                                                    \
-        TRACER_TRACE_USART##NUM(TRACER_SPI_TX_RECV);  			      \
+        TRACER_TRACE_USART##NUM##TX(TRACER_SPI_TX_RECV);                      \
         etracer_slot_event(ETRACER_PER_ID_MCU_SPI + NUM,                      \
                            ETRACER_PER_EVT_WRITE_COMMAND,                     \
                            ETRACER_PER_ARG_WR_DST_FIFO | ETRACER_ACCESS_LVL_BUS, 0); \
@@ -726,7 +732,7 @@ do {                                                                          \
         HW_SPY_PRINT_CONFIG(USART,NUM);                                       \
         break;                                                                \
       case USART_MODE_I2C:                                                    \
-        TRACER_TRACE_USART##NUM(TRACER_I2C_TX_RECV);			      \
+        TRACER_TRACE_USART##NUM##TX(TRACER_I2C_TX_RECV);		      \
         break;                                                                \
       }                                                                       \
       break;                                                                  \
@@ -764,7 +770,7 @@ do {                                                                          \
 	  val = MCU.USART.uxtx_shift_buf;                                     \
 	  MCU.USART.uxtx_shift_ready = 0;                                     \
 	  MCU.USART.uxtx_shift_empty = 1;                                     \
-          TRACER_TRACE_USART##NUM(TRACER_UART_IDLE);			      \
+          TRACER_TRACE_USART##NUM##TX(TRACER_UART_IDLE);		      \
           etracer_slot_event(ETRACER_PER_ID_MCU_SPI + NUM,                    \
                              ETRACER_PER_EVT_WRITE_COMMAND,                   \
                             (ETRACER_PER_ARG_WR_SRC_FIFO | (ETRACER_ACCESS_LVL_SPI + NUM)), 0); \
@@ -793,7 +799,7 @@ do {                                                                          \
   if (MCU.sfr.ME.b.urxe##NUM == 1)  /* verif Digi IO _SEL & _DIR */           \
     {                                                                         \
         {                                                                     \
-	  TRACER_TRACE_USART##NUM(TRACER_SPI_RX_RECV);			      \
+	  TRACER_TRACE_USART##NUM##RX(TRACER_SPI_RX_RECV);		      \
           MCU.USART.uxrx_shift_buf   = val;                                   \
           MCU.USART.uxrx_shift_empty = 0;                                     \
           MCU.USART.uxrx_shift_ready = 0;				      \
@@ -828,7 +834,7 @@ do {                                                                          \
 	  val = MCU.USART.uxtx_shift_buf;                                     \
 	  MCU.USART.uxtx_shift_ready = 0;                                     \
 	  MCU.USART.uxtx_shift_empty = 1;                                     \
-          TRACER_TRACE_USART##NUM(TRACER_UART_IDLE);			      \
+          TRACER_TRACE_USART##NUM##TX(TRACER_UART_IDLE);		      \
 	  return 1;                                                           \
 	}                                                                     \
     }                                                                         \
@@ -849,12 +855,13 @@ do {                                                                          \
 	}                                                                     \
       else                                                                    \
         {                                                                     \
-	  TRACER_TRACE_USART##NUM(TRACER_UART_RX_RECV);			      \
+	  TRACER_TRACE_USART##NUM##RX(TRACER_UART_RX_RECV);                   \
           MCU.USART.uxrx_shift_buf   = val;                                   \
           MCU.USART.uxrx_shift_empty = 0;                                     \
           MCU.USART.uxrx_shift_ready = 0;                                     \
           MCU.USART.uxrx_shift_delay = MCU.USART.uxbr_div;                    \
-          HW_DMSG_USART("msp430:usart%d: UART rx shift reg value 0x%02x\n",NUM,val);    \
+          HW_DMSG_USART("msp430:usart%d: UART rx shifter set to 0x%02x (delay %d)\n",\
+	                NUM,val,MCU.USART.uxrx_shift_delay);		      \
         }                                                                     \
     }                                                                         \
   else                                                                        \
@@ -897,6 +904,16 @@ void msp430_usart0_reset()
 void msp430_usart0_update()
 {
   USART_UPDATE(usart0,0,me1,ie1,ifg1)
+}
+
+void msp430_usart0_update_done()
+{
+  if (MCU.usart0.uxrx_shift_ready == 1)
+    {
+      /*   moved from update  */
+      MCU.usart0.uxrx_shift_ready = 0;
+      MCU.usart0.uxrx_shift_empty = 1;
+    }
 }
 
 /* usart read from MCU */

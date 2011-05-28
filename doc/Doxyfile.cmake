@@ -25,20 +25,20 @@ DOXYFILE_ENCODING      = UTF-8
 # The PROJECT_NAME tag is a single word (or a sequence of words surrounded
 # by quotes) that should identify the project.
 
-PROJECT_NAME           = "Wsim : WorldSens Hardware Simulator"
+PROJECT_NAME           = "${CPACK_PACKAGE_NAME} : ${CPACK_PACKAGE_DESCRIPTION}"
 
 # The PROJECT_NUMBER tag can be used to enter a project or revision number.
 # This could be handy for archiving the generated documentation or
 # if some version control system is used.
 
-PROJECT_NUMBER         =
+PROJECT_NUMBER         = ${VERSION}
 
 # The OUTPUT_DIRECTORY tag is used to specify the (relative or absolute)
 # base path where the generated documentation will be put.
 # If a relative path is entered, it will be relative to the location
 # where doxygen was started. If left blank the current directory will be used.
 
-OUTPUT_DIRECTORY       = doxygen
+OUTPUT_DIRECTORY       = api-doc
 
 # If the CREATE_SUBDIRS tag is set to YES, then doxygen will create
 # 4096 sub-directories (in 2 levels) under the output directory of each output
@@ -573,7 +573,7 @@ WARN_LOGFILE           =
 # documented source files. You may enter file names like "myfile.cpp" or
 # directories like "/usr/src/myproject". Separate the files or directories
 # with spaces.
-# @WSIM_SOURCE_DIR@/src
+# ${CMAKE_CURRENT_SOURCE_DIR}
 INPUT                  = @WSIM_SOURCE_DIR@/arch \
                          @WSIM_SOURCE_DIR@/devices \
                          @WSIM_SOURCE_DIR@/libconsole \

@@ -244,10 +244,10 @@ int msp430_mcu_create(int xt1)
   MSP430_TRACER_PORT4    = tracer_event_add_id(8,  "port_out4",  "msp430");
   MSP430_TRACER_PORT5    = tracer_event_add_id(8,  "port_out5",  "msp430");
   MSP430_TRACER_PORT6    = tracer_event_add_id(8,  "port_out6",  "msp430");
-  MSP430_TRACER_USART0RX = tracer_event_add_id(8,  "Usart0_RX",  "msp430");
-  MSP430_TRACER_USART0TX = tracer_event_add_id(8,  "Usart0_TX",  "msp430");
-  MSP430_TRACER_USART1RX = tracer_event_add_id(8,  "Usart1_RX",  "msp430");
-  MSP430_TRACER_USART1TX = tracer_event_add_id(8,  "Usart1_TX",  "msp430");
+  MSP430_TRACER_USART0RX = tracer_event_add_id(16, "Usart0_RX",  "msp430");
+  MSP430_TRACER_USART0TX = tracer_event_add_id(16, "Usart0_TX",  "msp430");
+  MSP430_TRACER_USART1RX = tracer_event_add_id(16, "Usart1_RX",  "msp430");
+  MSP430_TRACER_USART1TX = tracer_event_add_id(16, "Usart1_TX",  "msp430");
 
   return ret;
 }
@@ -352,6 +352,7 @@ void mcu_update_done()
 
   /* serial port                                  */
   msp430_usart0_update_done();
+  msp430_usart1_update_done();
 
   /* clear update flags on internal devices       */
   msp430_digiIO_update_done();

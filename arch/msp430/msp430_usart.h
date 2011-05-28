@@ -295,6 +295,7 @@ int    msp430_usart0_dev_write_uart_ok ();
 void   msp430_usart1_create();
 void   msp430_usart1_reset();
 void   msp430_usart1_update();
+void   msp430_usart1_update_done();
 int8_t msp430_usart1_read (uint16_t addr);
 void   msp430_usart1_write(uint16_t addr, int8_t val);
 int    msp430_usart1_chkifg();
@@ -308,9 +309,10 @@ int    msp430_usart1_dev_read_uart     (uint8_t *val);
 void   msp430_usart1_dev_write_uart    (uint8_t val);
 int    msp430_usart1_dev_write_uart_ok ();
 #else
-#define msp430_usart1_create() do { } while (0)
-#define msp430_usart1_reset()  do { } while (0)
-#define msp430_usart1_update() do { } while (0)
+#define msp430_usart1_create()      do { } while (0)
+#define msp430_usart1_reset()       do { } while (0)
+#define msp430_usart1_update()      do { } while (0)
+#define msp430_usart1_update_done() do { } while (0)
 #endif
 
 /* ************************************************** */

@@ -3,6 +3,7 @@
 ## =============Conf=====================
 WSIM=wsim-senslabv14
 WTRC=wtracer
+WCNS=wconsole
 WSNET1=wsnet1
 WSNET2=wsnet
 ELF=senslabv14-demo-serial.elf
@@ -20,7 +21,7 @@ MODE="--mode=time --modearg=200s"
 #MODE="--mode=gdb"
 
 # Serial terminal emulation
-#  stdout | UDP | TCP
+#  stdout | UDP | TCP | wconsole
 SERMODE="TCP"
 
 ## ======================================
@@ -46,6 +47,13 @@ else
     NETCAT=nc.traditional
 fi
 
+create_fifo()
+{
+    if [ ! -e $1 ] ; then 
+	mkfifo $1
+    fi
+}
+
 case $SERMODE in
     "stdout")
 	SERIAL="--serial0_io=stdout"
@@ -58,6 +66,14 @@ case $SERMODE in
     "TCP")
 	NCCMD="${NETCAT} localhost 6000"
 	SERIAL="--serial0_io=bk:tcp:s:localhost:6000"
+	;;
+    "wconsole")
+	create_fifo towsim
+	create_fifo fromwsim
+	NCCMD=""
+	${WCNS} -m o -f fromwsim & 
+	${WCNS} -m i -f towsim   &
+	SERIAL="--serial0_io=bk:fromwsim,towsim"
 	;;
 esac
 
@@ -98,6 +114,7 @@ killall -SIGUSR1 ${WSIM}   > /dev/null 2>&1
 killall -SIGQUIT ${WSNET1} > /dev/null 2>&1
 killall -SIGQUIT ${WSNET2} > /dev/null 2>&1
 killall -SIGUSR1 ${NETCAT} > /dev/null 2>&1
+killall -SIGQUIT ${WCNS}   > /dev/null 2>&1
 ## ======================================
 
 ## =============Traces===================

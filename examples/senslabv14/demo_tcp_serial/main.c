@@ -11,50 +11,80 @@
 #include "cc2420.h"
 #include "ds2411.h"
 
-/**********************
- * Interrupt handlers.
- *
- * LED_BLUE  : token
- * LED_RED   : timer
- * LED_GREEN : not used
- **********************/
 
-volatile int red_led;
-volatile int timer_wakeup;
+/* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
+
+volatile int green_led;
 
 uint16_t timer_cb(void)
 {
-  if (red_led)
-    LED_RED_OFF();
+  if (green_led)
+    LED_GREEN_OFF();
   else
-    LED_RED_ON();
-  red_led = 1 - red_led;
-  timer_wakeup = 1;
+    LED_GREEN_ON();
+  green_led = 1 - green_led;
 
-  return 0;
+  return 0; /* 1 == wakeup */
 }
 
-/**********************
- * Delay function.
- **********************/
+/* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
 
-#define DELAY 0x100
-void delay(unsigned int d) 
+#define SERIAL_RX_FIFO_SIZE 0xFF
+
+volatile uint8_t serial_rx_buffer[SERIAL_RX_FIFO_SIZE];
+volatile uint8_t serial_rx_rptr;
+volatile uint8_t serial_rx_wptr;
+volatile uint8_t serial_rx_size;
+
+/* ************************************************** */
+
+void serial_rx_buffer_init()
 {
-  int i,j;
-  for(j=0; j < d; j++)
+  serial_rx_rptr = 0;
+  serial_rx_wptr = 0;
+  serial_rx_size = 0;
+}
+
+/* ************************************************** */
+
+void serial_rx_buffer_put(uint8_t data) 
+{
+  serial_rx_buffer[serial_rx_wptr] = data;
+  serial_rx_wptr = (serial_rx_wptr + 1) % SERIAL_RX_FIFO_SIZE;
+  if (serial_rx_size < SERIAL_RX_FIFO_SIZE)
     {
-      for (i = 0; i < 0xff; i++) 
-	{
-	  nop();
-	  nop();
-	}
+      serial_rx_size ++;
+    }
+  else
+    {
+      LED_RED_ON();
     }
 }
 
-/**********************
- * printf putchar()
- **********************/
+/* ************************************************** */
+
+int serial_rx_buffer_get(uint8_t *data)
+{
+  dint();
+  if (serial_rx_size > 0)
+    {
+      *data = serial_rx_buffer[serial_rx_rptr];
+      serial_rx_rptr = (serial_rx_rptr + 1) % SERIAL_RX_FIFO_SIZE;
+      serial_rx_size --;
+      eint();        
+      return 1;
+    }
+  eint();        
+  return 0;
+}
+
+/* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
 
 int putchar(int c)
 {
@@ -63,25 +93,36 @@ int putchar(int c)
 
 uint16_t uart_cb(uint8_t c)
 {
-  printf("%02x\n",c);
-  return 0;
+  serial_rx_buffer_put(c);
+  return 1; /* wake up */
 }
 
-/**********************
- * main
- **********************/
 
-#define MSG_SIZE 255 
+/* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
+
+/*
+ * Serial port using 8 bit configuration
+ * 115200 bauds = 14400 bytes/s = 1 byte every 69.4µs
+ *  38400 bauds =  4800 bytes/s = 1 byte every 208.3µs
+ *   9600 bauds =  1200 bytes/s = 1 byte every 833.3µs
+ *
+ * VCD traces 
+ *  115200 =  63.5 µs
+ *   38400 = 208.0 µs
+ *    9600 = 831.8 µs
+ */
 
 int main(void) 
 {
-
-  timer_wakeup = 0;
+  int res;
+  uint8_t data;
 
   /* leds */
   LEDS_INIT();
   LEDS_OFF();
-  LEDS_ON();
+  green_led = 0;
 
   // set MCLK on XT2 at 8MHz
   set_mcu_speed_xt2_mclk_8MHz_smclk_1MHz();
@@ -94,7 +135,6 @@ int main(void)
   cc2420_init();
   printf("CC2420 init.\n");  
 
-  red_led = 0;
   timerA_init();
   timerA_register_cb(TIMERA_ALARM_CCR0, timer_cb);
   timerA_set_alarm_from_now(TIMERA_ALARM_CCR0, 1, 4496);
@@ -107,5 +147,10 @@ int main(void)
   while (1)
     {
       LPM0;
+
+      while ((res = serial_rx_buffer_get( &data )) != 0)
+	{
+	  putchar(data);
+	}
     }
 }

@@ -112,6 +112,12 @@ void uart0_init(uint16_t config){
       U0BR1  = 0x00;
       UMCTL0 = 0x5B;
       break;
+    case UART0_CONFIG_1MHZ_9600:
+      // 9200 baud & SMCLK @ 1MHZ
+      U0BR0  = 0x68;
+      U0BR1  = 0x00;
+      UMCTL0 = 0x04;
+      break;
     default:
       // 38400 baud & SMCLK @ 1MHZ
       U0BR0  = 0x1B;

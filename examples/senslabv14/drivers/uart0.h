@@ -51,6 +51,7 @@ typedef uint16_t (*uart0_cb_t)(uint8_t c);
 #define UART0_CONFIG_8MHZ_115200 0
 #define UART0_CONFIG_1MHZ_38400  1
 #define UART0_CONFIG_1MHZ_115200 2
+#define UART0_CONFIG_1MHZ_9600   3
 
 /**
  * Configure the USART0 for UART use.

@@ -33,7 +33,7 @@ uint16_t timer_cb(void)
 /* ************************************************** */
 /* ************************************************** */
 
-#define SERIAL_RX_FIFO_SIZE 0xFF
+#define SERIAL_RX_FIFO_SIZE 0x20 /*  must be a power of 2 */
 
 volatile uint8_t serial_rx_buffer[SERIAL_RX_FIFO_SIZE];
 volatile uint8_t serial_rx_rptr;

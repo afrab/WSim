@@ -3,7 +3,7 @@
 # Use, modification and distribution is subject to WSIM's licensing terms
 # See accompanying files LICENCE and AUTHORS for more details.
 
-# libetrace CMakeLists.txt
+# libgdb CMakeLists.txt
 
 
 FILE(
@@ -18,7 +18,7 @@ FILE(
 	*.h
 )
 
-ADD_LIBRARY(etrace STATIC ${source_files} ${header_files})
+ADD_LIBRARY(gdb STATIC ${source_files} ${header_files})
 
 # Install the library when install target is called
 # WSIM_INSTALL_TARGETS(logger)

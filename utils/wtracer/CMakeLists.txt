@@ -1,28 +1,36 @@
-cmake_minimum_required(VERSION 2.8)
+# Copyright (C) 2005-2011 Antoine Fraboulet (http://wsim.gforge.inria.fr/)
+#
+# Use, modification and distribution is subject to WSIM's licensing terms
+# See accompanying files LICENCE and AUTHORS for more details.
 
-project(wtracer)
+# Top-Level CMakeLists.txt
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
-
-set(WSIM "../..")
-set(WTRACER "${WSIM}/utils/wtracer")
-
-
-include_directories(${WTRACER})
-include_directories(${WTRACER}/src)
-include_directories(${CMAKE_CURRENT_BINARY_DIR})
+PROJECT(wtracer)
 
 
-add_executable(wtracer.elf  \\
-  ${WTRACER}/src/main       \\
-  ${WTRACER}/src/drv_vcd    \\
-  ${WTRACER}/src/drv_gplot  \\
-  ${WTRACER}/src/drv_raw    \\
-  ${WTRACER}/src/drv_sitc   \\
-  ${WTRACER}/src/endian     \\
-  ${WTRACER}/src/log        \\
-  ${WTRACER}/src/tracer
+# SET(WSIM "../..")
+# SET(WTRACER "${WSIM}/utils/wtracer")
+
+INCLUDE_DIRECTORIES(
+	${WTRACER_SOURCE_DIR}
+	${WTRACER_SOURCE_DIR}/src
+	${CMAKE_CURRENT_BINARY_DIR}
 )
 
+
+ADD_EXECUTABLE(wtracer.elf  \\
+	src/main       \\
+	src/drv_vcd    \\
+	src/drv_gplot  \\
+	src/drv_raw    \\
+	src/drv_sitc   \\
+	src/endian     \\
+	src/log        \\
+	src/tracer
+)
+
+ADD_SUBDIRECTORY(doc)
 
 INCLUDE (CheckIncludeFiles)
 CHECK_INCLUDE_FILES(strings.h  HAVE_STRINGS_H)

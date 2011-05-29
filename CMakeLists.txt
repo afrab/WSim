@@ -4,7 +4,7 @@
 # See accompanying files LICENCE and AUTHORS for more details.
 
 # Top-Level CMakeLists
-CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/")
 
 PROJECT(WSIM)
@@ -35,8 +35,18 @@ INCLUDE_DIRECTORIES(
 ADD_SUBDIRECTORY(doc)
 ADD_SUBDIRECTORY(liblogger)
 ADD_SUBDIRECTORY(libetrace)
+ADD_SUBDIRECTORY(libselect)
+ADD_SUBDIRECTORY(libconsole)
+ADD_SUBDIRECTORY(libgdb)
+ADD_SUBDIRECTORY(libelf)
+ADD_SUBDIRECTORY(liblogpkt)
+ADD_SUBDIRECTORY(machine)
 # ADD_SUBDIRECTORY(lib)
 # ADD_SUBDIRECTORY(src)
+
+# TODO: Add as a seperate target from ALL
+# Worldsens targets configuration
+ADD_SUBDIRECTORY(utils/wtracer)
 
 # Installation configuration
 
@@ -48,6 +58,9 @@ INSTALL(FILES ${DOC_FILES}
 
 # CPack configuration
 SET(CPACK_PACKAGE_NAME "wsim")
+
+SET(CPACK_RESOURCE_FILE_LICENSE ${WSIM_SOURCE_DIR}/LICENSE)
+SET(CPACK_RESOURCE_FILE_README ${WSIM_SOURCE_DIR}/README)
 
 ## Setting package description
 SET(

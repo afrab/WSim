@@ -182,9 +182,6 @@ struct msp430_basic_clock_plus_t
   uint32_t dco_freq;
   uint64_t dco_counter;
   int      dco_increment;
-  //***debug calibration only***
-  float    dco_fdco_calib;
-  uint32_t dco_fnom_calib;
   
   uint32_t vlo_freq;
   uint64_t vlo_counter;

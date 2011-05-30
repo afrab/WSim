@@ -129,7 +129,10 @@ core_start (struct _worldsens_s *worldsens)
       /* If no event or if event in the future, wait at rp point */
       if ((g_events == NULL) || (g_events->time > get_global_time()))
 	{
-	  worldsens_s_listen_to_next_rp (worldsens);
+	  if (worldsens_s_listen_to_next_rp (worldsens) < 0)
+	    {
+	      return -1;
+	    }
 	}
 
       if (g_events == NULL)

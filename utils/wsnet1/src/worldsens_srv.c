@@ -202,7 +202,11 @@ worldsens_s_recvfrom(struct _worldsens_s *worldsens, char *pkt, int sizemax, str
 
   if (len <= 0)
     {
-      perror ("worldsens:multicast:recvfrom");
+      fprintf(stderr,"==================================================\n");
+      fprintf(stderr,"  worldsens:multicast:recvfrom:%s\n",strerror(errno));
+      fprintf(stderr,"  multicast IP  does not seem to work\n");
+      fprintf(stderr,"  program will exit \n");
+      fprintf(stderr,"==================================================\n");
       close  (worldsens->mfd);
       worldsens->mfd = -1;
       return -1;

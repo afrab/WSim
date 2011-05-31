@@ -40,6 +40,7 @@
 	  <ol>
 	    QUESTION("#4-1",I get a multicast error when trying to use WSim + WSNet. What goes wrong ?)
 	    QUESTION("#4-2",Why does WConsole display several times the same data ?)
+	    QUESTION("#4-3",Netcat does not work and WSim displays the error message "wsim:libselect:update: error on descriptor (id=0:6) type UDP")
 	  </ol>
       </li>
     </ul>
@@ -188,6 +189,20 @@
       <p> You can change the behaviour by using a command line
 	argument <code>--serial1_io=bk:[arg]</code> instead
 	of <code>--serial1_io=[arg]</code>
+      </p>
+
+      ANSWER("4-3",Netcat does not work and WSim displays the error message 
+      "wsim:libselect:update: error on descriptor (id=0:6) type UDP")
+      <p> You probably used the netcat-openbsd package which is the
+	default one on Ubuntu and some other distributions. In order to use the 
+	examples and demo.sh scripts please change nc (NetCat) to the netcat-traditional
+	package.
+      </p>
+      <p>
+	You can keep both netcat-openbsd and netcat-traditional installed on 
+	your system if you need to. The two binaries are called "nc" (openbsd
+	version) and "nc.traditional". Most demo.sh script are testing for the
+	presence of nc.traditional before falling back to "nc".
       </p>
     </ol>
       

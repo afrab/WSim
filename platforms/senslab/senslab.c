@@ -351,10 +351,10 @@ int devices_reset_post(void)
   SYSTEM_FLASH_CS = 0;
   SYSTEM_RADIO_CS = 0;
 
+  REFRESH(LOGO1);
   REFRESH(LED1);
   REFRESH(LED2);
   REFRESH(LED3);
-  REFRESH(LOGO1);
   ui_refresh(refresh);
   return 0;
 }

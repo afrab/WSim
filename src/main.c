@@ -148,15 +148,12 @@ static void  main_run_mode(struct options_t* o)
 
     case SIM_MODE_RUN:
       machine_run_free();
-      main_dump_stats();
       break;
     case SIM_MODE_INSN:
       machine_run_insn(o->sim_insn);
-      main_dump_stats();
       break;
     case SIM_MODE_TIME:
       machine_run_time(o->sim_time);
-      main_dump_stats();
       break;
 
     default:
@@ -171,6 +168,7 @@ static void  main_run_mode(struct options_t* o)
 
 static void main_end(enum wsim_end_mode_t mode)
 {
+  main_dump_stats();
   MESSAGE("wsim:end mode %s (%d)\n", wsim_end_mode_str(mode), mode);
   /* simulation done */
   if (o.do_dump)

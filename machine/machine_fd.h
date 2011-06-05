@@ -82,6 +82,7 @@ struct machine_t
    * trace log
    **/
   uint32_t                 backtrack;
+  tracer_id_t              backtrack_trc;
 
   /**
    * ui

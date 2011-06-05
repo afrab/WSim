@@ -21,6 +21,17 @@
 #include "machine_mon.h"
 #include "machine.h"
 
+
+#define WSIM_RECORD_INTERNAL_EVENTS 0
+
+#if WSIM_RECORD_INTERNAL_EVENTS != 0
+#define MACHINE_TRC_BACKTRACK()        tracer_event_add_id(32, "backtrack",  "wsim")
+#define MACHINE_TRC_BACKTRACK_RECORD() tracer_event_record(machine.backtrack_trc, machine.backtrack)
+#else
+#define MACHINE_TRC_BACKTRACK() 0
+#define MACHINE_TRC_BACKTRACK_RECORD() do { } while (0)
+#endif
+
 /**
  * global variable
  **/
@@ -65,14 +76,15 @@ int machine_create()
 #endif
 
   /* zero memory */
-  machine.state                 = NULL;
-  machine.state_backup          = NULL;
-  machine.nanotime_incr         = 0;
-  machine.device_max            = 0;
+  machine.state                       = NULL;
+  machine.state_backup                = NULL;
+  machine.nanotime_incr               = 0;
+  machine.device_max                  = 0;
   memset(machine.device,      '\0',sizeof(struct device_t)*DEVICE_MAX);
   memset(machine.device_size, '\0',sizeof(int)*DEVICE_MAX);
 
   machine.backtrack                   = 0;
+  machine.backtrack_trc               = MACHINE_TRC_BACKTRACK();
   machine.ui.framebuffer_background   = 0;
 
   /* create devices = mcu + peripherals */
@@ -487,6 +499,7 @@ void machine_state_restore()
   worldsens_c_state_restore();
   /* count backtracks */
   machine.backtrack ++;
+  MACHINE_TRC_BACKTRACK_RECORD();
 }
 
 /* ************************************************** */

@@ -184,7 +184,7 @@ struct uigfx_img_t* uigfx_xpm_create(char **xpm)
       for(j=0; j < img->w; j++)
 	{
 	  char str[4];
-	  //int ncolor;
+	  int UNUSED ncolor;
 	  uigfx_readccstr(xpm[1+img->ncolors+i], j, cpp, str);
 	  ncolor = uigfx_readpixel(str, map, img->ncolors, & img->pixels[IMG_LINEAR(i,j)]);
 	  /* ERROR("%02d,",ncolor); */

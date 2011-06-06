@@ -22,7 +22,7 @@
 #include "machine.h"
 
 
-#define WSIM_RECORD_INTERNAL_EVENTS 0
+#define WSIM_RECORD_INTERNAL_EVENTS 1
 
 #if WSIM_RECORD_INTERNAL_EVENTS != 0
 #define MACHINE_TRC_BACKTRACK()        tracer_event_add_id(32, "backtrack",  "wsim")
@@ -259,7 +259,7 @@ static inline uint32_t machine_run(void)
 
 inline void machine_run_free(void)
 {
-  uint32_t sig;
+  uint32_t UNUSED sig;
   sig = machine_run();
   
   HW_DMSG_MISC("machine:run: stopped at 0x%04x with signal 0x%x=%s\n",mcu_get_pc(),sig,mcu_signal_str());
@@ -581,7 +581,7 @@ void machine_dump_stats(uint64_t user_nanotime)
 {
   uint64_t s;
   uint64_t ms;
-  uint64_t us;
+  uint64_t UNUSED us;
   float speedup;
 
   s         = MACHINE_TIME_GET_NANO() / NANO;

@@ -13,8 +13,10 @@
 /**************************************************************************/
 /**************************************************************************/
 
-#define WSNET_S_TIME      1  /* WSNet global TIME */
-#define WSNET_S_TX        1  /* data RX/TX        */
+#if defined(DEBUG)
+#define WSNET_S_TIME      0  /* WSNet global TIME */
+#define WSNET_S_TX        0  /* data RX/TX        */
+#endif
 
 #if WSNET_S_TIME != 0
 #    define WSNET_S_DBG_TIME(x...) printf(x)
@@ -32,8 +34,11 @@
 /**************************************************************************/
 /**************************************************************************/
 
-#define WSNET_S_ATTR  1  /* client node connections */
-#define WSNET_S_SYNC  1  /* SYNC + RP + BACKTRACK   */
+#define WSNET_S_ATTR      1  /* client node connections */
+
+#if defined(DEBUG)
+#define WSNET_S_SYNC      1  /* SYNC + RP + BACKTRACK   */
+#endif
 
 
 #if WSNET_S_ATTR != 0
@@ -52,10 +57,11 @@
 /**************************************************************************/
 /**************************************************************************/
 
+#if defined(DEBUG)
 #define WSNET_C_BCK_DBG   0
 #define WSNET_C_EXC_DBG   0
 #define WSNET_C_DBG       0
-
+#endif
 
 #if WSNET_C_BCK_DBG != 0
 #    define WSNET_C_DBG_BCK(x...) HW_DMSG(x)

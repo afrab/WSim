@@ -71,7 +71,10 @@
   FILE         : input/output data from a file descriptor
   TCP_LISTEN   : tcp listen socket
   TCP_SERV     : tcp socket after accept has been called
+  UDP          : udp socket
   FD_ONLY      : I/O data is not handled by libselect
+  STDIO        : stdin | stdout
+  WIN32_PIPE   : windows win32 pipe 
 */
 
 enum entry_type_t {
@@ -81,12 +84,13 @@ enum entry_type_t {
   ENTRY_TCP_SRV    = 3,
   ENTRY_UDP        = 4,
   ENTRY_FD_ONLY    = 5,
-  ENTRY_WIN32_PIPE,
+  ENTRY_STDIO      = 6,
+  ENTRY_WIN32_PIPE = 7,
 };
 
 struct libselect_entry_t {
   enum entry_type_t         entry_type;    /* type of Entry                      */
-  int                       registered;    /* in use ?                           */
+  int                       registered;    /* input in use ?                     */
 
   int                       fd_in;         /* from fd to wsim                    */
   int                       fd_out;        /* from wsim to fd                    */
@@ -171,18 +175,21 @@ char* entry_type_str(int type)
 {
   switch (type)
     {
-    case ENTRY_NONE:
-      return "NONE";
-    case ENTRY_FILE:
-      return "FILE";
-    case ENTRY_UDP:
-      return "UDP";
-    case ENTRY_TCP:
-      return "TCP";
-    default:
-      return "Unknown";
+    case ENTRY_NONE:       return "NONE";
+    case ENTRY_FILE:       return "FILE";
+    case ENTRY_TCP:        return "TCP";
+    case ENTRY_TCP_SRV:    return "TCP (listen)";
+    case ENTRY_UDP:        return "UDP";
+    case ENTRY_FD_ONLY:    return "External";
+    case ENTRY_STDIO:      return "STDIO";
+    case ENTRY_WIN32_PIPE: return "Win32 pipe";
+    default:               return "Unknown";
     }
 }
+
+/* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
 
 static inline int libselect_max(int a, int b) { return ((a)<(b) ? (b):(a)); }
 
@@ -227,6 +234,7 @@ int libselect_update_registered()
 	case ENTRY_TCP_SRV:
 	case ENTRY_UDP:
 	case ENTRY_FD_ONLY:
+	case ENTRY_STDIO:
 	  if (libselect.entry[id].registered)
 	    {
 	      /* *DMSG("wsim:libselect:update: add id=%d fd=%d\n",id,libselect.entry[id].fd_in); */
@@ -266,6 +274,7 @@ int libselect_update_registered()
 	    case ENTRY_FILE:
 	    case ENTRY_UDP:
 	    case ENTRY_TCP:
+	    case ENTRY_STDIO:
 	      switch (n = read(fd_in,buffer,BUFFER_MAX)) 
 		{
 		case -1:
@@ -289,7 +298,7 @@ int libselect_update_registered()
 		}
 	      break;
 	      
-	    case ENTRY_TCP_SRV:
+	    case ENTRY_TCP_SRV: /* accept() -> create an open ENTRY_TCP */
 	      if (fd_in == libselect.entry[id].skt.socket_listen)
 		{
 		  if (libselect_skt_accept( & libselect.entry[id].skt )) 
@@ -376,7 +385,7 @@ libselect_id_t libselect_id_create(char *argname, int UNUSED flags)
   if (strstr(cmdline,"bk:") == cmdline)
     {
       cmdline += 3;
-      DMSG("wsim:libselect: open file %s with backtrack buffer on output\n",cmdline);
+      DMSG("wsim:libselect: open file %s with backtrack buffer on input/output\n",cmdline);
       libselect.entry[id].backtrack = 1;
     }
   else
@@ -444,19 +453,19 @@ libselect_id_t libselect_id_create(char *argname, int UNUSED flags)
 #endif
   else if (strcmp(cmdline,"stdio") == 0)
     {
-      libselect.entry[id].entry_type = ENTRY_FILE;
+      libselect.entry[id].entry_type = ENTRY_STDIO;
       libselect.entry[id].fd_in      = 0;
       libselect.entry[id].fd_out     = 1;
     }
   else if (strcmp(cmdline,"stdin") == 0)
     {
-      libselect.entry[id].entry_type = ENTRY_FILE;
+      libselect.entry[id].entry_type = ENTRY_STDIO;
       libselect.entry[id].fd_in      = 0;
       libselect.entry[id].fd_out     = -1;
     }
   else if (strcmp(cmdline,"stdout") == 0)
     {
-      libselect.entry[id].entry_type = ENTRY_FILE;
+      libselect.entry[id].entry_type = ENTRY_STDIO;
       libselect.entry[id].fd_in      = -1;
       libselect.entry[id].fd_out     = 1;
     }
@@ -529,6 +538,10 @@ libselect_id_t libselect_id_create(char *argname, int UNUSED flags)
   return id;
 }
 
+/* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
+
 inline int libselect_id_is_valid(libselect_id_t id)
 {
   int ret = 0;
@@ -536,14 +549,26 @@ inline int libselect_id_is_valid(libselect_id_t id)
   return ret;
 }
 
+/* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
+
 int libselect_id_close(libselect_id_t id)
 {
   switch (libselect.entry[id].entry_type)
     {
     case ENTRY_NONE:
-      /* ERROR("wsim:libselect:close: error cannot close id %d of type NONE\n",id); */
+      /* */
       return 1;
     case ENTRY_FILE:
+      if (libselect.entry[id].fd_in != -1)
+	{
+	  close(libselect.entry[id].fd_in);
+	}
+      if (libselect.entry[id].fd_out != -1)
+	{
+	  close(libselect.entry[id].fd_out);
+	}
       break;
     case ENTRY_TCP:
       libselect_skt_close_client (& libselect.entry[id].skt);
@@ -556,8 +581,11 @@ int libselect_id_close(libselect_id_t id)
       libselect_skt_close_client (& libselect.entry[id].skt);
       break;
     case ENTRY_FD_ONLY: /* I/O data is not handled by libselect */
-      /* WARNING("wsim:libselect:close: cannot close id %d of type FD_ONLY\n",id); */
+      /*  */
       return 0;
+    case ENTRY_STDIO: /* do not close stdin and/or stdout */
+      /*  */
+      break;
     case ENTRY_WIN32_PIPE:
 #ifdef WINPIPES
       CloseHandle((HANDLE)libselect.entry[id].fd_out);
@@ -598,7 +626,7 @@ int libselect_id_register(libselect_id_t id)
 
   if (libselect.entry[id].fd_in == -1)
     {
-      WARNING("wsim:libselect: trying to register closed IN descriptor %d\n",id);
+      WARNING("wsim:libselect: trying to register closed Input descriptor %d\n",id);
       return 1;
     }
 
@@ -675,6 +703,10 @@ uint32_t libselect_id_read(libselect_id_t id, uint8_t *data, uint32_t size)
   return ret;
 }
 
+/* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
+
 uint32_t libselect_id_write(libselect_id_t id, uint8_t *data, uint32_t size)
 {
   uint32_t ret = -1;
@@ -690,18 +722,27 @@ uint32_t libselect_id_write(libselect_id_t id, uint8_t *data, uint32_t size)
       else
 	{
 #ifdef WINPIPES
-	  if (libselect.entry[id].entry_type == ENTRY_WIN32_PIPE) {
+	  if (libselect.entry[id].entry_type == ENTRY_WIN32_PIPE) 
+	    {
 		  DWORD r;
-		  if (WriteFile((HANDLE)(libselect.entry[id].fd_out), data, size > UINT32_MAX - 1 ? UINT32_MAX - 1 : size, &r, NULL))
-			  ret = r; /* safe as we limit the number of bytes */
+		  if (WriteFile((HANDLE)(libselect.entry[id].fd_out), data, 
+		                (size > UINT32_MAX - 1) ? UINT32_MAX - 1 : size, &r, NULL))
+		    {
+		      ret = r; /* safe as we limit the number of bytes */
+		    }
+		  else
+		    {
+		      ret = -1;
+		    }
+	    } 
 	  else
-			  ret = -1;
-	  } else
 #endif
-	    ret = write(libselect.entry[id].fd_out, data, size);
+	    {
+	      ret = write(libselect.entry[id].fd_out, data, size);
+	    }
 	  DMSG("wsim:libselect: WRITE %d bytes to id=%d, fd=%d, val=%c\n",
-		  size, id, libselect.entry[id].fd_out,
-		  isprint(data[0]) ? data[0] : '.');
+	       size, id, libselect.entry[id].fd_out,
+	       isprint(data[0]) ? data[0] : '.');
 	}
     }
   return ret;
@@ -736,6 +777,10 @@ int libselect_fd_register(int fd, unsigned int signal)
     }
   return -1;
 }
+
+/* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
 
 int libselect_fd_unregister(int fd)
 {
@@ -802,6 +847,10 @@ void libselect_state_save(void)
 	}      
     }
 }
+
+/* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
 
 void libselect_state_restore(void)
 {

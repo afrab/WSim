@@ -49,7 +49,7 @@
 #define WORLDSENS_MAX_PKTLENGTH		2000
 
 /* One rp per second */
-#define WORLDSENS_SYNCH_PERIOD		1000000000
+extern  uint32_t WORLDSENS_SYNCH_PERIOD;
 
 /* Client update frequency */
 #define WORLDSENS_UPDATE_PERIOD		1000000

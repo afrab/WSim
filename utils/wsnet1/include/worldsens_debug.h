@@ -9,58 +9,74 @@
 #ifndef _WORLDSENS_DEBUG_H
 #define _WORLDSENS_DEBUG_H
 
+/**************************************************************************/
+/**************************************************************************/
+/**************************************************************************/
 
-/**************************************************************************/
-/**************************************************************************/
-/**************************************************************************/
-#define WSNET_S_DBG
-#define WSNET_S_EXC_DBG
+#define WSNET_S_TIME      1  /* WSNet global TIME */
+#define WSNET_S_TX        1  /* data RX/TX        */
 
-
-/**************************************************************************/
-/**************************************************************************/
-/**************************************************************************/
-#ifdef WSNET_S_DBG
-#    define WSNET_S_DBG_DBG(x...) printf(x)
+#if WSNET_S_TIME != 0
+#    define WSNET_S_DBG_TIME(x...) printf(x)
 #else
-#    define WSNET_S_DBG_DBG(x...) do { } while (0)
+#    define WSNET_S_DBG_TIME(x...) do { } while (0)
 #endif
 
-#ifdef WSNET_S_EXC_DBG
-#    define WSNET_S_DBG_EXC(x...) printf(x)
+#if WSNET_S_TX != 0
+#    define WSNET_S_DBG_TX(x...) printf(x)
 #else
-#    define WSNET_S_DBG_EXC(x...) do { } while (0)
+#    define WSNET_S_DBG_TX(x...) do { } while (0)
 #endif
 
+/**************************************************************************/
+/**************************************************************************/
+/**************************************************************************/
+
+#define WSNET_S_ATTR  1  /* client node connections */
+#define WSNET_S_SYNC  1  /* SYNC + RP + BACKTRACK   */
+
+
+#if WSNET_S_ATTR != 0
+#    define WSNET_S_DBG_ATTR(x...) printf(x)
+#else
+#    define WSNET_S_DBG_ATTR(x...) do { } while (0)
+#endif
+
+#if WSNET_S_SYNC != 0
+#    define WSNET_S_DBG_SYNC(x...) printf(x)
+#else
+#    define WSNET_S_DBG_SYNC(x...) do { } while (0)
+#endif
 
 /**************************************************************************/
 /**************************************************************************/
 /**************************************************************************/
-#define _WSNET_C_BCK_DBG
-#define _WSNET_C_EXC_DBG
-#define _WSNET_C_DBG
+
+#define WSNET_C_BCK_DBG   0
+#define WSNET_C_EXC_DBG   0
+#define WSNET_C_DBG       0
 
 
-/**************************************************************************/
-/**************************************************************************/
-/**************************************************************************/
-#ifdef WSNET_C_BCK_DBG
+#if WSNET_C_BCK_DBG != 0
 #    define WSNET_C_DBG_BCK(x...) HW_DMSG(x)
 #else
 #    define WSNET_C_DBG_BCK(x...) do { } while (0)
 #endif
 
-#ifdef WSNET_C_EXC_DBG
+#if WSNET_C_EXC_DBG != 0
 #    define WSNET_C_DBG_EXC(x...) HW_DMSG(x)
 #else
 #    define WSNET_C_DBG_EXC(x...) do { } while (0)
 #endif
 
-#ifdef WSNET_C_DBG
+#if WSNET_C_DBG != 0
 #    define WSNET_C_DBG_DBG(x...) HW_DMSG(x)
 #else
 #    define WSNET_C_DBG_DBG(x...) do { } while (0)
 #endif
 
+/**************************************************************************/
+/**************************************************************************/
+/**************************************************************************/
 
 #endif

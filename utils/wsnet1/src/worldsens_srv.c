@@ -21,13 +21,15 @@
 /**************************************************************************/
 /**************************************************************************/
 
-uint16_t g_lport = 9998;
-uint16_t g_mport = 9999;
-char *g_maddr = "224.0.0.1";
-char *g_saddr = "localhost";
+uint16_t  g_lport                  = 9998;
+uint16_t  g_mport                  = 9999;
+char     *g_maddr                  = "224.0.0.1";
+char     *g_saddr                  = "localhost";
 
-int pkt_seq                = 0;
-int simulation_keeps_going = 1;
+uint32_t  WORLDSENS_SYNCH_PERIOD   = 1000000000;
+
+uint32_t  pkt_seq                  = 0;
+int       simulation_keeps_going   = 1;
 
 /**************************************************************************/
 /**************************************************************************/
@@ -155,14 +157,14 @@ void worldsens_packet_dump(char UNUSED *msg, char UNUSED *pkt, int UNUSED size)
 {
   /*  
   int i;
-  WSNET_S_DBG_DBG ("WSNET:: %s start ================================\n", msg);
-  WSNET_S_DBG_DBG ("WSNET::%s ", msg);
+  WSNET_S_DBG_DUMP ("WSNET:: %s start ================================\n", msg);
+  WSNET_S_DBG_DUMP ("WSNET::%s ", msg);
   for(i=0;i<size; i++)
     {
-      WSNET_S_DBG_DBG ("%02x:",pkt[i] & 0xff);
+      WSNET_S_DBG_DUMP ("%02x:",pkt[i] & 0xff);
     }
-  WSNET_S_DBG_DBG ("\n");
-  WSNET_S_DBG_DBG ("WSNET:: %s stop  ================================\n", msg);
+  WSNET_S_DBG_DUMP ("\n");
+  WSNET_S_DBG_DUMP ("WSNET:: %s stop  ================================\n", msg);
   */
 }
 
@@ -296,7 +298,7 @@ worldsens_s_connect (struct _worldsens_s *worldsens, struct sockaddr_in *addr,
   struct _worldsens_s_connect_pkt s_pkt;
   int pktlength = sizeof (struct _worldsens_s_connect_pkt);
 
-  WSNET_S_DBG_DBG ("WSNET:: <-- CONNECT (ip: %"PRIu32")\n", ntohl (c_pkt->node));
+  WSNET_S_DBG_ATTR ("WSNET:: <-- CONNECT (ip: %"PRIu32")\n", ntohl (c_pkt->node));
 
   if (node_create (ntohl (c_pkt->node)))
     {
@@ -309,7 +311,7 @@ worldsens_s_connect (struct _worldsens_s *worldsens, struct sockaddr_in *addr,
 	  return -1;
 	}
 
-      WSNET_S_DBG_EXC ("WSNET:: --> NOATTRADDR\n");
+      WSNET_S_DBG_ATTR ("WSNET:: --> NOATTRADDR\n");
       return 0;
     }
 
@@ -327,9 +329,9 @@ worldsens_s_connect (struct _worldsens_s *worldsens, struct sockaddr_in *addr,
       return -1;
     }
 
-  WSNET_S_DBG_DBG ("WSNET:: --> ATTRADDR (seq: %"PRIu32", ip: %"PRIu32") global time %"PRId64"\n",
+  WSNET_S_DBG_ATTR ("WSNET:: --> ATTRADDR (seq: %"PRIu32", ip: %"PRIu32") global time %"PRId64"\n",
 		   ntohl (s_pkt.pkt_seq), ntohl (c_pkt->node), ntohll(s_pkt.cnx_time));
-  WSNET_S_DBG_DBG ("WSNET:: --> RP (seq: %d, rp_seq: %d, period: %"PRId64 ")\n", 
+  WSNET_S_DBG_SYNC ("WSNET:: --> RP (seq: %d, rp_seq: %d, period: %"PRId64 ")\n", 
 		   pkt_seq, worldsens->rp_seq, worldsens->rp - get_global_time());
   return 0;
 }
@@ -345,7 +347,7 @@ worldsens_s_disconnect (struct _worldsens_s UNUSED * worldsens,
 {
   struct _worldsens_c_disconnect_pkt *pkt =
     (struct _worldsens_c_disconnect_pkt *) msg;
-  WSNET_S_DBG_DBG ("WSNET:: <-- DISCONNECT (ip: %"PRIu32")\n", ntohl (pkt->node));
+  WSNET_S_DBG_ATTR ("WSNET:: <-- DISCONNECT (ip: %"PRIu32")\n", ntohl (pkt->node));
   return node_delete (ntohl (pkt->node));
 }
 
@@ -417,11 +419,11 @@ worldsens_s_listen_to_next_rp (struct _worldsens_s *worldsens)
 	    }
 	  else
 	    {
-	      WSNET_S_DBG_DBG ("WSNET:: skipping old sync packet: rp seq %d)\n", ntohl(c_pkt->rp_seq));
+	      WSNET_S_DBG_SYNC ("WSNET:: skipping old sync packet: rp seq %d)\n", ntohl(c_pkt->rp_seq));
 	      continue;
 	    }
 
-	  WSNET_S_DBG_DBG ("WSNET:: <-- SYN  (seq: %d)\n",  worldsens->rp_seq);
+	  WSNET_S_DBG_SYNC ("WSNET:: <-- SYN  (seq: %d)\n",  worldsens->rp_seq);
 
 	  /* Synched */
 	  if (worldsens->synched == g_c_nodes)
@@ -443,7 +445,7 @@ worldsens_s_listen_to_next_rp (struct _worldsens_s *worldsens)
 	  if ((get_global_time() + ntohll (pkt->period)) > worldsens->rp)
 	    {
 	      /* Unsynchronized  */
-	      WSNET_S_DBG_EXC ("WSNET:: <-- Deprecated tx (ip: %d, time: %"PRId64", current rp: %"PRId64")\n", 
+	      WSNET_S_DBG_SYNC ("WSNET:: <-- Deprecated tx (ip: %d, time: %"PRId64", current rp: %"PRId64")\n", 
 			       node->addr, (get_global_time() + ntohll (pkt->period)), worldsens->rp);
 	      continue;
 
@@ -460,7 +462,7 @@ worldsens_s_listen_to_next_rp (struct _worldsens_s *worldsens)
 		      && (p_loop->seq == ntohl (pkt->pkt_seq)))
 		    {
 		      /* Retransmission */
-		      WSNET_S_DBG_EXC ("WSNET:: <--  Retransmit tx (ip: %d, seq: %"PRIu32")\n",
+		      WSNET_S_DBG_SYNC ("WSNET:: <--  Retransmit tx (ip: %d, seq: %"PRIu32")\n",
 				       node->addr, ntohl (pkt->pkt_seq));
 		      drop = 1;
 		      break;
@@ -496,13 +498,13 @@ worldsens_s_listen_to_next_rp (struct _worldsens_s *worldsens)
 
 	      {
 		int iii;
-		WSNET_S_DBG_DBG ("WSNET:: <-- TX (%"PRId64",%d) (ip:%d,size:%d,data:",
+		WSNET_S_DBG_TX ("WSNET:: <-- TX (%"PRId64",%d) (ip:%d,size:%d,data:",
 				 packet->tx_start, packet->seq, node->addr, packet->size);
 		for(iii=0; iii<packet->size; iii++)
 		  {
-		    WSNET_S_DBG_DBG("%02x:", packet->data[ iii ] & 0xff);
+		    WSNET_S_DBG_TX("%02x:", packet->data[ iii ] & 0xff);
 		  }
-		WSNET_S_DBG_DBG (",freq:%gMHz,mod:%d,tx:%lgmW)\n",
+		WSNET_S_DBG_TX (",freq:%gMHz,mod:%d,tx:%lgmW)\n",
 			       (unsigned)packet->freq / 1000000.0, packet->modulation, packet->tx_mW);
 	      }
 
@@ -572,8 +574,8 @@ worldsens_s_backtrack_async (struct _worldsens_s *worldsens, uint64_t period)
     }
   */
 
-  WSNET_S_DBG_EXC ("WSNET:: --> (seq: %d) BACKTRACK \n", pkt_seq - 1);
-  WSNET_S_DBG_EXC ("WSNET:: --> (seq: %d) RP (seq: %d, period: %"PRId64", rp: %"PRId64")\n", 
+  WSNET_S_DBG_SYNC ("WSNET:: --> (seq: %d) BACKTRACK \n", pkt_seq - 1);
+  WSNET_S_DBG_SYNC ("WSNET:: --> (seq: %d) RP (seq: %d, period: %"PRId64", rp: %"PRId64")\n", 
 		   pkt_seq - 1, worldsens->rp_seq, period, worldsens->rp);
   return 0;
 }
@@ -609,7 +611,7 @@ worldsens_s_save_release_request (struct _worldsens_s *worldsens,
       return -1;
     }
 
-  WSNET_S_DBG_EXC ("WSNET:: --> (seq:%d) SAVE + RP (seq: %d, period: %"PRId64", rp: %"PRId64")\n", 
+  WSNET_S_DBG_SYNC ("WSNET:: --> (seq:%d) SAVE + RP (seq: %d, period: %"PRId64", rp: %"PRId64")\n", 
 		   pkt_seq - 1, worldsens->rp_seq, period, worldsens->rp);
   return 0;
 }
@@ -656,9 +658,9 @@ worldsens_s_save_release_request_rx (struct _worldsens_s *worldsens, int node,
       return -1;
     }
 
-  WSNET_S_DBG_EXC ("WSNET:: --> (seq: %d) SAVE + RP (seq: %d, period: %"PRId64", rp: %"PRId64")\n",
+  WSNET_S_DBG_SYNC ("WSNET:: --> (seq: %d) SAVE + RP (seq: %d, period: %"PRId64", rp: %"PRId64")\n",
 		   pkt_seq - 1, worldsens->rp_seq, period, worldsens->rp);
-  WSNET_S_DBG_EXC ("WSNET:: --> RX (src ip:%d, size:%d, freq:%gMHz, modul:%d)\n", 
+  WSNET_S_DBG_TX ("WSNET:: --> RX (src ip:%d, size:%d, freq:%gMHz, modul:%d)\n", 
 		   node, length, (unsigned)freq / 1000000.0, modulation);
   return 0;
 }
@@ -701,7 +703,7 @@ worldsens_s_rx (struct _worldsens_s *worldsens, int node, int freq,
       return -1;
     }
 
-  WSNET_S_DBG_EXC ("WSNET:: --> RX (src ip:%d, size:%d, freq:%gMHz, modul:%d)\n", 
+  WSNET_S_DBG_TX ("WSNET:: --> RX (src ip:%d, size:%d, freq:%gMHz, modul:%d)\n", 
 		   node, length, (unsigned)freq / 1000000.0, modulation);
 
   return 0;

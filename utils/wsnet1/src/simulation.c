@@ -39,9 +39,9 @@ uint64_t get_global_time()
 void set_global_time(uint64_t time)  
 { 
   g_sim_time = time; 
-  WSNET_S_DBG_DBG ("WSNET:: === ==================================================\n");
-  WSNET_S_DBG_DBG ("WSNET:: === TIME  %"PRId64" (seq: %d)\n", time, worldsens.rp_seq);
-  WSNET_S_DBG_DBG ("WSNET:: === ==================================================\n");
+  WSNET_S_DBG_TIME ("WSNET:: ===\n");
+  WSNET_S_DBG_TIME ("WSNET:: === TIME  %"PRId64" (seq: %d)\n", time, worldsens.rp_seq);
+  WSNET_S_DBG_TIME ("WSNET:: ===\n");
 }
 
 /**************************************************************************/

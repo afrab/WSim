@@ -23,7 +23,7 @@ char g_config_repository[256];
 /**************************************************************************/
 /**************************************************************************/
 void usage(void) {
-  fprintf(stderr, "Usage: simulation [-s seed] [-l logfile] [-p local_port] [-P multicast_port] [-m multicast_addr]\n");
+  fprintf(stderr, "Usage: simulation [-s seed] [-l logfile] [-p local_port] [-P multicast_port] [-m multicast_addr] [-S synch_period]\n");
   return;
 }
 
@@ -34,7 +34,7 @@ void usage(void) {
 int command_line(int argc, char *argv[]) {
   int c;
 	
-  while ((c = getopt(argc, argv, "F:s:l:d:")) != -1) {
+  while ((c = getopt(argc, argv, "F:s:l:d:S:")) != -1) {
     switch (c) {
     case 'p': 
       g_lport = atoi(optarg);
@@ -48,6 +48,9 @@ int command_line(int argc, char *argv[]) {
     case 's':
       g_seed = atoi(optarg);
       break;				
+    case 'S':
+      WORLDSENS_SYNCH_PERIOD = atoi(optarg);
+      break;
     case 'F':       /* Deprecated option: here to avoid errors */
       break;
     case 'l':

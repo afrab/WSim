@@ -22,6 +22,8 @@ static char  logger_filename[MAXFILENAME];
 static FILE* logger_logfile;
 int logger_verbose_level = -1;
 
+#define UNUSED __attribute__((unused))
+
 /* ************************************************** */
 /* ************************************************** */
 /* ************************************************** */
@@ -119,7 +121,7 @@ mylog(char* fmt, va_list ap)
 
 void ERROR(char* fmt, ...)
 {
-  int length;
+  int UNUSED length;
   va_list ap;
   char buf[MAX_VNSPRINTF_BUF_LENGTH + 1];
 

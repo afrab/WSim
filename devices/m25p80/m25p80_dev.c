@@ -1456,8 +1456,8 @@ int m25p_ui_draw      (int UNUSED dev)
 
 void m25p_ui_get_size (int UNUSED dev, int *w, int *h)
 {
-  w = 0;
-  h = 0;
+  *w = 0;
+  *h = 0;
 }
 
 void m25p_ui_set_pos  (int UNUSED dev, int UNUSED x, int UNUSED y)

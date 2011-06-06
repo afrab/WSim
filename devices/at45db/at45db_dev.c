@@ -705,7 +705,8 @@ int check_pin(char UNUSED *msg, uint32_t mask, uint32_t value, int rshift, uint8
 
 void at45db_write(int UNUSED dev, uint32_t mask, uint32_t value)
 {
-  int CS,W,R; /* modified flags */
+  int UNUSED CS;
+  int W,R; /* modified flags */
   // HW_DMSG_AT45("at45db: write to flash 0x%04x mask 0x%04x\n",value, mask);
   
   CS = check_pin("CS",    mask,value,AT45DB_S_SHIFT, & AT45_DATA->pin_select);
@@ -1203,8 +1204,8 @@ int at45db_ui_draw      (int UNUSED dev)
 
 void at45db_ui_get_size (int UNUSED dev, int *w, int *h)
 {
-  w = 0;
-  h = 0;
+  *w = 0;
+  *h = 0;
 }
 
 void at45db_ui_set_pos  (int UNUSED dev, int UNUSED x, int UNUSED y)

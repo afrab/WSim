@@ -219,7 +219,7 @@ uint64_t cc1100_get_tx_byte_duration(struct _cc1100_t *cc1100)
   uint64_t sym_duration;
   uint64_t bit_sym_factor;
 
-  uint64_t bit_rate;
+  uint64_t UNUSED bit_rate;
   uint64_t bit_duration;
   uint64_t byte_duration;
 
@@ -263,9 +263,12 @@ uint64_t cc1100_get_tx_byte_duration(struct _cc1100_t *cc1100)
     }
 
   /*
-  CC1100_DBG_TX("cc1100: bit rate %dbps %lfbkpd %lfkBps\n",bit_rate,(float)bit_rate/1000.0,(float)bit_rate/8000.0);
-  CC1100_DBG_TX("cc1100: bit duration %"PRId64"ns %lfms\n",bit_duration,(double)bit_duration/1000000.0);
-  CC1100_DBG_TX("cc1100: byte duration %"PRId64"ns %lfms\n",byte_duration,(double)byte_duration/1000000.0);
+  CC1100_DBG_TX("cc1100: bit rate %dbps %lfbkpd %lfkBps\n",
+                bit_rate,(float)bit_rate/1000.0,(float)bit_rate/8000.0);
+  CC1100_DBG_TX("cc1100: bit duration %"PRId64"ns %lfms\n",
+                bit_duration,(double)bit_duration/1000000.0);
+  CC1100_DBG_TX("cc1100: byte duration %"PRId64"ns %lfms\n",
+                byte_duration,(double)byte_duration/1000000.0);
   */
 
   return byte_duration;

@@ -128,7 +128,7 @@ int msp430_interrupt_start_if_any(void)
 
 	      if (RUNNING_MODE() != RUNNING_AM)
 		{
-		  uint16_t nsr;
+		  uint16_t UNUSED nsr;
 		  HW_DMSG_LPM("msp430:intr: IRQ %d, LPM changed, going to AM\n",inum);
 		  HW_DMSG_LPM("msp430:intr:     from (SCG1:%d,SCG0:%d,OSCOFF:%d,CPUOFF:%d)\n",
 			      (SR>>SHIFT_SCG1)&1,(SR>>SHIFT_SCG0)&1,(SR>>SHIFT_OSCOFF)&1,(SR>>SHIFT_CPUOFF)&1);

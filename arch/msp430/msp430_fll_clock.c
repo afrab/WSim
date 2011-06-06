@@ -313,7 +313,7 @@ void msp430_fll_clock_write(uint16_t addr, int8_t val)
 	union {
 	  struct fll_ctl0_t    b;
 	  uint8_t              s;
-	} ctl0;
+	} UNUSED ctl0;
 
 	ctl0.s = val;
 	MCUFLL.ctl0.s = val;

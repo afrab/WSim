@@ -600,7 +600,7 @@ static void hd44_drawchar(int dev, int l, int c, uint8_t map[7])
   int  pixel,p,pp;
   unsigned char or,og,ob;
   unsigned char Or,Og,Ob;
-  unsigned char Br,Bg,Bb;
+  // unsigned char Br,Bg,Bb;
 
   /* #define HD44_MATRIX_WIDTH  ((2 + (HD44_MATRIX_X + 1) * HD44_N_COLS  + 1) * HD44_MATRIX_S) */
   /* #define HD44_MATRIX_HEIGHT ((2 + (HD44_MATRIX_Y + 1) * HD44_N_LINES + 1) * HD44_MATRIX_S) */
@@ -616,10 +616,11 @@ static void hd44_drawchar(int dev, int l, int c, uint8_t map[7])
   Og = (HD44_DATA->gfx_off >>  8) & 0xff;
   Ob = (HD44_DATA->gfx_off >>  0) & 0xff;
 
+  /*
   Br = (HD44_DATA->gfx_bg  >> 16) & 0xff;
   Bg = (HD44_DATA->gfx_bg  >>  8) & 0xff;
   Bb = (HD44_DATA->gfx_bg  >>  0) & 0xff;
-
+  */
   /* ERROR("HD44: on/off/bg %02x%02x%02x %02x%02x%02x %02x%02x%02x\n", or,og,ob,Or,Og,Ob,Br,Bg,Bb); */
   /* HW_DMSG_HD44("  lcd drawing char at %dx%d\n",x0,y0); */
 

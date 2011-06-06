@@ -67,7 +67,7 @@
  ****************************************/
 
 /*
-  NONE         : error id
+  NONE         : empty id
   FILE         : input/output data from a file descriptor
   TCP_LISTEN   : tcp listen socket
   TCP_SERV     : tcp socket after accept has been called
@@ -97,8 +97,8 @@ struct libselect_entry_t {
   struct libselect_socket_t skt;           /* unix socket                        */
 
   unsigned int              fifo_size;     /* i/o fifo size                      */
-  libselect_fifo_t          fifo_input;    /* input data fifo : from fd to wsim  */
-  libselect_fifo_t          fifo_output;   /* output data fifo : from wsim to fd */
+  libselect_fifo_input_t    fifo_input;    /* input data fifo : from fd to wsim  */
+  libselect_fifo_output_t   fifo_output;   /* output data fifo : from wsim to fd */
 
   libselect_callback        callback;      /* callback function()                */
   void                     *cb_ptr;        /* registered data for callback func. */
@@ -290,7 +290,7 @@ int libselect_update_registered()
 		  break;
 		default:
 		  DMSG("wsim:libselect:update: something to read on id %d = %d bytes\n",id,n);
-		  if (libselect_fifo_putblock(libselect.entry[id].fifo_input,buffer,n) < n)
+		  if (libselect_fifo_input_putblock(libselect.entry[id].fifo_input,buffer,n) < n)
 		    {
 		      ERROR("wsim:libselect:update: overrun on descriptor %d\n",id);
 		    }
@@ -319,7 +319,7 @@ int libselect_update_registered()
 		  if ((n = read(fd_in,buffer,BUFFER_MAX)) > 0)
 		    {
 		      DMSG("wsim:libselect:update: something to read on id %d = %d bytes\n",id,n);
-		      if (libselect_fifo_putblock(libselect.entry[id].fifo_input,buffer,n) < n)
+		      if (libselect_fifo_input_putblock(libselect.entry[id].fifo_input,buffer,n) < n)
 			{
 			  ERROR("wsim:libselect:update: fifo overrun on descriptor %d\n",id);
 			}
@@ -525,8 +525,8 @@ libselect_id_t libselect_id_create(char *argname, int UNUSED flags)
   /* allocate fifo memory if needed */
   if (libselect.entry[id].fifo_size > 0)
     {
-      libselect.entry[id].fifo_input  = libselect_fifo_create( libselect.entry[id].fifo_size );
-      libselect.entry[id].fifo_output = libselect_fifo_create( libselect.entry[id].fifo_size );
+      libselect.entry[id].fifo_input  = libselect_fifo_input_create(  id, libselect.entry[id].fifo_size );
+      libselect.entry[id].fifo_output = libselect_fifo_output_create( id, libselect.entry[id].fifo_size );
     }
   else
     {
@@ -593,8 +593,8 @@ int libselect_id_close(libselect_id_t id)
       return 1;
     }
 
-  libselect_fifo_delete(libselect.entry[id].fifo_input);
-  libselect_fifo_delete(libselect.entry[id].fifo_output);
+  libselect_fifo_input_delete(libselect.entry[id].fifo_input);
+  libselect_fifo_output_delete(libselect.entry[id].fifo_output);
   libselect.entry[id].entry_type = ENTRY_NONE;
   libselect.entry[id].registered = 0;
   return 0;
@@ -698,7 +698,26 @@ uint32_t libselect_id_read(libselect_id_t id, uint8_t *data, uint32_t size)
   uint32_t ret = 0;
   if (libselect.entry[id].fifo_input)
     {
-      ret = libselect_fifo_getblock(libselect.entry[id].fifo_input,data,size);
+      if (libselect.entry[id].backtrack && (libselect_ws_mode != WS_MODE_WSNET0))
+	{
+	  ret = libselect_fifo_input_readblock(libselect.entry[id].fifo_input,data,size);
+	  if (ret > 0)
+	    {
+	      DMSG_BK("wsim:libselect:bk: READ %d bytes to id=%d, fd=%d, fifo=%04d\n",
+	              size, id, libselect.entry[id].fd_in,
+	              libselect_fifo_input_avail ( libselect.entry[id].fifo_input ) );
+	    }
+	}
+      else
+	{
+	  ret = libselect_fifo_input_getblock(libselect.entry[id].fifo_input,data,size);
+	  if (ret > 0)
+	    {
+	      DMSG("wsim:libselect: WRITE %d bytes to id=%d, fd=%d, val=%c\n",
+	           size, id, libselect.entry[id].fd_in,
+	           isprint(data[0]) ? data[0] : '.');
+	    }
+	}
     }
   return ret;
 }
@@ -714,10 +733,10 @@ uint32_t libselect_id_write(libselect_id_t id, uint8_t *data, uint32_t size)
     {
       if (libselect.entry[id].backtrack && (libselect_ws_mode != WS_MODE_WSNET0))
 	{
-	  ret = libselect_fifo_putblock (libselect.entry[id].fifo_output, data, size);
+	  ret = libselect_fifo_output_putblock (libselect.entry[id].fifo_output, data, size);
 	  DMSG_BK("wsim:libselect:bk: WRITE %d bytes to id=%d, fd=%d, fifo=%04d\n",
 		  size, id, libselect.entry[id].fd_out,
-		  libselect_fifo_size ( libselect.entry[id].fifo_output ) );
+		  libselect_fifo_output_avail ( libselect.entry[id].fifo_output ) );
 	}
       else
 	{
@@ -823,11 +842,24 @@ void libselect_state_save(void)
       if (libselect_id_is_valid(id) && 
 	  libselect.entry[id].backtrack)
 	{
-	  size = libselect_fifo_size ( libselect.entry[id].fifo_output );
-	  libselect_fifo_getblock    ( libselect.entry[id].fifo_output, data, size );
-	  libselect_fifo_flush       ( libselect.entry[id].fifo_output) ;
+	  /* input
+	   *   - commit reads
+	   */
+	  size = libselect_fifo_input_readcommit  ( libselect.entry[id].fifo_input );
 	  if (size > 0)
 	    {
+	      DMSG_BK("wsim:libselect:bk: SAVE+READ id=%d, fd=%d, read %d bytes\n",
+	              id,libselect.entry[id].fd_in,size);
+	    }
+
+	  /* output 
+	   *   - write the whole fifo content  
+	   */
+	  size = libselect_fifo_output_avail ( libselect.entry[id].fifo_output );
+	  if (size > 0)
+	    {
+	      libselect_fifo_output_getblock    ( libselect.entry[id].fifo_output, data, size );
+	      libselect_fifo_output_flush       ( libselect.entry[id].fifo_output) ;
 	      if (write(libselect.entry[id].fd_out, data, size) != size)
 		{
 		  ERROR("wsim:libselect:bk: error on write id=%d, fd=%d\n",
@@ -861,9 +893,19 @@ void libselect_state_restore(void)
       if (libselect_id_is_valid(id) &&
 	  libselect.entry[id].backtrack)
 	{
-	  size = libselect_fifo_size ( libselect.entry[id].fifo_output );
-	  libselect_fifo_flush(libselect.entry[id].fifo_output);
-	  DMSG_BK("wsim:libselect:bk: RESTORE id=%d, fd=%d, cancel %d bytes\n",
+	  /* input
+	   *
+	   */
+	  size = libselect_fifo_input_readcancel ( libselect.entry[id].fifo_input );
+	  DMSG_BK("wsim:libselect:bk: RESTORE id=%d, fd=%d, cancel read %d bytes\n",
+		  id,libselect.entry[id].fd_in,size);
+
+	  /* output 
+	   *
+	   */
+	  size = libselect_fifo_output_avail ( libselect.entry[id].fifo_output );
+	  libselect_fifo_output_flush( libselect.entry[id].fifo_output );
+	  DMSG_BK("wsim:libselect:bk: RESTORE id=%d, fd=%d, cancel write %d bytes\n",
 		  id,libselect.entry[id].fd_out,size);
 	}      
     }

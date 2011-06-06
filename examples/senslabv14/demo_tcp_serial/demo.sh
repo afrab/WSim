@@ -17,7 +17,7 @@ LOG="--logfile=stdout --verbose=5"
 TRC="--trace=wsim.trc"
 
 # Mode = time | gdb
-MODE="--mode=time --modearg=200s"
+MODE="--mode=time --modearg=50s"
 #MODE="--mode=gdb"
 
 # Serial terminal emulation
@@ -61,7 +61,7 @@ case $SERMODE in
 	;;
     "UDP")
 	NCCMD="${NETCAT} -u -p 7000 localhost 6000"
-	SERIAL="--serial0_io=udp:localhost:6000:localhost:7000"
+	SERIAL="--serial0_io=bk:udp:localhost:6000:localhost:7000"
 	;;
     "TCP")
 	NCCMD="${NETCAT} localhost 6000"

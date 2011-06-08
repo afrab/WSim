@@ -292,7 +292,13 @@ int libselect_update_registered()
 		  DMSG("wsim:libselect:update: something to read on id %d = %d bytes\n",id,n);
 		  if (libselect_fifo_input_putblock(libselect.entry[id].fifo_input,buffer,n) < n)
 		    {
-		      ERROR("wsim:libselect:update: overrun on descriptor %d\n",id);
+		      ERROR("wsim: ===========================================\n");
+		      ERROR("wsim: Overrun error on input %d (type %s)\n",id,
+		            entry_type_str(libselect.entry[id].entry_type));
+		      ERROR("wsim: - data have been lost during simulation\n");
+		      ERROR("wsim: - the sender does not set its sending speed according to \n");
+		      ERROR("wsim:   the target capabilities\n");
+		      ERROR("wsim: ===========================================\n");
 		    }
 		  break;
 		}
@@ -393,6 +399,8 @@ libselect_id_t libselect_id_create(char *argname, int UNUSED flags)
       libselect.entry[id].backtrack = 0;
     }
 
+  libselect.entry[id].fd_in       = -1;
+  libselect.entry[id].fd_out      = -1;
   libselect.entry[id].signal      = 0;
   libselect.entry[id].callback    = NULL;
   libselect.entry[id].cb_ptr      = NULL;

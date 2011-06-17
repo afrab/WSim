@@ -218,20 +218,20 @@ struct msp430_uscia_t
 /* ************************************************** */
 
 #if defined(__msp430_have_uscia0)
-#define USCIA0_START  0x060
-#define USCIA0_END    0x067
+#define USCIA0_START  USCIA_BASE
+#define USCIA0_END    USCIA_BASE+10
 
-#define UCA0ABCTL     0x05D
-#define UCA0IRTCTL    0x05E
-#define UCA0IRRCTL    0x05F
-#define UCA0CTL0      0x060
-#define UCA0CTL1      0x061
-#define UCA0BR0       0x062
-#define UCA0BR1       0x063
-#define UCA0MCTL      0x064
-#define UCA0STAT      0x065
-#define UCA0RXBUF     0x066
-#define UCA0TXBUF     0x067
+#define UCA0ABCTL     USCIA_BASE
+#define UCA0IRTCTL    USCIA_BASE+1
+#define UCA0IRRCTL    USCIA_BASE+2
+#define UCA0CTL0      USCIA_BASE+3
+#define UCA0CTL1      USCIA_BASE+4
+#define UCA0BR0       USCIA_BASE+5
+#define UCA0BR1       USCIA_BASE+6
+#define UCA0MCTL      USCIA_BASE+7
+#define UCA0STAT      USCIA_BASE+8
+#define UCA0RXBUF     USCIA_BASE+9
+#define UCA0TXBUF     USCIA_BASE+10
 
 
 void   msp430_uscia0_create();

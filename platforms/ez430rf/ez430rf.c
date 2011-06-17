@@ -315,6 +315,7 @@ int devices_update(void)
    {
       machine.device[RADIO].write(RADIO, CC2500_DATA_MASK, val8);
       etracer_slot_access(0x0, 1, ETRACER_ACCESS_WRITE, ETRACER_ACCESS_BYTE, ETRACER_ACCESS_LVL_SPI0, 0);
+      HW_DMSG_PLATFORM("msp430:ez430rf:spi write mcu > radio with val %x\n",val8);
   }      
 
     
@@ -327,11 +328,12 @@ int devices_update(void)
   {
     uint32_t mask  = 0;
     uint32_t value = 0;
-    machine.device[ RADIO ].read( RADIO ,&mask,&value);
+    machine.device[RADIO].read( RADIO ,&mask,&value);
     if (mask & CC2500_DATA_MASK)
       {
 	msp430_uscib0_dev_write_spi(value & CC2500_DATA_MASK);
 	etracer_slot_access(0x0, 1, ETRACER_ACCESS_READ, ETRACER_ACCESS_BYTE, ETRACER_ACCESS_LVL_SPI0, 0);
+	HW_DMSG_PLATFORM("msp430:ez430rf:spi write radio > mcu with val %x\n",value);
       }
     if (mask & CC2500_GDO2_MASK) // GDO2 -> P2.7
       { 

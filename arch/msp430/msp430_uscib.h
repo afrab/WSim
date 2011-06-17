@@ -116,16 +116,16 @@ struct msp430_uscib_t
 /* ************************************************** */
 
 #if defined(__msp430_have_uscib0)
-#define USCIB0_START  0x068
-#define USCIB0_END    0x06f
+#define USCIB0_START  USCIB_BASE
+#define USCIB0_END    USCIB_BASE+7
 
-#define UCB0CTL0     0x068
-#define UCB0CTL1     0x069
-#define UCB0BR0      0x06a
-#define UCB0BR1      0x06b
-#define UCB0STAT     0x06d
-#define UCB0RXBUF    0x06e
-#define UCB0TXBUF    0x06f
+#define UCB0CTL0     USCIB_BASE
+#define UCB0CTL1     USCIB_BASE+1
+#define UCB0BR0      USCIB_BASE+2
+#define UCB0BR1      USCIB_BASE+3
+#define UCB0STAT     USCIB_BASE+5
+#define UCB0RXBUF    USCIB_BASE+6
+#define UCB0TXBUF    USCIB_BASE+7
 
 void   msp430_uscib0_create();
 void   msp430_uscib0_reset();

@@ -462,6 +462,10 @@ static infomem_t UNUSED infomem[] = {};
 #define FLASH_ERASE_TIMING_MASS    10593
 #define FLASH_ERASE_TIMING_SEG      4819
 
+//BASE Register (OFFSET)
+#define USCIA_BASE        0x05d
+#define USCIB_BASE        0x068
+
 /* ********************************************************************** */
 /* ********************************************************************** */
 /* ********************************************************************** */
@@ -544,6 +548,10 @@ static infomem_t UNUSED infomem[] = {
 #define FLASH_WRITE_TIMING_LSTBYTE     6
 #define FLASH_ERASE_TIMING_MASS    10593
 #define FLASH_ERASE_TIMING_SEG      4819
+
+//BASE Register (OFFSET)
+#define USCIA_BASE        0x05d
+#define USCIB_BASE        0x068
 
 /* ********************************************************************** */
 /* ********************************************************************** */

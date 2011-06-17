@@ -199,6 +199,10 @@ uint16_t rx_packet_cb(void)
               cc2420_frame_seq = rxframe[2] + 1;
               frame_type = swapbits((swapbits(rxframe[0], 8) & 0xE0) >> 5, 3);
               
+#define RSSI_OFFSET (-45)
+	      uint8_t lqi  = rxframe[length-1] & 0x7f ;
+	      int8_t  rssi = rxframe[length-2] + RSSI_OFFSET;        
+
               if (frame_type == 0x02)  /* ack frame */
                 {
                   if (cc2420_waiting_ack)
@@ -212,9 +216,9 @@ uint16_t rx_packet_cb(void)
                 {
 		  printf("Frame received from pan id %02x:%02x and addr %02x:%02x\n",
 		         rxframe[7],rxframe[8], rxframe[9], rxframe[10]);
-		  printf("to pan id %02x:%02x and addr %02x:%02x, type = %d, size %d, frame_seq %d\n",
+		  printf("to pan id %02x:%02x and addr %02x:%02x, type = %d, size %d, frame_seq %d, rssi %ddBm, lqi %d\n",
 		         rxframe[3], rxframe[4], rxframe[5], rxframe[6],
-		         rxframe[11], rxframe[12], rxframe[2]);
+		         rxframe[11], rxframe[12], rxframe[2], rssi, lqi);
 		  cc2420_size = length;
                 }
             }

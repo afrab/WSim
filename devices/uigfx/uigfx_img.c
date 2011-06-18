@@ -17,7 +17,13 @@
 /* ************************************************** */
 /* ************************************************** */
 
+#define DEBUG_IMG 0
+
+#if DEBUG_IMG != 0
 #define UIIMG_DBG(x...) DMSG_LIB_UI(x)
+#else
+#define UIIMG_DBG(x...) do { } while (0)
+#endif
 
 /* ************************************************** */
 /* ************************************************** */
@@ -67,15 +73,15 @@ static void uigfx_xpm_parsecolor(char *str, struct uigfx_map_t *cmap, int nc, in
     {
     case 1:
       sscanf(str, "%c c %s", &l1, color);
-      UIIMG_DBG("ui_img_xmp:RRR: %c c %s\n", l1, color);
+      UIIMG_DBG("ui_img_xpm:RRR: %c c %s\n", l1, color);
       break;
     case 2:
       sscanf(str, "%c%c c %s", &l1,&l2, color);
-      UIIMG_DBG("ui_img_xmp:RRR: %c%c c %s\n", l1,l2, color);
+      UIIMG_DBG("ui_img_xpm:RRR: %c%c c %s\n", l1,l2, color);
       break;
     case 3:
       sscanf(str, "%c%c%c c %s", &l1,&l2,&l3, color);
-      UIIMG_DBG("ui_img_xmp:RRR: %c%c%c c %s\n", l1,l2,l3, color);
+      UIIMG_DBG("ui_img_xpm:RRR: %c%c%c c %s\n", l1,l2,l3, color);
       break;
     }
   

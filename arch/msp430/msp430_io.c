@@ -203,7 +203,7 @@ static void msp430_set_readptr8(addr_map_read8_t f, uint16_t addr)
     }
   else
     {
-      ERROR("msp430:io: MCU create errror, IO read8 0x%04x function not unique\n",addr);
+      ERROR("msp430:io: MCU create error, IO read8 0x%04x function not unique\n",addr);
       machine_exit(0);
     }
 }
@@ -220,7 +220,7 @@ static void msp430_set_readptr16(addr_map_read16_t f, uint16_t addr)
     }
   else
     {
-      ERROR("msp430:io: MCU create errror, IO read16 0x%04x function not unique\n",addr);
+      ERROR("msp430:io: MCU create error, IO read16 0x%04x function not unique\n",addr);
       ERROR("msp430:io: function to set      %p\n",f);
       ERROR("msp430:io: function registered  %p\n",pread16[addr]);
       ERROR("msp430:io:       %p : sigbus\n",     msp430_read16_sigbus);
@@ -245,7 +245,7 @@ static void msp430_set_writeptr8(addr_map_write8_t f, uint16_t addr)
     }
   else
     {
-      ERROR("msp430:io: MCU create errror, IO write8 0x%04x function not unique\n",addr);
+      ERROR("msp430:io: MCU create error, IO write8 0x%04x function not unique\n",addr);
       machine_exit(0);
     }
 }
@@ -261,7 +261,7 @@ static void msp430_set_writeptr16(addr_map_write16_t f, uint16_t addr)
     }
   else
     {
-      ERROR("msp430:io: MCU create errror, IO write16 0x%04x function not unique\n",addr);
+      ERROR("msp430:io: MCU create error, IO write16 0x%04x function not unique\n",addr);
       machine_exit(0);
     }
 }

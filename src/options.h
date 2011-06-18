@@ -72,6 +72,7 @@ struct options_t {
   unsigned short     gdb_port;
   uint64_t           sim_insn;
   uint64_t           sim_time;
+  int                realtime;
 };
 
 

@@ -38,7 +38,7 @@
 #define DEFAULT_MULTICAST_IP       "224.0.0.1"
 #define DEFAULT_MULTICAST_PORT     9999
 #define DEFAULT_NODE_ID            1
-
+#define DEFAULT_REALTIME           0
 
 /* ************************************************** */
 /* ************************************************** */
@@ -46,8 +46,9 @@
 
 /* liblogger cannot be used during option parse */
 
-#define __DEBUG_OPTIONS
-#ifdef DEBUG_OPTIONS
+#define DEBUG_OPTIONS 0
+
+#if DEBUG_OPTIONS != 0
 #  define OPT_DMSG(x...)  fprintf(stderr,x)
 #else
 #  define OPT_DMSG(x...)  do { } while(0)
@@ -84,6 +85,13 @@ static struct moption_t modearg_opt = {
   .longname    = "modearg",
   .type        = required_argument,
   .helpstring  = "mode optional argument",
+  .value       = NULL
+};
+
+static struct moption_t realtime_opt = {
+  .longname    = "realtime",
+  .type        = no_argument,
+  .helpstring  = "realtime simulation speed",
   .value       = NULL
 };
 
@@ -263,6 +271,7 @@ void options_start()
   options_add_base(& version_opt        );
   options_add_base(& mode_opt           );
   options_add_base(& modearg_opt        );
+  options_add_base(& realtime_opt       );
   options_add_base(& preload_opt        );
   options_add_base(& noelf_opt          );
   /*  options_add_base(& dump_opt      ); */
@@ -377,6 +386,11 @@ void options_print_params(struct options_t* s)
       break;
     }
 
+  if (s->realtime)
+    {
+      OPT_PRINT("  realtime mode set\n");
+    }
+
   if ((s->do_elfload == 1) && (stat(s->progname, &fs) == -1))
     {
       fprintf(stdout," ** Cannot stat elf file\n");
@@ -420,6 +434,7 @@ void options_read_cmdline(struct options_t *s, int *argc, char *argv[])
   sprintf(s->preload,    "none");
 
   s->sim_mode           = DEFAULT_SIM_MODE;
+  s->realtime           = DEFAULT_REALTIME;
   s->gdb_port           = DEFAULT_GDB_PORT;
   s->sim_insn           = DEFAULT_RUN_INSN;
   s->sim_time           = DEFAULT_RUN_TIME;
@@ -556,7 +571,12 @@ void options_read_cmdline(struct options_t *s, int *argc, char *argv[])
 	}
     }
 
-
+  if (realtime_opt.isset)
+    {
+      OPT_DMSG(" realtime set\n");
+      s->realtime = 1;
+    }
+ 
   if (verbose_opt.isset)
     {
       OPT_DMSG(" verbose set\n");
@@ -669,6 +689,15 @@ void options_read_cmdline(struct options_t *s, int *argc, char *argv[])
       OPT_ERROR("\n ** missing node_id option ** \n\n");
       options_usage(argv[0]);
       exit(1);
+    }
+
+  if (realtime_opt.isset && (wsnet1_mode_opt.isset || wsnet2_mode_opt.isset))
+    {
+      OPT_WARNING("\n==================================================\n");
+      OPT_WARNING(" wsnet mode cannot be used with the realtime option\n");
+      OPT_WARNING(" realtime mode is disabled\n");
+      OPT_WARNING("\n==================================================\n");
+      s->realtime = 0;
     }
 
   OPT_DMSG("parseindex = %d, argc = %d\n",parseindex,*argc);

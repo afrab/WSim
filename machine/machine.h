@@ -13,6 +13,14 @@
 #include "devices/devices.h"
 #include "libelf/libelf.h"
 
+
+struct machine_opt_t {
+  uint64_t   insn;
+  wsimtime_t time;
+  int        realtime;
+};
+
+
 int machine_options_add();
 
 /**
@@ -69,9 +77,7 @@ wsimtime_t machine_get_nanotime(void);
  * machine_run
  **/
 void       machine_exit      (int arg);
-void       machine_run_free  (void);
-uint64_t   machine_run_insn  (uint64_t insn);
-wsimtime_t machine_run_time  (wsimtime_t nanotime);
+void       machine_run       (struct machine_opt_t *m);
 
 /**
  * machine state allocate

@@ -165,7 +165,7 @@ static void
 
 gdbremote_putpacket (struct gdbremote_t *gdb, char *buffer)
 {
-  int ret;
+  int UNUSED ret;
   int retry = -1;
   unsigned char cret;
   /*  $<packet info>#<checksum>. */
@@ -409,8 +409,8 @@ static void gdbremote_write_memory_binary(struct gdbremote_t *gdb, char *buffer,
 {
   char *token;
   char delim[] = " ,;:";
-  uint32_t addr;
-  uint32_t length;
+  uint32_t UNUSED addr;
+  uint32_t UNUSED length;
   
   /* buffer[0] == 'X'                 */
   /* X ADDR,LENGTH:XX... -- write mem */
@@ -669,7 +669,7 @@ gdbremote_single_step(struct gdbremote_t *gdb, char *buffer, int UNUSED size)
    * stop (at this time this is left to GDB_SINGLE signal) */
 
   mcu_signal_add(SIG_GDB_SINGLE); 
-  machine_run_free();
+  machine_run(NULL);
 
   DMSG_LIB_GDB("gdbremote: exit single step at 0x%04x (next 0x%4x, reg[0] 0x%04x) with signal = 0x%x (%s)\n",
 	   mcu_get_pc(),mcu_get_pc_next(),mcu_register_get(0),mcu_signal_get(),mcu_signal_str());
@@ -750,7 +750,7 @@ gdbremote_continue(struct gdbremote_t *gdb, char UNUSED *buffer, int UNUSED size
   assert(libselect_fd_register(gdb->skt.socket, SIG_GDB_IO) != -1);
   do 
     {
-      machine_run_free();
+      machine_run(NULL);
     }
   while ((mcu_signal_get() & GDB_STOP_BITMASK) == 0);  
   /* we stop on anything but WORLDSENS_IO */ 

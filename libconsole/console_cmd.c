@@ -240,10 +240,15 @@ con_cmd_val console_cmd_set(console_cmd_params p)
 
 con_cmd_val console_cmd_run (console_cmd_params p)
 {
+  struct machine_opt_t m;
+
   DBG_PRINT("wsim:con:cmd:run\n");
   assert(libselect_fd_register(p->cs->fd_input, SIG_CON_IO) != -1);
   /* do something */
-  machine_run_free();
+  m.realtime = 0;
+  m.insn     = 0;
+  m.time     = 0;
+  machine_run(&m);
   assert(libselect_fd_unregister(p->cs->fd_input) != -1);
 
   if ((mcu_signal_get() & SIG_CON_IO) == 0)
@@ -262,12 +267,16 @@ con_cmd_val console_cmd_run (console_cmd_params p)
 
 con_cmd_val console_cmd_run_insn(console_cmd_params p)
 {
+  struct machine_opt_t m;
   uint64_t n = atoll(p->options[0]);
 
   DBG_PRINT("wsim:con:cmd:run_insn: run for %"PRIu64" instructions\n",n);
   assert(libselect_fd_register(p->cs->fd_input, SIG_CON_IO) != -1);
   /* do something */
-  machine_run_insn(n);
+  m.realtime = 0;
+  m.insn     = n;
+  m.time     = 0;
+  machine_run(&m);
   assert(libselect_fd_unregister(p->cs->fd_input) != -1);
 
   if ((mcu_signal_get() & SIG_CON_IO))
@@ -286,12 +295,16 @@ con_cmd_val console_cmd_run_insn(console_cmd_params p)
 
 con_cmd_val console_cmd_run_time(console_cmd_params p)
 {
+  struct machine_opt_t m;
   uint64_t n = atoll(p->options[0]);
 
   DBG_PRINT("wsim:con:cmd:run_time: run for %"PRIu64" ns\n",n);
   assert(libselect_fd_register(p->cs->fd_input, SIG_CON_IO) != -1);
   /* do something */
-  machine_run_time(n);
+  m.realtime = 0;
+  m.insn     = n;
+  m.time     = 0;
+  machine_run(&m);
   assert(libselect_fd_unregister(p->cs->fd_input) != -1);
 
   if ((mcu_signal_get() & SIG_CON_IO))

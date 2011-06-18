@@ -43,11 +43,11 @@ struct watchpoint_t {
 };
 
 struct machine_state_t {
-  uint64_t    nanotime;
-  uint64_t    nanotime_incr;
-  char        watchpoint_modify_on_first_write[MONITOR_MAX_WATCHPOINT];
+  wsimtime_t    nanotime;
+  wsimtime_t    nanotime_incr;
+  char          watchpoint_modify_on_first_write[MONITOR_MAX_WATCHPOINT];
   /* devices_state must be last */
-  uint8_t     devices_state[0];
+  uint8_t       devices_state[0];
 };
 
 /* ************************************************** */
@@ -77,12 +77,18 @@ struct machine_t
    *
    **/
   int                      nanotime_incr;
+  int                      run_limit;
+  int                      run_realtime;
+  wsimtime_t               run_time;
+  uint64_t                 run_insn;
 
   /**
    * trace log
    **/
   uint32_t                 backtrack;
   tracer_id_t              backtrack_trc;
+  tracer_id_t              realtime_trc;
+  tracer_id_t              logwrite_trc;
 
   /**
    * ui

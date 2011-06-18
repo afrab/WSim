@@ -10,6 +10,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include <sys/time.h>
+#include <unistd.h>
 
 #include "arch/common/hardware.h"
 #include "devices/devices.h"
@@ -22,21 +24,34 @@
 #include "machine.h"
 
 
-#define WSIM_RECORD_INTERNAL_EVENTS 1
+#define WSIM_RECORD_INTERNAL_EVENTS 0
 
 #if WSIM_RECORD_INTERNAL_EVENTS != 0
-#define MACHINE_TRC_BACKTRACK()        tracer_event_add_id(32, "backtrack",  "wsim")
-#define MACHINE_TRC_BACKTRACK_RECORD() tracer_event_record(machine.backtrack_trc, machine.backtrack)
+#define MACHINE_TRC_BACKTRACK()            tracer_event_add_id(32, "backtrack",  "wsim")
+#define MACHINE_TRC_BACKTRACK_RECORD()     tracer_event_record(machine.backtrack_trc, machine.backtrack)
+#define MACHINE_TRC_REALTIME()             tracer_event_add_id(32, "realtime",  "wsim")
+#define MACHINE_TRC_REALTIME_RECORD(delta) tracer_event_record(machine.realtime_trc, delta)
+#define MACHINE_TRC_LOGWRITE()             tracer_event_add_id(32, "logwrite",  "wsim")
+#define MACHINE_TRC_LOGWRITE_RECORD(delta) tracer_event_record(machine.logwrite_trc, delta)
 #else
-#define MACHINE_TRC_BACKTRACK() 0
-#define MACHINE_TRC_BACKTRACK_RECORD() do { } while (0)
+#define MACHINE_TRC_BACKTRACK()            0
+#define MACHINE_TRC_BACKTRACK_RECORD()     do { } while (0)
+#define MACHINE_TRC_REALTIME()             0
+#define MACHINE_TRC_REALTIME_RECORD(delta) do { } while (0)
+#define MACHINE_TRC_LOGWRITE()             0
+#define MACHINE_TRC_LOGWRITEL_RECORD(delta) do { } while (0)
 #endif
 
 /**
  * global variable
  **/
-struct machine_t machine;
-static elf32_t machine_elf = NULL;
+struct machine_t  machine;
+static elf32_t    machine_elf  = NULL;
+
+
+#define LIMIT_REALTIME 0x01
+#define LIMIT_TIME     0x02
+#define LIMIT_INSN     0x04
 
 /* ************************************************** */
 /* ************************************************** */
@@ -79,12 +94,17 @@ int machine_create()
   machine.state                       = NULL;
   machine.state_backup                = NULL;
   machine.nanotime_incr               = 0;
+  machine.run_limit                   = 0;
+  machine.run_time                    = 0;
+  machine.run_insn                    = 0;
   machine.device_max                  = 0;
   memset(machine.device,      '\0',sizeof(struct device_t)*DEVICE_MAX);
   memset(machine.device_size, '\0',sizeof(int)*DEVICE_MAX);
 
   machine.backtrack                   = 0;
   machine.backtrack_trc               = MACHINE_TRC_BACKTRACK();
+  machine.realtime_trc                = MACHINE_TRC_REALTIME();
+  machine.logwrite_trc                = MACHINE_TRC_LOGWRITE();
   machine.ui.framebuffer_background   = 0;
 
   /* create devices = mcu + peripherals */
@@ -205,22 +225,48 @@ void machine_exit(int arg)
 /* ************************************************** */
 /* ************************************************** */
 
-static inline uint32_t machine_run(void)
+static inline wsimtime_t system_gettime()
+{
+  struct timeval t;
+  wsimtime_t ntime;
+  gettimeofday(&t, NULL);
+  ntime = t.tv_sec * 1000 * 1000 + t.tv_usec; // us
+  return ntime;
+}
+
+static inline void system_waitmicro(int64_t micro)
+{
+  /*
+  struct timespec t;
+  t.tv_sec  = micro / 1000000;
+  t.tv_nsec = micro * 1000;
+  nanosleep(&t);
+  */
+  usleep(micro);
+}
+
+static inline uint32_t machine_run_internal(void)
 {
   uint32_t sig;
-
+  wsimtime_t realtime_last_wsim;
+  wsimtime_t realtime_last_sys;
+  
   mcu_system_clock_speed_tracer_update();
+  machine_state_save();
+
+  realtime_last_wsim = MACHINE_TIME_GET_NANO();
+  realtime_last_sys  = system_gettime();
 
   do {
-
-    mcu_run();         // MCU step
-    devices_update();  // call platform
+    /* run */
+    mcu_run();         // MCU step and devices
+    devices_update();  // call platform devices
     mcu_update_done(); // MCU step done
-
     MACHINE_TIME_CLR_INCR();
-
     sig = mcu_signal_get();
-    if ((sig & SIG_MAC) != 0)
+
+    /* memory access control MAC */
+    if ( (sig & SIG_MAC) != 0 )
       {
 	mcu_signal_remove(SIG_MAC);
 	if ((sig & MAC_TO_SIG(MAC_MUST_WRITE_FIRST)) != 0)
@@ -248,6 +294,52 @@ static inline uint32_t machine_run(void)
 	  }
       }
 
+    /* time and instruction counters */
+    if (machine.run_limit != 0)
+      {
+	if ((machine.run_limit & LIMIT_INSN) && (mcu_get_cycles() >= machine.run_insn))
+	  {
+	    mcu_signal_add(SIG_RUN_INSN);
+	    sig = mcu_signal_get();
+	    return sig;
+	  }
+
+	if ((machine.run_limit & LIMIT_TIME) && (MACHINE_TIME_GET_NANO() >= machine.run_time))
+	  {
+	    mcu_signal_add(SIG_RUN_TIME);
+	    sig = mcu_signal_get();
+	    return sig;
+	  }
+
+#define REALTIME_PRECISION        50*1000*1000UL /* x0 ms */
+
+	if ((machine.run_limit & LIMIT_REALTIME) && 
+	    ((MACHINE_TIME_GET_NANO() - realtime_last_wsim) > REALTIME_PRECISION))
+	  {
+	    int64_t delta;
+	    wsimtime_t delta_wsim;
+	    wsimtime_t delta_sys;
+	    delta_wsim = MACHINE_TIME_GET_NANO() - realtime_last_wsim;
+	    delta_sys  = system_gettime() - realtime_last_sys;
+	    delta      = delta_wsim / 1000 - delta_sys;
+	    if (delta > 0)
+	      {
+		/* catch up */
+		system_waitmicro( delta ); // micro
+	      }
+	    else
+	      {
+		/* wsim is late */
+		HW_DMSG_MISC("wsim: realtime mode behind schedule by %05d usec (%03d ms) at %"PRIu64"\n", 
+		      -delta,  -delta / 1000, MACHINE_TIME_GET_NANO() / 1000000);
+		
+	      }
+	    MACHINE_TRC_REALTIME_RECORD(delta);
+	    realtime_last_wsim = MACHINE_TIME_GET_NANO();
+	    realtime_last_sys  = system_gettime();
+	  }
+      }
+
   } while (sig == 0);
 
   return sig;
@@ -257,97 +349,44 @@ static inline uint32_t machine_run(void)
 /* ************************************************** */
 /* ************************************************** */
 
-inline void machine_run_free(void)
+void machine_run(struct machine_opt_t *m)
 {
   uint32_t UNUSED sig;
-  sig = machine_run();
+
+  machine.run_realtime = 0;
+  machine.run_time     = 0;
+  machine.run_insn     = 0;
+
+  if (m != NULL)
+    {
+      if (m->realtime) 
+	{
+	  machine.run_limit   |= LIMIT_REALTIME;
+	  HW_DMSG_MISC("machine: will run realtime\n");
+	}
+      
+      if (m->insn > 0)
+	{
+	  machine.run_limit  |= LIMIT_INSN;
+	  machine.run_insn    = m->insn;
+	  HW_DMSG_MISC("machine: will run for %" PRIu64 " instructions\n",run_insn);
+	}
+      
+      if (m->time > 0)
+	{
+	  machine.run_limit  |= LIMIT_TIME;
+	  machine.run_time    = m->time;
+	  HW_DMSG_MISC("machine: will run for %" PRIu64 " nano seconds\n",nanotime);
+	}
+    }
+
+  sig = machine_run_internal();
   
   HW_DMSG_MISC("machine:run: stopped at 0x%04x with signal 0x%x=%s\n",mcu_get_pc(),sig,mcu_signal_str());
   /*
    * Allowed outside tools signals
    *    SIG_GDB | SIG_CONSOLE | SIG_WORLDSENS_IO 
    */
-}
-
-/* ************************************************** */
-/* ************************************************** */
-/* ************************************************** */
-
-#define TEST_SIGNAL_EXIT(sig)						\
-  ((sig & SIG_CON_IO)                           )  ||			\
-  ((sig & SIG_WORLDSENS_KILL)                   )  ||			\
-  ((sig & SIG_MCU)    && (sig & SIG_MCU_ILL)    )  ||			\
-  ((sig & SIG_HOST)   && (sig & SIG_HOST_SIGNAL))
-
-void TEST_SIGNAL_PRINT(char *name)
-{
-  OUTPUT("wsim:run:%s: exit at 0x%04x with signal 0x%x -- %s\n", 
-	 name,mcu_get_pc(), mcu_signal_get(), mcu_signal_str());
-  REAL_STDOUT("wsim:run:%s: exit at 0x%04x with signal %s\n", 
-	 name,mcu_get_pc(), mcu_signal_str());
-}
-
-/* ************************************************** */
-/* ************************************************** */
-/* ************************************************** */
-
-uint64_t machine_run_insn(uint64_t insn)
-{
-  uint32_t sig;
-  uint64_t i;
-  HW_DMSG_MISC("machine: will run for %" PRIu64 " instructions\n",insn);
-
-  mcu_signal_add(SIG_RUN_INSN);
-  machine_state_save();
-
-  for(i=0; i < insn; i++)
-    {
-      mcu_signal_add(SIG_RUN_INSN);
-      (void)machine_run();
-      mcu_signal_remove(SIG_RUN_INSN);
-
-      sig = mcu_signal_get();
-      if (sig)
-	{
-	  if (TEST_SIGNAL_EXIT(sig))
-	    {
-	      TEST_SIGNAL_PRINT("insn");
-	      return i;
-	    }
-	}
-    }
-  return insn;
-}
-
-/* ************************************************** */
-/* ************************************************** */
-/* ************************************************** */
-
-wsimtime_t machine_run_time(wsimtime_t nanotime)
-{
-  uint32_t sig;
-  HW_DMSG_MISC("machine: will run for %" PRIu64 " nano seconds\n",nanotime);
-
-  mcu_signal_add(SIG_RUN_TIME);
-  machine_state_save();
-
-  while (MACHINE_TIME_GET_NANO() < nanotime)
-    {
-      mcu_signal_add(SIG_RUN_TIME);
-      (void)machine_run();
-      mcu_signal_remove(SIG_RUN_TIME);
-
-      sig = mcu_signal_get();
-      if (sig)
-	{
-	  if (TEST_SIGNAL_EXIT(sig))
-	    {
-	      TEST_SIGNAL_PRINT("time");
-	      return MACHINE_TIME_GET_NANO();
-	    }
-	}
-    }
-  return MACHINE_TIME_GET_NANO();
 }
 
 /* ************************************************** */

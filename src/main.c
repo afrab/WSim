@@ -84,8 +84,10 @@ void signal_quit(int signum)
 static void main_dump_stats()
 {
 #define NANO  (1000*1000*1000)
-#define MICRO (1000)
-  int64_t unanotime = -1;
+#define MICRO (1000*1000)
+#define MILLI (1000)
+
+  int64_t unanotime = 0;
   /*  int64_t snanotime = -1; */
 
 #if defined(FUNC_GETRUSAGE_DEFINED)
@@ -94,8 +96,7 @@ static void main_dump_stats()
   /* explicit cast to prevent overflow */
   /* utime : user time                 */
   /* stime : system time               */
-  unanotime = ((uint64_t)ru.ru_utime.tv_sec) * NANO + ((uint64_t)ru.ru_utime.tv_usec) * MICRO;
-  /*  snanotime = ((uint64_t)ru.ru_stime.tv_sec) * NANO + ((uint64_t)ru.ru_stime.tv_usec) * MICRO; */
+  unanotime = ((uint64_t)ru.ru_utime.tv_sec) * NANO + ((uint64_t)ru.ru_utime.tv_usec) * 1000;
 #endif
 
 
@@ -105,8 +106,9 @@ static void main_dump_stats()
   OUTPUT("-----------\n");
   if (unanotime > 0)
     {
-      OUTPUT("  simulation user time          : %d.%03d s (%"PRId64" ns)\n", 
-	     unanotime / NANO, unanotime / 1000000, unanotime);
+      int64_t sec  = unanotime / NANO;
+      int64_t msec = (unanotime - sec*1000000000) / 1000000;
+      OUTPUT("  simulation user time          : %d.%03d s (%"PRId64" ns)\n", sec, msec, unanotime);
       /* 
        * OUTPUT("  system simulation time        : %d.%03d s\n", 
        *	 ru.ru_stime.tv_sec, ru.ru_stime.tv_usec / 1000); 
@@ -132,10 +134,12 @@ static void  main_run_mode(struct options_t* o)
   signal(SIGUSR2,signal_quit);
   signal(SIGPIPE,signal_quit); 
 #endif
-
+  
+  struct machine_opt_t m;
+  
   machine_reset();
   machine_state_save();
-
+  
   /* so far so good, run() */
   switch (o->sim_mode)
     {
@@ -145,15 +149,14 @@ static void  main_run_mode(struct options_t* o)
     case SIM_MODE_GDB:
       libgdb_target_mode_main(o->gdb_port);
       break;
-
+     
     case SIM_MODE_RUN:
-      machine_run_free();
-      break;
     case SIM_MODE_INSN:
-      machine_run_insn(o->sim_insn);
-      break;
     case SIM_MODE_TIME:
-      machine_run_time(o->sim_time);
+      m.insn     = o->sim_insn;
+      m.time     = o->sim_time;
+      m.realtime = o->realtime;
+      machine_run(&m);
       break;
 
     default:

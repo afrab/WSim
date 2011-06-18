@@ -28,8 +28,8 @@
     </tr>
 
     
-    ENTRY( 1 day   , , Add mode to slow down simulation to meet realtime mode. )
-    ENTRY( 1 day   , , Improve WSNet1 information tracing output. )
+    ENTRY( 1 day   , 100% , Add mode to slow down simulation to meet realtime mode. )
+    ENTRY( 1 day   , 25% , Improve WSNet1 configuration and information tracing output. )
     ENTRY( 1 day   , , Upgrade drivers and examples to newer version of MspGCC4. )
     ENTRY( 2 days  , 15% , Move source code building system from autoconf/automake 
                        to <a href="http://www.cmake.org/">Cmake</a>. )

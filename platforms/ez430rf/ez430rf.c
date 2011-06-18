@@ -238,9 +238,9 @@ int devices_reset_post(void)
   SYSTEM_RADIO_CS       = 0;
   SYSTEM_BUTTON_LAST    = 0xff;
 
+  REFRESH(LOGO1);
   REFRESH(LED_RED);
   REFRESH(LED_GREEN);
-  REFRESH(LOGO1);
   ui_refresh(refresh);
   return 0;
 }

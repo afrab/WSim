@@ -525,6 +525,8 @@ static infomem_t UNUSED infomem[] = {
 #define __msp430_have_port2
 #define __msp430_have_port3
 #define __msp430_have_port4
+#define __msp430_have_sel2
+#define __msp430_have_ren
 #define __msp430_have_uscia0  /* uart/lin + IrDA + SPI */
 #define __msp430_have_uscib0  /* SPI + I2C             */
 #define __msp430_have_adc10

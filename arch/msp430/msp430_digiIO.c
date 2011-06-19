@@ -12,16 +12,247 @@
 #include "arch/common/hardware.h"
 #include "msp430.h"
 
+
+/* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
+
+#define DIGIIO_START 0x0010
+#define DIGIIO_END   0x003f
+
+#define P1IN      0x0020 
+#define P1OUT     0x0021
+#define P1DIR     0x0022
+#define P1IFG     0x0023
+#define P1IES     0x0024
+#define P1IE      0x0025
+#define P1SEL     0x0026
+#define P1SEL2    0x0041
+#define P1REN     0x0027
+
+#define P2IN      0x0028 
+#define P2OUT     0x0029
+#define P2DIR     0x002a
+#define P2IFG     0x002b
+#define P2IES     0x002c
+#define P2IE      0x002d
+#define P2SEL     0x002e
+#define P2SEL2    0x0042
+#define P2REN     0x002f
+
+#define P3IN      0x0018
+#define P3OUT     0x0019
+#define P3DIR     0x001a
+#define P3SEL     0x001b
+#define P3SEL2    0x0043
+#define P3REN     0x0010
+
+#define P4IN      0x001c
+#define P4OUT     0x001d
+#define P4DIR     0x001e
+#define P4SEL     0x001f
+#define P4SEL2    0x0044
+#define P4REN     0x0011
+
+#define P5IN      0x0030
+#define P5OUT     0x0031
+#define P5DIR     0x0032
+#define P5SEL     0x0033
+#define P5SEL2    0x0045
+#define P5REN     0x0012
+
+#define P6IN      0x0034
+#define P6OUT     0x0035
+#define P6DIR     0x0036
+#define P6SEL     0x0037
+#define P6SEL2    0x0046
+#define P6REN     0x0013
+
+#define P7IN      0x0038
+#define P7OUT     0x003a
+#define P7DIR     0x003c
+#define P7SEL     0x003e
+#define P7SEL2    0x0047
+#define P7REN     0x0014
+
+#define P8IN      0x0039
+#define P8OUT     0x003b
+#define P8DIR     0x003d
+#define P8SEL     0x003f
+#define P8SEL2    0x0048
+#define P8REN     0x0015
+
+
+
+#if defined(__msp430_have_port1)
+#define IFPORT1(insn) do { insn } while (0)
+#else
+#define IFPORT1(insn) do { } while (0)
+#endif
+
+#if defined(__msp430_have_port2)
+#define IFPORT2(insn) do { insn } while (0)
+#else
+#define IFPORT2(insn) do { } while (0)
+#endif
+
+#if defined(__msp430_have_port3)
+#define IFPORT3(insn) do { insn } while (0)
+#else
+#define IFPORT3(insn) do { } while (0)
+#endif
+
+#if defined(__msp430_have_port4)
+#define IFPORT4(insn) do { insn } while (0)
+#else
+#define IFPORT4(insn) do { } while (0)
+#endif
+
+#if defined(__msp430_have_port5)
+#define IFPORT5(insn) do { insn } while (0)
+#else
+#define IFPORT5(insn) do { } while (0)
+#endif
+
+#if defined(__msp430_have_port6)
+#define IFPORT6(insn) do { insn } while (0)
+#else
+#define IFPORT6(insn) do { } while (0)
+#endif
+
+#if defined(__msp430_have_port7)
+#define IFPORT7(insn) do { insn } while (0)
+#else
+#define IFPORT7(insn) do { } while (0)
+#endif
+
+#if defined(__msp430_have_port8)
+#define IFPORT8(insn) do { insn } while (0)
+#else
+#define IFPORT8(insn) do { } while (0)
+#endif
+
+
+/* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
+
+tracer_id_t MSP430_TRACER_PORT1;
+tracer_id_t MSP430_TRACER_PORT2;
+tracer_id_t MSP430_TRACER_PORT3;
+tracer_id_t MSP430_TRACER_PORT4;
+tracer_id_t MSP430_TRACER_PORT5;
+tracer_id_t MSP430_TRACER_PORT6;
+tracer_id_t MSP430_TRACER_PORT7;
+tracer_id_t MSP430_TRACER_PORT8; 
+
+#define TRACER_TRACE_PORT1(v)   tracer_event_record(MSP430_TRACER_PORT1,v)
+#define TRACER_TRACE_PORT2(v)   tracer_event_record(MSP430_TRACER_PORT2,v)
+#define TRACER_TRACE_PORT3(v)   tracer_event_record(MSP430_TRACER_PORT3,v)
+#define TRACER_TRACE_PORT4(v)   tracer_event_record(MSP430_TRACER_PORT4,v)
+#define TRACER_TRACE_PORT5(v)   tracer_event_record(MSP430_TRACER_PORT5,v)
+#define TRACER_TRACE_PORT6(v)   tracer_event_record(MSP430_TRACER_PORT6,v)
+#define TRACER_TRACE_PORT7(v)   tracer_event_record(MSP430_TRACER_PORT7,v)
+#define TRACER_TRACE_PORT8(v)   tracer_event_record(MSP430_TRACER_PORT8,v)
+
+/* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
+
+char* msp430_digiIO_portname(uint16_t addr)
+{
+  switch (addr)
+    {
+    case P1IN  : return "P1IN"; 
+    case P1OUT : return "P1OUT"; 
+    case P1DIR : return "P1DIR"; 
+    case P1IFG : return "P1IFG"; 
+    case P1IES : return "P1IES"; 
+    case P1IE  : return "P1IEN"; 
+    case P1SEL : return "P1SEL"; 
+    case P1SEL2: return "P1SEL2";
+    case P1REN : return "P1REN";
+
+    case P2IN  : return "P2IN"; 
+    case P2OUT : return "P2OUT"; 
+    case P2DIR : return "P2DIR"; 
+    case P2IFG : return "P2IFG"; 
+    case P2IES : return "P2IES"; 
+    case P2IE  : return "P2IEN"; 
+    case P2SEL : return "P2SEL"; 
+    case P2SEL2: return "P2SEL2";
+    case P2REN : return "P2REN";
+
+#if defined(__msp430_have_port3)
+    case P3IN  : return "P3IN"; 
+    case P3OUT : return "P3OUT"; 
+    case P3DIR : return "P3DIR"; 
+    case P3SEL : return "P3SEL"; 
+    case P3SEL2: return "P3SEL2";
+    case P3REN : return "P3REN";
+#endif
+
+#if defined(__msp430_have_port4)
+    case P4IN  : return "P4IN"; 
+    case P4OUT : return "P4OUT"; 
+    case P4DIR : return "P4DIR"; 
+    case P4SEL : return "P4SEL"; 
+    case P4SEL2: return "P4SEL2";
+    case P4REN : return "P4REN";
+#endif
+
+#if defined(__msp430_have_port5)
+    case P5IN  : return "P5IN"; 
+    case P5OUT : return "P5OUT"; 
+    case P5DIR : return "P5DIR"; 
+    case P5SEL : return "P5SEL"; 
+    case P5SEL2: return "P5SEL2";
+    case P5REN : return "P5REN";
+#endif
+
+#if defined(__msp430_have_port6)
+    case P6IN  : return "P6IN"; 
+    case P6OUT : return "P6OUT"; 
+    case P6DIR : return "P6DIR"; 
+    case P6SEL : return "P6SEL"; 
+    case P6SEL2: return "P6SEL2";
+    case P6REN : return "P6REN";
+#endif
+
+#if defined(__msp430_have_port7)
+    case P7IN  : return "P7IN"; 
+    case P7OUT : return "P7OUT"; 
+    case P7DIR : return "P7DIR"; 
+    case P7SEL : return "P7SEL"; 
+    case P7SEL2: return "P7SEL2";
+    case P7REN : return "P7REN";
+#endif
+
+#if defined(__msp430_have_port8)
+    case P8IN  : return "P8IN"; 
+    case P8OUT : return "P8OUT"; 
+    case P8DIR : return "P8DIR"; 
+    case P8SEL : return "P8SEL"; 
+    case P8SEL2: return "P8SEL2";
+    case P8REN : return "P8REN";
+#endif
+
+    default: return "XXX";
+    }
+}
+
+/* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
+
 /** 
  * interrupt enable for port 1 and 2 
- * 8bit register
  * not taken into account if PxSEL(port,bit) != 0
  */
 #define DIGIIO_IEN(p)    MCU.digiIO.int_enable[p]
 
 /** 
  * edge select
- * 8bit register
  * 0: IFG is set on low to high transition 
  * 1: IFG is set on high to low transition
  */
@@ -29,7 +260,6 @@
 
 /** 
  * interrupt flag
- * 8bit register
  * 0: no interrupt is pending
  * 1: an interrupt is pending
  */
@@ -37,55 +267,66 @@
 
 /** 
  * input register 
- * 8bit register
  */
 #define DIGIIO_IN(p)     MCU.digiIO.in[p]
 
 /** 
  * output register 
- * 8bit register
  */
-
 #define DIGIIO_OUT(p)    MCU.digiIO.out[p]
 
 /** 
  * direction register 
- * 8bit register
+ * PxDIR : 0 = input direction, 1 = output direction
  */
-
 #define DIGIIO_DIR(p)    MCU.digiIO.direction[p]
 
-/* slau056e.pdf page 9-3 */
-
-/**
- * bit access pattern for in/out updated flags 
+/** 
+ * selection : IO or device 
+ * PxSEL : 0 = I/O function, 1 = Peripheral module
  */
+#define DIGIIO_SEL(p)    MCU.digiIO.selection[p]
 
-#define DIGIIO_P0  0x01
-#define DIGIIO_P1  0x02
-#define DIGIIO_P2  0x04
-#define DIGIIO_P3  0x08
-#define DIGIIO_P4  0x10
-#define DIGIIO_P5  0x20
+/** 
+ * selection : IO or device 
+ * SEL / SEL2
+ *  0     0    I/O function is selected.
+ *  0     1    Primary peripheral module function is selected.
+ *  1     0    Reserved. See device-specific data sheet.
+ *  1     1    Secondary peripheral module function is selected.
+ */
+#define DIGIIO_SEL2(p)   MCU.digiIO.selection2[p]
 
-/* #define DIGIIO_IN_UP(p)      (MCU.digiIO.in_updated   & DIGIIO_P##p) */
-/* #define DIGIIO_OUT_UP(p)     (MCU.digiIO.out_updated  & DIGIIO_P##p) */
+/** 
+ * resistor enable
+ * Bit = 0: Pullup/pulldown resistor disabled
+ * Bit = 1: Pullup/pulldown resistor enabled
+ */
+#define DIGIIO_REN(p)    MCU.digiIO.resistor[p]
 
-//#define DIGIIO_IN_SET_UP(p)   do { MCU.digiIO.in_updated  |= DIGIIO_P##p; } while (0)
-//#define DIGIIO_OUT_SET_UP(p)  do { MCU.digiIO.out_updated |= DIGIIO_P##p; } while (0)
-
-/* MCU can write on output port even if this port is selected IN */
-/* see Figure page 49 of [msp430f1611.pdf]                       */
-/* #define _WOK(p)    _DIR(p) & ~_SEL(p) */
+/** 
+ * MCU can write on output port even if this port is selected IN 
+ * see Figure page 49 of [msp430f1611.pdf]
+ * #define _WOK(p)    _DIR(p) & ~_SEL(p)
+ */
 #define DIGIIO_MCU_WOK(p)    ~DIGIIO_SEL(p)
 
 /* ************************************************** */
 /* ************************************************** */
 /* ************************************************** */
-
+  
 void msp430_digiIO_create()
 {
   msp430_io_register_range8(DIGIIO_START,DIGIIO_END,msp430_digiIO_mcu_read,msp430_digiIO_mcu_write);
+
+  IFPORT1 ( MSP430_TRACER_PORT1    = tracer_event_add_id(8,  "port1_out",  "msp430"); );
+  IFPORT2 ( MSP430_TRACER_PORT2    = tracer_event_add_id(8,  "port2_out",  "msp430"); );
+  IFPORT3 ( MSP430_TRACER_PORT3    = tracer_event_add_id(8,  "port3_out",  "msp430"); );
+  IFPORT4 ( MSP430_TRACER_PORT4    = tracer_event_add_id(8,  "port4_out",  "msp430"); );
+  IFPORT5 ( MSP430_TRACER_PORT5    = tracer_event_add_id(8,  "port5_out",  "msp430"); );
+  IFPORT6 ( MSP430_TRACER_PORT6    = tracer_event_add_id(8,  "port6_out",  "msp430"); );
+  IFPORT7 ( MSP430_TRACER_PORT7    = tracer_event_add_id(8,  "port7_out",  "msp430"); );
+  IFPORT8 ( MSP430_TRACER_PORT8    = tracer_event_add_id(8,  "port8_out",  "msp430"); );
 }
 
 /* ************************************************** */
@@ -96,10 +337,12 @@ void msp430_digiIO_reset()
 {
   /* after a reset the pin IO are switched to input mode */
   int i;
-  for(i=0; i<6; i++)
+  for(i=0; i<8; i++)
     {
-      DIGIIO_DIR(i) = 0;
-      DIGIIO_SEL(i) = 0;
+      DIGIIO_DIR (i) = 0;
+      DIGIIO_SEL (i) = 0;
+      DIGIIO_SEL2(i) = 0;
+      DIGIIO_REN (i) = 0;
     }
 }
 
@@ -112,57 +355,88 @@ int8_t msp430_digiIO_mcu_read (uint16_t addr)
   uint8_t r = 0;
   switch (addr)
     {
-    case P1IN:  r =  DIGIIO_IN(0); break;
-    case P1OUT: r = DIGIIO_OUT(0); break;
-    case P1DIR: r = DIGIIO_DIR(0); break;
-    case P1IFG: r = DIGIIO_IFG(0); break;
-    case P1IES: r = DIGIIO_IES(0); break;
-    case P1IE : r = DIGIIO_IEN(0); break;
-    case P1SEL: r = DIGIIO_SEL(0); break;
+    case P1IN  : r = DIGIIO_IN  (0); break;
+    case P1OUT : r = DIGIIO_OUT (0); break;
+    case P1DIR : r = DIGIIO_DIR (0); break;
+    case P1IFG : r = DIGIIO_IFG (0); break;
+    case P1IES : r = DIGIIO_IES (0); break;
+    case P1IE  : r = DIGIIO_IEN (0); break;
+    case P1SEL : r = DIGIIO_SEL (0); break;
+    case P1SEL2: r = DIGIIO_SEL2(0); break;
+    case P1REN : r = DIGIIO_REN (0); break;
 
 
-    case P2IN:  r =  DIGIIO_IN(1); break;
-    case P2OUT: r = DIGIIO_OUT(1); break;
-    case P2DIR: r = DIGIIO_DIR(1); break;
-    case P2IFG: r = DIGIIO_IFG(1); break;
-    case P2IES: r = DIGIIO_IES(1); break;
-    case P2IE : r = DIGIIO_IEN(1); break;
-    case P2SEL: r = DIGIIO_SEL(1); break;
+    case P2IN  : r = DIGIIO_IN  (1); break;
+    case P2OUT : r = DIGIIO_OUT (1); break;
+    case P2DIR : r = DIGIIO_DIR (1); break;
+    case P2IFG : r = DIGIIO_IFG (1); break;
+    case P2IES : r = DIGIIO_IES (1); break;
+    case P2IE  : r = DIGIIO_IEN (1); break;
+    case P2SEL : r = DIGIIO_SEL (1); break;
+    case P2SEL2: r = DIGIIO_SEL2(1); break;
+    case P2REN : r = DIGIIO_REN (1); break;
 
 
 #if defined(__msp430_have_port3)
-    case P3IN : r =  DIGIIO_IN(2); break;
-    case P3OUT: r = DIGIIO_OUT(2); break;
-    case P3DIR: r = DIGIIO_DIR(2); break;
-    case P3SEL: r = DIGIIO_SEL(2); break;
+    case P3IN  : r = DIGIIO_IN  (2); break;
+    case P3OUT : r = DIGIIO_OUT (2); break;
+    case P3DIR : r = DIGIIO_DIR (2); break;
+    case P3SEL : r = DIGIIO_SEL (2); break;
+    case P3SEL2: r = DIGIIO_SEL2(2); break;
+    case P3REN : r = DIGIIO_REN (2); break;
 #endif
 
 #if defined(__msp430_have_port4)
-    case P4IN:  r =  DIGIIO_IN(3); break;
-    case P4OUT: r = DIGIIO_OUT(3); break;
-    case P4DIR: r = DIGIIO_DIR(3); break;
-    case P4SEL: r = DIGIIO_SEL(3); break;
+    case P4IN  : r = DIGIIO_IN  (3); break;
+    case P4OUT : r = DIGIIO_OUT (3); break;
+    case P4DIR : r = DIGIIO_DIR (3); break;
+    case P4SEL : r = DIGIIO_SEL (3); break;
+    case P4SEL2: r = DIGIIO_SEL2(3); break;
+    case P4REN : r = DIGIIO_REN (3); break;
 #endif
 
 #if defined(__msp430_have_port5)
-    case P5IN:  r =  DIGIIO_IN(4); break;
-    case P5OUT: r = DIGIIO_OUT(4); break;
-    case P5DIR: r = DIGIIO_DIR(4); break;
-    case P5SEL: r = DIGIIO_SEL(4); break;
+    case P5IN  : r = DIGIIO_IN  (4); break;
+    case P5OUT : r = DIGIIO_OUT (4); break;
+    case P5DIR : r = DIGIIO_DIR (4); break;
+    case P5SEL : r = DIGIIO_SEL (4); break;
+    case P5SEL2: r = DIGIIO_SEL2(4); break;
+    case P5REN : r = DIGIIO_REN (4); break;
 #endif
 
 #if defined(__msp430_have_port6)
-    case P6IN:  r =  DIGIIO_IN(5); break;
-    case P6OUT: r = DIGIIO_OUT(5); break;
-    case P6DIR: r = DIGIIO_DIR(5); break;
-    case P6SEL: r = DIGIIO_SEL(5); break;
+    case P6IN  : r = DIGIIO_IN  (5); break;
+    case P6OUT : r = DIGIIO_OUT (5); break;
+    case P6DIR : r = DIGIIO_DIR (5); break;
+    case P6SEL : r = DIGIIO_SEL (5); break;
+    case P6SEL2: r = DIGIIO_SEL2(5); break;
+    case P6REN : r = DIGIIO_REN (5); break;
 #endif
+
+#if defined(__msp430_have_port7)
+    case P7IN  : r = DIGIIO_IN  (6); break;
+    case P7OUT : r = DIGIIO_OUT (6); break;
+    case P7DIR : r = DIGIIO_DIR (6); break;
+    case P7SEL : r = DIGIIO_SEL (6); break;
+    case P7SEL2: r = DIGIIO_SEL2(6); break;
+    case P7REN : r = DIGIIO_REN (6); break;
+#endif
+
+#if defined(__msp430_have_port8)
+    case P8IN  : r = DIGIIO_IN  (7); break;
+    case P8OUT : r = DIGIIO_OUT (7); break;
+    case P8DIR : r = DIGIIO_DIR (7); break;
+    case P8SEL : r = DIGIIO_SEL (7); break;
+    case P8SEL2: r = DIGIIO_SEL2(7); break;
+    case P8REN : r = DIGIIO_REN (7); break;
+#endif
+
     default:
       ERROR("msp430:dio: read [0x%02x] undefined\n",addr); 
       break;
     }
   HW_DMSG_DIGI_IO("msp430:dio: read  from MCU [%s:0x%02x] = 0x%02x\n",
-		  msp430_debug_portname(addr),addr,r);
+		  msp430_digiIO_portname(addr),addr,r);
   return r;
 }
 
@@ -174,7 +448,8 @@ void msp430_digiIO_mcu_write(uint16_t addr, int8_t val)
 {
   uint8_t oldval;
 
-  HW_DMSG_DIGI_IO("msp430:dio: write from MCU [%s:0x%02x] = 0x%02x\n",msp430_debug_portname(addr),addr,val & 0xff); 
+  HW_DMSG_DIGI_IO("msp430:dio: write from MCU [%s:0x%02x] = 0x%02x\n",
+                  msp430_digiIO_portname(addr),addr,val & 0xff); 
 
   switch (addr)
     {
@@ -198,6 +473,8 @@ void msp430_digiIO_mcu_write(uint16_t addr, int8_t val)
     case P1IES: DIGIIO_IES(0) = val; break;
     case P1IE : DIGIIO_IEN(0) = val; break;
     case P1SEL: DIGIIO_SEL(0) = val; break; 
+    case P1SEL2:DIGIIO_SEL2(0)= val; break; 
+    case P1REN: DIGIIO_REN(0) = val; break; 
 
       /* port 2 */
     case P2IN:  ERROR("msp430:dio: write on P2IN (read only)\n"); break;
@@ -219,6 +496,8 @@ void msp430_digiIO_mcu_write(uint16_t addr, int8_t val)
     case P2IES: DIGIIO_IES(1) = val; break;
     case P2IE : DIGIIO_IEN(1) = val; break;
     case P2SEL: DIGIIO_SEL(1) = val; break; 
+    case P2SEL2:DIGIIO_SEL2(1)= val; break; 
+    case P2REN: DIGIIO_REN(1) = val; break; 
 
       /* port 3 */
 #if defined(__msp430_have_port3)
@@ -231,6 +510,8 @@ void msp430_digiIO_mcu_write(uint16_t addr, int8_t val)
       break; 
     case P3DIR: DIGIIO_DIR(2) = val; break;
     case P3SEL: DIGIIO_SEL(2) = val; break; 
+    case P3SEL2:DIGIIO_SEL2(2)= val; break; 
+    case P3REN: DIGIIO_REN(2) = val; break; 
 #endif
 
       /* port 4 */
@@ -244,6 +525,8 @@ void msp430_digiIO_mcu_write(uint16_t addr, int8_t val)
       break;
     case P4DIR: DIGIIO_DIR(3) = val; break;
     case P4SEL: DIGIIO_SEL(3) = val; break; 
+    case P4SEL2:DIGIIO_SEL2(3)= val; break; 
+    case P4REN: DIGIIO_REN(3) = val; break; 
 #endif
 
       /* port 5 */
@@ -257,6 +540,8 @@ void msp430_digiIO_mcu_write(uint16_t addr, int8_t val)
       break;
     case P5DIR: DIGIIO_DIR(4) = val; break;
     case P5SEL: DIGIIO_SEL(4) = val; break; 
+    case P5SEL2:DIGIIO_SEL2(4)= val; break; 
+    case P5REN: DIGIIO_REN(4) = val; break; 
 #endif
 
       /* port 6 */
@@ -270,6 +555,38 @@ void msp430_digiIO_mcu_write(uint16_t addr, int8_t val)
       break;
     case P6DIR: DIGIIO_DIR(5) = val; break;
     case P6SEL: DIGIIO_SEL(5) = val; break; 
+    case P6SEL2:DIGIIO_SEL2(5)= val; break; 
+    case P6REN: DIGIIO_REN(5) = val; break; 
+#endif
+
+      /* port 7 */
+#if defined(__msp430_have_port7)
+    case P7IN : ERROR("msp430:dio: write on P7IN (read only)\n"); break;
+    case P7OUT: 
+      oldval = DIGIIO_OUT(6); 
+      DIGIIO_OUT(6) = val & DIGIIO_MCU_WOK(6);  
+      MCU.digiIO.out_updated[6] = oldval ^ DIGIIO_OUT(6); 
+      TRACER_TRACE_PORT7(DIGIIO_OUT(6));
+      break;
+    case P7DIR: DIGIIO_DIR(6) = val; break;
+    case P7SEL: DIGIIO_SEL(6) = val; break; 
+    case P7SEL2:DIGIIO_SEL2(6)= val; break; 
+    case P7REN: DIGIIO_REN(6) = val; break; 
+#endif
+
+      /* port 8 */
+#if defined(__msp430_have_port8)
+    case P8IN : ERROR("msp430:dio: write on P8IN (read only)\n"); break;
+    case P8OUT: 
+      oldval = DIGIIO_OUT(7); 
+      DIGIIO_OUT(7) = val & DIGIIO_MCU_WOK(7);  
+      MCU.digiIO.out_updated[7] = oldval ^ DIGIIO_OUT(7); 
+      TRACER_TRACE_PORT8(DIGIIO_OUT(7));
+      break;
+    case P8DIR: DIGIIO_DIR(7) = val; break;
+    case P8SEL: DIGIIO_SEL(7) = val; break; 
+    case P8SEL2:DIGIIO_SEL2(7)= val; break; 
+    case P8REN: DIGIIO_REN(7) = val; break; 
 #endif
 
     default:
@@ -282,16 +599,20 @@ void msp430_digiIO_mcu_write(uint16_t addr, int8_t val)
 /* * ACCESS OPERATIONS FOR EXTERNAL DEVICES ********* */
 /* ************************************************** */
 
-int msp430_digiIO_dev_read (int port_number, uint8_t *val)
-{
-  //  HW_DMSG_DIGI_IO("   Digital IO read from devices on port %d\n",port_number);
-  *val = DIGIIO_OUT(port_number);
-  return MCU.digiIO.out_updated[port_number]; // port has been updated ?
-}
-
 uint8_t msp430_digiIO_dev_read_dir (int port_number)
 {
   return DIGIIO_DIR(port_number);
+}
+
+/* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
+
+int msp430_digiIO_dev_read (int port_number, uint8_t *val)
+{
+  *val = DIGIIO_OUT(port_number);
+  /* port has been updated ? */
+  return MCU.digiIO.out_updated[port_number]; 
 }
 
 /* ************************************************** */
@@ -302,25 +623,42 @@ void msp430_digiIO_dev_write(int port_number, uint8_t val, uint8_t bitmask)
 {
   uint8_t oldval;
 
-  oldval = DIGIIO_IN(port_number);
-  DIGIIO_IN(port_number)    = (oldval & ~bitmask) | ((val & bitmask) & ~DIGIIO_DIR(port_number));
-
-  HW_DMSG_DIGI_IO("msp430:dio: write from devices on port %d val 0x%02x -> 0x%02x\n",port_number + 1,oldval & 0xff,DIGIIO_IN(port_number) & 0xff);
-
+  /* update value */
+#if defined(__msp430_have_ren)
+  /*
+   * Each bit in each PxREN register enables or disables the pullup/pulldown
+   * resistor of the corresponding I/O pin. The corresponding bit in the PxOUT
+   * register selects if the pin is pulled up or pulled down.
+   * Bit = 0: Pullup/pulldown resistor disabled
+   * Bit = 1: Pullup/pulldown resistor enabled
+   *
+   * Pullup/pulldown resistor
+   * PxOUT == 0 For pullup:   VIN = VSS;  # digital ground reference
+   * PxOUT == 1 For pulldown: VIN = VCC;
+   *
+   */
+  oldval                 = DIGIIO_IN(port_number);
+  DIGIIO_IN(port_number) = (oldval & ~bitmask) | ((val & bitmask) & ~DIGIIO_DIR(port_number));
   MCU.digiIO.in_updated[port_number] = oldval ^ DIGIIO_IN(port_number);
-  if (MCU.digiIO.in_updated[3] & 0x02) {
-    HW_DMSG_DIGI_IO("msp430:dio: SFD updated (telosb)\n");
-  }
-                                                                            
-#if defined(IFG_BIT_IS_SET_ONLY_WITH_IE_BIT_IS_ALSO_SET)
-  if ((port_number < 2) &&  ((DIGIIO_IEN(port_number) & bitmask) != 0))
-#else /* this seems to be the default behavior */
-  if ((port_number < 2))
+#else
+  oldval                 = DIGIIO_IN(port_number);
+  DIGIIO_IN(port_number) = (oldval & ~bitmask) | ((val & bitmask) & ~DIGIIO_DIR(port_number));
+  MCU.digiIO.in_updated[port_number] = oldval ^ DIGIIO_IN(port_number);
 #endif
+
+  HW_DMSG_DIGI_IO("msp430:dio: write from devices on port %d val 0x%02x -> 0x%02x\n",
+                  port_number + 1, oldval & 0xff, DIGIIO_IN(port_number) & 0xff);
+
+  /* interrupt on ports 1 & 2 */
+  if (port_number < 2)
     {
-      /* high to low : oldval=1 val=0 bitmask=1 DIGIIO_IES=1 */
-      /* low to high : oldval=0 val=1 bitmask=1 DIGIIO_IES=0 */
-      /*     ies = 1 high to low   //    ies = 0 low to high */
+      /*
+       * ies = 1 high to low 
+       * ies = 0 low to high
+       *        
+       * high to low : oldval=1 val=0 bitmask=1 DIGIIO_IES=1
+       * low to high : oldval=0 val=1 bitmask=1 DIGIIO_IES=0
+       */
       uint8_t ifg = (~val &  oldval & bitmask &  DIGIIO_IES(port_number)) | 
 	            ( val & ~oldval & bitmask & ~DIGIIO_IES(port_number));;
 
@@ -336,35 +674,13 @@ void msp430_digiIO_dev_write(int port_number, uint8_t val, uint8_t bitmask)
 }
 
 /* ************************************************** */
-/* * ACCESS OPERATIONS FOR INTERNAL DEVICES ********* */
-/* ************************************************** */
-/*
-int msp430_digiIO_internal_dev_read (int port_number, uint8_t *val)
-{
-  HW_DMSG_DIGI_IO("msp430:dio: read from internal devices on port %d\n",port_number);
-  *val = DIGIIO_IN(port_number);
-  return MCU.digiIO.in_updated & (1 << port_number); // port has been updated ?
-}
-*/
-/* ************************************************** */
-/* ************************************************** */
-/* ************************************************** */
-/*
-void msp430_digiIO_internal_dev_write(int port_number, uint8_t val, uint8_t bitmask)
-{
-  HW_DMSG_DIGI_IO("msp430:dio: write from devices on port %d val 0x%02x\n",port_number,val & 0xff);
-  DIGIIO_OUT(port_number)       = (val & DIGIIO_DIR(port_number) & bitmask) | (DIGIIO_OUT(port_number) & ~bitmask);
-  MCU.digiIO.out_updated |= (1 << port_number);
-}
-*/
-/* ************************************************** */
 /* ************************************************** */
 /* ************************************************** */
 
 void msp430_digiIO_update_done(void)
 { 
   int i;
-  for(i=0; i<6; i++)
+  for(i=0; i<8; i++)
     {
       MCU.digiIO.in_updated[i]  = 0;
       MCU.digiIO.out_updated[i] = 0;

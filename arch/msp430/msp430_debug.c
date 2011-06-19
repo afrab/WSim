@@ -162,61 +162,6 @@ void msp430_print_stack(int lines)
 /* ************************************************** */
 /* ************************************************** */
 
-char* msp430_debug_portname(uint16_t addr)
-{
-  switch (addr)
-    {
-    case P1IN:  return "P1IN"; 
-    case P1OUT: return "P1OUT"; 
-    case P1DIR: return "P1DIR"; 
-    case P1IFG: return "P1IFG"; 
-    case P1IES: return "P1IES"; 
-    case P1IE : return "P1IEN"; 
-    case P1SEL: return "P1SEL"; 
-
-    case P2IN:  return "P2IN"; 
-    case P2OUT: return "P2OUT"; 
-    case P2DIR: return "P2DIR"; 
-    case P2IFG: return "P2IFG"; 
-    case P2IES: return "P2IES"; 
-    case P2IE : return "P2IEN"; 
-    case P2SEL: return "P2SEL"; 
-
-#if defined(__msp430_have_port3)
-    case P3IN : return "P3IN"; 
-    case P3OUT: return "P3OUT"; 
-    case P3DIR: return "P3DIR"; 
-    case P3SEL: return "P3SEL"; 
-#endif
-
-#if defined(__msp430_have_port4)
-    case P4IN:  return "P4IN"; 
-    case P4OUT: return "P4OUT"; 
-    case P4DIR: return "P4DIR"; 
-    case P4SEL: return "P4SEL"; 
-#endif
-
-#if defined(__msp430_have_port5)
-    case P5IN:  return "P5IN"; 
-    case P5OUT: return "P5OUT"; 
-    case P5DIR: return "P5DIR"; 
-    case P5SEL: return "P5SEL"; 
-#endif
-
-#if defined(__msp430_have_port6)
-    case P6IN:  return "P6IN"; 
-    case P6OUT: return "P6OUT"; 
-    case P6DIR: return "P6DIR"; 
-    case P6SEL: return "P6SEL"; 
-#endif
-    default: return "XXX";
-    }
-}
-
-/* ************************************************** */
-/* ************************************************** */
-/* ************************************************** */
-
 /*
  * bits in SR register
  * ===================

@@ -80,12 +80,6 @@ extern tracer_id_t MSP430_TRACER_SP;
 extern tracer_id_t MSP430_TRACER_INTR;
 extern tracer_id_t MSP430_TRACER_LPM;
 extern tracer_id_t MSP430_TRACER_BKP;
-extern tracer_id_t MSP430_TRACER_PORT1;
-extern tracer_id_t MSP430_TRACER_PORT2;
-extern tracer_id_t MSP430_TRACER_PORT3;
-extern tracer_id_t MSP430_TRACER_PORT4;
-extern tracer_id_t MSP430_TRACER_PORT5;
-extern tracer_id_t MSP430_TRACER_PORT6;
 extern tracer_id_t MSP430_TRACER_USART0RX;
 extern tracer_id_t MSP430_TRACER_USART0TX;
 extern tracer_id_t MSP430_TRACER_USART1RX;
@@ -116,13 +110,6 @@ extern tracer_id_t MSP430_TRACER_USART1TX;
 #define TRACER_TRACE_ACLK(v)    tracer_event_record(MSP430_TRACER_ACLK,v)
 #define TRACER_TRACE_MCLK(v)    tracer_event_record(MSP430_TRACER_MCLK,v)
 #define TRACER_TRACE_SMCLK(v)   tracer_event_record(MSP430_TRACER_SMCLK,v)
-
-#define TRACER_TRACE_PORT1(v)   tracer_event_record(MSP430_TRACER_PORT1,v)
-#define TRACER_TRACE_PORT2(v)   tracer_event_record(MSP430_TRACER_PORT2,v)
-#define TRACER_TRACE_PORT3(v)   tracer_event_record(MSP430_TRACER_PORT3,v)
-#define TRACER_TRACE_PORT4(v)   tracer_event_record(MSP430_TRACER_PORT4,v)
-#define TRACER_TRACE_PORT5(v)   tracer_event_record(MSP430_TRACER_PORT5,v)
-#define TRACER_TRACE_PORT6(v)   tracer_event_record(MSP430_TRACER_PORT6,v)
 
 #define TRACER_TRACE_USART0RX(v)  tracer_event_record(MSP430_TRACER_USART0RX,v)
 #define TRACER_TRACE_USART0TX(v)  tracer_event_record(MSP430_TRACER_USART0TX,v)

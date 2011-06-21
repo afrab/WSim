@@ -90,7 +90,7 @@ void print_array(char* name, dtype *d, int size)
   printf(name);
   for(i=0; i < size; i++)
     {
-      printf("%d ",d[i]);
+      printf("%2d ",d[i]);
     }
   printf("\n");
 }
@@ -119,20 +119,21 @@ int main(void)
 	dtype data[] = {1,2,3,15,5,15,11,15,15,15,0,0,0,0,0,0};
 	dtype erasepos[5];
 	
-	print_array("0: data  ",data,16);
+	print_array("0: data     ",data,16);
 	
 	/* Encode gata in GF(15,10) */
 	encode_rs(&data[0],&data[10]);
-	print_array("1: data  ",data,16);
-	
+	print_array("1: encoded  ",data,16);
+	 
 	erasepos[0] = 5;
 	data[0] = 3;
 	data[11]= 0;
 	data[5] = 0;
-	/* Rstore data */
+	print_array("2: modified ",data,16);
+	/* Restore data */
 	res = eras_dec_rs(data, erasepos, 1);
 
-	print_array("2: data  ",data,16);
+	print_array("2: decoded  ",data,16);
 	print_array("2: erase ",erasepos,5);
 	printf("2: res = %d\n",res);
 	printf("\n");

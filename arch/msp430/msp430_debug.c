@@ -132,9 +132,9 @@ void msp430_print_registers(int columns)
   int i;
   for(i=0; i < 16; i++)
     {
-      HW_DMSG_MCU(" %3s:0x%04x",mcu_regname_str(i),MCU_REGS[i] & 0xffffu);
+      HW_DMSG_MSP(" %3s:0x%04x",mcu_regname_str(i),MCU_REGS[i] & 0xffffu);
       if (((i+1) % columns) == 0)
-	HW_DMSG_MCU("\n");
+	HW_DMSG_MSP("\n");
     }
 }
 

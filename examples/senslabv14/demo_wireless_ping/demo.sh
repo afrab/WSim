@@ -14,7 +14,7 @@ else
 fi
 
 # set WSNET to "--wsnet1", "--wsnet2", or "" if you are using wsim alone
-WSNET_MODE=--wsnet1
+WSNET_MODE=--wsnet2
 WSNET2_CONF="./worldsens.xml"
 NB_NODE=2
 

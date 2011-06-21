@@ -28,6 +28,19 @@
 /* ************************************************** */
 /* ************************************************** */
 
+#define HWMUL_START    0x130
+#define HWMUL_END      0x13e
+
+#define HWMUL_MPY      0x130
+#define HWMUL_MPYS     0x132
+#define HWMUL_MAC      0x134
+#define HWMUL_MACS     0x136
+
+#define HWMUL_OP2      0x138 
+#define HWMUL_RESLO    0x13a
+#define HWMUL_RESHI    0x13c
+#define HWMUL_SUMEXT   0x13e
+
 void msp430_hwmul_create()
 {
   msp430_io_register_range8(HWMUL_START,HWMUL_END+1, msp430_hwmul_read8,  msp430_hwmul_write8);
@@ -96,13 +109,13 @@ void    msp430_hwmul_write16 (uint16_t addr, int16_t val)
       MCU_HWMUL.op1  = val;
       MCU_HWMUL.mode = addr;
       HW_DMSG_HWMUL("msp430:hwmul:0x%04x: write op1 [0x%04x] = 0x%04x\n",
-		    mcu_get_pc(),addr,val);
+		    mcu_get_pc(),addr,val & 0xffff);
       break;
 
     case HWMUL_OP2      : 
       MCU_HWMUL.op2  = val;
       HW_DMSG_HWMUL("msp430:hwmul:0x%04x: write op2 [0x%04x] = 0x%04x\n",
-		    mcu_get_pc(),addr,val);
+		    mcu_get_pc(),addr,val & 0xffff);
       switch (MCU_HWMUL.mode)
 	{
 	  /**************************************/
@@ -110,21 +123,37 @@ void    msp430_hwmul_write16 (uint16_t addr, int16_t val)
 	  /**************************************/
 
 	case HWMUL_MPY:  /* unsigned multiply */
-	  MCU_HWMUL.mult_out.u = (unsigned)MCU_HWMUL.op2 * (unsigned)MCU_HWMUL.op1;
-	  MCU_HWMUL.sumext     = 0;
-	  MCU_HWMUL.reslo      =  MCU_HWMUL.mult_out.u        & 0xffff;
-	  MCU_HWMUL.reshi      = (MCU_HWMUL.mult_out.u >> 16) & 0xffff;
-	  HW_DMSG_HWMUL("msp430:hwmul:0x%04x: MPY unsigned mult. 0x%04x * 0x%04x = 0x%04x:%04x\n",
-			mcu_get_pc(),MCU_HWMUL.op1,MCU_HWMUL.op2,MCU_HWMUL.reshi,MCU_HWMUL.reslo);
+	  {
+	    uint32_t op1 = (unsigned int)MCU_HWMUL.op1 & 0xffff;
+	    uint32_t op2 = (unsigned int)MCU_HWMUL.op2 & 0xffff;
+	    uint64_t res = op1 * op2;
+	    MCU_HWMUL.sumext     =  0;
+	    MCU_HWMUL.reslo      =  res        & 0xffff;
+	    MCU_HWMUL.reshi      = (res >> 16) & 0xffff;
+	    HW_DMSG_HWMUL("msp430:hwmul:0x%04x: MPY unsigned mult. 0x%04x * 0x%04x = 0x%04x:%04x\n",
+	                  mcu_get_pc(),
+	                  MCU_HWMUL.op1   & 0xffff,
+	                  MCU_HWMUL.op2   & 0xffff,
+	                  MCU_HWMUL.reshi & 0xffff,
+	                  MCU_HWMUL.reslo & 0xffff);
+	  }
 	  break;
 
 	case HWMUL_MPYS: /* signed multiply */
-	  MCU_HWMUL.mult_out.s = MCU_HWMUL.op2 * MCU_HWMUL.op1;
-	  MCU_HWMUL.sumext     = (MCU_HWMUL.mult_out.s < 0) ? 0xffff : 0x0000;
-	  MCU_HWMUL.reslo      =  MCU_HWMUL.mult_out.s        & 0xffff;
-	  MCU_HWMUL.reshi      = (MCU_HWMUL.mult_out.s >> 16) & 0xffff;
-	  HW_DMSG_HWMUL("msp430:hwmul:0x%04x: MPYS signed mult. 0x%04x * 0x%04x = 0x%04x:%04x\n",
-			mcu_get_pc(),MCU_HWMUL.op1,MCU_HWMUL.op2,MCU_HWMUL.reshi,MCU_HWMUL.reslo);
+	  {
+	    int32_t op1 = MCU_HWMUL.op1; 
+	    int32_t op2 = MCU_HWMUL.op2;
+	    int64_t res = op1 * op2;
+	    MCU_HWMUL.sumext     = (res < 0) ? 0xffff : 0x0000;
+	    MCU_HWMUL.reslo      =  res        & 0xffff;
+	    MCU_HWMUL.reshi      = (res >> 16) & 0xffff;
+	    HW_DMSG_HWMUL("msp430:hwmul:0x%04x: MPYS signed mult. 0x%04x * 0x%04x = 0x%04x:%04x\n",
+	                  mcu_get_pc(),
+	                  MCU_HWMUL.op1   & 0xffff,
+	                  MCU_HWMUL.op2   & 0xffff,
+	                  MCU_HWMUL.reshi & 0xffff,
+	                  MCU_HWMUL.reslo & 0xffff);
+	  }
 	  break;
 
 	  /***************************************************/
@@ -140,8 +169,13 @@ void    msp430_hwmul_write16 (uint16_t addr, int16_t val)
 	    MCU_HWMUL.reslo      =   t        & 0xffff;
 	    MCU_HWMUL.reshi      =  (t >> 16) & 0xffff;
 	    HW_DMSG_HWMUL("msp430:hwmul:0x%04x: MAC 0x%04x:%04x + 0x%04x * 0x%04x = 0x%04x:%04x\n",
-			  mcu_get_pc(),MCU_HWMUL.reshi,MCU_HWMUL.reslo,
-			  MCU_HWMUL.op1,MCU_HWMUL.op2,MCU_HWMUL.reshi,MCU_HWMUL.reslo);
+			  mcu_get_pc(),
+	                  MCU_HWMUL.reshi & 0xffff,
+	                  MCU_HWMUL.reslo & 0xffff,
+			  MCU_HWMUL.op1   & 0xffff,
+	                  MCU_HWMUL.op2   & 0xffff,
+	                  MCU_HWMUL.reshi & 0xffff,
+	                  MCU_HWMUL.reslo & 0xffff);
 	  }
 	  break;
 
@@ -154,8 +188,13 @@ void    msp430_hwmul_write16 (uint16_t addr, int16_t val)
 	    MCU_HWMUL.reslo      =   t        & 0xffff;
 	    MCU_HWMUL.reshi      =  (t >> 16) & 0xffff;
 	    HW_DMSG_HWMUL("msp430:hwmul:0x%04x: MACS 0x%04x:%04x + 0x%04x * 0x%04x = 0x%04x:%04x\n",
-			  mcu_get_pc(),MCU_HWMUL.reshi,MCU_HWMUL.reslo,
-			  MCU_HWMUL.op1,MCU_HWMUL.op2,MCU_HWMUL.reshi,MCU_HWMUL.reslo);
+			  mcu_get_pc(),
+	                  MCU_HWMUL.reshi  & 0xffff,
+	                  MCU_HWMUL.reslo  & 0xffff,
+			  MCU_HWMUL.op1    & 0xffff,
+	                  MCU_HWMUL.op2    & 0xffff,
+	                  MCU_HWMUL.reshi  & 0xffff,
+	                  MCU_HWMUL.reslo  & 0xffff);
 	  }
 	  break;
 
@@ -168,17 +207,17 @@ void    msp430_hwmul_write16 (uint16_t addr, int16_t val)
 
     case HWMUL_RESLO    : 
       MCU_HWMUL.reslo = val;
-      HW_DMSG_HWMUL("msp430:hwmul:0x%04x: write reslo [0x%04x] = 0x%04x\n",mcu_get_pc(),addr,val);
+      HW_DMSG_HWMUL("msp430:hwmul:0x%04x: write reslo [0x%04x] = 0x%04x\n",mcu_get_pc(),addr,val & 0xffff);
       break;
     case HWMUL_RESHI    : 
       MCU_HWMUL.reshi = val;
-      HW_DMSG_HWMUL("msp430:hwmul:0x%04x: write reshi [0x%04x] = 0x%04x\n",mcu_get_pc(),addr,val);
+      HW_DMSG_HWMUL("msp430:hwmul:0x%04x: write reshi [0x%04x] = 0x%04x\n",mcu_get_pc(),addr,val & 0xffff);
       break;
     case HWMUL_SUMEXT   : 
       ERROR("msp430:hwmul:0x%04x: write on SUMEXT which is a read-only register\n",mcu_get_pc());
       break;
     default:
-      ERROR("msp430:hwmul:0x%04x: write address error [0x%04x] = 0x%04x\n",mcu_get_pc(),addr,val);
+      ERROR("msp430:hwmul:0x%04x: write address error [0x%04x] = 0x%04x\n",mcu_get_pc(),addr,val & 0xffff);
       break;
     }
 }
@@ -204,11 +243,11 @@ void msp430_hwmul_write8 (uint16_t addr, int8_t val)
       ERROR("msp430:hwmul:0x%04x: write on SUMEXT which is a read-only register\n",mcu_get_pc());
       return;
     default:
-      ERROR("msp430:hwmul:0x%04x: write address error [0x%04x] = 0x%04x\n",mcu_get_pc(),addr,val);
+      ERROR("msp430:hwmul:0x%04x: write address error [0x%04x] = 0x%04x\n",mcu_get_pc(),addr,val & 0xff);
       return;
     }
 
-  HW_DMSG_HWMUL("msp430:hwmul:0x%04x: write8 [0x%04x] = 0x%02x\n",mcu_get_pc(),addr,val);
+  HW_DMSG_HWMUL("msp430:hwmul:0x%04x: write8 [0x%04x] = 0x%02x\n",mcu_get_pc(),addr,val & 0xff);
 
   /* msp430 is little-endian : 0x130 == low byte, 0x131 == high byte */
   if ((addr & 0x1) != 0)

@@ -17,6 +17,7 @@
 #include <inttypes.h>
 #include <fcntl.h>
 #include <ctype.h>
+#include <errno.h>
 
 #if defined(_WIN32)
 #define ORIG_WIN32 1
@@ -362,6 +363,83 @@ int libselect_update_registered()
 /* ************************************************** */
 /* ************************************************** */
 
+#define CREATE_IO_IN  1
+#define CREATE_IO_OUT 2
+
+int libselect_id_create_io(int type, char* cmdline)
+{
+  if (strcmp(cmdline,"stdin") == 0)
+    {
+      switch (type) {
+      case CREATE_IO_IN:
+	return 0;
+      case CREATE_IO_OUT:
+	ERROR("wsim:libselect: Cannot open stdout as output stream\n");
+	return -1;
+      }
+    }
+  else if (strcmp(cmdline,"stdout") == 0)
+    {
+      switch (type) {
+      case CREATE_IO_IN:
+	ERROR("wsim:libselect: Cannot open stdout as input stream\n");
+	return -1;
+      case CREATE_IO_OUT:
+	return 1;
+      }
+    }
+  else if (strcmp(cmdline,"stderr") == 0)
+    {
+      switch (type) {
+      case CREATE_IO_IN:
+	ERROR("wsim:libselect: Cannot open stderr as input stream\n");
+	return -1;
+      case CREATE_IO_OUT:
+	return 2;
+      }
+    }
+  else if (strcmp(cmdline,"create") == 0)
+    {
+      int fd;
+      char f_local [MAX_FILENAME];
+      char f_remote[MAX_FILENAME];
+      if ((fd = libselect_get_system_fifo(f_local, f_remote)) == -1)
+	{
+	  ERROR("wsim:libselect: Cannot create system fifo\n");
+	  return -1;
+	}
+      WARNING("wsim:libselect: opening fifo in write only mode\n");
+      return fd;
+    }
+  else
+    {
+      int fd;
+      int flags;
+      switch (type) {
+      case CREATE_IO_IN:  
+	flags = O_RDONLY; 
+	break;
+      case CREATE_IO_OUT: 
+	flags = O_CREAT|O_WRONLY|O_TRUNC;
+	break;
+      default: return -1;
+      }
+
+      if ((fd = open(cmdline, flags)) == -1)
+	{
+	  ERROR("wsim:libselect: cannot open file %s - %s\n",cmdline, strerror(errno));
+	  return -1;
+	}
+      fchmod(fd, S_IRUSR | S_IWUSR);
+      return fd;
+    }
+  return -1;
+}
+
+/* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
+
 libselect_id_t libselect_id_create(char *argname, int UNUSED flags)
 {
   int  id;
@@ -459,39 +537,6 @@ libselect_id_t libselect_id_create(char *argname, int UNUSED flags)
       libselect.entry[id].fd_out     = (int)hPipe;
     }
 #endif
-  else if (strcmp(cmdline,"stdio") == 0)
-    {
-      libselect.entry[id].entry_type = ENTRY_STDIO;
-      libselect.entry[id].fd_in      = 0;
-      libselect.entry[id].fd_out     = 1;
-    }
-  else if (strcmp(cmdline,"stdin") == 0)
-    {
-      libselect.entry[id].entry_type = ENTRY_STDIO;
-      libselect.entry[id].fd_in      = 0;
-      libselect.entry[id].fd_out     = -1;
-    }
-  else if (strcmp(cmdline,"stdout") == 0)
-    {
-      libselect.entry[id].entry_type = ENTRY_STDIO;
-      libselect.entry[id].fd_in      = -1;
-      libselect.entry[id].fd_out     = 1;
-    }
-  else if (strcmp(cmdline,"create") == 0)
-    {
-      int fd;
-      char f_local [MAX_FILENAME];
-      char f_remote[MAX_FILENAME];
-      if ((fd = libselect_get_system_fifo(f_local, f_remote)) == -1)
-	{
-	  ERROR("wsim:libselect: Cannot create system fifo\n");
-	  return -1;
-	}
-      WARNING("wsim:libselect: opening fifo in write only mode\n");
-      libselect.entry[id].entry_type = ENTRY_FILE;
-      libselect.entry[id].fd_in      = -1;
-      libselect.entry[id].fd_out     = fd;
-    }
   else if (strchr(cmdline,',') != NULL)
     {
       // cmdline = output, input 
@@ -502,16 +547,17 @@ libselect_id_t libselect_id_create(char *argname, int UNUSED flags)
       c[0] = '\0';
       c = c+1;
 
-      if ((fd_out = open(cmdline,O_WRONLY)) == -1)
+      if ((fd_out = libselect_id_create_io(CREATE_IO_OUT, cmdline)) == -1)
 	{
-	  ERROR("wsim:libselect: Cannot open file %s\n",cmdline);
+	  ERROR("wsim:libselect: Cannot open output file %s\n",cmdline);
 	  return -1;
 	}
-      if ((fd_in = open(c,O_RDONLY)) == -1)
+      if ((fd_in = libselect_id_create_io(CREATE_IO_IN, c)) == -1)
 	{
-	  ERROR("wsim:libselect: Cannot open file %s\n",c);
+	  ERROR("wsim:libselect: Cannot open input file %s\n",c);
 	  return -1;
 	}
+
       libselect.entry[id].entry_type = ENTRY_FILE;
       libselect.entry[id].fd_in      = fd_in;
       libselect.entry[id].fd_out     = fd_out;
@@ -519,9 +565,9 @@ libselect_id_t libselect_id_create(char *argname, int UNUSED flags)
   else // cmdline = fifo_out
     {
       int fd;
-      if ((fd = open(cmdline,O_WRONLY)) == -1)
+      if ((fd = libselect_id_create_io(CREATE_IO_OUT, cmdline)) == -1)
 	{
-	  ERROR("wsim:libselect: Cannot open file %s\n",cmdline);
+	  ERROR("wsim:libselect: Cannot open output file %s\n",cmdline);
 	  return -1;
 	}
       WARNING("wsim:libselect: opening fifo in write only mode\n");
@@ -894,7 +940,7 @@ void libselect_state_save(void)
 
 void libselect_state_restore(void)
 {
-  int size;
+  int UNUSED size;
   libselect_id_t id;
   for(id=0; id < LIBSELECT_MAX_ENTRY; id++)
     {

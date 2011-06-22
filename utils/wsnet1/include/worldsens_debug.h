@@ -14,8 +14,8 @@
 /**************************************************************************/
 
 #if defined(DEBUG)
-#define WSNET_S_TIME      0  /* WSNet global TIME */
-#define WSNET_S_TX        0  /* data RX/TX        */
+#define WSNET_S_TIME      1  /* WSNet global TIME */
+#define WSNET_S_TX        1  /* data RX/TX        */
 #endif
 
 #if WSNET_S_TIME != 0

@@ -26,7 +26,7 @@ uint16_t  g_mport                  = 9999;
 char     *g_maddr                  = "224.0.0.1";
 char     *g_saddr                  = "localhost";
 
-uint32_t  WORLDSENS_SYNCH_PERIOD   = 1000000000;
+uint32_t  WORLDSENS_SYNCH_PERIOD   =   500000000; /* default to 0.5 second */
 
 uint32_t  pkt_seq                  = 0;
 int       simulation_keeps_going   = 1;

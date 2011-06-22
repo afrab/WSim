@@ -40,7 +40,7 @@ void set_global_time(uint64_t time)
 { 
   g_sim_time = time; 
   WSNET_S_DBG_TIME ("WSNET:: ===\n");
-  WSNET_S_DBG_TIME ("WSNET:: === TIME  %"PRId64" (seq: %d)\n", time, worldsens.rp_seq);
+  OUTPUT ("WSNET:: === TIME  %"PRId64" (%.2fms, seq: %d)\n", time, (float)time / 1000000.0, worldsens.rp_seq);
   WSNET_S_DBG_TIME ("WSNET:: ===\n");
 }
 

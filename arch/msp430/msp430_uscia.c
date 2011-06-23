@@ -126,9 +126,11 @@ static inline int32_t USCIA_MODE_UPDATE_BITCLK(int ucssel)
 
 void msp430_uscia0_set_baudrate()                                  
 {   
-  MCU.uscia0.ucaxbr_div = ((MCU.uscia0.ucaxbr1 << 8 | MCU.uscia0.ucaxbr0) / 2) * (7+!(MCU.uscia0.ucaxctl0.b.uc7bit)); 
-  HW_DMSG_USCIA("msp430:uscia0:   baudrate = div N %d/bit - %d/byte\n",      
-		  ((MCU.uscia0.ucaxbr1 << 8 | MCU.uscia0.ucaxbr0) / 2),MCU.uscia0.ucaxbr_div);  
+  uint32_t div = ((MCU.uscia0.ucaxbr1 << 8 | MCU.uscia0.ucaxbr0)) * (7+!(MCU.uscia0.ucaxctl0.b.uc7bit));
+
+  MCU.uscia0.ucaxbr_div = div;
+  HW_DMSG_USCIA("msp430:uscia0:   baudrate = div N %d/bit - %d/byte\n", 
+                div / (7+!(MCU.uscia0.ucaxctl0.b.uc7bit)), div);
 }
 
 void msp430_uscia0_reset()
@@ -143,11 +145,14 @@ void msp430_uscia0_reset()
                                                                                
   MCU.uscia0.ucaxtxbuf             = 0;                                           
   MCU.uscia0.ucaxtxbuf_full        = 0;                                           
-  MCU.uscia0.ucaxtx_full_delay     = 0;                                                                           
+  MCU.uscia0.ucaxtx_full_delay     = 0;     
+
   MCU.uscia0.ucaxtx_shift_buf      = 0;                                           
   MCU.uscia0.ucaxtx_shift_empty    = 1;                                           
   MCU.uscia0.ucaxtx_shift_ready    = 0;                                           
   MCU.uscia0.ucaxtx_shift_delay    = 0; 
+
+  MCU.sfr.ifg2.s                   = 0xA;
 }
 
 /***************************/
@@ -190,8 +195,7 @@ void msp430_uscia0_update()
 		MCU.uscia0.ucaxtx_full_delay -=                                    
 			USCIA_MODE_UPDATE_BITCLK(MCU.uscia0.ucaxctl1.b.ucssel);
 	      }                                                                 
-	} /* ucaxtfubuf_full */                                                                                                     
-
+	} /* ucaxtfubuf_full */ 
 
     /* TX shift register */                                                                      
     if (MCU.uscia0.ucaxtx_shift_empty == 0)                                        
@@ -291,7 +295,7 @@ int8_t msp430_uscia0_read(uint16_t addr)
       res = MCU.uscia0.ucaxrxbuf;                                                
       MCU.sfr.ifg2.b.uca0rxifg   = 0;                                          
       MCU.uscia0.ucaxrxbuf_full  = 0;                                          
-      /*TRACER_TRACE_USCIA(TRACER_USCIA_IDLE);*/                                                                                                 \
+      /*TRACER_TRACE_USCIA(TRACER_USCIA_IDLE);*/
       MCU.uscia0.ucaxstat.b.ucoe = 0;                                          
       HW_DMSG_USCIA("msp430:uscia0: read ucaxrxbuf = 0x%02x\n", res & 0xff);
       break;                                                                  
@@ -311,8 +315,8 @@ int8_t msp430_uscia0_read(uint16_t addr)
     case UCA0IRRCTL     :                                                 
       res = MCU.uscia0.ucaxirrctl.s;                                              
       HW_DMSG_USCIA("msp430:uscia0: read ucaxirrctl = 0x%02x\n", res & 0xff); 
-      break;                                                                                                                                                                                                  
-    default                 :                                                 
+      break;
+    default             :
       res = 0;                                                                
       ERROR("msp430:uscia0: read bad address 0x%04x\n", addr);            
       break;                                                                  
@@ -331,7 +335,7 @@ void msp430_uscia0_write(uint16_t UNUSED addr, int8_t UNUSED val)
 	union {                                                               
 	  struct ucaxctl0_t   b; 
 	  uint8_t             s;                                              
-	} ctl0;                                                                                                                             
+	} ctl0;
 	ctl0.s = val;                                               
 	/*debug message*/
 	HW_DMSG_USCIA("msp430:uscia0: write ucaxctl0 = 0x%02x\n", val & 0xff);                    
@@ -341,9 +345,8 @@ void msp430_uscia0_write(uint16_t UNUSED addr, int8_t UNUSED val)
 	HW_DMSG_USCIA("msp430:uscia0: uc7bit = %d\n", 	ctl0.b.uc7bit);
 	HW_DMSG_USCIA("msp430:uscia0: ucspb = %d\n", 	ctl0.b.ucspb);
 	HW_DMSG_USCIA("msp430:uscia0: ucmode = %d\n", 	ctl0.b.ucmode);
-	HW_DMSG_USCIA("msp430:uscia0: ucsync = %d\n", 	ctl0.b.ucsync);                                                                     
-	HW_DMSG_USCIA("msp430:uscia0: length = %d bits\n",             
-                                           (ctl0.b.uc7bit == 1) ? 7:8);         
+	HW_DMSG_USCIA("msp430:uscia0: ucsync = %d\n", 	ctl0.b.ucsync);
+      	HW_DMSG_USCIA("msp430:uscia0: length = %d bits\n", (ctl0.b.uc7bit == 1) ? 7:8);        
         /*modifications*/                                                                          
         MCU.uscia0.ucaxctl0.s = val;
 	if (ctl0.b.uc7bit != MCU.uscia0.ucaxctl0.b.uc7bit) 
@@ -359,7 +362,7 @@ void msp430_uscia0_write(uint16_t UNUSED addr, int8_t UNUSED val)
 	union {                                                               
 	  struct ucaxctl1_t   b; 
 	  uint8_t             s;                                              
-	} ctl1;                                                                                                                             
+	} ctl1;
 	ctl1.s = val;                                               
 	/*debug message*/
 	HW_DMSG_USCIA("msp430:uscia0: write ucaxctl1 = 0x%02x\n", val & 0xff);                    
@@ -376,13 +379,13 @@ void msp430_uscia0_write(uint16_t UNUSED addr, int8_t UNUSED val)
           {                                                                   
              /* reset  UCA0RXIE, UCA0TXIE, UCA0RXIFG, UCOE, and UCFE bits */            
              /* set    UCA0TXIFG flag                                     */           
-             HW_DMSG_USCIA("msp430:uscia0:   swrst  = 1, reset flags\n");                                             
+             HW_DMSG_USCIA("msp430:uscia0:   swrst  = 1, reset flags\n");
              MCU.sfr.ie2.b.uca0rxie           = 0;                                 
              MCU.sfr.ie2.b.uca0txie           = 0;                                 
              MCU.sfr.ifg2.b.uca0rxifg         = 0; 
 	     MCU.sfr.ifg2.b.uca0txifg         = 1; 
              MCU.uscia0.ucaxstat.b.ucoe       = 0;                                 
-             MCU.uscia0.ucaxstat.b.ucfe      = 0;                                                                     
+             MCU.uscia0.ucaxstat.b.ucfe       = 0;
              /* finishing current transaction */                              
              MCU.uscia0.ucaxtxbuf_full        = 0;                                 
              MCU.uscia0.ucaxtx_full_delay     = 0;             
@@ -411,13 +414,14 @@ void msp430_uscia0_write(uint16_t UNUSED addr, int8_t UNUSED val)
       msp430_uscia0_set_baudrate();                              
       break;
       
-     case UCA0MCTL       :		/* Modulation ctrl register */                                            
-	{ 
+     case UCA0MCTL       :		/* Modulation ctrl register */
+        { 
 	  /*temporary value*/
 	  union {                                                               
 	    struct ucaxmctl_t   b; 
 	    uint8_t             s;                                              
-	  } mctl;                                                                                                                             
+	  } mctl;
+
 	  mctl.s = val;                                               
 	  /*debug message*/
 	  HW_DMSG_USCIA("msp430:uscia0: write ucaxctl1 = 0x%02x\n", val & 0xff);                    
@@ -437,7 +441,8 @@ void msp430_uscia0_write(uint16_t UNUSED addr, int8_t UNUSED val)
 	  union {                                                               
 	    struct ucaxstat_t   b;
 	    uint8_t             s;                                              
-	  } stat;                                                                                                                                      
+	  } stat;
+
 	  stat.s = val;          
 	  /*debug message*/
 	  HW_DMSG_USCIA("msp430:uscia0: write ucbxstat = 0x%02x\n", val & 0xff);                   
@@ -464,17 +469,17 @@ void msp430_uscia0_write(uint16_t UNUSED addr, int8_t UNUSED val)
 	  HW_DMSG_USCIA("msp430:uscia0: write ucaxtxbuf  = 0x%02x [PC=0x%04x]\n",val &0xff, mcu_get_pc());
 	  if (MCU.uscia0.ucaxtxbuf_full == 1)
 	  {                                                                     
-	    WARNING("msp430:uscia0:    overwriting tx buffer with [0x%02x]\n",val & 0xff);                                              
+	    WARNING("msp430:uscia0:    overwriting tx buffer with [0x%02x]\n",val & 0xff);
 	  }                                                                     
 	  MCU.uscia0.ucaxtxbuf            = val;                                     
 	  MCU.uscia0.ucaxtxbuf_full       = 1;                                       
-	  MCU.uscia0.ucaxtx_full_delay    = 1; /* go to shifter after xx BITCLK */                                      
-	  MCU.sfr.ifg2.b.uca0txifg        = 0;                                                                             \
+	  MCU.uscia0.ucaxtx_full_delay    = 1; /* go to shifter after xx BITCLK */
+	  MCU.sfr.ifg2.b.uca0txifg        = 0;
 	  /*TRACER_TRACE_USCIA(TRACER_USCIA_TX_RECV);*/			     
 	  /* can be a dupe from the platform file */                            
 	  /*etracer_slot_event(ETRACER_PER_ID_MCU_USCIA,                    
 			    ETRACER_PER_EVT_WRITE_COMMAND,                     
-			    ETRACER_PER_ARG_WR_DST_FIFO, 0);*/                                                                                                                                                                                                     
+			    ETRACER_PER_ARG_WR_DST_FIFO, 0);*/
 	}
 	break; 
       
@@ -484,7 +489,7 @@ void msp430_uscia0_write(uint16_t UNUSED addr, int8_t UNUSED val)
 	  union {                                                               
 	    struct ucaxirtctl_t   b;
 	    uint8_t               s;                                              
-	  } irtctl;                                                                                                                                      
+	  } irtctl;
 	  irtctl.s = val;          
 	  /*debug message*/
 	  HW_DMSG_USCIA("msp430:uscia0: write ucbxabctl = 0x%02x\n", val & 0xff);                   
@@ -503,7 +508,7 @@ void msp430_uscia0_write(uint16_t UNUSED addr, int8_t UNUSED val)
 	  union {                                                               
 	    struct ucaxirrctl_t   b;
 	    uint8_t              s;                                              
-	  } irrctl;                                                                                                                                      
+	  } irrctl;
 	  irrctl.s = val;          
 	  /*debug message*/
 	  HW_DMSG_USCIA("msp430:uscia0: write ucbxabctl = 0x%02x\n", val & 0xff);                   
@@ -521,7 +526,7 @@ void msp430_uscia0_write(uint16_t UNUSED addr, int8_t UNUSED val)
 	  union {                                                               
 	    struct ucaxabctl_t   b;
 	    uint8_t              s;                                              
-	  } abctl;                                                                                                                                      
+	  } abctl;
 	  abctl.s = val;          
 	  /*debug message*/
 	  HW_DMSG_USCIA("msp430:uscia0: write ucbxabctl = 0x%02x\n", val & 0xff);                   

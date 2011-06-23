@@ -48,7 +48,10 @@
 
 //slau144e.pdf (page 497)
 /**
- * In synchronous mode, the USCI connects the MSP430 to an externalvia three or four pins: UCxSIMO, UCxSOMI, UCxCLK, and UCxSmode is selected when the UCSYNC bit is set and SPI mode (3-pin ois selected with the UCMODEx bits.
+ * In synchronous mode, the USCI connects the MSP430 to an external via 
+ * three or four pins: UCxSIMO, UCxSOMI, UCxCLK, and UCxSmode is selected 
+ * when the UCSYNC bit is set and SPI mode (3-pin ois selected with the UCMODEx bits.
+ *
  * SPI mode features include:
  * - 7- or 8-bit data length
  * - LSB-first or MSB-first data transmit and receive
@@ -102,7 +105,7 @@ void msp430_uscib0_create()
 
 void msp430_uscib0_set_baudrate()                                  
 {   
-  MCU.uscib0.ucbxbr_div = ((MCU.uscib0.ucbxbr1 << 8 | MCU.uscib0.ucbxbr0) / 2) * (7+!(MCU.uscib0.ucbxctl0.b.uc7bit)); 
+  MCU.uscib0.ucbxbr_div = ((MCU.uscib0.ucbxbr1 << 8 | MCU.uscib0.ucbxbr0)) * (7+!(MCU.uscib0.ucbxctl0.b.uc7bit)); 
   HW_DMSG_USCIB("msp430:uscib0:   baudrate = div N %d/bit - %d/byte\n",      
 		  ((MCU.uscib0.ucbxbr1 << 8 | MCU.uscib0.ucbxbr0) / 2),MCU.uscib0.ucbxbr_div); 
 }
@@ -127,6 +130,7 @@ void msp430_uscib0_reset()
   MCU.uscib0.ucbxtx_shift_ready     = 0;
   MCU.uscib0.ucbxtx_shift_delay     = 0;
 
+  MCU.sfr.ifg2.s                   = 0xA;
 }
 
 /***************************/
@@ -135,7 +139,7 @@ void msp430_uscib0_reset()
 /* update uscib0 within internal device loop */
 void msp430_uscib0_update()
 {
-  do {                                                                                                                                                
+  do {
       /* Tx buffer */
       if (MCU.uscib0.ucbxtxbuf_full == 1)                                        
         {                                                                     
@@ -302,7 +306,7 @@ int8_t msp430_uscib0_read(uint16_t addr)
                           (ETRACER_PER_ARG_WR_DST_FIFO | ETRACER_ACCESS_LVL_BUS), 0);*/
       MCU.uscib0.ucbxstat.b.ucoe = 0;                                          
       HW_DMSG_USCIB("msp430:uscib0: read ucbxrxbuf = 0x%02x\n",res & 0xff);
-      break;                                                                                                                                
+      break;
     case UCB0TXBUF :                                                 
       res = MCU.uscib0.ucbxtxbuf;                                                
       MCU.sfr.ifg2.b.ucb0txifg = 0;                                          
@@ -328,7 +332,7 @@ void msp430_uscib0_write(uint16_t addr, int8_t val)
 	union {                                                               
 	  struct ucbxctl0_t   b;
 	  uint8_t             s;                                              
-	} ctl0;                                                                                                                             
+	} ctl0;
 	ctl0.s = val;                                               
 	/*debug message*/
 	HW_DMSG_USCIB("msp430:uscib0: write ucbxctl0 = 0x%02x\n", val & 0xff);                    
@@ -338,7 +342,7 @@ void msp430_uscib0_write(uint16_t addr, int8_t val)
 	HW_DMSG_USCIB("msp430:uscib0: uc7bit = %d\n", 	ctl0.b.uc7bit);
 	HW_DMSG_USCIB("msp430:uscib0: ucmst = %d\n", 	ctl0.b.ucmst);
 	HW_DMSG_USCIB("msp430:uscib0: ucmode = %d\n", 	ctl0.b.ucmode);
-	HW_DMSG_USCIB("msp430:uscib0: ucsync = %d\n", 	ctl0.b.ucsync);                                                                     
+	HW_DMSG_USCIB("msp430:uscib0: ucsync = %d\n", 	ctl0.b.ucsync);
 	HW_DMSG_USCIB("msp430:uscib0: length = %d bits\n",             
                                            (ctl0.b.uc7bit == 1) ? 7:8);         
         /*modifications*/                                                                          
@@ -356,7 +360,7 @@ void msp430_uscib0_write(uint16_t addr, int8_t val)
 	union {                                                               
 	  struct ucbxctl1_t   b;
 	  uint8_t             s;                                              
-	} ctl1;                                                                                                                                      
+	} ctl1;
 	ctl1.s = val;                                                                   
 	/*debug message*/
         HW_DMSG_USCIB("msp430:uscib0: write ucbxctl1 = 0x%02x\n", val & 0xff);                   
@@ -368,13 +372,13 @@ void msp430_uscib0_write(uint16_t addr, int8_t val)
           {                                                                   
              /* reset  UCB0RXIE, UCB0TXIE, UCB0RXIFG, UCOE, and UCFE bits */            
              /* set    UCB0TXIFG flag                                     */           
-             HW_DMSG_USCIB("msp430:uscib0:   swrst  = 1, reset flags\n");                                             
+             HW_DMSG_USCIB("msp430:uscib0:   swrst  = 1, reset flags\n");
              MCU.sfr.ie2.b.ucb0rxie           = 0;                                 
              MCU.sfr.ie2.b.ucb0txie           = 0;                                 
              MCU.sfr.ifg2.b.ucb0rxifg         = 0; 
 	     MCU.sfr.ifg2.b.ucb0txifg         = 1; 
              MCU.uscib0.ucbxstat.b.ucoe       = 0;                                 
-             MCU.uscib0.ucbxstat.b.ucfce      = 0;                                                                     
+             MCU.uscib0.ucbxstat.b.ucfce      = 0;
              /* finishing current transaction */                              
              MCU.uscib0.ucbxtxbuf_full        = 0;                                 
              MCU.uscib0.ucbxtx_full_delay     = 0;             
@@ -411,7 +415,7 @@ void msp430_uscib0_write(uint16_t addr, int8_t val)
 	union {                                                               
 	  struct ucbxstat_t   b;
 	  uint8_t             s;                                              
-	} stat;                                                                                                                                      
+	} stat;
 	stat.s = val;          
 	/*debug message*/
         HW_DMSG_USCIB("msp430:uscib0: write ucbxstat = 0x%02x\n", val & 0xff);                   
@@ -436,7 +440,7 @@ void msp430_uscib0_write(uint16_t addr, int8_t val)
 		    mcu_get_pc());					
       if ((MCU.uscib0.ucbxtxbuf_full == 1) && (MCU.uscib0.ucbxctl0.b.ucmst == 1)) /* master */ 
         {                                                                     
-          WARNING("msp430:uscib0:    overwriting tx buffer with [0x%02x]\n",val & 0xff);                                              
+          WARNING("msp430:uscib0:    overwriting tx buffer with [0x%02x]\n",val & 0xff);
         }                                                                     
       MCU.uscib0.ucbxtxbuf               = val;                                     
       MCU.uscib0.ucbxtxbuf_full          = 1;                                       
@@ -479,7 +483,7 @@ int msp430_uscib0_chkifg()
 /* uscib0 SPI read from peripherals */
 int msp430_uscib0_dev_read_spi(uint8_t *val)
 {
-    int ret = 0;                                                                                                             
+    int ret = 0;
     if (MCU.uscib0.ucbxtx_shift_ready == 1)                                   
       {                                                                    
 	  *val = MCU.uscib0.ucbxtx_shift_buf;                                     

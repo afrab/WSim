@@ -109,8 +109,12 @@ static inline int32_t USCIA_MODE_UPDATE_BITCLK(int ucssel)
   int32_t res = 0;
   switch (ucssel)
     {
-    case 0:
-      ERROR("msp430:uscia0: USCIA clk = UCLK\n");
+    case 0: 	
+	//Source UCLK with UCLK not running
+	if (MCU.uscia0.ucaxctl1.b.ucswrst == 0)  
+	  {
+	    ERROR("msp430:uscia0: USCIA clk = UCLK not supported [PC=0x%04x]\n",mcu_get_pc());
+	  }
       res = 0;
       break;
     case 1:
@@ -135,6 +139,9 @@ void msp430_uscia0_set_baudrate()
 
 void msp430_uscia0_reset()
 {
+  
+  MCU.uscia0.ucaxctl1.b.ucswrst     = 1;
+  
   MCU.uscia0.ucaxrxbuf             = 0;
   MCU.uscia0.ucaxrxbuf_full        = 0;
   MCU.uscia0.ucaxrx_shift_buf      = 0;
@@ -374,7 +381,9 @@ void msp430_uscia0_write(uint16_t UNUSED addr, int8_t UNUSED val)
 	HW_DMSG_USCIA("msp430:uscia0: uctxbrk = %d\n", 	ctl1.b.uctxbrk);
 	HW_DMSG_USCIA("msp430:uscia0: ucswrst = %d\n", 	ctl1.b.ucswrst);
 
-        /*modifications*/                                                                          
+        /*modifications*/       
+
+	  
 	if ((ctl1.b.ucswrst == 0) && (MCU.uscia0.ucaxctl1.b.ucswrst == 0))       
           {                                                                   
              /* reset  UCA0RXIE, UCA0TXIE, UCA0RXIFG, UCOE, and UCFE bits */            

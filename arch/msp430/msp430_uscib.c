@@ -221,9 +221,14 @@ void msp430_uscib0_update()
           switch (MCU.uscib0.ucbxctl1.b.ucssel)                                    
             {                                                                 
           case 0:                                                             
-            ERROR("msp430:uscib0: SPI RX clk = UCLK not supported\n");   
-            MCU.uscib0.ucbxrx_shift_delay = 0;                                   
-            break;                                                            
+	      //Source UCLK with UCLK not running
+	      if (MCU.uscib0.ucbxctl1.b.ucswrst == 0) 
+	      {
+		ERROR("msp430:uscib0: SPI RX clk = UCLK not supported\n");   
+	      }
+	    MCU.uscib0.ucbxrx_shift_delay = 0;                                   
+            
+	    break;                                                            
           case 1:                                                             
             MCU.uscib0.ucbxrx_shift_delay -= MCU_CLOCK.ACLK_increment;           
             break;                                                            
@@ -368,6 +373,7 @@ void msp430_uscib0_write(uint16_t addr, int8_t val)
 	HW_DMSG_USCIB("msp430:uscib0: unused = %d\n", 	ctl1.b.unused);
 	HW_DMSG_USCIB("msp430:uscib0: ucswrst = %d\n", 	ctl1.b.ucswrst);
 	/*modifications*/
+	
 	if ((ctl1.b.ucswrst == 0) && (MCU.uscib0.ucbxctl1.b.ucswrst == 0))       
           {                                                                   
              /* reset  UCB0RXIE, UCB0TXIE, UCB0RXIFG, UCOE, and UCFE bits */            
@@ -490,7 +496,7 @@ int msp430_uscib0_dev_read_spi(uint8_t *val)
 	  MCU.uscib0.ucbxtx_shift_ready = 0;                                     
 	  MCU.uscib0.ucbxtx_shift_empty = 1;                                     
           /*TRACER_TRACE_USCIB0(TRACER_USCIB0_IDLE);			      
-          etracer_slot_event(ETRACER_PER_ID_MCU_SPI + NUM,                    
+          etracer_slot_event(ETRACER_PER_ID_MCU_SPI + NUM,	                   
                              ETRACER_PER_EVT_WRITE_COMMAND,                   
                             (ETRACER_PER_ARG_WR_SRC_FIFO | (ETRACER_ACCESS_LVL_SPI + NUM)), 0); */
 	  ret=1;                                                           

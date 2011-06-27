@@ -78,7 +78,7 @@ esac
 if [ "$WSNET_MODE" = "--wsnet1" ]
 then
     xterm -T ${WSNET1} -e "${WSNET1}" &
-    echo "${WSNET1} -S 1000000000"
+    echo "${WSNET1}"
 else
     if [ "$WSNET_MODE" = "--wsnet2" ]
     then

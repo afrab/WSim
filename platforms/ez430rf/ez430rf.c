@@ -139,9 +139,9 @@ int system_create(int dev_num)
 
   STDOUT("%s:\n", NAME);
   STDOUT("%s: =========================\n", NAME);
-  STDOUT("%s: boutton 1 = '1'\n", NAME);
+  STDOUT("%s: button 1 = '1'\n", NAME);
   STDOUT("%s:\n", NAME);
-  STDOUT("%s: 'q' pour quitter (hors mode gdb)\n", NAME);
+  STDOUT("%s: 'q' quit (except gdb mode)\n", NAME);
   STDOUT("%s: =========================\n", NAME);
   STDOUT("%s:\n", NAME);
   return 0;

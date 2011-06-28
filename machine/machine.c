@@ -369,14 +369,14 @@ void machine_run(struct machine_opt_t *m)
 	{
 	  machine.run_limit  |= LIMIT_INSN;
 	  machine.run_insn    = m->insn;
-	  HW_DMSG_MISC("machine: will run for %" PRIu64 " instructions\n",run_insn);
+	  HW_DMSG_MISC("machine: will run for %" PRIu64 " instructions\n",machine.run_insn);
 	}
       
       if (m->time > 0)
 	{
 	  machine.run_limit  |= LIMIT_TIME;
 	  machine.run_time    = m->time;
-	  HW_DMSG_MISC("machine: will run for %" PRIu64 " nano seconds\n",nanotime);
+	  HW_DMSG_MISC("machine: will run for %" PRIu64 " nano seconds\n",machine.run_time);
 	}
     }
 

@@ -199,7 +199,7 @@ do {                                                                          \
             switch (MCU.USART.uxtctl.b.ssel)                                  \
               {                                                               \
             case 0:                                                           \
-              ERROR("msp430:usart%d: SPI TX clk = UCLK, not supported\n",NUM);\
+              ERROR("msp430:usart%d: SPI TX clk = UCLK, not supported [PC=0x%04x]\n",NUM,mcu_get_pc()); \
               MCU.USART.uxtx_shift_delay = 0;                                 \
               break;                                                          \
             case 1:                                                           \
@@ -234,7 +234,7 @@ do {                                                                          \
           switch (MCU.USART.uxtctl.b.ssel)                                    \
             {                                                                 \
           case 0:                                                             \
-            ERROR("msp430:usart%d: SPI RX clk = UCLK not supported\n",NUM);   \
+            ERROR("msp430:usart%d: SPI RX clk = UCLK not supported [PC=0x%04x]\n",NUM,mcu_get_pc()); \
             MCU.USART.uxrx_shift_delay = 0;                                   \
             break;                                                            \
           case 1:                                                             \
@@ -308,7 +308,27 @@ static inline int32_t USART_MODE_UPDATE_BITCLK(int ssel, int num)
   switch (ssel)
     {
     case 0:
-      ERROR("msp430:usart%d: UART clk = UCLK\n",num);
+      /* switch to MCU.usart[num] */
+      switch (num) {
+#if defined(__msp430_have_usart1)
+      case 0:
+	if (MCU.usart0.uxctl.b.swrst == 0)
+	  {
+	    ERROR("msp430:usart%d: UART clk = UCLK not supported [PC=0x%04x]\n",num,mcu_get_pc());
+	  }
+	break;
+#endif
+#if defined(__msp430_have_usart1)
+      case 1:
+	if (MCU.usart1.uxctl.b.swrst == 0)
+	  {
+	    ERROR("msp430:usart%d: UART clk = UCLK not supported [PC=0x%04x]\n",num,mcu_get_pc());
+	  }
+	break;
+#endif
+      default:
+	break;
+      }
       res = 0;
       break;
     case 1:
@@ -407,7 +427,7 @@ do {                                                                          \
           if (MCU.USART.uxrxbuf_full == 1)                                    \
             {                                                                 \
                MCU.USART.uxrctl.b.oe = 1;                                     \
-               ERROR("msp430:usart%d: UART Rx Overrun (0x%x,%c)\n",NUM,       \
+               WARNING("msp430:usart%d: UART Rx Overrun (0x%x,%c)\n",NUM,     \
 		     MCU.USART.uxrx_shift_buf,                                \
                      isgraph(MCU.USART.uxrx_shift_buf) ?                      \
                      MCU.USART.uxrx_shift_buf : '.');                         \
@@ -819,7 +839,7 @@ do {                                                                          \
         {                                                                     \
           HW_DMSG_USART("msp430:usart%d: SPI receive disable while shift not empty\n",NUM); \
         }                                                                     \
-      ERROR("msp430:usart%d: SPI data RX but not in receive enable state\n",NUM);    \
+      WARNING("msp430:usart%d: SPI data RX but not in receive enable state\n",NUM);    \
     } 
 
 
@@ -870,7 +890,7 @@ do {                                                                          \
         {                                                                     \
           HW_DMSG_USART("msp430:usart%d: UART receive disable while shift not empty\n",NUM);\
         }                                                                     \
-      ERROR("msp430:usart%d: UART data RX but not in receive enable state\n",NUM);   \
+      WARNING("msp430:usart%d: UART data RX but not in receive enable state\n",NUM);   \
     } 
   
 /* ************************************************** */

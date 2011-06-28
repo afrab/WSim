@@ -430,7 +430,7 @@ void msp430_uscib0_write(uint16_t addr, int8_t val)
 	HW_DMSG_USCIB("msp430:uscib0: unused = %d\n", 	stat.b.unused);
 	HW_DMSG_USCIB("msp430:uscib0: ucbusy = %d\n", 	stat.b.ucbusy);
 	/*modifications*/
-	MCU.uscib0.ucbxstat.s = val;
+	MCU.uscib0.ucbxstat.s = stat.s;
       }
       break;
       

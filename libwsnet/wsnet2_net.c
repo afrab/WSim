@@ -724,7 +724,7 @@ static int wsnet2_published(char *msg) {
    int match_antennas    = 0;
    int match_measures    = 0;
    uint32_t counter  = 0;
-   uint32_t nb_models;
+   uint32_t UNUSED nb_models;
    int i = 0;
 
    /* update */

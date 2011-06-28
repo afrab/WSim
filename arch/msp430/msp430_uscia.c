@@ -439,7 +439,7 @@ void msp430_uscia0_write(uint16_t UNUSED addr, int8_t UNUSED val)
 	  HW_DMSG_USCIA("msp430:uscia0: ucos16 = %d\n", 	mctl.b.ucos16);
 	  
 	  /*modifications*/                                                                          
-	  MCU.uscia0.ucaxmctl.s = val;  
+	  MCU.uscia0.ucaxmctl.s = mctl.s;  
 	  msp430_uscia0_set_baudrate(); 
 	}                                                                       
 	break;
@@ -465,7 +465,7 @@ void msp430_uscia0_write(uint16_t UNUSED addr, int8_t UNUSED val)
 	  HW_DMSG_USCIA("msp430:uscia0: ucbusy = %d\n",	 stat.b.ucbusy);
 	  
 	  /*modifications*/
-	  MCU.uscia0.ucaxstat.s = val;
+	  MCU.uscia0.ucaxstat.s = stat.s;
 	}
 	break;
 	
@@ -507,7 +507,7 @@ void msp430_uscia0_write(uint16_t UNUSED addr, int8_t UNUSED val)
 	  HW_DMSG_USCIA("msp430:uscia0: uciren    = %d\n",  irtctl.b.uciren);
 	  
 	  /*modifications*/
-	  MCU.uscia0.ucaxirtctl.s = val;
+	  MCU.uscia0.ucaxirtctl.s = irtctl.s;
 	}
 	break;
 	
@@ -525,7 +525,7 @@ void msp430_uscia0_write(uint16_t UNUSED addr, int8_t UNUSED val)
 	  HW_DMSG_USCIA("msp430:uscia0: ucirrxpl   = %d\n", irrctl.b.ucirrxpl);
 	  HW_DMSG_USCIA("msp430:uscia0: ucirrxfe   = %d\n", irrctl.b.ucirrxfe);
 	  /*modifications*/
-	  MCU.uscia0.ucaxirrctl.s = val;
+	  MCU.uscia0.ucaxirrctl.s = irrctl.s;
 	}
 	break;
 	
@@ -547,7 +547,7 @@ void msp430_uscia0_write(uint16_t UNUSED addr, int8_t UNUSED val)
 	  HW_DMSG_USCIA("msp430:uscia0: ucabden  = %d\n",   abctl.b.ucabden);
     
 	  /*modifications*/
-	  MCU.uscia0.ucaxabctl.s = val;
+	  MCU.uscia0.ucaxabctl.s = abctl.s;
 	}
 	break;
 	

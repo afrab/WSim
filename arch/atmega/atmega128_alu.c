@@ -1072,7 +1072,7 @@ static int opcode_brbc(uint16_t opcode, uint16_t insn)
 /* TODO: code review */
 static int opcode_brbs(uint16_t opcode, uint16_t insn)
 {
-    uint8_t ss;
+  // uint8_t ss;
     int8_t K;
 
     // 1111 00kk kkkk ksss           BRBS
@@ -1085,7 +1085,7 @@ static int opcode_brbs(uint16_t opcode, uint16_t insn)
     // 1111 00kk kkkk k110           BRTS = BRBS 6,K
     // 1111 00kk kkkk k111           BRIE = BRBS 7,K
 
-    ss = (insn & 0x07);
+    // ss = (insn & 0x07);
     K  = ((insn >> 3) & 0x7f);
     if (K & 0x40) /* sign extension */
         K |= 0x80;
@@ -1184,7 +1184,7 @@ static int opcode_brbs(uint16_t opcode, uint16_t insn)
 static int opcode_elpm(uint16_t opcode, uint16_t insn)
 {
     uint8_t  dd;
-    int8_t   zplus;
+    int8_t   UNUSED zplus;
     uint32_t addr;
 
     /* OPT:POSSIBLE_SPLIT_OPCODE */
@@ -1629,7 +1629,7 @@ static int opcode_std(uint16_t opcode, uint16_t UNUSED insn)
 {
     int depl, y;
     uint8_t  rr;
-    char chrindex;
+    char UNUSED chrindex;
     uint16_t Index;
 
     /* OPT:POSSIBLE_SPLIT_OPCODE */
@@ -1965,7 +1965,7 @@ static int opcode_ldd(uint16_t opcode, uint16_t insn)
 {
     int depl, y;
     uint8_t dd;
-    char chrindex;
+    char UNUSED chrindex;
     uint16_t Index;
 
     // Y register
@@ -2907,7 +2907,7 @@ void mcu_update_done()
 unsigned int atmega128_mcu_run_insn(void)
 {
   uint16_t insn       = 0;
-  unsigned int opcode = 0;
+  unsigned int UNUSED opcode = 0;
   unsigned int cycles = 0;
   
   MCU_ALU.pc = MCU_ALU.next_pc;

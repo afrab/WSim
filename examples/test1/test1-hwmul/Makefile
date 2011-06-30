@@ -1,9 +1,9 @@
 # makfile configuration
-NAME            = insn
+NAME            = hwmul
 OBJECTS         = main.o uart.o
 CPU             = msp430x1611
 
-CFLAGS          = -mmcu=${CPU} -O2 -Wall -g
+CFLAGS          = -mmcu=${CPU} -Wall -g
 
 #switch the compiler (for the internal make rules)
 CC              = msp430-gcc
@@ -13,8 +13,8 @@ CC              = msp430-gcc
 #all should be the first target. it's built when make is run without args
 all: ${NAME}.elf ${NAME}.a43 ${NAME}.lst
 
-line: main.c
-	gcc -DLINUX main.c -o line
+hwmul: main.c
+	gcc -DLINUX main.c -o $@
 
 #confgigure the next line if you want to use the serial download
 download: download-jtag

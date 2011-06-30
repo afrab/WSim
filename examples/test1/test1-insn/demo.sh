@@ -1,6 +1,6 @@
 #! /bin/sh
 
-WSIM=wsim-msp135
+WSIM=wsim-msp1611
 WTRACE=wtracer
 #ESIMU=${BASE}/os_basse_conso/tools/skyeye/eSimu/src/esimu
 

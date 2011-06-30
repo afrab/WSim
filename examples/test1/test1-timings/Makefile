@@ -1,5 +1,5 @@
 # makfile configuration
-NAME            = insn
+NAME            = timings
 OBJECTS         = main.o uart.o
 CPU             = msp430x1611
 
@@ -12,9 +12,6 @@ CC              = msp430-gcc
 
 #all should be the first target. it's built when make is run without args
 all: ${NAME}.elf ${NAME}.a43 ${NAME}.lst
-
-line: main.c
-	gcc -DLINUX main.c -o line
 
 #confgigure the next line if you want to use the serial download
 download: download-jtag
@@ -46,7 +43,7 @@ download-bsl: all
 	msp430-bsl -e ${NAME}.elf
 
 clean:
-	rm -f ${NAME}.elf ${NAME}.a43 ${NAME}.lst ${OBJECTS}
+	rm -f ${NAME}.elf ${NAME}.a43 ${NAME}.lst ${OBJECTS} wsim.*
 
 #backup archive
 dist:

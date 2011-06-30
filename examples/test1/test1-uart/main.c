@@ -31,7 +31,7 @@ void delay(unsigned int d)
  **********************/
 
 #define portACLK_FREQUENCY_HZ  32768
-#define configTICK_RATE_HZ     1
+#define configTICK_RATE_HZ     40
 
 void
 set_timer()
@@ -59,19 +59,19 @@ set_timer()
  **********************/
 
 #define LED_OUT   P1OUT
+#define LED_DIR   P1DIR
 
-int led_state;
+uint8_t led_state;
 
 interrupt (TIMERA0_VECTOR) prvTickISR( void ); // __attribute__ ( ( naked ) );
 interrupt (TIMERA0_VECTOR) prvTickISR( void )
 {
   led_state <<= 1;
-  if (led_state > 0x04)
+  if (led_state == 0)
     {
       led_state = 1;
     }
-  // free leds are on bits 6, 5 and 4, port 5
-  LED_OUT = (led_state << 4) | (LED_OUT & 0x8fu);
+  LED_OUT = led_state;
 }
 
 /**********************
@@ -92,8 +92,9 @@ int main(void)
   int  c;
 
   /* leds */
-  P5DIR  = 0xff;
   led_state = 1;
+  LED_DIR = 0xff;
+  LED_OUT = 0xff;
 
   BCSCTL1 = DIVA0|RSEL2|RSEL0;
   BCSCTL2 = SELM_2|SELS|DIVS_1;
@@ -102,11 +103,11 @@ int main(void)
   uart1_init();
   eint();                             //enable interrupts
 
+  delay(500);
   printf("UART Test program ready.\n");
 
   while (1)
     {
-
       while ((c = uart1_getchar()))
 	{
 	  printf("%c",c);

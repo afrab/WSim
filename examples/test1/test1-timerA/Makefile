@@ -1,7 +1,7 @@
 # makfile configuration
 NAME            = timerA
 OBJECTS         = main.o uart.o
-CPU             = msp430x135
+CPU             = msp430x1611
 
 CFLAGS          = -mmcu=${CPU} -O2 -Wall -g
 

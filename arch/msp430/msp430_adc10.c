@@ -2,13 +2,55 @@
  *  \file   msp430_adc10.c
  *  \brief  MSP430 Adc10 controller
  *  \author Antoine Fraboulet
- *  \date   2006
+ *  \date   2011
  **/
 
+#include <stdlib.h>
+#include <string.h>
 #include "arch/common/hardware.h"
 #include "msp430.h"
+#include "src/options.h"
 
 #if defined(__msp430_have_adc10)
+
+/* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
+
+#define HW_DMSG_ADC(x...) HW_DMSG_MCUDEV(x)
+
+#define ADC_DEBUG_LEVEL_2 0
+
+#if ADC_DEBUG_LEVEL_2 != 0
+#define HW_DMSG_2_DBG(x...) HW_DMSG_ADC(x)
+#else
+#define HW_DMSG_2_DBG(x...) do { } while (0)
+#endif
+
+/* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
+
+#if !defined(ADC10_BASE)
+#define ADC10_BASE 0
+#endif
+
+enum adc10_addr_t {
+  ADC10AE   = ADC10_BASE + 0x004A, /*  8 */
+  ADC10DTC0 = ADC10_BASE + 0x0048, /*  8 */
+  ADC10DTC1 = ADC10_BASE + 0x0049, /*  8 */
+  ADC10CTL0 = ADC10_BASE + 0x01B0, /* 16 */
+  ADC10CTL1 = ADC10_BASE + 0x01B2, /* 16 */
+  ADC10MEM  = ADC10_BASE + 0x01B4, /* 16 */
+  ADC10SA   = ADC10_BASE + 0x01BC  /* 16 */
+};
+
+tracer_id_t MSP430_TRACER_ADC10STATE;
+tracer_id_t MSP430_TRACER_ADC10INPUT[ADC10_CHANNELS];
+
+#define ADC10_TRACER_STATE(v)   tracer_event_record(MSP430_TRACER_ADC10STATE, v)
+#define ADC10_TRACER_INPUT(i,v) tracer_event_record(MSP430_TRACER_ADC10INPUT[i], v)
+
 /* ************************************************** */
 /* ************************************************** */
 /* ************************************************** */

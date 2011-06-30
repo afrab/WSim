@@ -10,6 +10,8 @@ dvi: ${NAME}.tex
 
 html: ${NAME}.tex
 	latex2html --init_file=latex2html.init $<
+	mkdir wsim_dev_tutorial/icon
+	cp imgs/*.png wsim_dev_tutorial/icon
 
 clean:
 	rm -rf  wsim_dev_tutorial.pdf wsim_dev_tutorial.dvi wsim_dev_tutorial.html \

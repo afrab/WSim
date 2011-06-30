@@ -31,6 +31,8 @@ upload: all
 	rsync -ruz -e ssh --delete 		\
 	--exclude=log/ 				\
 	--exclude=tutorials/	 		\
+	--exclude=dev/				\
+	--exclude=user/				\
 	htdocs/ 				\
 	afraboul@scm.gforge.inria.fr:/home/groups/wsim/htdocs
 

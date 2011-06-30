@@ -28,7 +28,9 @@
  *
  */ 
 
-#define __DEBUG_ME_HARDER
+
+// SR/GIE state change debug message
+#define DEBUG_ME_HARDER 0
 
 /* ************************************************** */
 /* ************************************************** */
@@ -360,11 +362,6 @@ static void msp430_type1_double_operands(uint16_t insns)
   opt1.ad      = (insns >> 7) & 0x1;
   opt1.src_reg = (insns >> 8) & 0xf;
 
-#if defined(DEBUG) && defined(DEBUG_TIMING)
-  opt1.src_t_mode = 0xffu;
-  opt1.dst_t_mode = 0xffu;
-#endif
-
   ASM_START(insns);
   ASM_ADD("%s ",msp430_debug_opcode(insns >> 12,opt1.byte));
 
@@ -503,7 +500,7 @@ static void msp430_type1_double_operands(uint16_t insns)
     {
     case 0x0: /* dreg register   */
       opt1.dst_mode   = REG_MODE;
-      opt1.dst_t_mode = (opt1.dst_reg == PC_REG_IDX) ? DST_TIMING_0 : DST_TIMING_1;
+      opt1.dst_t_mode = DST_TIMING_0;
       /* opt1.dst_reg is already set */
       ASM_ADD("%s",mcu_regname_str(opt1.dst_reg));
       break;
@@ -590,10 +587,6 @@ static void msp430_type2_single_operand(uint16_t insns)
   opt2.reg  = (insns >> 0) & 0xf;
   opt2.ad   = (insns >> 4) & 0x3;
   opt2.byte = (insns >> 6) & 0x1;
-
-#if defined(DEBUG) && defined(DEBUG_TIMING)
-  opt2.t_mode = 0xffu;
-#endif
   
   ASM_START(insns);
   ASM_ADD("%s ",msp430_debug_opcode((insns >> 4) & ~7,opt2.byte));
@@ -794,7 +787,10 @@ static inline int16_t msp430_type3_offset(short insns)
  * 11 #N    Immediate mode
  **/
 
-#define SET_CYCLES(n)  msp430_instruction_cycles = n
+#define SET_CYCLES(n)				\
+  do {						\
+    msp430_instruction_cycles = n;		\
+  } while(0)
 
 /**
  * Type 1 opcode timing
@@ -952,7 +948,7 @@ unsigned int msp430_mcu_run_insn()
       unsigned int opcode;
       unsigned int msp430_instruction_cycles = 0; // used through SET_CYCLES(n)
 
-#if defined(DEBUG_ME_HARDER)
+#if DEBUG_ME_HARDER != 0
       uint16_t debug_SR = SR;
 #endif
 
@@ -1601,8 +1597,12 @@ unsigned int msp430_mcu_run_insn()
       /* statistics */
       MCU_INSN_CPT  += 1;
       MCU_CYCLE_CPT += msp430_instruction_cycles;
+#if DEBUG_DISASSEMBLE != 0 || DEBUG_SYSTEM_TIME != 0
+      HW_DMSG_MCU("msp430: add %d cycles\n", msp430_instruction_cycles);
+#endif
 
-#if defined(DEBUG_ME_HARDER)
+
+#if DEBUG_ME_HARDER != 0
       if (((debug_SR & MASK_GIE) == 0) && ((SR & MASK_GIE) == MASK_GIE))
 	{
 	  HW_DMSG_INTR("msp430:intr:debug: GIE set back to 1 at PC=0x%04x\n",

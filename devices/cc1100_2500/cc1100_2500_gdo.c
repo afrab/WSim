@@ -29,17 +29,17 @@
 void cc1100_spi_output(struct _cc1100_t *cc1100, uint8_t val) {
 
 	if ((cc1100->registers[CC1100_REG_IOCFG0] & 0x3F) == 0x2E) {
-		CC1100_DBG_SPI("cc1100: (spi DEBUG): GDO0 pin value %x\n", val);
+		CC1100_DBG_SPI("cc1100: (spi DEBUG): GDO0 pin value %02x\n", val);
 
 		cc1100_write_pin(cc1100, CC1100_INTERNAL_GO0_PIN, val);	
 	}
 	if ((cc1100->registers[CC1100_REG_IOCFG1] & 0x3F) == 0x2E) {
-		CC1100_DBG_SPI("cc1100: (spi DEBUG): GDO1 pin value %x\n", val);
+		CC1100_DBG_SPI("cc1100: (spi DEBUG): GDO1 pin value %02x\n", val);
 		
 		cc1100_write_pin(cc1100, CC1100_INTERNAL_GO1_PIN, val);	
 	}
 	if ((cc1100->registers[CC1100_REG_IOCFG2] & 0x3F) == 0x2E) {
-		CC1100_DBG_SPI("cc1100: (spi DEBUG): GDO2 pin value %x\n", val);
+		CC1100_DBG_SPI("cc1100: (spi DEBUG): GDO2 pin value %02x\n", val);
 		
 		cc1100_write_pin(cc1100, CC1100_INTERNAL_GO2_PIN, val);	
 	}

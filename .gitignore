@@ -1,7 +1,7 @@
-/Makefile.in
-/*/Makefile.in
-/*/*/Makefile.in
 /*/*/*/Makefile.in
+/*/*/Makefile.in
+/*/Makefile.in
+/Makefile.in
 /aclocal.m4
 /autom4te.cache
 /compile
@@ -9,6 +9,8 @@
 /config.h.in
 /config.sub
 /configure
+/cscope.files
+/cscope.out
 /depcomp
 /install-sh
 /missing

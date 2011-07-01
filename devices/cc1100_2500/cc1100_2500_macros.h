@@ -175,7 +175,7 @@
 #elif defined(CC2500)
 #define CC1100_SET_CRC_TRUE(cc1100)					\
   do {									\
-    if( (cc1100_read_register(cc1100, CC1100_REG_PKTCTRL0)) & 0x08 ) {	\
+    if( (cc1100_read_register(cc1100, CC1100_REG_PKTCTRL0)) & 0x04 ) {	\
         cc1100_assert_gdo(cc1100, 0x07, CC1100_PIN_ASSERT);		\
 	cc1100_assert_gdo(cc1100, 0x0F, CC1100_PIN_ASSERT);		\
 	cc1100->registers[CC1100_REG_LQI] |= 0x80;			\

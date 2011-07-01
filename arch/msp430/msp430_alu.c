@@ -500,7 +500,7 @@ static void msp430_type1_double_operands(uint16_t insns)
     {
     case 0x0: /* dreg register   */
       opt1.dst_mode   = REG_MODE;
-      opt1.dst_t_mode = DST_TIMING_0;
+      opt1.dst_t_mode = (opt1.dst_reg == PC_REG_IDX) ? DST_TIMING_1 : DST_TIMING_0;
       /* opt1.dst_reg is already set */
       ASM_ADD("%s",mcu_regname_str(opt1.dst_reg));
       break;

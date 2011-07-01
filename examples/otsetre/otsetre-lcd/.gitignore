@@ -1,1 +1,6 @@
 /display.a43
+/display.elf
+/display.lst
+/display.o
+/wsim.trc
+/wsim.vcd

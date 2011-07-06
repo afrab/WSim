@@ -79,7 +79,7 @@ MODE1=${MODE}
     fi
     eval DS="\$DS${iter}"
     WS="${WSIM} ${MODE1} ${WSNET_MODE} ${LOG} ${TRC} ${UI} "
-    WS="$WS --logfile=n${iter}.log --logpktfile=n${iter}-pkt.log "
+    WS="$WS --logfile=n${iter}.log --logpktfile=n${iter}.pkt "
     WS="$WS --trace=n${iter}.trc --serial1_io=bk:udp:localhost:600${iter}:localhost:700${iter} "
     WS="$WS --node-id=${iter} --ds2411=${DS} ./wsn430-demo.elf"
     xterm -T wsim-${iter} -e "${WS}" &

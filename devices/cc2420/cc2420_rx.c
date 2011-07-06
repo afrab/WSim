@@ -88,7 +88,7 @@ void cc2420_record_rssi(struct _cc2420_t * cc2420, double dBm) {
 	
     switch (cca_mode) {
     case CC2420_CCA_MODE_RESERVED :
-	CC2420_DEBUG("cc2420_record_rssi : bad CCA mode %d (reserved)\n", cca_mode);
+	CC2420_DBG_MUX("cc2420_record_rssi : bad CCA mode %d (reserved)\n", cca_mode);
         cc2420_assert_ccamux(cc2420, 0x00, CC2420_PIN_ASSERT);
 	cc2420->cca_internal_value = 0xFF;
 	break;
@@ -151,14 +151,14 @@ void cc2420_record_rssi(struct _cc2420_t * cc2420, double dBm) {
 	break;
 
     default : 
-	CC2420_DEBUG("cc2420_record_rssi : bad CCA mode %d\n", cca_mode);
+	CC2420_DBG_MUX("cc2420_record_rssi : bad CCA mode %d\n", cca_mode);
 	cc2420_assert_ccamux(cc2420, 0x00, CC2420_PIN_ASSERT);
 	cc2420->cca_internal_value = 0xFF;
 	break;
     }
 
     if (old_cca_value != cc2420->cca_internal_value) {
-      CC2420_DEBUG("cc2420_record_rssi : CCA internal value changed from 0x%02x to 0x%02x\n", old_cca_value, cc2420->cca_internal_value);
+      CC2420_DBG_RX("cc2420_record_rssi : CCA internal value changed from 0x%02x to 0x%02x\n", old_cca_value, cc2420->cca_internal_value);
     }
 
     return;
@@ -241,12 +241,12 @@ int cc2420_rx_filter(struct _cc2420_t * cc2420, double frequency, int modulation
       sync_delta = MACHINE_TIME_GET_NANO() - cc2420->rx_sync_timer;
       if (sync_delta < -33333) 
 	{
-	  CC2420_DEBUG("cc2420_callback_rx : bad sync, got byte too early : sync_delta is %"PRId64"d\n", sync_delta);
+	  CC2420_DBG_RX("cc2420_callback_rx : bad sync, got byte too early : sync_delta is %"PRId64"d\n", sync_delta);
 	  CC2420_RX_SFD_SEARCH_ENTER(cc2420);
 	  return -1;
 	}
       if (sync_delta > 33333) {
-	CC2420_DEBUG("cc2420_callback_rx : bad sync, got byte too late\n");
+	CC2420_DBG_RX("cc2420_callback_rx : bad sync, got byte too late\n");
 	CC2420_RX_SFD_SEARCH_ENTER(cc2420);
 	return -1;
       }
@@ -292,7 +292,7 @@ int cc2420_rx_check_crc(struct _cc2420_t * cc2420) {
     cc2420_rx_fifo_get_buffer(cc2420, cc2420->rx_frame_start + 1, buffer, cc2420->rx_len);
 
     if (cc2420->rx_len - 2 < 0) {
-	CC2420_DEBUG("invalid len %d, can't check crc\n", cc2420->rx_len);
+	CC2420_DBG_RX("invalid len %d, can't check crc\n", cc2420->rx_len);
 	return -1;
     }
 
@@ -304,7 +304,7 @@ int cc2420_rx_check_crc(struct _cc2420_t * cc2420) {
 
     /* and compare them */
     if (fcs != received_fcs) {
-	CC2420_DEBUG("cc2420_rx_check_frame : bad crc\n");
+	CC2420_DBG_RX("cc2420_rx_check_frame : bad crc\n");
 	/* todo : set crc status bit */
 	return -1;
     }
@@ -336,7 +336,7 @@ uint8_t swapbits(uint8_t c,int count) {
 
 int cc2420_rx_process_fcf(struct _cc2420_t * cc2420) {
 
-    CC2420_DEBUG("cc2420_process_fcf: got fcf %.2x\n", cc2420->rx_fcf);
+    CC2420_DBG_RX("cc2420_process_fcf: got fcf %.2x\n", cc2420->rx_fcf);
 
     cc2420->rx_frame_type    = swapbits( CC2420_FCF_FRAME_TYPE   (cc2420->rx_fcf), CC2420_FCF_FRAME_TYPE_LENGTH );
     cc2420->rx_sec_enabled   = swapbits( CC2420_FCF_SEC_ENABLED  (cc2420->rx_fcf), CC2420_FCF_SEC_ENABLED_LENGTH );
@@ -346,8 +346,8 @@ int cc2420_rx_process_fcf(struct _cc2420_t * cc2420) {
     cc2420->rx_dst_addr_mode = swapbits( CC2420_FCF_DST_ADDR_MODE(cc2420->rx_fcf), CC2420_FCF_DST_ADDR_MODE_LENGTH );
     cc2420->rx_src_addr_mode = swapbits( CC2420_FCF_SRC_ADDR_MODE(cc2420->rx_fcf), CC2420_FCF_SRC_ADDR_MODE_LENGTH );
 
-    CC2420_DEBUG("cc2420_process_fcf: ack_req is %d\n", cc2420->rx_ack_req);
-    CC2420_DEBUG("cc2420_process_fcf: frame_type is %d\n", cc2420->rx_frame_type);
+    CC2420_DBG_RX("cc2420_process_fcf: ack_req is %d\n", cc2420->rx_ack_req);
+    CC2420_DBG_RX("cc2420_process_fcf: frame_type is %d\n", cc2420->rx_frame_type);
 
     /* process addressing modes to determine addresses lengths and positions */
 
@@ -359,7 +359,7 @@ int cc2420_rx_process_fcf(struct _cc2420_t * cc2420) {
     case CC2420_ADDR_MODE_RESERVED :
 	cc2420->rx_dst_pan_len     = 0;
 	cc2420->rx_dst_addr_len    = 0;
-	CC2420_DEBUG("cc2420_process_fcf: using reserved addressing mode !\n");
+	CC2420_DBG_RX("cc2420_process_fcf: using reserved addressing mode !\n");
 	break;
     case CC2420_ADDR_MODE_16_BITS :
 	cc2420->rx_dst_pan_len     = 2;
@@ -379,7 +379,7 @@ int cc2420_rx_process_fcf(struct _cc2420_t * cc2420) {
     case CC2420_ADDR_MODE_RESERVED :
 	cc2420->rx_src_pan_len     = 0;
 	cc2420->rx_src_addr_len    = 0;
-	CC2420_DEBUG("cc2420_process_fcf: using reserved addressing mode !\n");
+	CC2420_DBG_RX("cc2420_process_fcf: using reserved addressing mode !\n");
 	break;
     case CC2420_ADDR_MODE_16_BITS :
 	cc2420->rx_src_pan_len     = 2;
@@ -400,7 +400,7 @@ int cc2420_rx_process_fcf(struct _cc2420_t * cc2420) {
     cc2420->rx_src_pan_offset  = cc2420->rx_dst_addr_offset + cc2420->rx_dst_addr_len;
     cc2420->rx_src_addr_offset = cc2420->rx_src_pan_offset  + cc2420->rx_src_pan_len;
     
-    CC2420_DEBUG("cc2420_process_fcf: dst addr len is %d/%d, src addr len is %d/%d\n",
+    CC2420_DBG_RX("cc2420_process_fcf: dst addr len is %d/%d, src addr len is %d/%d\n",
 		 cc2420->rx_src_addr_len, cc2420->rx_src_pan_len, cc2420->rx_dst_addr_len, cc2420->rx_dst_pan_len);
 
     return 0;
@@ -423,7 +423,7 @@ void print_buf(char * msg, uint8_t * buf, uint8_t len) {
 	strcat(debug_str, tmp);
     }
     strcat(debug_str, "\n");
-    CC2420_DEBUG(debug_str);
+    CC2420_DBG_RX(debug_str);
 }
 
 
@@ -447,7 +447,7 @@ int cc2420_rx_check_address(struct _cc2420_t * cc2420 UNUSED) {
 
     /* no address recognition for acknoledge frames */
     if(cc2420->rx_frame_type == CC2420_FRAME_TYPE_ACK) {
-        CC2420_DEBUG("Frame type = ACK, no adress recognition\n");
+        CC2420_DBG_RX("Frame type = ACK, no adress recognition\n");
         return 0;
     }
   
@@ -455,14 +455,14 @@ int cc2420_rx_check_address(struct _cc2420_t * cc2420 UNUSED) {
     /* calculate size corresponding to addresses */
 
     uint8_t addr_len = cc2420->rx_src_addr_offset + cc2420->rx_src_addr_len - cc2420->rx_dst_pan_offset;
-    CC2420_DEBUG("address len is %d\n", addr_len);
+    CC2420_DBG_RX("address len is %d\n", addr_len);
 
-    CC2420_DEBUG("in check_address, dst addr len is %d/%d, src addr len is %d/%d\n", cc2420->rx_src_addr_len, cc2420->rx_src_pan_len, 
+    CC2420_DBG_RX("in check_address, dst addr len is %d/%d, src addr len is %d/%d\n", cc2420->rx_src_addr_len, cc2420->rx_src_pan_len, 
 			 cc2420->rx_dst_addr_len, cc2420->rx_dst_pan_len);
 
 
     if (addr_len == 0) {
-	CC2420_DEBUG("no address, check what to do here\n");
+	CC2420_DBG_RX("no address, check what to do here\n");
 	return 0;
     }
     
@@ -500,18 +500,18 @@ int cc2420_rx_check_address(struct _cc2420_t * cc2420 UNUSED) {
 
     if (cc2420->rx_frame_type == CC2420_FRAME_TYPE_BEACON) {
         if (cc2420->rx_src_pan_len != 2) {
-            CC2420_DEBUG("no src pan ID for a beacon frame, dropping\n");
+            CC2420_DBG_RX("no src pan ID for a beacon frame, dropping\n");
             return -1;
         }
         /* get pan id */
 
         /* if pan id is 0xFFFF accept any source pan id */
         if (!memcmp(cc2420->ram + CC2420_RAM_PANID, broadcast_addr, 2)) {
-            CC2420_DEBUG("local pan id is 0xFFFF, won't check src pan id\n");
+            CC2420_DBG_RX("local pan id is 0xFFFF, won't check src pan id\n");
         }
         else {
             if (memcmp(cc2420->ram + CC2420_RAM_PANID, src_pan, 2)) {
-                CC2420_DEBUG("local pan id and src pan id are different on a beacon frame, dropping\n");
+                CC2420_DBG_RX("local pan id and src pan id are different on a beacon frame, dropping\n");
                 return -1;
             }
         }
@@ -521,11 +521,11 @@ int cc2420_rx_check_address(struct _cc2420_t * cc2420 UNUSED) {
     if (cc2420->rx_dst_pan_len > 0) {
         /* if not broadcast */
         if (!memcmp(dst_pan, broadcast_addr, 2)) {
-            CC2420_DEBUG("dst pan id is broadcast, not checking\n");
+            CC2420_DBG_RX("dst pan id is broadcast, not checking\n");
         }
         else {
             if (memcmp(cc2420->ram + CC2420_RAM_PANID, dst_pan, 2)) {
-	      CC2420_DEBUG("local pan id (%x,%x) and dst pan id (%x,%x) are different, dropping\n", *(cc2420->ram + CC2420_RAM_PANID), *(cc2420->ram + CC2420_RAM_PANID + 1), dst_pan[0], dst_pan[1]);
+	      CC2420_DBG_RX("local pan id (%x,%x) and dst pan id (%x,%x) are different, dropping\n", *(cc2420->ram + CC2420_RAM_PANID), *(cc2420->ram + CC2420_RAM_PANID + 1), dst_pan[0], dst_pan[1]);
                 return -1;
             }
         }
@@ -535,11 +535,11 @@ int cc2420_rx_check_address(struct _cc2420_t * cc2420 UNUSED) {
     if (cc2420->rx_dst_addr_len == 2) {
         /* if not broadcast */
         if (!memcmp(dst_addr, broadcast_addr, 2)) {
-            CC2420_DEBUG("dst short address is broadcast, not checking\n");
+            CC2420_DBG_RX("dst short address is broadcast, not checking\n");
         }
         else {
             if (memcmp(cc2420->ram + CC2420_RAM_SHORTADR, dst_addr, 2)) {
-                CC2420_DEBUG("dst short address and local short addresses are different, dropping\n");
+                CC2420_DBG_RX("dst short address and local short addresses are different, dropping\n");
                 return -1;
             }
         }
@@ -549,11 +549,11 @@ int cc2420_rx_check_address(struct _cc2420_t * cc2420 UNUSED) {
     else if (cc2420->rx_dst_addr_len == 8) {
         /* if not broadcast */
         if (!memcmp(dst_addr, broadcast_addr, 8)) {
-            CC2420_DEBUG("dst short address is broadcast, not checking\n");
+            CC2420_DBG_RX("dst short address is broadcast, not checking\n");
         }
         else {
             if (memcmp(cc2420->ram + CC2420_RAM_IEEEADR, dst_addr, 8)) {
-                CC2420_DEBUG("dst short address and local extended addresses are different, dropping\n");
+                CC2420_DBG_RX("dst short address and local extended addresses are different, dropping\n");
                 return -1;
             }
         }
@@ -563,18 +563,18 @@ int cc2420_rx_check_address(struct _cc2420_t * cc2420 UNUSED) {
     if ( (cc2420->rx_dst_pan_len == 0) && (cc2420->rx_dst_addr_len == 0) ) {
 
         if (!CC2420_REG_MDMCTRL0_PAN_COORDINATOR(cc2420->registers[CC2420_REG_MDMCTRL0])) {
-            CC2420_DEBUG("only source addressing fields, and I'm not a coordinator, dropping\n");
+            CC2420_DBG_RX("only source addressing fields, and I'm not a coordinator, dropping\n");
             return -1;
         }
 
         /* if there is no pan id, drop */
         if (cc2420->rx_src_pan_len == 0) {
-            CC2420_DEBUG("only source addressing fields, but no src pan id, dropping\n");
+            CC2420_DBG_RX("only source addressing fields, but no src pan id, dropping\n");
             return -1;
         }
         /* if source pan id doesn't match , drop */
         if (memcmp(cc2420->ram + CC2420_RAM_PANID, src_pan, 2)) {
-            CC2420_DEBUG("only source addressing fields, but bad pan id, dropping\n");
+            CC2420_DBG_RX("only source addressing fields, but bad pan id, dropping\n");
             return -1;
         }
     }
@@ -623,7 +623,7 @@ uint64_t cc2420_callback_rx(void *arg, struct wsnet_rx_info *wrx)
   double dBm       = wrx->power_dbm;
   double snr       = wrx->SiNR;
 
-  CC2420_DEBUG("cc2420_callback_rx : entering RX Callback, rx data 0x%02x\n", rx);
+  CC2420_DBG_RX("cc2420_callback_rx : entering RX Callback, rx data 0x%02x\n", rx);
 
     /* check if we are able to receive data */
     if (cc2420_rx_filter(cc2420, frequency, modulation, dBm, snr)) {
@@ -652,7 +652,7 @@ uint64_t cc2420_callback_rx(void *arg, struct wsnet_rx_info *wrx)
 	    }
 	}
 
-	CC2420_DEBUG("cc2420_callback_rx : non 0 byte not expected, dropping\n");
+	CC2420_DBG_RX("cc2420_callback_rx : non 0 byte not expected, dropping\n");
 
 	/* not a zero, not syncword -> drop and resynchronize */
 	logpkt_rx_abort_pkt(cc2420->worldsens_radio_id, "bad sync word");
@@ -666,7 +666,7 @@ uint64_t cc2420_callback_rx(void *arg, struct wsnet_rx_info *wrx)
 	if (cc2420->rx_data_bytes == 0) {
 	    /* just keep the 7 low bits */
 	    cc2420->rx_len = CC2420_TX_LEN_FIELD(rx);
-	    CC2420_DEBUG("got rx_len %d\n", cc2420->rx_len);
+	    CC2420_DBG_RX("got rx_len %d\n", cc2420->rx_len);
 
 	    /* set FIFO pin since we have data in fifo */
 	    cc2420->FIFO_pin    = 0xFF;
@@ -694,7 +694,7 @@ uint64_t cc2420_callback_rx(void *arg, struct wsnet_rx_info *wrx)
 	/* write byte to RX FIFO */
 	if (cc2420_rx_fifo_push(cc2420, rx) < 0) {
 	    logpkt_rx_abort_pkt(cc2420->worldsens_radio_id, "rx overflow");
-	    CC2420_DEBUG("cc2420_callback_rx : failed in push\n");
+	    CC2420_DBG_RX("cc2420_callback_rx : failed in push\n");
 	    CC2420_RX_OVERFLOW_ENTER(cc2420);
 	    cc2420->FIFOP_pin = 0xFF;
 	    cc2420->FIFOP_set = 1;
@@ -710,21 +710,21 @@ uint64_t cc2420_callback_rx(void *arg, struct wsnet_rx_info *wrx)
 
 	/* first byte of FCF */
 	if (cc2420->rx_data_bytes == 2) {
-	    CC2420_DEBUG("1st byte of fcf is %.1x, swapped %.1x\n", rx, swapbits(rx,8));
-	    CC2420_DEBUG("swapping byte, todo : check that it's not a bug in cc2420 in cc2420.c/com_send driver\n");
+	    CC2420_DBG_RX("1st byte of fcf is %.1x, swapped %.1x\n", rx, swapbits(rx,8));
+	    // CC2420_DBG_RX("swapping byte, todo : check that it's not a bug in cc2420 in cc2420.c/com_send driver\n");
 	    cc2420->rx_fcf = swapbits(rx,8);
 	}
 
 	/* second byte of FCF */
 	if (cc2420->rx_data_bytes == 3) {
-	    CC2420_DEBUG("2nd byte of fcf is %.1x, swapped %.1x\n", rx, swapbits(rx,8));
+	    CC2420_DBG_RX("2nd byte of fcf is %.1x, swapped %.1x\n", rx, swapbits(rx,8));
 	    cc2420->rx_fcf = (cc2420->rx_fcf << 8) | (swapbits(rx,8)) ; //cc2420->rx_fcf |= swapbits(rx,8) << 8;
 	}
 
 	/* sequence field */
 	if (cc2420->rx_data_bytes == 4) {
 	    cc2420->rx_sequence = rx;
-	    CC2420_DEBUG("seq is %d\n", rx);
+	    CC2420_DBG_RX("seq is %d\n", rx);
 	}
 
 
@@ -738,18 +738,18 @@ uint64_t cc2420_callback_rx(void *arg, struct wsnet_rx_info *wrx)
 
 	    /* if addressing fields were received, deal with address recognition */
 	    if (cc2420->rx_data_bytes == cc2420->rx_src_addr_offset + cc2420->rx_src_addr_len) {
-	        CC2420_DEBUG("got last addressing byte, data bytes is %d\n", cc2420->rx_data_bytes);
+	        CC2420_DBG_RX("got last addressing byte, data bytes is %d\n", cc2420->rx_data_bytes);
 		/* if address checking recognition fails, set flag to indicate that frame has to be flushed */
 		if (cc2420_rx_check_address(cc2420)) {
-		    CC2420_DEBUG("address recognition failed, will flush received frame when complete\n");
+		    CC2420_DBG_RX("address recognition failed, will flush received frame when complete\n");
 		    cc2420->rx_addr_decode_failed = 1;
 		    return 0;
 		}
 		else {
 		    uint8_t rx_threshold = CC2420_REG_IOCFG0_FIFOP_THR(cc2420->registers[CC2420_REG_IOCFG0]);
-		    CC2420_DEBUG("address recognition OK, checking threshold (%d)\n", rx_threshold);
+		    CC2420_DBG_RX("address recognition OK, checking threshold (%d)\n", rx_threshold);
 		    if (cc2420->rx_data_bytes >= rx_threshold && cc2420->FIFOP_pin == 0x00) {
-		      CC2420_DEBUG("rx_threshold (%d) reached, setting up FIFOP\n", rx_threshold);
+		      CC2420_DBG_RX("rx_threshold (%d) reached, setting up FIFOP\n", rx_threshold);
 			cc2420->FIFOP_pin = 0xFF;
 			cc2420->FIFOP_set =    1;
 		    }
@@ -760,7 +760,7 @@ uint64_t cc2420_callback_rx(void *arg, struct wsnet_rx_info *wrx)
 	  {
 	    uint8_t rx_threshold = CC2420_REG_IOCFG0_FIFOP_THR(cc2420->registers[CC2420_REG_IOCFG0]);
 	    if (cc2420->rx_data_bytes >= rx_threshold && cc2420->FIFOP_pin == 0x00) {
-	      CC2420_DEBUG("rx_threshold (%d) reached, setting up FIFOP\n", rx_threshold);
+	      CC2420_DBG_RX("rx_threshold (%d) reached, setting up FIFOP\n", rx_threshold);
 	      cc2420->FIFOP_pin = 0xFF;
 	      cc2420->FIFOP_set =    1;
 	    }
@@ -776,7 +776,7 @@ uint64_t cc2420_callback_rx(void *arg, struct wsnet_rx_info *wrx)
 	        else flush the frame */
 	        if (cc2420_rx_check_crc(cc2420)) {
 		    logpkt_rx_abort_pkt(cc2420->worldsens_radio_id, "crc check failed");
-		    CC2420_DEBUG("crc check failed, flushing received frame\n");
+		    CC2420_DBG_RX("crc check failed, flushing received frame\n");
 		    cc2420_rx_flush_current_frame(cc2420);
 		    CC2420_RX_SFD_SEARCH_ENTER(cc2420);
 		    return 0;
@@ -789,7 +789,7 @@ uint64_t cc2420_callback_rx(void *arg, struct wsnet_rx_info *wrx)
 
             if (cc2420->rx_addr_decode_failed) {
 	        logpkt_rx_abort_pkt(cc2420->worldsens_radio_id, "addr recognition failed");
-                CC2420_DEBUG("at end of frame, address recog was bad, flushing frame\n");
+                CC2420_DBG_RX("at end of frame, address recog was bad, flushing frame\n");
                 cc2420_rx_flush_current_frame(cc2420);
                 CC2420_RX_SFD_SEARCH_ENTER(cc2420);
                 return 0;
@@ -798,7 +798,7 @@ uint64_t cc2420_callback_rx(void *arg, struct wsnet_rx_info *wrx)
 	    /* update number of fully received frames in RX FIFO */
 	    cc2420->nb_rx_frames ++;
 
-	    CC2420_DEBUG("cc2420 : got a new frame, nb_rx_frames is now %d\n", cc2420->nb_rx_frames);
+	    CC2420_DBG_RX("cc2420 : got a new frame, nb_rx_frames is now %d\n", cc2420->nb_rx_frames);
 
 	    /* end of packet -> packet ready to be dump */
 	    logpkt_rx_complete_pkt(cc2420->worldsens_radio_id);
@@ -822,7 +822,8 @@ uint64_t cc2420_callback_rx(void *arg, struct wsnet_rx_info *wrx)
 	break;
 
     default :
-	CC2420_DEBUG("cc2420_callback_rx : bad state for rx\n");
+        // CC2420_DBG_RX("cc2420_callback_rx : bad state for RX\n");
+        ERROR("cc2420_callback_rx : bad state for RX\n");
 	return 0;
     }
 

@@ -87,7 +87,7 @@ int cc2420_check_register_access(struct _cc2420_t * cc2420, uint8_t addr) {
     if ( (cc2420->mem_access == CC2420_ACCESS_MAIN_ONLY) && (addr == CC2420_REG_MAIN) )
 	return 0;
 
-    CC2420_DEBUG("cc2420_check_register_access : register is not available in this state\n");
+    CC2420_DBG_ACCESS("cc2420_check_register_access : register is not available in this state\n");
 
     return -1;
 }
@@ -107,13 +107,13 @@ void cc2420_write_register(struct _cc2420_t * cc2420, uint8_t addr, uint16_t val
 
     /* check address range */
     if ( (addr < 0x10) || (addr > 0x3F) ) {
-	CC2420_DEBUG("cc2420_write_register : bad address\n");
+	WARNING("cc2420_write_register : bad address\n");
 	return;
     }
 
     /* check RO buffers */
     if (addr == CC2420_REG_FSMSTATE) {
-	CC2420_DEBUG("cc2420_write_register : can't write register CC2420_REG_FSMSTATE\n");
+	WARNING("cc2420_write_register : can't write register CC2420_REG_FSMSTATE\n");
 	return;
     }
 
@@ -163,13 +163,13 @@ void cc2420_write_register(struct _cc2420_t * cc2420, uint8_t addr, uint16_t val
 
 /*     /\* check address range *\/ */
 /*     if ( (addr < 0x10) || (addr > 0x3F) ) { */
-/* 	CC2420_DEBUG("cc2420_write_register : bad address\n"); */
+/* 	WARNING("cc2420_write_register : bad address\n"); */
 /* 	return; */
 /*     } */
 
 /*     /\* check read only buffers *\/ */
 /*     if (addr == CC2420_REG_FSMSTATE) { */
-/* 	CC2420_DEBUG("cc2420_write_register : can't write register CC2420_REG_FSMSTATE\n"); */
+/* 	WARNING("cc2420_write_register : can't write register CC2420_REG_FSMSTATE\n"); */
 /* 	return; */
 /*     } */
 
@@ -195,13 +195,13 @@ void cc2420_write_register(struct _cc2420_t * cc2420, uint8_t addr, uint16_t val
 
 /*     /\* check address range *\/ */
 /*     if ( (addr < 0x10) || (addr > 0x3F) ) { */
-/* 	CC2420_DEBUG("cc2420_write_register : bad address\n"); */
+/* 	WARNING("cc2420_write_register : bad address\n"); */
 /* 	return; */
 /*     } */
 
 /*     /\* check read-only buffers *\/ */
 /*     if (addr == CC2420_REG_FSMSTATE) { */
-/* 	CC2420_DEBUG("cc2420_write_register : can't write register CC2420_REG_FSMSTATE\n"); */
+/* 	WARNING("cc2420_write_register : can't write register CC2420_REG_FSMSTATE\n"); */
 /* 	return; */
 /*     } */
 
@@ -225,13 +225,13 @@ uint16_t cc2420_read_register(struct _cc2420_t * cc2420, uint8_t addr) {
 
     /* check address range */
     if ( (addr < 0x10) || (addr > 0x3F) ) {
-	CC2420_DEBUG("cc2420_read_register : bad address\n");
+	WARNING("cc2420_read_register : bad address\n");
 	return 0;
     }
     
     /* check write-only buffers */
     if (addr == CC2420_REG_TXFIFO) {
-	CC2420_DEBUG("cc2420_read_register : can't read register CC2420_REG_TXFIFO\n");
+	WARNING("cc2420_read_register : can't read register CC2420_REG_TXFIFO\n");
 	return 0;
     }
 
@@ -250,13 +250,13 @@ uint8_t  cc2420_read_register_h(struct _cc2420_t * cc2420, uint8_t addr) {
 
     /* check address range */
     if ( (addr < 0x10) || (addr > 0x3F) ) {
-	CC2420_DEBUG("cc2420_read_register : bad address\n");
+	WARNING("cc2420_read_register : bad address\n");
 	return 0;
     }
     
     /* check write-only buffers */
     if (addr == CC2420_REG_TXFIFO) {
-	CC2420_DEBUG("cc2420_read_register : can't read register CC2420_REG_TXFIFO\n");
+	WARNING("cc2420_read_register : can't read register CC2420_REG_TXFIFO\n");
 	return 0;
     }
 
@@ -275,13 +275,13 @@ uint8_t  cc2420_read_register_l(struct _cc2420_t * cc2420, uint8_t addr) {
 
     /* check address range */
     if ( (addr < 0x10) || (addr > 0x3F) ) {
-	CC2420_DEBUG("cc2420_read_register : bad address\n");
+	WARNING("cc2420_read_register : bad address\n");
 	return 0;
     }
     
     /* check write-only buffers */
     if (addr == CC2420_REG_TXFIFO) {
-	CC2420_DEBUG("cc2420_read_register : can't read register CC2420_REG_TXFIFO\n");
+	WARNING("cc2420_read_register : can't read register CC2420_REG_TXFIFO\n");
 	return 0;
     }
 

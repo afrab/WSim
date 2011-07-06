@@ -42,11 +42,11 @@ void cc2420_tx_fifo_write(struct _cc2420_t * cc2420, uint8_t val) {
         cc2420->tx_fifo_len = 0;
 	cc2420->tx_available_bytes = 0;
 	cc2420->tx_frame_completed = 0;
-	CC2420_DEBUG("cc2420_tx_fifo_write : first byte to be written in TX FIFO, flushed it before\n");
+	CC2420_DBG_FIFO("cc2420_tx_fifo_write : first byte to be written in TX FIFO, flushed it before\n");
     }
 
     if (cc2420->tx_fifo_len >= CC2420_RAM_TXFIFO_LEN) {
-	CC2420_DEBUG("cc2420_tx_fifo_write : TX FIFO is FULL\n");
+	CC2420_DBG_FIFO("cc2420_tx_fifo_write : TX FIFO is FULL\n");
 	return;
     }
 
@@ -57,12 +57,12 @@ void cc2420_tx_fifo_write(struct _cc2420_t * cc2420, uint8_t val) {
 
 	/* check if frame length is valid */
 	if (cc2420->tx_frame_len > CC2420_MAX_TX_LEN) {
-	    CC2420_DEBUG("cc2420_tx_fifo_write : frame length is too long, dropping byte\n");
+	    CC2420_DBG_FIFO("cc2420_tx_fifo_write : frame length is too long, dropping byte\n");
 	    cc2420->tx_frame_len = 0;
 	    return;
 	}
 	else if ( (cc2420->tx_frame_len < 2 && autocrc) || ( cc2420->tx_frame_len < 1 && !autocrc ) ) {
-	    CC2420_DEBUG("cc2420_tx_fifo_write : frame length is too low, dropping byte\n");
+	    CC2420_DBG_FIFO("cc2420_tx_fifo_write : frame length is too low, dropping byte\n");
 	    cc2420->tx_frame_len = 0;
 	    return;
 	    }
@@ -77,19 +77,19 @@ void cc2420_tx_fifo_write(struct _cc2420_t * cc2420, uint8_t val) {
 	cc2420->tx_available_bytes = 0;
 	cc2420->tx_fifo_len ++;
 	cc2420->ram[0] = val;
-	CC2420_DEBUG("cc2420_tx_fifo_write : val 0x%02x written in fifo at address 0x%02x\n", val, 0);
+	CC2420_DBG_FIFO("cc2420_tx_fifo_write : val 0x%02x written in fifo at address 0x%02x\n", val, 0);
 	return;
     }
 
     if (cc2420->tx_available_bytes == cc2420->tx_needed_bytes) {
 	/* too many data in TX FIFO */
-	CC2420_DEBUG("cc2420_tx_fifo_write : two many data (%d)\n", cc2420->tx_available_bytes);
+	CC2420_DBG_FIFO("cc2420_tx_fifo_write : two many data (%d)\n", cc2420->tx_available_bytes);
 	return;
     }
 
     addr = CC2420_RAM_TXFIFO_START + cc2420->tx_fifo_len;
     cc2420->ram[addr] = val;
-    CC2420_DEBUG("cc2420_tx_fifo_write : val 0x%02x written in fifo at address 0x%02x\n", val, addr);
+    CC2420_DBG_FIFO("cc2420_tx_fifo_write : val 0x%02x written in fifo at address 0x%02x\n", val, addr);
     cc2420->tx_fifo_len++;
     cc2420->tx_available_bytes ++;
 
@@ -106,7 +106,7 @@ void cc2420_tx_fifo_write(struct _cc2420_t * cc2420, uint8_t val) {
 int cc2420_rx_fifo_read(struct _cc2420_t * cc2420, uint8_t * val) {
 
    if (cc2420->rx_fifo_read == cc2420->rx_fifo_write) {
-	CC2420_DEBUG("cc2420_rx_fifo_read : fifo is empty\n");
+	CC2420_DBG_FIFO("cc2420_rx_fifo_read : fifo is empty\n");
 	return -1;
     }
 
@@ -125,7 +125,7 @@ int cc2420_rx_fifo_read(struct _cc2420_t * cc2420, uint8_t * val) {
  */
 
 int cc2420_rx_fifo_pop(struct _cc2420_t * cc2420, uint8_t * val) {
-    CC2420_DEBUG("cc2420_rx_fifo_pop : cc2420->rx_fifo_read=%d, cc2420->rx_frame_end=%d\n",
+    CC2420_DBG_FIFO("cc2420_rx_fifo_pop : cc2420->rx_fifo_read=%d, cc2420->rx_frame_end=%d\n",
 	       cc2420->rx_fifo_read, cc2420->rx_frame_end);
     uint8_t len_val;
     uint8_t calculate_length = 0;
@@ -137,7 +137,7 @@ int cc2420_rx_fifo_pop(struct _cc2420_t * cc2420, uint8_t * val) {
     if (cc2420->rx_fifo_read == cc2420->rx_first_data_byte) {
 	cc2420->rx_first_data_byte = -1;
 	if (cc2420->FIFOP_pin == 0xFF) {
-	  CC2420_DEBUG("cc2420_rx_fifo_pop : reading first data byte, unsetting FIFOP !!\n");
+	  CC2420_DBG_FIFO("cc2420_rx_fifo_pop : reading first data byte, unsetting FIFOP !!\n");
 	  cc2420->FIFOP_pin = 0x00;
 	  cc2420->FIFOP_set = 1;
 	}
@@ -147,7 +147,7 @@ int cc2420_rx_fifo_pop(struct _cc2420_t * cc2420, uint8_t * val) {
        update the number of frames in RX FIFO */
     if (cc2420->rx_fifo_read == cc2420->rx_frame_end) {
 	cc2420->nb_rx_frames --;
-	CC2420_DEBUG("cc2420_rx_fifo_pop : nb frames in rx fifo decremented from %d to %d\n", 
+	CC2420_DBG_FIFO("cc2420_rx_fifo_pop : nb frames in rx fifo decremented from %d to %d\n", 
 		     cc2420->nb_rx_frames + 1, cc2420->nb_rx_frames);
 	if (cc2420->nb_rx_frames > 0)
 	    calculate_length = 1;
@@ -196,13 +196,13 @@ int cc2420_rx_fifo_push(struct _cc2420_t * cc2420, uint8_t val) {
     /* if fifo is full */
     if ( ( (cc2420->rx_fifo_write + 1) % CC2420_RAM_RXFIFO_LEN) == cc2420->rx_fifo_read ) {
 	/* RW overflow state will be set by caller */
-	CC2420_DEBUG("cc2420_rx_fifo_push : fifo overflow\n");
+	CC2420_DBG_FIFO("cc2420_rx_fifo_push : fifo overflow\n");
 	return -1;
     }
 
     cc2420->ram[CC2420_RAM_RXFIFO_START + cc2420->rx_fifo_write] = val;
 
-    CC2420_DEBUG("cc2420_rx_fifo_push: data 0x%02x written in fifo at addr 0x%02x\n", 
+    CC2420_DBG_FIFO("cc2420_rx_fifo_push: data 0x%02x written in fifo at addr 0x%02x\n", 
 		 val, CC2420_RAM_RXFIFO_START + cc2420->rx_fifo_write);
 
     /* update write pointer */
@@ -230,7 +230,7 @@ int cc2420_rx_fifo_get_buffer(struct _cc2420_t * cc2420, uint8_t start_address, 
     
     /* no data in fifo */
     if (cc2420->rx_fifo_write == cc2420->rx_fifo_read) {
-	CC2420_DEBUG("cc2420_rx_fifo_get_buffer : no data in rx fifo\n");
+	CC2420_DBG_FIFO("cc2420_rx_fifo_get_buffer : no data in rx fifo\n");
 	return -1;
     }
 
@@ -244,7 +244,7 @@ int cc2420_rx_fifo_get_buffer(struct _cc2420_t * cc2420, uint8_t start_address, 
 
     /* there are not enough data to fill buffer */
     if (available_bytes < len) {
-	CC2420_DEBUG("cc2420_rx_fifo_get_buffer : not enough data in rx fifo\n");
+	CC2420_DBG_FIFO("cc2420_rx_fifo_get_buffer : not enough data in rx fifo\n");
 	return -1;
     }
 

@@ -42,14 +42,14 @@ int cc2420_reset_required(struct _cc2420_t * cc2420) {
 
     /* check reset pin (active low) */
     if (cc2420->RESET_pin == 0x00) {
-	CC2420_DEBUG("cc2420_update : reset pin is set\n");
+	CC2420_DBG_PINS("cc2420_update : reset pin is set\n");
 	return 1;
     }
 
     /* check configuration register */
     value = cc2420_read_register(cc2420, CC2420_REG_MAIN);
     if (CC2420_REG_MAIN_RESETn(value) == 0x0000) {
-	CC2420_DEBUG("cc2420_update : reset bit of main register is set\n");
+	CC2420_DBG_PINS("cc2420_update : reset bit of main register is set\n");
 	return 1;
     }
 
@@ -283,12 +283,12 @@ void cc2420_update_state_rx_sfd_search(struct _cc2420_t * cc2420) {
     }
 
     if (cc2420->rx_fifo_read != prev_read) {
-	CC2420_DEBUG("************** rx_fifo_read changed : %d -> %d\n", prev_read, cc2420->rx_fifo_read);
+	CC2420_DBG_FIFO("************** rx_fifo_read changed : %d -> %d\n", prev_read, cc2420->rx_fifo_read);
 	if ( (cc2420->rx_fifo_read > (prev_read + 1) ) || ( (cc2420->rx_fifo_read < prev_read) && (cc2420->rx_fifo_read != 0) ) ) {
-	    CC2420_DEBUG("*********************** GOT THE BUG ****************\n");
-	    CC2420_DEBUG("*********************** GOT THE BUG ****************\n");
-	    CC2420_DEBUG("*********************** GOT THE BUG ****************\n");
-	    CC2420_DEBUG("************** rx_fifo_read changed : %d -> %d\n", prev_read, cc2420->rx_fifo_read);
+	  //CC2420_DEBUG("*********************** GOT THE BUG ****************\n");
+	  //CC2420_DEBUG("*********************** GOT THE BUG ****************\n");
+	  //CC2420_DEBUG("*********************** GOT THE BUG ****************\n");
+	    CC2420_DBG_FIFO("************** rx_fifo_read changed : %d -> %d\n", prev_read, cc2420->rx_fifo_read);
 	}
     }
 
@@ -513,7 +513,7 @@ void cc2420_update_state_tx_ack(struct _cc2420_t * cc2420) {
     /* seq number */
     if (cc2420->tx_bytes == 3) {
         cc2420_tx_byte(cc2420, cc2420->rx_sequence);
-	CC2420_DEBUG("cc2420_update_state_tx_ack:rx_sequence=%x\n",cc2420->rx_sequence);
+	CC2420_DBG_RX("cc2420_update_state_tx_ack:rx_sequence=%x\n",cc2420->rx_sequence);
         cc2420->fsm_timer = MACHINE_TIME_GET_NANO() + 2 * CC2420_SYMBOL_PERIOD;
         cc2420->tx_bytes ++;
 	return;
@@ -540,7 +540,7 @@ void cc2420_update_state_tx_ack(struct _cc2420_t * cc2420) {
     }
 
     /* buggy */
-    CC2420_DEBUG(" !!! BUG : bad tx_bytes in tx_ack state !!! \n");
+    ERROR(" !!! BUG : bad tx_bytes in tx_ack state !!! \n");
 
     return;
 }
@@ -749,13 +749,14 @@ void cc2420_update_state_tx_frame(struct _cc2420_t * cc2420) {
     if (cc2420->tx_bytes < bytes_from_fifo) {
 	/* check TX underflow */
         if (cc2420->tx_bytes >= cc2420->tx_fifo_len) {
-	    CC2420_DEBUG("cc2420_update_state_tx : TX UNDERFLOW\n");
+	  // CC2420_DBG_FIFO("cc2420:update_state_tx: TX UNDERFLOW\n");
+	    WARNING("cc2420: TX Underflow\n");
 	    logpkt_tx_abort_pkt(cc2420->worldsens_radio_id, "tx underflow");
 	    CC2420_TX_UNDERFLOW_ENTER(cc2420);
 	    return;
 	}
 	cc2420_tx_byte(cc2420, cc2420->ram[CC2420_RAM_TXFIFO_START + cc2420->tx_bytes]);
-	CC2420_DEBUG("cc2420:update_state_tx_frame: val [0x%02x] pop from tx fifo\n", cc2420->ram[CC2420_RAM_TXFIFO_START + cc2420->tx_bytes]);
+	CC2420_DBG_FIFO("cc2420:update_state_tx_frame: val [0x%02x] pop from tx fifo\n", cc2420->ram[CC2420_RAM_TXFIFO_START + cc2420->tx_bytes]);
 	cc2420->tx_bytes++;
 	cc2420->fsm_timer = MACHINE_TIME_GET_NANO() + 2 * CC2420_SYMBOL_PERIOD;
 	return;
@@ -769,7 +770,7 @@ void cc2420_update_state_tx_frame(struct _cc2420_t * cc2420) {
       if (cc2420->tx_bytes == bytes_from_fifo) {     
       cc2420->tx_fcs = cc2420_icrc(&cc2420->ram[CC2420_RAM_TXFIFO_START] + 1, cc2420->tx_frame_len - 2);
       cc2420_tx_byte(cc2420, CC2420_LOBYTE(cc2420->tx_fcs));
-      CC2420_DEBUG("cc2420:update_state_tx_frame: val [0x%02x] pop from tx fifo\n", CC2420_LOBYTE(cc2420->tx_fcs));
+      CC2420_DBG_TX("cc2420:update_state_tx_frame: val [0x%02x] pop from tx fifo\n", CC2420_LOBYTE(cc2420->tx_fcs));
       cc2420->tx_bytes++;
       cc2420->fsm_timer = MACHINE_TIME_GET_NANO() + 2 * CC2420_SYMBOL_PERIOD;
       return;
@@ -777,7 +778,7 @@ void cc2420_update_state_tx_frame(struct _cc2420_t * cc2420) {
 
       /* transmit 2nd byte of CRC, TX is over */
       cc2420_tx_byte(cc2420, CC2420_HIBYTE(cc2420->tx_fcs));
-      CC2420_DEBUG("cc2420:update_state_tx_frame: val [0x%02x] pop from tx fifo\n", CC2420_HIBYTE(cc2420->tx_fcs));
+      CC2420_DBG_TX("cc2420:update_state_tx_frame: val [0x%02x] pop from tx fifo\n", CC2420_HIBYTE(cc2420->tx_fcs));
     }
     
     /* all tx fifo must have been sent, go to RX_CALIBRATE state */
@@ -898,7 +899,7 @@ int cc2420_update(int dev_num)
 	break;
 
     default : 
-	CC2420_DEBUG("cc2420_update : unknown state\n");
+	ERROR("cc2420_update : unknown state\n");
 	break;
     }
 

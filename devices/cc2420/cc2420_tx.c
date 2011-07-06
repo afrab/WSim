@@ -62,7 +62,7 @@ double cc2420_get_power_dbm(struct _cc2420_t * cc2420) {
     case 0xA0E7 : dbm = -15.0; break;
     case 0xA0E3 : dbm = -25.0; break;
     default :
-	CC2420_DEBUG("cc2420_get_power : unknown config for TXCTRL\n");
+	CC2420_DBG_TX("cc2420_get_power : unknown config for TXCTRL\n");
 	dbm = 0.0;
     }
     return dbm;

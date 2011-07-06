@@ -17,7 +17,7 @@ ${NAME}.lst: ${NAME}.elf
 
 clean:
 	rm -f ${NAME}.elf ${NAME}.a43 ${NAME}.lst ${OBJECTS}	\
-		*.eps *.log *.trc *.etr *.gp *.err *.vcd 
+		*.eps *.log *.trc *.pkt *.etr *.gp *.err *.vcd 
 
 
 #project dependencies

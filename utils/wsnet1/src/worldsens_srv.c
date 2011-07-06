@@ -266,8 +266,8 @@ worldsens_s_initialize (struct _worldsens_s *worldsens)
   worldsens->synched          = 0;
 
   /* Initialize tracer */
-  worldsens->trc_mcast_rx     = tracer_event_add_id(64,"mcast_rx","wsnet1");
-  worldsens->trc_mcast_tx     = tracer_event_add_id(64,"mcast_tx","wsnet1");
+  worldsens->trc_mcast_rx     = tracer_event_add_id(32,"mcast_rx","wsnet1");
+  worldsens->trc_mcast_tx     = tracer_event_add_id(32,"mcast_tx","wsnet1");
 
   return 0;
 
@@ -498,14 +498,17 @@ worldsens_s_listen_to_next_rp (struct _worldsens_s *worldsens)
 
 	      {
 		int iii;
+		uint32_t data = 0;
 		WSNET_S_DBG_TX ("WSNET:: <-- TX (%"PRId64",%d) (ip:%d,size:%d,data:",
 				 packet->tx_start, packet->seq, node->addr, packet->size);
 		for(iii=0; iii<packet->size; iii++)
 		  {
 		    WSNET_S_DBG_TX("%02x:", packet->data[ iii ] & 0xff);
+		    data = (data << 8) | (packet->data[ iii ] & 0xff);
 		  }
 		WSNET_S_DBG_TX (",freq:%gMHz,mod:%d,tx:%lgmW)\n",
 			       (unsigned)packet->freq / 1000000.0, packet->modulation, packet->tx_mW);
+		tracer_event_record(g_nodes[node->addr].trc_id,data);
 	      }
 
 	      /* Create event */
@@ -543,6 +546,9 @@ worldsens_s_backtrack_async (struct _worldsens_s *worldsens, uint64_t period)
   worldsens->rp_seq++;
   worldsens->rp = get_global_time() + period;
   worldsens->synched = 0;
+
+  tracer_state_restore();
+
   if (core_backtrack (worldsens->rp))
     {
       return -1;

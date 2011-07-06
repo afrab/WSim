@@ -61,8 +61,9 @@ AC_CACHE_CHECK([if \$CC accepts -flto],
     [CFLAGS="-flto ${CFLAGS_save}"
      AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[]], [[]])],[ac_cv_c_flto=yes],[ac_cv_c_flto=no])])
 CFLAGS="${CFLAGS_save}"
+CFLAGSLTO=""
 if test "${ac_cv_c_flto}" != "no"; then
-    CFLAGS="-flto ${CFLAGS}"
+    CFLAGSLTO="-flto "
 fi
 
 
@@ -90,6 +91,17 @@ else
     debug_sum="no"
 fi
 AM_CONDITIONAL([BUILD_DEBUG], [test "${debug_sum}" = "yes"])
+
+dnl LTO mode : 
+dnl ==========
+CFLAGS_save="${CFLAGS}"
+AC_ARG_ENABLE([lto],AS_HELP_STRING([--enable-lto],[gcc lto mode (default enabled if available)]))
+if test "${enable_lto}" != "no"; then
+    CFLAGS="$CFLAGS $CFLAGSLTO"
+    lto_sum="yes"
+else
+    lto_sum="no"
+fi
 
 dnl Cross Debug mode : enable debug code for wsim target code
 dnl ==================
@@ -723,6 +735,7 @@ Configuration summary:
         host         : ${host}
         host type    : $HOSTTYPE
         target(s)    : $PLATFORMNAMES
+	lto          : ${lto_sum} ${CFLAGSLTO}
         wsim debug   : ${debug_sum}
         target debug : ${xdebug_sum}
         Etrace       : ${etrace_sum}

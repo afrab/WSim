@@ -184,8 +184,6 @@ int cc2420_check_cca(struct _cc2420_t * cc2420) {
 
 /**
  * check if we can receive bytes or not
- * todo : check modulation (see with Guillaume what are the values of each modulation)
- * todo : SNR
  */
 
 int cc2420_rx_filter(struct _cc2420_t * cc2420, double frequency, int modulation,
@@ -203,7 +201,6 @@ int cc2420_rx_filter(struct _cc2420_t * cc2420, double frequency, int modulation
       CC2420_DBG_RX("cc2420:rx: dropping received data, not in Rx mode\n");
       return -1;
     }
-
 
   /* check sensitivity */
   if ( dBm < -95) 
@@ -236,16 +233,17 @@ int cc2420_rx_filter(struct _cc2420_t * cc2420, double frequency, int modulation
 
   /* if not 1st byte of frame check synchronisation */
   /* todo : check sync_delta limit values */
+#define SYNC_DELTA 33333
   if (cc2420->rx_data_bytes > 0) 
     {
       sync_delta = MACHINE_TIME_GET_NANO() - cc2420->rx_sync_timer;
-      if (sync_delta < -33333) 
+      if (sync_delta < -SYNC_DELTA) 
 	{
 	  CC2420_DBG_RX("cc2420_callback_rx : bad sync, got byte too early : sync_delta is %"PRId64"d\n", sync_delta);
 	  CC2420_RX_SFD_SEARCH_ENTER(cc2420);
 	  return -1;
 	}
-      if (sync_delta > 33333) {
+      if (sync_delta > SYNC_DELTA) {
 	CC2420_DBG_RX("cc2420_callback_rx : bad sync, got byte too late\n");
 	CC2420_RX_SFD_SEARCH_ENTER(cc2420);
 	return -1;
@@ -305,7 +303,6 @@ int cc2420_rx_check_crc(struct _cc2420_t * cc2420) {
     /* and compare them */
     if (fcs != received_fcs) {
 	CC2420_DBG_RX("cc2420_rx_check_frame : bad crc\n");
-	/* todo : set crc status bit */
 	return -1;
     }
 
@@ -574,7 +571,7 @@ int cc2420_rx_check_address(struct _cc2420_t * cc2420 UNUSED) {
         }
         /* if source pan id doesn't match , drop */
         if (memcmp(cc2420->ram + CC2420_RAM_PANID, src_pan, 2)) {
-            CC2420_DBG_RX("cc2420:rx:check_address: only source addressing fields, but bad pan id, dropping\n");
+            CC2420_DBG_RX("cc2420:rx:check_address:only source addressing fields, but bad pan id, dropping\n");
             return -1;
         }
     }

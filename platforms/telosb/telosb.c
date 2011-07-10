@@ -442,7 +442,7 @@ int devices_update()
 
       msk = M25P_H | M25P_S; 
       val = (BIT(val8,7) << M25P_H_SHIFT) | (BIT(val8,4) << M25P_S_SHIFT);
-      HW_DMSG_DEV("telosb: write to flash msk:0x%04x val:0x%04x\n",msk,val);
+      HW_DMSG_MISC("telosb: write to flash msk:0x%04x val:0x%04x\n",msk,val);
       machine.device[FLASH].write(FLASH, msk, val); 
       SYSTEM_FLASH_CS = BIT(val8,4);
       /* waiting for flash update */
@@ -453,7 +453,7 @@ int devices_update()
 	(BIT(val8,2) << CC2420_BIT_CSn) | 
 	(BIT(val8,5) << CC2420_BIT_VREG_EN) | 
 	(BIT(val8,6) << CC2420_BIT_RESET);
-      HW_DMSG_DEV("telosb: write to radio msk:0x%04x val:0x%04x\n",msk,val); 
+      HW_DMSG_MISC("telosb: write to radio msk:0x%04x val:0x%04x\n",msk,val); 
       machine.device[RADIO].write(RADIO, msk, val);
       SYSTEM_RADIO_CS = BIT(val8,2);
       /* waiting for cc2420 update */

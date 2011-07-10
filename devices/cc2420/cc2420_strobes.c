@@ -69,7 +69,7 @@ void cc2420_strobe_state_power_down(struct _cc2420_t * cc2420)
       break;
 
     default :
-      CC2420_DEBUG("cc2420:strobe:power_down: invalid strobe command %d in power down state\n",
+      CC2420_DBG_STROBE("cc2420:strobe:power_down: invalid strobe command %d in power down state\n",
 		   cc2420->SPI_addr);
       return;
     }
@@ -127,7 +127,7 @@ void cc2420_strobe_state_idle(struct _cc2420_t * cc2420)
 	break;
 
       default :
-	CC2420_DEBUG("cc2420:strobe:idle: invalid strobe command %d in idle state\n",
+	CC2420_DBG_STROBE("cc2420:strobe:idle: invalid strobe command %d in idle state\n",
 		     cc2420->SPI_addr);
 	return;
       }
@@ -178,7 +178,7 @@ void cc2420_strobe_state_tx_calibrate(struct _cc2420_t * cc2420)
       cc2420->FIFO_set  = 1;
       break;
     default :
-      CC2420_DEBUG("cc2420:strobe:calibrate: invalid strobe command %d in tx_calibrate state\n",
+      CC2420_DBG_STROBE("cc2420:strobe:calibrate: invalid strobe command %d in tx_calibrate state\n",
 		   cc2420->SPI_addr);
       return;
     }
@@ -234,7 +234,7 @@ void cc2420_strobe_state_tx_preamble(struct _cc2420_t * cc2420)
       CC2420_RX_SFD_SEARCH_ENTER(cc2420);
       break;
     default :
-      CC2420_DEBUG("cc2420:strobe:tx_preamble: invalid strobe command %d in tx_preamble state\n",
+      CC2420_DBG_STROBE("cc2420:strobe:tx_preamble: invalid strobe command %d in tx_preamble state\n",
 		   cc2420->SPI_addr);
       return;
     }
@@ -288,7 +288,7 @@ void cc2420_strobe_state_tx_frame(struct _cc2420_t * cc2420)
       cc2420->FIFO_set  = 1;
       break;
     default :
-      CC2420_DEBUG("cc2420:strobe:tx_frame: invalid strobe command %d in tx_frame state\n",
+      CC2420_DBG_STROBE("cc2420:strobe:tx_frame: invalid strobe command %d in tx_frame state\n",
 		   cc2420->SPI_addr);
       return;
     }
@@ -338,7 +338,7 @@ void cc2420_strobe_state_tx_underflow(struct _cc2420_t * cc2420)
       cc2420->FIFO_set  = 1;
       break;
     default :
-      CC2420_DEBUG("cc2420:strobe:tx_underflow: invalid strobe command %d in tx_underflow state\n",
+      CC2420_DBG_STROBE("cc2420:strobe:tx_underflow: invalid strobe command %d in tx_underflow state\n",
 		   cc2420->SPI_addr);
       return;
     }
@@ -398,7 +398,7 @@ void cc2420_strobe_state_rx_calibrate(struct _cc2420_t * cc2420)
       cc2420->FIFO_set  = 1;
       break;
     default :
-      CC2420_DEBUG("cc2420:strobe:rx_calibrate: invalid strobe command %d in rx_calibrate state\n",
+      CC2420_DBG_STROBE("cc2420:strobe:rx_calibrate: invalid strobe command %d in rx_calibrate state\n",
 		   cc2420->SPI_addr);
       return;
     }
@@ -481,7 +481,7 @@ void cc2420_strobe_state_rx_sfd_search(struct _cc2420_t * cc2420)
       CC2420_TX_ACK_CALIBRATE_ENTER(cc2420);
       break;
     default :
-      CC2420_DEBUG("cc2420:strobe:rx_sfd_search: invalid strobe command %d in rx_sfd_search state\n",
+      CC2420_DBG_STROBE("cc2420:strobe:rx_sfd_search: invalid strobe command %d in rx_sfd_search state\n",
 		   cc2420->SPI_addr);
       return;
     }
@@ -552,7 +552,7 @@ void cc2420_strobe_state_rx_frame(struct _cc2420_t * cc2420)
       CC2420_RX_SFD_SEARCH_ENTER(cc2420); /* verified on hardware */
       break;
     default :
-      CC2420_DEBUG("cc2420:strobe:rx_frame: invalid strobe command %d in rx_frame state\n",
+      CC2420_DBG_STROBE("cc2420:strobe:rx_frame: invalid strobe command %d in rx_frame state\n",
 		   cc2420->SPI_addr);
       return;
     }
@@ -611,7 +611,7 @@ void cc2420_strobe_state_tx_ack_calibrate(struct _cc2420_t * cc2420)
       CC2420_TX_CALIBRATE_ENTER(cc2420);
       break;
     default :
-      CC2420_DEBUG("cc2420:strobe:tx_ack_calibrate: invalid strobe command %d in tx_ack_calibrate state\n",
+      CC2420_DBG_STROBE("cc2420:strobe:tx_ack_calibrate: invalid strobe command %d in tx_ack_calibrate state\n",
 		   cc2420->SPI_addr);
       return;
     }
@@ -663,7 +663,7 @@ void cc2420_strobe_state_tx_ack_preamble(struct _cc2420_t * cc2420)
       cc2420->FIFOP_set = 1;
       break;
     default :
-      CC2420_DEBUG("cc2420:strobe:tx_ack_preamble: invalid strobe command %d in tx_ack_preamble state\n",
+      CC2420_DBG_STROBE("cc2420:strobe:tx_ack_preamble: invalid strobe command %d in tx_ack_preamble state\n",
 		   cc2420->SPI_addr);
       return;
     }
@@ -717,7 +717,7 @@ void cc2420_strobe_state_tx_ack(struct _cc2420_t * cc2420)
       cc2420->FIFO_set  = 1;
       break;
     default :
-      CC2420_DEBUG("cc2420:strobe:tx_ack: invalid strobe command %d in tx_ack state\n",
+      CC2420_DBG_STROBE("cc2420:strobe:tx_ack: invalid strobe command %d in tx_ack state\n",
 		   cc2420->SPI_addr);
       return;
     }
@@ -767,7 +767,7 @@ void cc2420_strobe_state_rx_wait(struct _cc2420_t * cc2420)
       cc2420->FIFO_set  = 1;
       break;
     default :
-      CC2420_DEBUG("cc2420:strobe:rx_wait: invalid strobe command %d in rx_wait state\n",
+      CC2420_DBG_STROBE("cc2420:strobe:rx_wait: invalid strobe command %d in rx_wait state\n",
 		   cc2420->SPI_addr);
       return;
     }
@@ -818,7 +818,7 @@ void cc2420_strobe_state_rx_overflow(struct _cc2420_t * cc2420)
       CC2420_RX_SFD_SEARCH_ENTER(cc2420);
       break;
     default :
-      CC2420_DEBUG("cc2420:strobe:rx_overflow: invalid strobe command %d in rx_overflow state\n",
+      CC2420_DBG_STROBE("cc2420:strobe:rx_overflow: invalid strobe command %d in rx_overflow state\n",
 		   cc2420->SPI_addr);
       return;
     }
@@ -843,7 +843,7 @@ void cc2420_strobe_command(struct _cc2420_t * cc2420)
 	   (cc2420->fsm_state == CC2420_STATE_VREG_STARTING) ||
 	   (cc2420->fsm_state == CC2420_STATE_RESET) ) 
 	{
-	  CC2420_DEBUG("cc2420:strobe:noop: NOOP not possible in state %d\n", cc2420->fsm_state);
+	  CC2420_DBG_STROBE("cc2420:strobe:noop: NOOP not possible in state %d\n", cc2420->fsm_state);
 	  return ;
 	}
       return ;
@@ -854,7 +854,7 @@ void cc2420_strobe_command(struct _cc2420_t * cc2420)
     case CC2420_STATE_VREG_OFF :
     case CC2420_STATE_VREG_STARTING :
     case CC2420_STATE_RESET :
-      CC2420_DEBUG("cc2420:strobe:command: VREG_OFF, VREG_STARTING, RESET: invalid states for strobe commands\n");
+      CC2420_DBG_STROBE("cc2420:strobe:command: VREG_OFF, VREG_STARTING, RESET: invalid states for strobe commands\n");
       break;
     case CC2420_STATE_POWER_DOWN :
       cc2420_strobe_state_power_down(cc2420);
@@ -899,7 +899,7 @@ void cc2420_strobe_command(struct _cc2420_t * cc2420)
       cc2420_strobe_state_rx_calibrate(cc2420);
       break;
     default:
-      CC2420_DEBUG("cc2420:probe: state %d not implemented yet\n",cc2420->fsm_state);
+      CC2420_DBG_STROBE("cc2420:strobe: state %d not implemented yet\n",cc2420->fsm_state);
       break;
     }
 }

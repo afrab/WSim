@@ -42,6 +42,7 @@ void set_global_time(uint64_t time)
   WSNET_S_DBG_TIME ("WSNET:: ===\n");
   OUTPUT ("WSNET:: === TIME  %"PRId64" (%.2fms, seq: %d)\n", time, (float)time / 1000000.0, worldsens.rp_seq);
   WSNET_S_DBG_TIME ("WSNET:: ===\n");
+  tracer_state_save();
 }
 
 /**************************************************************************/

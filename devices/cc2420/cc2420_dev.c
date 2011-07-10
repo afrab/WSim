@@ -429,7 +429,7 @@ int cc2420_io_pins(struct _cc2420_t * cc2420)
 	CC2420_DBG_ACCESS("cc2420:access: RXFIFO read address %x\n", cc2420->SPI_addr & 0xff);
 	if (cc2420_rx_fifo_pop(cc2420, &val) < 0 ) 
 	  {
-	    CC2420_DEBUG("cc2420_io_pins : can't read, RX FIFO is empty\n");
+	    CC2420_DBG_PINS("cc2420_io_pins : can't read, RX FIFO is empty\n");
 	  }
 	cc2420_spi_output(cc2420, val);
 	cc2420->SPI_addr++;
@@ -488,7 +488,7 @@ int cc2420_io_pins(struct _cc2420_t * cc2420)
       }
 
     /* *** SHOULD NEVER BE THERE *** */
-    CC2420_DEBUG("cc2420_io_pins : BUG, should not be there\n");
+    ERROR("cc2420_io_pins : BUG, should not be there\n");
     return 0;
 }
 
@@ -537,7 +537,7 @@ void cc2420_read(int  dev_num, uint32_t  *mask, uint32_t  *value)
       else 
 	{
 	  *value &= ~CC2420_FIFOP_MASK;
-	  CC2420_DEBUG("cc2420:pins:read: unsetting FIFOP pin\n");
+	  CC2420_DBG_PINS("cc2420:pins:read: unsetting FIFOP pin\n");
 	  tracer_event_record(TRACER_CC2420_FIFOP, 0);
 	}
    }

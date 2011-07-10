@@ -42,7 +42,7 @@ uint16_t cc2420_ram_bank_offset(uint8_t bank) {
         return 0;
 	
     default :
-	CC2420_DEBUG("cc2420_ram_bank_offset : bad RAM bank ID\n");
+	WARNING("cc2420_ram_bank_offset : bad RAM bank ID\n");
 	return 0;
     }
 }
@@ -55,7 +55,7 @@ uint16_t cc2420_ram_bank_offset(uint8_t bank) {
 
 int cc2420_check_ram_access(struct _cc2420_t * cc2420) {
     if (cc2420->mem_access != CC2420_ACCESS_ALL) {
-	CC2420_DEBUG("cc2420_check_ram_access : RAM is not available is this state\n");
+	WARNING("cc2420_check_ram_access : RAM is not available is this state\n");
 	return -1;
     }
 
@@ -73,7 +73,7 @@ uint8_t cc2420_ram_read_byte(struct _cc2420_t * cc2420, uint8_t bank, uint8_t ad
     uint16_t full_addr;
 
     if (cc2420_check_ram_access(cc2420)) {
-	CC2420_DEBUG("cc2420_ram_read_byte : access not allowed in this state, BUG !!\n");
+	WARNING("cc2420_ram_read_byte : access not allowed in this state, BUG !!\n");
 	return 0;
     }
 
@@ -84,7 +84,7 @@ uint8_t cc2420_ram_read_byte(struct _cc2420_t * cc2420, uint8_t bank, uint8_t ad
     full_addr = addr + cc2420_ram_bank_offset(bank);
 
     if (full_addr > CC2420_RAM_SIZE) {
-	CC2420_DEBUG("cc2420_ram_read_byte : out of RAM space, BUG !!\n");
+	WARNING("cc2420:ram_read_byte: out of RAM space, BUG !!\n");
 	return 0;
     }
     
@@ -111,7 +111,7 @@ uint8_t cc2420_ram_write_byte(struct _cc2420_t * cc2420, uint8_t bank, uint8_t a
     full_addr = addr + cc2420_ram_bank_offset(bank);
 
     if (full_addr > CC2420_RAM_SIZE) {
-	CC2420_DEBUG("cc2420_ram_read_byte : out of RAM space, BUG !!\n");
+	WARNING("cc2420_ram_read_byte : out of RAM space, BUG !!\n");
 	return 0;
     }
 

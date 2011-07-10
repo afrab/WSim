@@ -61,8 +61,9 @@ static void __inline__ micro_wait(register unsigned int n)
 
     __asm__ __volatile__ (
 		"1: \n"
-		" dec	%[n] \n"      /* 2 cycles */
-		" jne	1b \n"        /* 2 cycles */
+		" dec	%[n] \n"      /* 1 cycles */
+		" nop        \n"      /* 1 cycle  */
+		" jne	1b   \n"      /* 2 cycles */
         : [n] "+r"(n));
 }
 

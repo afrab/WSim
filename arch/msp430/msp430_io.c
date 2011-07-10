@@ -127,8 +127,16 @@ static int16_t msp430_read16_flash_jump_pc(uint16_t UNUSED addr)
 /* ** RAM ******************************************* */
 /* ************************************************** */
 
+static inline void CHECK_ALIGNMENT(uint16_t loc,char *str)
+{
+  if ((loc & 1) == 1)
+    {
+      ERROR("msp430:io: unaligned %s at 0x%04x [PC=0x%04x]\n",str,loc,mcu_get_pc());
+    }
+}
+
 /* these functions are called using funtion pointer arrays */
-/* the inline keyword is almost usless, need to check asm  */
+/* the inline keyword is almost useless, need to check asm */
 /* when compiled with -O3                                  */
 #define MEM_INLINE inline
 
@@ -141,6 +149,8 @@ static MEM_INLINE void msp430_write8_ram(uint16_t addr, int8_t val)
 
 static MEM_INLINE void msp430_write16_ram(uint16_t addr, int16_t val)
 {
+  CHECK_ALIGNMENT(addr,"read ");
+
   addr &= 0xffffu;  /* broken 16<>32 code with gcc, need to test later */
   mcu_ramctl_write(addr);
   MCU_RAM[addr++] =  val       & 0xff;
@@ -157,6 +167,8 @@ static MEM_INLINE int8_t msp430_read8_ram(uint16_t addr)
 
 static MEM_INLINE int16_t msp430_read16_ram(uint16_t addr)
 {
+  CHECK_ALIGNMENT(addr,"write");
+
   addr &= 0xffffu;  /* broken 16<>32 code with gcc, need to test later */
   mcu_ramctl_read(addr);
   mcu_ramctl_read(addr+1);
@@ -342,7 +354,7 @@ void msp430_io_register_range16(uint16_t start, uint16_t stop,
                                 addr_map_read16_t read16, addr_map_write16_t write16)
 {
   uint32_t addr;
-  for(addr = start; addr <= stop; addr+=2)
+  for(addr = start; addr <= stop; addr++)
     {
       msp430_set_readptr16  (read16,  addr);
       msp430_set_writeptr16 (write16, addr);
@@ -395,18 +407,6 @@ void msp430_io_create(void)
 /* ************************************************** */
 /* ************************************************** */
 
-static inline void CHECK_ALIGNMENT(uint16_t loc,char *str)
-{
-  if ((loc & 1) == 1)
-    {
-      ERROR("msp430:io: unaligned %s at 0x%04x [PC=0x%04x]\n",str,loc,mcu_get_pc());
-    }
-}
-
-/* ************************************************** */
-/* ************************************************** */
-/* ************************************************** */
-
 int8_t msp430_read_byte(uint16_t loc)
 {
   int8_t res = 0;
@@ -424,8 +424,6 @@ int8_t msp430_read_byte(uint16_t loc)
 int16_t msp430_read_short(uint16_t loc)
 {
   int16_t res = 0;
-  CHECK_ALIGNMENT(loc,"read ");
-
   etracer_slot_access(loc, 1, ETRACER_ACCESS_READ, ETRACER_ACCESS_HWORD, ETRACER_ACCESS_LVL_BUS, 0);
   res = pread16[loc](loc);
   mcu_ramctl_tst_read(loc);
@@ -467,8 +465,6 @@ void msp430_write_byte(uint16_t loc, int8_t val)
 
 void msp430_write_short(uint16_t loc, int16_t val)
 {
-  CHECK_ALIGNMENT(loc,"write");
-
   HW_DMSG_IO("msp430:op: write_short [0x%04x] = 0x%04x\n",loc,val);
   etracer_slot_access(loc, 1, ETRACER_ACCESS_WRITE, ETRACER_ACCESS_HWORD, ETRACER_ACCESS_LVL_BUS, 0);
   pwrite16[loc](loc,val);

@@ -114,7 +114,7 @@ killall -SIGUSR1 ${WSIM}   > /dev/null 2>&1
 killall -SIGQUIT ${WSNET1} > /dev/null 2>&1
 killall -SIGQUIT ${WSNET2} > /dev/null 2>&1
 killall -SIGUSR1 ${NETCAT} > /dev/null 2>&1
-killall -SIGQUIT ${WCNS}   > /dev/null 2>&1
+killall -SIGKILL ${WCNS}   > /dev/null 2>&1
 ## ======================================
 
 ## =============Traces===================

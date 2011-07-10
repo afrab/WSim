@@ -73,7 +73,7 @@ void cc2420_record_rssi(struct _cc2420_t * cc2420, double dBm) {
 
     
     /* update RSSI value register */
-    cc2420->registers[CC2420_REG_RSSI] |= cc2420->rx_rssi_value;
+    cc2420->registers[CC2420_REG_RSSI] = (cc2420->registers[CC2420_REG_RSSI] & 0xff00) | cc2420->rx_rssi_value;
 
 
     /* 
@@ -162,6 +162,32 @@ void cc2420_record_rssi(struct _cc2420_t * cc2420, double dBm) {
     }
 
     return;
+}
+
+
+/*
+ * update LQI value
+ */
+
+void cc2420_record_corr_lqi(struct _cc2420_t *cc2420, double snr)
+{
+  if (cc2420->corr_lqi_count >= 8) {
+    return;
+  }
+
+  cc2420->corr_lqi_count++;
+
+  if (snr > 110)
+      cc2420->corr_lqi_value += 110;
+  else
+      cc2420->corr_lqi_value += snr;
+
+  CC2420_DBG_RX("cc2420:rx: correlation value %d: snr = %g, corr = %d\n",
+                cc2420->corr_lqi_count, snr, cc2420->corr_lqi_value / cc2420->corr_lqi_count);
+
+  if (cc2420->corr_lqi_count == 8) {
+    cc2420->corr_lqi_value /= 8;
+  }
 }
 
 
@@ -614,7 +640,7 @@ uint64_t cc2420_callback_rx(void *arg, struct wsnet_rx_info *wrx)
 {
   struct _cc2420_t *cc2420 = (struct _cc2420_t *) arg;
 
-  uint8_t rx       = wrx->data;;
+  uint8_t rx       = wrx->data;
   double frequency = wrx->freq_mhz;
   int modulation   = wrx->modulation;
   double dBm       = wrx->power_dbm;
@@ -628,7 +654,7 @@ uint64_t cc2420_callback_rx(void *arg, struct wsnet_rx_info *wrx)
     uint16_t addr_decode = CC2420_REG_MDMCTRL0_ADR_DECODE(cc2420->registers[CC2420_REG_MDMCTRL0]);
     uint16_t autocrc = CC2420_REG_MDMCTRL0_AUTOCRC(cc2420->registers[CC2420_REG_MDMCTRL0]);
 
-  CC2420_DBG_RX("cc2420:rx:callback: entering RX Callback, rx data 0x%02x\n", rx);
+    CC2420_DBG_RX("cc2420:rx:callback: entering RX Callback, rx data 0x%02x\n", rx);
 
     /* log rx byte */
     logpkt_rx_byte(cc2420->worldsens_radio_id, rx);
@@ -670,6 +696,10 @@ uint64_t cc2420_callback_rx(void *arg, struct wsnet_rx_info *wrx)
 	    cc2420->FIFO_pin    = 0xFF;
 	    cc2420->FIFO_set    = 1;
 
+	    /* reset correlation for LQI */
+	    cc2420->corr_lqi_value = 0;
+	    cc2420->corr_lqi_count = 0;
+
 	    /* if this is the only frame in fifo, calculate rx_frame_end */
 	    /* rx_frame_end will be used in rx_fifo_pop to update the state of FIFOP */
 	    if (cc2420->nb_rx_frames == 0) {
@@ -682,6 +712,9 @@ uint64_t cc2420_callback_rx(void *arg, struct wsnet_rx_info *wrx)
 
 	/* update number of received bytes */
 	cc2420->rx_data_bytes ++;
+
+	/* update correlation / LQI for 8 first bytes */
+	cc2420_record_corr_lqi(cc2420,snr);
 
 	/* if first byte of data and no other pending frame in rx fifo, save firts byte position in RX FIFO */
 	if (cc2420->rx_data_bytes == 1 && cc2420->nb_rx_frames == 0) {
@@ -828,14 +861,17 @@ uint64_t cc2420_callback_rx(void *arg, struct wsnet_rx_info *wrx)
 }
 
 
+
+
 /**
  * Set CRC bit to 1 of the last received frame
  */
 void cc2420_fcs_replace(struct _cc2420_t *cc2420)
 {
     /* Set the significant bit in the last byte of the frame to 1 */
-    cc2420->ram[CC2420_RAM_RXFIFO_START + cc2420->rx_frame_start + cc2420->rx_len] = CC2420_CRC_OK;
-
+    cc2420->ram[CC2420_RAM_RXFIFO_START + cc2420->rx_frame_start + cc2420->rx_len] = CC2420_CRC_OK |
+      (cc2420->corr_lqi_value & 0x7f);
+  
     /* Replace the first byte of FCS by RSSI average value */
     cc2420->ram[CC2420_RAM_RXFIFO_START + cc2420->rx_frame_start + cc2420->rx_len - 1] = cc2420->rx_rssi_value_for_fcs;
 

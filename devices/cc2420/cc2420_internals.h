@@ -257,6 +257,12 @@ struct _cc2420_t {
     /* rssi validity */
     uint8_t rx_rssi_valid;
 
+    /* correlation/LQI byte count */
+    uint8_t corr_lqi_count;
+
+    /* correlation/LQI value */
+    uint16_t corr_lqi_value;
+
     /* rssi validity timer */
     uint64_t rx_rssi_timer;
 

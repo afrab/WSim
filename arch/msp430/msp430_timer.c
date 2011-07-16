@@ -1261,7 +1261,6 @@ static void msp430_timerB_set_limit(int i)
 
 enum timerB_addr_t {
  TBIV      = 0x011e,
-
  TBCTL     = 0x0180,
  TBCCTL0   = 0x0182,
  TBCCTL1   = 0x0184,

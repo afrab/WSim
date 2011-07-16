@@ -1103,9 +1103,20 @@ void ds2411_ui_get_pos  (int UNUSED dev, int *x, int *y)
 /***************************************************/
 /***************************************************/
 
+<<<<<<< HEAD
 void ds2411_statdump(int dev, wsimtime_t UNUSED user_nanotime)
 {
   OUTPUT("     + id: %s\n", ds2411_id_to_str( & DS2411_ID ));
+=======
+void ds2411_statdump(int UNUSED dev, wsimtime_t UNUSED user_nanotime)
+{
+  /*
+  if (.io.value)
+    {
+      OUTPUT("     + opt: %s\n",  opt_array[DS2411_SERID].io.value);
+    }
+  */
+>>>>>>> move statdump() to wsimtime_t type
 }
 
 /***************************************************/

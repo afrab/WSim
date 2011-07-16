@@ -65,7 +65,7 @@
 #define BCSCTL2_INIT    SELM_2|SELS|DIVS_1
 
 #define U0CTL_INIT      CHAR
-#define U0TCTL_INIT     SSEL_SMCLK|TXEPT     //use SMCLK
+#define U0TCTL_INIT     SSEL1|TXEPT     //use SMCLK
 #define U0RCTL_INIT     0
 
 //~ //115200 @4MHz

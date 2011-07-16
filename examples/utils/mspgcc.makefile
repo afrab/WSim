@@ -68,6 +68,8 @@ endif # CC_UNIARCH
 
 
 
+ASFLAGS += ${CPU} -D_GNU_ASSEMBLER_
+ASFLAGS += $(OPT) $(DEBUG) $(GCC_4_INCLUDE) $(INCLUDES)
 
 CFLAGS += $(CPU) -DGCC_MSP430
 CFLAGS += -MMD -MP -MF $(basename $@).d  # generate dependencies file
@@ -86,6 +88,8 @@ OBJ  = $(SRC:.c=.o)
 OBJS = $(SRCS:.c=.o)
 DEPS = $(SRCS:.c=.d)
 
+ASMOBJ = $(ASM:.S=.o)
+
 all : $(TARGETS)
 
 %.hex : %.elf
@@ -99,15 +103,18 @@ all : $(TARGETS)
 #     I didn't manage to get the content of SRC_target_name variable in prerequisites
 # but is really linked with only the needed files
 
-%.elf : $(OBJS)
-	$(CC) -o $@ $(CFLAGS)  $(OBJ) $(SRC_$(basename $@):.c=.o)
+%.elf : $(OBJS) $(ASMOBJ)
+	$(CC) -o $@ $(CFLAGS)  $(OBJ) $(SRC_$(basename $@):.c=.o) $(ASMOBJ)
 
 
 $(OBJS) :%.o : %.c $(filter-out %.d, $(MAKEFILE_LIST))
 	$(CC) -c $(CFLAGS) $< -o $@
 
+$(ASMOBJ) :%.o : %.S
+	$(CC) -c $(ASFLAGS) $< -o $@
+
 clean :
-	$(RM) $(TARGETS) $(OBJS) $(DEPS) *.elf *.hex 
+	$(RM) $(TARGETS) $(OBJS) ${ASMOBJ} $(DEPS) *.elf *.hex 
 
 realclean: clean 
 	$(RM) *.log *.trc *.vcd *.pkt

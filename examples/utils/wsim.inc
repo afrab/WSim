@@ -82,6 +82,13 @@ run_wsim_xterm()
 	    _OPT="${_OPT} --mode=time"
 	    if [ "x${TIME}" != "x" ] ; then _OPT="${_OPT} --modearg=${TIME}" ; fi
 	    ;;
+	"insn")
+	    _OPT="${_OPT} --mode=insn"
+	    if [ "x${INSN}" != "x" ] ; then _OPT="${_OPT} --modearg=${INSN}" ; fi
+	    ;;
+	"run")
+	    _OPT="${_OPT} --mode=run"
+	    ;;
 	"gdb")
 	    _OPT="${_OPT} --mode=gdb"
 	    if [ "x${GDBPORT}" != "x" ] ; then _OPT="${_OPT} --modearg=${GDBPORT}" ; fi

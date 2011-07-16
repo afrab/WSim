@@ -1,14 +1,25 @@
-#! /bin/sh
+#! /bin/bash
 
-rm -f trace*.eps trace*.gp
+source ../../utils/wsim.inc
 
-WSIM=../../../build/wsim-debug/platforms/tests/wsim-msp1611-2
-WTRC=../../../build/wtracer/src/wtracer
+## ============= Config===================
 
-PSER="--serial1_io=/dev/null"
-MODE="--mode=time --modearg=10s"
-#MODE="--mode=gdb"
-#UI="--ui"
+ELF=spi.elf
+PLATFORM=msp1611-2
 
-${WSIM} ${UI} ${MODE} ${PSER} --trace=wsim.trc --logfile=stdout --verbose=4 test2-spi.elf
-${WTRC} --in=wsim.trc --out=wsim.vcd --format=vcd
+VERBOSE=4
+LOGFILE=wsim.log
+TRACEFILE=wsim.trc
+
+MODE=run
+TIME=60s
+
+# Serial 0
+SERIAL[1]="stdout"
+
+## ============= Run =====================
+
+run_wsim
+
+## =======================================
+

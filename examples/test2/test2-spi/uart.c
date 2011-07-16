@@ -53,7 +53,7 @@ void uart_init(void)
   U1CTL  = SWRST;                 //reset
   U1CTL  = CHAR;                  //init & release reset
   
-  U1TCTL = SSEL_SMCLK|TXEPT;      //use SMCLK 
+  U1TCTL = SSEL1|TXEPT;      //use SMCLK 
   U1RCTL = 0;
 
   /* SMCLK @ 1MHz */

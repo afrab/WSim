@@ -209,6 +209,7 @@ int devices_reset_post()
   SPIDEV_CSn = 0;
   SPIDEV_Wn  = 0;
 
+  REFRESH(LOGO1);
   REFRESH(LED1);
   REFRESH(LED2);
   REFRESH(LED3);
@@ -217,7 +218,6 @@ int devices_reset_post()
   REFRESH(LED6);
   REFRESH(LED7);
   REFRESH(LED8);
-  REFRESH(LOGO1);
   ui_refresh(refresh);
   return 0;
 }

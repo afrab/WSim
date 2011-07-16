@@ -18,6 +18,7 @@
 
 #include <string.h>
 #include <math.h>
+#include <ctype.h>
 
 #include "cc2420.h"
 #include "cc2420_ram.h"
@@ -654,7 +655,8 @@ uint64_t cc2420_callback_rx(void *arg, struct wsnet_rx_info *wrx)
     uint16_t addr_decode = CC2420_REG_MDMCTRL0_ADR_DECODE(cc2420->registers[CC2420_REG_MDMCTRL0]);
     uint16_t autocrc = CC2420_REG_MDMCTRL0_AUTOCRC(cc2420->registers[CC2420_REG_MDMCTRL0]);
 
-    CC2420_DBG_RX("cc2420:rx:callback: entering RX Callback, rx data 0x%02x\n", rx);
+    CC2420_DBG_RX("cc2420:rx:callback: entering RX Callback, rx data 0x%02x [%c]\n", rx,
+                  isprint(rx) ? rx:'.');
 
     /* log rx byte */
     logpkt_rx_byte(cc2420->worldsens_radio_id, rx);

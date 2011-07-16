@@ -1,47 +1,13 @@
-# makfile configuration
-NAME            = nn4
-OBJECTS         = nn4.o main.o uart0.o
-CPU             = msp430x1611
 
-CFLAGS          = -mmcu=${CPU} -O2 -Wall -g # -DTEST_SOURCE
+# define one name for each executable to be built
+NAMES      = reed
+CPU        = -mmcu=msp430x1611
+UTILS_PATH = ../../utils
 
-#switch the compiler (for the internal make rules)
-CC              = msp430-gcc
+# sources files specific to 'first_target'
+SRC              = main.c nn4.c uart0.c
+INCLUDES         = -I. 
 
-.PHONY: all FORCE clean download download-jtag download-bsl dist
+# the makefile common will generate NAMES.hex and NAMES.elf files, and define 'all' and 'clean' directives
+-include ${UTILS_PATH}/mspgcc.makefile
 
-#all should be the first target. it's built when make is run without args
-all: ${NAME}.elf ${NAME}.a43 ${NAME}.lst
-
-#confgigure the next line if you want to use the serial download
-download: download-jtag
-#download: download-bsl
-
-#additional rules for files
-${NAME}.elf: ${OBJECTS}
-	${CC} -mmcu=${CPU} -o $@ ${OBJECTS}
-
-${NAME}.a43: ${NAME}.elf
-	msp430-objcopy -O ihex $^ $@
-
-${NAME}.lst: ${NAME}.elf
-	msp430-objdump -dSt $^ >$@
-
-download-jtag: all
-	msp430-jtag -e ${NAME}.elf
-
-download-bsl: all
-	msp430-bsl -e ${NAME}.elf
-
-clean:
-	rm -f ${NAME}.elf ${NAME}.a43 ${NAME}.lst ${OBJECTS}
-
-#backup archive
-dist:
-	tar czf dist.tgz *.c *.h *.txt makefile
-
-#dummy target as dependecy if something has to be build everytime
-FORCE:
-
-#project dependencies
-nn4.o: nn4.c

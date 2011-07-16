@@ -101,6 +101,8 @@ void print_array(char* name, dtype *d, int size)
 
 int main(void) 
 {
+  WDTCTL = WDTPW + WDTHOLD;
+
   /* leds */
   P1DIR = 0xff;
   P3DIR = 0x01;

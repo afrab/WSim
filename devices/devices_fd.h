@@ -32,7 +32,7 @@ struct device_t
   void (*ui_get_pos)    (int self, int *x, int *y);
   void (*ui_get_size)   (int self, int *width, int *height);
 
-  void (*statdump)      (int self, int64_t user_nanotime);
+  void (*statdump)      (int self, wsimtime_t user_nanotime);
 
   int state_size;
   int dev_num;

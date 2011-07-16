@@ -62,7 +62,7 @@ int  ptty_ui_draw     (int dev);
 void ptty_ui_get_size (int dev, int *w, int *h);
 void ptty_ui_set_pos  (int dev, int  x, int  y);
 void ptty_ui_get_pos  (int dev, int *x, int *y);
-void ptty_statdump    (int dev, int64_t UNUSED user_nanotime);
+void ptty_statdump    (int dev, wsimtime_t user_nanotime);
 
 /***************************************************/
 /***************************************************/
@@ -186,7 +186,7 @@ int ptty_reset(int UNUSED dev)
 /***************************************************/
 /***************************************************/
 
-void ptty_statdump(int dev, int64_t UNUSED user_nanotime)
+void ptty_statdump(int dev, wsimtime_t UNUSED user_nanotime)
 {
   if (opt_array[PTTY_SERID].io.value)
     {

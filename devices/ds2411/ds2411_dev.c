@@ -1102,6 +1102,20 @@ void ds2411_ui_get_pos  (int UNUSED dev, int *x, int *y)
 /***************************************************/
 /***************************************************/
 
+void ds2411_statdump(int UNUSED dev, wsimtime_t UNUSED user_nanotime)
+{
+  /*
+  if (.io.value)
+    {
+      OUTPUT("     + opt: %s\n",  opt_array[DS2411_SERID].io.value);
+    }
+  */
+}
+
+/***************************************************/
+/***************************************************/
+/***************************************************/
+
 int
 ds2411_device_create(int dev, char *serial)
 {
@@ -1123,6 +1137,7 @@ ds2411_device_create(int dev, char *serial)
 
   machine.device[dev].state_size   = ds2411_device_size();
   machine.device[dev].name         = "ds2411 serial number";
+  machine.device[dev].statdump     = ds2411_statdump;
 
   DS2411_ID = ds2411_str_to_id(serial);
 

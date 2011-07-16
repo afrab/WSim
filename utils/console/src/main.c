@@ -114,6 +114,7 @@ int options_parse(console_t *console, int argc, char* argv[])
 	  {"fifo",   required_argument, 0, 'f'},
 	  {"log",    required_argument, 0, 'l'},
 	  {"reopen", no_argument,       0, 'r'},
+	  {"mode",   required_argument, 0, 'm'},
 	  {"width",  required_argument, 0, 'W'},
 	  {"height", required_argument, 0, 'H'},
 	  {0, 0, 0, 0}

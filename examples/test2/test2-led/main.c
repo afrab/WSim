@@ -9,7 +9,7 @@ chris <cliechti@gmx.net>
 Delay function.
 */
 void delay(unsigned int d) {
-   int i;
+   unsigned int i;
    for (i = 0; i<d; i++) {
       nop();
       nop();

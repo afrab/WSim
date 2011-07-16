@@ -87,7 +87,7 @@ int TMP1,TMP2;
 unsigned int val;
 
 void initDisplay();
-void putc(char c);
+void mputc(char c);
 void clearDisplay();
 void printDecimal(int Number);
 void printHex(unsigned int Number);
@@ -114,7 +114,7 @@ void initDisplay() {
   InitLCD();
   clearDisplay();
 }
-void putc(char c) {
+void mputc(char c) {
     SEND_CHAR(c);
 }
 void clearDisplay() {
@@ -127,7 +127,7 @@ void gotoSecondLine() {
 }
 void printString(char *String) {
   while(*String)
-    putc(*String++);
+    mputc(*String++);
 }
 char HexDigit(int digitvalue) {
   if (digitvalue < 10)
@@ -366,7 +366,7 @@ void PRINT_BAR(unsigned char segment, unsigned char etat) {
 void RISE_BAR_ON(void) {
 	unsigned char i=0;
 	unsigned char led_on=1;
-	unsigned char led_off=0;
+	//unsigned char led_off=0;
 for (i=0; i<8 ;i++)
 	{
 		PRINT_BAR(i,led_on);
@@ -559,7 +559,7 @@ int main(void)
 	int station=1;
 	int volume=0;
 	int i=0;
-	//WDTCTL = WDTPW + WDTHOLD;  	//Stop watchdog
+	WDTCTL = WDTPW + WDTHOLD;  	//Stop watchdog
 	InitPorts();
 	//initDisplay();
 	//clearDisplay();

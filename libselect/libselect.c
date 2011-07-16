@@ -363,6 +363,21 @@ int libselect_update_registered()
 /* ************************************************** */
 /* ************************************************** */
 
+int file_exists(char *filename)
+{
+  struct stat statbuf;
+  if (stat(filename, &statbuf) == -1)
+    {
+      /* file does not exists */
+      return 0;
+    }
+  return 1;
+}
+
+/* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
+
 #define CREATE_IO_IN  1
 #define CREATE_IO_OUT 2
 
@@ -419,8 +434,13 @@ int libselect_id_create_io(int type, char* cmdline)
       case CREATE_IO_IN:  
 	flags = O_RDONLY; 
 	break;
-      case CREATE_IO_OUT: 
-	flags = O_CREAT|O_WRONLY|O_TRUNC;
+      case CREATE_IO_OUT:
+	/* check if file exists */
+	flags = O_WRONLY | O_TRUNC;
+	if (! file_exists(cmdline))
+	  {
+	    flags |= O_CREAT;
+	  }
 	break;
       default: return -1;
       }

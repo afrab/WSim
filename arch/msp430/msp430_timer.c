@@ -857,84 +857,124 @@ void msp430_timerA_update(void)
 /* ************************************************** */
 /* ************************************************** */
 /* ************************************************** */
+#if defined(MSP430f1611) 	     
+/* on msp430f1611 this capture pin is p1.(i+1) 
+	        CCR0: A=P1.1 B=P2.2
+	        CCR1: A=P1.2 B=CAOUT
+	        CCR2: A=P1.3 B=ACLK
+*/
+#define TIMERA_CAPTURE_A_INPUT_TEST(i)   ((MCU.digiIO.in_updated[0] & (0x2 << i)) != 0 ? 1 : 0)
+#define TIMERA_CAPTURE_A_INPUT_VALUE(i)  ((MCU.digiIO.in[0]         & (0x2 << i)) != 0 ? 1 : 0)
+#define TIMERA_CAPTURE_A_INPUT_TAR(i)    (MCU.timerA.tar)
+
+static int TIMERA_CAPTURE_B_INPUT_TEST(int i)
+{
+  switch(i) {
+  case 0: return ((MCU.digiIO.in_updated[1] & (0x4)) != 0 ? 1 : 0);
+  case 1: return -1;
+  case 2: return ((MCU_CLOCK.ACLK_increment > 0) ? 1 : 0);
+  }
+  return -1;
+}
+static int TIMERA_CAPTURE_B_INPUT_VALUE(int i)
+{
+  switch(i) {
+  case 0: return ((MCU.digiIO.in[1]         & (0x4)) != 0 ? 1 : 0);
+  case 1: return 0;
+  case 2: return ((MCU_CLOCK.ACLK_increment > 0) && (MCU.timerA.tacctl[ i ].b.cm == 1)) ? 1 : 0;
+  }
+  return 0;
+}
+static int TIMERA_CAPTURE_B_INPUT_TAR(int i)
+{
+  switch(i) {
+  case 0: return MCU.timerA.tar;
+  case 1: return MCU.timerA.tar;
+  case 2: return MCU.timerA.tar; // MCU_CLOCK.ACLK_increment > 1, should we go back in time ?
+  }
+  return 0;
+}
+#else
+#define TIMERA_CAPTURE_A_INPUT_TEST(i)   -1
+#define TIMERA_CAPTURE_A_INPUT_VALUE(i)  0
+#define TIMERA_CAPTURE_A_INPUT_TAR(i)    0
+#define TIMERA_CAPTURE_B_INPUT_TEST(i)   -1
+#define TIMERA_CAPTURE_B_INPUT_VALUE(i)  0
+#define TIMERA_CAPTURE_B_INPUT_TAR(i)    0
+#endif
+
+void msp430_timerA_capture_port(int i, char* AB, int test_bit, int input_bit, int input_tar)
+{
+  switch (test_bit) {
+  case 0: /* nothing happened */
+    break;
+  case 1:
+    {
+      int rising_edge  = (MCU.timerA.tacctl[ i ].b.cm == 1) &&  (input_bit);
+      int falling_edge = (MCU.timerA.tacctl[ i ].b.cm == 2) && !(input_bit);
+      int both_edges   = (MCU.timerA.tacctl[ i ].b.cm == 3);
+      if (rising_edge || falling_edge || both_edges) 
+	{
+	  MCU.timerA.taccr [ i ]         = (input_tar);
+	  MCU.timerA.tacctl[ i ].b.ccifg = 1;
+	  MCU.timerA.tacctl[ i ].b.cci   = (input_bit);
+	  msp430_timerA_set_tiv();
+	  
+	  if (MCU.timerA.tacctl[ i ].b.ccie == 1)
+	    {
+	      if (i==0)
+		{
+		  HW_DMSG_TIMER("msp430:" TIMERANAME ": set interrupt TIMERA_0 from CAPTURE CCI%d%s\n",i,AB);
+		  msp430_interrupt_set(INTR_TIMERA_0);
+		}
+	      else
+		{
+		  HW_DMSG_TIMER("msp430:" TIMERANAME ": set interrupt TIMERA_1 from CAPTURE CCI%d%s\n",i,AB);
+		  msp430_interrupt_set(INTR_TIMERA_1);
+		}
+	    }
+	}
+      break;
+    default:
+      ERROR("msp430:" TIMERANAME ": device specific capture ports undefined for CCI%d%s\n",i,AB);
+      break;
+    }
+  }
+}
 
 void msp430_timerA_capture(void)
 {
   int i;
-  /* 
-     at this time we don't care about:
-     SCS  : synchroneous capture source
-     SCCI : Synchronized capture/compare input
-  */ 
   for(i=0 ; i < TIMERA_COMPARATOR ; i++)
     {
-      if (MCU.timerA.tacctl[ i ].b.cap ==1 && 
-          MCU.timerA.tacctl[ i ].b.cm > 0)
+      if ((MCU.timerA.tacctl[ i ].b.cap == 1) && (MCU.timerA.tacctl[ i ].b.cm > 0))
 	{
 	  switch (MCU.timerA.tacctl[ i ].b.ccis)
 	    {
-	      /*
-	        CCR0: A=P1.1 B=P2.2
-	        CCR1: A=P1.2 B=CAOUT
-	        CCR2: A=P1.3 B=ACLK
-	      */
-	    case 0: /* CCIxA = TA1 */
-
-#if defined(MSP430f1611)
-	      /* on msp430f1611 this capture pin is p1.(i+1) */
-	      if (MCU.digiIO.in_updated[0] & (0x2 << i))
-#else
-	      if (1)
-		ERROR("msp430:" TIMERANAME ": device specific capture ports undefined\n");
-	      else
-#endif
-		{
-		  int rising_edge  = (MCU.timerA.tacctl[ i ].b.cm == 1) &&  (MCU.digiIO.in[0] & (0x2 << i));
-		  int falling_edge = (MCU.timerA.tacctl[ i ].b.cm == 2) && !(MCU.digiIO.in[0] & (0x2 << 1));
-		  int both_edges   = (MCU.timerA.tacctl[ i ].b.cm == 3);
-		  if (rising_edge || falling_edge || both_edges) 
-		    {
-		      MCU.timerA.taccr [ i ] = MCU.timerA.tar;
-		      MCU.timerA.tacctl[ i ].b.ccifg = 1;
-		      msp430_timerA_set_tiv();
-		      if (MCU.timerA.tacctl[ i ].b.ccie == 1)
-			{
-			  HW_DMSG_TIMER("msp430:" TIMERANAME ": set interrupt TIMERA_1 from CAPTURE CCI%dA\n",i);
-			  msp430_interrupt_set(INTR_TIMERA_1);
-			}
-		    }
-		}
-
+	      /***************/
+	    case 0: /* CCIxA */
+	      /***************/
+	      msp430_timerA_capture_port(i,"A",
+	                                 (TIMERA_CAPTURE_A_INPUT_TEST(i)),
+	                                 (TIMERA_CAPTURE_A_INPUT_VALUE(i)),
+	                                 (TIMERA_CAPTURE_A_INPUT_TAR(i)));
+	      break; 
+	      /*****************/
+	    case 1:  /* CCIxB  */
+	      /*****************/
+	      msp430_timerA_capture_port(i,"B",
+	                                 (TIMERA_CAPTURE_B_INPUT_TEST(i)),
+	                                 (TIMERA_CAPTURE_B_INPUT_VALUE(i)),
+	                                 (TIMERA_CAPTURE_B_INPUT_TAR(i)));
 	      break;
-	    case 1: /* CCIxB */
-#if !defined(MSP430f1611)
-	      ERROR("msp430:" TIMERANAME ": device specific capture ports undefined CCI%dB\n",i);
-#elif defined(MSP430f1611)
-	      if ((i == 0)) /* P2.2 */
-		{
-		  ERROR("msp430:" TIMERANAME ": device specific capture ports undefined CCI%dB\n",i);
-		}
-	      else if ((i == 1)) /* CAOUT */
-		{
-		  ERROR("msp430:" TIMERANAME ": device specific capture ports undefined CCI%dB\n",i);
-		}
-	      else if ((i == 2) && (MCU_CLOCK.ACLK_increment > 0))
-		{
-		  MCU.timerA.taccr [ i ] = MCU.timerA.tar;
-		  MCU.timerA.tacctl[ i ].b.ccifg = 1;
-		  msp430_timerA_set_tiv();
-		  if (MCU.timerA.tacctl[ i ].b.ccie == 1)
-		    {
-		      HW_DMSG_TIMER("msp430:" TIMERANAME ": set interrupt TIMERA_1 from CAPTURE CCI%dB\n",i);
-		      msp430_interrupt_set(INTR_TIMERA_1);
-		    }
-		}
-#endif
-	      break;
+	      /*************/
 	    case 2: /* GND */
+	      /*************/
 	      ERROR("msp430:" TIMERANAME ": capture not implemented on this port (GND)\n");
 	      break;
+	      /*************/
 	    case 3: /* Vcc */
+	      /*************/
 	      ERROR("msp430:" TIMERANAME ": capture not implemented on this port (Vcc)\n");
 	      break;
 	    }
@@ -1497,96 +1537,121 @@ void msp430_timerB_update(void)
 /* ************************************************** */
 /* ************************************************** */
 
+#if defined(MSP430f1611)
+/* on msp430f1611 this capture pin is p4.i 
+  CCR0  A=4.0  B=4.0
+  CCRx  A=4.x  B=4.x
+  CCR6  A=4.6  B=ACLK
+*/
+#define TIMERB_CAPTURE_A_INPUT_TEST(i)   ((MCU.digiIO.in_updated[3] & (0x1 << i)) != 0 ? 1 : 0)
+#define TIMERB_CAPTURE_A_INPUT_VALUE(i)  ((MCU.digiIO.in[3]         & (0x1 << i)) != 0 ? 1 : 0)
+#define TIMERB_CAPTURE_A_INPUT_TBR(i)    (MCU.timerB.tbr)
+
+static int TIMERB_CAPTURE_B_INPUT_TEST(int i)
+{
+  if (i < 6)
+    return TIMERB_CAPTURE_A_INPUT_TEST(i);
+  return ((MCU_CLOCK.ACLK_increment > 0) ? 1 : 0);
+}
+static int TIMERB_CAPTURE_B_INPUT_VALUE(int i)
+{
+  if (i < 6)
+    return TIMERB_CAPTURE_A_INPUT_VALUE(i);
+  return ((MCU_CLOCK.ACLK_increment > 0) ? 1 : 0);
+}
+static int TIMERB_CAPTURE_B_INPUT_TBR(int i)
+{
+  if (i < 6)
+    return TIMERB_CAPTURE_A_INPUT_TBR(i);
+  return MCU.timerB.tbr; // MCU_CLOCK.ACLK_increment > 1, should we go back in time ?
+}
+#else
+#define TIMERB_CAPTURE_A_INPUT_TEST(i)   -1
+#define TIMERB_CAPTURE_A_INPUT_VALUE(i)  0
+#define TIMERB_CAPTURE_A_INPUT_TBR(i)    0
+#define TIMERB_CAPTURE_B_INPUT_TEST(i)   -1
+#define TIMERB_CAPTURE_B_INPUT_VALUE(i)  0
+#define TIMERB_CAPTURE_B_INPUT_TBR(i)    0
+#endif
+
+void msp430_timerB_capture_port(int i, char* AB, int test_bit, int input_bit, int input_tbr)
+{
+  switch (test_bit) {
+  case 0: /* nothing happened */
+    break;
+  case 1:
+    {
+      int rising_edge  = (MCU.timerB.tbcctl[ i ].b.cm == 1) &&  (input_bit);
+      int falling_edge = (MCU.timerB.tbcctl[ i ].b.cm == 2) && !(input_bit);
+      int both_edges   = (MCU.timerB.tbcctl[ i ].b.cm == 3);
+      if (rising_edge || falling_edge || both_edges) 
+	{
+	  MCU.timerB.tbccr [ i ]         = (input_tbr);
+	  MCU.timerB.tbcctl[ i ].b.ccifg = 1;
+	  MCU.timerB.tbcctl[ i ].b.cci   = (input_bit);
+	  msp430_timerB_set_tiv();
+	  
+	  if (MCU.timerB.tbcctl[ i ].b.ccie == 1)
+	    {
+	      if (i==0)
+		{
+		  HW_DMSG_TIMER("msp430:" TIMERBNAME ": set interrupt TIMERB_0 from CAPTURE CCI%d%s\n",i,AB);
+		  msp430_interrupt_set(INTR_TIMERB_0);
+		}
+	      else
+		{
+		  HW_DMSG_TIMER("msp430:" TIMERBNAME ": set interrupt TIMERB_1 from CAPTURE CCI%d%s\n",i,AB);
+		  msp430_interrupt_set(INTR_TIMERB_1);
+		}
+	    }
+	}
+      break;
+    default:
+      ERROR("msp430:" TIMERBNAME ": device specific capture ports undefined for CCI%d%s\n",i,AB);
+      break;
+    }
+  }
+}
+
 void msp430_timerB_capture(void)
 {
   int i;
-  /* 
-     at this time we don't care about:
-     SCS  : synchroneous capture source
-     SCCI : Synchronized capture/compare input
-  */ 
   for(i=0 ; i < TIMERB_COMPARATOR ; i++)
     {
-      if (MCU.timerB.tbcctl[ i ].b.cap == 1 && 
-          MCU.timerB.tbcctl[ i ].b.cm > 0)
+      if (MCU.timerB.tbcctl[ i ].b.cap == 1 && MCU.timerB.tbcctl[ i ].b.cm > 0)
 	{
 	  switch (MCU.timerB.tbcctl[ i ].b.ccis)
 	    {
-	    case 0: /* CCIxA = TB1 */
-
-#if defined(MSP430f1611)
-	      /* on msp430f1611 this capture pin is p4.i */
-	      if (MCU.digiIO.in_updated[3] & (0x1 << i))
-#else
-	      if (1)
-		ERROR("msp430:" TIMERBNAME ": device specific capture ports undefined\n");
-	      else
-#endif
-		{
-		  int rising_edge  = (MCU.timerB.tbcctl[ i ].b.cm == 1) &&  (MCU.digiIO.in[3] & (0x1 << i));
-		  int falling_edge = (MCU.timerB.tbcctl[ i ].b.cm == 2) && !(MCU.digiIO.in[3] & (0x1 << 1));
-		  int both_edges   = (MCU.timerB.tbcctl[ i ].b.cm == 3);
-		  if (rising_edge || falling_edge || both_edges) 
-		    {
-		      MCU.timerB.tbccr [ i ] = MCU.timerB.tbr;
-		      MCU.timerB.tbcctl[ i ].b.ccifg = 1;
-		      msp430_timerB_set_tiv();
-		      if (MCU.timerB.tbcctl[ i ].b.ccie == 1)
-			{
-			  HW_DMSG_TIMER("msp430:" TIMERBNAME ": set interrupt TIMERB_1 from CAPTURE CCI%dA\n",i);
-			  msp430_interrupt_set(INTR_TIMERB_1);
-			}
-		    }
-		}
+	      /***************/
+	    case 0: /* CCIxA */
+	      /***************/
+	      msp430_timerB_capture_port(i,"A",
+	                                 (TIMERB_CAPTURE_A_INPUT_TEST(i)),
+	                                 (TIMERB_CAPTURE_A_INPUT_VALUE(i)),
+	                                 (TIMERB_CAPTURE_A_INPUT_TBR(i)));
+	      break; 
+	      /*****************/
+	    case 1:  /* CCIxB  */
+	      /*****************/
+	      msp430_timerB_capture_port(i,"B",
+	                                 (TIMERB_CAPTURE_B_INPUT_TEST(i)),
+	                                 (TIMERB_CAPTURE_B_INPUT_VALUE(i)),
+	                                 (TIMERB_CAPTURE_B_INPUT_TBR(i)));
 	      break;
-	    case 1: /* CCIxB */
-#if !defined(MSP430f1611)
-	      ERROR("msp430:" TIMERBNAME ": device specific capture ports undefined\n");
-	      /* on msp430f1611 this capture pin is p4.i */
-#elif defined(MSP430f1611)
-	      if ((i < 6) && (MCU.digiIO.in_updated[3] & (0x1 << i)))
-		{
-		  int rising_edge  = (MCU.timerB.tbcctl[ i ].b.cm == 1) &&  (MCU.digiIO.in[3] & (0x1 << i));
-		  int falling_edge = (MCU.timerB.tbcctl[ i ].b.cm == 2) && !(MCU.digiIO.in[3] & (0x1 << 1));
-		  int both_edges   = (MCU.timerB.tbcctl[ i ].b.cm == 3);
-		  if (rising_edge || falling_edge || both_edges) 
-		    {
-		      MCU.timerB.tbccr [ i ] = MCU.timerB.tbr;
-		      MCU.timerB.tbcctl[ i ].b.ccifg = 1;
-		      msp430_timerB_set_tiv();
-		      if (MCU.timerB.tbcctl[ i ].b.ccie == 1)
-			{
-			  HW_DMSG_TIMER("msp430:" TIMERBNAME ": set interrupt TIMERB_1 from CAPTURE CCI%dB\n",i);
-			  msp430_interrupt_set(INTR_TIMERB_1);
-			}
-		    }
-		}
-	      else if ((i == 6) && (MCU_CLOCK.ACLK_increment > 0)) 
-		{ /* we flipped ACLK so we have done both falling and rising edge */
-		  MCU.timerB.tbccr [ i ] = MCU.timerB.tbr;
-		  MCU.timerB.tbcctl[ i ].b.ccifg = 1;
-		  msp430_timerB_set_tiv();
-		  if (MCU.timerB.tbcctl[ i ].b.ccie == 1)
-		    {
-		      HW_DMSG_TIMER("msp430:" TIMERBNAME ": set interrupt TIMERB_1 from CAPTURE CCI%dB\n",i);
-		      msp430_interrupt_set(INTR_TIMERB_1);
-		    }
-		}
-#endif
-	      break;
+	      /*************/
 	    case 2: /* GND */
-	      HW_DMSG_TIMER("msp430:" TIMERBNAME ": capture not implemented on this port\n");
+	      /*************/
 	      ERROR("msp430:" TIMERBNAME ": capture not implemented on this port (GND)\n");
 	      break;
+	      /*************/
 	    case 3: /* Vcc */
-	      HW_DMSG_TIMER("msp430:" TIMERBNAME ": capture not implemented on this port\n");
+	      /*************/
 	      ERROR("msp430:" TIMERBNAME ": capture not implemented on this port (Vcc)\n");
 	      break;
 	    }
 	}
     }
 }
-
 
 /* ************************************************** */
 /* ************************************************** */

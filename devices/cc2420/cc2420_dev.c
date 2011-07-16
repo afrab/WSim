@@ -113,15 +113,15 @@ int cc2420_device_create (int dev_num, int fxosc_mhz, char *antenna)
 
   cc2420->fsm_state = CC2420_STATE_POWER_DOWN;
 
-  TRACER_CC2420_STATE   = tracer_event_add_id(8, "cc2420_state",   "cc2420");
-  TRACER_CC2420_STROBE  = tracer_event_add_id(8, "cc2420_strobe",  "cc2420");
-  TRACER_CC2420_CS      = tracer_event_add_id(1, "cc2420_cs",      "cc2420");
-  TRACER_CC2420_FIFOP   = tracer_event_add_id(1, "cc2420_fifop",   "cc2420");
-  TRACER_CC2420_FIFO    = tracer_event_add_id(1, "cc2420_fifo",    "cc2420");
-  TRACER_CC2420_CCA     = tracer_event_add_id(1, "cc2420_cca",     "cc2420");
-  TRACER_CC2420_SFD     = tracer_event_add_id(1, "cc2420_sfd",     "cc2420"); 
-  TRACER_CC2420_VREG_EN = tracer_event_add_id(1, "cc2420_vreg_en", "cc2420"); 
-  TRACER_CC2420_RESET   = tracer_event_add_id(1, "cc2420_reset",   "cc2420"); 
+  TRACER_CC2420_STATE   = tracer_event_add_id(8, "state",   "cc2420");
+  TRACER_CC2420_STROBE  = tracer_event_add_id(8, "strobe",  "cc2420");
+  TRACER_CC2420_CS      = tracer_event_add_id(1, "cs",      "cc2420");
+  TRACER_CC2420_FIFOP   = tracer_event_add_id(1, "fifop",   "cc2420");
+  TRACER_CC2420_FIFO    = tracer_event_add_id(1, "fifo",    "cc2420");
+  TRACER_CC2420_CCA     = tracer_event_add_id(1, "cca",     "cc2420");
+  TRACER_CC2420_SFD     = tracer_event_add_id(1, "sfd",     "cc2420"); 
+  TRACER_CC2420_VREG_EN = tracer_event_add_id(1, "vreg_en", "cc2420"); 
+  TRACER_CC2420_RESET   = tracer_event_add_id(1, "reset",   "cc2420"); 
 
   /* init packets log */
   logpkt_init_interface(cc2420->worldsens_radio_id, "cc2420", PCAP_DLT_802154);
@@ -315,7 +315,7 @@ int cc2420_io_pins(struct _cc2420_t * cc2420)
 	if      ( (!ram_access) && (!read_access) && (cc2420->SPI_addr <= 0x0E) ) 
 	  { 
 	    /* writing a command strobe, address cycle (the only cycle for strobes) */
-	    CC2420_DBG_ACCESS("cc2420:access: write address %x == Strobe\n", cc2420->SPI_addr & 0xff);
+	    CC2420_DBG_ACCESS("cc2420:access: write address 0x%02x == Strobe\n", cc2420->SPI_addr & 0xff);
 	    cc2420_write_status(cc2420);
 	    cc2420_strobe_command(cc2420);
 	    return 0;
@@ -323,7 +323,7 @@ int cc2420_io_pins(struct _cc2420_t * cc2420)
 	else if  ( (!ram_access) && (!read_access) && (cc2420->SPI_addr >= 0x10) && (cc2420->SPI_addr <= 0x30) ) 
 	  {
 	    /* writing to a conf register, address cycle */ /* wait for next two bytes */
-	    CC2420_DBG_ACCESS("cc2420:access: write address %x == REG\n", cc2420->SPI_addr & 0xff);
+	    CC2420_DBG_ACCESS("cc2420:access: write address 0x%02x == REG\n", cc2420->SPI_addr & 0xff);
 	    cc2420_write_status(cc2420);
 	    cc2420->SI_type = CC2420_SPI_NEXT_ACCESS_TYPE_REG_WRITE_BYTE1; 
 	    return 0;
@@ -331,7 +331,7 @@ int cc2420_io_pins(struct _cc2420_t * cc2420)
 	else if ( (!ram_access) && (!read_access) && (cc2420->SPI_addr == 0x3E) ) 
 	  {
 	    /* writing to the TX FIFO, address cycle */
-	    CC2420_DBG_ACCESS("cc2420:access: write address %x == TXFIFO\n", cc2420->SPI_addr & 0xff);
+	    CC2420_DBG_ACCESS("cc2420:access: write address 0x%02x == TXFIFO\n", cc2420->SPI_addr & 0xff);
 	    cc2420_write_status(cc2420);
 	    cc2420->SI_type = CC2420_SPI_NEXT_ACCESS_TYPE_TXFIFO_WRITE;
 	    return 0;
@@ -339,7 +339,7 @@ int cc2420_io_pins(struct _cc2420_t * cc2420)
 	else if ( (!ram_access) && (read_access) && (cc2420->SPI_addr >= 0x10) && (cc2420->SPI_addr <= 0x30) ) 
 	  {
 	    /* reading a conf register, address cycle */
-	    CC2420_DBG_ACCESS("cc2420:access: read address %x == REG\n", cc2420->SPI_addr & 0xff);
+	    CC2420_DBG_ACCESS("cc2420:access: read address 0x%02x == REG\n", cc2420->SPI_addr & 0xff);
 	    cc2420_write_status(cc2420);
 	    cc2420->SI_type = CC2420_SPI_NEXT_ACCESS_TYPE_REG_READ_BYTE1;
 	    return 0;
@@ -347,7 +347,7 @@ int cc2420_io_pins(struct _cc2420_t * cc2420)
 	else if ( (!ram_access) && (read_access) && (cc2420->SPI_addr == 0x3F) ) 
 	  {
 	    /* reading RX FIFO, address cycle */
-	    CC2420_DBG_ACCESS("cc2420:access: read address %x == RXFIFO\n", cc2420->SPI_addr & 0xff);
+	    CC2420_DBG_ACCESS("cc2420:access: read address 0x%02x == RXFIFO\n", cc2420->SPI_addr & 0xff);
 	    cc2420_write_status(cc2420);
 	    cc2420->SI_type = CC2420_SPI_NEXT_ACCESS_TYPE_RXFIFO_READ;
 	    return 0;
@@ -355,7 +355,7 @@ int cc2420_io_pins(struct _cc2420_t * cc2420)
 	else if (ram_access) 
 	  {
 	    /* RAM, 1st address cycle (still don't know if it's read or write) */
-	    CC2420_DBG_ACCESS("cc2420:access: write address %x == RAM\n", cc2420->SPI_addr & 0xff);
+	    CC2420_DBG_ACCESS("cc2420:access: write address 0x%02x == RAM\n", cc2420->SPI_addr & 0xff);
 	    cc2420_write_status(cc2420);
 	    cc2420->SI_type = CC2420_SPI_NEXT_ACCESS_TYPE_RAM_BANK_SELECT;
 	    return 0;
@@ -368,7 +368,7 @@ int cc2420_io_pins(struct _cc2420_t * cc2420)
 	/* CC2420_SPI_NEXT_ACCESS_TYPE_REG_WRITE_BYTE1
 	 * we're writing to a register, get the first byte (registers are 16 bits long)
 	 */
-	CC2420_DBG_ACCESS("cc2420:access: write address 0x%x / REG byte1 = 0x%02x\n", 
+	CC2420_DBG_ACCESS("cc2420:access: write address 0x%02x / REG byte 1 = 0x%02x\n", 
 			  cc2420->SPI_addr & 0xff, cc2420->SI_pin & 0xff);
 	cc2420_spi_output(cc2420, 0x00); /* Send a dummy byte to the SPI. Value got by experimental test on hardware */
 	cc2420->SI_byte1 = cc2420->SI_pin;
@@ -380,7 +380,7 @@ int cc2420_io_pins(struct _cc2420_t * cc2420)
 	/* CC2420_SPI_NEXT_ACCESS_TYPE_REG_WRITE_BYTE2
 	 * writing to a register, second byte
 	 */
-	CC2420_DBG_ACCESS("cc2420:access: write address 0x%x / REG byte2 = 0x%02x\n", 
+	CC2420_DBG_ACCESS("cc2420:access: write address 0x%02x / REG byte 2 = 0x%02x\n", 
 			  cc2420->SPI_addr & 0xff, cc2420->SI_pin & 0xff);
 	cc2420_spi_output(cc2420, 0x00); /*Send a dummy byte to the SPI. Value got by experimental test on hardware*/
 	cc2420_write_register(cc2420, cc2420->SPI_addr, (cc2420->SI_byte1 << 8) | cc2420->SI_pin);	
@@ -392,7 +392,8 @@ int cc2420_io_pins(struct _cc2420_t * cc2420)
 	/* CC2420_SPI_NEXT_ACCESS_TYPE_REG_READ_BYTE1
 	 * reading a register, 1st byte: output the high part
 	 */
-	CC2420_DBG_ACCESS("cc2420:access: read address %x == REG byte 1\n", cc2420->SPI_addr & 0xff);
+	CC2420_DBG_ACCESS("cc2420:access: read address 0x%02x / REG byte 1 = 0x%02x\n", 
+	                  cc2420->SPI_addr & 0xff, cc2420_read_register_h(cc2420, cc2420->SPI_addr));
 	cc2420_spi_output(cc2420, cc2420_read_register_h(cc2420, cc2420->SPI_addr));
 	cc2420->SI_type = CC2420_SPI_NEXT_ACCESS_TYPE_REG_READ_BYTE2;
 	return 0;
@@ -402,7 +403,8 @@ int cc2420_io_pins(struct _cc2420_t * cc2420)
 	/* CC2420_SPI_NEXT_ACCESS_TYPE_REG_READ_BYTE2
 	 * reading a register, 2nd byte : output the low part
 	 */
-	CC2420_DBG_ACCESS("cc2420:access: read address %x == REG byte 2\n", cc2420->SPI_addr & 0xff);
+	CC2420_DBG_ACCESS("cc2420:access: read address 0x%02x / REG byte 2 = 0x%02x\n", 
+	                  cc2420->SPI_addr & 0xff, cc2420_read_register_l(cc2420, cc2420->SPI_addr));
 	cc2420_spi_output(cc2420, cc2420_read_register_l(cc2420, cc2420->SPI_addr));
 	cc2420->SI_type = CC2420_SPI_NEXT_ACCESS_TYPE_ADDR;
 	return 0;
@@ -414,7 +416,7 @@ int cc2420_io_pins(struct _cc2420_t * cc2420)
 	 * leave access type unchanged, multiple access
 	 * increment SPI address
 	 */
-	CC2420_DBG_ACCESS("cc2420:access: TXFIFO write address %x\n", cc2420->SPI_addr & 0xff);
+	CC2420_DBG_ACCESS("cc2420:access: TXFIFO write address 0x%02x\n", cc2420->SPI_addr & 0xff);
 	cc2420_write_status(cc2420);
 	cc2420_tx_fifo_write(cc2420, cc2420->SI_pin);
 	cc2420->SPI_addr++;
@@ -427,7 +429,7 @@ int cc2420_io_pins(struct _cc2420_t * cc2420)
 	 * increment SPI addr
 	 */
 	uint8_t val = 0;
-	CC2420_DBG_ACCESS("cc2420:access: RXFIFO read address %x\n", cc2420->SPI_addr & 0xff);
+	CC2420_DBG_ACCESS("cc2420:access: RXFIFO read address 0x%02x\n", cc2420->SPI_addr & 0xff);
 	if (cc2420_rx_fifo_pop(cc2420, &val) < 0 ) 
 	  {
 	    CC2420_DBG_PINS("cc2420_io_pins : can't read, RX FIFO is empty\n");
@@ -449,19 +451,19 @@ int cc2420_io_pins(struct _cc2420_t * cc2420)
 	/* CC2420_SPI_NEXT_ACCESS_TYPE_RAM_BANK_SELECT
 	 * we'll get the bank and the R/W flag
 	 */
-	CC2420_DBG_ACCESS("cc2420:access: RAM Bank Select address %x\n", cc2420->SPI_addr & 0xff);
+	CC2420_DBG_ACCESS("cc2420:access: RAM Bank Select address 0x%02x\n", cc2420->SPI_addr & 0xff);
 	cc2420->ram_bank = CC2420_RAM_BANK(cc2420->SI_pin);
 	cc2420_spi_output(cc2420, 0x00); /* Send a dummy byte to the SPI */
 	if (CC2420_RAM_READ_ACCESS(cc2420->SI_pin)) 
 	  {
 	    cc2420->SI_type = CC2420_SPI_NEXT_ACCESS_TYPE_RAM_READ_BYTE;
-	    CC2420_DBG_ACCESS("cc2420:access: RAM Bank number %x, access type read\n", cc2420->ram_bank);
+	    CC2420_DBG_ACCESS("cc2420:access: RAM Bank number 0x%02x, access type read\n", cc2420->ram_bank);
 	    return 0;
 	  }
 	else 
 	  {
 	    cc2420->SI_type = CC2420_SPI_NEXT_ACCESS_TYPE_RAM_WRITE_BYTE;
-	    CC2420_DBG_ACCESS("cc2420:access: RAM Bank number %x, access type write\n", cc2420->ram_bank);
+	    CC2420_DBG_ACCESS("cc2420:access: RAM Bank number 0x%02x, access type write\n", cc2420->ram_bank);
 	    return 0;
 	  }
       }
@@ -471,7 +473,7 @@ int cc2420_io_pins(struct _cc2420_t * cc2420)
 	 * read a byte from RAM
 	 * don't change the access type, but increment SPI address
 	 */
-	CC2420_DBG_ACCESS("cc2420:access: RAM read byte address %x\n", cc2420->SPI_addr & 0xff);
+	CC2420_DBG_ACCESS("cc2420:access: RAM read byte address 0x%02x\n", cc2420->SPI_addr & 0xff);
 	cc2420_spi_output(cc2420, cc2420_ram_read_byte(cc2420, cc2420->ram_bank, cc2420->SPI_addr));
 	cc2420->SPI_addr++;
 	return 0;
@@ -482,7 +484,7 @@ int cc2420_io_pins(struct _cc2420_t * cc2420)
 	 * write a byte to RAM
 	 * don't change the access type, but increment SPI address
 	 */
-	CC2420_DBG_ACCESS("cc2420:access: RAM write byte address %x\n", cc2420->SPI_addr & 0xff);
+	CC2420_DBG_ACCESS("cc2420:access: RAM write byte address 0x%02x\n", cc2420->SPI_addr & 0xff);
 	cc2420_spi_output(cc2420, cc2420_ram_write_byte(cc2420, cc2420->ram_bank, cc2420->SPI_addr, cc2420->SI_pin));
 	cc2420->SPI_addr++;
 	return 0;
@@ -638,7 +640,7 @@ void cc2420_write(int dev_num, uint32_t mask, uint32_t value)
     {
       cc2420->SI_pin = value & CC2420_DATA_MASK;
       cc2420->SI_set = 1;
-      CC2420_DBG_PINS("cc2420:pins:write: from mcu SI = 0x%x\n", value & CC2420_DATA_MASK);
+      CC2420_DBG_PINS("cc2420:pins:write: from mcu SI = 0x%02x\n", value & CC2420_DATA_MASK);
     }
   else
     {

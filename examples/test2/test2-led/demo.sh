@@ -1,36 +1,23 @@
-#! /bin/sh
+#! /bin/bash
 
-rm -f trace*.eps trace*.gp trace*.jpg
+source ../../utils/wsim.inc
 
-gnuplot_build()
-{    
-    GP=`echo *.gp`
-    if [ "$GP" != "*.gp" ] ; then 
-	for i in ${GP} ; do 
-	    gnuplot < $i 
-	done
-    fi
-}
+## ============= Config===================
 
-gnuplot_show()
-{
-    EPS=`echo *.eps`
-    if [ "$EPS" != "*.eps" ] ; then 
-	for i in ${EPS} ; do 
-	    gv $i & 
-	done
-    fi
-}
+ELF=leds.elf
+PLATFORM=msp1611
 
-CALLGRINDOPTS="--dump-line=yes --dump-instr=yes --trace-jump=yes --collect-systime=yes --collect-jumps=yes --combine-dumps=yes"
-DEBUG="callgrind ${CALLGRINDOPTS}"
+VERBOSE=2
+LOGFILE=wsim.log
+TRACEFILE=wsim.trc
+GUI=yes
 
-DEBUG=""
+MODE=run
+TIME=30s
 
-if [ "$1" != "" ] ; then 
-    ${DEBUG}  ./wsim --ui --serial0=$1 --trace=trace --tracemode=gplot  leds.elf 
-else
-    ${DEBUG}  ./wsim --ui --serial0=stdout --trace=trace --tracemode=gplot  leds.elf 
-fi 
+## ============= Run =====================
 
+run_wsim
+
+## =======================================
 

@@ -23,7 +23,7 @@ int main(void) {
     int i;
     int o = 0;
 
-    WDTCTL = WDTCTL_INIT;               //Init watchdog timer
+    WDTCTL = WDTPW + WDTHOLD;
 
     P1OUT  = P1OUT_INIT;                //Init output data of port1
     P2OUT  = P2OUT_INIT;                //Init output data of port2
@@ -42,7 +42,7 @@ int main(void) {
     while (1) {                         //main loop, never ends...
         for (i=0; i<8; i++, o++) {
             P1OUT = (1<<i) | (0x80>>(o&7));
-            delay(0x4fff);
+            delay(0xfff);
         }
     }
 }

@@ -5,5 +5,7 @@ but do not contain much msp430/AVR software or device drivers.
 Please use these examples are small demo programs. Useful scripts usually
 called demo.sh can be found in each directory.
 
+/examples/wsn430 are compatible with mspgcc uniarch. Other MSP430 examples
+are still to be used with mspgcc3 and mspgcc4.
 
 

@@ -108,6 +108,17 @@ int ptty_add_options(int dev_num, int dev_id, const char *dev_name)
 \t\t\t\tUDP   = udp:localIP:localport:remoteIP:remoteport\n",dev_name);
   opt_array[dev_id].io.value       = NULL;
 
+  /*
+  cmdline = [bk:][IO]
+  bk ::
+  IO :: tcp:s:IP:port                 tcp server
+        tcp:c:IP:port                 tcp client
+        udp:local:port:remote:port    udp point to point link
+        pipe:                         MS Windows pipe
+        create:                       create a named pipe using /dev/ptmx
+        output[,input]                files (plain, named pipes, /dev/..)
+  */
+
   options_add( & opt_array[dev_id].io);
   return 0;
 }

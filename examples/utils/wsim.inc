@@ -213,9 +213,10 @@ run_serial_term()
 
 run_serial_term()
 {
-    if [ "x${SERIAL_TERM[$1]}" != "x" ] ; then
-	_CMD="xterm -T serial$1 -e ${SERIAL_TERM[$1]}"
-	echo ${_CMD}
+    SER_TERM="`wsim_serial_opt $1 term`"
+    if [ "x${SER_TERM}" != "x" ] ; then
+	_CMD="xterm -T serial$1 -e ${SER_TERM}"
+	echo "run:: " ${_CMD}
 	${_CMD}
     fi
 }

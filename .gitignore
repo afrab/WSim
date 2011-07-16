@@ -1,11 +1,14 @@
 *.in
 *.o
+*.d
+*.hex
 *.lst
 *.elf
 *.a43
 *.log
 *.trc
 *.vcd
+*.pkt
 *.nc
 /aclocal.m4
 /autom4te.cache

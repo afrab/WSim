@@ -214,7 +214,7 @@ int cc2420_check_cca(struct _cc2420_t * cc2420) {
  */
 
 int cc2420_rx_filter(struct _cc2420_t * cc2420, double frequency, int modulation,
-                     double dBm, double UNUSED snr, uint8_t UNUSED rx) 
+                     double dBm, double UNUSED snr, uint8_t UNUSED rx)
 {
   double freq_cc;
 

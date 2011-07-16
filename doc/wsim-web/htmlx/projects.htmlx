@@ -28,9 +28,10 @@
     </tr>
 
     
-    ENTRY( 1 day   , 100% , Add mode to slow down simulation to meet realtime mode. )
-    ENTRY( 1 day   , 25% , Improve WSNet1 configuration and information tracing output. )
-    ENTRY( 1 day   , , Upgrade drivers and examples to newer version of MspGCC4. )
+    ENTRY( 1 day   , done , Add mode to slow down simulation to meet realtime mode. )
+    ENTRY( 1 day   , done , Improve WSNet1 configuration and information tracing output. )
+    ENTRY( 1 day   , done , Upgrade drivers and examples to newer version of MspGCC4. )
+    ENTRY( 1 day   , done , Update packet logger to output pcap file format (used for 802.15.4). )
     ENTRY( 2 days  , 15% , Move source code building system from autoconf/automake 
                        to <a href="http://www.cmake.org/">Cmake</a>. )
     ENTRY( 2 days  , , Build binary packages for Linux and Windows using the Cmake system and 
@@ -39,7 +40,7 @@
 		       <a href="http://www.vtk.org/Wiki/CMake_Testing_With_CTest">Ctest</a>. )
     ENTRY( 2 days  , , Write a python wrapper around WSim per-platforms executables. )
     ENTRY( 2 days  , , Work on WSim documentation and produce a standalone documentation. )
-    ENTRY( 4 days  , , Add MSP430 adc10 model to the msp430 block library. )
+    ENTRY( 4 days  , 40% , Add MSP430 adc10 model to the msp430 block library. )
     ENTRY( 4 days  , , Refactor MSP430 fetch/decode/execute simulation loop to use tables 
 		       of function pointers. )
     ENTRY( 5 days  , , Work on a more sophisticated information logging	module with flags 
@@ -53,7 +54,7 @@
 		       in WSim and build test cases for unit and regression testing. )
     ENTRY( 1 week  , , Add <a href="http://www.taosinc.com/ProductDetails.aspx?id=133">tsl2550</a> 
 		       peripheral model for Senslab platforms. )
-    ENTRY( 1 week  , , Add <a href="http://www.maxim-ic.com/datasheet/index.mvp/id/2766">ds1722</a> 
+    ENTRY( 1 week  , done , Add <a href="http://www.maxim-ic.com/datasheet/index.mvp/id/2766">ds1722</a> 
 		       peripheral model for Senslab platforms. )
     ENTRY( 1 week  , , Implement I2C on USART for MSP430 micro-controllers. )
     ENTRY( 2 weeks , 5% , MSP430 refactoring and 20 bits support for pointers and address.)
@@ -66,7 +67,7 @@
     SEPARATOR()
 
 
-    ENTRY( 1 month , 70% , Add Msp430x2xx family for ez430-rf2500 platform. )
+    ENTRY( 1 month , done , Add Msp430x2xx family for ez430-rf2500 platform. )
     ENTRY( 1 month , , Add Atmel 802.15.4 wireless chipsets. )
     ENTRY( 2 months, , Include libQEmu ARM model in WSim to target Kortex M3 models in WSim. )
     ENTRY( 3 months, , Build a GUI around WSim / WSNet. )

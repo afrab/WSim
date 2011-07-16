@@ -25,7 +25,7 @@
 			  <ul>
 			    <li> models: f135; f149; f449; f1611; f1612; f2212 ; f2213; f2274 </li>
 			    <li> peripherals: basic_clock; fll_clock; timerA; timerB; basic_timer; watchdog; 
-			      usart/uart+spi; uscia/uart+spi; uscib/spi; DMA; flash controller; adc12 </li>
+			      usart/uart+spi; uscia/uart+spi; uscib/spi; DMA; flash controller; adc10 ; adc12 </li>
 			  </ul>
 			  <b>Atmel ATMega</b>
 			  <ul>
@@ -43,6 +43,7 @@
 
       ENTRY( Others,
 			  Maxim serial ID DS2411; <br />
+			  Maxim Themperature sensor DS1722; <br />
 			  Leds; Bargraphs; <br />
 			  7 segments modules; <br />
 			  LCD display (hd44780; gdm1602) <br />
@@ -72,7 +73,7 @@
 
       SEPARATOR(Environment, )
 
-      ENTRY( ,  WSNet simulation interface )
+      ENTRY( Radio,  WSNet wireless network simulation interface )
       ENTRY( Analog,  ADC interface file )
 
       SEPARATOR( , )

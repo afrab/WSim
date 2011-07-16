@@ -1,60 +1,13 @@
-# makfile configuration
-NAME            = hwmul
-OBJECTS         = main.o uart.o
-CPU             = msp430x1611
 
-CFLAGS          = -mmcu=${CPU} -Wall -g
+# define one name for each executable to be built
+NAMES      = hwmul
+CPU        = -mmcu=msp430x1611
+UTILS_PATH = ../../utils
 
-#switch the compiler (for the internal make rules)
-CC              = msp430-gcc
+# sources files specific to 'first_target'
+SRC              = main.c uart.c
+INCLUDES         = -I. 
 
-.PHONY: all FORCE clean download download-jtag download-bsl dist
+# the makefile common will generate NAMES.hex and NAMES.elf files, and define 'all' and 'clean' directives
+-include ${UTILS_PATH}/mspgcc.makefile
 
-#all should be the first target. it's built when make is run without args
-all: ${NAME}.elf ${NAME}.a43 ${NAME}.lst
-
-hwmul: main.c
-	gcc -DLINUX main.c -o $@
-
-#confgigure the next line if you want to use the serial download
-download: download-jtag
-#download: download-bsl
-
-#additional rules for files
-${NAME}.elf: ${OBJECTS}
-	${CC} -mmcu=${CPU} -o $@ ${OBJECTS}
-
-${NAME}.a43: ${NAME}.elf
-	msp430-objcopy -O ihex $^ $@
-
-${NAME}.lst: ${NAME}.elf
-	msp430-objdump -dSt $^ >$@
-
-${NAME}.dmp: ${NAME}.elf
-	msp430-objdump -d $^ >$@
-
-main.pp.c: main.c
-	${CC} -E $(CFLAGS) $^ >$@
-
-%.s: %.c
-	${CC} -S $(CFLAGS) $^ >$@
-
-download-jtag: all
-	msp430-jtag -e ${NAME}.elf
-
-download-bsl: all
-	msp430-bsl -e ${NAME}.elf
-
-clean:
-	rm -f ${NAME}.elf ${NAME}.a43 ${NAME}.lst ${OBJECTS}
-
-#backup archive
-dist:
-	tar czf dist.tgz *.c *.h *.txt makefile
-
-#dummy target as dependecy if something has to be build everytime
-FORCE:
-
-#project dependencies
-main.o: main.c uart.h
-uart.o: uart.c uart.h

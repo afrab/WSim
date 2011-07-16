@@ -174,6 +174,7 @@ void test_hwmul()
 
 int main(void) 
 {
+  WDTCTL = WDTPW + WDTHOLD;
 
 #if !defined(LINUX)
   asm("mov #0,r15");

@@ -60,15 +60,15 @@ typedef struct _infomem_t infomem_t;
 
 #define INTR_RESET        15
 #define INTR_NMI          14
-#define INTR_TIMERB3_0    13
-#define INTR_TIMERB3_1    12
+#define INTR_TIMERB_0     13
+#define INTR_TIMERB_1     12
 #define INTR_COMP_A       11
 #define INTR_WATCHDOG     10
 #define INTR_USART0_RX     9
 #define INTR_USART0_TX     8
 #define INTR_ADC12         7
-#define INTR_TIMERA3_0     6 // CCR0 CCIFG
-#define INTR_TIMERA3_1     5 // CCR1, CCR2, TAIFG
+#define INTR_TIMERA_0      6 // CCR0 CCIFG
+#define INTR_TIMERA_1      5 // CCR1, CCR2, TAIFG
 #define INTR_IOPORT1       4
 #define INTR_UNUSED_1      3
 #define INTR_UNUSED_2      2
@@ -136,15 +136,15 @@ static infomem_t UNUSED infomem[] = {};
 
 #define INTR_RESET        15
 #define INTR_NMI          14
-#define INTR_TIMERB7_0    13
-#define INTR_TIMERB7_1    12
+#define INTR_TIMERB_0     13
+#define INTR_TIMERB_1     12
 #define INTR_COMP_A       11
 #define INTR_WATCHDOG     10
 #define INTR_USART0_RX     9
 #define INTR_USART0_TX     8
 #define INTR_ADC12         7
-#define INTR_TIMERA3_0     6 // CCR0 CCIFG
-#define INTR_TIMERA3_1     5 // CCR1, CCR2, TAIFG
+#define INTR_TIMERA_0      6 // CCR0 CCIFG
+#define INTR_TIMERA_1      5 // CCR1, CCR2, TAIFG
 #define INTR_IOPORT1       4
 #define INTR_USART1_RX     3
 #define INTR_USART1_TX     2
@@ -216,15 +216,15 @@ static infomem_t UNUSED infomem[] = {};
 
 #define INTR_RESET         15
 #define INTR_NMI           14
-#define INTR_TIMERB7_0     13
-#define INTR_TIMERB7_1     12
+#define INTR_TIMERB_0      13
+#define INTR_TIMERB_1      12
 #define INTR_COMP_A        11
 #define INTR_WATCHDOG      10
 #define INTR_USART0_RX      9
 #define INTR_USART0_TX      8
 #define INTR_ADC12          7
-#define INTR_TIMERA3_0      6
-#define INTR_TIMERA3_1      5
+#define INTR_TIMERA_0       6
+#define INTR_TIMERA_1       5
 #define INTR_IOPORT1        4
 #define INTR_USART1_RX      3
 #define INTR_USART1_TX      2
@@ -322,15 +322,15 @@ static infomem_t UNUSED infomem[] = {};
 
 #define INTR_RESET        15
 #define INTR_NMI          14
-#define INTR_TIMERB7_0    13
-#define INTR_TIMERB7_1    12
+#define INTR_TIMERB_0     13
+#define INTR_TIMERB_1     12
 #define INTR_COMP_A       11
 #define INTR_WATCHDOG     10
 #define INTR_USART0_RX     9
 #define INTR_USART0_TX     8
 #define INTR_ADC12         7
-#define INTR_TIMERA3_0     6 // CCR0 CCIFG
-#define INTR_TIMERA3_1     5 // CCR1, CCR2, TAIFG
+#define INTR_TIMERA_0      6 // CCR0 CCIFG
+#define INTR_TIMERA_1      5 // CCR1, CCR2, TAIFG
 #define INTR_IOPORT1       4
 #define INTR_USART1_RX     3
 #define INTR_USART1_TX     2
@@ -487,12 +487,12 @@ static infomem_t UNUSED infomem[] = {};
 
 #define INTR_RESET        31
 #define INTR_NMI          30
-#define INTR_TIMERB3_0    29
-#define INTR_TIMERB3_1    28
+#define INTR_TIMERB_0     29
+#define INTR_TIMERB_1     28
 // 27
 #define INTR_WATCHDOG     26
-#define INTR_TIMERA3_0    25
-#define INTR_TIMERA3_1    24     
+#define INTR_TIMERA_0     25
+#define INTR_TIMERA_1     24     
 #define INTR_USCIX0_RX    23 // Multiple Source Flag (USCIA0 & USCIB0)
 #define INTR_USCIX0_TX    22 // Multiple Source Flag (USCIA0 & USCIB0)
 #define INTR_ADC10        21
@@ -570,16 +570,6 @@ static infomem_t UNUSED infomem[] = {
 /* ********************************************************************** */
 /* ********************************************************************** */
 /* ********************************************************************** */
-
-#if defined(__msp430_have_timerb3) || defined(__msp430_have_timerb7)
-#if defined(__msp430_have_timerb7)
-#define INTR_TIMERB_0 INTR_TIMERB7_0
-#define INTR_TIMERB_1 INTR_TIMERB7_1
-#else
-#define INTR_TIMERB_0 INTR_TIMERB3_0
-#define INTR_TIMERB_1 INTR_TIMERB3_1
-#endif
-#endif
 
 #if defined(WSIM_USES_GNU_BFD)
 #define MCU_MACH_ID MCU_BFD_MACH_ID

@@ -74,10 +74,15 @@ struct _battery_public {
 /**************************************************************************/
 /**************************************************************************/
 /**************************************************************************/
+
+#define TRACER_UNKNOWN_DATA 0xffffffff
+
 struct _node {
   int addr;
   int active;
   int trc_id;
+  uint32_t trc_lastdata;
+
   double x, y, z;
 	
   struct _model_application * application;

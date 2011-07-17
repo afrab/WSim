@@ -267,6 +267,7 @@ enum ds2411_searchrom_state_enum_t {
 
 typedef enum ds2411_readrom_state_enum_t   ds2411_readrom_state_t;
 typedef enum ds2411_searchrom_state_enum_t ds2411_searchrom_state_t;
+
 /***************************************************/
 /***************************************************/
 /***************************************************/
@@ -976,7 +977,7 @@ static void update_ds2411_state_readrom(int dev, uint64_t current_time, uint64_t
 	    {
 	      DS2411_READROM_BYTENUM  = 0;
 	      HW_DMSG_DSTATE("ds2411: READ ROM finished\n");
-	      INFO("ds2411: READ ROM finished\n");
+	      // INFO("ds2411: READ ROM finished\n");
 	      GO_WAIT_RESET(dev);
 	    }
 	}
@@ -1102,14 +1103,9 @@ void ds2411_ui_get_pos  (int UNUSED dev, int *x, int *y)
 /***************************************************/
 /***************************************************/
 
-void ds2411_statdump(int UNUSED dev, wsimtime_t UNUSED user_nanotime)
+void ds2411_statdump(int dev, wsimtime_t UNUSED user_nanotime)
 {
-  /*
-  if (.io.value)
-    {
-      OUTPUT("     + opt: %s\n",  opt_array[DS2411_SERID].io.value);
-    }
-  */
+  OUTPUT("     + id: %s\n", ds2411_id_to_str( & DS2411_ID ));
 }
 
 /***************************************************/

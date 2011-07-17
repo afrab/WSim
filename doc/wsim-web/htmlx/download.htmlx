@@ -31,6 +31,12 @@
   <pre class="terminal">
       <span class="prompt">$ </span><span class="input">svn checkout --username login https://scm.gforge.inria.fr/svn/wsim</span> </pre>
 
+  <h3>GIT instructions</h3>
+
+  <p> If you want to participate to WSim but do not want to create an account on the INRIA Forge, you
+    can fork the project on <a href="http://github.com/">Github</a>:
+    <a href="http://github.com/afrab/WSim">http://github.com/afrab/WSim</a>
+  </p>
 </div>
 
 <!-- FOOTER -->

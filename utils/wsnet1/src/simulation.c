@@ -6,6 +6,8 @@
  *  Copyright 2005 __WorldSens__. All rights reserved.
  *
  */
+#include <signal.h>
+
 #include <private/core_private.h>
 #include <private/sim_conf.h>
 #include <private/command_line.h>
@@ -49,8 +51,71 @@ void set_global_time(uint64_t time)
 /**************************************************************************/
 /**************************************************************************/
 
+#define SIG_NAME_MAX 30
+char* unix_signal_to_str(int sig)
+{
+  static char sig_unknown[SIG_NAME_MAX]; 
+
+  switch (sig)
+    {
+    case 0       : return "";
+    case SIGINT  : return "SIGINT";
+    case SIGILL  : return "SIGILL";
+    case SIGABRT : return "SIGABRT";
+    case SIGFPE  : return "SIGFPE";
+    case SIGSEGV : return "SIGSEGV";
+    case SIGTERM : return "SIGTERM";
+#if defined(SIGHUP)
+    case SIGHUP  : return "SIGHUP";
+    case SIGQUIT : return "SIGQUIT";
+    case SIGKILL : return "SIGKILL";
+    case SIGPIPE : return "SIGPIPE";
+    case SIGUSR1 : return "SIGUSR1";      
+    case SIGUSR2 : return "SIGUSR2";      
+    case SIGALRM : return "SIGALRM";
+    case SIGSTOP : return "SIGSTOP";
+    case SIGTSTP : return "SIGTSTP";
+    case SIGCONT : return "SIGCONT";
+#endif
+    default      : 
+      sprintf(sig_unknown,"unknown %d",sig);
+      return sig_unknown;
+    }
+}
+
+char* host_signal_str(int sig)
+{
+  static char buff[SIG_NAME_MAX];
+
+#if  0 /* defined(FUNC_STRSIGNAL_DEFINED) */
+  strcpy(buff,strsignal(sig));
+#else
+  strcpy(buff,unix_signal_to_str(sig));
+#endif
+
+  return buff;
+}
+
+void signal_quit(int signum)
+{
+  WARNING("wsnet1: simulation stopped, received Unix signal %d (%s)\n",signum,host_signal_str(signum));
+  simulation_keeps_going = 0;
+}
+
+/**************************************************************************/
+/**************************************************************************/
+/**************************************************************************/
+
 int simulation_start(int argc, char* argv[]) 
 {
+#if !defined(__MINGW32__)
+  signal(SIGINT ,signal_quit);
+  signal(SIGQUIT,signal_quit);
+  signal(SIGUSR1,signal_quit);
+  signal(SIGUSR2,signal_quit);
+  signal(SIGPIPE,signal_quit); 
+#endif
+
   logger_init("stdout",4);
   tracer_init("wsnet1.trc", 0);
   tracer_set_timeref(get_global_time);

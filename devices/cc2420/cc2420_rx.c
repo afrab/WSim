@@ -214,7 +214,7 @@ int cc2420_check_cca(struct _cc2420_t * cc2420) {
  */
 
 int cc2420_rx_filter(struct _cc2420_t * cc2420, double frequency, int modulation,
-		     double dBm, double UNUSED snr) 
+                     double dBm, double UNUSED snr, uint8_t rx) 
 {
   double freq_cc;
 
@@ -225,7 +225,8 @@ int cc2420_rx_filter(struct _cc2420_t * cc2420, double frequency, int modulation
   if ( (cc2420->fsm_state != CC2420_STATE_RX_SFD_SEARCH) &&
        (cc2420->fsm_state != CC2420_STATE_RX_FRAME) ) 
     {
-      CC2420_DBG_RX("cc2420:rx: dropping received data, not in Rx mode\n");
+      CC2420_DBG_RX("cc2420:rx: dropping received data [0x%02x,%c], not in Rx mode\n",
+                    rx, isprint(rx) ? rx:'.');
       return -1;
     }
 
@@ -649,7 +650,7 @@ uint64_t cc2420_callback_rx(void *arg, struct wsnet_rx_info *wrx)
 
 
     /* check if we are able to receive data */
-    if (cc2420_rx_filter(cc2420, frequency, modulation, dBm, snr)) {
+    if (cc2420_rx_filter(cc2420, frequency, modulation, dBm, snr, rx)) {
 	return 0;
     }
     uint16_t addr_decode = CC2420_REG_MDMCTRL0_ADR_DECODE(cc2420->registers[CC2420_REG_MDMCTRL0]);

@@ -266,8 +266,8 @@ worldsens_s_initialize (struct _worldsens_s *worldsens)
   worldsens->synched          = 0;
 
   /* Initialize tracer */
-  worldsens->trc_mcast_rx     = tracer_event_add_id(32,"mcast_rx","wsnet1");
-  worldsens->trc_mcast_tx     = tracer_event_add_id(32,"mcast_tx","wsnet1");
+  worldsens->trc_mcast_rx     = tracer_event_add_id(16,"mcast_rx","wsnet1");
+  worldsens->trc_mcast_tx     = tracer_event_add_id(16,"mcast_tx","wsnet1");
 
   return 0;
 
@@ -508,7 +508,22 @@ worldsens_s_listen_to_next_rp (struct _worldsens_s *worldsens)
 		  }
 		WSNET_S_DBG_TX (",freq:%gMHz,mod:%d,tx:%lgmW)\n",
 			       (unsigned)packet->freq / 1000000.0, packet->modulation, packet->tx_mW);
-		tracer_event_record(g_nodes[node->addr].trc_id,data);
+		
+		if ((g_nodes[node->addr].trc_lastdata != TRACER_UNKNOWN_DATA) &&
+		    (data == (g_nodes[node->addr].trc_lastdata & 0xff)))
+		  {
+		    int d;
+		    d = g_nodes[node->addr].trc_lastdata >> 8;
+		    d = ((d+1) << 8) | data;
+		    g_nodes[node->addr].trc_lastdata = d;
+		    tracer_event_record(g_nodes[node->addr].trc_id,d);
+		  }
+		else
+		  {
+		    g_nodes[node->addr].trc_lastdata = data;
+		    tracer_event_record(g_nodes[node->addr].trc_id,data);
+		  }
+		
 	      }
 
 	      /* Create event */

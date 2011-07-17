@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <ctype.h>
 
 #include "logpkt.h"
 #include "liblogger/logger.h"
@@ -413,6 +414,7 @@ void logpkt_tx_abort_pkt_op(int interface_id, const char* error)
 static void logpkt_rx_dump_pkt(struct _logpkt_state_t *logpkt, int interface_id)
 {
   int i;
+  char c;
 
   /* current rx frame not empty */
   if (logpkt->rx_pkt_offset && log_mode != LOG_TX_ONLY)
@@ -424,11 +426,22 @@ static void logpkt_rx_dump_pkt(struct _logpkt_state_t *logpkt, int interface_id)
 	      logpkt->rx_start_time,
 	      logpkt->rx_end_time);
 
+      /* hex */
       for (i = 0; i < logpkt->rx_pkt_offset - 1; i++)
 	{
 	  fprintf(logpkt_logfile,"%02x:", logpkt->current_rx_pkt[i]);
 	}
       fprintf(logpkt_logfile,"%02x", logpkt->current_rx_pkt[logpkt->rx_pkt_offset - 1]);
+      fprintf(logpkt_logfile,"%s\n", logpkt->rx_error_log);
+
+      /* ascii */
+      for (i = 0; i < logpkt->rx_pkt_offset - 1; i++)
+	{
+	  c = logpkt->current_rx_pkt[i];
+	  fprintf(logpkt_logfile," %c:", isprint(c) ? c : '.');
+	}
+      c = logpkt->current_rx_pkt[logpkt->rx_pkt_offset - 1];
+      fprintf(logpkt_logfile," %c", isprint(c) ? c : '.');
       fprintf(logpkt_logfile,"%s\n", logpkt->rx_error_log);
 
       logpkt_no_bk_tab[interface_id].rx_pkt_count++;
@@ -439,6 +452,7 @@ static void logpkt_rx_dump_pkt(struct _logpkt_state_t *logpkt, int interface_id)
 static void logpkt_tx_dump_pkt(struct _logpkt_state_t *logpkt, int interface_id)
 {
   int i;
+  char c;
 
   /* current tx frame not empty */
   if (logpkt->tx_pkt_offset && log_mode != LOG_RX_ONLY)
@@ -450,11 +464,22 @@ static void logpkt_tx_dump_pkt(struct _logpkt_state_t *logpkt, int interface_id)
 	      logpkt->tx_start_time,
 	      logpkt->tx_end_time);
 
+      /* hex */
       for (i = 0; i < logpkt->tx_pkt_offset - 1; i++)
 	{
 	  fprintf(logpkt_logfile,"%02x:", logpkt->current_tx_pkt[i]);
 	}
       fprintf(logpkt_logfile,"%02x", logpkt->current_tx_pkt[logpkt->tx_pkt_offset - 1]);
+      fprintf(logpkt_logfile,"%s\n", logpkt->tx_error_log);
+      
+      /* ascii */
+      for (i = 0; i < logpkt->tx_pkt_offset - 1; i++)
+	{
+	  c = logpkt->current_tx_pkt[i];
+	  fprintf(logpkt_logfile," %c:", isprint(c) ? c : '.');
+	}
+      c = logpkt->current_tx_pkt[logpkt->tx_pkt_offset - 1];
+      fprintf(logpkt_logfile," %c", isprint(c) ? c : '.');
       fprintf(logpkt_logfile,"%s\n", logpkt->tx_error_log);
 
       logpkt_no_bk_tab[interface_id].tx_pkt_count++;

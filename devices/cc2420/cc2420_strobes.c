@@ -832,10 +832,36 @@ void cc2420_strobe_state_rx_overflow(struct _cc2420_t * cc2420)
  * issue a command strobe
  */
 
+static char* cc2420_strobe_str(int strobe)
+{
+  switch (strobe) 
+    {
+    case CC2420_STROBE_SNOP    : return "SNOP";     /* no op                                        */
+    case CC2420_STROBE_SXOSCON : return "SXOSCON";  /* turn on oscillator                           */
+    case CC2420_STROBE_STXCAL  : return "STXCAL";   /* enable and calibrate freq synthetizer for TX */
+    case CC2420_STROBE_SRXON   : return "SRXON";    /* enable RX                                    */
+    case CC2420_STROBE_STXON   : return "STXON";    /* enable TX                                    */
+    case CC2420_STROBE_STXONCCA: return "STXONCCA"; /* if channel clear, enable cal and TX          */
+    case CC2420_STROBE_SRFOFF  : return "SRFOFF";   /* disable RT/TX and freq synth                 */
+    case CC2420_STROBE_SXOSCOFF: return "SXOSCOFF"; /* turn off crystal osc and RF                  */
+    case CC2420_STROBE_SFLUSHRX: return "SFLUSHRX"; /* flush RX FIFO                                */
+    case CC2420_STROBE_SFLUSHTX: return "SFLUSHTX"; /* flush TX FIFO                                */
+    case CC2420_STROBE_SACK    : return "SACK";     /* send ACK with pending field clear            */
+    case CC2420_STROBE_SACKPEND: return "SACKPEND"; /* send ACK with pending field set              */
+    case CC2420_STROBE_SRXDEC  : return "SRXDEC";   /* start RX FIFO inline decryption              */
+    case CC2420_STROBE_STXENC  : return "STXENC";   /* start TX FIFO inline encryption              */
+    case CC2420_STROBE_SAES    : return "SAES";     /* AES standalone encryption                    */
+    default: break;
+    }
+  return "Unknown";
+}
+
 void cc2420_strobe_command(struct _cc2420_t * cc2420) 
 {
   tracer_event_record(TRACER_CC2420_STROBE, cc2420->SPI_addr);
 
+  CC2420_DBG_STROBE("cc2420:strobe: starting Strobe %d - %s\n", cc2420->SPI_addr, 
+                    cc2420_strobe_str(cc2420->SPI_addr));
   if (cc2420->SPI_addr == CC2420_STROBE_SNOP) 
     {
       /* even for a noop do nothing in those states */
@@ -898,8 +924,12 @@ void cc2420_strobe_command(struct _cc2420_t * cc2420)
     case CC2420_STATE_RX_CALIBRATE :
       cc2420_strobe_state_rx_calibrate(cc2420);
       break;
+    case CC2420_STATE_XOSC_STARTING:
+      CC2420_DBG_STROBE("cc2420:strobe: XOSC not yet stable, strobe %d ignored\n");
+      break;
     default:
-      CC2420_DBG_STROBE("cc2420:strobe: state %d not implemented yet\n",cc2420->fsm_state);
+      CC2420_DBG_STROBE("cc2420:strobe: state %d, strobe %d not implemented yet\n",
+                        cc2420->fsm_state,cc2420->SPI_addr);
       break;
     }
 }

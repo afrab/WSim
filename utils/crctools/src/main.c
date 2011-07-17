@@ -79,6 +79,7 @@ uint8_t check_crc(char* line)
   uint8_t ui8[MAX_LEN];
   uint8_t crc;
 
+  memset(val,0,sizeof(val));
   n = sscanf(line, SERIAL_ID_STR, 
 	     & val[0], & val[1], & val[2], & val[3], 
 	     & val[4], & val[5], & val[6], & val[7]);
@@ -99,11 +100,24 @@ uint8_t check_crc(char* line)
 /* ************************************************** */
 /* ************************************************** */
 
+void usage()
+{
+  printf("wcrc: command line tool for serial number CRC.\n");
+  printf("  input: hex serial number (0f:07:06:05:04:03:02:01)\n");
+  printf("  output: crc value.\n");
+}
+
 int main(int argc, char* argv[])
 {
   FILE *fin,*fout;
   uint8_t crc;
   char crcline[MAXLINE];
+
+  if (argc > 1)
+    {
+      usage();
+      exit(0);
+    }
 
   fin  = stdin;
   fout = stdout;

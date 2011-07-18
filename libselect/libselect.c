@@ -445,7 +445,7 @@ int libselect_id_create_io(int type, char* cmdline)
       default: return -1;
       }
       
-      if (flags == O_CREAT) // O_CREAT flag requires a third argument named "mode" 
+      if (flags & O_CREAT) // O_CREAT flag requires a third argument named "mode" 
 	fd = open(cmdline, flags, S_IRWXU);
       else
 	fd = open(cmdline, flags);

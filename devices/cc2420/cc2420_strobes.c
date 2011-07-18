@@ -860,7 +860,7 @@ void cc2420_strobe_command(struct _cc2420_t * cc2420)
 {
   tracer_event_record(TRACER_CC2420_STROBE, cc2420->SPI_addr);
 
-  CC2420_DBG_STROBE("cc2420:strobe: starting Strobe %d - %s\n", cc2420->SPI_addr, 
+  CC2420_DBG_STROBE("cc2420:strobe: starting Strobe %02d - %s\n", cc2420->SPI_addr, 
                     cc2420_strobe_str(cc2420->SPI_addr));
   if (cc2420->SPI_addr == CC2420_STROBE_SNOP) 
     {

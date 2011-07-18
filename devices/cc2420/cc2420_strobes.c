@@ -31,6 +31,7 @@
 /** 
  * for debug, strobe command names
  */
+/*
 char * CC2420_STROBE_NAMES[] = 
 {
   "SNOP", 
@@ -49,7 +50,7 @@ char * CC2420_STROBE_NAMES[] =
   "STXENC",
   "SAES"
 };
-
+*/
 
 /***************************************************/
 /***************************************************/
@@ -832,7 +833,7 @@ void cc2420_strobe_state_rx_overflow(struct _cc2420_t * cc2420)
  * issue a command strobe
  */
 
-static char* cc2420_strobe_str(int strobe)
+char* cc2420_strobe_str(int strobe)
 {
   switch (strobe) 
     {

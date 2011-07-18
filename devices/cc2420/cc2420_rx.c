@@ -745,14 +745,17 @@ uint64_t cc2420_callback_rx(void *arg, struct wsnet_rx_info *wrx)
 	/* first byte of FCF */
 	if (cc2420->rx_data_bytes == 2) {
 	    CC2420_DBG_RX("cc2420:rx:callback: 1st byte of fcf is %.1x, swapped %.1x\n", rx, swapbits(rx,8));
-	    CC2420_DBG_RX("cc2420:rx:callback: swapping byte, todo : check that it's not a bug in cc2420 in cc2420.c/com_send driver\n");
+	    /*
+	      CC2420_DBG_RX("cc2420:rx:callback: swapping byte, todo : check that it's not 
+	      a bug in cc2420 in cc2420.c/com_send driver\n");
+	    */
 	    cc2420->rx_fcf = swapbits(rx,8);
 	}
 
 	/* second byte of FCF */
 	if (cc2420->rx_data_bytes == 3) {
 	    CC2420_DBG_RX("cc2420:rx:callback: 2nd byte of fcf is %.1x, swapped %.1x\n", rx, swapbits(rx,8));
-	    cc2420->rx_fcf = (cc2420->rx_fcf << 8) | (swapbits(rx,8)) ; //cc2420->rx_fcf |= swapbits(rx,8) << 8;
+	    cc2420->rx_fcf = (cc2420->rx_fcf << 8) | (swapbits(rx,8)) ; 
 	}
 
 	/* sequence field */

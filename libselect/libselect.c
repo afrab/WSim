@@ -444,8 +444,13 @@ int libselect_id_create_io(int type, char* cmdline)
 	break;
       default: return -1;
       }
-
-      if ((fd = open(cmdline, flags)) == -1)
+      
+      if (flags == O_CREAT) // O_CREAT flag requires a third argument named "mode" 
+	fd = open(cmdline, flags, S_IRWXU);
+      else
+	fd = open(cmdline, flags);
+     
+      if (fd == -1)
 	{
 	  ERROR("wsim:libselect: cannot open file %s - %s\n",cmdline, strerror(errno));
 	  return -1;

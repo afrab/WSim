@@ -52,7 +52,7 @@ extern tracer_id_t TRACER_CC2420_RESET;
 #define CC2420_VREG_STARTUP_TIME 6000000
 
 /* oscillator strartup time, cf p12 (depends on the crystal used) */
-#define CC2420_XOSC_STARTUP_TIME 1000000
+#define CC2420_XOSC_STARTUP_TIME 100000 /* 100 µs */
 
 /* TODO:: calculated from bitrate and sb/chip */
 #define CC2420_SYMBOL_PERIOD       16000

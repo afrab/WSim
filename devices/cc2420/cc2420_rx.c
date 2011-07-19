@@ -170,7 +170,7 @@ void cc2420_record_rssi(struct _cc2420_t * cc2420, double dBm) {
  * update LQI value
  */
 
-void cc2420_record_corr_lqi(struct _cc2420_t *cc2420, double snr)
+void cc2420_record_corr_lqi(struct _cc2420_t *cc2420, double snr, double UNUSED dBm)
 {
   if (cc2420->corr_lqi_count >= 8) {
     return;
@@ -717,7 +717,7 @@ uint64_t cc2420_callback_rx(void *arg, struct wsnet_rx_info *wrx)
 	cc2420->rx_data_bytes ++;
 
 	/* update correlation / LQI for 8 first bytes */
-	cc2420_record_corr_lqi(cc2420,snr);
+	cc2420_record_corr_lqi(cc2420,snr,dBm);
 
 	/* if first byte of data and no other pending frame in rx fifo, save firts byte position in RX FIFO */
 	if (cc2420->rx_data_bytes == 1 && cc2420->nb_rx_frames == 0) {

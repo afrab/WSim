@@ -380,6 +380,7 @@ int devices_update(void)
 
 	  if (b != SYSTEM_BUTTON_LAST)
 	    {
+	     
 	      if (((b                  & (0x10)) == 0) && 
 		  ((SYSTEM_BUTTON_LAST & (0x10)) != 0))
 		{
@@ -391,7 +392,7 @@ int devices_update(void)
 		  ((SYSTEM_BUTTON_LAST & (0x10)) == 0))
 		{
 		  INFO("%s: button 1 released\n",NAME);
-		  msp430_digiIO_dev_write(PORT1, 0x04, 0x04);
+		  msp430_digiIO_dev_write(PORT1, 0x00, 0x0400);
 		}
 
 	      SYSTEM_BUTTON_LAST = b;
@@ -408,6 +409,7 @@ int devices_update(void)
 	break;
       }
   }
+
 
   /* *************************************************************************** */
   /* update                                                                      */

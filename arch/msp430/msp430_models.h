@@ -539,7 +539,6 @@ static infomem_t UNUSED infomem[] = {
 #define __msp430_have_timera3
 #define __msp430_have_timerb3
 #define __msp430_have_watchdog
-#define __msp430_have_watchdog_plus
 #define __msp430_have_adc10
 #define __msp430_have_flash
 

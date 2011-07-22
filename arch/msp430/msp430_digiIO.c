@@ -619,7 +619,7 @@ int msp430_digiIO_dev_read (int port_number, uint8_t *val)
 /* ************************************************** */
 /* ************************************************** */
 
-void msp430_digiIO_dev_write(int port_number, uint8_t val, uint8_t bitmask)
+void msp430_digiIO_dev_write(int port_number, uint8_t val, uint16_t bitmask)
 {
   uint8_t oldval;
 
@@ -637,14 +637,22 @@ void msp430_digiIO_dev_write(int port_number, uint8_t val, uint8_t bitmask)
    * PxOUT == 1 For pulldown: VIN = VCC;
    *
    */
-  oldval                 = DIGIIO_IN(port_number);
-  DIGIIO_IN(port_number) = (oldval & ~bitmask) | ((val & bitmask) & ~DIGIIO_DIR(port_number));
-  MCU.digiIO.in_updated[port_number] = oldval ^ DIGIIO_IN(port_number);
-#else
-  oldval                 = DIGIIO_IN(port_number);
-  DIGIIO_IN(port_number) = (oldval & ~bitmask) | ((val & bitmask) & ~DIGIIO_DIR(port_number));
-  MCU.digiIO.in_updated[port_number] = oldval ^ DIGIIO_IN(port_number);
-#endif
+  if (bitmask & 0xff00) // Resistor enable : 16 bit bitmask [ren mask][bitmask]
+  {
+    
+    oldval                 = DIGIIO_IN(port_number);
+    DIGIIO_IN(port_number) = (oldval & ~bitmask) | ((val & bitmask) | ((bitmask >> 8) & DIGIIO_REN(port_number) & DIGIIO_OUT(port_number)) & ~DIGIIO_DIR(port_number));
+    MCU.digiIO.in_updated[port_number] = oldval ^ DIGIIO_IN(port_number);
+    HW_DMSG_DIGI_IO("msp430:dio: pullup/pulldown resistor enable old=0x%02x val=0x%02x \n",oldval, MCU.digiIO.in_updated[port_number]);
+  }
+  else // normal behaviour
+#endif  
+  {
+    oldval                 = DIGIIO_IN(port_number);
+    DIGIIO_IN(port_number) = (oldval & ~bitmask) | ((val & bitmask) & ~DIGIIO_DIR(port_number));
+    MCU.digiIO.in_updated[port_number] = oldval ^ DIGIIO_IN(port_number);
+  }
+
 
   HW_DMSG_DIGI_IO("msp430:dio: write from devices on port %d val 0x%02x -> 0x%02x\n",
                   port_number + 1, oldval & 0xff, DIGIIO_IN(port_number) & 0xff);

@@ -516,12 +516,12 @@ worldsens_s_listen_to_next_rp (struct _worldsens_s *worldsens)
 		    d = g_nodes[node->addr].trc_lastdata >> 8;
 		    d = ((d+1) << 8) | data;
 		    g_nodes[node->addr].trc_lastdata = d;
-		    tracer_event_record(g_nodes[node->addr].trc_id,d);
+		    tracer_event_record_time(g_nodes[node->addr].trc_id,d,packet->tx_start);
 		  }
 		else
 		  {
 		    g_nodes[node->addr].trc_lastdata = data;
-		    tracer_event_record(g_nodes[node->addr].trc_id,data);
+		    tracer_event_record_time(g_nodes[node->addr].trc_id,data,packet->tx_start);
 		  }
 		
 	      }

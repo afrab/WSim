@@ -31,9 +31,11 @@ User
 Setting one on command line, enables packets log.
 
 --logpkt=[rx | tx | rxtx]
-rx: only RX are logged
-tx: only TX are logged
-rxtx: both RX and TX are logged (by default)
+rx          : only RX are logged
+tx          : only TX are logged
+rxtx        : both RX and TX are logged (by default)
+pcap[:type] : pcap file format, optional Data Link Type identifier (default 802.15.4)
+
 Parameters are optional.
 
 --logpktfile=filename

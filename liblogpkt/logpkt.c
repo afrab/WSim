@@ -194,7 +194,7 @@ void logpkt_init(int do_log_pkt, char* logpkt, const char* logpktfilename)
     }
   else
     {
-      strncpy(logpkt_filename,logpktfilename,MAXFILENAME);
+      strncpyz(logpkt_filename,logpktfilename,MAXFILENAME);
       INFO("wsim:liblogpkt:%s\n",logpkt_filename);
     }
 
@@ -454,9 +454,12 @@ static void logpkt_rx_dump_pkt(struct _logpkt_state_t *logpkt, int interface_id)
       switch (log_mode) 
 	{
 	case LOG_PCAP:
-	  logpkt_pcap_logrx(logpkt_logfile,
-	                    logpkt->current_rx_pkt,logpkt->rx_pkt_offset,
-	                    logpkt->rx_start_time,logpkt->rx_end_time);
+	  if (strcmp(logpkt->rx_error_log,"") == 0)
+	    {
+	      logpkt_pcap_logrx(logpkt_logfile,
+	                        logpkt->current_rx_pkt,logpkt->rx_pkt_offset,
+	                        logpkt->rx_start_time,logpkt->rx_end_time);
+	    }
 	  logpkt_no_bk_tab[interface_id].rx_pkt_count++;
 	  break;
 	case LOG_TX_ONLY:
@@ -505,9 +508,12 @@ static void logpkt_tx_dump_pkt(struct _logpkt_state_t *logpkt, int interface_id)
       switch (log_mode)
 	{
 	case LOG_PCAP:
-	  logpkt_pcap_logtx(logpkt_logfile,
-	                    logpkt->current_tx_pkt,logpkt->tx_pkt_offset,
-	                    logpkt->tx_start_time,logpkt->tx_end_time);
+	  if (strcmp(logpkt->tx_error_log,"") == 0)
+	    {
+	      logpkt_pcap_logtx(logpkt_logfile,
+	                        logpkt->current_tx_pkt,logpkt->tx_pkt_offset,
+	                        logpkt->tx_start_time,logpkt->tx_end_time);
+	    }
 	  logpkt_no_bk_tab[interface_id].tx_pkt_count++;
 	  break;
 	case LOG_RX_ONLY:

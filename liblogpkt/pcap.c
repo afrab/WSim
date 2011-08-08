@@ -109,6 +109,7 @@ void logpkt_pcap_logtx(FILE *logfile, uint8_t *pkt, int size, wsimtime_t start, 
 {
   struct pcap_pkthdr hdr;
   uint8_t *pktdata;
+  size_t sw;
   size_t shdr = sizeof(hdr);
   wsimtime_t usec = start / 1000;
 
@@ -129,13 +130,20 @@ void logpkt_pcap_logtx(FILE *logfile, uint8_t *pkt, int size, wsimtime_t start, 
       break;
     }
 
+  if (hdr.caplen <= 1)
+    {
+      PCAP_DBG("logpkt:pcap:write: packet cancel too short (size %d)\n",size);
+      return;
+    }
+
   if (fwrite(&hdr, shdr, 1, logfile) != 1)
     {
       ERROR("logpkt:pcap:write: cannot write packet header\n");
     }
-  if (fwrite(pktdata,1,hdr.caplen,logfile) != hdr.caplen)
+
+  if ((sw = fwrite(pktdata,1,hdr.caplen,logfile)) != hdr.caplen)
     {
-      ERROR("logpkt:pcap:write: cannot write packet\n");
+      ERROR("logpkt:pcap:write: cannot write packet (%d < %d)\n", sw, hdr.caplen);
     }
   PCAP_DBG("logpkt:pcap:write: hdr size=%d, pkt size=%d, start=%"PRIu64"\n",shdr,hdr.caplen,start);
 }

@@ -29,21 +29,32 @@ double g_z    = -1.0;
 
 struct _worldsens_s worldsens;
 
-
-
-uint64_t g_sim_time = 0;
+uint64_t     g_sim_time  = 0;
+uint64_t     g_timestamp = 0;
+tracer_id_t  g_timestamp_trc;   /* global timestamp in time updates */
 
 uint64_t get_global_time()               
 { 
   return g_sim_time; 
 }
 
+#define WSNET_RECORD_INTERNAL_TIME_PREC_SECONDS 0.1 /* seconds */
+#define WSNET_RECORD_INTERNAL_TIME_PREC (WSNET_RECORD_INTERNAL_TIME_PREC_SECONDS * 1000 * 1000 * 1000)
+
+#define WSNET_TRC_TIMESTAMP_RECORD()     tracer_event_record(g_timestamp_trc, \
+							       g_timestamp / (1000*1000*100))
+
 void set_global_time(uint64_t time)  
 { 
   g_sim_time = time; 
-  WSNET_S_DBG_TIME ("WSNET:: ===\n");
+
   OUTPUT ("WSNET:: === TIME  %"PRId64" (%.2fms, seq: %d)\n", time, (float)time / 1000000.0, worldsens.rp_seq);
-  WSNET_S_DBG_TIME ("WSNET:: ===\n");
+  if ((g_sim_time - g_timestamp) >= WSNET_RECORD_INTERNAL_TIME_PREC)
+    {
+      g_timestamp = g_sim_time; 
+      WSNET_TRC_TIMESTAMP_RECORD();
+    }
+
   tracer_state_save();
 }
 
@@ -120,6 +131,7 @@ int simulation_start(int argc, char* argv[])
   tracer_init("wsnet1.trc", 0);
   tracer_set_timeref(get_global_time);
   tracer_start();
+  g_timestamp_trc = tracer_event_add_id(32, "time_updates", "wsnet1");
 
   if (command_line (argc, argv)) 
     {

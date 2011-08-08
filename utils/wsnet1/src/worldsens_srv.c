@@ -268,7 +268,6 @@ worldsens_s_initialize (struct _worldsens_s *worldsens)
   /* Initialize tracer */
   worldsens->trc_mcast_rx     = tracer_event_add_id(16,"mcast_rx","wsnet1");
   worldsens->trc_mcast_tx     = tracer_event_add_id(16,"mcast_tx","wsnet1");
-
   return 0;
 
  error:
@@ -499,8 +498,10 @@ worldsens_s_listen_to_next_rp (struct _worldsens_s *worldsens)
 	      {
 		int iii;
 		uint32_t data = 0;
-		WSNET_S_DBG_TX ("WSNET:: <-- TX (%"PRId64",%d) (ip:%d,size:%d,data:",
-				 packet->tx_start, packet->seq, node->addr, packet->size);
+		/* WSNET_S_DBG_TX ("WSNET:: <-- TX (%"PRId64",%d) (ip:%d,size:%d,data:",
+		   packet->tx_start, packet->seq, node->addr, packet->size); */
+		WSNET_S_DBG_TX ("WSNET:: <-- TX (%d) (ip:%d,size:%d,data:", 
+		                packet->seq, node->addr, packet->size);
 		for(iii=0; iii<packet->size; iii++)
 		  {
 		    WSNET_S_DBG_TX("%02x:", packet->data[ iii ] & 0xff);

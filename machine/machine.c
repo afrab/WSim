@@ -23,10 +23,24 @@
 #include "machine_mon.h"
 #include "machine.h"
 
+/* Record internal events
+ *
+ * TIMESTAMP : log an event every WSIM_RECORD_INTERNAL_TIME_PREC, 
+ *             the event is recorded in seconds * 10
+ * BACKTRACK : log an event every backtrack, event is backtrack count
+ * REALTIME  : log realtime mode delta sleeps
+ * LOGWRITE  : log every time log files are processed (unused at this stage)
+ *
+ */
 
-#define WSIM_RECORD_INTERNAL_EVENTS 0
+#define WSIM_RECORD_INTERNAL_EVENTS 1
+#define WSIM_RECORD_INTERNAL_TIME_PREC_SECONDS 0.5 /* seconds */
+#define WSIM_RECORD_INTERNAL_TIME_PREC (WSIM_RECORD_INTERNAL_TIME_PREC_SECONDS * 1000 * 1000 * 1000)
 
 #if WSIM_RECORD_INTERNAL_EVENTS != 0
+#define MACHINE_TRC_TIMESTAMP()            tracer_event_add_id(32, "timestamp",  "wsim")
+#define MACHINE_TRC_TIMESTAMP_RECORD()     tracer_event_record(machine.timestamp_trc, \
+							       machine.state->timestamp / (1000*1000*100))
 #define MACHINE_TRC_BACKTRACK()            tracer_event_add_id(32, "backtrack",  "wsim")
 #define MACHINE_TRC_BACKTRACK_RECORD()     tracer_event_record(machine.backtrack_trc, machine.backtrack)
 #define MACHINE_TRC_REALTIME()             tracer_event_add_id(32, "realtime",  "wsim")
@@ -34,6 +48,8 @@
 #define MACHINE_TRC_LOGWRITE()             tracer_event_add_id(32, "logwrite",  "wsim")
 #define MACHINE_TRC_LOGWRITE_RECORD(delta) tracer_event_record(machine.logwrite_trc, delta)
 #else
+#define MACHINE_TRC_TIMESTAMP()            0
+#define MACHINE_TRC_TIMESTAMP_RECORD()     do { } while (0)
 #define MACHINE_TRC_BACKTRACK()            0
 #define MACHINE_TRC_BACKTRACK_RECORD()     do { } while (0)
 #define MACHINE_TRC_REALTIME()             0
@@ -42,16 +58,24 @@
 #define MACHINE_TRC_LOGWRITEL_RECORD(delta) do { } while (0)
 #endif
 
-/**
- * global variable
- **/
+/*
+ * global variable and defines
+ */
 struct machine_t  machine;
 static elf32_t    machine_elf  = NULL;
 
-
+/*
+ * wsim run modes
+ */
 #define LIMIT_REALTIME 0x01
 #define LIMIT_TIME     0x02
 #define LIMIT_INSN     0x04
+
+/*
+ * realtime adjustment precision
+ */
+#define WSIM_REALTIME_PRECISION_SECONDS 0.05
+#define WSIM_REALTIME_PRECISION         (WSIM_REALTIME_PRECISION_SECONDS * 1000 * 1000 * 1000)
 
 /* ************************************************** */
 /* ************************************************** */
@@ -101,10 +125,13 @@ int machine_create()
   memset(machine.device,      '\0',sizeof(struct device_t)*DEVICE_MAX);
   memset(machine.device_size, '\0',sizeof(int)*DEVICE_MAX);
 
+  /* create tracer events */
   machine.backtrack                   = 0;
   machine.backtrack_trc               = MACHINE_TRC_BACKTRACK();
+  machine.timestamp_trc               = MACHINE_TRC_TIMESTAMP();
   machine.realtime_trc                = MACHINE_TRC_REALTIME();
   machine.logwrite_trc                = MACHINE_TRC_LOGWRITE();
+
   machine.ui.framebuffer_background   = 0;
 
   /* create devices = mcu + peripherals */
@@ -147,7 +174,6 @@ int machine_reset()
 /* ************************************************** */
 /* ************************************************** */
 
-/*
 int machine_dump_mem(FILE* out, uint8_t *ptr, uint32_t addr, uint32_t size)
 {
   int i;
@@ -181,7 +207,6 @@ int machine_dump_mem(FILE* out, uint8_t *ptr, uint32_t addr, uint32_t size)
 
   return 0;
 }
-*/
 
 /* ************************************************** */
 /* ************************************************** */
@@ -311,10 +336,8 @@ static inline uint32_t machine_run_internal(void)
 	    return sig;
 	  }
 
-#define REALTIME_PRECISION        50*1000*1000UL /* x0 ms */
-
 	if ((machine.run_limit & LIMIT_REALTIME) && 
-	    ((MACHINE_TIME_GET_NANO() - realtime_last_wsim) > REALTIME_PRECISION))
+	    ((MACHINE_TIME_GET_NANO() - realtime_last_wsim) > WSIM_REALTIME_PRECISION))
 	  {
 	    int64_t delta;
 	    wsimtime_t delta_wsim;
@@ -325,7 +348,7 @@ static inline uint32_t machine_run_internal(void)
 	    if (delta > 0)
 	      {
 		/* catch up */
-		system_waitmicro( delta ); // micro
+		system_waitmicro( delta ); // microseconds
 	      }
 	    else
 	      {
@@ -338,6 +361,12 @@ static inline uint32_t machine_run_internal(void)
 	    realtime_last_wsim = MACHINE_TIME_GET_NANO();
 	    realtime_last_sys  = system_gettime();
 	  }
+      }
+
+    if ((MACHINE_TIME_GET_NANO() - machine.state->timestamp) > WSIM_RECORD_INTERNAL_TIME_PREC)
+      {
+	machine.state->timestamp = MACHINE_TIME_GET_NANO();
+	MACHINE_TRC_TIMESTAMP_RECORD();
       }
 
   } while (sig == 0);

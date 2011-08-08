@@ -33,6 +33,14 @@ tracer_t* tracer_create()
 /* ************************************************** */
 /* ************************************************** */
 
+#if !defined(strncpyz)
+#define strncpyz(dst,src,size)			\
+  do {						\
+    strncpy(dst,src,size);			\
+    dst[size - 1] = '\0';			\
+  } while (0)
+#endif
+
 #define TERROR(test,msg)                      \
   do {					      \
     if (test)				      \
@@ -57,9 +65,9 @@ int tracer_dirmode_init(tracer_t *t, const char* pattern)
       return 1;
     }
       
-  strncpy(t->dir_pattern,pattern,FILENAME_MAX);
+  strncpyz(t->dir_pattern,pattern,FILENAME_MAX);
   t->dir_pattern[FILENAME_MAX - 1] = '\0';
-  strncpy(t->in_filename,"",FILENAME_MAX);
+  strncpyz(t->in_filename,"",FILENAME_MAX);
   t->in_filename[FILENAME_MAX - 1] = '\0';
   return 0;
 }

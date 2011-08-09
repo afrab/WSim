@@ -5,6 +5,7 @@ SUBDIRS = 		\
 	bargraph	\
 	cc1100_2500	\
 	cc2420		\
+	ds1722		\
 	ds2411		\
 	gdm1602a 	\
 	hd44780         \

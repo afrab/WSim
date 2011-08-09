@@ -6,6 +6,7 @@ INCLUDES=-I$(top_srcdir)
 
 SENSLAB_MCU= ../../arch/msp430/libmsp430f1611.a
 SENSLAB_DEV= ../../devices/led/libled.a			\
+		../../devices/ds1722/libds1722.a	\
 		../../devices/ds2411/libds2411.a	\
 		../../devices/m25p80/libm25p80.a	\
 		../../devices/ptty/libptty.a		\

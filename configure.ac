@@ -668,6 +668,7 @@ devices/led/Makefile
 devices/7seg/Makefile
 devices/m25p80/Makefile
 devices/at45db/Makefile
+devices/ds1722/Makefile
 devices/ds2411/Makefile
 devices/gdm1602a/Makefile
 devices/hd44780/Makefile

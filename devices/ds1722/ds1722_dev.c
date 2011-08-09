@@ -23,7 +23,7 @@ tracer_id_t TRACER_DS1722_STROBE;
 /***************************************************/
 /***************************************************/
 
-#define DS1722_DEBUG    1
+#define DS1722_DEBUG    0
 
 #if DS1722_DEBUG != 0
 #    define DS1722_DBG(x...) HW_DMSG_DEV(DS1722NAME ":" x)
@@ -529,7 +529,7 @@ wsimtime_t ds1722_get_sampling_time(int dev)
 /***************************************************/
 /***************************************************/
 
-int ds1722_update(int UNUSED dev)
+int ds1722_update(int dev)
 {
   if (DS1722_DATA->sample_start)
     {

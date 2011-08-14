@@ -243,8 +243,9 @@ int     msp430_adc12_chkifg     (void);
 /* ************************************************** */
 /* ************************************************** */
 #else
-#define msp430_adc12_create() do { } while (0)
-#define msp430_adc12_reset()  do { } while (0)
-#define msp430_adc12_update() do { } while (0)
+#define msp430_adc12_option_add()  do { } while(0)
+#define msp430_adc12_create()      do { } while (0)
+#define msp430_adc12_reset()       do { } while (0)
+#define msp430_adc12_update()      do { } while (0)
 #endif /* have_adc12 */
 #endif

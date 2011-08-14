@@ -72,6 +72,26 @@ struct __attribute__ ((packed)) adc10ctl1_t {
 };
 #endif
 
+#if defined(WORDS_BIGENDIAN)
+struct __attribute__ ((packed)) adc10dtc0_t {
+  uint8_t
+    reserved:4,
+    tb:1,
+    ct:1,
+    b1:1,
+    fetch:1;
+};
+#else
+struct __attribute__ ((packed)) adc10dtc0_t {
+  uint8_t
+    fetch:1,
+    b1:1,
+    ct:1,
+    tb:1,
+    reserved:4;
+};
+#endif
+
 enum adc10ssel_t {
   ADC10_SSEL_ADC10OSC      = 0,
   ADC10_SSEL_ACLK          = 1,
@@ -110,14 +130,29 @@ struct msp430_adc10_t {
     struct adc10ctl1_t  b;
     uint16_t            s;
   } ctl1;
-  
+
+  uint8_t  ae0;
+  uint8_t  ae1;
+  uint16_t mem;
+  uint16_t adc10mem;
+  union {
+    struct adc10dtc0_t  b;
+    uint8_t             s;
+  } dtc0;
+  uint8_t  dtc1;
+  uint16_t sa;
+
+
+  uint32_t        chann_ptr[ADC10_CHANNELS];     /* current ptr in data */
+  wsimtime_t     chann_time[ADC10_CHANNELS];
+  wsimtime_t   chann_period[ADC10_CHANNELS];
 };
 
 /* ************************************************** */
 /* ************************************************** */
 /* ************************************************** */
 
-int     msp430_adc12_option_add (void);
+int     msp430_adc10_option_add (void);
 
 void    msp430_adc10_create     (void);
 void    msp430_adc10_reset      (void);
@@ -134,8 +169,9 @@ void    msp430_adc10_write8     (uint16_t addr, int8_t val);
 /* ************************************************** */
 /* ************************************************** */
 #else
-#define msp430_adc10_create() do { } while (0)
-#define msp430_adc10_reset()  do { } while (0)
-#define msp430_adc10_update() do { } while (0)
+#define msp430_adc10_option_add() do { } while(0)
+#define msp430_adc10_create()     do { } while (0)
+#define msp430_adc10_reset()      do { } while (0)
+#define msp430_adc10_update()     do { } while (0)
 #endif /* have_adc10 */
 #endif

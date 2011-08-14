@@ -161,7 +161,10 @@ int ptty_device_create(int dev, int id)
   if (opt_array[id].io.value != NULL)
     {
       PTTY_IO = libselect_id_create(opt_array[id].io.value, 0);
-      libselect_id_register(PTTY_IO);
+      if (libselect_id_is_input(PTTY_IO))
+	{
+	  libselect_id_register(PTTY_IO);
+	}
     }
 
   if (libselect_id_is_valid(PTTY_IO))

@@ -86,6 +86,11 @@ int            libselect_id_close    (libselect_id_t id);
 int libselect_id_register(libselect_id_t id);
 
 /**
+ * check if id is configured as input
+ */
+int libselect_id_is_input(libselect_id_t id);
+
+/**
  * libselect_unregister is called from devices
  */
 int libselect_id_unregister(libselect_id_t id);

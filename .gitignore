@@ -1,7 +1,12 @@
-/Makefile.in
-/*/Makefile.in
-/*/*/Makefile.in
-/*/*/*/Makefile.in
+*.in
+*.o
+*.lst
+*.elf
+*.a43
+*.log
+*.trc
+*.vcd
+*.nc
 /aclocal.m4
 /autom4te.cache
 /compile

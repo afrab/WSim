@@ -22,7 +22,8 @@
 /* ************************************************** */
 /* ************************************************** */
 
-#define VCD_TRC_MAX 200
+#define VCD_TRC_MAX  200
+#define MAXWIDTH     128
 
 static int       vcd_trc_count;
 static tracer_t *vcd_traces[VCD_TRC_MAX];
@@ -50,16 +51,15 @@ tracer_driver_t tracer_driver_vcd =
 
 /* long long to char* binary representation */
 static char*
-tracer_lldbin(tracer_val_t v)
+tracer_lldbin(tracer_val_t val, int width)
 {
   int i;
-  static char s[65];
+  static char s[ MAXWIDTH + 1 ];
   
-  memset(s,'0',sizeof(s));
-  s[64] = '\0';
-  for(i=0; i < 63; i++)
+  memset(s,'\0',sizeof(s));
+  for(i=0; i < width; i++)
     {
-      s[63-i] = '0' +  ((v >> i) & 0x1);
+      s[width -i -1] = '0' +  ((val >> i) & 0x1);
     }
   return s;
 }
@@ -180,7 +180,7 @@ void vcd_dump_modules(tracer_t *t_out, tracer_t *t, int tnum)
 	      if (strcmp(t->hdr.id_module[id],t->id_module[mod]) == 0)
 		{
 		  numid_to_str(t->id_var[id], tnum, id);
-		  fprintf(t_out->out_fd,"    $var integer %d %s %s $end\n", 
+		  fprintf(t_out->out_fd,"    $var integer %2d %s %-20s $end\n", 
 			  t->hdr.id_width[id], t->id_var[id], t->hdr.id_name[id]);
 		}
 	    }
@@ -198,7 +198,7 @@ void vcd_dump_variables(tracer_t *t_out, tracer_t* t, int tnum)
       if ((t->hdr.id_name[id][0] != '\0') && (t->id_var[id][0] == '\0'))
 	{
 	  numid_to_str(t->id_var[id], tnum, id);
-	  fprintf(t_out->out_fd,"$var integer %d %s %s $end\n", 
+	  fprintf(t_out->out_fd,"$var integer %2d %s %-20s $end\n", 
 		  t->hdr.id_width[id], t->id_var[id], t->hdr.id_name[id]);
 	}
     }
@@ -284,7 +284,7 @@ void vcd_dump_init_vars(tracer_t *t, tracer_t *trc[], int nb_trc_files)
       for(id = 0; id < TRACER_MAX_ID; id++)
 	{
 	  if (trc[i]->hdr.id_name[id][0] != '\0')
-	    fprintf(t->out_fd,"b%s %s\n",tracer_lldbin(0),trc[i]->id_var[id]);
+	    fprintf(t->out_fd,"b%s %s\n",tracer_lldbin(0,trc[i]->hdr.id_width[id]),trc[i]->id_var[id]);
 	}
     }
   fprintf(t->out_fd,"$end\n");
@@ -327,7 +327,8 @@ int drv_vcd_process_file(tracer_t *t)
 	      if (is_first_sample)
 		{
 		  fprintf(t->out_fd,"\n#%" PRId64 "\n", curr_smpl.time);
-		  fprintf(t->out_fd,"b%s %s\n", tracer_lldbin(curr_smpl.val), t->id_var[curr_smpl.id]);
+		  fprintf(t->out_fd,"b%s %s\n", tracer_lldbin(curr_smpl.val,t->hdr.id_width[curr_smpl.id]), 
+		          t->id_var[curr_smpl.id]);
 		  id_last_smpl[curr_smpl.id] = curr_smpl;
 		  
 		  is_first_sample = 0;
@@ -339,7 +340,8 @@ int drv_vcd_process_file(tracer_t *t)
 		      if (curr_smpl.time != curr_time)
 			fprintf(t->out_fd,"\n#%" PRId64 "\n", curr_smpl.time);
 		      
-		      fprintf(t->out_fd,"b%s %s\n",tracer_lldbin(curr_smpl.val), t->id_var[curr_smpl.id]);
+		      fprintf(t->out_fd,"b%s %s\n",tracer_lldbin(curr_smpl.val,t->hdr.id_width[curr_smpl.id]),
+		              t->id_var[curr_smpl.id]);
 		      id_last_smpl[curr_smpl.id] = curr_smpl;
 		    }
 		}
@@ -445,7 +447,8 @@ static int drv_vcd_dump_merge(tracer_t *t, tracer_t *trc[], int nbtrc)
       if (ntotal == 0)
 	{
 	  fprintf(t->out_fd,"\n#%" PRId64 "\n", curr_smpl.time);
-	  fprintf(t->out_fd,"b%s %s\n", tracer_lldbin(curr_smpl.val), trc[itrc]->id_var[curr_smpl.id]);
+	  fprintf(t->out_fd,"b%s %s\n", tracer_lldbin(curr_smpl.val,trc[itrc]->hdr.id_width[curr_smpl.id]), 
+	          trc[itrc]->id_var[curr_smpl.id]);
 	  id_last_smpl[itrc][curr_smpl.id] = curr_smpl;
 	  curr_time = curr_smpl.time;
 	}
@@ -457,7 +460,8 @@ static int drv_vcd_dump_merge(tracer_t *t, tracer_t *trc[], int nbtrc)
 		{
 		  fprintf(t->out_fd,"\n#%" PRId64 "\n", curr_smpl.time);
 		}
-	      fprintf(t->out_fd,"b%s %s\n", tracer_lldbin(curr_smpl.val), trc[itrc]->id_var[curr_smpl.id]);
+	      fprintf(t->out_fd,"b%s %s\n", tracer_lldbin(curr_smpl.val,trc[itrc]->hdr.id_width[curr_smpl.id]), 
+	              trc[itrc]->id_var[curr_smpl.id]);
 	      id_last_smpl[itrc][curr_smpl.id] = curr_smpl;
 	      ntotal ++;
 	    }

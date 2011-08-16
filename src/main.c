@@ -71,11 +71,7 @@ static void main_end(enum wsim_end_mode_t mode);
 
 void signal_quit(int signum)
 {
-  OUTPUT("================\n");
-  OUTPUT("== wsim stop  ==\n");
-  OUTPUT("================\n");
   INFO("\nwsim: received Unix signal %d (%s)\n",signum,host_signal_str(signum));
-  
   mcu_signal_add(SIG_HOST | signum);
   main_end(WSIM_END_SIGNAL);
 }
@@ -185,6 +181,10 @@ void app_exit_error()
 
 static void main_end(enum wsim_end_mode_t mode)
 {
+  OUTPUT("================\n");
+  OUTPUT("== wsim stop  ==\n");
+  OUTPUT("================\n");
+
   main_dump_stats();
 
   INFO("\n");

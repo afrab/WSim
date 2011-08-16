@@ -62,7 +62,7 @@ at the end of the byte stream of the aborted frame in the log file.
 void logpkt_init               (int do_log_pkt, char* logpkt, const char* logpktfilename);
 
 /* public encapsulation functions */
-void (*logpkt_init_interface)  (int interface_id, const char* interface_name);
+void (*logpkt_init_interface)  (int interface_id, const char* interface_name, int pcap_dlt);
 void (*logpkt_close)           (void);
 void (*logpkt_rx_byte)         (int interface_id, uint8_t val);
 void (*logpkt_tx_byte)         (int interface_id, uint8_t val);
@@ -74,7 +74,7 @@ void (*logpkt_state_save)      (void);
 void (*logpkt_state_restore)   (void);
 
 /* public real functions */
-void logpkt_init_interface_op  (int interface_id, const char* interface_name);
+void logpkt_init_interface_op  (int interface_id, const char* interface_name, int pcap_dlt);
 void logpkt_close_op           (void);
 void logpkt_rx_byte_op         (int interface_id, uint8_t val);
 void logpkt_tx_byte_op         (int interface_id, uint8_t val);
@@ -86,7 +86,7 @@ void logpkt_state_save_op      (void);
 void logpkt_state_restore_op   (void);
 
 /* public nop functions */
-void logpkt_init_interface_nop (int interface_id, const char* interface_name);
+void logpkt_init_interface_nop (int interface_id, const char* interface_name, int pcap_dlt);
 void logpkt_close_nop          (void);
 void logpkt_rx_byte_nop        (int interface_id, uint8_t val);
 void logpkt_tx_byte_nop        (int interface_id, uint8_t val);

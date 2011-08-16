@@ -23,7 +23,7 @@
 /* ************************************************** */
 /* ************************************************** */
 
-#define DEBUG_PCAP 1
+#define DEBUG_PCAP 0
 
 #if DEBUG_PCAP != 0
 #define PCAP_DBG(x...) DMSG_LIB(x) 
@@ -92,6 +92,7 @@ void logpkt_pcap_start(FILE *logfile, int linktype)
     {
       ERROR("wsim:pcap:start: cannot create header\n");
     }
+  PCAP_DBG("logpkt:pcap:start: header ok, data link type %d\n",linktype);
 }
 
 /* ************************************************** */

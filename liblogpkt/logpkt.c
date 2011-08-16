@@ -18,7 +18,7 @@
 /* ************************************************** */
 /* ************************************************** */
 
-#define DEBUG_LOGPKT 1
+#define DEBUG_LOGPKT 0
 
 #if DEBUG_LOGPKT != 0
 #define LOGPKT_DBG(x...) DMSG_LIB(x) 
@@ -33,7 +33,7 @@
 #define UNUSED __attribute__((unused))
 
 #define MAX_PKT_LENGTH 1300  /* maximum size of a packet           */
-#define MAX_INTERFACES 5     /* maximum number of radio interfaces */
+#define MAX_INTERFACES 1     /* maximum number of radio interfaces */
 
 #define MAXINTERFACENAME 30
 #define MAXERRORLENGTH   50
@@ -53,7 +53,6 @@
 /* ************************************************** */
 /* ************************************************** */
 struct _logpkt_state_t {
-  char     interface_name[MAXINTERFACENAME];
   uint8_t  current_rx_pkt[MAX_PKT_LENGTH];
   uint8_t  current_tx_pkt[MAX_PKT_LENGTH];
   int      rx_pkt_offset;
@@ -70,6 +69,7 @@ struct _logpkt_state_t {
 
 struct _logpkt_state_no_bk_t {
   char     interface_name[MAXINTERFACENAME];
+  int      interface_dlt;
   uint32_t rx_pkt_count;
   uint32_t tx_pkt_count;
 };
@@ -88,7 +88,9 @@ static FILE* logpkt_logfile;
 static int nb_interfaces = 0;  /* number of different radio interfaces */
 
 static int log_mode     = DEFAULT_LOG_MODE;
-static int log_pcap_dlt = DEFAULT_PCAP_DLT;
+
+#define DLT_NO_INIT -1
+static int log_pcap_dlt = DLT_NO_INIT;
 
 /* ************************************************** */
 /* ************************************************** */
@@ -175,8 +177,8 @@ void logpkt_init(int do_log_pkt, char* logpkt, const char* logpktfilename)
 	    {
 	      int id = atoi(c+1);
 	      log_pcap_dlt = id;
+	      LOGPKT_DBG("liblogpkt:mode: force pcap dlt type to %d\n", log_pcap_dlt);
 	    }
-	  LOGPKT_DBG("liblogpkt:mode: set to pcap type %d\n", log_pcap_dlt);
 	}
       else
 	{
@@ -195,7 +197,7 @@ void logpkt_init(int do_log_pkt, char* logpkt, const char* logpktfilename)
   else
     {
       strncpyz(logpkt_filename,logpktfilename,MAXFILENAME);
-      INFO("wsim:liblogpkt:%s\n",logpkt_filename);
+      LOGPKT_DBG("wsim:liblogpkt:%s\n",logpkt_filename);
     }
 
   if (log_mode != LOG_PCAP)
@@ -223,16 +225,12 @@ void logpkt_init(int do_log_pkt, char* logpkt, const char* logpktfilename)
 	  break;
 	}
     }
-  else
-    {
-      logpkt_pcap_start(logpkt_logfile, log_pcap_dlt);
-    }
 }
 
 
 /* ************************************************** */
 /* ************************************************** */
-void logpkt_init_interface_op(int interface_id, const char* interface_name)
+void logpkt_init_interface_op(int interface_id, const char* interface_name, int pcap_dlt)
 {
   LOGPKT_DBG("liblogpkt:init interface %s\n", interface_name);
 
@@ -267,16 +265,30 @@ void logpkt_init_interface_op(int interface_id, const char* interface_name)
   logpkt_tab_buf_saved[interface_id].tx_pkt_completed = 0;
   strcpy(logpkt_tab_buf_saved[interface_id].tx_error_log, "");
 
-  strcpy(logpkt_no_bk_tab[interface_id].interface_name, interface_name);
   logpkt_no_bk_tab[interface_id].rx_pkt_count = 0;
   logpkt_no_bk_tab[interface_id].tx_pkt_count = 0;
+  strncpyz(logpkt_no_bk_tab[interface_id].interface_name, interface_name, MAXINTERFACENAME);
+  
+  if (log_pcap_dlt == DLT_NO_INIT) /* not forced */
+    {
+      logpkt_no_bk_tab[interface_id].interface_dlt = pcap_dlt;
+    }
+  else
+    {
+      logpkt_no_bk_tab[interface_id].interface_dlt = log_pcap_dlt;
+    }
 
   nb_interfaces++;
 
-  INFO("Interface %s registered\n", interface_name);
-  if (log_mode != LOG_PCAP)
+  LOGPKT_DBG("Interface %s registered\n", interface_name);
+  switch (log_mode)
     {
+    case LOG_PCAP:
+      logpkt_pcap_start(logpkt_logfile, logpkt_no_bk_tab[interface_id].interface_dlt);
+      break;
+    default:
       fprintf(logpkt_logfile, "Interface %s registered\n", interface_name);
+      break;
     }
 }
 
@@ -640,7 +652,7 @@ void logpkt_state_restore_op(void)
 /* Empty functions, when log packets disable          */
 /* ************************************************** */
 /* ************************************************** */
-void logpkt_init_interface_nop(int UNUSED interface_id, const UNUSED char* interface_name)
+void logpkt_init_interface_nop(int UNUSED interface_id, const UNUSED char* interface_name, int UNUSED dlt)
 {
 }
 

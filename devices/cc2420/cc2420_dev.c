@@ -20,6 +20,7 @@
 
 #include "arch/common/hardware.h"
 #include "arch/common/debug.h"
+#include "liblogpkt/pcap.h"
 
 #include "cc2420.h"
 #include "cc2420_registers.h"
@@ -123,7 +124,7 @@ int cc2420_device_create (int dev_num, int fxosc_mhz, char *antenna)
   TRACER_CC2420_RESET   = tracer_event_add_id(1, "cc2420_reset",   "cc2420"); 
 
   /* init packets log */
-  logpkt_init_interface(cc2420->worldsens_radio_id, "cc2420");
+  logpkt_init_interface(cc2420->worldsens_radio_id, "cc2420", PCAP_DLT_802154);
 
   return 0;
 }

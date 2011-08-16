@@ -19,6 +19,7 @@
 #include "arch/common/hardware.h"
 #include "devices/devices.h"
 #include "machine/machine.h"
+#include "liblogpkt/pcap.h"
 
 #include "cc1100_2500_internals.h"
 
@@ -262,7 +263,7 @@ int cc1100_device_create (int dev_num, int fxosc_mhz, char *antenna)
   TRACER_CC1100_GDO2   = tracer_event_add_id(1, "gdo2",   "cc1100");
  
   /* init packets log */
-  logpkt_init_interface(cc1100->worldsens_radio_id, "cc1100");
+  logpkt_init_interface(cc1100->worldsens_radio_id, "cc1100", PCAP_DLT_USER0);
 
   return 0;
 }
@@ -304,7 +305,7 @@ int cc2500_device_create (int dev_num, int fxosc_mhz, char *antenna)
   TRACER_CC1100_GDO2   = tracer_event_add_id(1, "gdo2",   "cc2500");
 
   /* init packets log */
-  logpkt_init_interface(cc1100->worldsens_radio_id, "cc2500");
+  logpkt_init_interface(cc1100->worldsens_radio_id, "cc2500", PCAP_DLT_USER0);
 
   return 0;
 }

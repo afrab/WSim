@@ -9,7 +9,8 @@ TELOSB_DEV= ../../devices/led/libled.a			\
 		../../devices/ds2411/libds2411.a	\
 		../../devices/m25p80/libm25p80.a	\
 		../../devices/ptty/libptty.a		\
-		../../devices/cc2420/libcc2420.a
+		../../devices/cc2420/libcc2420.a	\
+		../../devices/uigfx/libuigfx.a
 
 
 wsim_telosb_CFLAGS=-DMSP430f1611

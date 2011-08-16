@@ -10,25 +10,49 @@
 #define _REVISION_H_
 
 #include <ctype.h>
+#include "config.h"
+#include "liblogger/logger.h"
 
-/*  */ 
 #define SVN_REVISION "$Revision$" 
 
+#define REVISION  "20110816"
+#define REV_LIMIT 20
+
+/* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
+
+#if EXTRACT_REVISION != 0
 static char* extract_revision_number()
 {
-#define REV_LIMIT 6
   int    i = 0;
-  char  *p = SVN_REVISION;
+  char  *p = REVISION;
   static char rev[REV_LIMIT+1];
 
   while (! isdigit((unsigned char)*p))
     p++; 
 
-  while ((i<REV_LIMIT) && isdigit((unsigned char)*p))
+  while ((i<REV_LIMIT) && 
+         (isdigit(*p) || *p == '.' || *p=='-'))
     rev[i++] = *p++;
 
   rev[i] = 0;
   return rev;
 }
+#else
+#define extract_revision_number() REVISION
+#endif
+
+/* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
+
+#define OUTPUT_VERSION()						\
+  STDOUT("%s: version %s, rev %s, build %s.\n",				\
+              PACKAGE, PACKAGE_VERSION, extract_revision_number(), __DATE__)
+
+/* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
 
 #endif

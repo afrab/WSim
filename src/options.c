@@ -321,16 +321,6 @@ options:\n";
 /* ************************************************** */
 /* ************************************************** */
 
-void options_print_version(struct options_t UNUSED *s)
-{
-  OPT_PRINT("%s: version %s, rev %s, %s.\n", 
-	    PACKAGE, PACKAGE_VERSION, extract_revision_number(), __DATE__);
-}
-
-/* ************************************************** */
-/* ************************************************** */
-/* ************************************************** */
-
 void options_print_params(struct options_t* s)
 {
   struct stat fs;
@@ -633,7 +623,8 @@ void options_read_cmdline(struct options_t *s, int *argc, char *argv[])
 
   if (version_opt.isset)
     {
-      options_print_version(s);
+      OUTPUT_VERSION();
+      exit(EXIT_SUCCESS);
     }
 
   if (preload_opt.isset)

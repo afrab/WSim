@@ -5,7 +5,7 @@ dnl configure.ac for Worldsens architecture simulator
 dnl works only for automake 1.10 and above 
 dnl lower versions will have problem with bzero prototype replacement
 dnl --------------------------------------------------------------
-AC_INIT([wsim],[0.99.500svn])
+AC_INIT([wsim],[0.99])
 AC_CONFIG_SRCDIR(src/main.c)
 AC_CANONICAL_HOST
 AM_INIT_AUTOMAKE(foreign) dnl foreign = NEWS/TODO not required

@@ -237,7 +237,7 @@ int main(int argc, char* argv[])
   /* init log radios packets*/
   logpkt_init(o.do_logpkt, o.logpkt, o.logpktfilename);
 
-  OUTPUT("WSim %s, rev %s\n", PACKAGE_VERSION, extract_revision_number());
+  OUTPUT_VERSION();
   OUTPUT("copyright 2005, 2006, 2007, 2008, 2009, 2010, 2011\n");
   OUTPUT("Citi Lab, INRIA, INSA de Lyon\n");
   OUTPUT("wsim:pid:%d\n",getpid());

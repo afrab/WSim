@@ -494,7 +494,7 @@ void msp430_adc12_update(void)
       else
 	{
 	  ERROR("msp430:adc12: channel out of bounds\n");
-	  machine_exit(1);
+	  machine_exit_error();
 	}
     }
   else

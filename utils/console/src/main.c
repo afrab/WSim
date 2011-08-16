@@ -75,7 +75,7 @@ void usage(char* name)
   --log=name  -l : logfile name           \n\
   --width=n   -W : window width           \n\
   --height=n  -H : window height          \n",name);
-  exit(1);
+  exit( EXIT_FAILURE );
 }
 
 /* ************************************************** */     
@@ -375,7 +375,7 @@ main(int argc, char *argv[])
 			      console.screen_height,console.io_mode)) == NULL)
     {
       fprintf(stderr,"Cannot create user interface\n");
-      exit(1);
+      exit( EXIT_FAILURE );
     }
 
   if (console.io_mode == UI_MODE_OUTPUT)

@@ -193,7 +193,7 @@ void ptty_statdump(int dev, wsimtime_t UNUSED user_nanotime)
 {
   if (opt_array[PTTY_SERID].io.value)
     {
-      OUTPUT("     + opt: %s\n",  opt_array[PTTY_SERID].io.value);
+      OUTPUT_STATS("     + opt: %s\n",  opt_array[PTTY_SERID].io.value);
     }
 }
 

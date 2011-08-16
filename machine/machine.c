@@ -15,10 +15,10 @@
 
 #include "arch/common/hardware.h"
 #include "devices/devices.h"
-#include "machine/machine.h"
 #include "libelf/libelf.h"
 #include "libetrace/libetrace.h"
 #include "liblogger/logger.h"
+#include "src/common.h"
 
 #include "machine_mon.h"
 #include "machine.h"
@@ -240,10 +240,10 @@ int machine_get_node_id(void)
 /* ************************************************** */
 /* ************************************************** */
 
-void machine_exit(int arg)
+void machine_exit_error()
 {
-  REAL_STDERR("wsim: error, exit\n");
-  exit(arg);
+  INFO("wsim:machine: exit error\n");
+  app_exit_error();
 }
 
 /* ************************************************** */
@@ -458,10 +458,11 @@ void machine_monitor(char* monitor, char *modify)
 
 void machine_print_description()
 {
-  OUTPUT("== Machine description\n");
+  OUTPUT_BOXS("");
+  OUTPUT_BOXM("Machine description\n");
   mcu_print_description();
   devices_print();
-  OUTPUT("==\n");
+  OUTPUT_BOXE("");
 }
 
 /* ************************************************** */
@@ -656,29 +657,24 @@ void machine_dump_stats(uint64_t user_nanotime)
   ms        = ( MACHINE_TIME_GET_NANO() - (s * NANO)) / MILLI;
   us        = ( MACHINE_TIME_GET_NANO() - (s * NANO)) / MICRO;
 
-  OUTPUT("Machine stats:\n");
-  OUTPUT("--------------\n");
-  OUTPUT("  simulated time                : %"PRId64" ns (%"PRId64".%03"PRId64" s)\n", MACHINE_TIME_GET_NANO(),s,ms);
+  OUTPUT_STATS("Machine stats:\n");
+  OUTPUT_STATS("--------------\n");
+  OUTPUT_STATS("  simulated time                : %"PRId64" ns (%"PRId64".%03"PRId64" s)\n", 
+              MACHINE_TIME_GET_NANO(),s,ms);
   if (user_nanotime > 0)
     {
       speedup = (float)MACHINE_TIME_GET_NANO() / (float)user_nanotime;
-      OUTPUT("  simulation speedup            : %2.2f\n",speedup);
+      OUTPUT_STATS("  simulation speedup            : %2.2f\n",speedup);
     }
-  OUTPUT("  machine exit with signal      : %s\n",mcu_signal_str());
-
-  OUTPUT("\n");
-
-  OUTPUT("MCU:\n");
-  OUTPUT("----\n");
+  OUTPUT_STATS("  machine exit with signal      : %s\n",mcu_signal_str());
+  OUTPUT_STATS("\n");
+  OUTPUT_STATS("MCU:\n");
+  OUTPUT_STATS("----\n");
   mcu_dump_stats(user_nanotime);
-
-  OUTPUT("\n");
-
-  OUTPUT("DEVICES:\n");
-  OUTPUT("--------\n");
+  OUTPUT_STATS("\n");
+  OUTPUT_STATS("DEVICES:\n");
+  OUTPUT_STATS("--------\n");
   devices_dump_stats(user_nanotime);
-
-  OUTPUT("\n");
 }
 
 /**************************************************/

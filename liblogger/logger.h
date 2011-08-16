@@ -64,6 +64,14 @@ void REAL_STDERR(char* fmp, ...);
 void OUTPUT(char* fmt, ...);  // verbose 0
 void ERROR (char* fmt, ...);  // verbose 0
 
+#define OUTPUT_BOXS(x...)  OUTPUT(",----\n" x);
+#define OUTPUT_BOXM(x...)  OUTPUT("|  "     x);
+#define OUTPUT_BOXE(x...)  OUTPUT("`----\n" x);
+
+#define OUTPUT_STATS_START(x...) OUTPUT_BOXS(x)
+#define OUTPUT_STATS(x...)       OUTPUT_BOXM(x)
+#define OUTPUT_STATS_STOP(x...)  OUTPUT_BOXE(x)
+
 #if defined(VERBOSE_IS_A_FUNC)
 #else
 #define VERBOSE(level, x...)                 \

@@ -56,7 +56,7 @@ void usage(char* prog)
     wtracer --in=wsim.trc --out=- --format=vcd | gtkwave --vcd\n\
     ", prog);
 
-  exit(1);
+  exit( EXIT_FAILURE );
 }
 
 /* ************************************************** */
@@ -220,7 +220,7 @@ int options_validation(tracer_t *t)
 #define ERR_EXIT(x...)				\
   do {						\
   ERROR(x);					\
-  exit(1);					\
+  exit( EXIT_FAILURE );				\
   } while (0)
 
 int main(int argc, char* argv[])

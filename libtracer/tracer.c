@@ -26,8 +26,7 @@
 #include "tracer_bin.h"
 #include "tracer_vcd.h"
 
-#define APP_EXIT(i) exit(i)
-
+void app_exit_error();
 
 /* ************************************************** */
 /* ************************************************** */
@@ -244,7 +243,7 @@ tracer_event_add_id(int width, const char* name, const char* module)
 	  tracer_width[i] == width)
 	{
 	  ERROR("tracer: event %s.%s is already registered\n",module,name);
-	  APP_EXIT(1);
+	  app_exit_error();
 	  return -1;
 	}
     }
@@ -255,13 +254,13 @@ tracer_event_add_id(int width, const char* name, const char* module)
   if (id >= (TRACER_MAX_ID - 1))
     {
       ERROR("tracer: max event recording reached, could not register [%s] = %d\n",name,id);
-      APP_EXIT(1);
+      app_exit_error();
     }
 
   if ((name == NULL) || (strlen(name) == 0))
     {
       ERROR("tracer: event id %d must have a valid name (non null)\n",id);
-      APP_EXIT(1);
+      app_exit_error();
     }
 
   if (((width < 1) || (width > 64)) && (strcmp(name,"__WSIMLOGBUFFER") != 0))

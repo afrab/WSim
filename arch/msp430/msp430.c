@@ -75,11 +75,11 @@ char* mcu_modelname(void)
 
 void mcu_print_description(void)
 {
-  OUTPUT("mcu   : %s\n",MCU_NAME);
-  OUTPUT("model : %s\n",MCU_MODEL_NAME);
-  OUTPUT("  xin : %d\n",MCU_CLOCK.lfxt1_freq);
+  OUTPUT_BOXM("mcu   : %s\n",MCU_NAME);
+  OUTPUT_BOXM("model : %s\n",MCU_MODEL_NAME);
+  OUTPUT_BOXM("  xin : %d\n",MCU_CLOCK.lfxt1_freq);
 #if defined(__msp430_have_xt2)
-  OUTPUT("  xt2 : %d\n",MCU_CLOCK.xt2_freq);
+  OUTPUT_BOXM("  xt2 : %d\n",MCU_CLOCK.xt2_freq);
 #endif
 }
 
@@ -476,19 +476,19 @@ void mcu_dump_stats(int64_t user_nanotime)
   mean_cs   = (float)MCU_CYCLE_CPT / ((float)MACHINE_TIME_GET_NANO() / (float)NANO);
   mean_freq = mean_cs / (1000*1000);
 
-  OUTPUT("  simulated mcu instructions    : %"PRId64"\n",MCU_INSN_CPT);
-  OUTPUT("  simulated mcu cycles          : %"PRId64"\n",MCU_CYCLE_CPT);
-  OUTPUT("  simulated mcu mean freq       : %3.2f c/s (%3.2f MHz)\n",mean_cs,mean_freq);
+  OUTPUT_STATS("  simulated mcu instructions    : %"PRId64"\n",MCU_INSN_CPT);
+  OUTPUT_STATS("  simulated mcu cycles          : %"PRId64"\n",MCU_CYCLE_CPT);
+  OUTPUT_STATS("  simulated mcu mean freq       : %3.2f c/s (%3.2f MHz)\n",mean_cs,mean_freq);
   if (user_nanotime > 0)
     {
       simu_mean_cs   = (float)MCU_CYCLE_CPT / ((float)user_nanotime / (float)NANO);
       simu_mean_freq = simu_mean_cs / (1000*1000);
-      OUTPUT("  simulation mean freq          : %3.2f c/s (%3.2f MHz)\n",simu_mean_cs,simu_mean_freq);
-      OUTPUT("     - does not take into account sleep modes\n");
+      OUTPUT_STATS("  simulation mean freq          : %3.2f c/s (%3.2f MHz)\n",simu_mean_cs,simu_mean_freq);
+      OUTPUT_STATS("     - does not take into account sleep modes\n");
     }
-  OUTPUT("  mcu exit at PC                : 0x%04x\n",mcu_get_pc());
-  OUTPUT("  mcu exit in LPM mode          : %s\n",msp430_lpm_names[RUNNING_MODE()]);
-  OUTPUT("  mcu exit with IV              : 0x%08x\n",MCU_IV);
+  OUTPUT_STATS("  mcu exit at PC                : 0x%04x\n",mcu_get_pc());
+  OUTPUT_STATS("  mcu exit in LPM mode          : %s\n",msp430_lpm_names[RUNNING_MODE()]);
+  OUTPUT_STATS("  mcu exit with IV              : 0x%08x\n",MCU_IV);
 }
 
 /* ************************************************** */

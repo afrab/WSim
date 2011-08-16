@@ -509,20 +509,11 @@ int devices_update()
 	   */
 	  if ((SYSTEM_FLASH_CS == 0) && (SYSTEM_RADIO_CS == 0))
 	    {
-	      WARNING("devices:telosb: Flash and Radio SPI are selected at the same time\n");
+	      WARNING("telosb: Flash and Radio SPI are selected at the same time\n");
 	    }
 
-	  /* tests can/should be removed */
-	  // if (SYSTEM_FLASH_CS == 0) /* M25P CS is negated */
-	    {
-	      machine.device[FLASH].write(FLASH, M25P_D, val8);
-	    }
-
-	  /* tests can/should be removed */
-	  // if (SYSTEM_RADIO_CS == 0) /* CC2420 CS is negated */
-	    {
-	      machine.device[RADIO].write(RADIO, CC2420_DATA_MASK, val8);
-	    }
+	  machine.device[FLASH].write(FLASH, M25P_D, val8);
+	  machine.device[RADIO].write(RADIO, CC2420_DATA_MASK, val8);
 	}
       break;
     case USART_MODE_UART:

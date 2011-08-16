@@ -525,11 +525,11 @@ int devices_update(void)
     case USART_MODE_SPI:
       if (msp430_usart1_dev_read_spi(&val8))
 	{
-          if ((!FLASH_CS + !RADIO_CSn + !DS1722_CS) > 1)
+          if ((!FLASH_CS + !RADIO_CSn + DS1722_CS) > 1)
 	    {
-              WARNING("senslab:devices: more than one device among flash / radio / thermometer enabled at the same time on SPI1\n");
+              WARNING("senslab:devices: more than one device among flash(%d)/radio(%d)/thermometer(%d) enabled at the same time on SPI1\n",!FLASH_CS,!RADIO_CSn,DS1722_CS);
             }
-	  // HW_DMSG_MISC("senslab:write: to SPI1 devices: 0x%02x\n",val8);
+
           machine.device[FLASH ].write(FLASH,  M25P_D,          val8);
 	  machine.device[DS1722].write(DS1722, DS1722_D_MASK,   val8);
 	  machine.device[RADIO ].write(RADIO,  RADIO_DATA_MASK, val8);

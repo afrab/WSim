@@ -47,9 +47,7 @@ static char* extract_revision_number()
 /* ************************************************** */
 /* ************************************************** */
 
-#define OUTPUT_VERSION()						\
-  STDOUT("%s: version %s, rev %s, build %s.\n",				\
-              PACKAGE, PACKAGE_VERSION, extract_revision_number(), __DATE__)
+#define VERSION_STRING()   ( "WSim version " PACKAGE_VERSION ", rev. " REVISION ", build " __DATE__ )
 
 /* ************************************************** */
 /* ************************************************** */

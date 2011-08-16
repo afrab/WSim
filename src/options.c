@@ -446,11 +446,11 @@ void options_read_cmdline(struct options_t *s, int *argc, char *argv[])
     {
     case OPT_MISSING:
       fprintf(stderr,STR_MISSING,wsim_options.list[optindex]->longname);
-      exit(1);
+      exit( EXIT_FAILURE );
     case OPT_UNKNOWN:
       fprintf(stderr,STR_UNKNOWN,argv[parseindex]);
       options_usage(argv[0]);
-      exit(1);
+      exit( EXIT_FAILURE );
     case OPT_EOOPT: /* ok, do nothing */
       break;
     }
@@ -460,7 +460,7 @@ void options_read_cmdline(struct options_t *s, int *argc, char *argv[])
   if (help_opt.isset)
     {
       options_usage(argv[0]);
-      exit(0);
+      exit( EXIT_SUCCESS );
     }
 
   if (dump_opt.isset)
@@ -548,7 +548,7 @@ void options_read_cmdline(struct options_t *s, int *argc, char *argv[])
       else
 	{
 	  OPT_ERROR("mode must be set to gdb|console|run|insn|time\n");
-	  exit(1);
+	  exit( EXIT_FAILURE );
 	}
     }
   else /* run mode not set */
@@ -557,7 +557,7 @@ void options_read_cmdline(struct options_t *s, int *argc, char *argv[])
       if (modearg_opt.isset)
 	{
 	  OPT_ERROR("modearg must be used according to mode=[gdb|insn|time]\n");
-	  exit(1);
+	  exit( EXIT_FAILURE );
 	}
     }
 
@@ -623,8 +623,8 @@ void options_read_cmdline(struct options_t *s, int *argc, char *argv[])
 
   if (version_opt.isset)
     {
-      OUTPUT_VERSION();
-      exit(EXIT_SUCCESS);
+      OPT_PRINT("%s\n",VERSION_STRING());
+      exit( EXIT_SUCCESS );
     }
 
   if (preload_opt.isset)
@@ -679,7 +679,7 @@ void options_read_cmdline(struct options_t *s, int *argc, char *argv[])
     {
       OPT_ERROR("\n ** missing node_id option ** \n\n");
       options_usage(argv[0]);
-      exit(1);
+      exit( EXIT_FAILURE );
     }
 
   if (realtime_opt.isset && (wsnet1_mode_opt.isset || wsnet2_mode_opt.isset))
@@ -706,7 +706,7 @@ void options_read_cmdline(struct options_t *s, int *argc, char *argv[])
 	{
 	  OPT_ERROR("\n ** missing exec name, no program loaded ** \n\n");
 	  options_usage(argv[0]);
-	  exit(1);
+	  exit( EXIT_FAILURE );
 	}
     }
 }

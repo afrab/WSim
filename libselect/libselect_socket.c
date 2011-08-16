@@ -34,6 +34,7 @@
 
 #define LISTENQ 2 // socket listen fifo size (backlog)
 
+void     app_exit_error  ();
 
 /* ************************************************** */
 /* ************************************************** */
@@ -144,7 +145,7 @@ void READ1(char *var, char* delim, int size, int n)
       /* tcp:s:machine:port         */
       /* tcp:c:machine:port         */
       /* udp:local:port:remote:port */
-      exit(1);
+      app_exit_error();
     }
 }
 

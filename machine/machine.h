@@ -76,7 +76,6 @@ wsimtime_t machine_get_nanotime(void);
 /**
  * machine_run
  **/
-void       machine_exit      (int arg);
 void       machine_run       (struct machine_opt_t *m);
 
 /**

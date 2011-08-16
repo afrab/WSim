@@ -249,8 +249,8 @@ void mcu_state_restore(void)
 
 void mcu_print_description(void)
 {
-  OUTPUT("mcu   : %s\n",MCU_NAME);
-  OUTPUT("model : %s\n",MCU_MODEL_NAME);
+  OUTPUT_BOXM("mcu   : %s\n",MCU_NAME);
+  OUTPUT_BOXM("model : %s\n",MCU_MODEL_NAME);
 }
 
 

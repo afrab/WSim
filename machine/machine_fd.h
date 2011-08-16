@@ -111,7 +111,7 @@ extern struct machine_t machine;
 /* ************************************************** */
 /* ************************************************** */
 
-void     machine_exit      (int arg);
+void     machine_exit_error  ();
 
 #define MACHINE_TIME_GET_NANO()  machine.state->nanotime
 #define MACHINE_TIME_GET_INCR()  machine.nanotime_incr

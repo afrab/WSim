@@ -11,10 +11,7 @@
 #include <string.h>
 
 #undef  DEBUG
-
-#ifdef DEBUG
-#define __DEBUG_ME_HARDER
-#endif
+#define DEBUG_ME_HARDER 0
 
 #include "arch/common/hardware.h"
 #include "arch/msp430/msp430.h"
@@ -25,6 +22,7 @@
 #include "devices/ds2411/ds2411_dev.h"
 #include "devices/cc2420/cc2420_dev.h"
 #include "devices/ptty/ptty_dev.h"
+#include "devices/uigfx/uigfx_dev.h"
 #include "src/options.h"
 
 
@@ -115,9 +113,9 @@
 #define DS24             5
 #define RADIO            6
 #define SERIAL           7
-// #define LOGO1            8
+#define LOGO1            8
 
-#define END_DEV           SERIAL
+#define END_DEV           LOGO1
 #define BOARD_DEVICE_MAX (END_DEV+1)
 
 /* ************************************************** */
@@ -239,9 +237,7 @@ int devices_create(void)
   machine.device_size[DS24]   = ds2411_device_size(); // dallas ds2411
   machine.device_size[RADIO]  = cc2420_device_size(); // cc2420 radio
   machine.device_size[SERIAL] = ptty_device_size();
-#if defined(LOGO1)
   machine.device_size[LOGO1]  = uigfx_device_size();
-#endif
 
   /*********************************/
   /* allocate memory               */
@@ -254,13 +250,13 @@ int devices_create(void)
   /*********************************/
 
 #if defined(LOGO1)
-#  define BKG 0x000000
+#  define BKG 0xffffff
 #  define OFF 0x202020
-#  include "telosb.xpm"
-#  define WSIM telosb
+#  include "wsim.xpm"
+#  define WSIMLOGO wsim
 #else
-#  define BKG 0x000000
-#  define OFF 0x202020
+#  define BKG 0x202020
+#  define OFF 0x404040
 #endif
 
   res += system_create          (SYSTEM);
@@ -271,9 +267,7 @@ int devices_create(void)
   res += ds2411_device_create   (DS24,    ds2411_opt.value);
   res += cc2420_device_create   (RADIO,   16, cc2420_antenna);
   res += ptty_device_create     (SERIAL,  1);
-#if defined(LOGO1)
-  res += uigfx_device_create    (LOGO1,   telosb);
-#endif
+  res += uigfx_device_create    (LOGO1,   WSIMLOGO);
 
   /*********************************/
   /* place peripherals Gui         */
@@ -281,18 +275,15 @@ int devices_create(void)
 
   {
     int lw,lh;
+    int log_w,log_h;
 
-    machine.device[LED1].ui_get_size(LED1,&lw,&lh);
-#if defined(LOGO1)
+    machine.device[LED1].ui_get_size (LED1,&lw,&lh);
     machine.device[LOGO1].ui_get_size(LOGO1, &log_w, &log_h);
-#endif
 
-    machine.device[LED1].ui_set_pos  (LED1,    0,   0);
-    machine.device[LED2].ui_set_pos  (LED2, 1*lw,   0);
-    machine.device[LED3].ui_set_pos  (LED3, 2*lw,   0);
-#if defined(LOGO1)
+    machine.device[LED1 ].ui_set_pos (LED1,    0,   0);
+    machine.device[LED2 ].ui_set_pos (LED2, 1*lw,   0);
+    machine.device[LED3 ].ui_set_pos (LED3, 2*lw,   0);
     machine.device[LOGO1].ui_set_pos (LOGO1,   0,   0);
-#endif
   }
 
   /*********************************/
@@ -317,7 +308,8 @@ int devices_reset_post()
   SYSTEM_FLASH_CS = 0;
   SYSTEM_RADIO_CS = 0;
   SYSTEM_P2DIR    = msp430_digiIO_dev_read_dir(PORT2);
-  
+
+  REFRESH(LOGO1);
   REFRESH(LED1);
   REFRESH(LED2);
   REFRESH(LED3);
@@ -429,7 +421,7 @@ int devices_update()
       uint32_t msk;
       uint32_t val;
 
-#if defined(DEBUG_ME_HARDER)
+#if (DEBUG_ME_HARDER != 0)
       if (BIT(val8,4) != SYSTEM_FLASH_CS)
 	{
 	  HW_DMSG_DEV("telosb: flash CSn set to %d\n",BIT(val8,4));
@@ -517,20 +509,11 @@ int devices_update()
 	   */
 	  if ((SYSTEM_FLASH_CS == 0) && (SYSTEM_RADIO_CS == 0))
 	    {
-	      WARNING("devices:telosb: Flash and Radio SPI are selected at the same time\n");
+	      WARNING("telosb: Flash and Radio SPI are selected at the same time\n");
 	    }
 
-	  /* tests can/should be removed */
-	  // if (SYSTEM_FLASH_CS == 0) /* M25P CS is negated */
-	    {
-	      machine.device[FLASH].write(FLASH, M25P_D, val8);
-	    }
-
-	  /* tests can/should be removed */
-	  // if (SYSTEM_RADIO_CS == 0) /* CC2420 CS is negated */
-	    {
-	      machine.device[RADIO].write(RADIO, CC2420_DATA_MASK, val8);
-	    }
+	  machine.device[FLASH].write(FLASH, M25P_D, val8);
+	  machine.device[RADIO].write(RADIO, CC2420_DATA_MASK, val8);
 	}
       break;
     case USART_MODE_UART:

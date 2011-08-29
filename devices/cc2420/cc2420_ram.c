@@ -55,7 +55,7 @@ uint16_t cc2420_ram_bank_offset(uint8_t bank) {
 
 int cc2420_check_ram_access(struct _cc2420_t * cc2420) {
     if (cc2420->mem_access != CC2420_ACCESS_ALL) {
-	WARNING("cc2420_check_ram_access : RAM is not available is this state\n");
+	WARNING("cc2420_check_ram_access : RAM is not available in this state\n");
 	return -1;
     }
 

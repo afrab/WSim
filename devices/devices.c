@@ -81,12 +81,12 @@ int devices_reset(void)
 void devices_print(void)
 {
   int i;
-  OUTPUT("device list:\n");
+  OUTPUT_BOXM("device list:\n");
   for(i=0; i < machine.device_max; i++)
     {
       if (machine.device[i].name != NULL)
 	{
-	  OUTPUT("  dev %02d : %s\n",i,machine.device[i].name);
+	  OUTPUT_BOXM("  dev %02d : %s\n",i,machine.device[i].name);
 	}
     }
 }
@@ -102,7 +102,7 @@ void devices_dump_stats(int64_t user_nanotime)
     {
       if (machine.device[i].name != NULL)
 	{
-	  OUTPUT("  - %-28s:\n",machine.device[i].name);
+	  OUTPUT_STATS("  - %-28s:\n",machine.device[i].name);
 	  if (machine.device[i].statdump != NULL)
 	    {
 	      machine.device[i].statdump(i,user_nanotime);

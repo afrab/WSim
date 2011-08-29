@@ -779,10 +779,9 @@ static ssize_t worldsens1_packet_recv_internal(int fd, char* msg, size_t len, in
       ERROR("= fd=%d, msg=0x%lx, len=%lu, srec=%ld, flags=%d, dump=%d\n", 
 	    fd, (unsigned long)msg, (long unsigned)len, (long)srec, flags, dump); 
       ERROR("= current time = %"PRIu64" ns\n",MACHINE_TIME_GET_NANO());
-      //ERROR("= worldsens:recv: %s\n",strerror(errno));
       ERROR("===================================================\n");
       worldsens1_close_fds();
-      machine_exit(0);
+      machine_exit_error();
     }
 
   if (dump)

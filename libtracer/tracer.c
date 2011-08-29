@@ -26,8 +26,7 @@
 #include "tracer_bin.h"
 #include "tracer_vcd.h"
 
-#define APP_EXIT(i) exit(i)
-
+void app_exit_error();
 
 /* ************************************************** */
 /* ************************************************** */
@@ -61,15 +60,20 @@ static enum wsens_mode_t   tracer_ws_mode;
 /* ************************************************** */
 
 /* start/stop recording event */
-void  (*tracer_event_record_ptr)       (tracer_id_t id, tracer_val_t val);
-void  (*tracer_event_record_force_ptr) (tracer_id_t id, tracer_val_t val);
+void  (*tracer_event_record_ptr)               (tracer_id_t id, tracer_val_t val);
+void  (*tracer_event_record_force_ptr)         (tracer_id_t id, tracer_val_t val);
+void  (*tracer_event_record_time_ptr)          (tracer_id_t id, tracer_val_t val, tracer_time_t time);
 
-static void tracer_event_record_active(tracer_id_t id, tracer_val_t val);
-static void tracer_event_record_active_ws(tracer_id_t id, tracer_val_t val);
-static void tracer_event_record_time_nocheck(tracer_id_t id, tracer_val_t val, tracer_time_t time);
+static void tracer_event_record_active         (tracer_id_t id, tracer_val_t val);
+static void tracer_event_record_active_ws      (tracer_id_t id, tracer_val_t val);
 
-static void tracer_event_record_active_force(tracer_id_t id, tracer_val_t val);
+static void tracer_event_record_active_force   (tracer_id_t id, tracer_val_t val);
 static void tracer_event_record_active_force_ws(tracer_id_t id, tracer_val_t val);
+
+static void tracer_event_record_active_time    (tracer_id_t id, tracer_val_t val, tracer_time_t time);
+static void tracer_event_record_active_time_ws (tracer_id_t id, tracer_val_t val, tracer_time_t time);
+
+static void tracer_event_record_time_nocheck   (tracer_id_t id, tracer_val_t val, tracer_time_t time);
 
 /* ************************************************** */
 /* ************************************************** */
@@ -197,11 +201,13 @@ tracer_start(void)
 	{
 	  tracer_event_record_ptr       = tracer_event_record_active;
 	  tracer_event_record_force_ptr = tracer_event_record_active_force;
+	  tracer_event_record_time_ptr  = tracer_event_record_active_time;
 	}
       else
 	{
 	  tracer_event_record_ptr       = tracer_event_record_active_ws;
 	  tracer_event_record_force_ptr = tracer_event_record_active_force_ws;
+	  tracer_event_record_time_ptr  = tracer_event_record_active_time_ws;
 	}
     }
   else
@@ -237,7 +243,7 @@ tracer_event_add_id(int width, const char* name, const char* module)
 	  tracer_width[i] == width)
 	{
 	  ERROR("tracer: event %s.%s is already registered\n",module,name);
-	  APP_EXIT(1);
+	  app_exit_error();
 	  return -1;
 	}
     }
@@ -248,13 +254,13 @@ tracer_event_add_id(int width, const char* name, const char* module)
   if (id >= (TRACER_MAX_ID - 1))
     {
       ERROR("tracer: max event recording reached, could not register [%s] = %d\n",name,id);
-      APP_EXIT(1);
+      app_exit_error();
     }
 
   if ((name == NULL) || (strlen(name) == 0))
     {
       ERROR("tracer: event id %d must have a valid name (non null)\n",id);
-      APP_EXIT(1);
+      app_exit_error();
     }
 
   if (((width < 1) || (width > 64)) && (strcmp(name,"__WSIMLOGBUFFER") != 0))
@@ -332,6 +338,30 @@ tracer_event_record_time_nocheck(tracer_id_t id, tracer_val_t val, tracer_time_t
  ****************************************/
 
 static void 
+tracer_event_record_active_time(tracer_id_t id, tracer_val_t val, tracer_time_t time)
+{
+  /* we record only value change to limit trace size */
+  if (val != EVENT_TRACER.id_val[id])
+    {
+      tracer_event_record_time_nocheck(id,val,time);
+    }
+  if (EVENT_TRACER.ev_count > TRACER_BLOCK_THRESHOLD)
+    {
+      tracer_dump_data();
+    }
+}
+
+static void 
+tracer_event_record_active_time_ws(tracer_id_t id, tracer_val_t val, tracer_time_t time)
+{
+  /* we record only value change to limit trace size */
+  if (val != EVENT_TRACER.id_val[id])
+    {
+      tracer_event_record_time_nocheck(id,val,time);
+    }
+}
+
+static void 
 tracer_event_record_active(tracer_id_t id, tracer_val_t val)
 {
   /* we record only value change to limit trace size */
@@ -358,7 +388,7 @@ tracer_event_record_active_ws(tracer_id_t id, tracer_val_t val)
 }
 
 
-/* force:: we write a zero to make VCD will change */
+/* force:: we write a zero to make sure VCD will notify */
 static void 
 tracer_event_record_active_force(tracer_id_t id, tracer_val_t val)
 {

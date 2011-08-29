@@ -80,7 +80,6 @@ void options_start         ();
 void options_add           (struct moption_t *o);
 
 void options_read_cmdline  (struct options_t* s, int *argc, char *argv[]);
-void options_print_version (struct options_t *s);
 void options_print_params  (struct options_t *s);
 
 #endif

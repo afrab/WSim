@@ -24,25 +24,25 @@
  */
 
 enum {
-    CC2420_STATE_POWER_DOWN       = 0,
-    CC2420_STATE_IDLE             = 1,
-    CC2420_STATE_RX_CALIBRATE     = 2,
-    CC2420_STATE_RX_SFD_SEARCH    = 3,
-    CC2420_STATE_RX_FRAME         = 16,
-    CC2420_STATE_TX_ACK_CALIBRATE = 48,
-    CC2420_STATE_TX_ACK_PREAMBLE  = 49,
-    CC2420_STATE_TX_ACK           = 52,
-    CC2420_STATE_RX_WAIT          = 14,
-    CC2420_STATE_RX_OVERFLOW      = 17,
-    CC2420_STATE_TX_CALIBRATE     = 32,
-    CC2420_STATE_TX_PREAMBLE      = 34,
-    CC2420_STATE_TX_FRAME         = 37,
-    CC2420_STATE_TX_UNDERFLOW     = 56,
+  CC2420_STATE_POWER_DOWN       = 0,     /* 0x00 */
+  CC2420_STATE_IDLE             = 1,     /* 0x01 */
+  CC2420_STATE_RX_CALIBRATE     = 2,     /* 0x02 */
+  CC2420_STATE_RX_SFD_SEARCH    = 3,     /* 0x03 */
+  CC2420_STATE_RX_FRAME         = 16,    /* 0x10 */
+  CC2420_STATE_TX_ACK_CALIBRATE = 48,    /* 0x30 */
+  CC2420_STATE_TX_ACK_PREAMBLE  = 49,    /* 0x31 */
+  CC2420_STATE_TX_ACK           = 52,    /* 0x34 */
+  CC2420_STATE_RX_WAIT          = 14,    /* 0x0D */
+  CC2420_STATE_RX_OVERFLOW      = 17,    /* 0x11 */
+  CC2420_STATE_TX_CALIBRATE     = 32,    /* 0x20 */
+  CC2420_STATE_TX_PREAMBLE      = 34,    /* 0x22 */
+  CC2420_STATE_TX_FRAME         = 37,    /* 0x25 */
+  CC2420_STATE_TX_UNDERFLOW     = 56,    /* 0x38 */
 
-    CC2420_STATE_VREG_OFF         = 100,
-    CC2420_STATE_VREG_STARTING    = 101,
-    CC2420_STATE_RESET            = 102,
-    CC2420_STATE_XOSC_STARTING    = 103,
+  CC2420_STATE_VREG_OFF         = 100,   /* 0x64 */
+  CC2420_STATE_VREG_STARTING    = 101,   /* 0x65 */
+  CC2420_STATE_RESET            = 102,   /* 0x66 */
+  CC2420_STATE_XOSC_STARTING    = 103,   /* 0x67 */
 };
 
 /* internal tx_frame states */

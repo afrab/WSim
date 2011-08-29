@@ -71,8 +71,7 @@ static void main_end(enum wsim_end_mode_t mode);
 
 void signal_quit(int signum)
 {
-  ERROR("wsim: received Unix signal %d (%s)\n",signum,host_signal_str(signum));
-  
+  INFO("\nwsim: received Unix signal %d (%s)\n",signum,host_signal_str(signum));
   mcu_signal_add(SIG_HOST | signum);
   main_end(WSIM_END_SIGNAL);
 }
@@ -101,24 +100,24 @@ static void main_dump_stats()
 
 
   OUTPUT("\n");
-  OUTPUT("================\n");
-  OUTPUT("WSim stats:\n");
-  OUTPUT("-----------\n");
+  OUTPUT_STATS_START("");
+  OUTPUT_STATS("WSim stats:\n");
+  OUTPUT_STATS("-----------\n");
   if (unanotime > 0)
     {
       int64_t sec  = unanotime / NANO;
       int64_t msec = (unanotime - sec*1000000000) / 1000000;
-      OUTPUT("  simulation user time          : %d.%03d s (%"PRId64" ns)\n", sec, msec, unanotime);
+      OUTPUT_STATS("  simulation user time          : %d.%03d s (%"PRId64" ns)\n", sec, msec, unanotime);
       /* 
-       * OUTPUT("  system simulation time        : %d.%03d s\n", 
+       * OUTPUT_BOXM("  system simulation time        : %d.%03d s\n", 
        *	 ru.ru_stime.tv_sec, ru.ru_stime.tv_usec / 1000); 
        */
     }
-  OUTPUT("  simulation backtracks         : %d\n",machine.backtrack); 
+  OUTPUT_STATS("  simulation backtracks         : %d\n",machine.backtrack); 
 
-  OUTPUT("\n");
+  OUTPUT_STATS("\n");
   machine_dump_stats(unanotime); /* system time */
-  OUTPUT("================\n");
+  OUTPUT_STATS_STOP("");
 }
 
 /* ************************************************** */
@@ -169,27 +168,45 @@ static void  main_run_mode(struct options_t* o)
 /* ************************************************** */
 /* ************************************************** */
 
+void app_exit_error()
+{
+  INFO ("wsim: error, exit\n");
+  ERROR("wsim: error, exit\n");
+  exit( EXIT_FAILURE );
+}
+
+/* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
+
 static void main_end(enum wsim_end_mode_t mode)
 {
+  OUTPUT("================\n");
+  OUTPUT("== wsim stop  ==\n");
+  OUTPUT("================\n");
+
   main_dump_stats();
-  MESSAGE("wsim:end mode %s (%d)\n", wsim_end_mode_str(mode), mode);
+
+  INFO("\n");
+  INFO("wsim: end mode %s (%d)\n", wsim_end_mode_str(mode), mode);
+
   /* simulation done */
   if (o.do_dump)
     {
-      INFO("wsim:dumper: dump machine state in [%s]\n",o.dumpfile);
+      INFO("wsim: dump machine state in [%s]\n",o.dumpfile);
       machine_dump(o.dumpfile);
     }
 
   /* finishing traces */
   if (o.do_trace)
     {
-      INFO("wsim:tracer: finalize trace in [%s]\n",o.tracefile);
+      INFO("wsim: finalize trace in [%s]\n",o.tracefile);
       tracer_close();
     }
 
   if (o.do_etrace)
     {
-      INFO("wsim:tracer: finalize eTrace in [%s]\n",o.etracefile);
+      INFO("wsim: finalize etrace in [%s]\n",o.etracefile);
       etracer_close();
     }
 
@@ -199,7 +216,7 @@ static void main_end(enum wsim_end_mode_t mode)
   logger_close();
   logpkt_close();
   ui_delete();
-  exit(0);
+  exit( EXIT_SUCCESS );
 }
 
 /* ************************************************** */
@@ -234,21 +251,19 @@ int main(int argc, char* argv[])
   /* do not use logger functions before that line */
   logger_init(o.logfilename,o.verbose);
 
-  /* init log radios packets*/
-  logpkt_init(o.do_logpkt, o.logpkt, o.logpktfilename);
-
-  OUTPUT("WSim %s, rev %s\n", PACKAGE_VERSION, extract_revision_number());
+  OUTPUT("%s\n",VERSION_STRING());
   OUTPUT("copyright 2005, 2006, 2007, 2008, 2009, 2010, 2011\n");
   OUTPUT("Citi Lab, INRIA, INSA de Lyon\n");
-  OUTPUT("wsim:pid:%d\n",getpid());
+  OUTPUT("\n");
+  OUTPUT("wsim: pid %d\n",getpid());
 
   switch (sizeof(long))
     {
     case 4:
-      INFO("wsim: 32 bits edition\n");
+      INFO("wsim: 32-bit edition\n");
       break;
     case 8:
-      INFO("wsim: 64 bits edition\n");
+      INFO("wsim: 64-bit edition\n");
       break;
     default:
       INFO("wsim: alien edition\n");
@@ -263,6 +278,9 @@ int main(int argc, char* argv[])
 
   /* event tracer */
   tracer_init(o.tracefile, o.wsens_mode);
+
+  /* packet logger */
+  logpkt_init(o.do_logpkt, o.logpkt, o.logpktfilename);
 
   /* libselect init  */
   libselect_init(o.wsens_mode);
@@ -318,13 +336,7 @@ int main(int argc, char* argv[])
     {
       ERROR("** Cannot load file, bailing out\n");
       machine_delete();
-      exit(0);
-    }
-
-  /* what has been created so far */
-  if (o.verbose > 1)
-    {
-      machine_print_description();
+      machine_exit_error();
     }
 
   /* GUI */
@@ -353,7 +365,24 @@ int main(int argc, char* argv[])
       tracer_start();
     }
 
+  /* radios packets logger */
+  if (o.do_logpkt)
+    {
+      INFO("wsim: starting packet logger\n");
+    }
+
+  /* what has been created so far */
+  if (o.verbose > 1)
+    {
+      OUTPUT("\n");
+      machine_print_description();
+    }
+
   /* go */
+  OUTPUT("\n");
+  OUTPUT("================\n");
+  OUTPUT("== wsim start ==\n");
+  OUTPUT("================\n");
   main_run_mode(&o);
 
   main_end(WSIM_END_NORMAL);

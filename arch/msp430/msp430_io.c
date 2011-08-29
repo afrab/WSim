@@ -216,7 +216,7 @@ static void msp430_set_readptr8(addr_map_read8_t f, uint16_t addr)
   else
     {
       ERROR("msp430:io: MCU create error, IO read8 0x%04x function not unique\n",addr);
-      machine_exit(0);
+      machine_exit_error();
     }
 }
 
@@ -242,7 +242,7 @@ static void msp430_set_readptr16(addr_map_read16_t f, uint16_t addr)
 #if defined(ADDR_MIRROR_START)
       ERROR("msp430:io:       %p : ram mirror\n", msp430_read16_ram_mirrored);
 #endif
-      machine_exit(0);
+      machine_exit_error();
     }
 }
 
@@ -258,7 +258,7 @@ static void msp430_set_writeptr8(addr_map_write8_t f, uint16_t addr)
   else
     {
       ERROR("msp430:io: MCU create error, IO write8 0x%04x function not unique\n",addr);
-      machine_exit(0);
+      machine_exit_error();
     }
 }
 
@@ -274,7 +274,7 @@ static void msp430_set_writeptr16(addr_map_write16_t f, uint16_t addr)
   else
     {
       ERROR("msp430:io: MCU create error, IO write16 0x%04x function not unique\n",addr);
-      machine_exit(0);
+      machine_exit_error();
     }
 }
 

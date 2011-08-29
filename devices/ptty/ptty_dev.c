@@ -161,7 +161,10 @@ int ptty_device_create(int dev, int id)
   if (opt_array[id].io.value != NULL)
     {
       PTTY_IO = libselect_id_create(opt_array[id].io.value, 0);
-      libselect_id_register(PTTY_IO);
+      if (libselect_id_is_input(PTTY_IO))
+	{
+	  libselect_id_register(PTTY_IO);
+	}
     }
 
   if (libselect_id_is_valid(PTTY_IO))
@@ -190,7 +193,7 @@ void ptty_statdump(int dev, wsimtime_t UNUSED user_nanotime)
 {
   if (opt_array[PTTY_SERID].io.value)
     {
-      OUTPUT("     + opt: %s\n",  opt_array[PTTY_SERID].io.value);
+      OUTPUT_STATS("     + opt: %s\n",  opt_array[PTTY_SERID].io.value);
     }
 }
 

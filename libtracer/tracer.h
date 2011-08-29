@@ -54,18 +54,25 @@ void  tracer_set_initial_time   (tracer_time_t time);
  */
 extern void  (*tracer_event_record_ptr)       (tracer_id_t id, tracer_val_t val);
 extern void  (*tracer_event_record_force_ptr) (tracer_id_t id, tracer_val_t val);
+extern void  (*tracer_event_record_time_ptr)  (tracer_id_t id, tracer_val_t val, tracer_time_t time);
 
-#define tracer_event_record(id,val)          \
-do {                                         \
-  if (tracer_event_record_ptr != NULL)       \
-    tracer_event_record_ptr(id,val);         \
-} while(0)
+#define tracer_event_record(id,val)             \
+  do {					        \
+    if (tracer_event_record_ptr != NULL)        \
+      tracer_event_record_ptr(id,val);	        \
+  } while(0)
 
-#define tracer_event_record_force(id,val)    \
-do {                                         \
-  if (tracer_event_record_force_ptr != NULL) \
-    tracer_event_record_force_ptr(id,val);   \
-} while(0)
+#define tracer_event_record_force(id,val)	\
+  do {						\
+    if (tracer_event_record_force_ptr != NULL)	\
+      tracer_event_record_force_ptr(id,val);	\
+  } while(0)
+
+#define tracer_event_record_time(id,val,time)		\
+  do {							\
+    if (tracer_event_record_time_ptr != NULL)		\
+      tracer_event_record_time_ptr(id,val,time);	\
+  } while(0)
 
 void  tracer_state_save         (void);
 void  tracer_state_restore      (void);
@@ -75,18 +82,20 @@ void  tracer_state_restore      (void);
 /* ************************************************** */
 #if 0
 #define NOOP  do { } while (0)
-#define tracer_close()                NOOP
-#define tracer_init(f1,f2)            NOOP
-#define tracer_set_timeref(f1)        NOOP
-#define tracer_start()                NOOP
-#define tracer_stop()                 NOOP
-#define tracer_event_add_id(j,k,l)    0
-#define tracer_event_record(i,v)      NOOP
-#define tracer_state_save()           NOOP
-#define tracer_state_restore()        NOOP
-#define tracer_dump_set_format(f)     1
-#define tracer_dump_file(n)           NOOP
-#define tracer_set_node_id(i)         NOOP
+#define tracer_close()                        NOOP
+#define tracer_init(f1,f2)                    NOOP
+#define tracer_set_timeref(f1)                NOOP
+#define tracer_start()                        NOOP
+#define tracer_stop()                         NOOP
+#define tracer_event_add_id(j,k,l)            0
+#define tracer_event_record(i,v)              NOOP
+#define tracer_event_record_force(i,v)        NOOP
+#define tracer_event_record_time(i,v,t)       NOOP
+#define tracer_state_save()                   NOOP
+#define tracer_state_restore()                NOOP
+#define tracer_dump_set_format(f)             1
+#define tracer_dump_file(n)                   NOOP
+#define tracer_set_node_id(i)                 NOOP
 #endif
 
 /* ************************************************** */

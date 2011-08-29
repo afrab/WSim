@@ -32,46 +32,54 @@
 /* ************************************************** */
 /* ************************************************** */
 
+#if !defined(ADC12_BASE)
+#define ADC12_BASE   0x01A0
+#define ADC12M_BASE  0x0120
+#define ADC12MC_BASE 0x0070
+#endif
+
 enum adc12_addr_t {
-  ADC12CTL0   = 0x01A0, /* 16 */
-  ADC12CTL1   = 0x01A2, /* 16 */
-  ADC12IFG    = 0x01A4, /* 16 */
-  ADC12IE     = 0x01A6, /* 16 */
-  ADC12IV     = 0x01A8, /* 16 */
+  /* control offset address are different for ADC12_A */
+
+  ADC12CTL0   = (ADC12_BASE + 0x0000), /* 16 */
+  ADC12CTL1   = (ADC12_BASE + 0x0002), /* 16 */
+  ADC12IFG    = (ADC12_BASE + 0x0004), /* 16 */
+  ADC12IE     = (ADC12_BASE + 0x0006), /* 16 */
+  ADC12IV     = (ADC12_BASE + 0x0008), /* 16 */
   
-  ADC12MEM0   = 0x0140, /* 16 */
-  ADC12MEM1   = 0x0142,
-  ADC12MEM2   = 0x0144,
-  ADC12MEM3   = 0x0146,
-  ADC12MEM4   = 0x0148,
-  ADC12MEM5   = 0x014A,
-  ADC12MEM6   = 0x014C,
-  ADC12MEM7   = 0x014E,
-  ADC12MEM8   = 0x0150,
-  ADC12MEM9   = 0x0152,
-  ADC12MEM10  = 0x0154,
-  ADC12MEM11  = 0x0156,
-  ADC12MEM12  = 0x0158,
-  ADC12MEM13  = 0x015A,
-  ADC12MEM14  = 0x015C,
-  ADC12MEM15  = 0x015E,
+  ADC12MEM0   = (ADC12M_BASE + 0x0020), /* 16 */
+  ADC12MEM1   = (ADC12M_BASE + 0x0022),
+  ADC12MEM2   = (ADC12M_BASE + 0x0024),
+  ADC12MEM3   = (ADC12M_BASE + 0x0026),
+  ADC12MEM4   = (ADC12M_BASE + 0x0028),
+  ADC12MEM5   = (ADC12M_BASE + 0x002A),
+  ADC12MEM6   = (ADC12M_BASE + 0x002C),
+  ADC12MEM7   = (ADC12M_BASE + 0x002E),
+  ADC12MEM8   = (ADC12M_BASE + 0x0030),
+  ADC12MEM9   = (ADC12M_BASE + 0x0032),
+  ADC12MEM10  = (ADC12M_BASE + 0x0034),
+  ADC12MEM11  = (ADC12M_BASE + 0x0036),
+  ADC12MEM12  = (ADC12M_BASE + 0x0038),
+  ADC12MEM13  = (ADC12M_BASE + 0x003A),
+  ADC12MEM14  = (ADC12M_BASE + 0x003C),
+  ADC12MEM15  = (ADC12M_BASE + 0x003E),
   
-  ADC12MCTL0  = 0x080, /*  8 */
-  ADC12MCTL1  = 0x081,
-  ADC12MCTL2  = 0x082,
-  ADC12MCTL3  = 0x083,
-  ADC12MCTL4  = 0x084,
-  ADC12MCTL5  = 0x085,
-  ADC12MCTL6  = 0x086,
-  ADC12MCTL7  = 0x087,
-  ADC12MCTL8  = 0x088,
-  ADC12MCTL9  = 0x089,
-  ADC12MCTL10 = 0x08A,
-  ADC12MCTL11 = 0x08B,
-  ADC12MCTL12 = 0x08C,
-  ADC12MCTL13 = 0x08D,
-  ADC12MCTL14 = 0x08E,
-  ADC12MCTL15 = 0x08F
+  ADC12MCTL0  = (ADC12MC_BASE + 0x010), /*  8 */
+  ADC12MCTL1  = (ADC12MC_BASE + 0x011),
+  ADC12MCTL2  = (ADC12MC_BASE + 0x012),
+  ADC12MCTL3  = (ADC12MC_BASE + 0x013),
+  ADC12MCTL4  = (ADC12MC_BASE + 0x014),
+  ADC12MCTL5  = (ADC12MC_BASE + 0x015),
+  ADC12MCTL6  = (ADC12MC_BASE + 0x016),
+  ADC12MCTL7  = (ADC12MC_BASE + 0x017),
+  ADC12MCTL8  = (ADC12MC_BASE + 0x018),
+  ADC12MCTL9  = (ADC12MC_BASE + 0x019),
+  ADC12MCTL10 = (ADC12MC_BASE + 0x01A),
+  ADC12MCTL11 = (ADC12MC_BASE + 0x01B),
+  ADC12MCTL12 = (ADC12MC_BASE + 0x01C),
+  ADC12MCTL13 = (ADC12MC_BASE + 0x01D),
+  ADC12MCTL14 = (ADC12MC_BASE + 0x01E),
+  ADC12MCTL15 = (ADC12MC_BASE + 0x01F)
 };
 
 /* ************************************************** */
@@ -486,7 +494,7 @@ void msp430_adc12_update(void)
       else
 	{
 	  ERROR("msp430:adc12: channel out of bounds\n");
-	  machine_exit(1);
+	  machine_exit_error();
 	}
     }
   else

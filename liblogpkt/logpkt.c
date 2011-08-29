@@ -10,17 +10,17 @@
 #include <stdio.h>
 #include <ctype.h>
 
-#include "logpkt.h"
-#include "liblogger/logger.h"
 #include "arch/common/hardware.h"
+#include "pcap.h"
+#include "logpkt.h"
 
 
 /* ************************************************** */
 /* ************************************************** */
 
-#undef DEBUG
+#define DEBUG_LOGPKT 0
 
-#if defined(DEBUG)
+#if DEBUG_LOGPKT != 0
 #define LOGPKT_DBG(x...) DMSG_LIB(x) 
 #else
 #define LOGPKT_DBG(x...) do { } while (0)
@@ -32,8 +32,8 @@
 #undef UNUSED
 #define UNUSED __attribute__((unused))
 
-#define MAX_PKT_LENGTH 1000  /* maximum size of a packet           */
-#define MAX_INTERFACES 5     /* maximum number of radio interfaces */
+#define MAX_PKT_LENGTH 1300  /* maximum size of a packet           */
+#define MAX_INTERFACES 1     /* maximum number of radio interfaces */
 
 #define MAXINTERFACENAME 30
 #define MAXERRORLENGTH   50
@@ -44,6 +44,7 @@
 #define LOG_RX_ONLY   0
 #define LOG_TX_ONLY   1
 #define LOG_RX_AND_TX 2
+#define LOG_PCAP      3
 
 #define DEFAULT_LOG_MODE LOG_RX_AND_TX
 
@@ -52,7 +53,6 @@
 /* ************************************************** */
 /* ************************************************** */
 struct _logpkt_state_t {
-  char     interface_name[MAXINTERFACENAME];
   uint8_t  current_rx_pkt[MAX_PKT_LENGTH];
   uint8_t  current_tx_pkt[MAX_PKT_LENGTH];
   int      rx_pkt_offset;
@@ -69,6 +69,7 @@ struct _logpkt_state_t {
 
 struct _logpkt_state_no_bk_t {
   char     interface_name[MAXINTERFACENAME];
+  int      interface_dlt;
   uint32_t rx_pkt_count;
   uint32_t tx_pkt_count;
 };
@@ -86,8 +87,10 @@ static FILE* logpkt_logfile;
 
 static int nb_interfaces = 0;  /* number of different radio interfaces */
 
-static int log_mode = DEFAULT_LOG_MODE;
+static int log_mode     = DEFAULT_LOG_MODE;
 
+#define DLT_NO_INIT -1
+static int log_pcap_dlt = DLT_NO_INIT;
 
 /* ************************************************** */
 /* ************************************************** */
@@ -154,18 +157,32 @@ void logpkt_init(int do_log_pkt, char* logpkt, const char* logpktfilename)
       if (!strcmp(logpkt, "rx"))
 	{
 	  log_mode = LOG_RX_ONLY;
+	  LOGPKT_DBG("liblogpkt:mode: set to RX only\n");
 	}
       else if (!strcmp(logpkt, "tx"))
 	{
 	  log_mode = LOG_TX_ONLY;
+	  LOGPKT_DBG("liblogpkt:mode: set to TX only\n");
 	}
       else if (!strcmp(logpkt, "rxtx") || !strcmp(logpkt, "txrx"))
 	{
 	  log_mode = LOG_RX_AND_TX;
+	  LOGPKT_DBG("liblogpkt:mode: set to RX and TX\n");
+	}
+      else if (strstr(logpkt,"pcap") == logpkt)
+	{
+	  char *c;
+	  log_mode = LOG_PCAP;
+	  if ((c = strchr(logpkt,':')) != NULL)
+	    {
+	      int id = atoi(c+1);
+	      log_pcap_dlt = id;
+	      LOGPKT_DBG("liblogpkt:mode: force pcap dlt type to %d\n", log_pcap_dlt);
+	    }
 	}
       else
 	{
-	  ERROR("pktlog: wrong option, should be '--pktlog=tx', '--pktlog=rx' or '--pktlog=rxtx'\n");
+	  ERROR("pktlog: wrong option, should be '--pktlog=[tx|rx|rxtx|pcap[:id]]'\n");
 	  ERROR("pktlog: log mode set to RX and TX\n");
 	  log_mode = LOG_RX_AND_TX;
 	}
@@ -179,38 +196,41 @@ void logpkt_init(int do_log_pkt, char* logpkt, const char* logpktfilename)
     }
   else
     {
-      strcpy(logpkt_filename,logpktfilename);
-      /* REAL_STDOUT("wsim:log:%s\n",filename); */
+      strncpyz(logpkt_filename,logpktfilename,MAXFILENAME);
+      LOGPKT_DBG("wsim:liblogpkt:%s\n",logpkt_filename);
     }
-  
-  fprintf(logpkt_logfile, "\n");
-  fprintf(logpkt_logfile, "========================\n");
-  fprintf(logpkt_logfile, "== Radios packets log ==\n");
-  fprintf(logpkt_logfile, "========================\n");
-  fprintf(logpkt_logfile, "\n");
-  fprintf(logpkt_logfile, "Note : rx and tx packets contains preamble, sync word and data\n");
-  fprintf(logpkt_logfile, "Note : rx packets are logged before crc replacement\n");
-  fprintf(logpkt_logfile, "Note : time interval syntax -> [tx or rx start; tx or rx end]\n");
-  fprintf(logpkt_logfile, "\n");
 
-  switch(log_mode)
+  if (log_mode != LOG_PCAP)
     {
-    case LOG_RX_ONLY:
-      fprintf(logpkt_logfile, "Log mode: RX only\n");
-      break;
-    case LOG_TX_ONLY:
-      fprintf(logpkt_logfile, "Log mode: TX only\n");
-      break;
-    case LOG_RX_AND_TX:
-      fprintf(logpkt_logfile, "Log mode: RX and TX\n");
-      break;
+      fprintf(logpkt_logfile, "\n");
+      fprintf(logpkt_logfile, "========================\n");
+      fprintf(logpkt_logfile, "== Radios packets log ==\n");
+      fprintf(logpkt_logfile, "========================\n");
+      fprintf(logpkt_logfile, "\n");
+      fprintf(logpkt_logfile, "Note : rx and tx packets contains preamble, sync word and data\n");
+      fprintf(logpkt_logfile, "Note : rx packets are logged before crc replacement\n");
+      fprintf(logpkt_logfile, "Note : time interval syntax -> [tx or rx start; tx or rx end]\n");
+      fprintf(logpkt_logfile, "\n");
+
+      switch(log_mode)
+	{
+	case LOG_RX_ONLY:
+	  fprintf(logpkt_logfile, "Log mode: RX only\n");
+	  break;
+	case LOG_TX_ONLY:
+	  fprintf(logpkt_logfile, "Log mode: TX only\n");
+	  break;
+	case LOG_RX_AND_TX:
+	  fprintf(logpkt_logfile, "Log mode: RX and TX\n");
+	  break;
+	}
     }
 }
 
 
 /* ************************************************** */
 /* ************************************************** */
-void logpkt_init_interface_op(int interface_id, const char* interface_name)
+void logpkt_init_interface_op(int interface_id, const char* interface_name, int pcap_dlt)
 {
   LOGPKT_DBG("liblogpkt:init interface %s\n", interface_name);
 
@@ -245,29 +265,51 @@ void logpkt_init_interface_op(int interface_id, const char* interface_name)
   logpkt_tab_buf_saved[interface_id].tx_pkt_completed = 0;
   strcpy(logpkt_tab_buf_saved[interface_id].tx_error_log, "");
 
-  strcpy(logpkt_no_bk_tab[interface_id].interface_name, interface_name);
   logpkt_no_bk_tab[interface_id].rx_pkt_count = 0;
   logpkt_no_bk_tab[interface_id].tx_pkt_count = 0;
+  strncpyz(logpkt_no_bk_tab[interface_id].interface_name, interface_name, MAXINTERFACENAME);
+  
+  if (log_pcap_dlt == DLT_NO_INIT) /* not forced */
+    {
+      logpkt_no_bk_tab[interface_id].interface_dlt = pcap_dlt;
+    }
+  else
+    {
+      logpkt_no_bk_tab[interface_id].interface_dlt = log_pcap_dlt;
+    }
 
   nb_interfaces++;
 
-  fprintf(logpkt_logfile, "Interface %s registered\n", interface_name);
+  LOGPKT_DBG("Interface %s registered\n", interface_name);
+  switch (log_mode)
+    {
+    case LOG_PCAP:
+      logpkt_pcap_start(logpkt_logfile, logpkt_no_bk_tab[interface_id].interface_dlt);
+      break;
+    default:
+      fprintf(logpkt_logfile, "Interface %s registered\n", interface_name);
+      break;
+    }
 }
 
+/* ************************************************** */
+/* ************************************************** */
 
-/* ************************************************** */
-/* ************************************************** */
 void logpkt_close_op(void)
 {
   if ((logpkt_logfile != stdout) && (logpkt_logfile != stderr))
     {
+      if (log_mode == LOG_PCAP)
+	{
+	  logpkt_pcap_close(logpkt_logfile);
+	}
       fclose(logpkt_logfile);
     }
 }
 
+/* ************************************************** */
+/* ************************************************** */
 
-/* ************************************************** */
-/* ************************************************** */
 void logpkt_rx_byte_op(int interface_id, uint8_t val)
 {
   if (!logpkt_tab[interface_id].rx_pkt_completed)
@@ -326,6 +368,7 @@ void logpkt_tx_byte_op(int interface_id, uint8_t val)
 
 /* ************************************************** */
 /* ************************************************** */
+
 void logpkt_rx_complete_pkt_op(int interface_id)
 {
   if (!logpkt_tab[interface_id].rx_pkt_completed && logpkt_tab[interface_id].rx_pkt_offset)
@@ -411,40 +454,57 @@ void logpkt_tx_abort_pkt_op(int interface_id, const char* error)
 
 /* ************************************************** */
 /* ************************************************** */
+
 static void logpkt_rx_dump_pkt(struct _logpkt_state_t *logpkt, int interface_id)
 {
   int i;
   char c;
 
   /* current rx frame not empty */
-  if (logpkt->rx_pkt_offset && log_mode != LOG_TX_ONLY)
+  if (logpkt->rx_pkt_offset)
     {
-      fprintf(logpkt_logfile,"\n");
-      fprintf(logpkt_logfile,"******* %s: RX packet (n°%d) [%"PRIu64"ns; %"PRIu64"ns] *******\n",
-	      logpkt_no_bk_tab[interface_id].interface_name,
-	      logpkt_no_bk_tab[interface_id].rx_pkt_count,
-	      logpkt->rx_start_time,
-	      logpkt->rx_end_time);
-
-      /* hex */
-      for (i = 0; i < logpkt->rx_pkt_offset - 1; i++)
+      switch (log_mode) 
 	{
-	  fprintf(logpkt_logfile,"%02x:", logpkt->current_rx_pkt[i]);
+	case LOG_PCAP:
+	  if (strcmp(logpkt->rx_error_log,"") == 0)
+	    {
+	      logpkt_pcap_logrx(logpkt_logfile,
+	                        logpkt->current_rx_pkt,logpkt->rx_pkt_offset,
+	                        logpkt->rx_start_time,logpkt->rx_end_time);
+	    }
+	  logpkt_no_bk_tab[interface_id].rx_pkt_count++;
+	  break;
+	case LOG_TX_ONLY:
+	  break;
+	default:
+	  fprintf(logpkt_logfile,"\n");
+	  fprintf(logpkt_logfile,"******* %s: RX packet (n°%d) [%"PRIu64"ns; %"PRIu64"ns] *******\n",
+	          logpkt_no_bk_tab[interface_id].interface_name,
+	          logpkt_no_bk_tab[interface_id].rx_pkt_count,
+	          logpkt->rx_start_time,
+	          logpkt->rx_end_time);
+	  
+	  /* hex */
+	  for (i = 0; i < logpkt->rx_pkt_offset - 1; i++)
+	    {
+	      fprintf(logpkt_logfile,"%02x:", logpkt->current_rx_pkt[i]);
+	    }
+	  fprintf(logpkt_logfile,"%02x", logpkt->current_rx_pkt[logpkt->rx_pkt_offset - 1]);
+	  fprintf(logpkt_logfile,"%s\n", logpkt->rx_error_log);
+	  
+	  /* ascii */
+	  for (i = 0; i < logpkt->rx_pkt_offset - 1; i++)
+	    {
+	      c = logpkt->current_rx_pkt[i];
+	      fprintf(logpkt_logfile," %c:", isprint(c) ? c : '.');
+	    }
+	  c = logpkt->current_rx_pkt[logpkt->rx_pkt_offset - 1];
+	  fprintf(logpkt_logfile," %c", isprint(c) ? c : '.');
+	  fprintf(logpkt_logfile,"%s\n", logpkt->rx_error_log);
+	  
+	  logpkt_no_bk_tab[interface_id].rx_pkt_count++;
+	  break;
 	}
-      fprintf(logpkt_logfile,"%02x", logpkt->current_rx_pkt[logpkt->rx_pkt_offset - 1]);
-      fprintf(logpkt_logfile,"%s\n", logpkt->rx_error_log);
-
-      /* ascii */
-      for (i = 0; i < logpkt->rx_pkt_offset - 1; i++)
-	{
-	  c = logpkt->current_rx_pkt[i];
-	  fprintf(logpkt_logfile," %c:", isprint(c) ? c : '.');
-	}
-      c = logpkt->current_rx_pkt[logpkt->rx_pkt_offset - 1];
-      fprintf(logpkt_logfile," %c", isprint(c) ? c : '.');
-      fprintf(logpkt_logfile,"%s\n", logpkt->rx_error_log);
-
-      logpkt_no_bk_tab[interface_id].rx_pkt_count++;
     }
 }
 
@@ -455,39 +515,55 @@ static void logpkt_tx_dump_pkt(struct _logpkt_state_t *logpkt, int interface_id)
   char c;
 
   /* current tx frame not empty */
-  if (logpkt->tx_pkt_offset && log_mode != LOG_RX_ONLY)
+  if (logpkt->tx_pkt_offset)
     {
-      fprintf(logpkt_logfile,"\n");
-      fprintf(logpkt_logfile,"******* %s: TX packet (n°%d) [%"PRIu64"ns; %"PRIu64"ns] *******\n",
-	      logpkt_no_bk_tab[interface_id].interface_name,
-	      logpkt_no_bk_tab[interface_id].tx_pkt_count,
-	      logpkt->tx_start_time,
-	      logpkt->tx_end_time);
-
-      /* hex */
-      for (i = 0; i < logpkt->tx_pkt_offset - 1; i++)
+      switch (log_mode)
 	{
-	  fprintf(logpkt_logfile,"%02x:", logpkt->current_tx_pkt[i]);
+	case LOG_PCAP:
+	  if (strcmp(logpkt->tx_error_log,"") == 0)
+	    {
+	      logpkt_pcap_logtx(logpkt_logfile,
+	                        logpkt->current_tx_pkt,logpkt->tx_pkt_offset,
+	                        logpkt->tx_start_time,logpkt->tx_end_time);
+	    }
+	  logpkt_no_bk_tab[interface_id].tx_pkt_count++;
+	  break;
+	case LOG_RX_ONLY:
+	  break;
+	default:
+	  fprintf(logpkt_logfile,"\n");
+	  fprintf(logpkt_logfile,"******* %s: TX packet (n°%d) [%"PRIu64"ns; %"PRIu64"ns] *******\n",
+	          logpkt_no_bk_tab[interface_id].interface_name,
+	          logpkt_no_bk_tab[interface_id].tx_pkt_count,
+	          logpkt->tx_start_time,
+	          logpkt->tx_end_time);
+	  
+	  /* hex */
+	  for (i = 0; i < logpkt->tx_pkt_offset - 1; i++)
+	    {
+	      fprintf(logpkt_logfile,"%02x:", logpkt->current_tx_pkt[i]);
+	    }
+	  fprintf(logpkt_logfile,"%02x", logpkt->current_tx_pkt[logpkt->tx_pkt_offset - 1]);
+	  fprintf(logpkt_logfile,"%s\n", logpkt->tx_error_log);
+	  
+	  /* ascii */
+	  for (i = 0; i < logpkt->tx_pkt_offset - 1; i++)
+	    {
+	      c = logpkt->current_tx_pkt[i];
+	      fprintf(logpkt_logfile," %c:", isprint(c) ? c : '.');
+	    }
+	  c = logpkt->current_tx_pkt[logpkt->tx_pkt_offset - 1];
+	  fprintf(logpkt_logfile," %c", isprint(c) ? c : '.');
+	  fprintf(logpkt_logfile,"%s\n", logpkt->tx_error_log);
+	  
+	  logpkt_no_bk_tab[interface_id].tx_pkt_count++;
 	}
-      fprintf(logpkt_logfile,"%02x", logpkt->current_tx_pkt[logpkt->tx_pkt_offset - 1]);
-      fprintf(logpkt_logfile,"%s\n", logpkt->tx_error_log);
-      
-      /* ascii */
-      for (i = 0; i < logpkt->tx_pkt_offset - 1; i++)
-	{
-	  c = logpkt->current_tx_pkt[i];
-	  fprintf(logpkt_logfile," %c:", isprint(c) ? c : '.');
-	}
-      c = logpkt->current_tx_pkt[logpkt->tx_pkt_offset - 1];
-      fprintf(logpkt_logfile," %c", isprint(c) ? c : '.');
-      fprintf(logpkt_logfile,"%s\n", logpkt->tx_error_log);
-
-      logpkt_no_bk_tab[interface_id].tx_pkt_count++;
     }
 }
 
 /* ************************************************** */
 /* ************************************************** */
+
 void logpkt_state_save_op(void)
 {
   int i;
@@ -576,7 +652,7 @@ void logpkt_state_restore_op(void)
 /* Empty functions, when log packets disable          */
 /* ************************************************** */
 /* ************************************************** */
-void logpkt_init_interface_nop(int UNUSED interface_id, const UNUSED char* interface_name)
+void logpkt_init_interface_nop(int UNUSED interface_id, const UNUSED char* interface_name, int UNUSED dlt)
 {
 }
 
@@ -632,3 +708,5 @@ void logpkt_state_save_nop(void)
 void logpkt_state_restore_nop(void)
 {
 }
+/* ************************************************** */
+/* ************************************************** */

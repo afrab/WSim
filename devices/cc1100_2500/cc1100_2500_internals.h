@@ -31,7 +31,7 @@
 /***************************************************/
 /***************************************************/
 
-/* Private cc1100 time constants in MHz and ns (cf [1] p9) */
+/* Private cc1100 time constants in MHz and ns (cf [1] p9)  */
 // #define CC1100_INTERNAL_XOSC_FREQ         26 /* MHz      */
 // #define CC1100_INTERNAL_XOSC_PERIOD       38 /* 1/26 MHz */
 

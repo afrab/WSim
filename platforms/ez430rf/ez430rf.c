@@ -369,9 +369,6 @@ int devices_update(void)
       case UI_EVENT_USER:
 	{
 	  uint8_t b = 0xff;
-	  // the reset button is negated
-	  //  if (machine.ui.val & UI_BUTTON_1)
-	  //  msp430_reset_pin((machine.ui.b_down & UI_BUTTON_1) ? 0 : 1);
 	  
 	  if ((machine.ui.b_down & UI_BUTTON_1) != 0)
 	    {
@@ -391,6 +388,8 @@ int devices_update(void)
 	      if (((b                  & (0x10)) != 0) && 
 		  ((SYSTEM_BUTTON_LAST & (0x10)) == 0))
 		{
+		  // 0x0400 --> button is disconnected, 
+		  // value depends on msp430 configuration
 		  INFO("%s: button 1 released\n",NAME);
 		  msp430_digiIO_dev_write(PORT1, 0x00, 0x0400);
 		}

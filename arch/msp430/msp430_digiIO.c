@@ -641,9 +641,17 @@ void msp430_digiIO_dev_write(int port_number, uint8_t val, uint16_t bitmask)
   {
     
     oldval                 = DIGIIO_IN(port_number);
-    DIGIIO_IN(port_number) = (oldval & ~bitmask) | ((val & bitmask) | ((bitmask >> 8) & DIGIIO_REN(port_number) & DIGIIO_OUT(port_number)) & ~DIGIIO_DIR(port_number));
+    // keep bits that are not used in bitmask and REN bitmask
+    uint8_t keep    = (oldval & ~bitmask & ~(bitmask >> 8));
+    // set bits imposed by bitmask only
+    uint8_t forced  = (val    &  bitmask & ~(bitmask >> 8)) & ~DIGIIO_DIR(port_number);
+    // set bits according to REN register
+    uint8_t renval  = ((bitmask >> 8) & DIGIIO_REN(port_number)) & DIGIIO_OUT(port_number) & ~DIGIIO_DIR(port_number);
+
+    DIGIIO_IN(port_number) = keep | forced | renval;
     MCU.digiIO.in_updated[port_number] = oldval ^ DIGIIO_IN(port_number);
-    HW_DMSG_DIGI_IO("msp430:dio: pullup/pulldown resistor enable old=0x%02x val=0x%02x \n",oldval, MCU.digiIO.in_updated[port_number]);
+    HW_DMSG_DIGI_IO("msp430:dio: pullup/pulldown resistor enable old=0x%02x val=0x%02x \n",
+                    oldval, MCU.digiIO.in_updated[port_number]);
   }
   else // normal behaviour
 #endif  

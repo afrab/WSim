@@ -188,8 +188,7 @@ int msp430_mcu_create(int xt1)
   // timers
   msp430_watchdog_create();
   msp430_basic_timer_create();
-  msp430_timerA3_create();
-  msp430_timerA5_create();
+  msp430_timerA_create();
   msp430_timerB_create();
   // analog
   msp430_cmpa_create();
@@ -266,8 +265,7 @@ void mcu_reset()
   // timers
   msp430_watchdog_reset();
   msp430_basic_timer_reset();
-  msp430_timerA3_reset();
-  msp430_timerA5_reset();
+  msp430_timerA_reset();
   msp430_timerB_reset();
   // analog
   msp430_adc10_reset();
@@ -311,8 +309,7 @@ void msp430_devices_update(unsigned int cycles)
   // timers
   msp430_watchdog_update();
   msp430_basic_timer_update();
-  msp430_timerA3_update();
-  msp430_timerA5_update();
+  msp430_timerA_update();
   msp430_timerB_update();
   // analog
   msp430_adc10_update();
@@ -333,8 +330,7 @@ void mcu_update_done()
 {
   uint32_t signal;
   /* timers capture operations                    */
-  msp430_timerA3_capture();
-  msp430_timerA5_capture();
+  msp430_timerA_capture();
   msp430_timerB_capture();
 
   /* serial port                                  */

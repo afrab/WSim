@@ -70,8 +70,8 @@ int msp430_interrupt_start_if_any(void)
    * device-specific                               0FFF2h       9     USART0 rx
    * device-specific                               0FFF0h       8     USART0 tx
    * device-specific                               0FFEEh       7     ADC12
-   * device-specific                               0FFECh       6     TimerA3 ccr0
-   * device-specific                               0FFEAh       5     TimerA3 ccr1 ccr2
+   * device-specific                               0FFECh       6     TimerA ccr0
+   * device-specific                               0FFEAh       5     TimerA ccr1 ccr2
    * device-specific                               0FFE8h       4     P1
    * device-specific                               0FFE6h       3     USART1 rx
    * device-specific                               0FFE4h       2     USART1 tx
@@ -159,9 +159,9 @@ int msp430_interrupt_start_if_any(void)
 		  break;
 
 #if defined(__msp430_have_timera3)
-		case INTR_TIMERA3_0:
-		  HW_DMSG_INTR("msp430:intr:   Reset timerA3 taccr0 IFG flag\n");
-		  MCU.timerA3.tacctl[0].b.ccifg = 0;
+		case INTR_TIMERA_0:
+		  HW_DMSG_INTR("msp430:intr:   Reset timerA taccr0 IFG flag\n");
+		  MCU.timerA.tacctl[0].b.ccifg = 0;
 #if defined(SOFT_INTR)
 		  MCU.soft_intr         = 1;
 		  MCU.soft_intr_timeend = MACHINE_TIME_GET_NANO() + SOFT_INTR_DUR;
@@ -271,15 +271,10 @@ int msp430_interrupt_checkifg(void)
 #if defined(__msp430_have_basic_timer)
   res |= msp430_basic_timer_chkifg();
 #endif
-#if defined(__msp430_have_timera3)
-  res |= msp430_timerA3_chkifg();
-#endif
-#if defined(__msp430_have_timera5)
-  res |= msp430_timerA5_chkifg();
-#endif
-#if defined(__msp430_have_timerb3) || defined(__msp430_have_timerb7)
+
+  res |= msp430_timerA_chkifg();
   res |= msp430_timerB_chkifg();
-#endif
+
 #if defined(__msp430_have_adc12)
   res |= msp430_adc12_chkifg();
 #endif

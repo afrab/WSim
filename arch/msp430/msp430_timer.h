@@ -135,7 +135,7 @@ union tacctlu_t {
     uint16_t         s;
 };
 
-struct msp430_timerA3_t 
+struct msp430_timerA_t 
 {
   union {
     struct tactl_t   b;
@@ -166,46 +166,23 @@ struct msp430_timerA3_t
   enum timer_ud_mode_t  udmode;
 };
 
-void    msp430_timerA3_create (void);
-void    msp430_timerA3_reset  (void);
-void    msp430_timerA3_update (void);
-void    msp430_timerA3_capture(void);
-int16_t msp430_timerA3_read   (uint16_t addr);
-void    msp430_timerA3_write  (uint16_t addr, int16_t val);
-int8_t  msp430_timerA3_read8  (uint16_t addr);
-void    msp430_timerA3_write8 (uint16_t addr, int8_t val);
-int     msp430_timerA3_chkifg ();
+void    msp430_timerA_create (void);
+void    msp430_timerA_reset  (void);
+void    msp430_timerA_update (void);
+void    msp430_timerA_capture(void);
+int16_t msp430_timerA_read   (uint16_t addr);
+void    msp430_timerA_write  (uint16_t addr, int16_t val);
+int8_t  msp430_timerA_read8  (uint16_t addr);
+void    msp430_timerA_write8 (uint16_t addr, int8_t val);
+int     msp430_timerA_chkifg ();
 
 #else
-#define msp430_timerA3_create()  do { } while (0)
-#define msp430_timerA3_reset()   do { } while (0)
-#define msp430_timerA3_update()  do { } while (0)
-#define msp430_timerA3_capture() do { } while (0)
+#define msp430_timerA_create()  do { } while (0)
+#define msp430_timerA_reset()   do { } while (0)
+#define msp430_timerA_update()  do { } while (0)
+#define msp430_timerA_capture() do { } while (0)
+#define msp430_timerA_chkifg()  0
 #endif
-
-/***************************************************/
-/** Timer A5 ***************************************/
-/***************************************************/
-#if defined(__msp430_have_timera5)
-
-struct msp430_timerA5_t  
-{
-};
-
-void    msp430_timerA5_create (void);
-void    msp430_timerA5_reset  (void);
-void    msp430_timerA5_update (void);
-void    msp430_timerA5_capture(void);
-int16_t msp430_timerA5_read   (uint16_t addr);
-void    msp430_timerA5_write  (uint16_t addr, int16_t val);
-#define msp430_timerA5_chkifg() 0
-
-#else
-#define msp430_timerA5_create()  do { } while (0)
-#define msp430_timerA5_reset()   do { } while (0)
-#define msp430_timerA5_update()  do { } while (0)
-#define msp430_timerA5_capture() do { } while (0)
-#endif /* have_timera5 */
 
 /***************************************************/
 /** Timer B ****************************************/
@@ -340,10 +317,11 @@ int     msp430_timerB_chkifg (void);
 #define msp430_timerB_reset()   do { } while (0)
 #define msp430_timerB_update()  do { } while (0)
 #define msp430_timerB_capture() do { } while (0)
+#define msp430_timerB_chkifg()  0
 #endif /* have_timerb */
 
 /***************************************************/
 /***************************************************/
 /***************************************************/
 
-#endif
+#endif // timerb

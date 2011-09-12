@@ -143,11 +143,8 @@ struct msp430_mcu_t {
 #if defined(__msp430_have_basic_timer)
   struct msp430_basic_timer_t  bt;
 #endif
-#if defined(__msp430_have_timera3)
-  struct msp430_timerA3_t      timerA3;
-#endif
-#if defined(__msp430_have_timera5)
-  struct msp430_timerA5_t      timerA5;
+#if defined(__msp430_have_timera3) || defined(__msp430_have_timera5)
+  struct msp430_timerA_t       timerA;
 #endif
 #if defined(__msp430_have_timerb3) || defined(__msp430_have_timerb7)
   struct msp430_timerB_t       timerB;

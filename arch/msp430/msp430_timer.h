@@ -61,32 +61,10 @@ enum timer_outmod_t {
 /***************************************************/
 #if defined(__msp430_have_timera3)
 
-/* Timer1_A3 - Timer 0 */
-
-enum timerA3_addr_t {
-  TAIV      = 0x012e, /* read only */
-
-  TACTL     = 0x0160,
-  TACCTL0   = 0x0162,
-  TACCTL1   = 0x0164,
-  TACCTL2   = 0x0166,
-  TA_RES1   = 0x0168, /* reserved */
-  TA_RES2   = 0x016a, /* reserved */
-  TA_RES3   = 0x016c, /* reserved */
-  TA_RES4   = 0x016e, /* reserved */
-
-  TAR       = 0x0170,
-  TACCR0    = 0x0172,
-  TACCR1    = 0x0174,
-  TACCR2    = 0x0176,
-  TA_RES5   = 0x0178, /* reserved */
-  TA_RES6   = 0x017a, /* reserved */
-  TA_RES7   = 0x017c, /* reserved */
-  TA_RES8   = 0x017e  /* reserved */
-};
-
-#define TIMER_A3_START 0x0160
-#define TIMER_A3_END   0x017e
+#if defined(__msp430_have_timera3)
+#define TIMERANAME "timerA3"
+#define TIMERA_COMPARATOR 3
+#endif
 
 /**
  * Timer A Data Structure
@@ -157,8 +135,6 @@ union tacctlu_t {
     uint16_t         s;
 };
 
-#define TIMERA_COMPARATOR 3
-
 struct msp430_timerA3_t 
 {
   union {
@@ -212,25 +188,6 @@ int     msp430_timerA3_chkifg ();
 /***************************************************/
 #if defined(__msp430_have_timera5)
 
-enum timerA5_addr_t {
-  TA1IV     = 0x011e,
-  TA1CTL    = 0x0180,
-  TA1CCTL0  = 0x0182,
-  TA1CCTL1  = 0x0184,
-  TA1CCTL2  = 0x0186,
-  TA1CCTL3  = 0x0188,
-  TA1CCTL4  = 0x018a,
-  TA1R      = 0x0190,
-  TA1CCR0   = 0x0192,
-  TA1CCR1   = 0x0194,
-  TA1CCR2   = 0x0196,
-  TA1CCR3   = 0x0198,
-  TA1CCR4   = 0x019a
-};
-
-#define TIMER_A5_START  0x180
-#define TIMER_A5_END    0x19e
-
 struct msp430_timerA5_t  
 {
 };
@@ -256,34 +213,13 @@ void    msp430_timerA5_write  (uint16_t addr, int16_t val);
 
 #if defined(__msp430_have_timerb3) || defined(__msp430_have_timerb7)
 
-#if defined(__msp430_have_timerb7)
-#define TIMERBNAME "timerB7"
-#else
+#if defined(__msp430_have_timerb3)
 #define TIMERBNAME "timerB3"
+#define TIMERB_COMPARATOR 3
+#elif defined(__msp430_have_timerb7)
+#define TIMERBNAME "timerB7"
+#define TIMERB_COMPARATOR 7
 #endif
-
-enum timerB_addr_t {
- TBIV      = 0x011e,
- TBCTL     = 0x0180,
- TBCCTL0   = 0x0182,
- TBCCTL1   = 0x0184,
- TBCCTL2   = 0x0186,
- TBCCTL3   = 0x0188,
- TBCCTL4   = 0x018a,
- TBCCTL5   = 0x018c,
- TBCCTL6   = 0x018e,
- TBR       = 0x0190,
- TBCCR0    = 0x0192,
- TBCCR1    = 0x0194,
- TBCCR2    = 0x0196,
- TBCCR3    = 0x0198,
- TBCCR4    = 0x019a,
- TBCCR5    = 0x019c,
- TBCCR6    = 0x019e
-};
-
-#define TIMER_B_START  0x180
-#define TIMER_B_END    0x19e
 
 /* tbr length is selectable */
 #define TBR_8  0xffu
@@ -359,12 +295,6 @@ union tbcctlu_t {
     struct tbcctl_t  b;
     uint16_t         s;
 };
-
-#if defined(__msp430_have_timerb7)
-#define TIMERB_COMPARATOR 7
-#else
-#define TIMERB_COMPARATOR 3
-#endif
 
 struct msp430_timerB_t  
 {

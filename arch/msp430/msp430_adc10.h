@@ -1,8 +1,8 @@
 /**
  *  \file   msp430_adc10.h
  *  \brief  MSP430 ADC10 controller
- *  \author Antoine Fraboulet
- *  \date   2006
+ *  \author Antoine Fraboulet & Julien Carpentier
+ *  \date   2006, 2011
  **/
 
 #ifndef MSP430_ADC10_H
@@ -14,7 +14,7 @@
 struct __attribute__ ((packed)) adc10ctl0_t {
   uint16_t
     srefx:3,
-    ssetx:2,
+    adc10shtx:2,
     adc10sr:1,
     refout:1,
     refburst:1,
@@ -41,8 +41,8 @@ struct __attribute__ ((packed)) adc10ctl0_t {
     reburst:1,
     refout:1,
     adc10sr:1,
-    shtx:2,
-    srefx:1;
+    adc10shtx:2,
+    srefx:3;
 };
 #endif
 
@@ -146,6 +146,16 @@ struct msp430_adc10_t {
   uint32_t        chann_ptr[ADC10_CHANNELS];     /* current ptr in data */
   wsimtime_t     chann_time[ADC10_CHANNELS];
   wsimtime_t   chann_period[ADC10_CHANNELS];
+  
+  enum adc10state_t state;
+  
+  uint32_t adc10osc_freq;
+  uint64_t adc10osc_counter;
+  int      adc10osc_increment;
+  int      adc10osc_temp;
+  uint32_t adc10osc_cycle_nanotime;
+  
+  
 };
 
 /* ************************************************** */

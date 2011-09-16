@@ -1,7 +1,7 @@
 /**
  *  \file   msp430_adc10.c
  *  \brief  MSP430 Adc10 controller
- *  \author Antoine Fraboulet
+ *  \author Antoine Fraboulet & Julien Carpentier
  *  \date   2006, 2011
  **/
 
@@ -17,12 +17,12 @@
 /* ************************************************** */
 /* ************************************************** */
 
-#define HW_DMSG_ADC(x...) HW_DMSG_MCUDEV(x)
+#define HW_DMSG_ADC10(x...) HW_DMSG_MCUDEV(x)
 
-#define ADC_DEBUG_LEVEL_2 0
+#define ADC10_DEBUG_LEVEL_2 0
 
-#if ADC_DEBUG_LEVEL_2 != 0
-#define HW_DMSG_2_DBG(x...) HW_DMSG_ADC(x)
+#if ADC10_DEBUG_LEVEL_2 != 0
+#define HW_DMSG_2_DBG(x...) HW_DMSG_ADC10(x)
 #else
 #define HW_DMSG_2_DBG(x...) do { } while (0)
 #endif
@@ -36,7 +36,8 @@
 #endif
 
 enum adc10_addr_t {
-  ADC10AE   = ADC10_BASE + 0x004A, /*  8 */
+  ADC10AE0   = ADC10_BASE + 0x004A, /*  8 */
+  ADC10AE1   = ADC10_BASE + 0x004B, /*  8 */
   ADC10DTC0 = ADC10_BASE + 0x0048, /*  8 */
   ADC10DTC1 = ADC10_BASE + 0x0049, /*  8 */
   ADC10CTL0 = ADC10_BASE + 0x01B0, /* 16 */
@@ -76,6 +77,30 @@ char trace_names[ADC10_CHANNELS][ADC10_CHANNEL_NAMES] = {
 /* ************************************************** */
 /* ************************************************** */
 /* ************************************************** */
+#define ADC10_MODES        4
+#define ADC10_MODES_NAMES 40
+char adc10_modes[ADC10_MODES][ADC10_MODES_NAMES] = {
+  "Single Channel Single Conversion",  "Sequence of Channels",
+  "Repeat Single Channel",  "Repeat Sequence of Channels"
+};
+
+#define ADC10_STATES        6
+#define ADC10_STATES_NAMES 40
+char adc10_states[ADC10_STATES][ADC10_STATES_NAMES] = {
+  "Off", "Wait enable", "Wait trigger", "Sample", "Convert", "Store"
+};
+
+/* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
+
+/* ADC12 internal OSC is ~ 5MHz */
+/* cycle_nanotime == 200        */
+#define NANO                    (  1000*1000*1000)
+#define ADC10OSC_FREQ           (     5*1000*1000)
+
+#define ADC10OSC_CYCLE_NANOTIME (NANO / ADC10OSC_FREQ) 
+
 
 static struct moption_t adc10_in_opt = {
   .longname    = "msp430_adc10",
@@ -136,7 +161,8 @@ static int msp430_adc10_init(void)
 
 void msp430_adc10_create()
 {
-  msp430_io_register_addr8 (ADC10AE  ,msp430_adc10_read8 ,msp430_adc10_write8);
+  msp430_io_register_addr8 (ADC10AE0 ,msp430_adc10_read8 ,msp430_adc10_write8);
+  msp430_io_register_addr8 (ADC10AE1 ,msp430_adc10_read8 ,msp430_adc10_write8);
   msp430_io_register_addr8 (ADC10DTC0,msp430_adc10_read8 ,msp430_adc10_write8);
   msp430_io_register_addr8 (ADC10DTC1,msp430_adc10_read8 ,msp430_adc10_write8);
 
@@ -154,7 +180,45 @@ void msp430_adc10_create()
 
 void msp430_adc10_reset()
 {
+  int i;
+  /* set initial values */
+  HW_DMSG_ADC10("msp430:adc10:reset()\n");
+  MCU.adc10.ctl0.s = 0;             //clear IFG, IE, SREFx
+  MCU.adc10.ctl1.s = 0;             //clear INCHx
+  MCU.adc10.adc10osc_freq           = ADC10OSC_FREQ;
+  MCU.adc10.adc10osc_cycle_nanotime = ADC10OSC_CYCLE_NANOTIME;
 }
+
+static inline void ADC10_SET_STATE(int state)
+{
+  int current_state = MCU.adc10.state;
+
+  MCU.adc10.state = state;
+  ADC10_TRACER_STATE(MCU.adc10.state);
+  if (current_state != state)
+    {
+      HW_DMSG_ADC10("msp430:adc10: mode \"%s\", state \"%s\" -> \"%s\"\n", 
+		    adc10_modes[MCU.adc10.ctl1.b.conseqx], 
+		    adc10_states[current_state],
+		    adc10_states[state]);
+    }
+  switch (state)
+    {
+    case ADC10_STATE_SAMPLE:
+    case ADC10_STATE_CONVERT:
+    case ADC10_STATE_STORE:
+            MCU.adc10.ctl1.b.adc10busy = 1; /* operation done */
+	    break;
+    default:
+            MCU.adc10.ctl1.b.adc10busy = 0; /* operation done */
+	    break;
+    }
+}
+
+static const int shtdiv[4] = 
+{
+  4, 8, 16, 64 
+};
 
 /* ************************************************** */
 /* ************************************************** */
@@ -162,6 +226,18 @@ void msp430_adc10_reset()
 
 void msp430_adc10_update()
 {
+    if (MCU.adc10.ctl0.b.adc10on == 0)
+    {
+      ADC10_SET_STATE( ADC10_STATE_OFF );
+      return;
+      
+    }
+    
+    //TODO
+    
+    
+    
+    
 }
 
 /* ************************************************** */

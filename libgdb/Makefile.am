@@ -9,5 +9,5 @@ libgdb_a_SOURCES = \
 	gdbremote_utils.h       \
 	gdbremote_utils.c	\
 	gdbremote.h		\
-	gdbremote.c		\
+	gdbremote.c
 

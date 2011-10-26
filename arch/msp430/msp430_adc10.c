@@ -180,7 +180,7 @@ void msp430_adc10_create()
 
 void msp430_adc10_reset()
 {
-  int i;
+  //  int i;
   /* set initial values */
   HW_DMSG_ADC10("msp430:adc10:reset()\n");
   MCU.adc10.ctl0.s = 0;             //clear IFG, IE, SREFx

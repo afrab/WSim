@@ -86,7 +86,8 @@ void msp430_flash_update_wait(void)
       else
 	{
 	  /* waiting, decrease time to wait */
-	  uint32_t clock, div, mod;
+	  uint32_t clock = 0;
+	  uint32_t div, mod;
 	  switch (MCUFLASH.fctl2.b.fsselx)
 	    {
 	    case 0:

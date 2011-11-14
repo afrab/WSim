@@ -70,6 +70,7 @@ void ptty_statdump    (int dev, wsimtime_t user_nanotime);
 
 #define WSIM_MAX_PTTYS 4
 #define MAXNAME        40
+#define MAXHELP        1024
 
 struct ptty_opt_t {
   int  dev_num;
@@ -82,8 +83,8 @@ static struct ptty_opt_t opt_array[WSIM_MAX_PTTYS];
 
 char* str_build(const char* str, const char* name)
 {
-  char buff[MAXNAME];
-  snprintf(buff,MAXNAME,str,name);
+  char buff[MAXHELP];
+  snprintf(buff,MAXHELP,str,name);
   return strdup(buff); /* create strings */
 }
 
@@ -101,7 +102,10 @@ int ptty_add_options(int dev_num, int dev_id, const char *dev_name)
 
   opt_array[dev_id].io.longname    = str_build("%s_io", dev_name);
   opt_array[dev_id].io.type        = required_argument;
-  opt_array[dev_id].io.helpstring  = str_build("%s in/out", dev_name);
+  opt_array[dev_id].io.helpstring  = str_build("%s in/out\n\
+\t\t\t\tFiles = output[,input]\n\
+\t\t\t\tTCP   = tcp:s:localIP:port\n\
+\t\t\t\tUDP   = udp:localIP:localport:remoteIP:remoteport\n",dev_name);
   opt_array[dev_id].io.value       = NULL;
 
   options_add( & opt_array[dev_id].io);

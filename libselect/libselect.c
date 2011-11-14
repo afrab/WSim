@@ -53,15 +53,17 @@
  * dimensions are fixed
  ****************************************/
 
-#define SELECT_SKIP_UPDATES 0
+#define SELECT_SKIP_UPDATES       0
+
 #if SELECT_SKIP_UPDATES != 0
-#define LIBSELECT_UPDATE_SKIP   200
+#define LIBSELECT_UPDATE_SKIP     200
 #endif
 
-#define DEFAULT_FIFO_SIZE       5120
-#define LIBSELECT_MAX_ENTRY     20
-#define BUFFER_MAX              DEFAULT_FIFO_SIZE /* max 64ko == IP datagram max size */
+#define DEFAULT_FIFO_SIZE         5120
+#define LIBSELECT_MAX_ENTRY       20
+#define BUFFER_MAX                DEFAULT_FIFO_SIZE /* max 64ko == IP datagram max size */
 
+#define BACKTRACK_DEFAULT_SETTING 1 /* on */
 /****************************************
  * libselect internal structure
  *
@@ -494,12 +496,18 @@ libselect_id_t libselect_id_create(char *argname, int UNUSED flags)
   if (strstr(cmdline,"bk:") == cmdline)
     {
       cmdline += 3;
-      DMSG("wsim:libselect: open file %s with backtrack buffer on input/output\n",cmdline);
+      DMSG("wsim:libselect: open file %s *with* backtrack buffer on input/output\n",cmdline);
       libselect.entry[id].backtrack = 1;
     }
-  else
+  else if (strstr(cmdline,"nobk:") == cmdline)
     {
+      cmdline += 5;
+      DMSG("wsim:libselect: open file %s *without* backtrack buffer on input/output\n",cmdline);
       libselect.entry[id].backtrack = 0;
+    }
+  else 
+    {
+      libselect.entry[id].backtrack = BACKTRACK_DEFAULT_SETTING; 
     }
 
   libselect.entry[id].fd_in       = -1;

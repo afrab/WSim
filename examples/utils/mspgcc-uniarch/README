@@ -1,0 +1,13 @@
+## ##################################################
+##
+##   Generic Makefile 
+##       common rules for all examples
+##       mspgcc4 and uniarch adaptation
+##
+##   Contributed by Gaetan Harter 14/11/2011
+##     INRIA Senslab / Senstools
+##
+## ##################################################
+
+Files allowing effortless forward compatibility with the new msp430-gcc uniarch version
+If you find something missing or unsupported please report on senslab-user mailing list

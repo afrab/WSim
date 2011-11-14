@@ -51,8 +51,6 @@ WARNINGS += -Wcast-align -Wsign-compare -Waggregate-return # -Wmissing-prototype
 WARNINGS += -Wunused # -Wmissing-declarations 
 
 
-
-
 # GCC Uniarch compatibility
 
 # New version on mspgcc (Uniarch) from mspgcc.sf.net defines a __MSPGCC__ variable

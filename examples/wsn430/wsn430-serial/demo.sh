@@ -8,7 +8,7 @@ ELF=wsn430-serial.elf
 PLATFORM=wsn430
 
 VERBOSE=2
-LOGFILE=stdout
+LOGFILE=wsim.log
 TRACEFILE=wsim.trc
 GUI=yes
 

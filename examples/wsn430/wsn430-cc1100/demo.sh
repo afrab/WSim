@@ -70,7 +70,7 @@ iter=0
 while [ ${iter} -lt ${NB_NODE} ]
 do 
     eval DS="\$DS${iter}"
-    WS="${WSIM} ${MODE} ${WSNET_MODE} ${LOG} ${TRC} --logfile=n${iter}.log --trace=n${iter}.trc --serial1_io=bk:udp:localhost:600${iter}:localhost:700${iter} --node-id=${iter} --ds2411=${DS} ./cc1100-26MHz.elf"
+    WS="${WSIM} ${MODE} ${WSNET_MODE} ${LOG} ${TRC} --logfile=n${iter}.log --trace=n${iter}.trc --serial1_io=bk:udp:localhost:600${iter}:localhost:700${iter} --node-id=${iter} --ds2411=${DS} ./wsn430-cc1100.elf"
     xterm -T wsim-${iter} -e "${WS}" &
     echo "${WS}"
     iter=`expr ${iter} + 1`

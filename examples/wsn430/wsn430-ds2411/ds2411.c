@@ -9,8 +9,8 @@
 #include <iomacros.h>
 #include <stdio.h>
 #include <string.h>
-#include "ds2411.h"
 
+#include "ds2411.h"
 
 /*
 
@@ -61,8 +61,7 @@ static void __inline__ micro_wait(register unsigned int n)
 
     __asm__ __volatile__ (
 		"1: \n"
-		" dec	%[n] \n"      /* 1 cycles */
-		" nop        \n"      /* 1 cycle  */
+		" dec	%[n] \n"      /* 2 cycles */
 		" jne	1b   \n"      /* 2 cycles */
         : [n] "+r"(n));
 }
@@ -153,6 +152,14 @@ do {                                        \
 #define DS2411Pin_prepare_read()            MSP430_DIR_ds2411_INPUT()
 #define DS2411Pin_read()                    MSP430_READ_ds2411()
 
+#if 0
+inline int DS2411Pin_read()
+{
+  unsigned char v = P2IN;
+  return (v >> 4) & 1;
+}
+#endif
+
 /***************************************************/
 /* INIT ********************************************/
 /***************************************************/
@@ -235,6 +242,7 @@ static uint8_t ds2411_read_byte() // >= 560us
       if( ds2411_read_bit() )
 	byte |= bit;
     }
+
   return byte;
 }
 
@@ -265,7 +273,7 @@ enum ds2411_result_t DS2411_init() // >= 6000us
 	      crc = ds2411_crc8_byte( crc, *byte );
 	    }
 
-	  //	  if( crc == 0 )
+	  if( crc == 0 )
 	    {
 	      memcpy( ds2411_id, id, 8 );
 	      return DS2411_SUCCESS;

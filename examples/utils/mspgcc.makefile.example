@@ -1,0 +1,31 @@
+ifndef WSN430_DRIVERS_PATH
+$(error Please set environment variable WSN430_DRIVERS_PATH to the drivers folder)
+endif
+
+# define one name for each executable to be built
+NAMES  = firt_target second_target
+
+
+# the specific sources files must be stored in a variable called SRC_target_name to be found automatically
+# These variables can be undefined or empty
+
+# sources files specific to 'first_target'
+SRC_first_target  = main_first_target.c
+
+# sources files specific to 'second_target'
+SRC_second_target  = main_second_target.c
+SRC_second_target += specific_file_for_second_target.c
+
+
+# common sources for all targets
+SRC  = $(WSN430_DRIVERS_PATH)/cc2420.c
+SRC += $(WSN430_DRIVERS_PATH)/uart0.c
+SRC += $(WSN430_DRIVERS_PATH)/spi1.c
+SRC += $(WSN430_DRIVERS_PATH)/clock.c
+
+
+INCLUDES  = -I. -I$(WSN430_DRIVERS_PATH)
+
+# the makefile common will generate NAMES.hex and NAMES.elf files, and define 'all' and 'clean' directives
+-include $(WSN430_DRIVERS_PATH)/Makefile.common
+

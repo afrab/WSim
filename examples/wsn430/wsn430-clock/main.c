@@ -14,7 +14,7 @@
 
 void delay(unsigned int d) 
 {
-  int i,j;
+  unsigned int i,j;
   for(j=0; j < 0xff; j++)
     {
       for (i = 0; i<d; i++) 
@@ -45,8 +45,7 @@ micro_wait(register unsigned int n)
 
     __asm__ __volatile__ (
 		"1: \n"
-		" dec	%[n] \n" /* 1 cycle  */
-		" nop        \n" /* 1 cycle  */
+		" dec	%[n] \n" /* 2 cycle  */
 		" jne	1b   \n" /* 2 cycles */
         : [n] "+r"(n));
 } /* micro_wait */
@@ -56,7 +55,7 @@ micro_wait(register unsigned int n)
 void
 milli_wait(register unsigned int n)
 {
-  int i;
+  unsigned int i;
   for(i=0; i<n; i++)
     micro_wait(1000 MICRO);
 }

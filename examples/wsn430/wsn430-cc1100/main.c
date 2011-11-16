@@ -40,7 +40,7 @@ interrupt (PORT1_VECTOR) port1_irq_handler(void)
 
 void delay(unsigned int d) 
 {
-  int i,j;
+  unsigned int i,j;
   for(j=0; j < d; j++)
     {
       for (i = 0; i < 0xff; i++) 
@@ -220,7 +220,9 @@ int got_root()
 int main(void) 
 {
   int root;
-
+  
+  WDTCTL = WDTPW + WDTHOLD;
+    
   P1IE   = 0x00;        // Interrupt enable
   P2IE   = 0x00;        // 0:disable 1:enable
 

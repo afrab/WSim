@@ -38,6 +38,7 @@ endif # INCLUDES
 
 CC      = msp430-gcc
 OBJCOPY = msp430-objcopy
+OBJDUMP = msp430-objdump
 RM      = -rm -f
 
 DEBUG   ?= -g
@@ -46,8 +47,8 @@ OPT     ?= -Os
 CPU     ?= -mmcu=msp430x1611
 
 WARNINGS += -Wall -Wpointer-arith -Wbad-function-cast
-WARNINGS += -Wcast-align -Wsign-compare -Waggregate-return -Wmissing-prototypes
-WARNINGS += -Wmissing-declarations -Wunused
+WARNINGS += -Wcast-align -Wsign-compare -Waggregate-return # -Wmissing-prototypes
+WARNINGS += -Wunused # -Wmissing-declarations 
 
 
 
@@ -75,7 +76,7 @@ CFLAGS += $(OPT) $(DEBUG) $(GCC_4_INCLUDE) $(INCLUDES) $(WARNINGS)
 
 .PHONY: all clean
 
-TARGETS += $(addsuffix .hex, $(NAMES)) $(addsuffix .elf, $(NAMES))
+TARGETS += $(addsuffix .hex, $(NAMES)) $(addsuffix .elf, $(NAMES)) $(addsuffix .lst, $(NAMES))
 
 # sort gives us the uniqueness of object files
 SRCS = $(sort $(SRC) $(foreach name, $(NAMES), $(SRC_$(name))))
@@ -89,6 +90,9 @@ all : $(TARGETS)
 
 %.hex : %.elf
 	$(OBJCOPY) -O ihex $< $@
+
+%.lst : %.elf
+	$(OBJDUMP) -dSt $< > $@
 
 
 # Each binary requires ALL oject files dependency,
@@ -106,7 +110,7 @@ clean :
 	$(RM) $(TARGETS) $(OBJS) $(DEPS) *.elf *.hex 
 
 realclean: clean 
-	$(RM) *.log *.trc *.vcd
+	$(RM) *.log *.trc *.vcd *.pkt
 
 -include $(DEPS)
 

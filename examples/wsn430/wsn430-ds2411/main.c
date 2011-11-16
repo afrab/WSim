@@ -16,7 +16,7 @@
 
 void delay(unsigned int d) 
 {
-  int i,j;
+  unsigned int i,j;
   for(j=0; j < 0xff; j++)
     {
       for (i = 0; i<d; i++) 
@@ -90,6 +90,8 @@ void blue_led()
 int main(void) 
 {
   ds2411_serial_number_t id; 
+
+  WDTCTL = WDTPW + WDTHOLD;
 
   P1IE   = 0x00;        // Interrupt enable
   P2IE   = 0x00;        // 0:disable 1:enable

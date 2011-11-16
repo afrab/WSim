@@ -16,7 +16,7 @@ int uart0_init()
   U0CTL  = SWRST;                 //reset
   U0CTL  = CHAR;                  //init & release reset
   
-  U0TCTL = SSEL_SMCLK|TXEPT;      //use SMCLK
+  U0TCTL = SSEL1|TXEPT;      //use SMCLK
   U0RCTL = 0;
 
 //~ //115200 @4MHz

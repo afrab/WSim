@@ -1,54 +1,26 @@
-#! /bin/sh
+#! /bin/bash
 
-# Serial terminal emulation
-#  stdout | UDP | TCP
-SERMODE="UDP"
+source ../../utils/wsim.inc
 
-if [ "x`which nc.traditional`" = "x" ]
-then
-    NETCAT=nc
-else
-    NETCAT=nc.traditional
-fi
+## ============= Config===================
 
-case $SERMODE in
-    "stdout")
-        NCCMD=""
-        SERIAL="--serial0_io=stdout"
-        ;;
-    "UDP")
-        NCCMD="${NETCAT} -u -p 7000 localhost 6010"
-        SERIAL="--serial0_io=udp:localhost:6010:localhost:7000"
-        ;;
-    "TCP")
-        NCCMD="${NETCAT} localhost 6000"
-        SERIAL="--serial0_io=bk:tcp:s:localhost:6000"
-        ;;
-esac
+ELF=reed.elf
+PLATFORM=msp1611
 
-## ##################################################
-## ##################################################
+VERBOSE=2
+LOGFILE=wsim.log
+TRACEFILE=wsim.trc
 
-WSIM=wsim-msp1611
+MODE=run
+TIME=60s
 
-CMD="${WSIM} --ui ${SERIAL} --trace=wsim.trc nn4.elf"
-echo $CMD
-$CMD &
+# Serial 0
+SERIAL[0]="tcp:s:localhost:6000"
+SERIAL_TERM[0]="${NETCAT} localhost 6000"
 
-## ##################################################
-## ##################################################
+## ============= Run =====================
 
-if [ "${NCCMD}" != "" ] ; then
-    xterm -T netcat-1 -e "${NCCMD}" &
-    echo "${NCCMD}"
-fi
+run_wsim
 
-## ##################################################
-## ##################################################
-
-read dummyval
-killall -SIGUSR1 ${WSIM}   > /dev/null 2>&1
-killall -SIGQUIT ${NETCAT} > /dev/null 2>&1
-
-wtracer --in=wsim.trc --out=wsim.vcd --format=vcd
+## =======================================
 

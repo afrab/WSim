@@ -1,43 +1,32 @@
-NAME     = wsn430-demo
-CPU      = msp430x1611
-CC       = msp430-gcc
 
-OBJECTS  = main.o uart1.o ds2411.o clock.o timer.o cc1100_27MHz.o cc1100_wsn430.o
-INCLUDES = -I../wsn430-leds -I../wsn430-serial -I../wsn430-cc1100 -I../wsn430-ds2411 -I../wsn430-clock -I../wsn430-timer
-CFLAGS   = -mmcu=${CPU} -Wall ${INCLUDES} -g 
+# define one name for each executable to be built
+NAMES      = wsn430-token
+CPU        = -mmcu=msp430x1611
+OPT        = -O2
 
+UTILS_PATH = ../../utils
+CFLAGS     = -DFREQ_BASE_27MHz
 
-all: ${NAME}.elf  ${NAME}.lst
+# sources files specific to 'first_target'
+SRC_wsn430-token = main.c
 
-${NAME}.elf: ${OBJECTS}
-	${CC} -mmcu=${CPU} -o $@ ${OBJECTS}
+SRC               = ../wsn430-clock/clock.c 
+SRC              += ../wsn430-timer/timer.c 
+SRC              += ../wsn430-serial/uart1.c
+SRC              += ../wsn430-m25p80/m25p80.c
+SRC              += ../wsn430-ds2411/ds2411.c
+SRC              += ../wsn430-cc1100/cc1100.c
+SRC              += ../wsn430-cc1100/cc1100_wsn430.c
 
-${NAME}.lst: ${NAME}.elf
-	msp430-objdump -dSt $^ >$@
+INCLUDES          = -I. 
+INCLUDES         += -I../wsn430-leds 
+INCLUDES         += -I../wsn430-clock 
+INCLUDES         += -I../wsn430-timer
+INCLUDES         += -I../wsn430-serial
+INCLUDES         += -I../wsn430-m25p80
+INCLUDES         += -I../wsn430-ds2411
+INCLUDES         += -I../wsn430-cc1100
 
-clean:
-	rm -f ${NAME}.elf ${NAME}.a43 ${NAME}.lst ${OBJECTS}	\
-		*.eps *.log *.trc *.pkt *.etr *.gp *.err *.vcd 
+# the makefile common will generate NAMES.hex and NAMES.elf files, and define 'all' and 'clean' directives
+-include ${UTILS_PATH}/mspgcc.makefile
 
-
-#project dependencies
-main.o: main.c 
-	${CC} -c ${CFLAGS} $<
-
-uart1.o: ../wsn430-serial/uart1.c ../wsn430-serial/uart1.h
-	${CC} -c ${CFLAGS} $<
-
-cc1100_27MHz.o: ../wsn430-cc1100/cc1100.c ../wsn430-cc1100/cc1100.h 
-	${CC} -c ${CFLAGS} -DFREQ_BASE_27MHz $< -o $@
-
-cc1100_wsn430.o: ../wsn430-cc1100/cc1100_wsn430.c ../wsn430-cc1100/cc1100_wsn430.h 
-	${CC} -c ${CFLAGS} $<
-
-ds2411.o: ../wsn430-ds2411/ds2411.c ../wsn430-ds2411/ds2411.h
-	${CC} -c ${CFLAGS} -O2 $< 
-
-clock.o: ../wsn430-clock/clock.c ../wsn430-clock/clock.h
-	${CC} -c ${CFLAGS} $<
-
-timer.o: ../wsn430-timer/timer.c ../wsn430-timer/timer.h
-	${CC} -c ${CFLAGS} $<

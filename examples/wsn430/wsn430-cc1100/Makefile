@@ -2,8 +2,11 @@
 # define one name for each executable to be built
 NAMES      = wsn430-cc1100
 CPU        = -mmcu=msp430x1611
+OPT        = -O2
+
 UTILS_PATH = ../../utils
-CFLAGS     = -DCC1100_POLLING_RX -DFREQ_BASE_26MHz
+CFLAGS     = -DCC1100_POLLING_RX -DFREQ_BASE_27MHz
+#CFLAGS     = -DCC1100_POLLING_RX -DFREQ_BASE_26MHz
 
 # sources files specific to 'first_target'
 SRC_wsn430-cc1100 = main.c cc1100.c cc1100_wsn430.c

@@ -56,7 +56,7 @@ void timer_cb(void)
 #define DELAY 0x100
 void delay(unsigned int d) 
 {
-  int i,j;
+  unsigned int i,j;
   for(j=0; j < d; j++)
     {
       for (i = 0; i < 0xff; i++) 
@@ -122,6 +122,8 @@ int main(void)
   int token     = 0;
   char rx_buffer[MSG_SIZE +1];
   char tx_buffer[MSG_SIZE +1];
+
+  WDTCTL = WDTPW + WDTHOLD;
 
   timer_wakeup = 0;
 

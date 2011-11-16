@@ -1,92 +1,48 @@
-#! /bin/sh
+#! /bin/bash
 
-## =============Conf=====================
-WSIM=wsim-wsn430
-WTRC=wtracer
-NB_NODE=1
+source ../../utils/wsim.inc
 
-# set WSNET to "wsnet1", "wsnet2", or "" if you are using wsim alone
-WSNET=""
-WSNET2_CONF="./worldsens.xml"
+## ============= Config===================
 
-UI="--ui"
-LOG="--logfile=stdout --verbose=5"
-TRC="--trace=wsim.trc"
+ELF=wsn430-serial.elf
+PLATFORM=wsn430
 
-# Mode = time | gdb
-MODE="--mode=time --modearg=10s"
-#MODE="--mode=gdb"
+VERBOSE=2
+LOGFILE=stdout
+TRACEFILE=wsim.trc
+GUI=yes
 
-# Serial terminal emulation
-#  stdout | UDP | TCP
-SERMODE="UDP"
+MODE=time
+TIME=60s
 
-## ======================================
+# Serial 0
+SERIAL[0]=""
+SERIAL_TERM[0]=""
 
-if [ "x`which nc.traditional`" = "x" ]
-then
-    NETCAT=nc
-else
-    NETCAT=nc.traditional
-fi
-
-case $SERMODE in
+# Serial 1
+SERMODE=TCP
+case "$SERMODE" in
     "stdout")
-	SERIAL="--serial1_io=stdout"
-	NCCMD=""
+	SERIAL[1]="stdout"
+	SERIAL_TERM[1]=""
 	;;
     "UDP")
-	NCCMD="${NETCAT} -u -p 7000 localhost 6000"
-	SERIAL="--serial1_io=udp:localhost:6000:localhost:7000"
+	SERIAL[1]="udp:localhost:6000:localhost:7000"
+	SERIAL_TERM[1]="${NETCAT} -u localhost 6000"
 	;;
     "TCP")
-	NCCMD="${NETCAT} localhost 6000"
-	SERIAL="--serial1_io=bk:tcp:s:localhost:6000"
+	SERIAL[1]="tcp:s:localhost:6000"
+	SERIAL_TERM[1]="${NETCAT} localhost 6000"
+	;;
+    *)
+	SERIAL[1]=""
+	SERIAL_TERM[1]=""
 	;;
 esac
 
-## =============WSNET=====================
-if [ "$WSNET" = "wsnet1" ]
-then
-    xterm -T ${WSNET} -e "${WSNET}"
-    echo "${WSNET}"
-else
-    if [ "$WSNET_MODE" = "wsnet2" ]
-    then
-        xterm -T ${WSNET} -e "${WSNET} -c ${WSNET2_CONF}"
-        echo "${WSNET} -c ${WSNET2_CONF}"
-    fi
-fi
-## ======================================
+## ============= Run =====================
 
+run_wsim
 
-## =============WSIM=====================
-WS1="${WSIM} ${MODE} ${LOG} ${TRC} ${SERIAL} ./wsn430-serial.elf"
-xterm -T wsim-1 -e "${WS1}" &
-echo "${WS1}"
-sleep 0.5
-## ======================================
+## =======================================
 
-
-## =============NETCAT / SERIAL ==========
-if [ "${NCCMD}" != "" ] ; then
-    xterm -T netcat-1 -e "${NCCMD}" &
-    echo "${NCCMD}"
-fi
-## ======================================
-
-## =============Wait=====================
-read dummyval
-## ======================================
-
-
-## =============End======================
-killall -SIGUSR1 ${WSIM}   > /dev/null 2>&1
-killall -SIGQUIT ${WSNET}  > /dev/null 2>&1
-killall -SIGQUIT ${NETCAT} > /dev/null 2>&1
-## ======================================
-
-
-## =============Traces===================
-${WTRC} --in=wsim.trc --out=wsim.vcd --format=vcd
-## ======================================

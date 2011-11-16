@@ -1,35 +1,23 @@
-#! /bin/sh
+#! /bin/bash
 
-## =============Conf=====================
-WSIM=wsim-wsn430
-WTRC=wtracer
+source ../../utils/wsim.inc
 
-LOG="--logfile=wsim.log --verbose=2"
-TRC="--trace=wsim.trc"
+## ============= Config===================
 
-MODE="--mode=time --modearg=30s"
-#MODE="--mode=gdb"
-UI="--ui"
-## ======================================
+ELF=wsn430-clock.elf
+PLATFORM=wsn430
 
+VERBOSE=2
+LOGFILE=wsim.log
+TRACEFILE=wsim.trc
+GUI=yes
 
-## =============WSIM=====================
-WS1="${WSIM} ${UI} ${MODE} ${LOG} ${TRC} ./wsn430-clock.elf"
-xterm -T wsim-1 -e "${WS1}" &
-echo "${WS1}"
-## ======================================
+MODE=time
+TIME=60s
 
+## ============= Run =====================
 
-## =============Wait=====================
-read dummyval
-## ======================================
+run_wsim
 
+## =======================================
 
-## =============End======================
-killall -SIGUSR1 ${WSIM}   > /dev/null 2>&1
-## ======================================
-
-
-## =============Traces===================
-${WTRC} --in=wsim.trc --out=wsim.vcd --format=vcd
-## ======================================

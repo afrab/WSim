@@ -14,9 +14,7 @@ TRACEFILE=wsim.trc
 MODE=run
 TIME=60s
 
-# Serial 0
-SERIAL[0]="tcp:s:localhost:6000"
-SERIAL_TERM[0]="${NETCAT} localhost 6000"
+SERIAL[0]="tcp:netcat"
 
 ## ============= Run =====================
 

@@ -1,41 +1,13 @@
-## -*-makefile-*-
-NAME    = test2-spi
-SRC     = main.c
 
-CC=msp430-gcc
-CPU=msp430x1611
-CFLAGS  = -mmcu=${CPU} -Wall
-CFLAGS += -mdisable-hwmul
-CFLAGS += -O2 -g
+# define one name for each executable to be built
+NAMES      = spi
+CPU        = -mmcu=msp430x1611
+UTILS_PATH = ../../utils
 
-OBJ_BASE= leds.o clock.o timer.o uart.o spi.o
+# sources files specific to 'first_target'
+SRC              = main.c spi.c timer.c uart.c clock.c leds.c
+INCLUDES         = -I. 
 
-OBJECTS = ${OBJ_BASE} 
+# the makefile common will generate NAMES.hex and NAMES.elf files, and define 'all' and 'clean' directives
+-include ${UTILS_PATH}/mspgcc.makefile
 
-CCMDLINE = ${CFLAGS} ${INCLUDES}
-OBJS=$(SRC:.c=.o)
-OBJECTS+=${OBJS}
-
-# ##################################################
-# ##################################################
-
-${NAME}.elf: ${OBJECTS} 
-	@${CC} -mmcu=${CPU} ${LDFLAGS} ${OBJECTS} ${LDLIBS} -o $@ 
-	@echo LD $@
-	@echo "=================================================="
-	@echo "`pwd` ::" $@
-	@msp430-size $@
-	@echo "=================================================="
-
-%.lst: %.elf
-	@msp430-objdump -dSt $^ >$@
-
-# ##################################################
-# ##################################################
-
-%.o:%.c
-	@echo CC ${CFLAGS} $< 
-	@${CC} -c ${CCMDLINE} $< -o $@
-
-clean:
-	rm *.o *.elf

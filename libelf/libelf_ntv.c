@@ -19,6 +19,7 @@
 /* libentry point is libelf_load_exec_code()          */
 /* ************************************************** */
 
+#define ELF_CHECK_MACH_ID 0
 
 /* ************************************************** */
 /* ** ELF Types ************************************* */
@@ -1037,7 +1038,9 @@ elf32_t libelf_load(const char* filename, int verbose_level)
       ERROR("===================================================================\n");
       return NULL;
     }
-  else if (elf->mach != mcu_mach_id())
+
+#if ELF_CHECK_MACH_ID 
+  if (elf->mach != mcu_mach_id())
     {
       ERROR("===================================================================\n");
       ERROR("The software you are using is compiled for a different machine\n");
@@ -1046,6 +1049,7 @@ elf32_t libelf_load(const char* filename, int verbose_level)
       ERROR("===================================================================\n");
       return NULL;
     }
+#endif
 
   DMSG_LIB_ELF("\nlibelf: all tests passed\n");
   DMSG_LIB_ELF("libelf:    arch %3d 0x%02x : %s\n",mcu_arch_id(),mcu_arch_id(),mcu_name());

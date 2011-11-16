@@ -52,6 +52,8 @@ int main(void)
 {
   int i;
 
+  WDTCTL = WDTPW + WDTHOLD;
+
   P1IE   = 0x00;        // Interrupt enable
   P2IE   = 0x00;        // 0:disable 1:enable
 

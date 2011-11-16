@@ -103,7 +103,10 @@ $(OBJS) :%.o : %.c $(filter-out %.d, $(MAKEFILE_LIST))
 	$(CC) -c $(CFLAGS) $< -o $@
 
 clean :
-	$(RM) $(TARGETS) $(OBJS) $(DEPS) *.elf *.hex
+	$(RM) $(TARGETS) $(OBJS) $(DEPS) *.elf *.hex 
+
+realclean: clean 
+	$(RM) *.log *.trc *.vcd
 
 -include $(DEPS)
 

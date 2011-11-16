@@ -16,7 +16,7 @@
 
 void delay(unsigned int d) 
 {
-  int i,j;
+  unsigned int i,j;
   for(j=0; j < 0xff; j++)
     {
       for (i = 0; i<d; i++) 

@@ -14,7 +14,7 @@
 
 void delay(unsigned int d) 
 {
-  int i,j;
+  unsigned int i,j;
   for(j=0; j < 0xff; j++)
     {
       for (i = 0; i<d; i++) 
@@ -98,7 +98,8 @@ interrupt (TIMERA0_VECTOR) TickISR( void )
 
 int main(void) 
 {
-  int  c;
+  WDTCTL = WDTPW + WDTHOLD;
+
 
   BCSCTL1 |= XTS;        //ACLK = LFTX1 = High Freq 8Mhz
   BCSCTL1 |= DIVA_3;     //ACLK = 1 Mhz

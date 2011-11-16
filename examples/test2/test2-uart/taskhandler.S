@@ -68,7 +68,7 @@ taskhandler:
 
 .golowpower:                                    ; if it was last entry...
         bic.b #LEDRT, &P2OUT                    ; Activity indicator
-        bis   #LPM0, r2                         ; go in lowpower mode until wakeup trough interrupt
+        bis   #CPUOFF, r2                         ; go in lowpower mode until wakeup trough interrupt
         bis.b #LEDRT, &P2OUT                    ; Activity indicator
         jmp   .Ltsk1                            ; restart searching on wakeup
 

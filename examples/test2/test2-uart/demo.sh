@@ -1,34 +1,25 @@
-#! /bin/sh
+#! /bin/bash
 
-rm -f trace*.eps trace*.gp
+source ../../utils/wsim.inc
 
-gnuplot_build()
-{    
-    GP=`echo *.gp`
-    if [ "$GP" != "*.gp" ] ; then 
-	for i in ${GP} ; do 
-	    gnuplot < $i 
-	done
-    fi
-}
+## ============= Config===================
 
-gnuplot_show()
-{
-    EPS=`echo *.eps`
-    if [ "$EPS" != "*.eps" ] ; then 
-	for i in ${EPS} ; do 
-	    gv $i & 
-	done
-    fi
-}
+ELF=uart.elf
+PLATFORM=msp1611-2
 
-CALLGRINDOPTS="--dump-line=yes --dump-instr=yes --trace-jump=yes --collect-systime=yes --collect-jumps=yes --combine-dumps=yes"
-DEBUG="callgrind ${CALLGRINDOPTS}"
-DEBUG=""
+VERBOSE=4
+LOGFILE=wsim.log
+TRACEFILE=wsim.trc
 
-if [ "$1" != "" ] ; then 
-    ${DEBUG}  ./wsim --ui --serial0=$1 --trace=trace --tracemode=gplot  uart.elf 
-else
-    ${DEBUG}  ./wsim --ui --serial0=stdout --trace=trace --tracemode=gplot  uart.elf 
-fi 
-    
+MODE=run
+TIME=60s
+
+# Serial 0
+SERIAL[0]="stdout"
+
+## ============= Run =====================
+
+run_wsim
+
+## =======================================
+

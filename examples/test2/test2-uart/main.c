@@ -58,10 +58,10 @@ int main(void) {
     P6SEL  = P6SEL_INIT;                //Init port or module -function on port6
 #endif
 
-    IE1    = IE1_INIT;
-    IE2    = IE2_INIT;
-    ME1    = ME1_INIT;
-    ME2    = ME2_INIT;
+    //    IE1    = IE1_INIT;
+    //    IE2    = IE2_INIT;
+    //    ME1    = ME1_INIT;
+    //    ME2    = ME2_INIT;
 
     P2OUT |= BIT0;                       //light LED during init
     

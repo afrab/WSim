@@ -1,3 +1,9 @@
 This directory contains some small examples that can be run
 using WSim platforms. They can be used to test basic functionnalities
-but do not contain much msp430 software or device drivers.
+but do not contain much msp430/AVR software or device drivers.
+
+Please use these examples are small demo programs. Useful scripts usually
+called demo.sh can be found in each directory.
+
+
+

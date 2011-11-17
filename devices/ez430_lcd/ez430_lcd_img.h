@@ -1,29 +1,24 @@
-F/**
- *  \file   ez430_lcd_dev.h
- *  \brief  ez430-chronos LCD
+/**
+ *  \file   ez430_lcd_img.h
+ *  \brief  ez430_lcd bitmap image definition
  *  \author Bernhard Dick
  *  \date   2011
  **/
 
-#ifndef EZ430_LCD_DEV_H
-#define EZ430_LCD_DEV_H
+#ifndef _EZ430_LCD_IMG_H
+#define _EZ430_LCD_IMG_H
 
-/**
- *
- **/
-int  ez430_lcd_device_create (int dev_num);
-int  ez430_lcd_device_size   ();
+struct ez430_lcd_img_t {
+  int x;
+  int y;
+  int w;
+  int h;
+  uint8_t*** img;
+};
 
-int  ez430_lcd_reset       (int dev);
-int  ez430_lcd_delete      (int dev);
-void ez430_lcd_write       (int dev, uint32_t mask, uint32_t val);
-int  ez430_lcd_update      (int dev);
-int  ez430_lcd_ui_draw     (int dev);
-void ez430_lcd_ui_get_size (int dev, int *w, int *h);
-void ez430_lcd_ui_set_pos  (int dev, int  x, int  y);
-void ez430_lcd_ui_get_pos  (int dev, int *x, int *y);
-
-void ez430_lcd_regwrite    (int dev, uint8_t mem[15], uint8_t bmem[15]);
+struct ez430_lcd_img_t* ez430_lcd_img_create();
+void ez430_lcd_img_delete(struct ez430_lcd_img_t *img);
+void ez430_lcd_img_print(struct ez430_lcd_img_t *img);
+void ez430_lcd_img_draw(struct ez430_lcd_img_t *img, uint8_t mem[15], uint8_t bmem[15]);
 
 #endif
-

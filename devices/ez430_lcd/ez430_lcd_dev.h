@@ -1,4 +1,4 @@
-F/**
+/**
  *  \file   ez430_lcd_dev.h
  *  \brief  ez430-chronos LCD
  *  \author Bernhard Dick

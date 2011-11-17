@@ -680,6 +680,8 @@ devices/uigfx/Makefile
 devices/spidev/Makefile
 devices/spidev_master/Makefile
 devices/spidev_dsp/Makefile
+devices/cma3000_spi/Makefile
+devices/scp1000_i2c/Makefile
 dnl
 platforms/Makefile
 platforms/wsn430/Makefile

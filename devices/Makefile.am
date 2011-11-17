@@ -15,7 +15,9 @@ SUBDIRS = 		\
 	uigfx		\
 	spidev          \
 	spidev_master	\
-	spidev_dsp
+	spidev_dsp	\
+	cma3000_spi	\
+	scp1000_i2c
 
 
 noinst_LIBRARIES= libdevices.a

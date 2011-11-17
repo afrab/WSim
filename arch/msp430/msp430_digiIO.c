@@ -99,7 +99,7 @@
 #define P1IES     (DIGIIO_BASE + 0x018)
 #define P1IE      (DIGIIO_BASE + 0x01a)
 #define P1SEL     (DIGIIO_BASE + 0x00a)
-#define P1SEL2    0xffff
+#define P1SEL2    0xff01
 #define P1REN     (DIGIIO_BASE + 0x006)
 
 #define P2IN      (DIGIIO_BASE + 0x001)
@@ -109,35 +109,35 @@
 #define P2IES     (DIGIIO_BASE + 0x019)
 #define P2IE      (DIGIIO_BASE + 0x01b)
 #define P2SEL     (DIGIIO_BASE + 0x00b)
-#define P2SEL2    0xffff
+#define P2SEL2    0xff02
 #define P2REN     (DIGIIO_BASE + 0x007)
 
 #define P3IN      (DIGIIO_BASE + 0x020)
 #define P3OUT     (DIGIIO_BASE + 0x022)
 #define P3DIR     (DIGIIO_BASE + 0x024)
 #define P3SEL     (DIGIIO_BASE + 0x02a)
-#define P3SEL2    0xffff
+#define P3SEL2    0xff03
 #define P3REN     (DIGIIO_BASE + 0x026)
 
 #define P4IN      (DIGIIO_BASE + 0x021)
 #define P4OUT     (DIGIIO_BASE + 0x023)
 #define P4DIR     (DIGIIO_BASE + 0x025)
 #define P4SEL     (DIGIIO_BASE + 0x02b)
-#define P4SEL2    0xffff
+#define P4SEL2    0xff04
 #define P4REN     (DIGIIO_BASE + 0x027)
 
 #define P5IN      (DIGIIO_BASE + 0x040)
 #define P5OUT     (DIGIIO_BASE + 0x042)
 #define P5DIR     (DIGIIO_BASE + 0x044)
 #define P5SEL     (DIGIIO_BASE + 0x04a)
-#define P5SEL2    0xffff
+#define P5SEL2    0xff05
 #define P5REN     (DIGIIO_BASE + 0x046)
 
 #define P6IN      (DIGIIO_BASE + 0x041)
 #define P6OUT     (DIGIIO_BASE + 0x043)
 #define P6DIR     (DIGIIO_BASE + 0x045)
 #define P6SEL     (DIGIIO_BASE + 0x04b)
-#define P6SEL2    0xffff
+#define P6SEL2    0xff06
 #define P6REN     (DIGIIO_BASE + 0x047)
 
 #define PJIN      (DIGIIO_BASE + 0x120)
@@ -512,10 +512,10 @@ int8_t msp430_digiIO_mcu_read (uint16_t addr)
 #endif
 
 #if defined(__msp430_have_portj)
-    case P8IN  : r = DIGIIO_IN  (8); break;
-    case P8OUT : r = DIGIIO_OUT (8); break;
-    case P8DIR : r = DIGIIO_DIR (8); break;
-    case P8REN : r = DIGIIO_REN (8); break;
+    case PJIN  : r = DIGIIO_IN  (8); break;
+    case PJOUT : r = DIGIIO_OUT (8); break;
+    case PJDIR : r = DIGIIO_DIR (8); break;
+    case PJREN : r = DIGIIO_REN (8); break;
 #endif
 
     default:

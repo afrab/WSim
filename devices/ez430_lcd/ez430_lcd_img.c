@@ -32,8 +32,8 @@
 #define SEG_8C ':'
 #define SEG_8D '9'
 #define SEG_8E '2'
-#define SEG_8F '^'
-#define SEG_8G '\''
+#define SEG_8F '\''
+#define SEG_8G '^'
 
 #define SEG_7A '#'
 #define SEG_7B '*'
@@ -184,7 +184,7 @@ struct ez430_lcd_img_t *ez430_lcd_img_create()
       } else if (ez430_lcd_xpm[i + 1 + ncolors][j] == '-' && ez430_lcd_xpm[i + 1 + ncolors][j + 1] == '.') { //PM DOT
         img->img[j / 2][i][0] = 1 << 1;
       } else if (ez430_lcd_xpm[i + 1 + ncolors][j] == '*' && ez430_lcd_xpm[i + 1 + ncolors][j + 1] == '.') { //SYM CIRCLE
-        img->img[j / 2][i][2] = 1 << 1;
+        img->img[j / 2][i][4] = 1 << 1;
       } else {
         for (k = 0; k < 12; k++) //LCDMEMx
         {

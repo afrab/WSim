@@ -324,4 +324,322 @@ int     msp430_timerB_chkifg (void);
 /***************************************************/
 /***************************************************/
 
+/***************************************************/
+/** New Timer_A ************************************/
+/***************************************************/
+
+#if defined(__msp430_have_timerTA0)
+#define TIMER_TA0_START  TIMER_TA0_BASE
+#define TIMER_TA0_END    (TIMER_TA0_BASE + 0x2e)
+
+enum timerTA0_addr_t {
+  TA0CTL     = (TIMER_TA0_BASE + 0x00),
+  TA0CCTL0   = (TIMER_TA0_BASE + 0x02),
+  TA0CCTL1   = (TIMER_TA0_BASE + 0x04),
+  TA0CCTL2   = (TIMER_TA0_BASE + 0x06),
+  TA0CCTL3   = (TIMER_TA0_BASE + 0x08),
+  TA0CCTL4   = (TIMER_TA0_BASE + 0x0a),
+
+  TA0R       = (TIMER_TA0_BASE + 0x10),
+  TA0CCR0    = (TIMER_TA0_BASE + 0x12),
+  TA0CCR1    = (TIMER_TA0_BASE + 0x14),
+  TA0CCR2    = (TIMER_TA0_BASE + 0x16),
+  TA0CCR3    = (TIMER_TA0_BASE + 0x18),
+  TA0CCR4    = (TIMER_TA0_BASE + 0x1a),
+
+  TA0EX0     = (TIMER_TA0_BASE + 0x20),
+  TA0IV      = (TIMER_TA0_BASE + 0x2e)
+};
+
+/**
+ * Timer TA0 Data Structure
+ */
+
+#if defined(WORDS_BIGENDIAN)
+struct __attribute__ ((packed)) ta0ctl_t {
+  uint16_t
+    unused:6,
+    tassel:2,
+    id:2,
+    mc:2,
+    unused1:1,
+    taclr:1,
+    taie:1,
+    taifg:0;
+};
+#else
+struct __attribute__ ((packed)) ta0ctl_t {
+  uint16_t
+    taifg:1,
+    taie:1,
+    taclr:1,
+    unused1:1,
+    mc:2,
+    id:2,
+    tassel:2,
+    unused:6;
+};
+#endif
+
+#if defined(WORDS_BIGENDIAN)
+struct __attribute ((packed)) ta0r_t {
+  uint16_t
+    count:16;
+};
+#else
+struct __attribute ((packed)) ta0r_t {
+  uint16_t
+    count:16;
+};
+#endif
+
+#if defined(WORDS_BIGENDIAN)
+struct  __attribute__ ((packed)) ta0cctl_t {
+  uint16_t
+    cm:2,
+    ccis:2,
+    scs:1,
+    scci:1,
+    unused:1,
+    cap:1,
+    outmod:3,
+    ccie:1,
+    cci:1,
+    out:1,
+    cov:1,
+    ccifg:1;
+};
+#else
+struct  __attribute__ ((packed)) ta0cctl_t {
+  uint16_t
+    ccifg:1,
+    cov:1,
+    out:1,
+    cci:1,
+    ccie:1,
+    outmod:3,
+    cap:1,
+    unused:1,
+    scci:1,
+    scs:1,
+    ccis:2,
+    cm:2;
+};
+#endif
+
+union ta0cctln_t {
+    struct ta0cctl_t  b;
+    uint16_t         s;
+};
+
+#define TIMERTA0_COMPARATOR 5
+
+struct msp430_timerTA0_t
+{
+  union {
+    struct ta0ctl_t   b;
+    uint16_t         s;
+  } ta0ctl;
+
+
+  /* input clock is taken before div */
+  /* tar is incremented by (divbuffer >> id) */
+  unsigned int divbuffer;    /* counts input clocks           */
+  unsigned int divuppermask; /* tar += divbuffer >> timer.id  */
+  unsigned int divlowermask; /* divbuffer &= divlowermask     */
+
+  /* we keep int for counters to detect overflow */
+  int      tar;            /* 0x170 */
+
+
+  union ta0cctln_t  ta0cctl [TIMERTA0_COMPARATOR];
+  int            b_ta0ccr  [TIMERTA0_COMPARATOR];
+  int              ta0ccr  [TIMERTA0_COMPARATOR];
+  int              equ    [TIMERTA0_COMPARATOR];
+  int              out    [TIMERTA0_COMPARATOR];
+
+  union {
+    struct tiv_t     b;
+    uint16_t         s;
+  } tiv;                   /* 0x12e */
+
+  enum timer_ud_mode_t  udmode;
+};
+
+void    msp430_timerTA0_create (void);
+void    msp430_timerTA0_reset  (void);
+void    msp430_timerTA0_update (void);
+void    msp430_timerTA0_capture(void);
+int16_t msp430_timerTA0_read   (uint16_t addr);
+void    msp430_timerTA0_write  (uint16_t addr, int16_t val);
+int8_t  msp430_timerTA0_read8  (uint16_t addr);
+void    msp430_timerTA0_write8 (uint16_t addr, int8_t val);
+int     msp430_timertA0_chkifg ();
+
+#else
+#define msp430_timerTA0_create()  do { } while (0)
+#define msp430_timerTA0_reset()   do { } while (0)
+#define msp430_timerTA0_update()  do { } while (0)
+#define msp430_timerTA0_capture() do { } while (0)
+#endif
+
+/***************************************************/
+/** TimerTA1 ***************************************/
+/***************************************************/
+
+#if defined(__msp430_have_timerTA1)
+#define TIMER_TA1_START  TIMER_TA1_BASE
+#define TIMER_TA1_END    (TIMER_TA1_BASE + 0x2e)
+
+enum timerTA1_addr_t {
+  TA1CTL     = (TIMER_TA1_BASE + 0x00),
+  TA1CCTL0   = (TIMER_TA1_BASE + 0x02),
+  TA1CCTL1   = (TIMER_TA1_BASE + 0x04),
+  TA1CCTL2   = (TIMER_TA1_BASE + 0x06),
+  TA1CCTL3   = (TIMER_TA1_BASE + 0x08),
+  TA1CCTL4   = (TIMER_TA1_BASE + 0x0a),
+
+  TA1R       = (TIMER_TA1_BASE + 0x10),
+  TA1CCR0    = (TIMER_TA1_BASE + 0x12),
+  TA1CCR1    = (TIMER_TA1_BASE + 0x14),
+  TA1CCR2    = (TIMER_TA1_BASE + 0x16),
+  TA1CCR3    = (TIMER_TA1_BASE + 0x18),
+  TA1CCR4    = (TIMER_TA1_BASE + 0x1a),
+
+  TA1EX0     = (TIMER_TA1_BASE + 0x20),
+  TA1IV      = (TIMER_TA1_BASE + 0x2e)
+};
+
+/**
+ * Timer TA1 Data Structure
+ */
+
+#if defined(WORDS_BIGENDIAN)
+struct __attribute__ ((packed)) ta1ctl_t {
+  uint16_t
+    unused:6,
+    tassel:2,
+    id:2,
+    mc:2,
+    unused1:1,
+    taclr:1,
+    taie:1,
+    taifg:0;
+};
+#else
+struct __attribute__ ((packed)) ta1ctl_t {
+  uint16_t
+    taifg:1,
+    taie:1,
+    taclr:1,
+    unused1:1,
+    mc:2,
+    id:2,
+    tassel:2,
+    unused:6;
+};
+#endif
+
+#if defined(WORDS_BIGENDIAN)
+struct __attribute ((packed)) ta1r_t {
+  uint16_t
+    count:16;
+};
+#else
+struct __attribute ((packed)) ta1r_t {
+  uint16_t
+    count:16;
+};
+#endif
+
+#if defined(WORDS_BIGENDIAN)
+struct  __attribute__ ((packed)) ta1cctl_t {
+  uint16_t
+    cm:2,
+    ccis:2,
+    scs:1,
+    scci:1,
+    unused:1,
+    cap:1,
+    outmod:3,
+    ccie:1,
+    cci:1,
+    out:1,
+    cov:1,
+    ccifg:1;
+};
+#else
+struct  __attribute__ ((packed)) ta1cctl_t {
+  uint16_t
+    ccifg:1,
+    cov:1,
+    out:1,
+    cci:1,
+    ccie:1,
+    outmod:3,
+    cap:1,
+    unused:1,
+    scci:1,
+    scs:1,
+    ccis:2,
+    cm:2;
+};
+#endif
+
+union ta1cctln_t {
+    struct ta1cctl_t  b;
+    uint16_t         s;
+};
+
+#define TIMERTA1_COMPARATOR 5
+
+struct msp430_timerTA1_t
+{
+  union {
+    struct ta1ctl_t   b;
+    uint16_t         s;
+  } ta1ctl;
+
+
+  /* input clock is taken before div */
+  /* tar is incremented by (divbuffer >> id) */
+  unsigned int divbuffer;    /* counts input clocks           */
+  unsigned int divuppermask; /* tar += divbuffer >> timer.id  */
+  unsigned int divlowermask; /* divbuffer &= divlowermask     */
+
+  /* we keep int for counters to detect overflow */
+  int      tar;            /* 0x170 */
+
+
+  union ta1cctln_t  ta1cctl [TIMERTA1_COMPARATOR];
+  int            b_ta1ccr  [TIMERTA1_COMPARATOR];
+  int              ta1ccr  [TIMERTA1_COMPARATOR];
+  int              equ    [TIMERTA1_COMPARATOR];
+  int              out    [TIMERTA1_COMPARATOR];
+
+  union {
+    struct tiv_t     b;
+    uint16_t         s;
+  } tiv;                   /* 0x12e */
+
+  enum timer_ud_mode_t  udmode;
+};
+
+void    msp430_timerTA1_create (void);
+void    msp430_timerTA1_reset  (void);
+void    msp430_timerTA1_update (void);
+void    msp430_timerTA1_capture(void);
+int16_t msp430_timerTA1_read   (uint16_t addr);
+void    msp430_timerTA1_write  (uint16_t addr, int16_t val);
+int8_t  msp430_timerTA1_read8  (uint16_t addr);
+void    msp430_timerTA1_write8 (uint16_t addr, int8_t val);
+int     msp430_timertA0_chkifg ();
+
+#else
+#define msp430_timerTA1_create()  do { } while (0)
+#define msp430_timerTA1_reset()   do { } while (0)
+#define msp430_timerTA1_update()  do { } while (0)
+#define msp430_timerTA1_capture() do { } while (0)
+#endif
+
 #endif // timerb

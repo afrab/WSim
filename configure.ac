@@ -682,6 +682,7 @@ devices/spidev_master/Makefile
 devices/spidev_dsp/Makefile
 devices/cma3000_spi/Makefile
 devices/scp1000_i2c/Makefile
+devices/ez430_lcd/Makefile
 dnl
 platforms/Makefile
 platforms/wsn430/Makefile

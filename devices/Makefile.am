@@ -17,7 +17,8 @@ SUBDIRS = 		\
 	spidev_master	\
 	spidev_dsp	\
 	cma3000_spi	\
-	scp1000_i2c
+	scp1000_i2c	\
+	ez430_lcd
 
 
 noinst_LIBRARIES= libdevices.a

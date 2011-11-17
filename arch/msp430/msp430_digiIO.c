@@ -17,70 +17,134 @@
 /* ************************************************** */
 /* ************************************************** */
 
-#define DIGIIO_START 0x0010
-#define DIGIIO_END   0x003f
+#if !defined(DIGIIO_BASE)
+#define DIGIIO_BASE  0x0010
+#endif
 
-#define P1IN      0x0020 
-#define P1OUT     0x0021
-#define P1DIR     0x0022
-#define P1IFG     0x0023
-#define P1IES     0x0024
-#define P1IE      0x0025
-#define P1SEL     0x0026
-#define P1SEL2    0x0041
-#define P1REN     0x0027
+#if !defined(DIGIIO_NEW_OFFSETS)
+#define DIGIIO_START DIGIIO_BASE
+#define DIGIIO_END   (DIGIIO_BASE + 0x2f)
 
-#define P2IN      0x0028 
-#define P2OUT     0x0029
-#define P2DIR     0x002a
-#define P2IFG     0x002b
-#define P2IES     0x002c
-#define P2IE      0x002d
-#define P2SEL     0x002e
-#define P2SEL2    0x0042
-#define P2REN     0x002f
+#define P1IN      (DIGIIO_BASE + 0x10)
+#define P1OUT     (DIGIIO_BASE + 0x11)
+#define P1DIR     (DIGIIO_BASE + 0x12)
+#define P1IFG     (DIGIIO_BASE + 0x13)
+#define P1IES     (DIGIIO_BASE + 0x14)
+#define P1IE      (DIGIIO_BASE + 0x15)
+#define P1SEL     (DIGIIO_BASE + 0x16)
+#define P1SEL2    (DIGIIO_BASE + 0x31)
+#define P1REN     (DIGIIO_BASE + 0x17)
 
-#define P3IN      0x0018
-#define P3OUT     0x0019
-#define P3DIR     0x001a
-#define P3SEL     0x001b
-#define P3SEL2    0x0043
-#define P3REN     0x0010
+#define P2IN      (DIGIIO_BASE + 0x18)
+#define P2OUT     (DIGIIO_BASE + 0x19)
+#define P2DIR     (DIGIIO_BASE + 0x1a)
+#define P2IFG     (DIGIIO_BASE + 0x1b)
+#define P2IES     (DIGIIO_BASE + 0x1c)
+#define P2IE      (DIGIIO_BASE + 0x1d)
+#define P2SEL     (DIGIIO_BASE + 0x1e)
+#define P2SEL2    (DIGIIO_BASE + 0x32)
+#define P2REN     (DIGIIO_BASE + 0x1f)
 
-#define P4IN      0x001c
-#define P4OUT     0x001d
-#define P4DIR     0x001e
-#define P4SEL     0x001f
-#define P4SEL2    0x0044
-#define P4REN     0x0011
+#define P3IN      (DIGIIO_BASE + 0x08)
+#define P3OUT     (DIGIIO_BASE + 0x09)
+#define P3DIR     (DIGIIO_BASE + 0x0a)
+#define P3SEL     (DIGIIO_BASE + 0x0b)
+#define P3SEL2    (DIGIIO_BASE + 0x33)
+#define P3REN     (DIGIIO_BASE + 0x00)
 
-#define P5IN      0x0030
-#define P5OUT     0x0031
-#define P5DIR     0x0032
-#define P5SEL     0x0033
-#define P5SEL2    0x0045
-#define P5REN     0x0012
+#define P4IN      (DIGIIO_BASE + 0x0c)
+#define P4OUT     (DIGIIO_BASE + 0x0d)
+#define P4DIR     (DIGIIO_BASE + 0x0e)
+#define P4SEL     (DIGIIO_BASE + 0x0f)
+#define P4SEL2    (DIGIIO_BASE + 0x34)
+#define P4REN     (DIGIIO_BASE + 0x01)
 
-#define P6IN      0x0034
-#define P6OUT     0x0035
-#define P6DIR     0x0036
-#define P6SEL     0x0037
-#define P6SEL2    0x0046
-#define P6REN     0x0013
+#define P5IN      (DIGIIO_BASE + 0x20)
+#define P5OUT     (DIGIIO_BASE + 0x21)
+#define P5DIR     (DIGIIO_BASE + 0x22)
+#define P5SEL     (DIGIIO_BASE + 0x23)
+#define P5SEL2    (DIGIIO_BASE + 0x35)
+#define P5REN     (DIGIIO_BASE + 0x02)
 
-#define P7IN      0x0038
-#define P7OUT     0x003a
-#define P7DIR     0x003c
-#define P7SEL     0x003e
-#define P7SEL2    0x0047
-#define P7REN     0x0014
+#define P6IN      (DIGIIO_BASE + 0x24)
+#define P6OUT     (DIGIIO_BASE + 0x25)
+#define P6DIR     (DIGIIO_BASE + 0x26)
+#define P6SEL     (DIGIIO_BASE + 0x27)
+#define P6SEL2    (DIGIIO_BASE + 0x36)
+#define P6REN     (DIGIIO_BASE + 0x03)
 
-#define P8IN      0x0039
-#define P8OUT     0x003b
-#define P8DIR     0x003d
-#define P8SEL     0x003f
-#define P8SEL2    0x0048
-#define P8REN     0x0015
+#define P7IN      (DIGIIO_BASE + 0x28)
+#define P7OUT     (DIGIIO_BASE + 0x2a)
+#define P7DIR     (DIGIIO_BASE + 0x2c)
+#define P7SEL     (DIGIIO_BASE + 0x2e)
+#define P7SEL2    (DIGIIO_BASE + 0x37)
+#define P7REN     (DIGIIO_BASE + 0x04)
+
+#define P8IN      (DIGIIO_BASE + 0x29)
+#define P8OUT     (DIGIIO_BASE + 0x2b)
+#define P8DIR     (DIGIIO_BASE + 0x2d)
+#define P8SEL     (DIGIIO_BASE + 0x2f)
+#define P8SEL2    (DIGIIO_BASE + 0x38)
+#define P8REN     (DIGIIO_BASE + 0x05)
+
+#else
+
+#define DIGIIO_START DIGIIO_BASE
+#define DIGIIO_END   (DIGIIO_BASE + 0x12f)
+
+#define P1IN      (DIGIIO_BASE + 0x000)
+#define P1OUT     (DIGIIO_BASE + 0x002)
+#define P1DIR     (DIGIIO_BASE + 0x004)
+#define P1IFG     (DIGIIO_BASE + 0x01c)
+#define P1IES     (DIGIIO_BASE + 0x018)
+#define P1IE      (DIGIIO_BASE + 0x01a)
+#define P1SEL     (DIGIIO_BASE + 0x00a)
+#define P1SEL2    0xffff
+#define P1REN     (DIGIIO_BASE + 0x006)
+
+#define P2IN      (DIGIIO_BASE + 0x001)
+#define P2OUT     (DIGIIO_BASE + 0x003)
+#define P2DIR     (DIGIIO_BASE + 0x005)
+#define P2IFG     (DIGIIO_BASE + 0x01d)
+#define P2IES     (DIGIIO_BASE + 0x019)
+#define P2IE      (DIGIIO_BASE + 0x01b)
+#define P2SEL     (DIGIIO_BASE + 0x00b)
+#define P2SEL2    0xffff
+#define P2REN     (DIGIIO_BASE + 0x007)
+
+#define P3IN      (DIGIIO_BASE + 0x020)
+#define P3OUT     (DIGIIO_BASE + 0x022)
+#define P3DIR     (DIGIIO_BASE + 0x024)
+#define P3SEL     (DIGIIO_BASE + 0x02a)
+#define P3SEL2    0xffff
+#define P3REN     (DIGIIO_BASE + 0x026)
+
+#define P4IN      (DIGIIO_BASE + 0x021)
+#define P4OUT     (DIGIIO_BASE + 0x023)
+#define P4DIR     (DIGIIO_BASE + 0x025)
+#define P4SEL     (DIGIIO_BASE + 0x02b)
+#define P4SEL2    0xffff
+#define P4REN     (DIGIIO_BASE + 0x027)
+
+#define P5IN      (DIGIIO_BASE + 0x040)
+#define P5OUT     (DIGIIO_BASE + 0x042)
+#define P5DIR     (DIGIIO_BASE + 0x044)
+#define P5SEL     (DIGIIO_BASE + 0x04a)
+#define P5SEL2    0xffff
+#define P5REN     (DIGIIO_BASE + 0x046)
+
+#define P6IN      (DIGIIO_BASE + 0x041)
+#define P6OUT     (DIGIIO_BASE + 0x043)
+#define P6DIR     (DIGIIO_BASE + 0x045)
+#define P6SEL     (DIGIIO_BASE + 0x04b)
+#define P6SEL2    0xffff
+#define P6REN     (DIGIIO_BASE + 0x047)
+
+#define PJIN      (DIGIIO_BASE + 0x120)
+#define PJOUT     (DIGIIO_BASE + 0x122)
+#define PJDIR     (DIGIIO_BASE + 0x124)
+#define PJREN     (DIGIIO_BASE + 0x126)
+#endif
 
 
 
@@ -132,6 +196,12 @@
 #define IFPORT8(insn) do { } while (0)
 #endif
 
+#if defined(__msp430_have_portj)
+#define IFPORTJ(insn) do { insn } while (0)
+#else
+#define IFPORTJ(insn) do { } while (0)
+#endif
+
 
 /* ************************************************** */
 /* ************************************************** */
@@ -144,7 +214,8 @@ tracer_id_t MSP430_TRACER_PORT4;
 tracer_id_t MSP430_TRACER_PORT5;
 tracer_id_t MSP430_TRACER_PORT6;
 tracer_id_t MSP430_TRACER_PORT7;
-tracer_id_t MSP430_TRACER_PORT8; 
+tracer_id_t MSP430_TRACER_PORT8;
+tracer_id_t MSP430_TRACER_PORTJ;
 
 #define TRACER_TRACE_PORT1(v)   tracer_event_record(MSP430_TRACER_PORT1,v)
 #define TRACER_TRACE_PORT2(v)   tracer_event_record(MSP430_TRACER_PORT2,v)
@@ -154,6 +225,7 @@ tracer_id_t MSP430_TRACER_PORT8;
 #define TRACER_TRACE_PORT6(v)   tracer_event_record(MSP430_TRACER_PORT6,v)
 #define TRACER_TRACE_PORT7(v)   tracer_event_record(MSP430_TRACER_PORT7,v)
 #define TRACER_TRACE_PORT8(v)   tracer_event_record(MSP430_TRACER_PORT8,v)
+#define TRACER_TRACE_PORTJ(v)   tracer_event_record(MSP430_TRACER_PORTJ,v)
 
 /* ************************************************** */
 /* ************************************************** */
@@ -235,6 +307,13 @@ char* msp430_digiIO_portname(uint16_t addr)
     case P8SEL : return "P8SEL"; 
     case P8SEL2: return "P8SEL2";
     case P8REN : return "P8REN";
+#endif
+    
+#if defined(__msp430_have_portj)
+    case PJIN  : return "PJIN";
+    case PJOUT : return "PJOUT";
+    case PJDIR : return "PJDIR";
+    case PJREN : return "PJREN";
 #endif
 
     default: return "XXX";
@@ -327,6 +406,7 @@ void msp430_digiIO_create()
   IFPORT6 ( MSP430_TRACER_PORT6    = tracer_event_add_id(8,  "port6_out",  "msp430"); );
   IFPORT7 ( MSP430_TRACER_PORT7    = tracer_event_add_id(8,  "port7_out",  "msp430"); );
   IFPORT8 ( MSP430_TRACER_PORT8    = tracer_event_add_id(8,  "port8_out",  "msp430"); );
+  IFPORTJ ( MSP430_TRACER_PORTJ    = tracer_event_add_id(8,  "portj_out",  "msp430"); );
 }
 
 /* ************************************************** */
@@ -337,7 +417,7 @@ void msp430_digiIO_reset()
 {
   /* after a reset the pin IO are switched to input mode */
   int i;
-  for(i=0; i<8; i++)
+  for(i=0; i<9; i++)
     {
       DIGIIO_DIR (i) = 0;
       DIGIIO_SEL (i) = 0;
@@ -429,6 +509,13 @@ int8_t msp430_digiIO_mcu_read (uint16_t addr)
     case P8SEL : r = DIGIIO_SEL (7); break;
     case P8SEL2: r = DIGIIO_SEL2(7); break;
     case P8REN : r = DIGIIO_REN (7); break;
+#endif
+
+#if defined(__msp430_have_portj)
+    case P8IN  : r = DIGIIO_IN  (8); break;
+    case P8OUT : r = DIGIIO_OUT (8); break;
+    case P8DIR : r = DIGIIO_DIR (8); break;
+    case P8REN : r = DIGIIO_REN (8); break;
 #endif
 
     default:
@@ -589,6 +676,19 @@ void msp430_digiIO_mcu_write(uint16_t addr, int8_t val)
     case P8REN: DIGIIO_REN(7) = val; break; 
 #endif
 
+      /* port J */
+#if defined(__msp430_have_portj)
+    case PJIN : ERROR("msp430:dio: write on PJIN (read only)\n"); break;
+    case PJOUT:
+      oldval = DIGIIO_OUT(8);
+      DIGIIO_OUT(8) = val & DIGIIO_MCU_WOK(8);
+      MCU.digiIO.out_updated[8] = oldval ^ DIGIIO_OUT(8);
+      TRACER_TRACE_PORT8(DIGIIO_OUT(8));
+      break;
+    case PJDIR: DIGIIO_DIR(8) = val; break;
+    case PJREN: DIGIIO_REN(8) = val; break;
+#endif
+
     default:
       ERROR("msp430:dio: write [0x%02x] undefined\n",addr); 
       break;
@@ -696,7 +796,7 @@ void msp430_digiIO_dev_write(int port_number, uint8_t val, uint16_t bitmask)
 void msp430_digiIO_update_done(void)
 { 
   int i;
-  for(i=0; i<8; i++)
+  for(i=0; i<9; i++)
     {
       MCU.digiIO.in_updated[i]  = 0;
       MCU.digiIO.out_updated[i] = 0;
@@ -727,3 +827,4 @@ int msp430_digiIO_chkifg(void)
 /* ************************************************** */
 /* ************************************************** */
 /* ************************************************** */
+

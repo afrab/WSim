@@ -21,20 +21,21 @@
 #define PORT6     5
 #define PORT7     6
 #define PORT8     7
+#define PORTJ     8
 
 
 struct msp430_digiIO_t
 {
-  uint8_t in             [8];
-  uint8_t in_updated     [8];
+  uint8_t in             [9];
+  uint8_t in_updated     [9];
 
-  uint8_t out            [8];
-  uint8_t out_updated    [8];
+  uint8_t out            [9];
+  uint8_t out_updated    [9];
 
-  uint8_t direction      [8];
-  uint8_t selection      [8];
-  uint8_t selection2     [8];
-  uint8_t resistor       [8];
+  uint8_t direction      [9];
+  uint8_t selection      [9];
+  uint8_t selection2     [9];
+  uint8_t resistor       [9];
 
   /** only for ports 1 & 2 **/
   uint8_t int_enable     [2];
@@ -61,3 +62,4 @@ void    msp430_digiIO_update_done       (void);
 int     msp430_digiIO_chkifg            (void);
 
 #endif
+

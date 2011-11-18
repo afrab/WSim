@@ -11,6 +11,9 @@
 #include "msp430.h"
 #include "src/options.h"
 
+
+
+
 #if defined(__msp430_have_adc12)
 
 /* ************************************************** */
@@ -96,16 +99,6 @@ tracer_id_t MSP430_TRACER_ADC12INPUT[ADC12_CHANNELS];
 /* ************************************************** */
 /* ************************************************** */
 
-#define ADC12_NONE      0
-#define ADC12_CHANN_PTR 1
-#define ADC12_RND       2
-#define ADC12_WSNET     3
-
-int         msp430_adc12_channels_valid[ADC12_CHANNELS];
-char        msp430_adc12_channels_name[ADC12_CHANNELS][MAX_FILENAME];
-uint16_t*   msp430_adc12_channels_data[ADC12_CHANNELS];
-uint32_t    msp430_adc12_channels_data_max[ADC12_CHANNELS];
-
 #define ADC12_CHANNEL_NAMES 20
 char trace_names[ADC12_CHANNELS][ADC12_CHANNEL_NAMES] = {
   "adc12_input_00", "adc12_input_01", "adc12_input_02", "adc12_input_03",
@@ -139,10 +132,6 @@ char adc12_states[ADC12_STATES][ADC12_STATES_NAMES] = {
 #define ADC12OSC_CYCLE_NANOTIME (NANO / ADC12OSC_FREQ) 
 
 
-/* ************************************************** */
-/* ************************************************** */
-/* ************************************************** */
-
 static struct moption_t adc12_in_opt = {
   .longname    = "msp430_adc12",
   .type        = required_argument,
@@ -150,7 +139,7 @@ static struct moption_t adc12_in_opt = {
   .value       = NULL
 };
 
-int msp430_adc12_option_add (void)
+int msp430_adc_option_add (void)
 {
   options_add( &adc12_in_opt );
   return 0;
@@ -160,205 +149,17 @@ int msp430_adc12_option_add (void)
 /* ************************************************** */
 /* ************************************************** */
 
-int msp430_adc12_find_inputs()
-{
-  const char delim1[] = ",";
-  const char delim2[] = ":";
-  char *str1,*str2;
-  char *token,*subtoken;
-  char *saveptr1,*saveptr2;
-  char *filename;
-  char name[MAX_FILENAME];
-  int  j;
-  int id;
-  strncpyz(name, adc12_in_opt.value, MAX_FILENAME);
-
-  /* --msp430_adc12=1:file,2:file,3:file ... */
-
-  for (j = 1, str1 = name; ; j++, str1 = NULL) 
-    {
-      token = strtok_r(str1, delim1, &saveptr1);
-      if (token == NULL)
-	break;
-      HW_DMSG_ADC12("msp430:adc12:%d: %s\n", j, token);
-    
-      str2 = token;
-      subtoken = strtok_r(str2, delim2, &saveptr2);
-      if (subtoken == NULL) 
-	{ 
-	  ERROR("msp430:adc12: wrong channel id \n");
-	  return 1;	
-	}
-      id = atoi(subtoken);
-      if ((id < 0) || (id >= ADC12_CHANNELS))
-	{
-	  ERROR("msp430:adc12: wrong channel id %s (%d)\n",subtoken,id);
-	  return 1;
-	}
-
-      subtoken = strtok_r(NULL, delim2, &saveptr2);
-      filename = subtoken;
-      if (subtoken == NULL) 
-	{
-	  ERROR("msp430:adc12: wrong channel filename\n");
-	  return 1;	
-	}
-
-      subtoken = strtok_r(NULL, delim2, &saveptr2);
-      if (subtoken != NULL) 
-	{
-	  ERROR("msp430:adc12: wrong channel filename trailer %s\n",subtoken);
-	  return 1;	
-	}
-
-      HW_DMSG_ADC12("msp430:adc12: channel %02d = %s\n",id, filename);
-      msp430_adc12_channels_valid[id]    = ADC12_CHANN_PTR;
-      strncpyz(msp430_adc12_channels_name[id], filename, MAX_FILENAME);
-    }
-  return 0;
-}
-
-/* ************************************************** */
-/* ************************************************** */
-/* ************************************************** */
-
-int msp430_adc12_read_inputs()
-{
-  int chan;
-  uint32_t smpl;
-  for(chan=0; chan < ADC12_CHANNELS; chan++)
-    {
-      if (msp430_adc12_channels_valid[ chan ] == ADC12_CHANN_PTR)
-	{
-	  FILE* f;
-	  int   val;
-
-	  /* size */
-	  f = fopen(msp430_adc12_channels_name[ chan ],"rb");
-	  if (f==NULL)
-	    {
-	      ERROR("msp430:adc12: cannot open file %s\n",msp430_adc12_channels_name[ chan ]);
-	      return 1;
-	    }
-	  while(fscanf(f,"%d",&val) > 0)
-	    {
-	      msp430_adc12_channels_data_max[ chan ] ++;
-	    }
-	  msp430_adc12_channels_data[ chan ] = malloc(msp430_adc12_channels_data_max[ chan ]*sizeof(uint16_t));
-	  if (msp430_adc12_channels_data[ chan ] == NULL)
-	    {
-	      ERROR("msp430:adc12: cannot allocate memory for input %s\n",msp430_adc12_channels_name[ chan ]);
-	      fclose(f);
-	      return 1;
-	    }
-
-	  /* read */
-	  fseek(f,0,SEEK_SET);
-	  for(smpl=0; smpl<msp430_adc12_channels_data_max[ chan ]; smpl++)
-	    {
-	      if (fscanf(f,"%d",&val) != 1)
-		{
-		  val = 0;
-		  ERROR("msp430:adc12: ======================================\n");
-		  ERROR("msp430:adc12: cannot read value from data input file\n");
-		  ERROR("msp430:adc12: ======================================\n");
-		}
-	      msp430_adc12_channels_data[ chan ][ smpl ] = val & 0xfff; /* 12 bits */
-	    }
-
-	  fclose(f);
-	  HW_DMSG_ADC12("msp430:adc12: channel %02d filled with %d samples\n",
-			chan ,msp430_adc12_channels_data_max[ chan ]);
-	}
-    }
-  return 0;
-}
-
-int msp430_adc12_delete_inputs()
-{
-  int i;
-  for(i=0; i < ADC12_CHANNELS; i++)
-    {
-      if (msp430_adc12_channels_valid[i] == ADC12_CHANN_PTR)
-	{
-	  free(msp430_adc12_channels_data[i]);
-	  msp430_adc12_channels_data[i] = NULL;
-	}
-    }
-  return 0;
-}
-
-uint16_t msp430_adc12_sample_input(int hw_channel_x)
-{
-  uint16_t sample = 0;
-  switch (msp430_adc12_channels_valid[hw_channel_x])
-    {
-    case ADC12_NONE:
-      /* default mode */
-      HW_DMSG_ADC12("msp430:adc12:     0xeaea sample for input channel %d\n", hw_channel_x);
-      sample = 0xeaea;
-      break;
-
-    case ADC12_CHANN_PTR:
-      HW_DMSG_2_DBG("msp430:adc12:     sample for input channel %d - %s\n",
-		    hw_channel_x, msp430_adc12_channels_name[hw_channel_x]);
-
-      sample = msp430_adc12_channels_data[ hw_channel_x ][ MCU.adc12.chann_ptr[ hw_channel_x ] ] ;
-
-      MCU.adc12.chann_ptr[ hw_channel_x ] ++;
-      if (MCU.adc12.chann_ptr[ hw_channel_x ] == msp430_adc12_channels_data_max[ hw_channel_x ])
-	{
-	  MCU.adc12.chann_ptr[ hw_channel_x ] = 0;
-	}
-      break;
-
-    case ADC12_RND:
-      HW_DMSG_ADC12("msp430:adc12:     random sample for input channel %d\n", hw_channel_x);
-#if !defined(WIN32)
-      sample = random();
-#else
-      sample = rand();
-#endif
-      break;
-
-    case ADC12_WSNET:
-      break;
-    }
-  
-  return sample & 0x0FFF; /* 12 bits */
-}
-
-/* ************************************************** */
-/* ************************************************** */
-/* ************************************************** */
-
 static int msp430_adc12_init(void)
 {
-  int i;
 
-  for(i=0; i<ADC12_CHANNELS; i++)
-    {
-      MSP430_TRACER_ADC12INPUT[i]       = 0;
-      msp430_adc12_channels_valid[i]    = ADC12_NONE;
-      msp430_adc12_channels_data[i]     = NULL;
-      msp430_adc12_channels_data_max[i] = 0;
-      strcpy(msp430_adc12_channels_name[i], "none");
-
-      MCU.adc12.chann_ptr[i] = 0;
-      MCU.adc12.chann_time[i] = 0;
-      MCU.adc12.chann_period[i] = 0;
-    }
-
-  if (adc12_in_opt.isset)
-    {
-      msp430_adc12_find_inputs();
-      msp430_adc12_read_inputs();
-    }
-
+  msp430_adc_init(& MCU.adc12.channels, 12, &adc12_in_opt);
+  
   MSP430_TRACER_ADC12STATE    = tracer_event_add_id(1,  "adc12_state",   "msp430");
+  
+  int i;
   for(i=0; i<ADC12_CHANNELS; i++)
-    {
-      if (msp430_adc12_channels_valid[i] != ADC12_NONE )
+    {     
+      if (MCU.adc12.channels.channels_valid[i] != ADC_NONE )
 	{
 	  MSP430_TRACER_ADC12INPUT[i] = tracer_event_add_id(16,  trace_names[i],   "msp430");
 	}
@@ -425,9 +226,9 @@ static inline void ADC12_SET_STATE(int state)
     }
   switch (state)
     {
-    case ADC12_STATE_SAMPLE:
-    case ADC12_STATE_CONVERT:
-    case ADC12_STATE_STORE:
+    case ADC_STATE_SAMPLE:
+    case ADC_STATE_CONVERT:
+    case ADC_STATE_STORE:
             MCU.adc12.ctl1.b.adc12busy = 1; /* operation done */
 	    break;
     default:
@@ -442,7 +243,7 @@ static inline void ADC12_SET_STATE(int state)
   do {							\
     if (MCU.adc12.ctl0.b.enc == 0)			\
       {							\
-	ADC12_SET_STATE( ADC12_STATE_WAIT_ENABLE );	\
+	ADC12_SET_STATE( ADC_STATE_WAIT_ENABLE );	\
 	return;						\
       }							\
   } while(0)
@@ -458,7 +259,7 @@ void msp430_adc12_update(void)
 {
   if (MCU.adc12.ctl0.b.adc12on == 0)
     {
-      ADC12_SET_STATE( ADC12_STATE_OFF );
+      ADC12_SET_STATE( ADC_STATE_OFF );
       return;
     }
 
@@ -510,34 +311,34 @@ void msp430_adc12_update(void)
       /***************/
       /* OFF         */
       /***************/
-    case ADC12_STATE_OFF: 
-      ADC12_SET_STATE( ADC12_STATE_WAIT_ENABLE );
+    case ADC_STATE_OFF: 
+      ADC12_SET_STATE( ADC_STATE_WAIT_ENABLE );
       /* no break */
 
       /***************/
       /* ENABLE      */
       /***************/
-    case ADC12_STATE_WAIT_ENABLE:
+    case ADC_STATE_WAIT_ENABLE:
       if (MCU.adc12.ctl0.b.enc)
 	{
-	  ADC12_SET_STATE( ADC12_STATE_WAIT_TRIGGER ); 
+	  ADC12_SET_STATE( ADC_STATE_WAIT_TRIGGER ); 
 	}
       if ((MCU.adc12.ctl0.b.enc) && 
 	  (MCU.adc12.ctl0.b.adc12sc == 1) &&
 	  (MCU.adc12.ctl1.b.shsx == 0))
 	{
-	  ADC12_SET_STATE( ADC12_STATE_SAMPLE );
+	  ADC12_SET_STATE( ADC_STATE_SAMPLE );
 	}
       break;
       
       /***************/
       /* TRIGGER     */
       /***************/
-    case ADC12_STATE_WAIT_TRIGGER:
+    case ADC_STATE_WAIT_TRIGGER:
       CHECK_ENC();
       if (MCU.adc12.sampcon > 0)
 	{
-	  ADC12_SET_STATE( ADC12_STATE_SAMPLE );
+	  ADC12_SET_STATE( ADC_STATE_SAMPLE );
 	  MCU.adc12.sampcon --;
 	}
       else
@@ -549,7 +350,7 @@ void msp430_adc12_update(void)
       /***************/
       /* SAMPLE      */
       /***************/
-    case ADC12_STATE_SAMPLE:
+    case ADC_STATE_SAMPLE:
       CHECK_ENC();
       if (MCU.adc12.sampcon > 0)
 	{
@@ -558,7 +359,7 @@ void msp430_adc12_update(void)
 	   *   SEL = 1  // Selector  = 0:GPIO  1:peripheral
 	   *   DIR = 0  // Direction = 0:input 1:output
 	   */
-	  MCU.adc12.sample = msp430_adc12_sample_input(MCU.adc12.mctl[MCU.adc12.current_x].b.inch);
+	  MCU.adc12.sample = msp430_adc_sample_input(&MCU.adc12.channels, ADC_CHANNELS, MCU.adc12.current_x);
 	  ADC12_TRACER_INPUT( MCU.adc12.mctl[MCU.adc12.current_x].b.inch, MCU.adc12.sample );
 
 	  HW_DMSG_ADC12("msp430:adc12:     sampling on config %d hw_channel %d (%s) = 0x%04x [%"PRId64"]\n",
@@ -568,7 +369,7 @@ void msp430_adc12_update(void)
 			MCU.adc12.sample,
 			MACHINE_TIME_GET_NANO());
  
-	  ADC12_SET_STATE( ADC12_STATE_CONVERT );
+	  ADC12_SET_STATE( ADC_STATE_CONVERT );
 	  MCU.adc12.adc12clk_reftime = MCU.adc12.adc12clk_counter;
 	  MCU.adc12.sampcon --;
 	  
@@ -582,12 +383,12 @@ void msp430_adc12_update(void)
       /***************/
       /* CONVERT     */
       /***************/
-    case ADC12_STATE_CONVERT:
+    case ADC_STATE_CONVERT:
       CHECK_ENC();
       if (MCU.adc12.adc12clk_counter > (MCU.adc12.adc12clk_reftime + 12))
 	{
 	  HW_DMSG_ADC12("msp430:adc12:     convert = 0x%04x (%d) \n",MCU.adc12.sample,MCU.adc12.sample);
-	  ADC12_SET_STATE( ADC12_STATE_STORE );
+	  ADC12_SET_STATE( ADC_STATE_STORE );
 	}
       else
 	{ 
@@ -605,7 +406,7 @@ void msp430_adc12_update(void)
       /***************/
       /* STORE       */
       /***************/
-    case ADC12_STATE_STORE:
+    case ADC_STATE_STORE:
       CHECK_ENC();
       HW_DMSG_ADC12("msp430:adc12:     ADC12MEM%d = 0x%04x\n", ADC12x, SAMPLE);
       MCU.adc12.mem[ ADC12x ].s = SAMPLE;
@@ -619,64 +420,64 @@ void msp430_adc12_update(void)
 
       switch (MCU.adc12.ctl1.b.conseqx)
 	{
-	case ADC12_MODE_SINGLE:
+	case ADC_MODE_SINGLE:
 	  ENC   = 0;
-	  ADC12_SET_STATE( ADC12_STATE_WAIT_ENABLE );
+	  ADC12_SET_STATE( ADC_STATE_WAIT_ENABLE );
 	  break;
 
-	case ADC12_MODE_SEQ_CHAN:
+	case ADC_MODE_SEQ_CHAN:
 	  if (MCU.adc12.mctl[ ADC12x ].b.eos == 1)
 	    {
 	      ENC   = 0;
-	      ADC12_SET_STATE( ADC12_STATE_WAIT_ENABLE );
+	      ADC12_SET_STATE( ADC_STATE_WAIT_ENABLE );
 	    }
 	  else
 	    {
 	      ADC12x = (ADC12x + 1) % ADC12_CHANNELS;
 	      if (MSC && SHP)
 		{
-		  ADC12_SET_STATE( ADC12_STATE_SAMPLE );
+		  ADC12_SET_STATE( ADC_STATE_SAMPLE );
 		}
 	      else
 		{
-		  ADC12_SET_STATE( ADC12_STATE_WAIT_TRIGGER );
+		  ADC12_SET_STATE( ADC_STATE_WAIT_TRIGGER );
 		}
 	    }
 	  break;
 
-	case ADC12_MODE_REPEAT_SINGLE:
+	case ADC_MODE_REPEAT_SINGLE:
 	  if (ENC == 0)
 	    {
-	      ADC12_SET_STATE( ADC12_STATE_WAIT_ENABLE );
+	      ADC12_SET_STATE( ADC_STATE_WAIT_ENABLE );
 	    }
 	  else
 	    {
 	      if (MSC && SHP)
 		{
-		  ADC12_SET_STATE( ADC12_STATE_SAMPLE );
+		  ADC12_SET_STATE( ADC_STATE_SAMPLE );
 		}
 	      else
 		{
-		  ADC12_SET_STATE( ADC12_STATE_WAIT_TRIGGER );
+		  ADC12_SET_STATE( ADC_STATE_WAIT_TRIGGER );
 		}
 	    }
 	  break;
 
-	case ADC12_MODE_REPEAT_SEQ:
+	case ADC_MODE_REPEAT_SEQ:
 	  if ((ENC == 0) && (MCU.adc12.mctl[ ADC12x ].b.eos == 1))
 	    {
-	      ADC12_SET_STATE( ADC12_STATE_WAIT_ENABLE );
+	      ADC12_SET_STATE( ADC_STATE_WAIT_ENABLE );
 	    }
 	  else
 	    {
 	      ADC12x = (ADC12x + 1) % ADC12_CHANNELS;
 	      if (MSC && SHP)
 		{
-		  ADC12_SET_STATE( ADC12_STATE_SAMPLE );
+		  ADC12_SET_STATE( ADC_STATE_SAMPLE );
 		}
 	      else
 		{
-		  ADC12_SET_STATE( ADC12_STATE_WAIT_TRIGGER );
+		  ADC12_SET_STATE( ADC_STATE_WAIT_TRIGGER );
 		}
 	    }
 	  break;

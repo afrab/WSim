@@ -8,6 +8,7 @@
 #ifndef MSP430_ADC12_H
 #define MSP430_ADC12_H
 
+
 #if defined(__msp430_have_adc12)
 
 #if defined(WORDS_BIGENDIAN)
@@ -138,28 +139,7 @@ struct __attribute__ ((packed)) adc12iv_t {
 };
 #endif
 
-enum adc12ssel_t {
-  ADC12_SSEL_ADC12OSC      = 0,
-  ADC12_SSEL_ACLK          = 1,
-  ADC12_SSEL_MCLK          = 2,
-  ADC12_SSEL_SMCLK         = 3
-};
 
-enum adc12modes_t {
-  ADC12_MODE_SINGLE        = 0,
-  ADC12_MODE_SEQ_CHAN      = 1,
-  ADC12_MODE_REPEAT_SINGLE = 2,
-  ADC12_MODE_REPEAT_SEQ    = 3
-};
-
-enum adc12state_t {
-  ADC12_STATE_OFF          = 0,
-  ADC12_STATE_WAIT_ENABLE  = 1,
-  ADC12_STATE_WAIT_TRIGGER = 2,
-  ADC12_STATE_SAMPLE       = 3,
-  ADC12_STATE_CONVERT      = 4,
-  ADC12_STATE_STORE        = 5
-};
 
 /* ************************************************** */
 /* ************************************************** */
@@ -193,13 +173,12 @@ struct msp430_adc12_t {
     uint8_t             s;
   } mctl[16];
 
-  uint32_t        chann_ptr[ADC12_CHANNELS];     /* current ptr in data */
-  wsimtime_t     chann_time[ADC12_CHANNELS];
-  wsimtime_t   chann_period[ADC12_CHANNELS];
 
+  struct adc_channels_t  channels;
+  enum adcssel_t         ssel;
+  enum adcmodes_t        modes;
+  enum adcstate_t        state;
 
-  enum adc12state_t state;
-  
   uint32_t adc12osc_freq;
   uint64_t adc12osc_counter;
   int      adc12osc_increment;
@@ -226,8 +205,6 @@ struct msp430_adc12_t {
 /* ************************************************** */
 /* ************************************************** */
 
-int     msp430_adc12_option_add (void);
-
 void    msp430_adc12_create     (void);
 void    msp430_adc12_reset      (void);
 void    msp430_adc12_update     (void);
@@ -243,7 +220,6 @@ int     msp430_adc12_chkifg     (void);
 /* ************************************************** */
 /* ************************************************** */
 #else
-#define msp430_adc12_option_add()  do { } while(0)
 #define msp430_adc12_create()      do { } while (0)
 #define msp430_adc12_reset()       do { } while (0)
 #define msp430_adc12_update()      do { } while (0)

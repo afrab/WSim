@@ -56,16 +56,6 @@ tracer_id_t MSP430_TRACER_ADC10INPUT[ADC10_CHANNELS];
 /* ************************************************** */
 /* ************************************************** */
 
-#define ADC10_NONE      0
-#define ADC10_CHANN_PTR 1
-#define ADC10_RND       2
-#define ADC10_WSNET     3
-
-int         msp430_adc10_channels_valid[ADC10_CHANNELS];
-char        msp430_adc10_channels_name[ADC10_CHANNELS][MAX_FILENAME];
-uint16_t*   msp430_adc10_channels_data[ADC10_CHANNELS];
-uint32_t    msp430_adc10_channels_data_max[ADC10_CHANNELS];
-
 #define ADC10_CHANNEL_NAMES 20
 char trace_names[ADC10_CHANNELS][ADC10_CHANNEL_NAMES] = {
   "adc10_input_00", "adc10_input_01", "adc10_input_02", "adc10_input_03",
@@ -94,7 +84,7 @@ char adc10_states[ADC10_STATES][ADC10_STATES_NAMES] = {
 /* ************************************************** */
 /* ************************************************** */
 
-/* ADC12 internal OSC is ~ 5MHz */
+/* ADC10 internal OSC is ~ 5MHz */
 /* cycle_nanotime == 200        */
 #define NANO                    (  1000*1000*1000)
 #define ADC10OSC_FREQ           (     5*1000*1000)
@@ -109,7 +99,7 @@ static struct moption_t adc10_in_opt = {
   .value       = NULL
 };
 
-int msp430_adc10_option_add (void)
+int msp430_adc_option_add (void)
 {
   options_add( &adc10_in_opt );
   return 0;
@@ -121,30 +111,14 @@ int msp430_adc10_option_add (void)
 
 static int msp430_adc10_init(void)
 {
+
+  msp430_adc_init(& MCU.adc10.channels, 10, &adc10_in_opt);
+
+  MSP430_TRACER_ADC10STATE = tracer_event_add_id(1, "adc10_state", "msp430");
   int i;
   for(i=0; i<ADC10_CHANNELS; i++)
     {
-      MSP430_TRACER_ADC10INPUT[i]       = 0;
-      msp430_adc10_channels_valid[i]    = ADC10_NONE;
-      msp430_adc10_channels_data[i]     = NULL;
-      msp430_adc10_channels_data_max[i] = 0;
-      strcpy(msp430_adc10_channels_name[i], "none");
-      
-      MCU.adc10.chann_ptr[i]    = 0;
-      MCU.adc10.chann_time[i]   = 0;
-      MCU.adc10.chann_period[i] = 0;
-    }
-
-  if (adc10_in_opt.isset)
-    {
-      //msp430_adc10_find_inputs();
-      //msp430_adc10_read_inputs();
-    }
-
-  MSP430_TRACER_ADC10STATE = tracer_event_add_id(1, "adc10_state", "msp430");
-  for(i=0; i<ADC10_CHANNELS; i++)
-    {
-      if (msp430_adc10_channels_valid[i] != ADC10_NONE)
+      if (MCU.adc10.channels.channels_valid[i] != ADC_NONE)
 	{
 	  MSP430_TRACER_ADC10INPUT[i] = tracer_event_add_id(16, trace_names[i], "msp430");
 	}
@@ -180,7 +154,6 @@ void msp430_adc10_create()
 
 void msp430_adc10_reset()
 {
-  //  int i;
   /* set initial values */
   HW_DMSG_ADC10("msp430:adc10:reset()\n");
   MCU.adc10.ctl0.s = 0;             //clear IFG, IE, SREFx
@@ -191,6 +164,7 @@ void msp430_adc10_reset()
 
 static inline void ADC10_SET_STATE(int state)
 {
+  
   int current_state = MCU.adc10.state;
 
   MCU.adc10.state = state;
@@ -204,16 +178,27 @@ static inline void ADC10_SET_STATE(int state)
     }
   switch (state)
     {
-    case ADC10_STATE_SAMPLE:
-    case ADC10_STATE_CONVERT:
-    case ADC10_STATE_STORE:
+    case ADC_STATE_SAMPLE:
+    case ADC_STATE_CONVERT:
+    case ADC_STATE_STORE:
             MCU.adc10.ctl1.b.adc10busy = 1; /* operation done */
 	    break;
     default:
             MCU.adc10.ctl1.b.adc10busy = 0; /* operation done */
 	    break;
+	    
     }
+    
 }
+
+#define CHECK_ENC()					\
+  do {							\
+    if (MCU.adc10.ctl0.b.enc == 0)			\
+      {							\
+	ADC10_SET_STATE( ADC_STATE_WAIT_ENABLE );	\
+	return;						\
+      }							\
+  } while(0)
 
 static const int shtdiv[4] = 
 {
@@ -223,19 +208,229 @@ static const int shtdiv[4] =
 /* ************************************************** */
 /* ************************************************** */
 /* ************************************************** */
-
+#define ENABLE 0
 void msp430_adc10_update()
 {
+#if ENABLE
+
     if (MCU.adc10.ctl0.b.adc10on == 0)
     {
-      ADC10_SET_STATE( ADC10_STATE_OFF );
-      return;
-      
+      ADC10_SET_STATE( ADC_STATE_OFF );
+      return; 
     }
     
-    //TODO
+    //ADC10 Oscillator
+    MCU.adc10.adc10osc_temp     += MACHINE_TIME_GET_INCR();
+    MCU.adc10.adc10osc_increment = MCU.adc10.adc10osc_temp / MCU.adc10.adc10osc_cycle_nanotime;
+    MCU.adc10.adc10osc_temp      = MCU.adc10.adc10osc_temp % MCU.adc10.adc10osc_cycle_nanotime;
+    MCU.adc10.adc10osc_counter  += MCU.adc10.adc10osc_increment;
+
+    //ADC10 Clock
+    MCU.adc10.adc10clk_temp     += MCU.adc10.adc10osc_increment;
+    MCU.adc10.adc10clk_increment = MCU.adc10.adc10clk_temp / (MCU.adc10.ctl1.b.adc10divx + 1);
+    MCU.adc10.adc10clk_temp      = MCU.adc10.adc10clk_temp % (MCU.adc10.ctl1.b.adc10divx + 1);
+    MCU.adc10.adc10clk_counter  += MCU.adc10.adc10clk_increment;
     
+    //ADC10 Sample and hold time
+    MCU.adc10.sht_temp         += MCU.adc10.adc10clk_increment;
+    MCU.adc10.sht_increment     = MCU.adc10.sht_temp / (shtdiv[MCU.adc10.ctl0.b.adc10shtx]);
+    MCU.adc10.sht_temp          = MCU.adc10.sht_temp % (shtdiv[MCU.adc10.ctl0.b.adc10shtx]);
+    MCU.adc10.sampcon           = MCU.adc10.sht_increment;
+	
     
+    switch (MCU.adc10.state)
+    {
+      /***************/
+      /* OFF         */
+      /***************/
+    case ADC_STATE_OFF: 
+      ADC10_SET_STATE( ADC_STATE_WAIT_ENABLE );
+      /* no break */
+
+      /***************/
+      /* ENABLE      */
+      /***************/
+    case ADC_STATE_WAIT_ENABLE:
+      if (MCU.adc10.ctl0.b.enc)
+	{
+	  ADC10_SET_STATE( ADC_STATE_WAIT_TRIGGER ); 
+	}
+      if ((MCU.adc10.ctl0.b.enc) && 
+	  (MCU.adc10.ctl0.b.adc10sc == 1) &&
+	  (MCU.adc10.ctl1.b.shsx == 0))
+	{
+	  ADC10_SET_STATE( ADC_STATE_SAMPLE );
+	}
+      break;
+      
+      /***************/
+      /* TRIGGER     */
+      /***************/
+    case ADC_STATE_WAIT_TRIGGER:
+      CHECK_ENC();
+      if (MCU.adc10.sampcon > 0)
+	{
+	  ADC10_SET_STATE( ADC_STATE_SAMPLE );
+	  MCU.adc10.sampcon --;
+	}
+      else
+	{
+	  return;
+	}
+      /* no break */
+
+      /***************/
+      /* SAMPLE      */
+      /***************/
+    case ADC_STATE_SAMPLE:
+      CHECK_ENC();
+      if (MCU.adc10.sampcon > 0)
+	{
+	  /* 
+	   * check port configuration. 
+	   *   SEL = 1  // Selector  = 0:GPIO  1:peripheral
+	   *   DIR = 0  // Direction = 0:input 1:output
+	   */
+	  MCU.adc10.sample = msp430_adc_sample_input(& MCU.adc10.channels,ADC10_CHANNELS, MCU.adc10.current_x);
+	  ADC10_TRACER_INPUT( MCU.adc10.ctl1.b.inch, MCU.adc10.sample );
+
+	  HW_DMSG_ADC10("msp430:adc10:     sampling on config %d hw_channel %d (%s) = 0x%04x [%"PRId64"]\n",
+			MCU.adc10.current_x, 
+			MCU.adc10.ctl1.b.inch,
+			
+			trace_names[MCU.adc10.ctl1.b.inch],
+			MCU.adc10.sample,
+			MACHINE_TIME_GET_NANO());
+ 
+	  ADC10_SET_STATE( ADC_STATE_CONVERT );
+	  MCU.adc10.adc10clk_reftime = MCU.adc10.adc10clk_counter;
+	  MCU.adc10.sampcon --;
+	  
+	}
+      else
+	{
+	  return;
+	}
+      break;
+
+      /***************/
+      /* CONVERT     */
+      /***************/
+    case ADC_STATE_CONVERT:
+      CHECK_ENC();
+      if (MCU.adc10.adc10clk_counter > (MCU.adc10.adc10clk_reftime + 12))
+	{
+	  HW_DMSG_ADC10("msp430:adc10:     convert = 0x%04x (%d) \n",MCU.adc10.sample,MCU.adc10.sample);
+	  ADC10_SET_STATE( ADC_STATE_STORE );
+	}
+      else
+	{ 
+	  return;
+	}
+      /* no break */
+
+#define SAMPLE MCU.adc10.sample
+#define STATE  MCU.adc10.state
+#define ENC    MCU.adc10.ctl0.b.enc
+#define MSC    MCU.adc10.ctl0.b.msc
+#define SHP    MCU.adc10.ctl1.b.shp
+#define ADC10x MCU.adc10.current_x
+
+      /***************/
+      /* STORE       */
+      /***************/
+      
+    case ADC10_STATE_STORE:
+      
+      //TODO 
+      /*
+      CHECK_ENC();
+      HW_DMSG_ADC10("msp430:adc10:     ADC12MEM%d = 0x%04x\n", ADC10x, SAMPLE);
+      MCU.adc10.mem[ ADC10x ].s = SAMPLE;
+
+      if ((MCU.adc10.ifg & (1 << ADC10x)) == 0)
+	{
+	  HW_DMSG_ADC10("msp430:adc10: set interrupt for channel %d\n", ADC10x);
+	}
+      MCU.adc10.ifg |= 1 << ADC10x;
+      msp430_adc10_chkifg();
+
+      switch (MCU.adc10.ctl1.b.conseqx)
+	{
+	case ADC10_MODE_SINGLE:
+	  ENC   = 0;
+	  ADC10_SET_STATE( ADC10_STATE_WAIT_ENABLE );
+	  break;
+	*/
+	case ADC10_MODE_SEQ_CHAN:
+	//TODO 
+	/*
+	  if (MCU.adc12.mctl[ ADC12x ].b.eos == 1)
+	    {
+	      ENC   = 0;
+	      ADC12_SET_STATE( ADC12_STATE_WAIT_ENABLE );
+	    }
+	  else
+	    {
+	      ADC12x = (ADC12x + 1) % ADC12_CHANNELS;
+	      if (MSC && SHP)
+		{
+		  ADC12_SET_STATE( ADC12_STATE_SAMPLE );
+		}
+	      else
+		{
+		  ADC12_SET_STATE( ADC12_STATE_WAIT_TRIGGER );
+		}
+	    }
+	  break;
+	*/
+	case ADC10_MODE_REPEAT_SINGLE:
+	//TODO 
+	/*
+	  if (ENC == 0)
+	    {
+	      ADC12_SET_STATE( ADC12_STATE_WAIT_ENABLE );
+	    }
+	  else
+	    {
+	      if (MSC && SHP)
+		{
+		  ADC12_SET_STATE( ADC12_STATE_SAMPLE );
+		}
+	      else
+		{
+		  ADC12_SET_STATE( ADC12_STATE_WAIT_TRIGGER );
+		}
+	    }
+	  break;
+	  */
+	case ADC10_MODE_REPEAT_SEQ:
+	 //TODO  
+	  /*
+	  if ((ENC == 0) && (MCU.adc12.mctl[ ADC12x ].b.eos == 1))
+	    {
+	      ADC12_SET_STATE( ADC12_STATE_WAIT_ENABLE );
+	    }
+	  else
+	    {
+	      ADC12x = (ADC12x + 1) % ADC12_CHANNELS;
+	      if (MSC && SHP)
+		{
+		  ADC12_SET_STATE( ADC12_STATE_SAMPLE );
+		}
+	      else
+		{
+		  ADC12_SET_STATE( ADC12_STATE_WAIT_TRIGGER );
+		}
+	    }
+	  break;
+	  */
+	}
+      break;
+    
+      
+    }
+#endif
     
     
 }
@@ -246,6 +441,7 @@ void msp430_adc10_update()
 
 int16_t msp430_adc10_read16 (uint16_t addr)
 {
+  //TODO
   ERROR("msp430:adc10: read [0x%04x] block not implemented\n",addr);
   return 0;
 }
@@ -256,6 +452,7 @@ int16_t msp430_adc10_read16 (uint16_t addr)
 
 void msp430_adc10_write16 (uint16_t addr, int16_t val)
 {
+  //TODO
   ERROR("msp430:adc10: write [0x%04x] = 0x%04x, block not implemented\n",addr,val);
 }
 
@@ -265,6 +462,7 @@ void msp430_adc10_write16 (uint16_t addr, int16_t val)
 
 int8_t msp430_adc10_read8  (uint16_t addr)
 {
+  //TODO
   ERROR("msp430:adc10: read [0x%04x] block not implemented\n",addr);
   return 0;
 }
@@ -275,6 +473,7 @@ int8_t msp430_adc10_read8  (uint16_t addr)
 
 void msp430_adc10_write8 (uint16_t addr, int8_t val)
 {
+  //TODO
   ERROR("msp430:adc10: write [0x%04x] = 0x%02x, block not implemented\n",addr,val);
 }
 

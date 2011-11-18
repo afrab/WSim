@@ -36,6 +36,7 @@
 #include "msp430_flash.h"
 #include "msp430_svs.h"
 #include "msp430_cmpa.h"
+#include "msp430_adc.h"
 #include "msp430_adc12.h"
 #include "msp430_adc10.h"
 #include "msp430_dac12.h"
@@ -194,9 +195,12 @@ struct msp430_mcu_t {
 #endif
 
 #if defined(__msp430_have_adc10)
+  struct adc_channels_t        channels;
   struct msp430_adc10_t        adc10;
 #endif
+
 #if defined(__msp430_have_adc12)
+  struct adc_channels_t        channels;
   struct msp430_adc12_t        adc12;
 #endif
 

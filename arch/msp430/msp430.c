@@ -123,8 +123,7 @@ int mcu_options_add(void)
 {
   options_add( &trace_pc_opt );
   options_add( &trace_sp_opt );
-  msp430_adc10_option_add();
-  msp430_adc12_option_add();
+  msp430_adc_option_add();
   return 0;
 }
 

@@ -92,28 +92,6 @@ struct __attribute__ ((packed)) adc10dtc0_t {
 };
 #endif
 
-enum adc10ssel_t {
-  ADC10_SSEL_ADC10OSC      = 0,
-  ADC10_SSEL_ACLK          = 1,
-  ADC10_SSEL_MCLK          = 2,
-  ADC10_SSEL_SMCLK         = 3
-};
-
-enum adc10modes_t {
-  ADC10_MODE_SINGLE        = 0,
-  ADC10_MODE_SEQ_CHAN      = 1,
-  ADC10_MODE_REPEAT_SINGLE = 2,
-  ADC10_MODE_REPEAT_SEQ    = 3
-};
-
-enum adc10state_t {
-  ADC10_STATE_OFF          = 0,
-  ADC10_STATE_WAIT_ENABLE  = 1,
-  ADC10_STATE_WAIT_TRIGGER = 2,
-  ADC10_STATE_SAMPLE       = 3,
-  ADC10_STATE_CONVERT      = 4,
-  ADC10_STATE_STORE        = 5
-};
 
 /* ************************************************** */
 /* ************************************************** */
@@ -122,10 +100,12 @@ enum adc10state_t {
 #define ADC10_CHANNELS 16
 
 struct msp430_adc10_t {
+  
   union {
     struct adc10ctl0_t  b;
     uint16_t            s;
   } ctl0;
+  
   union {
     struct adc10ctl1_t  b;
     uint16_t            s;
@@ -135,25 +115,37 @@ struct msp430_adc10_t {
   uint8_t  ae1;
   uint16_t mem;
   uint16_t adc10mem;
+  
   union {
     struct adc10dtc0_t  b;
     uint8_t             s;
   } dtc0;
+  
   uint8_t  dtc1;
   uint16_t sa;
-
-
-  uint32_t        chann_ptr[ADC10_CHANNELS];     /* current ptr in data */
-  wsimtime_t     chann_time[ADC10_CHANNELS];
-  wsimtime_t   chann_period[ADC10_CHANNELS];
   
-  enum adc10state_t state;
-  
+  struct adc_channels_t  channels;
+  enum adcssel_t         ssel;
+  enum adcmodes_t        modes;
+  enum adcstate_t        state;
+   
   uint32_t adc10osc_freq;
   uint64_t adc10osc_counter;
   int      adc10osc_increment;
   int      adc10osc_temp;
   uint32_t adc10osc_cycle_nanotime;
+  
+  uint64_t adc10clk_counter;
+  int      adc10clk_increment;
+  int      adc10clk_temp;
+
+  int      sht_increment;
+  int      sht_temp;
+
+  int      sampcon;
+  int      current_x;
+  uint16_t sample;
+  uint64_t adc10clk_reftime;
   
   
 };
@@ -162,7 +154,6 @@ struct msp430_adc10_t {
 /* ************************************************** */
 /* ************************************************** */
 
-int     msp430_adc10_option_add (void);
 
 void    msp430_adc10_create     (void);
 void    msp430_adc10_reset      (void);

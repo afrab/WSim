@@ -239,10 +239,10 @@ void msp430_uscia0_update()
 	    if (MCU.uscia0.ucaxrxbuf_full == 1)                                     
 	      {                                                                  
 		  MCU.uscia0.ucaxstat.b.ucoe = 1;                                      
-		  ERROR("msp430:uscia0: USCIA Rx Overrun (0x%x,%c)\n",       
+		  /*ERROR("msp430:uscia0: USCIA Rx Overrun (0x%x,%c)\n",       
 		      MCU.uscia0.ucaxrx_shift_buf,                                 
 		      isgraph(MCU.uscia0.ucaxrx_shift_buf) ?                       
-		      MCU.uscia0.ucaxrx_shift_buf : '.');                          
+		      MCU.uscia0.ucaxrx_shift_buf : '.');       */                   
 	      }                                                                  
 	    /*tracer_event_record(TRACER_USCIA0,TRACER_USCIA_RX_READY);*/     
 	    MCU.uscia0.ucaxrxbuf          = MCU.uscia0.ucaxrx_shift_buf;               

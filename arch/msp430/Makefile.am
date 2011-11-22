@@ -38,9 +38,12 @@ MSPSRC= 				             		\
 	msp430_adc12.h       	    msp430_adc12.c       	\
 	msp430_adc10.h       	    msp430_adc10.c       	\
 	msp430_dac12.h       	    msp430_dac12.c	 	\
--	msp430_ucs.h	     	    msp430_ucs.c         	\
--	msp430_lcdb.h	     	    msp430_lcdb.c	 	\
-	msp430_adc.h         	    msp430_adc.c         	
+	msp430_ucs.h	     	    msp430_ucs.c         	\
+	msp430_lcdb.h	     	    msp430_lcdb.c	 	\
+	msp430_adc.h         	    msp430_adc.c         	\
+	msp430_rtc.h                msp430_rtc.c		\
+	msp430_pmm.h                msp430_pmm.c		\
+	msp430_portmap.h            msp430_portmap.c
 
 libmsp430f135_a_CFLAGS=-DMSP430f135
 libmsp430f135_a_SOURCES=${MSPSRC}

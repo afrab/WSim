@@ -67,7 +67,6 @@ WARNINGS += -Wfatal-errors
 endif # CC_UNIARCH
 
 
-
 ASFLAGS += ${CPU} -D_GNU_ASSEMBLER_
 ASFLAGS += $(OPT) $(DEBUG) $(GCC_4_INCLUDE) $(INCLUDES)
 

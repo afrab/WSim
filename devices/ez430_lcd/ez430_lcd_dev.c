@@ -19,7 +19,7 @@
 
 struct ez430_lcd_t {
   int n;
-  int val;
+  unsigned int val;
   int update;
   uint8_t mem[15];
   uint8_t bmem[15];

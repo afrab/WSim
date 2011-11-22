@@ -8,7 +8,8 @@ noinst_LIBRARIES = \
 	libmsp430f1612.a	\
 	libmsp430f2012.a	\
 	libmsp430f2013.a	\
-	libmsp430f2274.a
+	libmsp430f2274.a	\
+	libcc430f6137.a
 
 INCLUDES=-I$(top_srcdir)
 
@@ -68,5 +69,8 @@ libmsp430f2013_a_SOURCES=${MSPSRC}
 
 libmsp430f2274_a_CFLAGS=-DMSP430f2274
 libmsp430f2274_a_SOURCES=${MSPSRC}
+
+libcc430f6137_a_CFLAGS=-DCC430f6137
+libcc430f6137_a_SOURCES=${MSPSRC}
 
 endif

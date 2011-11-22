@@ -1979,10 +1979,10 @@ int msp430_timerB_chkifg(void)
 
 void msp430_timerTA0_create()
 {
-  msp430_io_register_addr8(TA0IV, msp430_timerTA0_read8, msp430_timerTA0_write8);
+  //msp430_io_register_addr8(TA0IV, msp430_timerTA0_read8, msp430_timerTA0_write8);
   msp430_io_register_range8(TIMER_TA0_START, TIMER_TA0_END + 1, msp430_timerTA0_read8, msp430_timerTA0_write8);
 
-  msp430_io_register_addr16(TA0IV, msp430_timerTA0_read, msp430_timerTA0_write);
+  //msp430_io_register_addr16(TA0IV, msp430_timerTA0_read, msp430_timerTA0_write);
   msp430_io_register_range16(TIMER_TA0_START, TIMER_TA0_END, msp430_timerTA0_read, msp430_timerTA0_write);
 }
 
@@ -2521,10 +2521,10 @@ int msp430_timerTA0_chkifg(void)
 
 void msp430_timerTA1_create()
 {
-  msp430_io_register_addr8(TA1IV, msp430_timerTA1_read8, msp430_timerTA1_write8);
+  //msp430_io_register_addr8(TA1IV, msp430_timerTA1_read8, msp430_timerTA1_write8);
   msp430_io_register_range8(TIMER_TA1_START, TIMER_TA1_END + 1, msp430_timerTA1_read8, msp430_timerTA1_write8);
 
-  msp430_io_register_addr16(TA1IV, msp430_timerTA1_read, msp430_timerTA1_write);
+  //msp430_io_register_addr16(TA1IV, msp430_timerTA1_read, msp430_timerTA1_write);
   msp430_io_register_range16(TIMER_TA1_START, TIMER_TA1_END, msp430_timerTA1_read, msp430_timerTA1_write);
 }
 

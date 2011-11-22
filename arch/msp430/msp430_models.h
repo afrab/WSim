@@ -17,6 +17,7 @@
    MSP430f1611   
    MSP430f2013
    MSP430f2274
+   CC430f6137
 */
 
 #define MCU_NAME         "msp430" /* used in libelf_ntv */
@@ -558,7 +559,107 @@ static infomem_t UNUSED infomem[] = {
 /* ********************************************************************** */
 /* ********************************************************************** */
 /* ********************************************************************** */
+#elif defined(CC430f6137)
 
+#define MCU_BFD_MACH_ID   54
+#define MCU_VERSION       "f6137"
+#define MCU_MODEL_NAME    "cc430f6137"
+
+#define ADDR_FLASH_STOP    0xFFFFu
+#define ADDR_FLASH_START   0x8000u
+#define ADDR_NVM_STOP      0x19FFu
+#define ADDR_NVM_START     0x1800u
+#define ADDR_BOOTMEM_STOP  0x17FFu
+#define ADDR_BOOTMEM_START 0x1000u
+#define ADDR_RAM_STOP      0x2BFFu
+#define ADDR_RAM_START     0x1C00u
+
+#define INTR_RESET        63
+// 62
+#define INTR_NMI          61 // user NMI, 62 is SYS NMI
+// 60 - Comparator_B
+#define INTR_WATCHDOG     59
+#define INTR_USCIA0_RXTX  58
+#define INTR_USCIB0_RXTX  57
+#define INTR_ADC12        56
+#define INTR_TIMERTA0_0   55
+#define INTR_TIMERTA0_1   54
+#define INTR_RF1A         53
+#define INTR_DMA          52
+#define INTR_TIMERTA1_0   51
+#define INTR_TIMERTA1_1   50
+#define INTR_IOPORT1      49
+#define INTR_IOPORT2      48
+#define INTR_LCDB         47
+// 46 -- RTC
+// 45 -- AES
+// 44-0
+
+
+#define __msp430_have_64_interrupts
+#define INTR_FIRST_NMI    61
+//#define INTR_FIRST_NMI    54
+#define INTR_BASE_IV_ADDR 0xFF80u
+
+// infomem
+static infomem_t UNUSED infomem[] = {};
+
+// system clock
+#define __msp430_have_ucs
+#define __msp430_have_xt2
+
+//ucscia ucsib
+//#define __msp430_have_uscia0
+//#define __msp430_have_uscib0
+
+// 8 bit blocks
+#define __msp430_have_portmap
+#define __msp430_have_port1
+#define __msp430_have_port2
+#define __msp430_have_port3
+#define __msp430_have_port4
+#define __msp430_have_portj
+
+// 16 bit blocks
+#define __msp430_have_flash
+#define __msp430_have_watchdog
+#define __msp430_have_watchdog_plus
+#define __msp430_have_lcdb
+#define __msp430_have_timerTA0
+#define __msp430_have_timerTA1
+#define __msp430_have_pmm
+#define __msp430_have_rtc
+#define __msp430_have_new_sfr
+
+// Flash erase timings
+#define FLASH_WRITE_TIMING_BYTE       30
+#define FLASH_WRITE_TIMING_FSTBYTE    25
+#define FLASH_WRITE_TIMING_NXTBYTE    18
+#define FLASH_WRITE_TIMING_LSTBYTE     6
+#define FLASH_ERASE_TIMING_MASS    10593
+#define FLASH_ERASE_TIMING_SEG      4819
+
+//BASE Register (OFFSET)
+#define USCIA_BASE        0x05d
+#define SFR_BASE          0x100
+#define PMM_BASE          0x120
+#define FLASHCTL_BASE     0x140
+#define WATCHDOG_BASE     0x15c
+#define UCS_BASE          0x160
+#define PORTMAP_BASE      0x1c0
+#define DIGIIO_BASE       0x200
+#define TIMER_TA0_BASE    0x340
+#define TIMER_TA1_BASE    0x380
+#define RTC_BASE          0x4a0
+#define USCIB_BASE        0x5e0
+#define LCDB_BASE         0xa00
+
+#define DIGIIO_NEW_OFFSETS
+
+/* ********************************************************************** */
+/* ********************************************************************** */
+/* ********************************************************************** */
+/* ********************************************************************** */
 #else
 #error "you must define one MSP430 mcu model"
 #endif // defined(model)

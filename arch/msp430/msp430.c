@@ -216,6 +216,10 @@ int msp430_mcu_create(int xt1)
 #if defined(__msp430_have_basic_clock_plus)
   MCU_CLOCK.vlo_freq   = vlo;
 #endif
+#if defined(__msp430_have_ucs)
+  MCU_CLOCK.vlo_freq   = vlo;
+  MCU_CLOCK.refo_freq  = refo;
+#endif
 
   msp430_trace_pc_switch = 0;
   msp430_trace_sp_switch = 0;

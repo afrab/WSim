@@ -1702,6 +1702,22 @@ void msp430_timerB_capture(void)
 
 
 /* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
+
+#define TBCCRWRITE_ERROR(NUM)						\
+  case TBCCR##NUM :							\
+  ERROR("msp430:" TIMERBNAME ": tbccr%d not present\n",NUM);		\
+  break;
+
+
+#define TBCCTLWRITE_ERROR(NUM)						\
+  case TBCCTL##NUM :							\
+  ERROR("msp430:" TIMERBNAME ": tbcctl%d not present\n",NUM);		\
+  break;
+
+
+/* ************************************************** */
 
 void msp430_timerB_write (uint16_t addr, int16_t val)
 {

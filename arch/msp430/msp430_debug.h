@@ -191,6 +191,12 @@ extern char* msp430_lpm_names[];
 #    define HW_DMSG_HWMUL(x...) do { } while (0)
 #endif
 
+#if DEBUG_PMM
+#    define HW_DMSG_PMM(x...) HW_DMSG_MCUDEV(x)
+#else
+#    define HW_DMSG_PMM(x...) do { } while (0)
+#endif
+
 /* ************************************************** */
 /* ************************************************** */
 /* ************************************************** */

@@ -516,6 +516,38 @@ char* timerB_tiv_to_str(int val)
 		  MACHINE_TIME_GET_NANO());				\
   }while(0)
 
+/*************/
+/* timer TA0 */
+/*************/
+#define WRITE_TIMERTA0_CCR(NUM)						\
+  do {									\
+    MCU.timerTA0.ta0ccr[NUM]  = val & 0x00ffffl;				\
+    if (MCU.timerTA0.tar > MCU.timerTA0.ta0ccr[NUM])			\
+      MCU.timerTA0.b_ta0ccr[NUM] = COMPARE_UNREACHABLE;			\
+    else								\
+      MCU.timerTA0.b_ta0ccr[NUM] = 0;					\
+    HW_DMSG_TIMER("msp430:timerTA0: ta0ccr%d  = 0x%04x "			\
+		  "(TAR = 0x%04x) [%"PRId64"]\n",			\
+		  NUM,MCU.timerTA0.ta0ccr[NUM],MCU.timerTA0.tar,		\
+		  MACHINE_TIME_GET_NANO());				\
+  } while(0)
+
+/*************/
+/* timer TA1 */
+/*************/
+#define WRITE_TIMERTA1_CCR(NUM)						\
+  do {									\
+    MCU.timerTA1.ta1ccr[NUM]  = val & 0x00ffffl;				\
+    if (MCU.timerTA1.tar > MCU.timerTA1.ta1ccr[NUM])			\
+      MCU.timerTA1.b_ta1ccr[NUM] = COMPARE_UNREACHABLE;			\
+    else								\
+      MCU.timerTA1.b_ta1ccr[NUM] = 0;					\
+    HW_DMSG_TIMER("msp430:timerTA1: ta1ccr%d  = 0x%04x "			\
+		  "(TAR = 0x%04x) [%"PRId64"]\n",			\
+		  NUM,MCU.timerTA1.ta1ccr[NUM],MCU.timerTA1.tar,		\
+		  MACHINE_TIME_GET_NANO());				\
+  } while(0)
+
 #define TBCCRWRITE(NUM)							\
   case TBCCR##NUM :							\
   WRITE_TIMERB_CCR(NUM);						\

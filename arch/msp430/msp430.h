@@ -139,6 +139,9 @@ struct msp430_mcu_t {
 #if defined(__msp430_have_fll_and_xt2)
   struct msp430_fll_clock_t    fll_clock;
 #endif
+#if defined(__msp430_have_ucs)
+  struct msp430_ucs_t    ucs;
+#endif
 #if defined(__msp430_have_basic_clock)
   struct msp430_basic_clock_t  basic_clock;
 #endif
@@ -154,6 +157,12 @@ struct msp430_mcu_t {
 #endif
 #if defined(__msp430_have_timerb3) || defined(__msp430_have_timerb7)
   struct msp430_timerB_t       timerB;
+#endif
+#if defined(__msp430_have_timerTA0)
+  struct msp430_timerTA0_t      timerTA0;
+#endif
+#if defined(__msp430_have_timerTA1)
+  struct msp430_timerTA1_t      timerTA1;
 #endif
 
   struct msp430_digiIO_t       digiIO;
@@ -187,6 +196,10 @@ struct msp430_mcu_t {
   struct msp430_lcd_t          lcd;
 #endif
 
+#if defined(__msp430_have_lcdb)
+  struct msp430_lcdb_t          lcdb;
+#endif
+
 #if defined(__msp430_have_dma)
   struct msp430_dma_t          dma;
 #endif
@@ -207,6 +220,18 @@ struct msp430_mcu_t {
 #if defined(__msp430_have_adc12)
   struct adc_channels_t        channels;
   struct msp430_adc12_t        adc12;
+#endif
+  
+#if defined(__msp430_have_pmm)
+  struct msp430_pmm_t          pmm;
+#endif
+
+#if defined(__msp430_have_portmap)
+  struct msp430_portmap_t          portmap;
+#endif
+  
+#if defined(__msp430_have_rtc)
+  struct msp430_rtc_t          rtc;
 #endif
 
 #if defined(SOFT_INTR)
@@ -243,12 +268,17 @@ extern struct msp430_mcu_t mcu_backup;
 #if defined(__msp430_have_fll_and_xt2)
 #define MCU_CLOCK          MCU.fll_clock
 #endif
+#if defined(__msp430_have_ucs)
+#define MCU_CLOCK          MCU.ucs
+#endif
 
 #define CYCLE_INCREMENT    MCU_CLOCK.MCLK_increment
 
 #define MCU_INTR           msp430_interrupt
 
-#if defined(__msp430_have_basic_clock_plus)
+#if defined(__msp430_have_ucs)
+  int msp430_mcu_create(int xt1, int xt2, int vlo, int refo);
+#elif defined(__msp430_have_basic_clock_plus)
    #if defined(__msp430_have_xt2)
    int msp430_mcu_create(int xt1, int xt2, int vlo);
    #else

@@ -10,4 +10,3 @@ libgdb_a_SOURCES = \
 	gdbremote_utils.c	\
 	gdbremote.h		\
 	gdbremote.c
-

@@ -62,7 +62,7 @@ struct cma3000_spi_t {
   uint8_t state; /* 0 first byte, 1 second byte*/
   uint8_t write;
 
-  uint8_t cycle_count; /* cycle count */
+  uint32_t cycle_count; /* cycle count */
   uint8_t INT_send; /* INT Pin */
 };
 

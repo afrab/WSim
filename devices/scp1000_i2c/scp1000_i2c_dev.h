@@ -55,7 +55,7 @@ struct scp1000_i2c_t {
   uint8_t SDA_send; /* value to send on the I2C SDA line    */
   uint8_t DRDY_send; /* value to send on the DRDY pin        */
 
-  uint8_t cycle_count; /* count update cycles for the DRDY val */
+  uint32_t cycle_count; /* count update cycles for the DRDY val */
 };
 
 /* methods */

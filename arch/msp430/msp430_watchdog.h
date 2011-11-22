@@ -11,10 +11,14 @@
 
 #if defined(__msp430_have_watchdog)
 
-#define WATCHDOG_START 0x0120
-#define WATCHDOG_END   0x0120
+#if !defined(WATCHDOG_BASE)
+#define WATCHDOG_BASE 0x0120
+#endif
 
-#define WDTCTL 0x120
+#define WATCHDOG_START WATCHDOG_BASE
+#define WATCHDOG_END   WATCHDOG_BASE
+
+#define WDTCTL WATCHDOG_BASE
 
 enum watchdog_mode_t {
   WDT_MODE_WATCHDOG = 0,

@@ -9,13 +9,17 @@
 #define MSP430_FLASH_H
 #if defined(__msp430_have_flash)
 
-#define FLASHCTL_START  0x128
-#define FLASHCTL_END    0x12C
+#if !defined(FLASHCTL_BASE)
+#define FLASHCTL_BASE   0x128
+#endif
+
+#define FLASHCTL_START  FLASHCTL_BASE
+#define FLASHCTL_END    (FLASHCTL_BASE + 0x06)
 
 enum flash_addr_t {
-  FLASH_FCTL1     = 0x0128,
-  FLASH_FCTL2     = 0x012A,
-  FLASH_FCTL3     = 0x012C
+  FLASH_FCTL1     = FLASHCTL_BASE,
+  FLASH_FCTL2     = (FLASHCTL_BASE + 0x02),
+  FLASH_FCTL3     = (FLASHCTL_BASE + 0x04)
 };
 
 #if defined(WORDS_BIGENDIAN)

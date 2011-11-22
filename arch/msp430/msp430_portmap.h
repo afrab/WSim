@@ -19,7 +19,7 @@ struct msp430_portmap_t {
   int tmp;
 };
 
-void msp430_pormtap_create();
+void msp430_portmap_create();
 int msp430_portmap_reset();
 void msp430_portmap_update();
 int8_t msp430_portmap_read8(uint16_t addr);

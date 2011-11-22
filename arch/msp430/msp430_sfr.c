@@ -18,7 +18,8 @@
 
 void msp430_sfr_create()
 {
-  msp430_io_register_range8(SFR_START,SFR_END,msp430_sfr_read,msp430_sfr_write);
+  msp430_io_register_range8(SFR_START,SFR_END,msp430_sfr_read8,msp430_sfr_write8);
+  msp430_io_register_range16(SFR_START,SFR_END,msp430_sfr_read,msp430_sfr_write);
 }
 
 /* ************************************************** */
@@ -34,7 +35,7 @@ void msp430_sfr_reset()
 /* ************************************************** */
 /* ************************************************** */
 
-int8_t msp430_sfr_read (uint16_t addr)
+int8_t msp430_sfr_read8 (uint16_t addr)
 {
   int8_t res = 0;
   switch(addr)
@@ -55,6 +56,16 @@ int8_t msp430_sfr_read (uint16_t addr)
       res = MCU.sfr.ifg2.s;
       HW_DMSG_SFR("msp430:sfr: read IFG2 [0x%04x] = 0x%02x \n",addr,res & 0xff);
       break;
+#if defined(__msp430_have_new_sfr)
+    case SFRRPCR:
+      res = MCU.sfr.sfrrpcr.s & 0x00ff;
+      HW_DMSG_SFR("msp430:sfr: read SFRRPCR_L [0x%04x] = 0x%02x \n",addr,res & 0xff);
+      break;
+    case SFRRPCR + 1:
+      res = (MCU.sfr.sfrrpcr.s & 0xff00) >> 8;
+      HW_DMSG_SFR("msp430:sfr: read SFRRPCR_H [0x%04x] = 0x%02x \n",addr,res & 0xff);
+      break;
+#else
     case SFR_MER1:
       res = MCU.sfr.me1.s;
       HW_DMSG_SFR("msp430:sfr: read ME1 [0x%04x] = 0x%02x \n",addr,res & 0xff);
@@ -63,6 +74,7 @@ int8_t msp430_sfr_read (uint16_t addr)
       res = MCU.sfr.me2.s;
       HW_DMSG_SFR("msp430:sfr: read ME2 [0x%04x] = 0x%02x \n",addr,res & 0xff);
       break;
+#endif
     default:
       ERROR("msp430:sfr: read bad address 0x%04x\n",addr);
       break;
@@ -74,24 +86,71 @@ int8_t msp430_sfr_read (uint16_t addr)
 /* ************************************************** */
 /* ************************************************** */
 
-void msp430_sfr_write(uint16_t addr, int8_t val)
+int16_t msp430_sfr_read(uint16_t addr)
+{
+  int16_t res = 0;
+  switch(addr)
+    {
+    case SFR_IE1:
+      res = MCU.sfr.ie1.s | (MCU.sfr.ie2.s << 8);
+      HW_DMSG_SFR("msp430:sfr: read IE [0x%04x] = 0x%04x \n",addr,res & 0xffff);
+      break;
+    case SFR_IFG1:
+      res = MCU.sfr.ifg1.s | (MCU.sfr.ifg1.s << 8);
+      HW_DMSG_SFR("msp430:sfr: read IFG [0x%04x] = 0x%04x \n",addr,res & 0xffff);
+      break;
+#if defined (__msp430_have_new_sfr)
+    case SFRRPCR:
+      res = MCU.sfr.sfrrpcr.s;
+      HW_DMSG_SFR("msp430:sfr: read SFRRPCR [0x%04x] = 0x%04x \n",addr,res & 0xffff);
+      break;
+#endif
+    default:
+      ERROR("msp430:sfr: read bad address 0x%04x\n",addr);
+      break;
+    }
+  return res;
+}
+
+/* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
+
+void msp430_sfr_write8(uint16_t addr, int8_t val)
 {
   switch(addr)
     {
-      /***********/
     case SFR_IE1:
-      /***********/
       MCU.sfr.ie1.s  = val;
       HW_DMSG_SFR("msp430:sfr: write IE1 [0x%04x] = 0x%02x\n",addr,val & 0xff); 
       break;
 
-      /***********/
     case SFR_IE2:
-      /***********/
       MCU.sfr.ie2.s  = val;
       HW_DMSG_SFR("msp430:sfr: write IE2 [0x%04x] = 0x%02x\n",addr,val & 0xff); 
       break;
 
+#if defined(__msp430_have_new_sfr)
+    case SFR_IFG1:
+      MCU.sfr.ifg1.s  = val;
+      HW_DMSG_SFR("msp430:sfr: write IFG1 [0x%04x] = 0x%02x\n",addr,val & 0xff); 
+      break;
+
+    case SFR_IFG2:
+      MCU.sfr.ifg2.s  = val;
+      HW_DMSG_SFR("msp430:sfr: write IFG1 [0x%04x] = 0x%02x\n",addr,val & 0xff); 
+      break;      
+
+    case SFRRPCR:
+      MCU.sfr.sfrrpcr.s  = (MCU.sfr.sfrrpcr.s & 0xff00) | val;
+      HW_DMSG_SFR("msp430:sfr: write SFRRPCR_L [0x%04x] = 0x%02x\n",addr,val & 0xff); 
+      break;      
+
+    case SFRRPCR + 1:
+      MCU.sfr.sfrrpcr.s  = (MCU.sfr.sfrrpcr.s & 0x00ff) | (val << 8);
+      HW_DMSG_SFR("msp430:sfr: write SFRRPCR_H [0x%04x] = 0x%02x\n",addr,val & 0xff); 
+      break;
+#else
       /***********/
     case SFR_IFG1:
       /***********/
@@ -166,9 +225,40 @@ void msp430_sfr_write(uint16_t addr, int8_t val)
       HW_DMSG_SFR("msp430:sfr: write ME2 [0x%04x] = 0x%02x\n",addr,val & 0xff); 
       break;
 
-      /***********/
+#endif
     default:
-      /***********/
+      ERROR("msp430:sfr: write bad address [0x%04x]=0x%02x\n",addr,val & 0xff);
+      break;
+    }
+}
+
+/* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
+
+void msp430_sfr_write(uint16_t addr, int16_t val)
+{
+  switch(addr)
+    {
+    case SFR_IE1:
+      MCU.sfr.ie1.s = val & 0x00ff;
+      MCU.sfr.ie2.s = (val & 0xff00) >> 8;
+      HW_DMSG_SFR("msp430:sfr: write IE [0x%04x] = 0x%04x\n",addr,val & 0xffff);
+      break;
+
+#if defined(__msp430_have_new_sfr)
+    case SFR_IFG1:
+      MCU.sfr.ifg1.s = val & 0x00ff;
+      MCU.sfr.ifg2.s = (val & 0xff00) >> 8;
+      HW_DMSG_SFR("msp430:sfr: write IFG [0x%04x] = 0x%04x\n",addr,val & 0xffff);
+      break;
+
+    case SFRRPCR:
+      MCU.sfr.sfrrpcr.s = val;
+      HW_DMSG_SFR("msp430:sfr: write SFRRPCR [0x%04x] = 0x%04x\n",addr,val & 0xffff);
+      break;    
+#endif
+    default:
       ERROR("msp430:sfr: write bad address [0x%04x]=0x%02x\n",addr,val & 0xff);
       break;
     }

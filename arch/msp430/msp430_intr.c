@@ -177,7 +177,31 @@ int msp430_interrupt_start_if_any(void)
 		  break;
 #endif
 
-#if defined(__msp430_have_uscia0) || defined(__msp430_have_uscib0)
+#if defined(__msp430_have_timerTA0)
+		case INTR_TIMERTA0_0:
+		  HW_DMSG_INTR("msp430:intr:   Reset timerTA0 taccr0 IFG flag\n");
+		  MCU.timerTA0.ta0cctl[0].b.ccifg = 0;
+#if defined(SOFT_INTR)
+		  MCU.soft_intr         = 1;
+		  MCU.soft_intr_timeend = MACHINE_TIME_GET_NANO() + SOFT_INTR_DUR;
+		  etracer_slot_event(SOFT_INTR_EVT, ETRACER_PER_EVT_MODE_CHANGED, 2, 0);
+#endif
+		  break;
+#endif
+
+#if defined(__msp430_have_timerTA1)
+ 		case INTR_TIMERTA1_0:
+		  HW_DMSG_INTR("msp430:intr:   Reset timerTA1 taccr1 IFG flag\n");
+		  MCU.timerTA1.ta1cctl[0].b.ccifg = 0;
+#if defined(SOFT_INTR)
+		  MCU.soft_intr         = 1;
+		  MCU.soft_intr_timeend = MACHINE_TIME_GET_NANO() + SOFT_INTR_DUR;
+		  etracer_slot_event(SOFT_INTR_EVT, ETRACER_PER_EVT_MODE_CHANGED, 2, 0);
+#endif
+		  break;
+#endif
+
+#if ( defined(__msp430_have_uscia0) || defined(__msp430_have_uscib0) ) && !defined(__msp430_have_new_sfr)
 		case INTR_USCIX0_RX:
 		  #if defined(__msp430_have_uscia0)
 		    HW_DMSG_INTR("msp430:intr:   Reset USCIA0 rx IFG flag\n");
@@ -198,7 +222,7 @@ int msp430_interrupt_start_if_any(void)
 		  break;
 #endif
 		  	  
-#if defined(__msp430_have_usart0)
+#if defined(__msp430_have_usart0) && !defined(__msp430_have_new_sfr)
 		case INTR_USART0_RX:
 		  HW_DMSG_INTR("msp430:intr:   Reset USART0 rx IFG flag\n");
 		  MCU.sfr.ifg1.b.urxifg0 = 0;
@@ -209,7 +233,7 @@ int msp430_interrupt_start_if_any(void)
 		  break;
 #endif
 		
-#if defined(__msp430_have_usart1)
+#if defined(__msp430_have_usart1) && !defined(__msp430_have_new_sfr)
 		case INTR_USART1_RX:
 		  HW_DMSG_INTR("msp430:intr:   Reset USART1 rx IFG flag\n");
 		  MCU.sfr.ifg2.b.urxifg1 = 0;

@@ -1261,6 +1261,7 @@ static void msp430_timerB_set_limit(int i)
 
 enum timerB_addr_t {
  TBIV      = 0x011e,
+
  TBCTL     = 0x0180,
  TBCCTL0   = 0x0182,
  TBCCTL1   = 0x0184,
@@ -1684,6 +1685,22 @@ void msp430_timerB_capture(void)
 	}
     }
 }
+
+/* ************************************************** */
+/* ************************************************** */
+/* ************************************************** */
+
+#define TBCCRWRITE_ERROR(NUM)						\
+  case TBCCR##NUM :							\
+  ERROR("msp430:" TIMERBNAME ": tbccr%d not present\n",NUM);		\
+  break;
+
+
+#define TBCCTLWRITE_ERROR(NUM)						\
+  case TBCCTL##NUM :							\
+  ERROR("msp430:" TIMERBNAME ": tbcctl%d not present\n",NUM);		\
+  break;
+
 
 /* ************************************************** */
 /* ************************************************** */

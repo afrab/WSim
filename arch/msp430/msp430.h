@@ -40,6 +40,11 @@
 #include "msp430_adc12.h"
 #include "msp430_adc10.h"
 #include "msp430_dac12.h"
+#include "msp430_lcdb.h"
+#include "msp430_pmm.h"
+#include "msp430_ucs.h"
+#include "msp430_portmap.h"
+#include "msp430_rtc.h"
 
   /**
    * 0x0ffff

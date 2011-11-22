@@ -148,7 +148,9 @@ void msp430_infomem_init(void)
 /* ** MCU_CREATE ************************************ */
 /* ************************************************** */
 
-#if defined(__msp430_have_basic_clock_plus)
+#if defined(__msp430_have_ucs)
+  int msp430_mcu_create(int xt1, int xt2, int vlo, int refo)
+#elif defined(__msp430_have_basic_clock_plus)
   #if defined(__msp430_have_xt2)
   int msp430_mcu_create(int xt1, int xt2, int vlo)
   #else
@@ -175,7 +177,10 @@ int msp430_mcu_create(int xt1)
   msp430_svs_create();
   msp430_hwmul_create();
   msp430_digiIO_create();
+  msp430_pmm_create();
+  msp430_portmap_create();
   // system clock
+  msp430_ucs_create();
   msp430_basic_clock_create();
   msp430_basic_clock_plus_create();
   msp430_fll_clock_create();
@@ -189,6 +194,8 @@ int msp430_mcu_create(int xt1)
   msp430_basic_timer_create();
   msp430_timerA_create();
   msp430_timerB_create();
+  msp430_timerTA0_create();
+  msp430_timerTA1_create();
   // analog
   msp430_cmpa_create();
   msp430_adc10_create();
@@ -198,6 +205,8 @@ int msp430_mcu_create(int xt1)
   msp430_dma_create();
   msp430_flash_create();
   msp430_lcd_create();
+  msp430_lcdb_create();
+  msp430_rtc_create();
 
 
   MCU_CLOCK.lfxt1_freq = xt1;
@@ -252,7 +261,10 @@ void mcu_reset()
   msp430_svs_reset();
   msp430_hwmul_reset();
   msp430_digiIO_reset();
+  msp430_pmm_reset();
+  msp430_portmap_reset();
   // system clock
+  msp430_ucs_reset();
   msp430_basic_clock_reset();
   msp430_basic_clock_plus_reset();
   msp430_fll_clock_reset();
@@ -266,6 +278,8 @@ void mcu_reset()
   msp430_basic_timer_reset();
   msp430_timerA_reset();
   msp430_timerB_reset();
+  msp430_timerTA0_reset();
+  msp430_timerTA1_reset();
   // analog
   msp430_adc10_reset();
   msp430_adc12_reset();
@@ -275,6 +289,8 @@ void mcu_reset()
   msp430_dma_reset();
   msp430_flash_reset();
   msp430_lcd_reset();
+  msp430_lcdb_reset();
+  msp430_rtc_reset();
 
 #if defined(SOFT_INTR)
   MCU.soft_intr         = 0;
@@ -300,6 +316,8 @@ void msp430_devices_update(unsigned int cycles)
   msp430_svs_update();
   msp430_hwmul_update();
   msp430_digiIO_update();
+  msp430_pmm_update();
+  msp430_portmap_update();
   // serial interfaces
   msp430_uscia0_update();
   msp430_uscib0_update();
@@ -310,6 +328,8 @@ void msp430_devices_update(unsigned int cycles)
   msp430_basic_timer_update();
   msp430_timerA_update();
   msp430_timerB_update();
+  msp430_timerTA0_update();
+  msp430_timerTA1_update();
   // analog
   msp430_adc10_update();
   msp430_adc12_update();
@@ -319,6 +339,8 @@ void msp430_devices_update(unsigned int cycles)
   msp430_dma_update();
   msp430_flash_update();
   msp430_lcd_update();
+  msp430_lcdb_update();
+  msp430_rtc_update();
 }
 
 /* ************************************************** */
@@ -331,6 +353,8 @@ void mcu_update_done()
   /* timers capture operations                    */
   msp430_timerA_capture();
   msp430_timerB_capture();
+  msp430_timerTA0_capture();
+  msp430_timerTA1_capture();
 
   /* serial port                                  */
   msp430_usart0_update_done();

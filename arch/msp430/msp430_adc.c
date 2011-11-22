@@ -33,7 +33,7 @@
 /* ************************************************** */
 /* ************************************************** */
 
-int msp430_adc_init(struct adc_channels_t* channels, int width, struct moption_t* opt)
+int msp430_adc_init(struct adc_channels_t* channels, int UNUSED width, struct moption_t* opt)
 {
   
   int i;
@@ -188,7 +188,7 @@ int msp430_adc_delete_inputs(struct adc_channels_t* channels)
   return 0;
 }
 
-uint16_t msp430_adc_sample_input(struct adc_channels_t* channels, int hw_channel_x, int current_x)
+uint16_t msp430_adc_sample_input(struct adc_channels_t* channels, int hw_channel_x, int UNUSED current_x)
 {
   uint16_t sample = 0;
   switch (channels->channels_valid[hw_channel_x])

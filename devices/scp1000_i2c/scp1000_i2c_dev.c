@@ -71,7 +71,7 @@ int scp1000_i2c_device_create(int dev_num)
   return 0;
 }
 
-int scp1000_i2c_reset(int dev)
+int scp1000_i2c_reset(int UNUSED dev)
 {
   HW_DMSG_DEV("scp1000 : device reset");
   return 0;
@@ -233,7 +233,7 @@ int scp1000_i2c_update(int dev)
   case SCP1000_I2C_FSM_SENDDATA:
     if (scp1000->SCL_last == 0 && scp1000->SCL == 1) {
       scp1000->I2C_send = 1;
-      scp1000->SDA_send = ((scp1000->registers[scp1000->read_regaddr] >> 7 - scp1000->state_pos) & 0x01);
+      scp1000->SDA_send = ((scp1000->registers[scp1000->read_regaddr] >> (7 - scp1000->state_pos)) & 0x01);
       scp1000->state_pos++;
       if (scp1000->state_pos == 8) {
         scp1000->read_tmp = 0;
@@ -290,7 +290,7 @@ int scp1000_i2c_update(int dev)
   return 0;
 }
 
-int scp1000_i2c_delete(int dev)
+int scp1000_i2c_delete(int UNUSED dev)
 {
   return 0;
 }

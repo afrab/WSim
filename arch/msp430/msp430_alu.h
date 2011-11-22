@@ -15,7 +15,7 @@ typedef int16_t mcu_register_t;
 
 struct msp430_alu_t {
   mcu_register_t   regs[MCU_REGISTERS];
-  uint32_t         interrupt_vector;
+  uint64_t         interrupt_vector;
   uint32_t         signal;
 
   uint64_t         insn_counter;

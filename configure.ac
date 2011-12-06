@@ -95,8 +95,8 @@ AM_CONDITIONAL([BUILD_DEBUG], [test "${debug_sum}" = "yes"])
 dnl LTO mode : 
 dnl ==========
 CFLAGS_save="${CFLAGS}"
-AC_ARG_ENABLE([lto],AS_HELP_STRING([--enable-lto],[gcc lto mode (default enabled if available)]))
-if test "${enable_lto}" != "no"; then
+AC_ARG_ENABLE([lto],AS_HELP_STRING([--enable-lto],[gcc lto mode (default disabled)]))
+if test "${enable_lto}" = "yes"; then
     CFLAGS="$CFLAGS $CFLAGSLTO"
     lto_sum="yes"
 else

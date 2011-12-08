@@ -14,7 +14,7 @@
 #endif
 
 #define FLASHCTL_START  FLASHCTL_BASE
-#define FLASHCTL_END    (FLASHCTL_BASE + 0x06)
+#define FLASHCTL_END    (FLASHCTL_BASE + 0x04)
 
 enum flash_addr_t {
   FLASH_FCTL1     = FLASHCTL_BASE,

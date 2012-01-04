@@ -182,7 +182,7 @@ void logpkt_init(int do_log_pkt, char* logpkt, const char* logpktfilename)
 	}
       else
 	{
-	  ERROR("pktlog: wrong option, should be '--pktlog=[tx|rx|rxtx|pcap[:id]]'\n");
+	  ERROR("pktlog: wrong option, should be '--logpkt=[tx|rx|rxtx|pcap[:id]]'\n");
 	  ERROR("pktlog: log mode set to RX and TX\n");
 	  log_mode = LOG_RX_AND_TX;
 	}

@@ -30,7 +30,7 @@ User
 2 options refer to this functionality, --logpkt and --logpktfile.
 Setting one on command line, enables packets log.
 
---logpkt=[rx | tx | rxtx]
+--logpkt=[rx | tx | rxtx | pcap[:type] ]
 rx          : only RX are logged
 tx          : only TX are logged
 rxtx        : both RX and TX are logged (by default)

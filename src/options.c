@@ -107,7 +107,12 @@ static struct moption_t logfile_opt = {
 static struct moption_t logpkt_opt = {
   .longname    = "logpkt",
   .type        = optional_argument,
-  .helpstring  = "enable radio packets log and set options",
+  .helpstring  = "enable radio packets log and set options\n\
+\t\t\t\t--logpkt=[rx | tx | rxtx | pcap[:type] ]\n\
+\t\t\t\t\trx          : only RX are logged\n\
+\t\t\t\t\ttx          : only TX are logged\n\
+\t\t\t\t\trxtx        : both RX and TX are logged (by default)\n\
+\t\t\t\t\tpcap[:type] : pcap file format, optional Data Link Type identifier (default 802.15.4)\n",
   .value       = NULL
 };
 

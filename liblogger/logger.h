@@ -61,8 +61,8 @@ void REAL_STDERR(char* fmp, ...);
 #undef ERROR        
 #endif
 
-void OUTPUT(char* fmt, ...);  // verbose 0
-void ERROR (char* fmt, ...);  // verbose 0
+void OUTPUT(const char* fmt, ...);  // verbose 0
+void ERROR (const char* fmt, ...);  // verbose 0
 
 #define OUTPUT_BOXS(x...)  OUTPUT(",----\n" x);
 #define OUTPUT_BOXM(x...)  OUTPUT("|  "     x);

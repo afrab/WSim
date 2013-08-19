@@ -175,6 +175,8 @@ int msp430_mcu_create(int xt1)
   // basic
   msp430_sfr_create();
   msp430_svs_create();
+  msp430_sharedreference_create();
+  msp430_sysrstiv_create();
   msp430_hwmul_create();
   msp430_digiIO_create();
   msp430_pmm_create();
@@ -207,8 +209,11 @@ int msp430_mcu_create(int xt1)
   msp430_lcd_create();
   msp430_lcdb_create();
   msp430_rtc_create();
-
-
+  
+#if defined(__msp430_have_cc1101)
+  cc1101mm_create();
+#endif
+  
   MCU_CLOCK.lfxt1_freq = xt1;
 #if defined(__msp430_have_xt2)
   MCU_CLOCK.xt2_freq   = xt2;
@@ -263,6 +268,8 @@ void mcu_reset()
 
   msp430_alu_reset();
   msp430_svs_reset();
+  msp430_sysrstiv_reset();
+  msp430_sharedreference_reset();
   msp430_hwmul_reset();
   msp430_digiIO_reset();
   msp430_pmm_reset();
@@ -295,7 +302,10 @@ void mcu_reset()
   msp430_lcd_reset();
   msp430_lcdb_reset();
   msp430_rtc_reset();
-
+#if defined(__msp430_have_cc1101)
+  cc1101mm_reset();
+#endif
+  
 #if defined(SOFT_INTR)
   MCU.soft_intr         = 0;
   MCU.soft_intr_timeend = 0;
@@ -318,6 +328,8 @@ void msp430_devices_update(unsigned int cycles)
 
   msp430_sfr_update();
   msp430_svs_update();
+  msp430_sysrstiv_update();
+  msp430_sharedreference_update();
   msp430_hwmul_update();
   msp430_digiIO_update();
   msp430_pmm_update();
@@ -354,6 +366,12 @@ void msp430_devices_update(unsigned int cycles)
 void mcu_update_done()
 {
   uint32_t signal;
+  
+#if defined(__msp430_have_cc1101)
+  /* radio update must be done at end of peripheral evaluation */
+  cc1101mm_update();
+#endif
+  
   /* timers capture operations                    */
   msp430_timerA_capture();
   msp430_timerB_capture();
@@ -572,7 +590,7 @@ int mcu_registers_number()
 /* ************************************************** */
 /* ************************************************** */
 
-uint16_t mcu_register_get(int i)
+uint32_t mcu_register_get(int i)
 {
   return MCU_REGS[i];
 }
@@ -581,7 +599,7 @@ uint16_t mcu_register_get(int i)
 /* ************************************************** */
 /* ************************************************** */
 
-void mcu_register_set(int i, uint16_t v)
+void mcu_register_set(int i, uint32_t v)
 {
   MCU_REGS[i] = v;
 }

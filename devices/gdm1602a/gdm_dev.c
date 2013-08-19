@@ -119,7 +119,7 @@ int gdm_device_create(int dev_num)
   memset(dev,0,sizeof(struct gdm_t));
 
   machine.device[dev_num].reset         = gdm_reset;
-  machine.device[dev_num].delete        = gdm_delete;
+  machine.device[dev_num].deleteFnt        = gdm_delete;
 
   machine.device[dev_num].read          = gdm_read;
   machine.device[dev_num].write         = gdm_write;

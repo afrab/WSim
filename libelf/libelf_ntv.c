@@ -878,14 +878,9 @@ int libelf_symtab_find_size_by_name(elf32_t elf, const char *name)
 /* ************************************************** */
 /* ************************************************** */
 
-#define MSP430_DATA_INIT_WORKAROUND 1
-
 static void libelf_load_section(elf32_t elf, int n, int UNUSED verbose_level)
 {
   elf32_sh_t *s = &(elf->elf_section[n]);
-#if defined(MSP430_DATA_INIT_WORKAROUND)
-  static uint16_t text_end    = 0; /* section text end in ram adress */
-#endif
 
   switch (s->sh_type)
     {
@@ -894,31 +889,32 @@ static void libelf_load_section(elf32_t elf, int n, int UNUSED verbose_level)
 	if (s->sh_flags & elf_sh_flags_ALLOC)
 	  {
 	    DMSG_LIB_ELF("libelf: looking at section %s\n",libelf_get_elf_section_name(elf,n));
-	    DMSG_LIB_ELF("libelf:    - allocating %d bytes at 0x%04x\n",s->sh_size,s->sh_addr);
-	    DMSG_LIB_ELF("libelf:    - copying 0x%04x bytes from file to 0x%04x in mem\n",s->sh_size,s->sh_addr);
+	    DMSG_LIB_ELF("libelf:    allocating at 0x%04x; copying %d bytes from file to mem (0x%04x-0x%04x)\n",
+			   s->sh_addr,s->sh_size,s->sh_addr,s->sh_addr+s->sh_size-1);
 	    mcu_jtag_write_section(elf->file_raw + s->sh_offset, s->sh_addr, s->sh_size);
-	    DMSG_LIB_ELF_DMP("\n");
 	    libelf_dump_section(elf->file_raw, s->sh_offset, s->sh_size, DUMP_COLS);
 	    
-#if defined(MSP430_DATA_INIT_WORKAROUND)
-	    if (strcmp(mcu_name(),"msp430") == 0)
-	      {
-		if (strcmp(libelf_get_elf_section_name(elf,n),".text") == 0)
-		  {
-		    text_end    = s->sh_addr + s->sh_size;
-		  }
-		
-		if (strcmp(libelf_get_elf_section_name(elf,n),".data") == 0)
-		  {
-		    if (text_end == 0)
-		      {
-			DMSG_LIB_ELF("libelf: msp430 init data : section text is missing\n");
-		      }
-		    DMSG_LIB_ELF("libelf: msp430 init data section workaround: copy %d data bytes at 0x%04x\n",s->sh_size,text_end);
-		    mcu_jtag_write_section(elf->file_raw + s->sh_offset, text_end, s->sh_size);
-		  }
-	      }
-#endif
+		/*
+		 * Workaround for msp430 mcu and gcc compiler. The .data section in the elf file is located
+		 * after .text (or .rodata if existing) and the gcc generated startup code (__do_copy_data) assumes to find
+		 * .data there. The __do_copy_data pupose is to copy .data from flash to an adress where the ram on the real
+		 * hardware is located.
+		 * 
+		 * In the elf file the target address of .data is already the ram address and we copy it to the right
+		 * destination. But unfortunatelly the gcc startup code (__do_copy_data) overwrites whatever is after
+		 * the .text/.rodata section to the ram address, making initalized variables in the code no longer work.
+		 * 
+		 * The fix: We get the address where the section before .data ends and copy .data there.
+		 */
+	    if ( (strcmp(mcu_name(),"msp430") == 0) && (strcmp(libelf_get_elf_section_name(elf,n),".data") == 0) && n>0)
+		{
+			elf32_sh_t *s_before = &(elf->elf_section[n-1]);
+			/* section address of section before .data: Usually .text or .rodata */
+			uint16_t address_section_before_data    = s_before->sh_addr + s_before->sh_size;
+			DMSG_LIB_ELF("libelf:    msp430/gcc __do_copy_data workaround: copy %d bytes to mem 0x%04x (after %s)\n",s->sh_size,address_section_before_data,
+				libelf_get_elf_section_name(elf,n-1));
+			mcu_jtag_write_section(elf->file_raw + s->sh_offset, address_section_before_data, s->sh_size);
+		}
 	    DMSG_LIB_ELF("\n");
 	  }
       }

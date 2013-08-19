@@ -28,6 +28,8 @@ MSPSRC= 				             		\
 	msp430_digiIO.h      	    msp430_digiIO.c      	\
 	msp430_lcd.h         	    msp430_lcd.c         	\
 	msp430_sfr.h         	    msp430_sfr.c         	\
+	msp430_sysrstiv.h    	    msp430_sysrstiv.c    	\
+	msp430_shared_reference.h   msp430_shared_reference.c	\
 	msp430_uscia.h       	    msp430_uscia.c       	\
 	msp430_uscib.h       	    msp430_uscib.c       	\
 	msp430_usart.h       	    msp430_usart.c       	\

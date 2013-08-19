@@ -61,7 +61,7 @@ int sevenseg_device_create(int dev_num)
   dev->val      = 0;
 
   machine.device[dev_num].reset         = seg7_reset;
-  machine.device[dev_num].delete        = seg7_delete;
+  machine.device[dev_num].deleteFnt        = seg7_delete;
 
   machine.device[dev_num].write         = seg7_write;
   machine.device[dev_num].update        = seg7_update;

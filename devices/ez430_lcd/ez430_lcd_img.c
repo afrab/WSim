@@ -7,6 +7,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "arch/common/hardware.h"
 #include "ez430_lcd_img.h"
@@ -229,6 +230,7 @@ void ez430_lcd_img_draw(struct ez430_lcd_img_t *img, uint8_t mem[15], uint8_t bm
   int i, j, k;
   int pixel;
 
+  // set pixels
   pixel = (img->x + img->y * machine.ui.width) * machine.ui.bpp;
   for (i = 0; i < img->h; i++) {
     int pii = pixel;
@@ -240,11 +242,11 @@ void ez430_lcd_img_draw(struct ez430_lcd_img_t *img, uint8_t mem[15], uint8_t bm
             setpixel(pii, 0x00, 0xee, 0x00); // blink
             break;
           } else {
-            setpixel(pii, 0xee, 0x00, 0x00); // on
+             setpixel(pii, 0xee, 0x00, 0x00); // on
             break;
           }
         } else if (img->img[j][i][k] > 0) {
-          setpixel(pii, 0x30, 0x30, 0x30); // off
+          setpixel(pii, 0x20, 0x10, 0x10); // off
         }
       }
       pii += 3;

@@ -43,6 +43,9 @@
 #define OP_RRA	  0x110
 #define OP_RRC	  0x100
 
+#define OP_PUSHM   0x14
+#define OP_POPM	   0x16
+
 /* ************************************************** */
 /* ************************************************** */
 /* ************************************************** */
@@ -83,6 +86,9 @@ char* msp430_debug_opcode(unsigned short opcode, int b)
     case OP_RRA:  sprintf(buff,"rra   "); break;
     case OP_SWPB: sprintf(buff,"swpb  "); break;
     case OP_RRC:  sprintf(buff,"rrc   "); break;
+
+    case OP_PUSHM:sprintf(buff,"pushm "); break;
+    case OP_POPM: sprintf(buff,"popm  "); break;
 
     default: sprintf(buff,"unknown"); break;
     }

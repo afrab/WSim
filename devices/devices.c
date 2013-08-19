@@ -21,7 +21,7 @@
 int devices_delete(void)
 {
   int res = 0;
-  MAP_OVER_DEVICES(delete);
+  MAP_OVER_DEVICES(deleteFnt);
   return res;
 }
 

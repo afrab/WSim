@@ -92,7 +92,7 @@ void logger_close()
 /* ************************************************** */
 
 static void
-mylog(char* fmt, va_list ap)
+mylog(const char* fmt, va_list ap)
 {
   int length;
   char buf[MAX_VNSPRINTF_BUF_LENGTH + 1];
@@ -119,7 +119,7 @@ mylog(char* fmt, va_list ap)
 /* ************************************************** */
 /* ************************************************** */
 
-void ERROR(char* fmt, ...)
+void ERROR(const char* fmt, ...)
 {
   int UNUSED length;
   va_list ap;
@@ -152,7 +152,7 @@ void FIXME(char* fmt, ...)
 /* ************************************************** */
 /* ************************************************** */
 
-void OUTPUT(char* fmt, ...)
+void OUTPUT(const char* fmt, ...)
 {
   va_list ap;
   va_start(ap, fmt);

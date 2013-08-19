@@ -365,7 +365,7 @@ int libselect_update_registered()
 /* ************************************************** */
 /* ************************************************** */
 
-int file_exists(char *filename)
+int file_exists(const char *filename)
 {
   struct stat statbuf;
   if (stat(filename, &statbuf) == -1)
@@ -383,7 +383,7 @@ int file_exists(char *filename)
 #define CREATE_IO_IN  1
 #define CREATE_IO_OUT 2
 
-int libselect_id_create_io(int type, char* cmdline)
+int libselect_id_create_io(int type, const char* cmdline)
 {
   if (strcmp(cmdline,"stdin") == 0)
     {
@@ -467,10 +467,10 @@ int libselect_id_create_io(int type, char* cmdline)
 /* ************************************************** */
 /* ************************************************** */
 
-libselect_id_t libselect_id_create(char *argname, int UNUSED flags)
+libselect_id_t libselect_id_create(const char *argname, int UNUSED flags)
 {
   int  id;
-  char *cmdline;
+  const char *cmdline;
 
   if (libselect_init_done == 0)
     {

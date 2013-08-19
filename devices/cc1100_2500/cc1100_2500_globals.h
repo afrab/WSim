@@ -32,8 +32,13 @@
 #define CC1100_FS_WAKEUP_DELAY_US               45
 #define CC1100_SETTLING_DELAY_NS                44200
 #define CC1100_SETTLING_DELAY_US                44
+#if defined(CC1101MM)
+#define CC1100_CALIBRATE_DELAY_NS               0
+#define CC1100_CALIBRATE_DELAY_US               0
+#else
 #define CC1100_CALIBRATE_DELAY_NS               720600
 #define CC1100_CALIBRATE_DELAY_US               720
+#endif
 /* RC oscillator calibration time, cf AN047 p8 */
 #define CC1100_RC_CALIBRATE_DELAY_NS            2000000
 #define CC1100_RC_CALIBRATE_DELAY_US            2000

@@ -75,7 +75,7 @@ do {                                          \
 typedef int  libselect_id_t;
 typedef void (*libselect_callback)(libselect_id_t, uint64_t flags, void *ptr);
 
-libselect_id_t libselect_id_create   (char *name, int flags);
+libselect_id_t libselect_id_create   (const char *name, int flags);
 int            libselect_id_is_valid (libselect_id_t id);
 int            libselect_id_close    (libselect_id_t id);
 

@@ -109,7 +109,7 @@ int spidev_device_size()
 int spidev_device_create(int dev, int UNUSED id)
 {
   machine.device[dev].reset         = spidev_reset;
-  machine.device[dev].delete        = spidev_delete;
+  machine.device[dev].deleteFnt        = spidev_delete;
   machine.device[dev].power_up      = spidev_power_up;
   machine.device[dev].power_down    = spidev_power_down;
 

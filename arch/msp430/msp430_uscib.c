@@ -164,13 +164,20 @@ void msp430_uscib0_update()
 		   MCU.uscib0.ucbxtx_shift_delay = 0;      
 		   MCU.uscib0.ucbxrx_slave_rx_done = 0;	      
 		 }
-              
-		MCU.sfr.ifg2.b.ucb0txifg  = 1;                                         
-		if (MCU.sfr.ie2.b.ucb0txie)                                 
-                 {                                                            
-                    msp430_interrupt_set(INTR_USCIX0_TX);           
-                 }   
-                 
+     
+#ifdef __msp430_have_new_uscib
+     MCU.uscib0.ucbxifg.b.uctxifg=1;
+     if(MCU.uscib0.ucbxie.b.uctxie) 
+     {
+       msp430_interrupt_set(INTR_USCIB0_RXTX);
+     }
+#else
+     MCU.sfr.ifg2.b.ucb0txifg  = 1;                                         
+		 if (MCU.sfr.ie2.b.ucb0txie)                                 
+     {                                                            
+        msp430_interrupt_set(INTR_USCIX0_TX);           
+     }   
+#endif
                  
                HW_DMSG_USCIB("msp430:uscib0: SPI tx buf -> shifter (%d)\n",  
 			     MCU.uscib0.ucbxtx_shift_delay);		      
@@ -263,12 +270,21 @@ void msp430_uscib0_update()
           HW_DMSG_USCIB("msp430:uscib0: SPI rx shifter -> rx buf\n");    
 	  HW_SPY("msp430:uscib0: SPI receive (0x%x,%c)\n",	              
                   MCU.uscib0.ucbxrxbuf, isgraph(MCU.uscib0.ucbxrxbuf) ?	      
-                  MCU.uscib0.ucbxrxbuf : '.');	                              
+                  MCU.uscib0.ucbxrxbuf : '.');	   
+#ifdef __msp430_have_new_uscib
+          MCU.uscib0.ucbxifg.b.ucrxifg=1;
+          if(MCU.uscib0.ucbxie.b.ucrxie) 
+            {
+              msp430_interrupt_set(INTR_USCIB0_RXTX);
+            }
+#else
           MCU.sfr.ifg2.b.ucb0rxifg  = 1;                                     
           if (MCU.sfr.ie2.b.ucb0rxie)                                        
             {                                                                 
                msp430_interrupt_set(INTR_USCIX0_RX);                    
-            }                                                                 
+            }
+#endif
+          
         } /* shift ready */                                                   
     } /* urxe. spie */                                                        
     while (0);  
@@ -302,8 +318,12 @@ int8_t msp430_uscib0_read(uint16_t addr)
       HW_DMSG_USCIB("msp430:uscib0: read ucbxstat = 0x%02x\n",res & 0xff);  
       break;                                                                  
     case UCB0RXBUF :                                                 
-      res = MCU.uscib0.ucbxrxbuf;                                                
-      MCU.sfr.ifg2.b.ucb0rxifg   = 0;                                          
+      res = MCU.uscib0.ucbxrxbuf;
+#ifdef __msp430_have_new_uscib
+      MCU.uscib0.ucbxifg.b.ucrxifg=0;
+#else
+      MCU.sfr.ifg2.b.ucb0rxifg   = 0;
+#endif
       MCU.uscib0.ucbxrxbuf_full  = 0; 
       /*TRACER_TRACE_USCIB0(TRACER_USCIB0_IDLE);
       etracer_slot_event(ETRACER_PER_ID_MCU_SPI,
@@ -313,10 +333,20 @@ int8_t msp430_uscib0_read(uint16_t addr)
       HW_DMSG_USCIB("msp430:uscib0: read ucbxrxbuf = 0x%02x\n",res & 0xff);
       break;
     case UCB0TXBUF :                                                 
-      res = MCU.uscib0.ucbxtxbuf;                                                
-      MCU.sfr.ifg2.b.ucb0txifg = 0;                                          
+      res = MCU.uscib0.ucbxtxbuf;
+#ifdef __msp430_have_new_uscib
+      MCU.uscib0.ucbxifg.b.uctxifg=0;
+#else
+      MCU.sfr.ifg2.b.ucb0txifg = 0;
+#endif
       HW_DMSG_USCIB("msp430:uscib0: read ucbxtxbuf = 0x%02x\n",res & 0xff);
-      break;                                                                  
+      break;
+#ifdef __msp430_have_new_uscib
+      case UCB0IFG:
+          res = MCU.uscib0.ucbxifg.s;
+          HW_DMSG_USCIB("msp430:uscib0: read ucbxifg = 0x%02x\n",res & 0xff);
+          break;
+#endif
     default :                                                 
       res = 0;                                                                
       ERROR("msp430:uscib0: read bad address 0x%04x\n",addr);           
@@ -379,10 +409,16 @@ void msp430_uscib0_write(uint16_t addr, int8_t val)
              /* reset  UCB0RXIE, UCB0TXIE, UCB0RXIFG, UCOE, and UCFE bits */            
              /* set    UCB0TXIFG flag                                     */           
              HW_DMSG_USCIB("msp430:uscib0:   swrst  = 1, reset flags\n");
+#if !defined(__msp430_have_new_sfr)
              MCU.sfr.ie2.b.ucb0rxie           = 0;                                 
              MCU.sfr.ie2.b.ucb0txie           = 0;                                 
              MCU.sfr.ifg2.b.ucb0rxifg         = 0; 
-	     MCU.sfr.ifg2.b.ucb0txifg         = 1; 
+             MCU.sfr.ifg2.b.ucb0txifg         = 1;
+#endif
+#ifdef __msp430_have_new_uscib
+             MCU.uscib0.ucbxifg.b.ucrxifg     = 0;
+             MCU.uscib0.ucbxifg.b.uctxifg     = 1;
+#endif
              MCU.uscib0.ucbxstat.b.ucoe       = 0;                                 
              MCU.uscib0.ucbxstat.b.ucfce      = 0;
              /* finishing current transaction */                              
@@ -450,8 +486,12 @@ void msp430_uscib0_write(uint16_t addr, int8_t val)
         }                                                                     
       MCU.uscib0.ucbxtxbuf               = val;                                     
       MCU.uscib0.ucbxtxbuf_full          = 1;                                       
-      MCU.uscib0.ucbxtx_full_delay       = 1;                                   
-      MCU.sfr.ifg2.b.ucb0txifg           = 0;                                       
+      MCU.uscib0.ucbxtx_full_delay       = 1;          
+#ifdef __msp430_have_new_uscib
+      MCU.uscib0.ucbxifg.b.uctxifg       = 0;
+#else
+      MCU.sfr.ifg2.b.ucb0txifg           = 0;
+#endif
       /*TRACER_TRACE_USCIB0(TRACER_USCIB0_TX_RECV); 
       etracer_slot_event(ETRACER_PER_ID_MCU_USCIB0,                      
                            ETRACER_PER_EVT_WRITE_COMMAND,                     
@@ -469,8 +509,20 @@ void msp430_uscib0_write(uint16_t addr, int8_t val)
 /* uscib0 chk ifg for MCU interrupt */
 int msp430_uscib0_chkifg()
 {
-  int ret = 0;                                                               
-   if (MCU.sfr.ifg2.b.ucb0txifg  && MCU.sfr.ie2.b.ucb0txie)                  
+  int ret = 0;    
+#ifdef __msp430_have_new_uscib
+  if(MCU.uscib0.ucbxie.b.uctxie & MCU.uscib0.ucbxifg.b.uctxifg) 
+    {
+      msp430_interrupt_set(INTR_USCIB0_RXTX);
+      ret = 1;
+    }
+  if(MCU.uscib0.ucbxie.b.ucrxie & MCU.uscib0.ucbxifg.b.ucrxifg) 
+    {
+      msp430_interrupt_set(INTR_USCIB0_RXTX);
+      ret = 1;
+    }
+#else
+  if (MCU.sfr.ifg2.b.ucb0txifg  && MCU.sfr.ie2.b.ucb0txie)                  
      {                                                                        
         msp430_interrupt_set(INTR_USCIX0_TX);                           
         ret = 1;                                                              
@@ -479,7 +531,8 @@ int msp430_uscib0_chkifg()
      {                                                                        
         msp430_interrupt_set(INTR_USCIX0_RX);                           
         ret = 1;                                                              
-     }                                                                        
+     }
+#endif
    return ret;
 }
 

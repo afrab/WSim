@@ -61,7 +61,7 @@ int bargraph_device_create(int dev_num, uint32_t on, uint32_t off, uint32_t bg)
   dev->val      = 0;
 
   machine.device[dev_num].reset         = bargraph_reset;
-  machine.device[dev_num].delete        = bargraph_delete;
+  machine.device[dev_num].deleteFnt        = bargraph_delete;
 
   machine.device[dev_num].write         = bargraph_write;
   machine.device[dev_num].update        = bargraph_update;

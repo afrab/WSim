@@ -16,7 +16,17 @@ static char *str_ssel[] = { "SMCLK", "ACLK" };
 
 #if defined(__msp430_have_watchdog)
 
-static int wdt_intervals[] = { 32768, 8192, 512, 64 };
+// GCC Sourcecode definitions for watchdog intervals
+// #define WDTIS__2G         (0x0000)  /* WDT - Timer Interval Select: /2G */
+// #define WDTIS__128M       (0x0001)  /* WDT - Timer Interval Select: /128M */
+// #define WDTIS__8192K      (0x0002)  /* WDT - Timer Interval Select: /8192k */
+// #define WDTIS__512K       (0x0003)  /* WDT - Timer Interval Select: /512k */
+// #define WDTIS__32K        (0x0004)  /* WDT - Timer Interval Select: /32k */
+// #define WDTIS__8192       (0x0005)  /* WDT - Timer Interval Select: /8192 */
+// #define WDTIS__512        (0x0006)  /* WDT - Timer Interval Select: /512 */
+// #define WDTIS__64         (0x0007)  /* WDT - Timer Interval Select: /64 */
+
+static int wdt_intervals[] = { 1073741824, 16777216, 8388608, 524288, 32768, 8192, 512, 64 };
 
 /* ************************************************** */
 /* defined WATCHDOG_ONLY_WARNS to only get warning    */
@@ -33,13 +43,14 @@ void
 msp430_watchdog_create(void)
 {
   msp430_io_register_range16(WATCHDOG_START,WATCHDOG_END,msp430_watchdog_read,msp430_watchdog_write);
+  msp430_io_register_range8(WATCHDOG_START, WATCHDOG_END, msp430_watchdog_read8, msp430_watchdog_write8);
 }
 
 
 void 
 msp430_watchdog_reset(void)
 {
-  MCU.watchdog.wdtctl.s    = 0x6900u;
+  MCU.watchdog.wdtctl.b.wdthold = 1; //disable watchdog on reset
   MCU.watchdog.wdtcnt      = 0;
   MCU.watchdog.wdtinterval = wdt_intervals[MCU.watchdog.wdtctl.b.wdtis];
 }
@@ -53,66 +64,99 @@ msp430_watchdog_reset(void)
 #define WDT_NMI_RST       0
 #define WDT_NMI_NMI       1
 
-
-#define WDT_SSEL_SMCLK  0
-#define WDT_SSEL_ACLK   1
-
 void 
 msp430_watchdog_update(void)
 {
-  if (MCU.watchdog.wdtctl.b.wdthold)
-    return ;
-
-  switch (MCU.watchdog.wdtctl.b.wdtssel)
-    {
-    case WDT_SSEL_SMCLK:
-      MCU.watchdog.wdtcnt += MCU_CLOCK.SMCLK_increment;
-      break;
-    case WDT_SSEL_ACLK:
-      MCU.watchdog.wdtcnt += MCU_CLOCK.ACLK_increment;
-      break;
-    }
-
-  if (MCU.watchdog.wdtcnt > MCU.watchdog.wdtinterval)
-    {
-      HW_DMSG_WD("msp430:watchdog: interval wrapping\n");
-      if (MCU.watchdog.wdtctl.b.wdttmsel == WDT_MODE_WATCHDOG)
+	if (MCU.watchdog.wdtctl.b.wdthold)
+		return;
+  
+	#define WDT_SSEL_SMCLK  0 /* Watchdog clock SMCLK */
+	#define WDT_SSEL_ACLK   1 /* Watchdog clock ACLK */
+	#define WDT_SSEL_VLOCLK   2 /* Watchdog clock VLOCLK */
+	#define WDT_SSEL_X_CLK   3 /* Watchdog clock X_CLK */
+	switch (MCU.watchdog.wdtctl.b.wdtssel)
 	{
-#if WATCHDOG_ONLY_WARNS != 0
-	  WARNING("msp430:watchdog: =======================================\n");
-	  WARNING("msp430:watchdog: set interrupt RESET\n");
-	  WARNING("msp430:watchdog: =======================================\n");
-	  MCU.watchdog.wdtcnt = 0;
-	  MCU.watchdog.wdtctl.b.wdttmsel = WDT_MODE_INTERVAL;
-#else
-	  msp430_interrupt_set(INTR_RESET);
-	  MCU.sfr.ifg1.b.wdtifg = 1;
-#endif
-	}
-      else /* interval */
-	{
-	  MCU.sfr.ifg1.b.wdtifg = 1;
-	  if (MCU.sfr.ie1.b.wdtie)
-	    {
-	      msp430_interrupt_set(INTR_WATCHDOG);
-	    }
+		case WDT_SSEL_SMCLK:
+		MCU.watchdog.wdtcnt += MCU_CLOCK.SMCLK_increment;
+		break;
+		case WDT_SSEL_ACLK:
+		MCU.watchdog.wdtcnt += MCU_CLOCK.ACLK_increment;
+		break;
+		#ifdef WATCHDOG_THREE_BITS_WDTIS
+		case WDT_SSEL_VLOCLK:
+		MCU.watchdog.wdtcnt += MCU_CLOCK.ACLK_increment;
+		break;
+		case WDT_SSEL_X_CLK:
+		MCU.watchdog.wdtcnt += MCU_CLOCK.ACLK_increment;
+		break;
+		#endif
 	}
 
-      MCU.watchdog.wdtcnt -= MCU.watchdog.wdtinterval;
-    }
+	if (MCU.watchdog.wdtcnt > MCU.watchdog.wdtinterval)
+	{
+		HW_DMSG_WD("msp430:watchdog: interval wrapping\n");
+		if (MCU.watchdog.wdtctl.b.wdttmsel == WDT_MODE_WATCHDOG)
+		{
+			#if WATCHDOG_ONLY_WARNS != 0
+			WARNING("msp430:watchdog: =======================================\n");
+			WARNING("msp430:watchdog: set interrupt RESET\n");
+			WARNING("msp430:watchdog: =======================================\n");
+			MCU.watchdog.wdtcnt = 0;
+			MCU.watchdog.wdtctl.b.wdttmsel = WDT_MODE_INTERVAL;
+			#else
+			//ERROR("msp430:watchdog reset! %u to %u\n", MCU.watchdog.wdtcnt, MCU.watchdog.wdtinterval);
+			msp430_interrupt_set(INTR_RESET);
+			MCU.sfr.ifg1.b.wdtifg = 1;
+			#endif
+		}
+	else /* interval */
+	{
+		MCU.sfr.ifg1.b.wdtifg = 1;
+		if (MCU.sfr.ie1.b.wdtie)
+		{
+			msp430_interrupt_set(INTR_WATCHDOG);
+		}
+	}
+
+		MCU.watchdog.wdtcnt -= MCU.watchdog.wdtinterval;
+	}
 }
 
 /* ************************************************** */
 /* ************************************************** */
 /* ************************************************** */
 
+#define WD_PASSWORD_READ 0x69
+/**
+ * From documentation:
+   Reading WDTCTL returns 0x69 in the upper byte, so reading WDTCTL and writing the value back violates,
+   the password and causes a reset.
+ */
 int16_t 
 msp430_watchdog_read (uint16_t addr)
 {
   assert(addr == WDTCTL);
+  
+  // copy wdtctl, set upper byte to WD_PASSWORD_READ, set wdtcntcl to 0
+  union {
+    struct wdtctl_t b;
+    uint16_t        s;
+  } wdtctl;
+  wdtctl.s = MCU.watchdog.wdtctl.s;
+  wdtctl.b.wdtcntcl = 0; // always reads as 0
+  wdtctl.b.wdtpw = WD_PASSWORD_READ;
+  
   HW_DMSG_WD("msp430:watchdog: read wdtctl\n");
-  return MCU.watchdog.wdtctl.s;
+  return wdtctl.s;
 }
+
+int8_t msp430_watchdog_read8(uint16_t addr) {
+	assert(addr == WDTCTL);
+	//ERROR("msp430:watchdog: read at 0x%04x\n",addr);
+	return MCU.watchdog.wdtctl.s & 0xff;
+}
+
+void msp430_watchdog_write8(uint16_t addr, int8_t val) {}
 
 /* ************************************************** */
 /* ************************************************** */
@@ -123,12 +167,12 @@ msp430_watchdog_read (uint16_t addr)
 void 
 msp430_watchdog_write(uint16_t addr, int16_t val)
 {
+  assert(addr == WDTCTL);
+  
   union {
     struct wdtctl_t b;
     uint16_t        s;
   } wdtctl;
-
-  assert(addr == WDTCTL);
   wdtctl.s = val;
 
   HW_DMSG_WD("msp430:watchdog: wdtctl = 0x%04x\n",val);
@@ -141,17 +185,20 @@ msp430_watchdog_write(uint16_t addr, int16_t val)
   if (wdtctl.b.wdthold != MCU.watchdog.wdtctl.b.wdthold)
     {
       HW_DMSG_WD("msp430:watchdog: wdtctl.wdthold 0x%02x\n",wdtctl.b.wdthold);
+	  //ERROR("msp430:watchdog: wdtctl.wdthold 0x%02x\n",wdtctl.b.wdthold);
     }
+  #ifndef WATCHDOG_THREE_BITS_WDTIS
   if (wdtctl.b.wdtnmies != MCU.watchdog.wdtctl.b.wdtnmies)
     {
       HW_DMSG_WD("msp430:watchdog: wdtctl.wdtnmies 0x%02x\n",wdtctl.b.wdtnmies);
-      ERROR("msp430:watchdog: control of RST/NMI pin not implemented\n");
+      ERROR("msp430:watchdog: control of RST/NMI pin not implemented: wdtctl.wdtnmies 0x%02x\n",wdtctl.b.wdtnmies);
     }
   if (wdtctl.b.wdtnmi != MCU.watchdog.wdtctl.b.wdtnmi)
     {
       HW_DMSG_WD("msp430:watchdog: wdtctl.wdtnmi 0x%02x\n",wdtctl.b.wdtnmi);
-      ERROR("msp430:watchdog: control of RST/NMI pin not implemented\n");
+      ERROR("msp430:watchdog: control of RST/NMI pin not implemented: wdtctl.wdtnmies 0x%02x\n",wdtctl.b.wdtnmi);
     }
+  #endif
   if (wdtctl.b.wdttmsel != MCU.watchdog.wdtctl.b.wdttmsel)
     {
       HW_DMSG_WD("msp430:watchdog: wdtctl.wdttmsel 0x%02x\n",wdtctl.b.wdttmsel);
@@ -160,7 +207,8 @@ msp430_watchdog_write(uint16_t addr, int16_t val)
     {
       HW_DMSG_WD("msp430:watchdog: wdtctl.wdtcntcl 0x%02x (clear)\n",wdtctl.b.wdtcntcl);
       MCU.watchdog.wdtcnt = 0;
-      wdtctl.b.wdtcntcl   = 0; 
+      wdtctl.b.wdtcntcl   = 0;
+	  //ERROR("msp430:watchdog clear!\n");
     }
   if (wdtctl.b.wdtssel != MCU.watchdog.wdtctl.b.wdtssel)
     {
@@ -169,12 +217,13 @@ msp430_watchdog_write(uint16_t addr, int16_t val)
     }
   if (wdtctl.b.wdtis != MCU.watchdog.wdtctl.b.wdtis)
     {
-      HW_DMSG_WD("msp430:watchdog: wdtctl.wdtis 0x%02x (/%d)\n",
-		 wdtctl.b.wdtis, wdt_intervals[wdtctl.b.wdtis]);
+      HW_DMSG_WD("msp430:watchdog: wdtctl.wdtis 0x%02x (/%d)\n", wdtctl.b.wdtis, wdt_intervals[wdtctl.b.wdtis]);
       MCU.watchdog.wdtinterval = wdt_intervals[wdtctl.b.wdtis];
+	  //ERROR("msp430:watchdog interval set to index %u with value %u!\n", wdtctl.b.wdtis, MCU.watchdog.wdtinterval);
     }
 
-  MCU.watchdog.wdtctl.s = wdtctl.s; /* wdtctl.s is modified during write */
+  /* wdtctl.s is modified during write */
+  MCU.watchdog.wdtctl.s = wdtctl.s;
 }
 
 /* ************************************************** */

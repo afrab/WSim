@@ -69,7 +69,58 @@ struct __attribute__ ((packed)) ucbxstat_t {
 };
 #endif
 
-  
+#if defined(__msp430_have_new_uscib)
+
+#if defined(WORDS_BIGENDIAN)
+struct __attribute__ ((packed)) ucbxie_t {
+  uint8_t
+    reserved:6,
+    uctxie:1,
+    ucrxie:1;
+};
+#else
+struct __attribute__ ((packed)) ucbxie_t {
+  uint8_t
+    ucrxie:1,
+    uctxie:1,
+    reserved:6;
+};
+#endif
+
+#if defined(WORDS_BIGENDIAN)
+struct __attribute__ ((packed)) ucbxifg_t {
+  uint8_t
+    reserved:6,
+    uctxifg:1,
+    ucrxifg:1;
+};
+#else
+struct __attribute__ ((packed)) ucbxifg_t {
+  uint8_t
+    ucrxifg:1,
+    uctxifg:1,
+    reserved:6;
+};
+#endif
+
+#if defined(WORDS_BIGENDIAN)
+struct __attribute__ ((packed)) ucbxiv_t {
+  uint16_t
+    reserved:13,
+    ucivx:2,
+    reserved1:1;
+};
+#else
+struct __attribute__ ((packed)) ucbxiv_t {
+  uint16_t
+    reserved1:1,
+    ucivx:2,
+    reserved:13;
+};
+#endif
+
+#endif
+
 struct msp430_uscib_t
 {
   union {
@@ -84,6 +135,20 @@ struct msp430_uscib_t
     struct ucbxstat_t  b;
     int8_t             s;
   } ucbxstat;
+#if defined(__msp430_have_new_uscib)
+  union {
+    struct ucbxie_t  b;
+    int8_t             s;
+  } ucbxie;
+  union {
+    struct ucbxifg_t  b;
+    int8_t             s;
+  } ucbxifg;
+  union {
+    struct ucbxiv_t  b;
+    int16_t             s;
+  } ucbxiv;
+#endif
   
   uint8_t   ucbxbr0;
   uint8_t   ucbxbr1;
@@ -116,9 +181,28 @@ struct msp430_uscib_t
 /* ************************************************** */
 
 #if defined(__msp430_have_uscib0)
+#if defined(__msp430_have_new_uscib)
+
+#define USCIB0_START  USCIB_BASE
+#define USCIB0_END    USCIB_BASE + 0x1e
+
+#define UCB0CTL0     USCIB0_START + 0x01
+#define UCB0CTL1     USCIB0_START + 0x00
+#define UCB0BR0      USCIB0_START + 0x06
+#define UCB0BR1      USCIB0_START + 0x07
+#define UCB0STAT     USCIB0_START + 0x0a
+#define UCB0RXBUF    USCIB0_START + 0x0c
+#define UCB0TXBUF    USCIB0_START + 0x0e
+#define UCB0ICTL     USCIB0_START + 0x1c
+#define UCB0IE       USCIB0_START + 0x1c
+#define UCB0IFG      USCIB0_START + 0x1d
+#define UCB0IV       USCIB0_START + 0x1e
+
+#else
+
 #define USCIB0_START  USCIB_BASE
 #define USCIB0_END    USCIB_BASE+7
-
+ 
 #define UCB0CTL0     USCIB_BASE
 #define UCB0CTL1     USCIB_BASE+1
 #define UCB0BR0      USCIB_BASE+2
@@ -126,6 +210,8 @@ struct msp430_uscib_t
 #define UCB0STAT     USCIB_BASE+5
 #define UCB0RXBUF    USCIB_BASE+6
 #define UCB0TXBUF    USCIB_BASE+7
+
+#endif
 
 void   msp430_uscib0_create();
 void   msp430_uscib0_reset();

@@ -79,7 +79,7 @@ void msp430_lcd_write(uint16_t addr, int8_t val)
     }
   else
     {
-      ERROR("msp430:lcd: bad write address 0x%04x = 0x%02x\n",addr,val & 0xff);
+		ERROR("msp430:lcd: bad write address 0x%04x = 0x%02x (Valid range: 0x%04x-0x%04x )\n",addr,val & 0xff,LCD_MEM_START,LCD_MEM_STOP);
     }
 }
 

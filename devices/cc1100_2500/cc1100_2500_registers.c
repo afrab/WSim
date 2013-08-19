@@ -129,7 +129,11 @@ void cc1100_write_register(struct _cc1100_t *cc1100, uint8_t addr, uint8_t val)
       /* Need to calibrate if the frequency registers are modified */
       CC1100_UNCALIBRATE(cc1100);
     } 
-  else if ((addr <= CC1100_REG_IOCFG0) && (val != old_val)) 
+  #if defined(CC1101MM)
+  else if ((addr <= CC1100_REG_IOCFG0))
+  #else
+  else if ((addr <= CC1100_REG_IOCFG0) && (val != old_val))
+  #endif
     {
       /* Need to update pins if modified */
       cc1100_update_gdo(cc1100, val);

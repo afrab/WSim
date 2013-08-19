@@ -150,7 +150,7 @@ void READ1(char *var, char* delim, int size, int n)
 }
 
 int 
-libselect_skt_init(struct libselect_socket_t *skt, char *name_org)
+libselect_skt_init(struct libselect_socket_t *skt, const char *name_org)
 {
   char *tok;
   char delim[] = ":";

@@ -233,7 +233,7 @@ int cc1100_device_create (int dev_num, int fxosc_mhz, char *antenna)
   struct _cc1100_t *cc1100 = (struct _cc1100_t *) machine.device[dev_num].data;
 
   machine.device[dev_num].reset         = cc1100_reset;
-  machine.device[dev_num].delete        = cc1100_delete;
+  machine.device[dev_num].deleteFnt        = cc1100_delete;
   
   machine.device[dev_num].power_up      = cc1100_power_up;
   machine.device[dev_num].power_down    = cc1100_power_down;
@@ -275,7 +275,7 @@ int cc2500_device_create (int dev_num, int fxosc_mhz, char *antenna)
   struct _cc1100_t *cc1100 = (struct _cc1100_t *) machine.device[dev_num].data;
 
   machine.device[dev_num].reset         = cc1100_reset;
-  machine.device[dev_num].delete        = cc1100_delete;
+  machine.device[dev_num].deleteFnt        = cc1100_delete;
   
   machine.device[dev_num].power_up      = cc1100_power_up;
   machine.device[dev_num].power_down    = cc1100_power_down;
@@ -418,6 +418,9 @@ int cc1100_reset (int dev_num)
 
 int cc1100_io_pins (struct _cc1100_t *cc1100) 
 {
+#if defined(CC1101MM)
+  return 0;
+#endif
 	
   if (cc1100_read_pin(cc1100, CC1100_INTERNAL_CSn_PIN) == 0xFF) 
     {
@@ -800,6 +803,14 @@ void cc1100_write_status(struct _cc1100_t *cc1100)
   ETRACER_SRC(12);
   cc1100_spi_output(cc1100, status);
 }
+
+#if defined(CC1101MM)
+int cc1100_update(int dev_num)
+{
+  struct _cc1100_t *cc1100 = (struct _cc1100_t *) machine.device[dev_num].data;
+  return cc1100_update_state (cc1100);
+}
+#endif
 
 /***************************************************/
 /***************************************************/

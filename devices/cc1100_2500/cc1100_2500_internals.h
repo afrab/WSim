@@ -185,6 +185,9 @@ int	 cc1100_reset                   (int dev_num);
 void	 cc1100_reset_internal          (struct _cc1100_t *cc1100);
 int	 cc1100_io_pins	                (struct _cc1100_t *cc1100);
 void	 cc1100_write_status		(struct _cc1100_t *cc1100);
+#if defined(CC1101MM)
+int   cc1100_update_state            (struct _cc1100_t *cc1100);
+#endif
 
 
 /***************************************

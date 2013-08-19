@@ -93,7 +93,7 @@ int cc2420_device_create (int dev_num, int fxosc_mhz, char *antenna)
   struct _cc2420_t *cc2420 = (struct _cc2420_t *) machine.device[dev_num].data;
 
   machine.device[dev_num].reset         = cc2420_reset;
-  machine.device[dev_num].delete        = cc2420_delete;
+  machine.device[dev_num].deleteFnt        = cc2420_delete;
 
   machine.device[dev_num].power_up      = cc2420_power_up;
   machine.device[dev_num].power_down    = cc2420_power_down;

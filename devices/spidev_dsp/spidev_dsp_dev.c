@@ -141,7 +141,7 @@ int spidev_dsp_device_size()
 int spidev_dsp_device_create(int dev, int UNUSED id, const char *dev_name)
 {
   machine.device[dev].reset         = spidev_dsp_reset;
-  machine.device[dev].delete        = spidev_dsp_delete;
+  machine.device[dev].deleteFnt        = spidev_dsp_delete;
   machine.device[dev].power_up      = spidev_dsp_power_up;
   machine.device[dev].power_down    = spidev_dsp_power_down;
 

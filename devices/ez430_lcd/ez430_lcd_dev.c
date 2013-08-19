@@ -60,7 +60,7 @@ int ez430_lcd_device_create(int dev_num)
   }
 
   machine.device[dev_num].reset = ez430_lcd_reset;
-  machine.device[dev_num].delete = ez430_lcd_delete;
+  machine.device[dev_num].deleteFnt = ez430_lcd_delete;
 
   machine.device[dev_num].write = ez430_lcd_write;
   machine.device[dev_num].update = ez430_lcd_update;

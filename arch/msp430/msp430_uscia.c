@@ -98,7 +98,27 @@ UART mode features include:
 void msp430_uscia0_create()
 {
   msp430_io_register_range8(USCIA0_START,USCIA0_END,msp430_uscia0_read,msp430_uscia0_write);
+#if defined(__msp430_have_new_uscia)
+  msp430_io_register_range16(USCIA0_START,USCIA0_END,msp430_uscia0_read16,msp430_uscia0_write16);
+#endif
 }
+
+#if defined(__msp430_have_new_uscia)
+int16_t msp430_uscia0_read16(uint16_t addr)
+  {
+    uint8_t upper = msp430_uscia0_read(addr);
+    uint8_t lower = msp430_uscia0_read(addr + 0x01);
+    return (upper << 8) | lower;
+  }
+
+void msp430_uscia0_write16(uint16_t addr, int8_t val)
+  {
+    uint8_t upper = (val & 0xff00) >> 8;
+    uint8_t lower = (val & 0x00ff);
+    msp430_uscia0_write(addr, upper);
+    msp430_uscia0_write(addr + 0x01, lower);
+  }
+#endif
 
 /* ************************************************** */
 /* ************************************************** */
@@ -180,8 +200,16 @@ void msp430_uscia0_update()
 		MCU.uscia0.ucaxtx_full_delay  = 0;                                
 		MCU.uscia0.ucaxtx_shift_empty = 0;                                
 		MCU.uscia0.ucaxtx_shift_ready = 0;                                
-		MCU.uscia0.ucaxtx_shift_delay = MCU.uscia0.ucaxbr_div;               
-		MCU.sfr.ifg2.b.uca0txifg = 1;                                
+		MCU.uscia0.ucaxtx_shift_delay = MCU.uscia0.ucaxbr_div;
+
+#ifdef __msp430_have_new_uscia
+                MCU.uscia0.ucaxifg.b.uctxifg=1;
+                if(MCU.uscia0.ucaxie.b.uctxie) 
+                  {
+                    msp430_interrupt_set(INTR_USCIA0_RXTX);
+                  }
+#else
+                MCU.sfr.ifg2.b.uca0txifg = 1;                                
 		if (MCU.sfr.ie2.b.uca0txie)                                   
 		  {                                                            
 		      msp430_interrupt_set(INTR_USCIX0_TX);               
@@ -189,7 +217,9 @@ void msp430_uscia0_update()
 		else      
 		  {      
 		    DMA_SET_UTXIFG0();
-		  }		      
+		  }
+#endif
+				      
 		HW_DMSG_USCIA("msp430:uscia0: USCIA tx buf -> shifter (delay %d, val 0x%02x)\n", 
 			      MCU.uscia0.ucaxtx_shift_delay, MCU.uscia0.ucaxtxbuf);            
 		HW_SPY("msp430:uscia0: USCIA send (0x%x,%c)\n",            
@@ -252,7 +282,15 @@ void msp430_uscia0_update()
 	    HW_DMSG_USCIA("msp430:uscia0: USCIA rx shifter -> rx buf\n");    
 	    HW_SPY("msp430:uscia0: USCIA receive (0x%x,%c)\n",               
 		    MCU.uscia0.ucaxrxbuf, isgraph(MCU.uscia0.ucaxrxbuf) ?              
-		    MCU.uscia0.ucaxrxbuf : '.');                                    
+		    MCU.uscia0.ucaxrxbuf : '.');  
+            
+#ifdef __msp430_have_new_uscia
+            MCU.uscia0.ucaxifg.b.ucrxifg=1;
+            if(MCU.uscia0.ucaxie.b.ucrxie) 
+              {
+                msp430_interrupt_set(INTR_USCIA0_RXTX);
+              }
+#else           
 	    MCU.sfr.ifg2.b.uca0rxifg  = 1; 
 	    
 	    if (MCU.sfr.ie2.b.uca0rxie)                                         
@@ -262,7 +300,9 @@ void msp430_uscia0_update()
 	    else       
 	      {      
 		DMA_SET_URXIFG0();
-	      }      
+	      }
+#endif
+            
 	 } /* shift ready */  
 	  
     } while (0);
@@ -299,16 +339,24 @@ int8_t msp430_uscia0_read(uint16_t addr)
       HW_DMSG_USCIA("msp430:uscia0: read ucaxstat = 0x%02x\n", res & 0xff); 
       break;  
     case UCA0RXBUF      :                                                 
-      res = MCU.uscia0.ucaxrxbuf;                                                
-      MCU.sfr.ifg2.b.uca0rxifg   = 0;                                          
+      res = MCU.uscia0.ucaxrxbuf;
+#ifdef __msp430_have_new_uscia
+      MCU.uscia0.ucaxifg.b.ucrxifg=0;
+#else
+      MCU.sfr.ifg2.b.uca0rxifg   = 0;
+#endif
       MCU.uscia0.ucaxrxbuf_full  = 0;                                          
       /*TRACER_TRACE_USCIA(TRACER_USCIA_IDLE);*/
       MCU.uscia0.ucaxstat.b.ucoe = 0;                                          
       HW_DMSG_USCIA("msp430:uscia0: read ucaxrxbuf = 0x%02x\n", res & 0xff);
       break;                                                                  
     case UCA0TXBUF      :                                                 
-      res = MCU.uscia0.ucaxtxbuf;                                                
-      MCU.sfr.ifg2.b.uca0txifg = 0;                                          
+      res = MCU.uscia0.ucaxtxbuf;
+#ifdef __msp430_have_new_uscia
+      MCU.uscia0.ucaxifg.b.uctxifg=0;
+#else
+      MCU.sfr.ifg2.b.uca0txifg = 0;
+#endif
       HW_DMSG_USCIA("msp430:uscia0: read ucaxtxbuf = 0x%02x\n", res & 0xff);
       break;                                
     case UCA0ABCTL      :                                                 
@@ -323,6 +371,12 @@ int8_t msp430_uscia0_read(uint16_t addr)
       res = MCU.uscia0.ucaxirrctl.s;                                              
       HW_DMSG_USCIA("msp430:uscia0: read ucaxirrctl = 0x%02x\n", res & 0xff); 
       break;
+#ifdef __msp430_have_new_uscia
+      case UCA0IFG      :
+      res = MCU.uscia0.ucaxifg.s;
+      HW_DMSG_USCIB("msp430:uscia0: read ucaxifg = 0x%02x\n",res & 0xff);
+      break;
+#endif
     default             :
       res = 0;                                                                
       ERROR("msp430:uscia0: read bad address 0x%04x\n", addr);            
@@ -389,10 +443,16 @@ void msp430_uscia0_write(uint16_t UNUSED addr, int8_t UNUSED val)
              /* reset  UCA0RXIE, UCA0TXIE, UCA0RXIFG, UCOE, and UCFE bits */            
              /* set    UCA0TXIFG flag                                     */           
              HW_DMSG_USCIA("msp430:uscia0:   swrst  = 1, reset flags\n");
+#if !defined(__msp430_have_new_sfr)
              MCU.sfr.ie2.b.uca0rxie           = 0;                                 
              MCU.sfr.ie2.b.uca0txie           = 0;                                 
              MCU.sfr.ifg2.b.uca0rxifg         = 0; 
 	     MCU.sfr.ifg2.b.uca0txifg         = 1; 
+#endif
+#ifdef defined(__msp430_have_new_uscia)
+             MCU.uscia0.ucaxifg.b.ucrxifg     = 0;
+             MCU.uscia0.ucaxifg.b.uctxifg     = 1;
+#endif
              MCU.uscia0.ucaxstat.b.ucoe       = 0;                                 
              MCU.uscia0.ucaxstat.b.ucfe       = 0;
              /* finishing current transaction */                              
@@ -483,7 +543,11 @@ void msp430_uscia0_write(uint16_t UNUSED addr, int8_t UNUSED val)
 	  MCU.uscia0.ucaxtxbuf            = val;                                     
 	  MCU.uscia0.ucaxtxbuf_full       = 1;                                       
 	  MCU.uscia0.ucaxtx_full_delay    = 1; /* go to shifter after xx BITCLK */
+#ifdef __msp430_have_new_uscia
+          MCU.uscia0.ucaxifg.b.uctxifg    = 0;
+#else          
 	  MCU.sfr.ifg2.b.uca0txifg        = 0;
+#endif
 	  /*TRACER_TRACE_USCIA(TRACER_USCIA_TX_RECV);*/			     
 	  /* can be a dupe from the platform file */                            
 	  /*etracer_slot_event(ETRACER_PER_ID_MCU_USCIA,                    
@@ -557,7 +621,19 @@ void msp430_uscia0_write(uint16_t UNUSED addr, int8_t UNUSED val)
 /* uscia0 chk ifg for MCU interrupt */
 int msp430_uscia0_chkifg()
 {
-   int ret = 0;                                                               
+   int ret = 0;
+#ifdef __msp430_have_new_uscia
+   if(MCU.uscia0.ucaxie.b.uctxie & MCU.uscia0.ucaxifg.b.uctxifg)
+     {
+       msp430_interrupt_set(INTR_USCIA0_RXTX);
+       ret = 1;
+     }
+   if(MCU.uscia0.ucaxie.b.ucrxie & MCU.uscia0.ucaxifg.b.ucrxifg)
+     {
+       msp430_interrupt_set(INTR_USCIA0_RXTX);
+       ret = 1;
+     }
+#else
    if (MCU.sfr.ifg2.b.uca0txifg  && MCU.sfr.ie2.b.uca0txie)                  
      {                                                                        
         msp430_interrupt_set(INTR_USCIX0_TX);                           
@@ -567,7 +643,8 @@ int msp430_uscia0_chkifg()
      {                                                                        
         msp430_interrupt_set(INTR_USCIX0_RX);                           
         ret = 1;                                                              
-     }                                                                        
+     }
+#endif
    return ret;
 }
 

@@ -64,7 +64,7 @@ int led_device_create(int dev_num, uint32_t on, uint32_t off, uint32_t bg, char*
   snprintf(dev->name, len, "%s", name);
 
   machine.device[dev_num].reset         = led_reset;
-  machine.device[dev_num].delete        = led_delete;
+  machine.device[dev_num].deleteFnt        = led_delete;
 
   machine.device[dev_num].write         = led_write;
   machine.device[dev_num].update        = led_update;

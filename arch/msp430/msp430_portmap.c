@@ -70,7 +70,11 @@ int16_t msp430_portmap_read(uint16_t addr)
 
 void msp430_portmap_write8(uint16_t addr, int8_t val)
 {
-  ERROR("msp430:portmap: bad write address 0x%04x = 0x%02x\n", addr, val & 0xff);
+  static uint8_t already_message = 0;
+  if (already_message)
+    return;
+  already_message = 1;
+  ERROR("msp430:portmap: write not implemented (0x%04x = 0x%02x)\n", addr, val & 0xff);
 }
 
 /* ************************************************** */
@@ -80,7 +84,11 @@ void msp430_portmap_write8(uint16_t addr, int8_t val)
 
 void msp430_portmap_write(uint16_t addr, int16_t val)
 {
-  ERROR("msp430:portmap: bad write address 0x%04x = 0x%02x\n", addr, val & 0xff);
+  static uint8_t already_message = 0;
+  if (already_message)
+    return;
+  already_message = 1;
+  ERROR("msp430:portmap: read not implemented (0x%04x = 0x%02x)\n", addr, val & 0xff);
 }
 
 /* ************************************************** */

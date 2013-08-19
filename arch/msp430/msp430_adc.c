@@ -79,37 +79,38 @@ int msp430_adc_find_inputs(struct adc_channels_t* channels, struct moption_t* op
     {
       token = strtok_r(str1, delim1, &saveptr1);
       if (token == NULL)
-	break;
+        break;
       HW_DMSG_ADC("msp430:adc:%d: %s\n", j, token);
     
       str2 = token;
       subtoken = strtok_r(str2, delim2, &saveptr2);
       if (subtoken == NULL) 
-	{ 
-	  ERROR("msp430:adc: wrong channel id \n");
-	  return 1;	
-	}
+      { 
+        ERROR("msp430:adc: wrong channel id \n");
+        return 1;	
+      }
+      
       id = atoi(subtoken);
       if ((id < 0) || (id >= ADC_CHANNELS))
-	{
-	  ERROR("msp430:adc: wrong channel id %s (%d)\n",subtoken,id);
-	  return 1;
-	}
+      {
+        ERROR("msp430:adc: wrong channel id %s (%d)\n",subtoken,id);
+        return 1;
+      }
 
       subtoken = strtok_r(NULL, delim2, &saveptr2);
       filename = subtoken;
       if (subtoken == NULL) 
-	{
-	  ERROR("msp430:adc: wrong channel filename\n");
-	  return 1;	
-	}
+      {
+        ERROR("msp430:adc: wrong channel filename\n");
+        return 1;	
+      }
 
       subtoken = strtok_r(NULL, delim2, &saveptr2);
       if (subtoken != NULL) 
-	{
-	  ERROR("msp430:adc: wrong channel filename trailer %s\n",subtoken);
-	  return 1;	
-	}
+      {
+        ERROR("msp430:adc: wrong channel filename trailer %s\n",subtoken);
+        return 1;	
+      }
 
       HW_DMSG_ADC("msp430:adc: channel %02d = %s\n",id, filename);
       channels->channels_valid[id]    = ADC_CHANN_PTR;
@@ -157,13 +158,14 @@ int msp430_adc_read_inputs(struct adc_channels_t* channels)
 	  for(smpl=0; smpl < channels->channels_data_max[ chan ]; smpl++)
 	    {
 	      if (fscanf(f,"%d",&val) != 1)
-		{
-		  val = 0;
-		  ERROR("msp430:adc: ======================================\n");
-		  ERROR("msp430:adc: cannot read value from data input file\n");
-		  ERROR("msp430:adc: ======================================\n");
-		}
+        {
+          val = 0;
+          ERROR("msp430:adc: ======================================\n");
+          ERROR("msp430:adc: cannot read value from data input file\n");
+          ERROR("msp430:adc: ======================================\n");
+        }
 	      channels->channels_data[ chan ][ smpl ] = val & 0xfff; /* 12 bits */
+        HW_DMSG_ADC("msp430:adc: read %i; chan %i; sample %i\n", channels->channels_data[ chan ][ smpl ], chan, smpl);
 	    }
 
 	  fclose(f);
@@ -190,6 +192,12 @@ int msp430_adc_delete_inputs(struct adc_channels_t* channels)
 
 uint16_t msp430_adc_sample_input(struct adc_channels_t* channels, int hw_channel_x, int UNUSED current_x)
 {
+  if (hw_channel_x >= ADC_CHANNELS) {
+    ERROR("msp430:adc:sample: requesting channel data for non existing channel: %i\n",hw_channel_x);
+    machine_exit_error();
+    return 0;
+  }
+  
   uint16_t sample = 0;
   switch (channels->channels_valid[hw_channel_x])
     {
@@ -204,7 +212,6 @@ uint16_t msp430_adc_sample_input(struct adc_channels_t* channels, int hw_channel
 		    hw_channel_x, channels->channels_name[hw_channel_x]);
 
       sample = channels->channels_data[ hw_channel_x ][ MCU.channels.chann_ptr[ hw_channel_x ] ] ;
-
       MCU.channels.chann_ptr[ hw_channel_x ] ++;
       if (MCU.channels.chann_ptr[ hw_channel_x ] == channels->channels_data_max[ hw_channel_x ])
 	{
@@ -222,6 +229,10 @@ uint16_t msp430_adc_sample_input(struct adc_channels_t* channels, int hw_channel
       break;
 
     case ADC_WSNET:
+      break;
+      
+    default:
+      ERROR("msp430:adc:sample: no channel data for %i. Return 0.\n",hw_channel_x);
       break;
     }
   

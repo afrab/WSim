@@ -118,7 +118,7 @@ int cma3000_spi_device_size()
 int cma3000_spi_device_create(int dev, int UNUSED id)
 {
   machine.device[dev].reset = cma3000_spi_reset;
-  machine.device[dev].delete = cma3000_spi_delete;
+  machine.device[dev].deleteFnt = cma3000_spi_delete;
   machine.device[dev].power_up = cma3000_spi_power_up;
   machine.device[dev].power_down = cma3000_spi_power_down;
 
@@ -314,10 +314,13 @@ int cma3000_spi_update(int dev)
     CMA3000_SPI_DATA->got_data = 0;
   }
 
+  /*
+   never ready (did some strange things
   CMA3000_SPI_DATA->cycle_count++;
-  if (CMA3000_SPI_DATA->cycle_count == 100001) {
+  if (CMA3000_SPI_DATA->cycle_count == 10001) {
     CMA3000_SPI_DATA->INT_send = 1;
   }
+   */
   return 0;
 }
 

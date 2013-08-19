@@ -210,7 +210,7 @@ int cc1100_update_state_fs_wakeup (struct _cc1100_t *cc1100) {
 /***************************************************/
 /***************************************************/
 int cc1100_update_state_fs_calibrate (struct _cc1100_t *cc1100) {
-	
+  
 	/* Check if calibration is over */
 	if (MACHINE_TIME_GET_NANO() >= cc1100->fsm_timer) {
 		CC1100_CALIBRATE(cc1100);
@@ -403,10 +403,14 @@ int cc1100_update_state_rx (struct _cc1100_t *cc1100)
 /***************************************************/
 /***************************************************/
 
-int cc1100_update (int dev_num) 
+#if defined(CC1101MM)
+int cc1100_update_state (struct _cc1100_t *cc1100)
+{
+#else
+int cc1100_update (int dev_num)
 {
   struct _cc1100_t *cc1100 = (struct _cc1100_t *) machine.device[dev_num].data;
-
+#endif
     /* Update gdo */
   cc1100_update_xosc(cc1100);
 	

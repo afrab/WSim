@@ -6,6 +6,7 @@
  **/
 
 #include <stdio.h>
+#include <string.h>
 
 #include "arch/common/hardware.h"
 #include "msp430.h"
@@ -53,22 +54,32 @@ void msp430_lcdb_update()
 
 int16_t msp430_lcdb_read(uint16_t addr)
 {
-  int16_t res;
-  if (addr == LCDB_LCDBCTL0) {
-    res = MCU.lcdb.lcdbctl0.s;
-  } else if (addr == LCDB_LCDBCTL1) {
-    res = MCU.lcdb.lcdbctl1.s;
-  } else if (addr == LCDB_LCDBBLKCTL) {
-    res = MCU.lcdb.lcdbblkctl.s;
-  } else if ((addr >= LCDB_LCDM_START) && (addr <= LCDB_LCDM_STOP)) {
-    res = MCU.lcdb.mem[addr - LCDB_LCDM_START];
-  } else if ((addr >= LCDB_LCDBM_START) && (addr <= LCDB_LCDBM_STOP)) {
-    res = MCU.lcdb.bmem[addr - LCDB_LCDBM_START];
-  } else {
-    ERROR("msp430:lcdb: bad read8 address 0x%04x\n", addr);
-    res = 0;
-  }
-  return res;
+	switch(addr) {
+		case LCDB_LCDBCTL0:
+			return MCU.lcdb.lcdbctl0.s;
+		case LCDB_LCDBCTL1:
+			return MCU.lcdb.lcdbctl1.s;
+		case LCDB_LCDBBLKCTL:
+			return MCU.lcdb.lcdbblkctl.s;
+		case LCDB_LCDBMEMCTL: /* LCD_B memory control register */
+		case LCDB_LCDBPCTL0: /* LCD_B Port Control Registers */
+		case LCDB_LCDBPCTL1:
+		case LCDB_LCDBPCTL2:
+		case LCDB_LCDBPCTL3:
+		case LCDB_LCDBVCTL: /* LCD_B Voltage Control Register */
+		case LCDB_LCDBCPCTL: /* LCD_B Charge Pump Control Register */
+			return 0; /* return 0: not implemented */
+		default: /* no control register. Maybe an address for the lcd segment buffer/blinking buffer? */
+			if ((addr >= LCDB_LCDM_START) && (addr <= LCDB_LCDM_STOP)) {
+				return MCU.lcdb.mem[addr - LCDB_LCDM_START];
+			} else if ((addr >= LCDB_LCDBM_START) && (addr <= LCDB_LCDBM_STOP)) {
+				return MCU.lcdb.bmem[addr - LCDB_LCDBM_START];
+			} else {
+				/* Address unknown */
+				ERROR("msp430:lcdb: bad read address 0x%04x\n", addr);
+				return 0;
+			}
+	}
 }
 
 /* ************************************************** */
@@ -78,16 +89,32 @@ int16_t msp430_lcdb_read(uint16_t addr)
 
 int8_t msp430_lcdb_read8(uint16_t addr)
 {
-  int8_t res;
-  if ((addr >= LCDB_LCDM_START) && (addr <= LCDB_LCDM_STOP)) {
-    res = MCU.lcdb.mem[addr - LCDB_LCDM_START];
-  } else if ((addr >= LCDB_LCDBM_START) && (addr <= LCDB_LCDBM_STOP)) {
-    res = MCU.lcdb.bmem[addr - LCDB_LCDBM_START];
-  } else {
-    ERROR("msp430:lcdb: bad read address 0x%04x\n", addr);
-    res = 0;
-  }
-  return res;
+	switch(addr) {
+		case LCDB_LCDBCTL0:
+			return MCU.lcdb.lcdbctl0.s;
+		case LCDB_LCDBCTL1:
+			return MCU.lcdb.lcdbctl1.s;
+		case LCDB_LCDBBLKCTL:
+			return MCU.lcdb.lcdbblkctl.s;
+		case LCDB_LCDBMEMCTL: /* LCD_B memory control register */
+		case LCDB_LCDBPCTL0: /* LCD_B Port Control Registers */
+		case LCDB_LCDBPCTL1:
+		case LCDB_LCDBPCTL2:
+		case LCDB_LCDBPCTL3:
+		case LCDB_LCDBVCTL: /* LCD_B Voltage Control Register */
+		case LCDB_LCDBCPCTL: /* LCD_B Charge Pump Control Register */
+			return 0; /* return 0: not implemented */
+		default: /* no control register. Maybe an address for the lcd segment buffer/blinking buffer? */
+			if ((addr >= LCDB_LCDM_START) && (addr <= LCDB_LCDM_STOP)) {
+				return MCU.lcdb.mem[addr - LCDB_LCDM_START];
+			} else if ((addr >= LCDB_LCDBM_START) && (addr <= LCDB_LCDBM_STOP)) {
+				return MCU.lcdb.bmem[addr - LCDB_LCDBM_START];
+			} else {
+				/* Address unknown */
+				ERROR("msp430:lcdb: bad read8 address 0x%04x\n", addr);
+				return 0;
+			}
+	}
 }
 
 /* ************************************************** */
@@ -97,19 +124,41 @@ int8_t msp430_lcdb_read8(uint16_t addr)
 
 void msp430_lcdb_write(uint16_t addr, int16_t val)
 {
-  if (addr == LCDB_LCDBCTL0) {
-    MCU.lcdb.lcdbctl0.s = val;
-  } else if (addr == LCDB_LCDBCTL1) {
-    MCU.lcdb.lcdbctl1.s = val;
-  } else if (addr == LCDB_LCDBBLKCTL) {
-    MCU.lcdb.lcdbblkctl.s = val;
-  } else if ((addr >= LCDB_LCDM_START) && (addr <= LCDB_LCDM_STOP)) {
-    MCU.lcdb.mem[addr - LCDB_LCDM_START] = val;
-  } else if ((addr >= LCDB_LCDBM_START) && (addr <= LCDB_LCDBM_STOP)) {
-    MCU.lcdb.bmem[addr - LCDB_LCDBM_START] = val;
-  } else {
-    ERROR("msp430:lcd: bad write address 0x%04x = 0x%02x\n", addr, val & 0xff);
-  }
+	switch(addr) {
+		case LCDB_LCDBCTL0:
+			MCU.lcdb.lcdbctl0.s = val;
+			break;
+		case LCDB_LCDBCTL1:
+			MCU.lcdb.lcdbctl1.s = val;
+			break;
+		case LCDB_LCDBBLKCTL:
+			MCU.lcdb.lcdbblkctl.s = val;
+			break;
+		case LCDB_LCDBMEMCTL:
+			if (val & LCDCLRM) { /* clear display */
+				memset(&MCU.lcdb.mem, 0, LCDB_LCDM_STOP-LCDB_LCDM_START);
+			}
+			if (val & LCDCLRBM) { /* LCD_B Clear LCD blinking memory */
+				memset(&MCU.lcdb.bmem, 0, LCDB_LCDBM_STOP-LCDB_LCDBM_START);
+			}
+		case LCDB_LCDBPCTL0: /* ignore LCD_B Port Control Registers */
+		case LCDB_LCDBPCTL1:
+		case LCDB_LCDBPCTL2:
+		case LCDB_LCDBPCTL3:
+		case LCDB_LCDBVCTL: /* ignore LCD_B Voltage Control Register */
+		case LCDB_LCDBCPCTL: /* ignore LCD_B Charge Pump Control Register */
+			break;
+		default: /* no control register. Maybe an address for the lcd segment buffer/blinking buffer? */
+			if ((addr >= LCDB_LCDM_START) && (addr <= LCDB_LCDM_STOP)) {
+				MCU.lcdb.mem[addr - LCDB_LCDM_START] = val;
+			} else if ((addr >= LCDB_LCDBM_START) && (addr <= LCDB_LCDBM_STOP)) {
+				MCU.lcdb.bmem[addr - LCDB_LCDBM_START] = val;
+			} else {
+				/* Address unknown */
+				ERROR("msp430:lcdb: bad write address 0x%04x = 0x%02x (Valid: 0x%04x,0x%04x,0x%04x,0x%04x-0x%04x)\n",
+						addr, val & 0xff, LCDB_LCDBCTL0, LCDB_LCDBCTL1, LCDB_LCDBBLKCTL, LCDB_LCDM_START, LCDB_LCDM_STOP);
+			}
+	}
 }
 
 /* ************************************************** */
@@ -124,7 +173,7 @@ void msp430_lcdb_write8(uint16_t addr, int8_t val)
   } else if ((addr >= LCDB_LCDBM_START) && (addr <= LCDB_LCDBM_STOP)) {
     MCU.lcdb.bmem[addr - LCDB_LCDBM_START] = val;
   } else {
-    ERROR("msp430:lcd: bad write address 0x%04x = 0x%02x\n", addr, val & 0xff);
+    ERROR("msp430:lcdb: bad write8 address 0x%04x = 0x%02x\n", addr, val & 0xff);
   }
 }
 

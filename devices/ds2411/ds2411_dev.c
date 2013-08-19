@@ -1115,7 +1115,7 @@ void ds2411_statdump(int dev, wsimtime_t UNUSED user_nanotime)
 int
 ds2411_device_create(int dev, char *serial)
 {
-  machine.device[dev].delete       = ds2411_delete;
+  machine.device[dev].deleteFnt       = ds2411_delete;
   machine.device[dev].reset        = ds2411_reset;
 
   machine.device[dev].power_up     = ds2411_power_up;

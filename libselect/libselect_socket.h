@@ -32,7 +32,7 @@ struct libselect_socket_t {
 /* ************************************************** */
 /* ************************************************** */
 
-int  libselect_skt_init         (struct libselect_socket_t *s, char *name);
+int  libselect_skt_init         (struct libselect_socket_t *s, const char *name);
 int  libselect_skt_accept       (struct libselect_socket_t *s);
 int  libselect_skt_close        (struct libselect_socket_t *s);
 int  libselect_skt_close_client (struct libselect_socket_t *s);

@@ -1,4 +1,3 @@
-
 /**
  *  \file   msp430_alu.c
  *  \brief  MSP430 ALU emulation 
@@ -77,17 +76,17 @@
 /* MSP430 MACHINE       */
 /************************/
 
-inline uint16_t mcu_get_pc(void)
+inline uint32_t mcu_get_pc(void)
 {
   return MCU_ALU.regs[PC_REG_IDX];
 }
 
-inline uint16_t mcu_get_pc_next(void)
+inline uint32_t mcu_get_pc_next(void)
 {
   return MCU_ALU.next_pc;
 }
 
-inline void mcu_set_pc_next(uint16_t x)
+inline void mcu_set_pc_next(uint32_t x)
 {
   /* next instruction */
   MCU_ALU.next_pc = x;
@@ -180,6 +179,13 @@ inline void msp430_alu_reset(void)
 #define OP_JL	   0x38 // 0011 1000
 #define OP_JMP	   0x3c // 0011 1100
 
+/** 
+  * MSP430X Instructions - Type 1
+  **/
+
+#define OP_PUSHM   0x14
+#define OP_POPM	   0x16
+
 static inline unsigned int extract_opcode(uint16_t insn)
 {
   unsigned int tmp;
@@ -188,6 +194,11 @@ static inline unsigned int extract_opcode(uint16_t insn)
 
   /* HW_DMSG_DIS("PC:0x%04x ins:0x%04x  ",mcu_get_pc() & 0xffff,insn & 0xffff); */
   
+  /* MSP430x PUSHM/POPM */
+  if (((insn >> 8) & 0xfc) == 0x14)
+    {
+      return ((unsigned int)insn >> 8) & ~1;
+    }
   /* type 1 = double operands : opcode 4 bits */
   if ((tmp & 0xc) != 0x0) 
     {
@@ -569,10 +580,43 @@ struct msp430_op_type2
 
 };
 
+
 /**
  * global variable used for type2 operations
  **/
 static struct msp430_op_type2 opt2;
+
+/** 
+ * MSP430X PUSHM/POPM structure decode from instruction 
+ **/
+
+static void msp430_typeX_pushpop_operands(uint16_t insns)
+{
+  ASM_VAR();
+  uint16_t decode_next_pc;
+
+  /*     5 4 3 2 1 0 9 8 7 6 5 4 3 2 1 0       */
+  /*    [      op     |A|   n   |  reg  ]      */
+
+  opt2.reg     = (insns >> 0) & 0xf;
+  opt2.val     = (insns >> 4) & 0xf;
+  opt2.byte    = (insns >> 8) & 0x1;
+
+  ASM_START(insns);
+  ASM_ADD("%s ", msp430_debug_opcode((insn >> 8) & 0xfc));
+  ASM_ADD("%d,", opt2.val);
+  ASM_ADD("%s", mcu_regname_str(opt2.reg));
+
+  decode_next_pc = mcu_get_pc() + 2;
+
+  ASM_ADD("\n");
+  ASM_END();
+
+  mcu_set_pc_next(decode_next_pc);
+#if defined(ETRACE)
+  MCU_ALU.sequ_pc = decode_next_pc;
+#endif
+}
 
 /** 
  * opt2 structure decode from instruction 
@@ -1104,6 +1148,51 @@ unsigned int msp430_mcu_run_insn()
 	    SET_CYCLES(opt2_cycles_class2[opt2.t_mode]);
 	  }
           break;
+
+	case OP_PUSHM:
+	  {
+	    int32_t result;
+	    int n;
+	    msp430_typeX_pushpop_operands( insn );
+            for(n=0; n <= opt2.val; n++)
+              {
+		result = MCU_ALU.regs[opt2.reg-n];
+                SP-=2;
+                msp430_write_short(SP, (int16_t)result);
+                if(!opt2.byte)
+                {
+                  SP-=2;
+                  msp430_write_short(SP, (int16_t)(result>>16));
+                }
+              }
+                
+            TRACER_TRACE_SP(SP);		
+	    SET_CYCLES(opt2_cycles_class2[opt2.t_mode] * (opt2.val+1));
+	  }
+	  break;
+
+	case OP_POPM:
+	  {
+	    int32_t result;
+	    int n;
+	    msp430_typeX_pushpop_operands( insn );
+            for(n=0; n <= opt2.val ; n++)
+              {
+                if(!opt2.byte)
+                {
+		  result=msp430_read_short(SP);
+                  SP+=2;
+		  MCU_ALU.regs[opt2.reg+n] |= (result << 16);
+                }
+		result=msp430_read_short(SP);
+		SP+=2;
+		MCU_ALU.regs[opt2.reg+n] = result;
+              }
+                
+            TRACER_TRACE_SP(SP);		
+	    SET_CYCLES(opt2_cycles_class2[opt2.t_mode] * (opt2.val+1));
+	  }
+	  break;
 
         case OP_CALL:
 	  {

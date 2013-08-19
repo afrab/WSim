@@ -13,8 +13,8 @@ EZ430CHRONOS_DEV= ../../devices/led/libled.a \
 
 
 ## v1: model
-wsim_ez430chronos_CFLAGS=-DCC430f6137
+wsim_ez430chronos_CFLAGS=-DCC430f6137 -DCC1101MM -DCC1100
 wsim_ez430chronos_SOURCES=ez430chronos.c
-wsim_ez430chronos_LDADD=${EZ430CHRONOS_DEV} ${WSIMADD} ${EZ430CHRONOS_MCU}
+wsim_ez430chronos_LDADD=${EZ430CHRONOS_DEV} ${WSIMADD} ${EZ430CHRONOS_MCU} ../../devices/cc1100_2500/libcc1101mm.a
 wsim_ez430chronos_DEPENDENCIES=${wsim_ez430chronos_LDADD}
 endif

@@ -21,7 +21,7 @@ int scp1000_i2c_device_create(int dev_num)
 {
   HW_DMSG_DEV("scp1000 : device create");
   machine.device[dev_num].reset = scp1000_i2c_reset;
-  machine.device[dev_num].delete = scp1000_i2c_delete;
+  machine.device[dev_num].deleteFnt = scp1000_i2c_delete;
 
   machine.device[dev_num].update = scp1000_i2c_update;
 
@@ -101,7 +101,7 @@ void scp1000_i2c_write(int dev, uint32_t mask, uint32_t value)
     scp1000->SDA = ((value & SCP1000_I2C_SDA_MASK) == SCP1000_I2C_SDA_MASK) ? 1 : 0;
   }
 
-  HW_DMSG_DEV("scp1000 : SDA=0x%02x SCL=0x%02x \n", scp1000->SDA, scp1000->SCL);
+  //HW_DMSG_DEV("scp1000 : SDA=0x%02x SCL=0x%02x \n", scp1000->SDA, scp1000->SCL);
 }
 
 int scp1000_i2c_update(int dev)
@@ -283,10 +283,13 @@ int scp1000_i2c_update(int dev)
   scp1000->SCL_last = scp1000->SCL;
   scp1000->SDA_last = scp1000->SDA;
 
+  /*
+   never ready (did some strange things
   scp1000->cycle_count++;
-  if (scp1000->cycle_count == 200000) { /* "ready" always 1000 cycles after pressure read */
+  if (scp1000->cycle_count == 1000) {
     scp1000->DRDY_send = 1;
   }
+   */
   return 0;
 }
 

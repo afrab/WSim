@@ -153,8 +153,57 @@ struct __attribute__ ((packed)) ucaxabctl_t {
 };
 #endif
 
+#if defined(__msp430_have_new_uscia)
 
+#if defined(WORDS_BIGENDIAN)
+struct __attribute__ ((packed)) ucaxie_t {
+  uint8_t
+    reserved:6,
+    uctxie:1,
+    ucrxie:1;
+};
+#else
+struct __attribute__ ((packed)) ucaxie_t {
+  uint8_t
+    ucrxie:1,
+    uctxie:1,
+    reserved:6;
+};
+#endif
 
+#if defined(WORDS_BIGENDIAN)
+struct __attribute__ ((packed)) ucaxifg_t {
+  uint8_t
+    reserved:6,
+    uctxifg:1,
+    ucrxifg:1;
+};
+#else
+struct __attribute__ ((packed)) ucaxifg_t {
+  uint8_t
+    ucrxifg:1,
+    uctxifg:1,
+    reserved:6;
+};
+#endif
+
+#if defined(WORDS_BIGENDIAN)
+struct __attribute__ ((packed)) ucaxiv_t {
+  uint16_t
+    reserved:13,
+    ucivx:2,
+    reserved1:1;
+};
+#else
+struct __attribute__ ((packed)) ucaxiv_t {
+  uint16_t
+    reserved1:1,
+    ucivx:2,
+    reserved:13;
+};
+#endif
+
+#endif
   
 struct msp430_uscia_t
 {
@@ -186,7 +235,21 @@ struct msp430_uscia_t
     struct ucaxirrctl_t  b;
     int8_t               s;
   } ucaxirrctl;
-
+#if defined(__msp430_have_new_uscia)
+  union {
+    struct ucaxie_t      b;
+    int8_t               s;
+  } ucaxie;
+  union {
+    struct ucaxifg_t     b;
+    int8_t               s;
+  } ucaxifg;
+  union {
+    struct ucaxiv_t      b;
+    int16_t              s;
+  } ucaxiv;
+#endif
+  
   uint8_t   ucaxbr0;
   uint8_t   ucaxbr1;
   uint8_t   ucaxrxbuf;
@@ -218,6 +281,31 @@ struct msp430_uscia_t
 /* ************************************************** */
 
 #if defined(__msp430_have_uscia0)
+#if defined(__msp430_have_new_uscia)
+
+#define USCIA0_START  USCIA_BASE
+#define USCIA0_END    USCIA_BASE + 0x1e
+
+#define UCA0CTL0      USCIA_BASE + 0x01
+#define UCA0CTL1      USCIA_BASE + 0x00
+#define UCA0BR0       USCIA_BASE + 0x06
+#define UCA0BR1       USCIA_BASE + 0x07
+#define UCA0MCTL      USCIA_BASE + 0x08
+#define UCA0STAT      USCIA_BASE + 0x0a
+#define UCA0RXBUF     USCIA_BASE + 0x0c
+#define UCA0TXBUF     USCIA_BASE + 0x0e
+#define UCA0ABCTL     USCIA_BASE + 0x10
+#define UCA0IRTCTL    USCIA_BASE + 0x12
+#define UCA0IRRCTL    USCIA_BASE + 0x13 
+#define UCA0IE        USCIA_BASE + 0x1c
+#define UCA0IFG       USCIA_BASE + 0x1d
+#define UCA0IV        USCIA_BASE + 0x1e
+
+int16_t msp430_uscia0_read16(uint16_t addr);
+void msp430_uscia0_write16(uint16_t UNUSED addr, int8_t UNUSED val);
+
+#else
+
 #define USCIA0_START  USCIA_BASE
 #define USCIA0_END    USCIA_BASE+10
 
@@ -232,6 +320,7 @@ struct msp430_uscia_t
 #define UCA0STAT      USCIA_BASE+8
 #define UCA0RXBUF     USCIA_BASE+9
 #define UCA0TXBUF     USCIA_BASE+10
+#endif
 
 
 void   msp430_uscia0_create();

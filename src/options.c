@@ -38,7 +38,7 @@
 #define DEFAULT_MULTICAST_IP       "224.0.0.1"
 #define DEFAULT_MULTICAST_PORT     9999
 #define DEFAULT_NODE_ID            1
-#define DEFAULT_REALTIME           0
+#define DEFAULT_REALTIME           1
 
 /* ************************************************** */
 /* ************************************************** */
@@ -483,7 +483,7 @@ void options_read_cmdline(struct options_t *s, int *argc, char *argv[])
   /* mode */
   if (mode_opt.isset)
     {
-      char *optarg = modearg_opt.value;
+      const char *optarg = modearg_opt.value;
       OPT_DMSG("mode set : ");
 
       if (strcmp(mode_opt.value,"run") == 0)
@@ -611,19 +611,19 @@ void options_read_cmdline(struct options_t *s, int *argc, char *argv[])
   if (logpkt_opt.isset)
     {
       s->do_logpkt = 1;
-      s->logpkt = logpkt_opt.value;
+      s->logpkt = (char*)logpkt_opt.value;
     }
 
   if (mem_monitor_opt.isset)
     {
       s->do_monitor = 1;
-      s->monitor = mem_monitor_opt.value;
+      s->monitor = (char*)mem_monitor_opt.value;
     }
 
   if (mem_modify_opt.isset)
     {
       s->do_modify = 1;
-      s->modify = mem_modify_opt.value;
+      s->modify = (char*)mem_modify_opt.value;
     }
 
   if (version_opt.isset)
@@ -691,9 +691,8 @@ void options_read_cmdline(struct options_t *s, int *argc, char *argv[])
     {
       OPT_WARNING("\n==================================================\n");
       OPT_WARNING(" wsnet mode cannot be used with the realtime option\n");
-      OPT_WARNING(" realtime mode is disabled\n");
       OPT_WARNING("\n==================================================\n");
-      s->realtime = 0;
+       s->realtime = 0;
     }
 
   OPT_DMSG("parseindex = %d, argc = %d\n",parseindex,*argc);

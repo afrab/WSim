@@ -161,7 +161,7 @@ int ptty_device_create(int dev, int id)
   machine.device[dev].read          = ptty_dummy_read;
   machine.device[dev].write         = ptty_dummy_write;
   machine.device[dev].reset         = ptty_reset;
-  machine.device[dev].delete        = ptty_delete;
+  machine.device[dev].deleteFnt        = ptty_delete;
   machine.device[dev].power_up      = ptty_power_up;
   machine.device[dev].power_down    = ptty_power_down;
   machine.device[dev].update        = ptty_update;
@@ -221,10 +221,10 @@ int ptty_delete(int dev)
   libselect_id_close(PTTY_IO);
 
   if (opt_array[PTTY_SERID].io.longname)
-    free(opt_array[PTTY_SERID].io.longname);
+    free((void*)opt_array[PTTY_SERID].io.longname);
 
   if (opt_array[PTTY_SERID].io.helpstring)
-    free(opt_array[PTTY_SERID].io.helpstring);
+    free((void*)opt_array[PTTY_SERID].io.helpstring);
 
   return 0;
 }

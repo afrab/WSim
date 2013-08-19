@@ -1,8 +1,8 @@
 /**
  *  \file   msp430_adc12.c
  *  \brief  MSP430 Adc12 controller
- *  \author Antoine Fraboulet
- *  \date   2006
+ *  \author Antoine Fraboulet, David Gräff
+ *  \date   2006, 2013
  **/
 
 #include <stdlib.h>
@@ -43,12 +43,20 @@
 
 enum adc12_addr_t {
   /* control offset address are different for ADC12_A */
-
+  #ifdef ADC12A_PLUS
+  ADC12CTL0   = (ADC12_BASE + 0x0000), /* 16 */
+  ADC12CTL1   = (ADC12_BASE + 0x0002), /* 16 */
+  ADC12CTL2   = (ADC12_BASE + 0x0004), /* 16 */
+  ADC12IFG    = (ADC12_BASE + 0x000A), /* 16 */
+  ADC12IE     = (ADC12_BASE + 0x000C), /* 16 */
+  ADC12IV     = (ADC12_BASE + 0x000E), /* 16 */
+  #else
   ADC12CTL0   = (ADC12_BASE + 0x0000), /* 16 */
   ADC12CTL1   = (ADC12_BASE + 0x0002), /* 16 */
   ADC12IFG    = (ADC12_BASE + 0x0004), /* 16 */
   ADC12IE     = (ADC12_BASE + 0x0006), /* 16 */
   ADC12IV     = (ADC12_BASE + 0x0008), /* 16 */
+  #endif
   
   ADC12MEM0   = (ADC12M_BASE + 0x0020), /* 16 */
   ADC12MEM1   = (ADC12M_BASE + 0x0022),
@@ -160,10 +168,9 @@ static int msp430_adc12_init(void)
   for(i=0; i<ADC12_CHANNELS; i++)
     {     
       if (MCU.adc12.channels.channels_valid[i] != ADC_NONE )
-	{
-	  MSP430_TRACER_ADC12INPUT[i] = tracer_event_add_id(16,  trace_names[i],   "msp430");
-	}
-
+      {
+        MSP430_TRACER_ADC12INPUT[i] = tracer_event_add_id(16,  trace_names[i],   "msp430");
+      }
       MCU.adc12.mem[i].s = 0;
     }
 
@@ -359,7 +366,7 @@ void msp430_adc12_update(void)
 	   *   SEL = 1  // Selector  = 0:GPIO  1:peripheral
 	   *   DIR = 0  // Direction = 0:input 1:output
 	   */
-	  MCU.adc12.sample = msp430_adc_sample_input(&MCU.adc12.channels, ADC_CHANNELS, MCU.adc12.current_x);
+	  MCU.adc12.sample = msp430_adc_sample_input(&MCU.adc12.channels, MCU.adc12.mctl[MCU.adc12.current_x].b.inch, MCU.adc12.current_x);
 	  ADC12_TRACER_INPUT( MCU.adc12.mctl[MCU.adc12.current_x].b.inch, MCU.adc12.sample );
 
 	  HW_DMSG_ADC12("msp430:adc12:     sampling on config %d hw_channel %d (%s) = 0x%04x [%"PRId64"]\n",

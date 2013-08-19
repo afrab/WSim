@@ -121,12 +121,12 @@ void     mcu_run                (void);
 void     mcu_update_done        (void);
 
 int      mcu_registers_number   (void);
-uint16_t mcu_register_get       (int i);
-void     mcu_register_set       (int i, uint16_t v);
+uint32_t mcu_register_get       (int i);
+void     mcu_register_set       (int i, uint32_t v);
 
-uint16_t mcu_get_pc             (void);        /* current instruction   */
-void     mcu_set_pc_next        (uint16_t x);  /* set next instruction  */
-uint16_t mcu_get_pc_next        (void);        /* read next instruction */
+uint32_t mcu_get_pc             (void);        /* current instruction   */
+void     mcu_set_pc_next        (uint32_t x);  /* set next instruction  */
+uint32_t mcu_get_pc_next        (void);        /* read next instruction */
 
 void     mcu_signal_set         (uint32_t sig);
 void     mcu_signal_add         (uint32_t sig);

@@ -59,6 +59,8 @@ at the end of the byte stream of the aborted frame in the log file.
 
 ***************************************************************************************/
 
+
+
 void logpkt_init               (int do_log_pkt, char* logpkt, const char* logpktfilename);
 
 /* public encapsulation functions */

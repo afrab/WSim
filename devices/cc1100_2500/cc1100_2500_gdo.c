@@ -16,10 +16,13 @@
  */
 
 /*
- * Implemented signals: 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x29, 0x2E, 0x3F
+ * Implemented signals: 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x1E (for cc1101mm), 0x29, 0x2E, 0x3F
  */
 
 #include "cc1100_2500_internals.h"
+#if defined(CC1101MM)
+#include "cc1101mm_dev.h"
+#endif
 
 
 /***************************************************/
@@ -116,6 +119,11 @@ void cc1100_assert_gdo(struct _cc1100_t *cc1100, int event, int assert) {
 			}
 		}
 	}
+  
+#if defined(CC1101MM)
+  /* connection to cc1101mm */
+  cc1101mm_assert_gdo(event, assert);
+#endif
 }
 
 
@@ -209,9 +217,23 @@ void cc1100_update_gdo (struct _cc1100_t *cc1100, uint8_t val) {
 			cc1100_assert_gdo(cc1100, 0x07, CC1100_PIN_DEASSERT);
 #endif
 			break;
+#if defined(CC1101MM)
+    case 0x1E:
+      //always good RSSI level.
+      cc1100_assert_gdo(cc1100,0x1e,CC1100_PIN_ASSERT);
+      break;
 		case 0x29:
+      if(cc1100->fsm_state==CC1100_STATE_SLEEP) {
+        cc1100_assert_gdo(cc1100, 0x29, CC1100_PIN_ASSERT);
+      } else {
+        cc1100_assert_gdo(cc1100, 0x29, CC1100_PIN_DEASSERT);
+      }
+			break;
+#else
+      case 0x29:
 			cc1100_assert_gdo(cc1100, 0x29, CC1100_PIN_ASSERT);
 			break;
+#endif
 		case 0x3F:
 			cc1100_update_xosc(cc1100);
 			break;

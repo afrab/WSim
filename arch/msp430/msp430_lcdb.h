@@ -12,9 +12,17 @@
 #define LCDB_IOMEM_BEGIN        LCDB_BASE
 #define LCDB_IOMEM_END          (LCDB_BASE + 0x5f)
 
-#define LCDB_LCDBCTL0           (LCDB_BASE + 0x00)
-#define LCDB_LCDBCTL1           (LCDB_BASE + 0x02)
-#define LCDB_LCDBBLKCTL         (LCDB_BASE + 0x04)
+#define LCDB_LCDBCTL0           (LCDB_BASE + 0x00) /* LCD_B Control Register 0 */
+#define LCDB_LCDBCTL1           (LCDB_BASE + 0x02) /* LCD_B Control Register 1 */
+#define LCDB_LCDBBLKCTL         (LCDB_BASE + 0x04) /* LCD_B blinking control register */
+#define LCDB_LCDBMEMCTL         (LCDB_BASE + 0x06) /* LCD_B memory control register */
+#define LCDB_LCDBVCTL           (LCDB_BASE + 0x08) /* LCD_B Voltage Control Register */
+#define LCDB_LCDBPCTL0          (LCDB_BASE + 0x0A) /* LCD_B Port Control Register 0 */
+#define LCDB_LCDBPCTL1          (LCDB_BASE + 0x0C) /* LCD_B Port Control Register 1 */
+#define LCDB_LCDBPCTL2          (LCDB_BASE + 0x0E) /* LCD_B Port Control Register 2 */
+#define LCDB_LCDBPCTL3          (LCDB_BASE + 0x10) /* LCD_B Port Control Register 3 */
+#define LCDB_LCDBCPCTL          (LCDB_BASE + 0x12) /* LCD_B Charge Pump Control Register 3 */
+#define LCDB_LCDBIV             (LCDB_BASE + 0x1E) /* LCD_B Interrupt Vector Register */
 #define LCDB_LCDM_START         (LCDB_BASE + 0x20)
 #define LCDB_LCDM_STOP          (LCDB_BASE + 0x2D)
 #define LCDB_LCDM_SIZE          (LCDB_LCDM_STOP - LCDB_LCDM_START + 1)
@@ -22,6 +30,10 @@
 #define LCDB_LCDBM_STOP         (LCDB_BASE + 0x4D)
 #define LCDB_LCDBM_SIZE         (LCDB_LCDBM_STOP - LCDB_LCDBM_START + 1)
 
+// LCDBMEMCTL
+#define LCDDISP             (0x0001)  /* LCD_B LCD memory registers for display */
+#define LCDCLRM             (0x0002)  /* LCD_B Clear LCD memory */
+#define LCDCLRBM            (0x0004)  /* LCD_B Clear LCD blinking memory */
 
 #if defined(WORDS_BIGENDIAN)
 

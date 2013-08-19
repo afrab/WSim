@@ -21,7 +21,7 @@ struct device_t
 
   // create is static
   // size   is static
-  int  (*delete)        (int self);
+  int  (*deleteFnt)        (int self);
 
   int  (*reset)         (int self);
   int  (*power_up)      (int self);

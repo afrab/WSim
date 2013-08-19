@@ -54,7 +54,7 @@ int uigfx_device_create(int dev_num, char** xpm)
   dev->val      = 0;
 
   machine.device[dev_num].reset         = uigfx_reset;
-  machine.device[dev_num].delete        = uigfx_delete;
+  machine.device[dev_num].deleteFnt        = uigfx_delete;
 
   machine.device[dev_num].write         = uigfx_write;
   machine.device[dev_num].update        = uigfx_update;

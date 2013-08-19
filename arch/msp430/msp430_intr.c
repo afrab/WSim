@@ -308,7 +308,9 @@ int msp430_interrupt_checkifg(void)
 #if defined(__msp430_have_dac12)
   res |= msp430_dac12_chkifg();
 #endif
-
+#if defined(__msp430_have_cc1101)
+  res |= cc1101mm_chkifg();
+#endif
   return res;
 }
 

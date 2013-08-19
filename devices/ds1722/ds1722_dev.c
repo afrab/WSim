@@ -202,7 +202,7 @@ int ds1722_device_size()
 int ds1722_device_create(int dev, int UNUSED id)
 {
   machine.device[dev].reset         = ds1722_reset;
-  machine.device[dev].delete        = ds1722_delete;
+  machine.device[dev].deleteFnt        = ds1722_delete;
   machine.device[dev].power_up      = ds1722_power_up;
   machine.device[dev].power_down    = ds1722_power_down;
 

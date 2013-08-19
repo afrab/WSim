@@ -23,11 +23,11 @@ enum option_package {
 };
 
 struct moption_t {
-  char               *longname;
+  const char               *longname;
   enum option_type    type;
-  char               *helpstring;
+  const char               *helpstring;
   char                isset;
-  char               *value;
+  const char               *value;
 };
 
 struct moption_list_t {

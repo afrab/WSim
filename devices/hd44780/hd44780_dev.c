@@ -140,7 +140,7 @@ int hd44_device_create(int dev, uint32_t on, uint32_t off, uint32_t bg)
   memset(hddev,0,sizeof(struct hd44_t));
 
   machine.device[dev].reset         = hd44_reset;
-  machine.device[dev].delete        = hd44_delete;
+  machine.device[dev].deleteFnt        = hd44_delete;
 
   machine.device[dev].read          = hd44_read;
   machine.device[dev].write         = hd44_write;

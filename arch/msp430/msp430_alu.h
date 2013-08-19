@@ -11,7 +11,7 @@
 
 #define MCU_REGISTERS   	16
 
-typedef int16_t mcu_register_t; 
+typedef int32_t mcu_register_t; 
 
 struct msp430_alu_t {
   mcu_register_t   regs[MCU_REGISTERS];

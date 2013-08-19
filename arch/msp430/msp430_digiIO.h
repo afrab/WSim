@@ -49,7 +49,9 @@ void    msp430_digiIO_reset             (void);
 #define msp430_digiIO_update()          do { } while (0)
 
 int8_t  msp430_digiIO_mcu_read          (uint16_t addr);
+int16_t msp430_digiIO_mcu_read16       (uint16_t addr);
 void    msp430_digiIO_mcu_write         (uint16_t addr, int8_t val);
+void    msp430_digiIO_mcu_write16       (uint16_t addr, int16_t val);
 
 int     msp430_digiIO_dev_read          (int port_number, uint8_t *val);
 uint8_t msp430_digiIO_dev_read_dir      (int port_number);
